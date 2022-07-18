@@ -7,6 +7,6 @@ services:
         build: .
         volumes:
             - type: bind
-              source: ./downloads # in nextcloud /zwembad/nextcloud/data/files/...
-              target: /downloads
+              source: ./music # in nextcloud /zwembad/nextcloud/data/files/...
+              target: /music
         user: "1000"
