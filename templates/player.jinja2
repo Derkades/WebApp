@@ -2,13 +2,52 @@
 <html>
 <head>
 <title>test</title>
+
+<script>
+
+
+
+</script>
 </head>
 <body>
 
-<ul>
+{# <ul>
 {% for guest in guests %}
     <li>{{ guest }}</li>
 {% endfor %}
-</ul>
+</ul> #}
+
+<button id="song-button">Geef me liedje</button>
+
+<div id="audio">
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const songButton = document.getElementById('song-button');
+    songButton.addEventListener("click", function () {
+        const request = new Request('/choose_track?person=DK', {
+            method: 'GET',
+        });
+        fetch(request).then(response => {
+            response.json().then(data => {
+                const trackName = data.name;
+                const streamUrl = '/get_track?person=DK&track_name=' + encodeURIComponent(trackName);
+                const audioDiv = document.getElementById('audio');
+                const audioElem = document.createElement('audio');
+                const sourceElem = document.createElement('source');
+                sourceElem.setAttribute('src', streamUrl);
+                audioElem.setAttribute('controls', '');
+                audioElem.setAttribute('autoplay', '');
+                audioElem.appendChild(sourceElem);
+                audioDiv.innerHTML = '';
+                audioDiv.appendChild(audioElem);
+                console.log(streamUrl);
+            });
+        });
+    });
+});
+</script>
 
 </body>

@@ -23,7 +23,7 @@ music_dir = Path('/music')
 @app.route('/')
 def player():
     return render_template('player.jinja2',
-                           guests=[d.name for d in Path(music_dir, 'Gasten').iterdir()])
+                           guests=[d.name for d in Path(music_dir, 'Guest').iterdir()])
 
 @app.route('/choose_track', methods=['GET'])
 def choose_track():
