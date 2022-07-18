@@ -11,7 +11,7 @@
 #     app.run(debug=False)
 
 
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, send_file
 import subprocess
 from pathlib import Path
 import random
@@ -35,8 +35,12 @@ def choose_track():
         'name': chosen_track.name
     }
 
-# @app.route('/get_track')
-# def get_track()
+@app.route('/get_track')
+def get_track():
+    person = request.args['person']
+    track_name = request.args['track_name']
+    return send_file(Path(music_dir, person, track_name))
+
 
 # def constant_time_compare(val1, val2):
 #     if len(val1) != len(val2):
