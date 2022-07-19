@@ -1,0 +1,51 @@
+body, html {
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+
+    /* De scale: 1.1 voor #bg-image veroorzaakt scroll bars, geen idee hoe ik dat moet fixen. Verberg ze gewoon! */
+    overflow: hidden;
+}
+
+#bg-image, #album-cover {
+    background-image: url("/get_album_cover?song_title=no%20music");
+}
+
+#bg-image {
+    filter: blur(32px);
+    height: 100%;
+    width: 100%;
+
+    z-index: -1;
+
+    /* hide white border after blur */
+    scale: 1.1;
+
+    /* dit werkt niet */
+    transition: background 5s;
+}
+
+#content {
+    /* transform: translate(0, -100vh); */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: calc(100% - 4em);
+    height: calc(100% - 4em);
+    padding: 2em;
+}
+
+p, label {
+    background-color: white;
+}
+
+.background-cover {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+#album-cover {
+    height: 400px;
+    width: 400px;
+}

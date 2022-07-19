@@ -2,61 +2,8 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Fancy music player</title>
-
-    <style>
-        body, html {
-            height: 100vh;
-            width: 100vw;
-            margin: 0;
-
-            /* De scale: 1.1 voor #bg-image veroorzaakt scroll bars, geen idee hoe ik dat moet fixen. Verberg ze gewoon! */
-            overflow: hidden;
-        }
-
-        #bg-image, #album-cover {
-            background-image: url("/get_album_cover?song_title=no%20music");
-        }
-
-        #bg-image {
-            filter: blur(32px);
-            height: 100%;
-            width: 100%;
-
-            z-index: -1;
-
-            /* hide white border after blur */
-            scale: 1.1;
-
-            /* dit werkt niet */
-            transition: background 5s;
-        }
-
-        #content {
-            /* transform: translate(0, -100vh); */
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: calc(100% - 4em);
-            height: calc(100% - 4em);
-            padding: 2em;
-        }
-
-        p, label {
-            background-color: white;
-        }
-
-        .background-cover {
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: cover;
-        }
-
-        #album-cover {
-            height: {{image_size}}px;
-            width: {{image_size}}px;
-        }
-    </style>
+    <title>Super fancy music player</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 
@@ -89,102 +36,7 @@
 
     </main>
 
-    <script>
-    function liedje() {
-        const person = getNextPerson();
-        const request = new Request('/choose_track?person=' + encodeURIComponent(person), {
-            method: 'GET',
-        });
-
-        fetch(request).then(response => {
-            response.json().then(data => {
-                const trackName = data.name;
-                const streamUrl = '/get_track?person=' + encodeURIComponent(person) + '&track_name=' + encodeURIComponent(trackName);
-
-                // Replace audio stream
-                // TODO volume van oude audio element overnemen voor nieuwe element
-                const audioDiv = document.getElementById('audio');
-                const audioElem = document.createElement('audio');
-                const sourceElem = document.createElement('source');
-                sourceElem.setAttribute('src', streamUrl);
-                audioElem.setAttribute('controls', '');
-                audioElem.setAttribute('autoplay', '');
-                audioElem.appendChild(sourceElem);
-                audioDiv.innerHTML = '';
-                audioDiv.appendChild(audioElem);
-                audioElem.onended = liedje;
-
-                // Replace album cover
-                const albumCoverUrl = '/get_album_cover?song_title=' + encodeURIComponent(trackName);
-                const albumCoverElem = document.getElementById('album-cover');
-                // albumCoverElem.setAttribute('src', albumCoverUrl);
-                albumCoverElem.style.backgroundImage = 'url("' + albumCoverUrl + '")';
-
-                const bgImageElem = document.getElementById('bg-image');
-                bgImageElem.style.backgroundImage = 'url("' + albumCoverUrl + '")';
-
-                // Replace 'currently playing' text
-                const currentTitleElem = document.getElementById('current-song-title');
-                currentTitleElem.innerText = trackName;
-            });
-        });
-    }
-
-    function getActivePersons() {
-        const active = [];
-
-        ['CB', 'DK', 'JK'].forEach(function(person) {
-            if (document.getElementById('enable-' + person).checked) {
-                active.push(person);
-            }
-        });
-
-        // TODO extra person checkboxes
-
-        return active;
-    }
-
-    function choice(arr) {
-        return arr[Math.floor(Math.random() * arr.length)];
-    }
-
-    function getNextPerson() {
-        const active = getActivePersons();
-
-        var person;
-
-        if (active.length === 0) {
-            // No one is selected
-            // TODO how to handle properly?
-            person = "DK";
-        } else if (document.currentPerson === undefined) {
-            // No person chosen yet, choose random person
-            person = choice(active);
-        } else {
-            const currentIndex = active.indexOf(document.currentPerson);
-            if (currentIndex === -1) {
-                // Current person is no longer active, we don't know the logical next person
-                // Choose random person
-                person = choice(active);
-            } else {
-                // Choose next person in list, wrapping around if at the end
-                person = active[(currentIndex + 1) % active.length];
-            }
-        }
-
-        const currentPersonElem = document.getElementById('current-song-person');
-        currentPersonElem.innerText = person;
-
-        document.currentPerson = person;
-
-        return person;
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-        const songButton = document.getElementById('song-button');
-        songButton.addEventListener("click", liedje);
-    });
-    </script>
+    <script src="/script.js"></script>
 
 </body>
 </html>

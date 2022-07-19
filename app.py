@@ -11,15 +11,23 @@ app = Flask(__name__)
 
 music_dir = Path('/music')
 
-# Let op dat raphson.png ook deze grootte hoort te zijn
-# De grootte van images van bing wordt automatisch aangepast
-IMAGE_SIZE = 410
 
 @app.route('/')
 def player():
+    guests = [d.name for d in Path(music_dir, 'Guest').iterdir()]
     return render_template('player.jinja2',
-                           guests=[d.name for d in Path(music_dir, 'Guest').iterdir()],
-                           image_size=IMAGE_SIZE)
+                           guests=guests)
+
+
+@app.route('/style.css')
+def style():
+    return send_file('style.css')
+
+
+@app.route('/script.js')
+def script():
+    return send_file('script.js')
+
 
 @app.route('/choose_track', methods=['GET'])
 def choose_track():
@@ -31,26 +39,29 @@ def choose_track():
         'name': chosen_track.name
     }
 
+
 @app.route('/get_track')
 def get_track():
     person = request.args['person']
     track_name = request.args['track_name']
     return send_file(Path(music_dir, person, track_name))
 
+
 def bing_search_image(bing_query: str) -> bytes:
     headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0'}
     r = requests.get('https://www.bing.com/images/search',
-                    headers=headers,
-                    params={'q': bing_query,
-                            'form': 'HDRSC2',
-                            'first': '1',
-                            'scenario': 'ImageBasicHover'})
+                     headers=headers,
+                     params={'q': bing_query,
+                             'form': 'HDRSC2',
+                             'first': '1',
+                             'scenario': 'ImageBasicHover'})
     soup = BeautifulSoup(r.text, 'html.parser')
     data = soup.find_all('a', {'class': 'iusc'})[0]
     json_data = json.loads(data['m'])
     img_link = json_data['murl']
     r = requests.get(img_link, headers=headers)
     return r.content
+
 
 @app.route('/get_album_cover')
 def get_album_cover():
