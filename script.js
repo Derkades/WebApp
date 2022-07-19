@@ -1,3 +1,9 @@
+document.addEventListener("DOMContentLoaded", function () {
+    const songButton = document.getElementById('song-button');
+    songButton.addEventListener("click", liedje);
+    liedje();
+});
+
 function liedje() {
     const person = getNextPerson();
     const request = new Request('/choose_track?person=' + encodeURIComponent(person), {
@@ -12,15 +18,13 @@ function liedje() {
             // Replace audio stream
             // TODO volume van oude audio element overnemen voor nieuwe element
             const audioDiv = document.getElementById('audio');
-            const audioElem = document.createElement('audio');
-            const sourceElem = document.createElement('source');
-            sourceElem.setAttribute('src', streamUrl);
-            audioElem.setAttribute('controls', '');
-            audioElem.setAttribute('autoplay', '');
-            audioElem.appendChild(sourceElem);
+
+            // Kies hier tussen streaming en normalized
+            // const audioElem = streamingAudioElement(streamUrl);
+            const audioElem = normalizedAudioElement(streamUrl);
+
             audioDiv.innerHTML = '';
             audioDiv.appendChild(audioElem);
-            audioElem.onended = liedje;
 
             // Replace album cover
             const albumCoverUrl = '/get_album_cover?song_title=' + encodeURIComponent(trackName);
@@ -94,7 +98,78 @@ function getNextPerson() {
     return person;
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    const songButton = document.getElementById('song-button');
-    songButton.addEventListener("click", liedje);
-});
+function streamingAudioElement(streamUrl) {
+    const audioElem = document.createElement('audio');
+    const sourceElem = document.createElement('source');
+    sourceElem.setAttribute('src', streamUrl);
+    audioElem.setAttribute('controls', '');
+    audioElem.setAttribute('autoplay', '');
+    audioElem.appendChild(sourceElem);
+    audioElem.onended = liedje;
+    return audioElem;
+}
+
+// Audio normalisatie dingen gestolen met modificaties van:
+// https://github.com/est31/js-audio-normalizer/blob/master/normalizer/normalizer.html
+
+var audioCtx = new AudioContext();
+
+function normalizedAudioElement(streamUrl) {
+	// var audioElem = document.getElementById(name + "-n");
+    const audioElem = document.createElement('audio');
+    audioElem.setAttribute('controls', '');
+    audioElem.onended = liedje;
+	var src = audioCtx.createMediaElementSource(audioElem);
+	var gainNode = audioCtx.createGain();
+	gainNode.gain.value = 0.1; // voor het geval er iets mis gaat willen we de gain laag hebben
+
+	audioElem.addEventListener("play", function() {
+		src.connect(gainNode);
+		gainNode.connect(audioCtx.destination);
+	}, true);
+	audioElem.addEventListener("pause", function() {
+		// disconnect the nodes on pause, otherwise all nodes always run
+		src.disconnect(gainNode);
+		gainNode.disconnect(audioCtx.destination);
+	}, true);
+	fetch(streamUrl)
+		.then(res => res.blob())
+        .then(blob => {
+            // De functie die ik gestolen heb wil zelf de mp3 downloaden. Om te voorkomen
+            // dat de download 2 keer gebeurd, converteren we hier de response naar een blob
+            // en geven we die direct aan het audio element.
+            // Vervolgens krijgt de rest van de functie de blob als ArrayBuffer
+            const sourceElem = document.createElement('source');
+            sourceElem.src = URL.createObjectURL(blob);
+            audioElem.appendChild(sourceElem);
+            return blob.arrayBuffer();
+        })
+		.then(buf => audioCtx.decodeAudioData(buf))
+		.then(function(decodedData) {
+			var decodedBuffer = decodedData.getChannelData(0);
+			var sliceLen = Math.floor(decodedData.sampleRate * 0.05);
+			var averages = [];
+			var sum = 0.0;
+			for (var i = 0; i < decodedBuffer.length; i++) {
+				sum += decodedBuffer[i] ** 2;
+				if (i % sliceLen === 0) {
+					sum = Math.sqrt(sum / sliceLen);
+					averages.push(sum);
+					sum = 0;
+				}
+			}
+			// Ascending sort of the averages array
+			averages.sort(function(a, b) { return a - b; });
+			// Take the average at the 95th percentile
+			var a = averages[Math.floor(averages.length * 0.95)];
+
+			var gain = 1.0 / a;
+			gain = gain / 10.0;
+            console.log('Gain', gain)
+			gainNode.gain.value = gain;
+
+            // Nu dat de gain aangepast is kan de audio afgespeeld worden
+            audioElem.play();
+		});
+    return audioElem;
+}
