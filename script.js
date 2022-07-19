@@ -44,7 +44,16 @@ function getActivePersons() {
         }
     });
 
-    // TODO extra person checkboxes
+    const guestBoxesElem = document.getElementById('guest-checkboxes');
+    Array.from(guestBoxesElem.children).forEach(child => {
+        if (child.tagName !== "INPUT") {
+            return;
+        }
+
+        if (child.checked) {
+            active.push(child.name);
+        }
+    });
 
     return active;
 }

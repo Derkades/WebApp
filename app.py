@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 import traceback
 import requests
 import json
+import re
 
 app = Flask(__name__)
 
@@ -14,7 +15,7 @@ music_dir = Path('/music')
 
 @app.route('/')
 def player():
-    guests = [d.name for d in Path(music_dir, 'Guest').iterdir()]
+    guests = [d.name[6:] for d in Path(music_dir).iterdir() if d.name.startswith('Guest-')]
     return render_template('player.jinja2',
                            guests=guests)
 
@@ -48,6 +49,7 @@ def get_track():
 
 
 def bing_search_image(bing_query: str) -> bytes:
+
     headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0'}
     r = requests.get('https://www.bing.com/images/search',
                      headers=headers,
@@ -63,12 +65,24 @@ def bing_search_image(bing_query: str) -> bytes:
     return r.content
 
 
+def title_to_bing_query(title: str):
+    print('Original title:', title, flush=True)
+    title = title.lower()
+    title = title.rstrip('.mp3').rstrip('.webm')  # Remove file extensions
+    title = re.sub(r' \[[a-z0-9]{11}\]', '', title)  # Remove youtube id suffix
+    title = re.sub(r' \[[a-z]+ release\]', '', title)  # Remove "[... release]"
+    title = title.replace('official video', '')  # Remove "official video"
+    title = ''.join([c for c in title if c == ' ' or c == '-' or c >= 'a' and c <= 'z'])  # Remove special characters
+    title = title.strip()
+    print('Bing title:', title, flush=True)
+    return title
+
+
 @app.route('/get_album_cover')
 def get_album_cover():
     try:
         song_title = request.args['song_title']
-        bing_query = song_title.rstrip('.mp3')
-        image = bing_search_image(bing_query)
+        image = bing_search_image(title_to_bing_query(song_title))
         # TODO resize met iets van Image.open(BytesIO(image)).resize((IMAGE_SIZE, IMAGE_SIZE))
         # beter hier dan in frontend om de grootte van de afbeelding te verminderen, minder data verbruik en sneller
         # misschien zelfs overwegen wat sterke jpeg compressie toe te passen, de afbeelding is toch klein

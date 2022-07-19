@@ -15,13 +15,22 @@
 
         <br>
 
-        <span class="main-checkboxes">
-            <input type="checkbox" id="enable-CB" name="enable-cb" checked>
-            <label for="enable-cb">CB</label>
-            <input type="checkbox" id="enable-DK" name="enable-dk" checked>
-            <label for="enable-dk">DK</label>
-            <input type="checkbox" id="enable-JK" name="enable-jk" checked>
-            <label for="enable-jk">JK</label>
+        <span id="main-checkboxes">
+            <input type="checkbox" id="enable-CB" name="cb" checked>
+            <label for="cb">CB</label>
+            <input type="checkbox" id="enable-DK" name="dk" checked>
+            <label for="dk">DK</label>
+            <input type="checkbox" id="enable-JK" name="jk" checked>
+            <label for="jk">JK</label>
+        </span>
+
+        <br>
+
+        <span id="guest-checkboxes">
+            {% for guest in guests %}
+                <input type="checkbox" id="enable-{{guest}}" name="Guest-{{guest}}">
+                <label for="enable-{{guest}}">{{guest}}</label>
+            {% endfor %}
         </span>
 
         <br>
