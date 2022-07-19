@@ -12,31 +12,17 @@ body, html {
 }
 
 #bg-image {
-    filter: blur(32px);
+    filter: blur(8em);
     height: 100%;
     width: 100%;
 
     z-index: -1;
 
-    /* hide white border after blur */
-    scale: 1.1;
+    /* blur heeft witte randen, vergroot de achtergrond om dit te verbergen */
+    scale: 1.2;
 
-    /* dit werkt niet */
+    /* dit werkt niet in firefox */
     transition: background 5s;
-}
-
-#content {
-    /* transform: translate(0, -100vh); */
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: calc(100% - 4em);
-    height: calc(100% - 4em);
-    padding: 2em;
-}
-
-p, label {
-    background-color: white;
 }
 
 .background-cover {
@@ -48,4 +34,53 @@ p, label {
 #album-cover {
     height: 512px;
     width: 512px;
+    border-radius: .25em;
+}
+
+.sidebar {
+    position: absolute;
+    top: 0;
+    width: calc(50vw - 6em);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#left-sidebar {
+    left: 3em;
+}
+
+#right-sidebar {
+    right: 3em;
+}
+
+input[type=checkbox] {
+    height: 1.75em;
+    width: 1.75em;
+}
+
+button {
+    padding: .5em 1em;
+}
+
+.controls {
+    background: rgba(255, 255, 255, 0.5);
+    padding: 1em;
+    border-radius: .25em;
+    width: 35vw;
+    margin: 2em 0;
+}
+
+h3 {
+    margin: .5em 0;
+}
+
+p {
+    margin: .2em 0;
+}
+
+audio {
+    width: 100%;
+    border-radius: .25em;
 }

@@ -9,44 +9,66 @@
 
     <div id="bg-image" class="background-cover"></div>
 
-    <main id="content">
+    <div id="left-sidebar" class="sidebar">
 
-        <button id="song-button">Start / FF</button>
+        <div>
 
-        <br>
+            <div class="controls">
 
-        <span id="main-checkboxes">
-            <input type="checkbox" id="enable-CB" name="cb" checked>
-            <label for="cb">CB</label>
-            <input type="checkbox" id="enable-DK" name="dk" checked>
-            <label for="dk">DK</label>
-            <input type="checkbox" id="enable-JK" name="jk" checked>
-            <label for="jk">JK</label>
-        </span>
+                <h3>Raphson</h3>
 
-        <br>
+                <span id="main-checkboxes">
+                    <input type="checkbox" id="enable-CB" name="cb" checked>
+                    <label for="cb">CB</label>
+                    <input type="checkbox" id="enable-DK" name="dk" checked>
+                    <label for="dk">DK</label>
+                    <input type="checkbox" id="enable-JK" name="jk" checked>
+                    <label for="jk">JK</label>
+                </span>
 
-        <span id="guest-checkboxes">
-            {% for guest in guests %}
-                <input type="checkbox" id="enable-{{guest}}" name="Guest-{{guest}}">
-                <label for="enable-{{guest}}">{{guest}}</label>
-            {% endfor %}
-        </span>
+                <br>
 
-        <br>
+                <h3>Gasten</h3>
 
+                {% if guests %}
+                    <span id="guest-checkboxes">
+                        {% for guest in guests %}
+                            <input type="checkbox" id="enable-{{guest}}" name="Guest-{{guest}}">
+                            <label for="enable-{{guest}}">{{guest}}</label>
+                        {% endfor %}
+                    </span>
+                {% else %}
+                    <p>Er zijn geen mappen voor gasten</p>
+                {% endif %}
+
+                <br>
+
+            </div>
+
+            <div class="controls">
+
+                <h3>Muziek</h3>
+
+                <p>
+                Currently playing: [<span id="current-song-person">--</span>] <span id="current-song-title">-</span>
+                </p>
+                <p>
+                Previous: [<span id="previous-song-person">--</span>] <span id="previous-song-title">-</span>
+                </p>
+
+                <div id="audio"></div>
+
+                <button id="ff-button">FF</button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="right-sidebar" class="sidebar">
         <div id="album-cover" class="background-cover"></div>
-
-        <p>
-        Currently playing: [<span id="current-song-person">--</span>] <span id="current-song-title">-</span>
-        </p>
-        <p>
-        Previous: [<span id="previous-song-person">--</span>] <span id="previous-song-title">-</span>
-        </p>
-
-        <div id="audio"></div>
-
-    </main>
+    </div>
 
     <script src="/script.js"></script>
 

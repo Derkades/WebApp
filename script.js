@@ -1,10 +1,12 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const songButton = document.getElementById('song-button');
+    const songButton = document.getElementById('ff-button');
     songButton.addEventListener("click", liedje);
     liedje();
 });
 
 function liedje() {
+    const songButton = document.getElementById('ff-button');
+    songButton.setAttribute('disabled', '');
     const person = getNextPerson();
 
     const currentPersonElem = document.getElementById('current-song-person');
@@ -59,15 +61,17 @@ function getActivePersons() {
     });
 
     const guestBoxesElem = document.getElementById('guest-checkboxes');
-    Array.from(guestBoxesElem.children).forEach(child => {
-        if (child.tagName !== "INPUT") {
-            return;
-        }
+    if (guestBoxesElem) {
+        Array.from(guestBoxesElem.children).forEach(child => {
+            if (child.tagName !== "INPUT") {
+                return;
+            }
 
-        if (child.checked) {
-            active.push(child.name);
-        }
-    });
+            if (child.checked) {
+                active.push(child.name);
+            }
+        });
+    }
 
     return active;
 }
@@ -113,6 +117,8 @@ function streamingAudioElement(streamUrl) {
     audioElem.setAttribute('autoplay', '');
     audioElem.appendChild(sourceElem);
     audioElem.onended = liedje;
+    const songButton = document.getElementById('ff-button');
+    songButton.removeAttribute('disabled');
     return audioElem;
 }
 
@@ -177,6 +183,8 @@ function normalizedAudioElement(streamUrl) {
 
             // Nu dat de gain aangepast is kan de audio afgespeeld worden
             audioElem.play();
+            const songButton = document.getElementById('ff-button');
+            songButton.removeAttribute('disabled');
 		});
     return audioElem;
 }

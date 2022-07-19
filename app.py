@@ -118,9 +118,9 @@ def get_album_cover():
     try:
         img_bytes = bing_search_image(bing_query)
         img = Image.open(BytesIO(img_bytes))
-        img.thumbnail((512, 512), Image.ANTIALIAS)
+        img.thumbnail((1024, 1024), Image.ANTIALIAS)
         img_out = BytesIO()
-        img.save(img_out, format='webp', quality=50)
+        img.save(img_out, format='webp', quality=80)
         img_out.seek(0)
         return send_file(img_out, mimetype='image/webp')
     except:
