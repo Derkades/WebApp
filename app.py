@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, send_file
 import subprocess
 from pathlib import Path
+import os
 import random
 from bs4 import BeautifulSoup
 import traceback
@@ -10,10 +11,13 @@ import re
 from io import BytesIO
 from PIL import Image
 import mimetypes
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
 music_dir = Path('/music')
+
+last_played = {}
 
 
 @app.route('/')
@@ -37,10 +41,19 @@ def script():
 def choose_track():
     person = request.args['person']
     person_dir = Path(music_dir, person)
-    tracks = list(person_dir.iterdir())
-    chosen_track = random.choice(tracks)
+    tracks = [f.name for f in person_dir.iterdir() if os.path.isfile(f)]
+    for attempt in range(10):
+        chosen_track = random.choice(tracks)
+        if chosen_track in last_played:
+            if datetime.now() - last_played[chosen_track] < timedelta(hours=2):
+                print(chosen_track, 'was played recently, picking a new song', flush=True)
+                continue
+        break
+
+    last_played[chosen_track] = datetime.now()
+
     return {
-        'name': chosen_track.name
+        'name': chosen_track
     }
 
 
@@ -88,6 +101,7 @@ def title_to_bing_query(title: str):
         'clip officiel',
         'hq videoclip',
         'videoclip',
+        '(visual)'
     ]
     for strip_keyword in strip_keywords:
         title = title.replace(strip_keyword, '')
