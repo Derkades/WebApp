@@ -32,9 +32,9 @@ body, html {
 }
 
 #album-cover {
-    height: 512px;
-    width: 512px;
-    border-radius: .25em;
+    height: 40vw;
+    width: 40vw;
+    border-radius: .5em;
 }
 
 .sidebar {
@@ -67,8 +67,7 @@ button {
 .controls {
     background: rgba(255, 255, 255, 0.5);
     padding: 1em;
-    border-radius: .25em;
-    width: 35vw;
+    width: 40vw;
     margin: 2em 0;
 }
 
@@ -82,5 +81,9 @@ p {
 
 audio {
     width: 100%;
-    border-radius: .25em;
+}
+
+.box {
+    border-radius: .5em;
+    box-shadow: .3em .3em 1em rgba(0, 0, 0, 0.3)
 }
