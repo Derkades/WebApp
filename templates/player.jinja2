@@ -100,7 +100,9 @@
             response.json().then(data => {
                 const trackName = data.name;
                 const streamUrl = '/get_track?person=' + encodeURIComponent(person) + '&track_name=' + encodeURIComponent(trackName);
+
                 // Replace audio stream
+                // TODO volume van oude audio element overnemen voor nieuwe element
                 const audioDiv = document.getElementById('audio');
                 const audioElem = document.createElement('audio');
                 const sourceElem = document.createElement('source');
