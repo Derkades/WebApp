@@ -7,6 +7,9 @@ import traceback
 import requests
 import json
 import re
+from io import BytesIO
+from PIL import Image
+import mimetypes
 
 app = Flask(__name__)
 
@@ -69,9 +72,25 @@ def title_to_bing_query(title: str):
     print('Original title:', title, flush=True)
     title = title.lower()
     title = title.rstrip('.mp3').rstrip('.webm')  # Remove file extensions
-    title = re.sub(r' \[[a-z0-9]{11}\]', '', title)  # Remove youtube id suffix
-    title = re.sub(r' \[[a-z]+ release\]', '', title)  # Remove "[... release]"
-    title = title.replace('official video', '')  # Remove "official video"
+    title = re.sub(r' \[[a-z0-9\-_]+\]', '', title)  # Remove youtube id suffix
+    strip_keywords = [
+        'monstercat release',
+        'nerd nation release',
+        'monstercat official music video',
+        'official audio',
+        'official video',
+        'official music video',
+        'official lyric video',
+        'official hd video',
+        'extended version',
+        'long version',
+        '[out now]',
+        'clip officiel',
+        'hq videoclip',
+        'videoclip',
+    ]
+    for strip_keyword in strip_keywords:
+        title = title.replace(strip_keyword, '')
     title = ''.join([c for c in title if c == ' ' or c == '-' or c >= 'a' and c <= 'z'])  # Remove special characters
     title = title.strip()
     print('Bing title:', title, flush=True)
@@ -80,14 +99,18 @@ def title_to_bing_query(title: str):
 
 @app.route('/get_album_cover')
 def get_album_cover():
+    song_title = request.args['song_title']
+    bing_query = title_to_bing_query(song_title)
     try:
-        song_title = request.args['song_title']
-        image = bing_search_image(title_to_bing_query(song_title))
-        # TODO resize met iets van Image.open(BytesIO(image)).resize((IMAGE_SIZE, IMAGE_SIZE))
-        # beter hier dan in frontend om de grootte van de afbeelding te verminderen, minder data verbruik en sneller
-        # misschien zelfs overwegen wat sterke jpeg compressie toe te passen, de afbeelding is toch klein
-        return image
+        img_bytes = bing_search_image(bing_query)
+        img = Image.open(BytesIO(img_bytes))
+        img.thumbnail((512, 512), Image.ANTIALIAS)
+        img_out = BytesIO()
+        img.save(img_out, format='webp', quality=50)
+        img_out.seek(0)
+        return send_file(img_out, mimetype='image/webp')
     except:
+        print('No bing results', flush=True)
         traceback.print_exc()
         return send_file('raphson.png')
 

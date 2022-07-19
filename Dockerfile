@@ -2,7 +2,7 @@ FROM python:3-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg
 
-RUN pip install yt-dlp flask bs4 requests
+RUN pip install yt-dlp flask bs4 requests Pillow
 
 RUN mkdir /app
 
