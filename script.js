@@ -6,6 +6,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function liedje() {
     const person = getNextPerson();
+
+    const currentPersonElem = document.getElementById('current-song-person');
+    const previousPersonElem = document.getElementById('previous-song-person');
+    previousPersonElem.innerText = currentPersonElem.innerText;
+    currentPersonElem.innerText = person;
+
     const request = new Request('/choose_track?person=' + encodeURIComponent(person), {
         method: 'GET',
     });
@@ -34,6 +40,8 @@ function liedje() {
 
             // Replace 'currently playing' text
             const currentTitleElem = document.getElementById('current-song-title');
+            const previousTitleElem = document.getElementById('previous-song-title');
+            previousTitleElem.innerText = currentTitleElem.innerText;
             currentTitleElem.innerText = trackName;
         });
     });
@@ -89,9 +97,6 @@ function getNextPerson() {
             person = active[(currentIndex + 1) % active.length];
         }
     }
-
-    const currentPersonElem = document.getElementById('current-song-person');
-    currentPersonElem.innerText = person;
 
     document.currentPerson = person;
 
