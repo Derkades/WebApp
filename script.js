@@ -39,6 +39,8 @@ function liedje() {
             });
 
             // Replace 'currently playing' text
+            console.log('Now playing', trackName);
+            console.log('Stream URL', streamUrl);
             const currentTitleElem = document.getElementById('current-song-title');
             const previousTitleElem = document.getElementById('previous-song-title');
             previousTitleElem.innerText = currentTitleElem.innerText;
