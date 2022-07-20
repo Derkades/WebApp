@@ -60,10 +60,6 @@ input[type=checkbox] {
     width: 1.75em;
 }
 
-button {
-    padding: .5em 1em;
-}
-
 .controls {
     background: rgba(255, 255, 255, 0.5);
     padding: 1em;
@@ -107,4 +103,10 @@ audio {
 #progress-time {
     display: inline-block;
     padding: 0 .5em;
+}
+
+.icon-button {
+    height: 2.5em;
+    width: 2.5em;
+    font-size: x-large;
 }

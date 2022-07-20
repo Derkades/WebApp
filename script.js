@@ -2,6 +2,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const songButton = document.getElementById('ff-button');
     songButton.addEventListener("click", liedje);
 
+    const ppButton = document.getElementById('pp-button');
+    ppButton.addEventListener("click", playPause);
+
     document.addEventListener('keydown', event => handleKey(event.key));
 
     liedje();
@@ -40,12 +43,7 @@ function handleKey(key) {
             elem.checked = !elem.checked;
         }
     } else if (key == 'p') {
-        const audioElem = getAudioElement();
-        if (audioElem.paused) {
-            audioElem.play();
-        } else {
-            audioElem.pause();
-        }
+        playPause();
     } else if (key == 'ArrowRight') {
         const songButton = document.getElementById('ff-button');
         if (!songButton.hasAttribute('disabled')) {
@@ -66,6 +64,15 @@ function replaceAudioElement(newElement) {
     const audioDiv = document.getElementById('audio');
     audioDiv.innerHTML = '';
     audioDiv.appendChild(newElement);
+}
+
+function playPause() {
+    const audioElem = getAudioElement();
+    if (audioElem.paused) {
+        audioElem.play();
+    } else {
+        audioElem.pause();
+    }
 }
 
 function liedje() {
