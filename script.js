@@ -1,3 +1,5 @@
+"use strict";
+
 document.addEventListener("DOMContentLoaded", () => {
     const songButton = document.getElementById('ff-button');
     songButton.addEventListener("click", liedje);
@@ -42,9 +44,9 @@ function handleKey(key) {
             const elem = document.getElementById(elemId);
             elem.checked = !elem.checked;
         }
-    } else if (key == 'p' || key == ' ') {
+    } else if (key === 'p' || key === ' ') {
         playPause();
-    } else if (key == 'ArrowRight') {
+    } else if (key === 'ArrowRight' || key === 'f') {
         const songButton = document.getElementById('ff-button');
         if (!songButton.hasAttribute('disabled')) {
             liedje();
@@ -92,30 +94,32 @@ function liedje() {
             const trackName = data.name;
             const streamUrl = '/get_track?person=' + encodeURIComponent(person) + '&track_name=' + encodeURIComponent(trackName);
 
+            console.log('Now playing', trackName, streamUrl);
+
             // Kies hier tussen streaming en normalized
             // replaceAudioElement(streamingAudioElement(streamUrl));
             replaceAudioElement(normalizedAudioElement(streamUrl));
 
-            // Replace album cover
-            const albumCoverUrl = '/get_album_cover?song_title=' + encodeURIComponent(trackName);
-            const image = new Image();
-            image.src = albumCoverUrl;
-            image.onload = () => {
-                ['album-cover', 'bg-image'].forEach(id => {
-                    document.getElementById(id).style.backgroundImage = 'url("' + albumCoverUrl + '")';
-                });
-            }
+            updateAlbumCover(trackName);
 
             // Replace 'currently playing' text
-            console.log('Now playing', trackName);
-            console.log('Stream URL', streamUrl);
-
             const currentTrackElem = document.getElementById('current-track');
             const previousTrackElem = document.getElementById('previous-track');
             previousTrackElem.innerText = currentTrackElem.innerText;
             currentTrackElem.innerText = '[' + person + '] ' + trackName;
         });
     });
+}
+
+function updateAlbumCover(trackName) {
+    const albumCoverUrl = '/get_album_cover?song_title=' + encodeURIComponent(trackName);
+    const image = new Image();
+    image.src = albumCoverUrl;
+    image.onload = () => {
+        ['album-cover', 'bg-image'].forEach(id => {
+            document.getElementById(id).style.backgroundImage = 'url("' + albumCoverUrl + '")';
+        });
+    }
 }
 
 function getActivePersons() {
