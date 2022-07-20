@@ -78,14 +78,10 @@ function playPause() {
 }
 
 function liedje() {
-    const songButton = document.getElementById('ff-button');
-    songButton.setAttribute('disabled', '');
-    const person = getNextPerson();
+    const ffButton = document.getElementById('ff-button');
+    ffButton.setAttribute('disabled', '');
 
-    const currentPersonElem = document.getElementById('current-song-person');
-    const previousPersonElem = document.getElementById('previous-song-person');
-    previousPersonElem.innerText = currentPersonElem.innerText;
-    currentPersonElem.innerText = person;
+    const person = getNextPerson();
 
     const request = new Request('/choose_track?person=' + encodeURIComponent(person), {
         method: 'GET',
@@ -113,10 +109,11 @@ function liedje() {
             // Replace 'currently playing' text
             console.log('Now playing', trackName);
             console.log('Stream URL', streamUrl);
-            const currentTitleElem = document.getElementById('current-song-title');
-            const previousTitleElem = document.getElementById('previous-song-title');
-            previousTitleElem.innerText = currentTitleElem.innerText;
-            currentTitleElem.innerText = trackName;
+
+            const currentTrackElem = document.getElementById('current-track');
+            const previousTrackElem = document.getElementById('previous-track');
+            previousTrackElem.innerText = currentTrackElem.innerText;
+            currentTrackElem.innerText = '[' + person + '] ' + trackName;
         });
     });
 }
