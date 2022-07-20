@@ -1,8 +1,66 @@
 document.addEventListener("DOMContentLoaded", function () {
     const songButton = document.getElementById('ff-button');
     songButton.addEventListener("click", liedje);
+
+    document.addEventListener('keydown', event => handleKey(event.key));
+
     liedje();
 });
+
+function handleKey(key) {
+    var elemId = null;
+    const keyInt = parseInt(key);
+    if (!isNaN(keyInt)) {
+        if (keyInt === 1) {
+            elemId = 'enable-CB';
+        } else if (keyInt == 2) {
+            elemId = 'enable-DK';
+        } else if (keyInt === 3) {
+            elemId = 'enable-JK';
+        } else if (keyInt >= 4 && keyInt <= 9) {
+            const guestBoxesElem = document.getElementById('guest-checkboxes');
+            var index = 4;
+            if (guestBoxesElem) {
+                for (const child of guestBoxesElem.children) {
+                    if (child.tagName !== "INPUT") {
+                        continue;
+                    }
+                    if (index === keyInt) {
+                        elemId = child.id;
+                        break;
+                    }
+                    index++;
+                }
+            }
+        }
+
+        console.log('number key', keyInt, 'elemId', elemId);
+        if (elemId !== null) {
+            const elem = document.getElementById(elemId);
+            elem.checked = !elem.checked;
+        }
+    } else if (key == 'p') {
+        const audioElem = getAudioElement();
+        if (audioElem.paused) {
+            audioElem.play();
+        } else {
+            audioElem.pause();
+        }
+    } else if (key == 'ArrowRight') {
+        const songButton = document.getElementById('ff-button');
+        if (!songButton.hasAttribute('disabled')) {
+            liedje();
+        }
+    }
+}
+
+function getAudioElement() {
+    const audioDiv = document.getElementById('audio');
+    if (audioDiv.children.length === 1) {
+        return audioDiv.children[0];
+    }
+    return null;
+}
 
 function liedje() {
     const songButton = document.getElementById('ff-button');

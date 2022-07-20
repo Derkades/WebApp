@@ -19,11 +19,11 @@
 
                 <span id="main-checkboxes">
                     <input type="checkbox" id="enable-CB" name="cb" checked>
-                    <label for="cb">CB</label>
+                    <label for="cb">CB<sup>1</sup></label>
                     <input type="checkbox" id="enable-DK" name="dk" checked>
-                    <label for="dk">DK</label>
+                    <label for="dk">DK<sup>2</sup></label>
                     <input type="checkbox" id="enable-JK" name="jk" checked>
-                    <label for="jk">JK</label>
+                    <label for="jk">JK<sup>3</sup></label>
                 </span>
 
                 <br>
@@ -34,7 +34,7 @@
                     <span id="guest-checkboxes">
                         {% for guest in guests %}
                             <input type="checkbox" id="enable-{{guest}}" name="Guest-{{guest}}">
-                            <label for="enable-{{guest}}">{{guest}}</label>
+                            <label for="enable-{{guest}}">{{guest}}<sup>{{loop.index + 3}}</label>
                         {% endfor %}
                     </span>
                 {% else %}
@@ -58,7 +58,7 @@
 
                 <div id="audio"></div>
 
-                <button id="ff-button">FF</button>
+                <button id="ff-button">FF<sup>&gt;</sup></button>
 
             </div>
 
