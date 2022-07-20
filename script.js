@@ -125,9 +125,9 @@ function streamingAudioElement(streamUrl) {
 // Audio normalisatie dingen gestolen met modificaties van:
 // https://github.com/est31/js-audio-normalizer/blob/master/normalizer/normalizer.html
 
-var audioCtx = new AudioContext();
 
 function normalizedAudioElement(streamUrl) {
+    var audioCtx = new AudioContext();
 	// var audioElem = document.getElementById(name + "-n");
     const audioElem = document.createElement('audio');
     audioElem.setAttribute('controls', '');

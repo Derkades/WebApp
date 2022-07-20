@@ -3,7 +3,7 @@ FROM python:3
 # RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg
 # RUN pip install yt-dlp
 
-RUN pip install flask bs4 requests Pillow
+RUN pip install flask bs4 requests Pillow gunicorn
 
 RUN mkdir /app
 
@@ -12,4 +12,5 @@ COPY ./templates /app/templates
 
 WORKDIR /app
 
-ENTRYPOINT ["flask", "run", "--host", "0.0.0.0"]
+# ENTRYPOINT ["flask", "run", "--host", "0.0.0.0"]
+ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8080", "app"]

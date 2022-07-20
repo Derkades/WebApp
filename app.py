@@ -13,31 +13,31 @@ from PIL import Image
 import mimetypes
 from datetime import datetime, timedelta
 
-app = Flask(__name__)
+application = Flask(__name__)
 
 music_dir = Path('/music')
 
 last_played = {}
 
 
-@app.route('/')
+@application.route('/')
 def player():
     guests = [d.name[6:] for d in Path(music_dir).iterdir() if d.name.startswith('Guest-')]
     return render_template('player.jinja2',
                            guests=guests)
 
 
-@app.route('/style.css')
+@application.route('/style.css')
 def style():
     return send_file('style.css')
 
 
-@app.route('/script.js')
+@application.route('/script.js')
 def script():
     return send_file('script.js')
 
 
-@app.route('/choose_track', methods=['GET'])
+@application.route('/choose_track', methods=['GET'])
 def choose_track():
     person = request.args['person']
     person_dir = Path(music_dir, person)
@@ -57,7 +57,7 @@ def choose_track():
     }
 
 
-@app.route('/get_track')
+@application.route('/get_track')
 def get_track():
     person = request.args['person']
     track_name = request.args['track_name']
@@ -111,7 +111,7 @@ def title_to_bing_query(title: str):
     return title
 
 
-@app.route('/get_album_cover')
+@application.route('/get_album_cover')
 def get_album_cover():
     song_title = request.args['song_title']
     bing_query = title_to_bing_query(song_title)
@@ -164,5 +164,5 @@ def get_album_cover():
 #     dirs = [d.name for d in music_dir.iterdir()]
 #     return {'dirs': dirs}
 
-if __name__ == "__main__":
-    app.run(debug=False)
+# if __name__ == "__main__":
+#     app.run(debug=False)
