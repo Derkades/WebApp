@@ -87,3 +87,24 @@ audio {
     border-radius: .5em;
     box-shadow: .3em .3em 1em rgba(0, 0, 0, 0.3)
 }
+
+.outer-bar,
+#progress-bar {
+    height: 1em;
+}
+
+.outer-bar {
+    border: 1px solid blue;
+    width: 100%;
+    margin: .5em 0;
+}
+
+#progress-bar {
+    background-color: blue;
+    width: 0;
+}
+
+#progress-time {
+    display: inline-block;
+    padding: 0 .5em;
+}

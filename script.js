@@ -62,6 +62,12 @@ function getAudioElement() {
     return null;
 }
 
+function replaceAudioElement(newElement) {
+    const audioDiv = document.getElementById('audio');
+    audioDiv.innerHTML = '';
+    audioDiv.appendChild(newElement);
+}
+
 function liedje() {
     const songButton = document.getElementById('ff-button');
     songButton.setAttribute('disabled', '');
@@ -81,16 +87,9 @@ function liedje() {
             const trackName = data.name;
             const streamUrl = '/get_track?person=' + encodeURIComponent(person) + '&track_name=' + encodeURIComponent(trackName);
 
-            // Replace audio stream
-            // TODO volume van oude audio element overnemen voor nieuwe element
-            const audioDiv = document.getElementById('audio');
-
             // Kies hier tussen streaming en normalized
-            // const audioElem = streamingAudioElement(streamUrl);
-            const audioElem = normalizedAudioElement(streamUrl);
-
-            audioDiv.innerHTML = '';
-            audioDiv.appendChild(audioElem);
+            // replaceAudioElement(streamingAudioElement(streamUrl));
+            replaceAudioElement(normalizedAudioElement(streamUrl));
 
             // Replace album cover
             const albumCoverUrl = '/get_album_cover?song_title=' + encodeURIComponent(trackName);
@@ -167,14 +166,27 @@ function getNextPerson() {
     return person;
 }
 
+function updateProgress(audioElem) {
+    const current = Math.floor(audioElem.currentTime);
+    const max = Math.floor(audioElem.duration);
+    const percentage = (audioElem.currentTime / audioElem.duration) * 100;
+
+    const timeElem = document.getElementById('progress-time');
+    timeElem.innerText = current + ' / ' + max;
+
+    const barElem = document.getElementById('progress-bar');
+    barElem.style.width = percentage + '%';
+}
+
 function streamingAudioElement(streamUrl) {
     const audioElem = document.createElement('audio');
     const sourceElem = document.createElement('source');
     sourceElem.setAttribute('src', streamUrl);
-    audioElem.setAttribute('controls', '');
+    // audioElem.setAttribute('controls', '');
     audioElem.setAttribute('autoplay', '');
     audioElem.appendChild(sourceElem);
     audioElem.onended = liedje;
+    audioElem.ontimeupdate = () => updateProgress(audioElem);
     const songButton = document.getElementById('ff-button');
     songButton.removeAttribute('disabled');
     return audioElem;
@@ -188,8 +200,10 @@ var audioCtx = new AudioContext();
 function normalizedAudioElement(streamUrl) {
 	// var audioElem = document.getElementById(name + "-n");
     const audioElem = document.createElement('audio');
-    audioElem.setAttribute('controls', '');
+    // audioElem.setAttribute('controls', '');
     audioElem.onended = liedje;
+    audioElem.ontimeupdate = () => updateProgress(audioElem);
+
 	var src = audioCtx.createMediaElementSource(audioElem);
 	var gainNode = audioCtx.createGain();
 	gainNode.gain.value = 0.1; // voor het geval er iets mis gaat willen we de gain laag hebben
