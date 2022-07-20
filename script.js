@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
     const songButton = document.getElementById('ff-button');
     songButton.addEventListener("click", liedje);
 
@@ -42,13 +42,15 @@ function handleKey(key) {
             const elem = document.getElementById(elemId);
             elem.checked = !elem.checked;
         }
-    } else if (key == 'p') {
+    } else if (key == 'p' || key == ' ') {
         playPause();
     } else if (key == 'ArrowRight') {
         const songButton = document.getElementById('ff-button');
         if (!songButton.hasAttribute('disabled')) {
             liedje();
         }
+    } else {
+        console.log('Unhandled keypress', key)
     }
 }
 
@@ -100,9 +102,13 @@ function liedje() {
 
             // Replace album cover
             const albumCoverUrl = '/get_album_cover?song_title=' + encodeURIComponent(trackName);
-            ['album-cover', 'bg-image'].forEach(id => {
-                document.getElementById(id).style.backgroundImage = 'url("' + albumCoverUrl + '")';
-            });
+            const image = new Image();
+            image.src = albumCoverUrl;
+            image.onload = () => {
+                ['album-cover', 'bg-image'].forEach(id => {
+                    document.getElementById(id).style.backgroundImage = 'url("' + albumCoverUrl + '")';
+                });
+            }
 
             // Replace 'currently playing' text
             console.log('Now playing', trackName);
