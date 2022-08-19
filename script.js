@@ -96,8 +96,8 @@ function liedje() {
             console.log('Now playing', trackName, streamUrl);
 
             // Kies hier tussen streaming en normalized
-            // replaceAudioElement(streamingAudioElement(streamUrl));
-            replaceAudioElement(normalizedAudioElement(streamUrl));
+            replaceAudioElement(streamingAudioElement(streamUrl));
+            // replaceAudioElement(normalizedAudioElement(streamUrl));
 
             updateAlbumCover(trackName);
 

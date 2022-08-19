@@ -1,9 +1,10 @@
 FROM python:3
 
-# RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg
-# RUN pip install yt-dlp
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ffmpeg && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN pip install flask bs4 requests Pillow gunicorn
+RUN pip install yt-dlp flask bs4 requests Pillow gunicorn
 
 RUN mkdir /app
 

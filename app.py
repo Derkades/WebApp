@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 import hmac
 from hmac import HMAC
 import hashlib
+import tempfile
 
 application = Flask(__name__)
 
@@ -97,6 +98,21 @@ def choose_track():
     }
 
 
+def transcode(input_file: Path, output_file: str) -> bytes:
+    command = ['ffmpeg',
+               '-y',  # overwrite existing file
+               '-hide_banner',
+               '-loglevel', 'info',
+               '-i', input_file.absolute().as_posix(),
+               '-c:a', 'libopus',
+               '-b:a', '96K',
+               '-f', 'opus',
+               '-vbr', 'on',
+               '-af', 'dynaudnorm=',
+               output_file]
+    subprocess.check_output(command, shell=False)
+
+
 @application.route('/get_track')
 def get_track():
     if not check_password_cookie():
@@ -104,7 +120,18 @@ def get_track():
 
     person = request.args['person']
     track_name = request.args['track_name']
-    return send_file(Path(music_dir, person, track_name))
+    file_path = Path(music_dir, person, track_name)
+
+    do_transcode = True
+    if do_transcode:
+        temp: BytesIO
+        with tempfile.NamedTemporaryFile(delete=False) as temp:
+            transcode(file_path, temp.name)
+            # We can't use send_file here, because the temp file is automatically deleted once outside of the 'with' block
+            # Read the entire file and send it in one go, instead.
+            return Response(temp.read(), mimetype='audio/ogg')
+    else:
+        return send_file(file_path)
 
 
 def bing_search_image(bing_query: str) -> bytes:
