@@ -11,3 +11,5 @@ services:
         source: ./music # in nextcloud /zwembad/nextcloud/data/files/...
         target: /music
     user: "1000"
+    environment:
+      WEB_PASSWORD: 1234

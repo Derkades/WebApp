@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, send_file
+from flask import Flask, request, render_template, send_file, Response, redirect
 import subprocess
 from pathlib import Path
 import os
@@ -12,6 +12,9 @@ from io import BytesIO
 from PIL import Image
 import mimetypes
 from datetime import datetime, timedelta
+import hmac
+from hmac import HMAC
+import hashlib
 
 application = Flask(__name__)
 
@@ -20,25 +23,62 @@ music_dir = Path('/music')
 last_played = {}
 
 
+def check_password(password: str) -> bool:
+    if password is None:
+        return False
+
+    # First hash passwords so they have the same length
+    # otherwise compare_digest still leaks length
+
+    hashed_pass = hashlib.sha256()
+    hashed_pass.update(password.encode())
+    hashed_pass = hashed_pass.digest()
+
+    hashed_correct = hashlib.sha256()
+    hashed_correct.update(os.environ['WEB_PASSWORD'].encode())
+    hashed_correct = hashed_correct.digest()
+
+    # Constant time comparison
+    return hmac.compare_digest(hashed_pass, hashed_correct)
+
+
+def check_password_cookie() -> bool:
+    return check_password(request.cookies.get('password'))
+
+
+@application.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        if 'password' not in request.form:
+            return 'invalid form input'
+
+        password = request.form['password']
+
+        if not check_password(password):
+            return 'Invalid password. <a href="/login">Try again</a>'
+
+        response = redirect('/')
+        response.set_cookie('password', password, max_age=3600*24*30)
+        return response
+    else:
+        return render_template('login.jinja2')
+
+
 @application.route('/')
 def player():
+    if not check_password_cookie():
+        return redirect('/login')
+
     guests = [d.name[6:] for d in Path(music_dir).iterdir() if d.name.startswith('Guest-')]
     return render_template('player.jinja2',
                            guests=guests)
 
 
-@application.route('/style.css')
-def style():
-    return send_file('style.css')
-
-
-@application.route('/script.js')
-def script():
-    return send_file('script.js')
-
-
 @application.route('/choose_track', methods=['GET'])
 def choose_track():
+    if not check_password_cookie():
+        return Response(None, 403)
+
     person = request.args['person']
     person_dir = Path(music_dir, person)
     tracks = [f.name for f in person_dir.iterdir() if os.path.isfile(f)]
@@ -59,13 +99,15 @@ def choose_track():
 
 @application.route('/get_track')
 def get_track():
+    if not check_password_cookie():
+        return Response(None, 403)
+
     person = request.args['person']
     track_name = request.args['track_name']
     return send_file(Path(music_dir, person, track_name))
 
 
 def bing_search_image(bing_query: str) -> bytes:
-
     headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0'}
     r = requests.get('https://www.bing.com/images/search',
                      headers=headers,
@@ -113,6 +155,9 @@ def title_to_bing_query(title: str):
 
 @application.route('/get_album_cover')
 def get_album_cover():
+    if not check_password_cookie():
+        return Response(None, 403)
+
     song_title = request.args['song_title']
     bing_query = title_to_bing_query(song_title)
     try:
@@ -127,6 +172,16 @@ def get_album_cover():
         print('No bing results', flush=True)
         traceback.print_exc()
         return send_file('raphson.png')
+
+
+@application.route('/style.css')
+def style():
+    return send_file('style.css')
+
+
+@application.route('/script.js')
+def script():
+    return send_file('script.js')
 
 
 # hieronder oude dingen voor youtube downloader, herimplementeren we later wel
