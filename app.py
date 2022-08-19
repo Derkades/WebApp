@@ -108,7 +108,7 @@ def transcode(input_file: Path, output_file: str) -> bytes:
                '-b:a', '96K',
                '-f', 'opus',
                '-vbr', 'on',
-               '-af', 'dynaudnorm=',
+               '-af', 'dynaudnorm=p=0.5',
                output_file]
     subprocess.check_output(command, shell=False)
 
