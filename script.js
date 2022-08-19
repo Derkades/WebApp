@@ -80,17 +80,16 @@ function playPause() {
 }
 
 function liedje() {
-    const ffButton = document.getElementById('ff-button');
-    ffButton.setAttribute('disabled', '');
+    document.getElementById('ff-button').setAttribute('disabled', '');
 
     const person = getNextPerson();
 
-    const request = new Request('/choose_track?person=' + encodeURIComponent(person), {
-        method: 'GET',
-    });
+    const request = new Request('/choose_track?person=' + encodeURIComponent(person),
+                                { method: 'GET'});
 
-    fetch(request).then(response => {
-        response.json().then(data => {
+    fetch(request)
+        .then(response => response.json())
+        .then(data => {
             const trackName = data.name;
             const streamUrl = '/get_track?person=' + encodeURIComponent(person) + '&track_name=' + encodeURIComponent(trackName);
 
@@ -108,7 +107,6 @@ function liedje() {
             previousTrackElem.innerText = currentTrackElem.innerText;
             currentTrackElem.innerText = '[' + person + '] ' + trackName;
         });
-    });
 }
 
 function updateAlbumCover(trackName) {
@@ -158,7 +156,7 @@ function getNextPerson() {
 
     if (active.length === 0) {
         // No one is selected
-        // TODO how to handle properly?
+        // eigenlijk zou er een error moeten komen, maar voor nu kiezen we DK
         person = "DK";
     } else if (document.currentPerson === undefined) {
         // No person chosen yet, choose random person
@@ -196,7 +194,6 @@ function streamingAudioElement(streamUrl) {
     const audioElem = document.createElement('audio');
     const sourceElem = document.createElement('source');
     sourceElem.setAttribute('src', streamUrl);
-    // audioElem.setAttribute('controls', '');
     audioElem.setAttribute('autoplay', '');
     audioElem.appendChild(sourceElem);
     audioElem.onended = liedje;
@@ -212,9 +209,7 @@ function streamingAudioElement(streamUrl) {
 var audioCtx = new AudioContext();
 
 function normalizedAudioElement(streamUrl) {
-	// var audioElem = document.getElementById(name + "-n");
     const audioElem = document.createElement('audio');
-    // audioElem.setAttribute('controls', '');
     audioElem.onended = liedje;
     audioElem.ontimeupdate = () => updateProgress(audioElem);
 
