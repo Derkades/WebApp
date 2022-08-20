@@ -61,12 +61,13 @@
                     <div id="progress-bar"></div>
                 </div>
 
-                <button id="pp-button" class="icon-button">&#x23EF;</button>
-                {# <sup>p</sup> #}
-                <button id="skip-button" class="icon-button">&#x23ED;</button>
-                {# <sup>&#x2192;</sup> #}
-                <span id="progress-time"></span>
+                {% for button_name in ['backward-fast', 'backward', 'play', 'pause', 'forward', 'forward-fast', 'forward-step'] %}
+                    <button id="button-{{ button_name }}" class="icon-button">
+                        <div class="icon" style="background-image: url('{{ assets[button_name + '.svg'] }}')">
+                    </button>
+                {% endfor %}
 
+                <span id="progress-time"></span>
             </div>
 
             <div class="controls box">

@@ -8,8 +8,9 @@ RUN pip install yt-dlp flask bs4 requests Pillow gunicorn
 
 RUN mkdir /app
 
-COPY app.py raphson.png script.js style.css /app/
+COPY *.py raphson.png script.js style.css /app/
 COPY ./templates /app/templates
+COPY ./assets /app/assets
 
 WORKDIR /app
 

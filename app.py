@@ -18,6 +18,8 @@ import hashlib
 import tempfile
 from typing import Optional
 
+from assets import Assets
+
 
 def getenv(key: str, default: Optional[str]) -> str:
     if default is None and key not in os.environ:
@@ -26,6 +28,7 @@ def getenv(key: str, default: Optional[str]) -> str:
 
 
 application = Flask(__name__)
+assets = Assets()
 
 music_dir = Path('/music')
 
@@ -85,7 +88,8 @@ def player():
 
     guests = [d.name[6:] for d in Path(music_dir).iterdir() if d.name.startswith('Guest-')]
     return render_template('player.jinja2',
-                           guests=guests)
+                           guests=guests,
+                           assets=assets.all_assets_dict())
 
 
 @application.route('/choose_track', methods=['GET'])
@@ -117,6 +121,7 @@ def transcode(input_file: Path, output_file: str) -> bytes:
                '-hide_banner',
                '-loglevel', ffmpeg_loglevel,
                '-i', input_file.absolute().as_posix(),
+               '-map_metadata', '-1',  # sommige metadata kan firefox niet aan "NS_ERROR_DOM_MEDIA_METADATA_ERR", dus we halen alle metadata weg
                '-c:a', 'libopus',
                '-b:a', opus_bitrate,
                '-f', 'opus',

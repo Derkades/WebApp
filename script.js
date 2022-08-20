@@ -5,14 +5,20 @@ document.queueBusy = false;
 document.queueSize = 4;
 
 document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById('skip-button').addEventListener("click", liedje);
-    document.getElementById('pp-button').addEventListener("click", playPause);
+    document.getElementById('button-backward-fast').addEventListener('click', () => seek(-30));
+    document.getElementById('button-backward').addEventListener('click', () => seek(-5));
+    document.getElementById('button-play').addEventListener('click', play);
+    document.getElementById('button-pause').addEventListener('click', pause);
+    document.getElementById('button-forward').addEventListener('click', () => seek(5));
+    document.getElementById('button-forward-fast').addEventListener('click', () => seek(30));
+    document.getElementById('button-forward-step').addEventListener('click', liedje);
 
     document.addEventListener('keydown', event => handleKey(event.key));
 
     updateQueueHtml();
     updateQueue();
     liedje();
+    setInterval(showCorrectPlayPauseButton, 50);
 });
 
 function handleKey(key) {
@@ -50,9 +56,7 @@ function handleKey(key) {
     } else if (key === 'p' || key === ' ') {
         playPause();
     } else if (key === 'ArrowRight' || key === 'f') {
-        if (!document.getElementById('skip-button').hasAttribute('disabled')) {
-            liedje();
-        }
+        liedje();
     } else {
         console.log('Unhandled keypress', key)
     }
@@ -72,22 +76,47 @@ function replaceAudioElement(newElement) {
     audioDiv.appendChild(newElement);
 }
 
-function playPause() {
+function play() {
     const audioElem = getAudioElement();
     if (audioElem == null) {
         return;
     }
+    audioElem.play();
+}
 
-    if (audioElem.paused) {
-        audioElem.play();
+function pause() {
+    const audioElem = getAudioElement();
+    if (audioElem == null) {
+        return;
+    }
+    audioElem.pause();
+}
+
+function showCorrectPlayPauseButton() {
+    const audioElem = getAudioElement();
+    if (audioElem == null || audioElem.paused) {
+        document.getElementById('button-pause').style.display = 'none';
+        document.getElementById('button-play').style.display = '';
     } else {
-        audioElem.pause();
+        document.getElementById('button-play').style.display = 'none';
+        document.getElementById('button-pause').style.display = '';
+    }
+
+}
+
+function seek(delta) {
+    const audioElem = getAudioElement();
+    if (audioElem == null) {
+        return;
+    }
+    const newTime = audioElem.currentTime + delta;
+    if (delta > 0 && newTime < audioElem.duration ||
+        delta < 0 && newTime > 0) {
+        audioElem.currentTime = newTime;
     }
 }
 
 function liedje() {
-    document.getElementById('skip-button').setAttribute('disabled', '');
-
     if (document.queue.length === 0) {
         console.log('queue is empty, trying again later');
         setTimeout(liedje, 1000);
@@ -182,7 +211,6 @@ function createAudioElement(sourceUrl) {
     audioElem.setAttribute('autoplay', '');
     audioElem.onended = liedje;
     audioElem.ontimeupdate = () => updateProgress(audioElem);
-    document.getElementById('skip-button').removeAttribute('disabled');
     return audioElem;
 }
 
@@ -217,7 +245,6 @@ function getNextPerson(currentPerson) {
     return person;
 }
 
-
 function updateQueue() {
     if (document.queueBusy) {
         return;
@@ -234,48 +261,51 @@ function updateQueue() {
     }
 
     if (document.queue.length < document.queueSize) {
-        document.queueBusy = true;
-        console.log('updating queue, finding track...');
-
-        fetch(new Request('/choose_track?person=' + encodeURIComponent(person)))
-            .then(response => response.json())
-            .then(data => {
-                console.log('updating queue, downloading track...');
-
-                const trackName = data.name;
-                const streamUrl = '/get_track?person=' + encodeURIComponent(person) + '&track_name=' + encodeURIComponent(trackName);
-                fetch(new Request(streamUrl))
-                    .then(response => response.blob())
-                    .then(audioBlob => {
-                        console.log('updating queue, downloading album cover...');
-                        const coverUrl = '/get_album_cover?song_title=' + encodeURIComponent(trackName);
-                        fetch(new Request(coverUrl))
-                            .then(response => response.blob())
-                            .then(imageBlob => {
-                                let personDisplay;
-                                if (person.startsWith("Guest-")) {
-                                    personDisplay = person.substring('6');
-                                } else {
-                                    personDisplay = person;
-                                }
-
-                                const trackData = {
-                                    person: person,
-                                    personDisplay: personDisplay,
-                                    name: trackName,
-                                    audioUrl: URL.createObjectURL(audioBlob),
-                                    imageUrl: URL.createObjectURL(imageBlob),
-                                }
-
-                                document.queue.push(trackData);
-                                document.queueBusy = false;
-                                console.log('updating queue, done.');
-                                updateQueueHtml();
-                                updateQueue();
-                            });
-                    });
-            });
+        downloadTrackToQueue();
     }
+}
+
+function downloadTrackToQueue() {
+    document.queueBusy = true;
+    console.log('updating queue, finding track...');
+    fetch(new Request('/choose_track?person=' + encodeURIComponent(person)))
+        .then(response => response.json())
+        .then(data => {
+            console.log('updating queue, downloading track...');
+
+            const trackName = data.name;
+            const streamUrl = '/get_track?person=' + encodeURIComponent(person) + '&track_name=' + encodeURIComponent(trackName);
+            fetch(new Request(streamUrl))
+                .then(response => response.blob())
+                .then(audioBlob => {
+                    console.log('updating queue, downloading album cover...');
+                    const coverUrl = '/get_album_cover?song_title=' + encodeURIComponent(trackName);
+                    fetch(new Request(coverUrl))
+                        .then(response => response.blob())
+                        .then(imageBlob => {
+                            let personDisplay;
+                            if (person.startsWith("Guest-")) {
+                                personDisplay = person.substring('6');
+                            } else {
+                                personDisplay = person;
+                            }
+
+                            const trackData = {
+                                person: person,
+                                personDisplay: personDisplay,
+                                name: trackName,
+                                audioUrl: URL.createObjectURL(audioBlob),
+                                imageUrl: URL.createObjectURL(imageBlob),
+                            }
+
+                            document.queue.push(trackData);
+                            document.queueBusy = false;
+                            console.log('updating queue, done.');
+                            updateQueueHtml();
+                            updateQueue();
+                        });
+                });
+        });
 }
 
 // function clearQueue() {
@@ -317,7 +347,6 @@ function updateQueueHtml() {
         html += '<td class="background-cover box" style="background-image: url(\'' + escapeHtml(queuedTrack.imageUrl) + '\')" onclick="removeFromQueue(' + i + ')"></td>';
         html += '<td>' + queuedTrack.personDisplay + '</td>';
         html += '<td>' + escapeHtml(queuedTrack.name) + '</td>';
-        // html += '<td onclick="removeFromQueue(' + i + ')">&#x274C;</td>';
         html += '</tr>';
         i++;
     }

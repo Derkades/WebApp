@@ -47,7 +47,8 @@ p.secondary {
     scale: 1.2;
 }
 
-.background-cover {
+.background-cover,
+.spinner {
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -131,10 +132,11 @@ audio {
 }
 
 .icon-button {
-    height: 3rem;
-    width: 3rem;
-    padding: .3rem 0 0 0;
-    font-size: x-large;
+    /* height: 3rem; */
+    /* width: 3rem; */
+    /* padding: .3rem 0 0 0; */
+    /* font-size: x-large; */
+    padding: .5rem;
 }
 
 .queue-table {
@@ -169,9 +171,6 @@ audio {
     display: inline-block;
     margin-left: 1rem;
     background-image: url('/raphson');
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
     height: 2rem;
     width: 2rem;
 }
@@ -183,4 +182,12 @@ audio {
     to {
         transform: rotate(360deg);
     }
+}
+
+.icon {
+    height: 2rem;
+    width: 2rem;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
 }
