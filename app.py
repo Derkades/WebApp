@@ -108,7 +108,7 @@ def transcode(input_file: Path, output_file: str) -> bytes:
                '-b:a', '96K',
                '-f', 'opus',
                '-vbr', 'on',
-               '-af', 'dynaudnorm=p=0.5',
+               '-filter:a', 'silenceremove=start_periods=1:stop_periods=1:start_threshold=-90dB:stop_threshold=-90dB:detection=1,dynaudnorm=p=0.5',
                output_file]
     subprocess.check_output(command, shell=False)
 
