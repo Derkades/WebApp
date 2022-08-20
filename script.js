@@ -206,66 +206,66 @@ function streamingAudioElement(streamUrl) {
 // Audio normalisatie dingen gestolen met modificaties van:
 // https://github.com/est31/js-audio-normalizer/blob/master/normalizer/normalizer.html
 
-var audioCtx = new AudioContext();
+// var audioCtx = new AudioContext();
 
-function normalizedAudioElement(streamUrl) {
-    const audioElem = document.createElement('audio');
-    audioElem.onended = liedje;
-    audioElem.ontimeupdate = () => updateProgress(audioElem);
+// function normalizedAudioElement(streamUrl) {
+//     const audioElem = document.createElement('audio');
+//     audioElem.onended = liedje;
+//     audioElem.ontimeupdate = () => updateProgress(audioElem);
 
-	var src = audioCtx.createMediaElementSource(audioElem);
-	var gainNode = audioCtx.createGain();
-	gainNode.gain.value = 0.1; // voor het geval er iets mis gaat willen we de gain laag hebben
+// 	var src = audioCtx.createMediaElementSource(audioElem);
+// 	var gainNode = audioCtx.createGain();
+// 	gainNode.gain.value = 0.1; // voor het geval er iets mis gaat willen we de gain laag hebben
 
-	audioElem.addEventListener("play", function() {
-		src.connect(gainNode);
-		gainNode.connect(audioCtx.destination);
-	}, true);
-	audioElem.addEventListener("pause", function() {
-		// disconnect the nodes on pause, otherwise all nodes always run
-		src.disconnect(gainNode);
-		gainNode.disconnect(audioCtx.destination);
-	}, true);
-	fetch(streamUrl)
-		.then(res => res.blob())
-        .then(blob => {
-            // De functie die ik gestolen heb wil zelf de mp3 downloaden. Om te voorkomen
-            // dat de download 2 keer gebeurd, converteren we hier de response naar een blob
-            // en geven we die direct aan het audio element.
-            // Vervolgens krijgt de rest van de functie de blob als ArrayBuffer
-            const sourceElem = document.createElement('source');
-            sourceElem.src = URL.createObjectURL(blob);
-            audioElem.appendChild(sourceElem);
-            return blob.arrayBuffer();
-        })
-		.then(buf => audioCtx.decodeAudioData(buf))
-		.then(function(decodedData) {
-			var decodedBuffer = decodedData.getChannelData(0);
-			var sliceLen = Math.floor(decodedData.sampleRate * 0.05);
-			var averages = [];
-			var sum = 0.0;
-			for (var i = 0; i < decodedBuffer.length; i++) {
-				sum += decodedBuffer[i] ** 2;
-				if (i % sliceLen === 0) {
-					sum = Math.sqrt(sum / sliceLen);
-					averages.push(sum);
-					sum = 0;
-				}
-			}
-			// Ascending sort of the averages array
-			averages.sort(function(a, b) { return a - b; });
-			// Take the average at the 95th percentile
-			var a = averages[Math.floor(averages.length * 0.95)];
+// 	audioElem.addEventListener("play", function() {
+// 		src.connect(gainNode);
+// 		gainNode.connect(audioCtx.destination);
+// 	}, true);
+// 	audioElem.addEventListener("pause", function() {
+// 		// disconnect the nodes on pause, otherwise all nodes always run
+// 		src.disconnect(gainNode);
+// 		gainNode.disconnect(audioCtx.destination);
+// 	}, true);
+// 	fetch(streamUrl)
+// 		.then(res => res.blob())
+//         .then(blob => {
+//             // De functie die ik gestolen heb wil zelf de mp3 downloaden. Om te voorkomen
+//             // dat de download 2 keer gebeurd, converteren we hier de response naar een blob
+//             // en geven we die direct aan het audio element.
+//             // Vervolgens krijgt de rest van de functie de blob als ArrayBuffer
+//             const sourceElem = document.createElement('source');
+//             sourceElem.src = URL.createObjectURL(blob);
+//             audioElem.appendChild(sourceElem);
+//             return blob.arrayBuffer();
+//         })
+// 		.then(buf => audioCtx.decodeAudioData(buf))
+// 		.then(function(decodedData) {
+// 			var decodedBuffer = decodedData.getChannelData(0);
+// 			var sliceLen = Math.floor(decodedData.sampleRate * 0.05);
+// 			var averages = [];
+// 			var sum = 0.0;
+// 			for (var i = 0; i < decodedBuffer.length; i++) {
+// 				sum += decodedBuffer[i] ** 2;
+// 				if (i % sliceLen === 0) {
+// 					sum = Math.sqrt(sum / sliceLen);
+// 					averages.push(sum);
+// 					sum = 0;
+// 				}
+// 			}
+// 			// Ascending sort of the averages array
+// 			averages.sort(function(a, b) { return a - b; });
+// 			// Take the average at the 95th percentile
+// 			var a = averages[Math.floor(averages.length * 0.95)];
 
-			var gain = 1.0 / a;
-			gain = gain / 10.0;
-            console.log('Gain', gain)
-			gainNode.gain.value = gain;
+// 			var gain = 1.0 / a;
+// 			gain = gain / 10.0;
+//             console.log('Gain', gain)
+// 			gainNode.gain.value = gain;
 
-            // Nu dat de gain aangepast is kan de audio afgespeeld worden
-            audioElem.play();
-            const songButton = document.getElementById('ff-button');
-            songButton.removeAttribute('disabled');
-		});
-    return audioElem;
-}
+//             // Nu dat de gain aangepast is kan de audio afgespeeld worden
+//             audioElem.play();
+//             const songButton = document.getElementById('ff-button');
+//             songButton.removeAttribute('disabled');
+// 		});
+//     return audioElem;
+// }
