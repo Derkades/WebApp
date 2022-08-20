@@ -2,6 +2,7 @@
 
 document.queue = [];
 document.queueBusy = false;
+document.queueSize = 4;
 
 document.addEventListener("DOMContentLoaded", () => {
     const songButton = document.getElementById('ff-button');
@@ -12,12 +13,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.addEventListener('keydown', event => handleKey(event.key));
 
+    updateQueueHtml();
     updateQueue();
     liedje();
 });
 
 function handleKey(key) {
-    var elemId = null;
+    let elemId = null;
     const keyInt = parseInt(key);
     if (!isNaN(keyInt)) {
         if (keyInt === 1) {
@@ -28,7 +30,7 @@ function handleKey(key) {
             elemId = 'enable-JK';
         } else if (keyInt >= 4 && keyInt <= 9) {
             const guestBoxesElem = document.getElementById('guest-checkboxes');
-            var index = 4;
+            let index = 4;
             if (guestBoxesElem) {
                 for (const child of guestBoxesElem.children) {
                     if (child.tagName !== "INPUT") {
@@ -99,13 +101,10 @@ function liedje() {
     // Get and remove first item from queue
     const track = getTrackFromQueue();
 
-    const audioUrl = URL.createObjectURL(track.audioBlob);
-    const imageUrl = URL.createObjectURL(track.imageBlob);
-
-    const audioElem = createAudioElement(audioUrl);
+    const audioElem = createAudioElement(track.audioUrl);
     replaceAudioElement(audioElem);
 
-    replaceAlbumCover(imageUrl)
+    replaceAlbumCover(track.imageUrl)
 
     // Replace 'currently playing' text
     const currentTrackElem = document.getElementById('current-track');
@@ -179,7 +178,7 @@ function choice(arr) {
 function getNextPerson(currentPerson) {
     const active = getActivePersons();
 
-    var person;
+    let person;
 
     if (active.length === 0) {
         // No one is selected
@@ -205,7 +204,7 @@ function getNextPerson(currentPerson) {
 
 
 function updateQueue() {
-    if (isQueueBusy()) {
+    if (document.queueBusy) {
         return;
     }
 
@@ -219,8 +218,8 @@ function updateQueue() {
         person = getNextPerson();
     }
 
-    if (document.queue.length < 5) {
-        setQueueBusy(true);
+    if (document.queue.length < document.queueSize) {
+        document.queueBusy = true;
         console.log('updating queue, finding track...');
 
         fetch(new Request('/choose_track?person=' + encodeURIComponent(person)))
@@ -241,11 +240,11 @@ function updateQueue() {
                                 const trackData = {
                                     person: person,
                                     name: trackName,
-                                    audioBlob: audioBlob,
-                                    imageBlob: imageBlob,
+                                    audioUrl: URL.createObjectURL(audioBlob),
+                                    imageUrl: URL.createObjectURL(imageBlob),
                                 }
                                 document.queue.push(trackData);
-                                setQueueBusy(false);
+                                document.queueBusy = false;
                                 console.log('updating queue, done.');
                                 updateQueueHtml();
                                 updateQueue();
@@ -255,18 +254,8 @@ function updateQueue() {
     }
 }
 
-function isQueueBusy() {
-    return document.queueBusy;
-}
-
-function setQueueBusy(busy) {
-    document.queueBusy = busy;
-    const spinner = document.getElementById('queue-spinner');
-    spinner.style.visibility = busy ? 'visible' : 'hidden';
-}
-
 // function clearQueue() {
-//     if (isQueueBusy()) {
+//     if (document.queueBusy) {
 //         setTimeout(clearQueue, 500);
 //         return;
 //     }
@@ -283,7 +272,7 @@ function getTrackFromQueue() {
 }
 
 function escapeHtml(unescaped) {
-    var p = document.createElement("p");
+    const p = document.createElement("p");
     p.textContent = unescaped;
     return p.innerHTML;
 }
@@ -297,23 +286,36 @@ function removeFromQueue(index) {
 function updateQueueHtml() {
     let html = `
         <table class="queue-table">
-            <thead>
+            <!--<thead>
                 <tr>
-                    <th>Person</th>
-                    <th>Track name</th>
-                    <th>rm</th>
+                    <th>Persoon</th>
+                    <th>Naam</th>
+                    <th>x</th>
                 </tr>
-            </thead>
+            </thead>-->
             <tbody>`;
     let i = 0;
     for (const queuedTrack of document.queue) {
         html += '<tr>';
+        html += '<td class="image" style="background-image: url(\'' + escapeHtml(queuedTrack.imageUrl) + '\')"></td>';
         html += '<td>' + queuedTrack.person + '</td>';
-        html += '<td>' + escapeHtml(queuedTrack.name) + '</td>'
-        html += '<td onclick="removeFromQueue(' + i + ')">&#x274C;</td>'
+        html += '<td>' + escapeHtml(queuedTrack.name) + '</td>';
+        html += '<td class="remove-button" onclick="removeFromQueue(' + i + ')">&#x274C;</td>';
         html += '</tr>';
         i++;
     }
+
+    let first = true;
+    while (i < document.queueSize) {
+        html += '<tr><td colspan="4" class="secondary downloading">';
+        if (first) {
+            first = false;
+            html += '<span class="spinner" id="queue-spinner"></span>';
+        }
+        html += '</td></tr>';
+        i++;
+    }
+
     html += '</tbody></table>';
     const outerDiv = document.getElementById('queue');
     outerDiv.innerHTML = html;

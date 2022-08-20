@@ -7,8 +7,24 @@ body, html {
     overflow: hidden;
 }
 
-h3, p, label {
+h3, p, label, td {
     font-family: Verdana, sans-serif;
+}
+
+h3 {
+    margin: .5rem 0;
+}
+
+p {
+    margin: .2rem 0;
+}
+
+.secondary {
+    color: #444;
+}
+
+p.secondary {
+    font-size: .7em;
 }
 
 #bg-image, #album-cover {
@@ -16,7 +32,7 @@ h3, p, label {
 }
 
 #bg-image {
-    filter: blur(8em);
+    filter: blur(8rem);
     height: 100%;
     width: 100%;
 
@@ -40,7 +56,7 @@ h3, p, label {
 .sidebar {
     position: absolute;
     top: 0;
-    width: calc(50vw - 6em);
+    width: calc(50vw - 6rem);
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -56,23 +72,15 @@ h3, p, label {
 }
 
 input[type=checkbox] {
-    height: 1.75em;
-    width: 1.75em;
+    height: 1.25rem;
+    width: 1.25rem;
 }
 
 .controls {
-    background: rgba(255, 255, 255, 0.5);
-    padding: 1em;
+    background: rgba(255, 255, 255, 0.35);
+    padding: 1rem;
     width: 40vw;
-    margin: 2em 0;
-}
-
-h3 {
-    margin: .5em 0;
-}
-
-p {
-    margin: .2em 0;
+    margin: 1.25rem 0;
 }
 
 audio {
@@ -80,8 +88,8 @@ audio {
 }
 
 .box {
-    border-radius: .5em;
-    box-shadow: .3em .3em 1em rgba(0, 0, 0, 0.3);
+    border-radius: .5rem;
+    box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
     /* border: 2px solid white; */
 }
 
@@ -93,7 +101,7 @@ audio {
 .outer-bar {
     border: 1px solid blue;
     width: 100%;
-    margin: .5em 0;
+    margin: .5rem 0;
 }
 
 #progress-bar {
@@ -103,13 +111,13 @@ audio {
 
 #progress-time {
     display: inline-block;
-    padding: 0 .5em;
+    padding: 0 .5rem;
 }
 
 .icon-button {
-    height: 2.5em;
-    width: 2.5em;
-    padding: .2em 0 0 0;
+    height: 3rem;
+    width: 3rem;
+    padding: .3rem 0 0 0;
     font-size: x-large;
 }
 
@@ -117,17 +125,38 @@ audio {
     width: 100%;
 }
 
+.queue-table td {
+    height: 4rem;
+    font-size: .85rem;
+}
+
+.queue-table td.image {
+    width: 4rem;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+}
+
+.queue-table td.downloading {
+    text-align: center;
+}
+
+.queue-table td.remove-button {
+    cursor: pointer;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
 .spinner {
     animation: rotate 1.25s linear infinite;
     display: inline-block;
-    margin-left: 1em;
-    visibility: hidden;
+    margin-left: 1rem;
     background-image: url('/raphson');
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
-    height: 1.5em;
-    width: 1.5em;
+    height: 2rem;
+    width: 2rem;
 }
 
 @keyframes rotate {
