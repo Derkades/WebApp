@@ -16,4 +16,4 @@ services:
           size: '128M'
     user: "1000"
     environment:
-      WEB_PASSWORD: 1234
+      MUSIC_WEB_PASSWORD: 1234

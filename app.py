@@ -16,12 +16,25 @@ import hmac
 from hmac import HMAC
 import hashlib
 import tempfile
+from typing import Optional
+
+
+def getenv(key: str, default: Optional[str]) -> str:
+    if default is None and key not in os.environ:
+        raise ValueError('Required environment variable ' + key + ' not configured.')
+    return os.environ[key] if key in os.environ else default
+
 
 application = Flask(__name__)
 
 music_dir = Path('/music')
 
 last_played = {}
+
+web_password = getenv('MUSIC_WEB_PASSWORD', None)
+ffmpeg_loglevel = getenv('MUSIC_FFMPEG_LOGLEVEL', 'info')
+opus_bitrate = getenv('MUSIC_OPUS_BITRATE', '96K')
+max_duration = getenv('MUSIC_MAX_DURATION', '00:08:00')
 
 
 def check_password(password: str) -> bool:
@@ -36,7 +49,7 @@ def check_password(password: str) -> bool:
     hashed_pass = hashed_pass.digest()
 
     hashed_correct = hashlib.sha256()
-    hashed_correct.update(os.environ['WEB_PASSWORD'].encode())
+    hashed_correct.update(web_password.encode())
     hashed_correct = hashed_correct.digest()
 
     # Constant time comparison
@@ -102,19 +115,20 @@ def transcode(input_file: Path, output_file: str) -> bytes:
     command = ['ffmpeg',
                '-y',  # overwrite existing file
                '-hide_banner',
-               '-loglevel', 'info',
+               '-loglevel', ffmpeg_loglevel,
                '-i', input_file.absolute().as_posix(),
                '-c:a', 'libopus',
-               '-b:a', '96K',
+               '-b:a', opus_bitrate,
                '-f', 'opus',
                '-vbr', 'on',
+               '-t', max_duration,
                '-filter:a', 'silenceremove=start_periods=1:stop_periods=1:start_threshold=-90dB:stop_threshold=-90dB:detection=1,dynaudnorm=p=0.5',
                output_file]
     subprocess.check_output(command, shell=False)
 
 
 @application.route('/get_track')
-def get_track():
+def get_track() -> Response:
     if not check_password_cookie():
         return Response(None, 403)
 
@@ -150,7 +164,7 @@ def bing_search_image(bing_query: str) -> bytes:
     return r.content
 
 
-def title_to_bing_query(title: str):
+def title_to_bing_query(title: str) -> str:
     print('Original title:', title, flush=True)
     title = title.lower()
     title = title.rstrip('.mp3').rstrip('.webm')  # Remove file extensions
@@ -181,7 +195,7 @@ def title_to_bing_query(title: str):
 
 
 @application.route('/get_album_cover')
-def get_album_cover():
+def get_album_cover() -> Response:
     if not check_password_cookie():
         return Response(None, 403)
 
@@ -202,17 +216,17 @@ def get_album_cover():
 
 
 @application.route('/style.css')
-def style():
+def style() -> Response:
     return send_file('style.css')
 
 
 @application.route('/script.js')
-def script():
+def script() -> Response:
     return send_file('script.js')
 
 
 @application.route('/raphson')
-def raphson():
+def raphson() -> Response:
     return send_file('raphson.png')
 
 
