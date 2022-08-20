@@ -112,3 +112,29 @@ audio {
     padding: .2em 0 0 0;
     font-size: x-large;
 }
+
+.queue-table {
+    width: 100%;
+}
+
+.spinner {
+    animation: rotate 1.25s linear infinite;
+    display: inline-block;
+    margin-left: 1em;
+    visibility: hidden;
+    background-image: url('/raphson');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 1.5em;
+    width: 1.5em;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

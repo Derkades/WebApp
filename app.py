@@ -211,6 +211,11 @@ def script():
     return send_file('script.js')
 
 
+@application.route('/raphson')
+def raphson():
+    return send_file('raphson.png')
+
+
 # hieronder oude dingen voor youtube downloader, herimplementeren we later wel
 
 # def constant_time_compare(val1, val2):

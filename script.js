@@ -1,5 +1,8 @@
 "use strict";
 
+document.queue = [];
+document.queueBusy = false;
+
 document.addEventListener("DOMContentLoaded", () => {
     const songButton = document.getElementById('ff-button');
     songButton.addEventListener("click", liedje);
@@ -9,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.addEventListener('keydown', event => handleKey(event.key));
 
+    updateQueue();
     liedje();
 });
 
@@ -72,6 +76,10 @@ function replaceAudioElement(newElement) {
 
 function playPause() {
     const audioElem = getAudioElement();
+    if (audioElem == null) {
+        return;
+    }
+
     if (audioElem.paused) {
         audioElem.play();
     } else {
@@ -82,42 +90,36 @@ function playPause() {
 function liedje() {
     document.getElementById('ff-button').setAttribute('disabled', '');
 
-    const person = getNextPerson();
+    if (document.queue.length === 0) {
+        console.log('queue is empty, try again later');
+        setTimeout(liedje, 1000);
+        return;
+    }
 
-    const request = new Request('/choose_track?person=' + encodeURIComponent(person),
-                                { method: 'GET'});
+    // Get and remove first item from queue
+    const track = getTrackFromQueue();
 
-    fetch(request)
-        .then(response => response.json())
-        .then(data => {
-            const trackName = data.name;
-            const streamUrl = '/get_track?person=' + encodeURIComponent(person) + '&track_name=' + encodeURIComponent(trackName);
+    const audioUrl = URL.createObjectURL(track.audioBlob);
+    const imageUrl = URL.createObjectURL(track.imageBlob);
 
-            console.log('Now playing', trackName, streamUrl);
+    const audioElem = createAudioElement(audioUrl);
+    replaceAudioElement(audioElem);
 
-            // Kies hier tussen streaming en normalized
-            replaceAudioElement(streamingAudioElement(streamUrl));
-            // replaceAudioElement(normalizedAudioElement(streamUrl));
+    replaceAlbumCover(imageUrl)
 
-            updateAlbumCover(trackName);
+    // Replace 'currently playing' text
+    const currentTrackElem = document.getElementById('current-track');
+    const previousTrackElem = document.getElementById('previous-track');
+    previousTrackElem.innerText = currentTrackElem.innerText;
+    currentTrackElem.innerText = '[' + track.person + '] ' + track.name;
 
-            // Replace 'currently playing' text
-            const currentTrackElem = document.getElementById('current-track');
-            const previousTrackElem = document.getElementById('previous-track');
-            previousTrackElem.innerText = currentTrackElem.innerText;
-            currentTrackElem.innerText = '[' + person + '] ' + trackName;
-        });
+    updateQueue();
 }
 
-function updateAlbumCover(trackName) {
-    const albumCoverUrl = '/get_album_cover?song_title=' + encodeURIComponent(trackName);
-    const image = new Image();
-    image.src = albumCoverUrl;
-    image.onload = () => {
-        ['album-cover', 'bg-image'].forEach(id => {
-            document.getElementById(id).style.backgroundImage = 'url("' + albumCoverUrl + '")';
-        });
-    }
+function replaceAlbumCover(imageUrl) {
+    ['album-cover', 'bg-image'].forEach(id => {
+        document.getElementById(id).style.backgroundImage = 'url("' + imageUrl + '")';
+    });
 }
 
 function getActivePersons() {
@@ -145,39 +147,6 @@ function getActivePersons() {
     return active;
 }
 
-function choice(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
-}
-
-function getNextPerson() {
-    const active = getActivePersons();
-
-    var person;
-
-    if (active.length === 0) {
-        // No one is selected
-        // eigenlijk zou er een error moeten komen, maar voor nu kiezen we DK
-        person = "DK";
-    } else if (document.currentPerson === undefined) {
-        // No person chosen yet, choose random person
-        person = choice(active);
-    } else {
-        const currentIndex = active.indexOf(document.currentPerson);
-        if (currentIndex === -1) {
-            // Current person is no longer active, we don't know the logical next person
-            // Choose random person
-            person = choice(active);
-        } else {
-            // Choose next person in list, wrapping around if at the end
-            person = active[(currentIndex + 1) % active.length];
-        }
-    }
-
-    document.currentPerson = person;
-
-    return person;
-}
-
 function updateProgress(audioElem) {
     const current = Math.floor(audioElem.currentTime);
     const max = Math.floor(audioElem.duration);
@@ -190,17 +159,164 @@ function updateProgress(audioElem) {
     barElem.style.width = percentage + '%';
 }
 
-function streamingAudioElement(streamUrl) {
+function createAudioElement(sourceUrl) {
     const audioElem = document.createElement('audio');
     const sourceElem = document.createElement('source');
-    sourceElem.setAttribute('src', streamUrl);
-    audioElem.setAttribute('autoplay', '');
+    sourceElem.src = sourceUrl;
     audioElem.appendChild(sourceElem);
+    audioElem.setAttribute('autoplay', '');
     audioElem.onended = liedje;
     audioElem.ontimeupdate = () => updateProgress(audioElem);
     const songButton = document.getElementById('ff-button');
     songButton.removeAttribute('disabled');
     return audioElem;
+}
+
+function choice(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function getNextPerson(currentPerson) {
+    const active = getActivePersons();
+
+    var person;
+
+    if (active.length === 0) {
+        // No one is selected
+        // eigenlijk zou er een error moeten komen, maar voor nu kiezen we DK
+        person = "DK";
+    } else if (currentPerson === undefined) {
+        // No person chosen yet, choose random person
+        person = choice(active);
+    } else {
+        const currentIndex = active.indexOf(currentPerson);
+        if (currentIndex === -1) {
+            // Current person is no longer active, we don't know the logical next person
+            // Choose random person
+            person = choice(active);
+        } else {
+            // Choose next person in list, wrapping around if at the end
+            person = active[(currentIndex + 1) % active.length];
+        }
+    }
+
+    return person;
+}
+
+
+function updateQueue() {
+    if (isQueueBusy()) {
+        return;
+    }
+
+    let person;
+
+    if (document.queue.length > 0) {
+        const lastTrack = document.queue[document.queue.length - 1];
+        const lastPerson = lastTrack.person;
+        person = getNextPerson(lastPerson);
+    } else {
+        person = getNextPerson();
+    }
+
+    if (document.queue.length < 5) {
+        setQueueBusy(true);
+        console.log('updating queue, finding track...');
+
+        fetch(new Request('/choose_track?person=' + encodeURIComponent(person)))
+            .then(response => response.json())
+            .then(data => {
+                console.log('updating queue, downloading track...');
+
+                const trackName = data.name;
+                const streamUrl = '/get_track?person=' + encodeURIComponent(person) + '&track_name=' + encodeURIComponent(trackName);
+                fetch(new Request(streamUrl))
+                    .then(response => response.blob())
+                    .then(audioBlob => {
+                        console.log('updating queue, downloading album cover...');
+                        const coverUrl = '/get_album_cover?song_title=' + encodeURIComponent(trackName);
+                        fetch(new Request(coverUrl))
+                            .then(response => response.blob())
+                            .then(imageBlob => {
+                                const trackData = {
+                                    person: person,
+                                    name: trackName,
+                                    audioBlob: audioBlob,
+                                    imageBlob: imageBlob,
+                                }
+                                document.queue.push(trackData);
+                                setQueueBusy(false);
+                                console.log('updating queue, done.');
+                                updateQueueHtml();
+                                updateQueue();
+                            });
+                    });
+            });
+    }
+}
+
+function isQueueBusy() {
+    return document.queueBusy;
+}
+
+function setQueueBusy(busy) {
+    document.queueBusy = busy;
+    const spinner = document.getElementById('queue-spinner');
+    spinner.style.visibility = busy ? 'visible' : 'hidden';
+}
+
+// function clearQueue() {
+//     if (isQueueBusy()) {
+//         setTimeout(clearQueue, 500);
+//         return;
+//     }
+
+//     document.queue = [];
+//     updateQueue();
+// }
+
+function getTrackFromQueue() {
+    // Get and remove first element from queue
+    const track = document.queue.shift();
+    updateQueueHtml();
+    return track;
+}
+
+function escapeHtml(unescaped) {
+    var p = document.createElement("p");
+    p.textContent = unescaped;
+    return p.innerHTML;
+}
+
+function removeFromQueue(index) {
+    document.queue.splice(index, 1);
+    updateQueueHtml();
+    updateQueue();
+}
+
+function updateQueueHtml() {
+    let html = `
+        <table class="queue-table">
+            <thead>
+                <tr>
+                    <th>Person</th>
+                    <th>Track name</th>
+                    <th>rm</th>
+                </tr>
+            </thead>
+            <tbody>`;
+    let i = 0;
+    for (const queuedTrack of document.queue) {
+        html += '<tr>';
+        html += '<td>' + queuedTrack.person + '</td>';
+        html += '<td>' + escapeHtml(queuedTrack.name) + '</td>'
+        html += '<td onclick="removeFromQueue(' + i + ')">&#x274C;</td>'
+        html += '</tr>';
+        i++;
+    }
+    html += '</tbody></table>';
+    const outerDiv = document.getElementById('queue');
+    outerDiv.innerHTML = html;
 }
 
 // Audio normalisatie dingen gestolen met modificaties van:
