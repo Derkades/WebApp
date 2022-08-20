@@ -5,11 +5,8 @@ document.queueBusy = false;
 document.queueSize = 4;
 
 document.addEventListener("DOMContentLoaded", () => {
-    const songButton = document.getElementById('ff-button');
-    songButton.addEventListener("click", liedje);
-
-    const ppButton = document.getElementById('pp-button');
-    ppButton.addEventListener("click", playPause);
+    document.getElementById('skip-button').addEventListener("click", liedje);
+    document.getElementById('pp-button').addEventListener("click", playPause);
 
     document.addEventListener('keydown', event => handleKey(event.key));
 
@@ -53,8 +50,7 @@ function handleKey(key) {
     } else if (key === 'p' || key === ' ') {
         playPause();
     } else if (key === 'ArrowRight' || key === 'f') {
-        const songButton = document.getElementById('ff-button');
-        if (!songButton.hasAttribute('disabled')) {
+        if (!document.getElementById('skip-button').hasAttribute('disabled')) {
             liedje();
         }
     } else {
@@ -90,10 +86,10 @@ function playPause() {
 }
 
 function liedje() {
-    document.getElementById('ff-button').setAttribute('disabled', '');
+    document.getElementById('skip-button').setAttribute('disabled', '');
 
     if (document.queue.length === 0) {
-        console.log('queue is empty, try again later');
+        console.log('queue is empty, trying again later');
         setTimeout(liedje, 1000);
         return;
     }
@@ -104,21 +100,41 @@ function liedje() {
     const audioElem = createAudioElement(track.audioUrl);
     replaceAudioElement(audioElem);
 
-    replaceAlbumCover(track.imageUrl)
+    replaceAlbumImages(track.imageUrl)
 
     // Replace 'currently playing' text
     const currentTrackElem = document.getElementById('current-track');
     const previousTrackElem = document.getElementById('previous-track');
     previousTrackElem.innerText = currentTrackElem.innerText;
-    currentTrackElem.innerText = '[' + track.person + '] ' + track.name;
+    currentTrackElem.innerText = '[' + track.personDisplay + '] ' + track.name;
 
     updateQueue();
 }
 
-function replaceAlbumCover(imageUrl) {
-    ['album-cover', 'bg-image'].forEach(id => {
-        document.getElementById(id).style.backgroundImage = 'url("' + imageUrl + '")';
-    });
+function replaceAlbumImages(imageUrl) {
+    const cssUrl = 'url("' + imageUrl + '")';
+
+    const bg1 = document.getElementById('bg-image-1');
+    const bg2 = document.getElementById('bg-image-2');
+    const fg1 = document.getElementById('album-cover-1');
+    const fg2 = document.getElementById('album-cover-2');
+
+    // Set bottom (1) to new image
+    bg1.style.backgroundImage = cssUrl;
+    fg1.style.backgroundImage = cssUrl;
+
+    // Slowly fade out old image (2)
+    bg2.style.opacity = 0;
+    fg2.style.opacity = 0;
+
+    setTimeout(() => {
+        // To prepare for next replacement, move bottom image (1) to top image (2)
+        bg2.style.backgroundImage = cssUrl;
+        fg2.style.backgroundImage = cssUrl;
+        // Make it visible
+        bg2.style.opacity = 1;
+        fg2.style.opacity = 1;
+    }, 1000);
 }
 
 function getActivePersons() {
@@ -166,8 +182,7 @@ function createAudioElement(sourceUrl) {
     audioElem.setAttribute('autoplay', '');
     audioElem.onended = liedje;
     audioElem.ontimeupdate = () => updateProgress(audioElem);
-    const songButton = document.getElementById('ff-button');
-    songButton.removeAttribute('disabled');
+    document.getElementById('skip-button').removeAttribute('disabled');
     return audioElem;
 }
 
@@ -237,12 +252,21 @@ function updateQueue() {
                         fetch(new Request(coverUrl))
                             .then(response => response.blob())
                             .then(imageBlob => {
+                                let personDisplay;
+                                if (person.startsWith("Guest-")) {
+                                    personDisplay = person.substring('6');
+                                } else {
+                                    personDisplay = person;
+                                }
+
                                 const trackData = {
                                     person: person,
+                                    personDisplay: personDisplay,
                                     name: trackName,
                                     audioUrl: URL.createObjectURL(audioBlob),
                                     imageUrl: URL.createObjectURL(imageBlob),
                                 }
+
                                 document.queue.push(trackData);
                                 document.queueBusy = false;
                                 console.log('updating queue, done.');
@@ -286,28 +310,21 @@ function removeFromQueue(index) {
 function updateQueueHtml() {
     let html = `
         <table class="queue-table">
-            <!--<thead>
-                <tr>
-                    <th>Persoon</th>
-                    <th>Naam</th>
-                    <th>x</th>
-                </tr>
-            </thead>-->
             <tbody>`;
     let i = 0;
     for (const queuedTrack of document.queue) {
         html += '<tr>';
-        html += '<td class="image" style="background-image: url(\'' + escapeHtml(queuedTrack.imageUrl) + '\')"></td>';
-        html += '<td>' + queuedTrack.person + '</td>';
+        html += '<td class="background-cover box" style="background-image: url(\'' + escapeHtml(queuedTrack.imageUrl) + '\')" onclick="removeFromQueue(' + i + ')"></td>';
+        html += '<td>' + queuedTrack.personDisplay + '</td>';
         html += '<td>' + escapeHtml(queuedTrack.name) + '</td>';
-        html += '<td class="remove-button" onclick="removeFromQueue(' + i + ')">&#x274C;</td>';
+        // html += '<td onclick="removeFromQueue(' + i + ')">&#x274C;</td>';
         html += '</tr>';
         i++;
     }
 
     let first = true;
     while (i < document.queueSize) {
-        html += '<tr><td colspan="4" class="secondary downloading">';
+        html += '<tr><td colspan="3" class="secondary downloading">';
         if (first) {
             first = false;
             html += '<span class="spinner" id="queue-spinner"></span>';

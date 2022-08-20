@@ -7,7 +7,8 @@
 </head>
 <body>
 
-    <div id="bg-image" class="background-cover"></div>
+    <div id="bg-image-1" class="bg-image background-cover"></div>
+    <div id="bg-image-2" class="bg-image background-cover fade-image-top"></div>
 
     <div id="left-sidebar" class="sidebar">
 
@@ -62,9 +63,9 @@
 
                 <button id="pp-button" class="icon-button">&#x23EF;</button>
                 {# <sup>p</sup> #}
-                <button id="ff-button" class="icon-button">&#x23ED;</button>
+                <button id="skip-button" class="icon-button">&#x23ED;</button>
                 {# <sup>&#x2192;</sup> #}
-                <div id="progress-time"></div>
+                <span id="progress-time"></span>
 
             </div>
 
@@ -78,7 +79,10 @@
     </div>
 
     <div id="right-sidebar" class="sidebar">
-        <div id="album-cover" class="background-cover box"></div>
+        <div class="album-covers">
+            <div id="album-cover-1" class="background-cover box"></div>
+            <div id="album-cover-2" class="background-cover box fade-image-top"></div>
+        </div>
     </div>
 
     <div id="audio"></div>

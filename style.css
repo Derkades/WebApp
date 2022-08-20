@@ -7,7 +7,7 @@ body, html {
     overflow: hidden;
 }
 
-h3, p, label, td {
+h3, p, label, td, div {
     font-family: Verdana, sans-serif;
 }
 
@@ -27,12 +27,17 @@ p.secondary {
     font-size: .7em;
 }
 
-#bg-image, #album-cover {
-    background-image: url("/get_album_cover?song_title=no%20music");
+#bg-image-2, #album-cover-2 {
+    background-color: #222;
+    transition: opacity 1s;
 }
 
-#bg-image {
+.bg-image {
     filter: blur(8rem);
+    position: absolute;
+    top: 0;
+    left: 0;
+
     height: 100%;
     width: 100%;
 
@@ -48,9 +53,20 @@ p.secondary {
     background-size: cover;
 }
 
-#album-cover {
+.album-covers {
     height: 40vw;
     width: 40vw;
+}
+
+.album-covers > div {
+    height: 100%;
+    width: 100%;
+}
+
+/* Position second album cover exactly on top of first one */
+#album-cover-2 {
+    position: relative;
+    bottom: 40vw;
 }
 
 .sidebar {
@@ -123,6 +139,7 @@ audio {
 
 .queue-table {
     width: 100%;
+    border-spacing: .5rem;
 }
 
 .queue-table td {
@@ -130,22 +147,22 @@ audio {
     font-size: .85rem;
 }
 
-.queue-table td.image {
+/* album image column */
+.queue-table td:first-child {
     width: 4rem;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
+    cursor: pointer;
 }
 
-.queue-table td.downloading {
+.queue-table td.downloading,
+.queue-table td:nth-child(2) {
     text-align: center;
 }
 
-.queue-table td.remove-button {
+/* .queue-table td:nth-child(4) {
     cursor: pointer;
     font-size: 1.5rem;
     font-weight: bold;
-}
+} */
 
 .spinner {
     animation: rotate 1.25s linear infinite;
