@@ -148,8 +148,8 @@ function getActivePersons() {
 }
 
 function updateProgress(audioElem) {
-    const current = Math.floor(audioElem.currentTime);
-    const max = Math.floor(audioElem.duration);
+    const current = secondsToString(Math.floor(audioElem.currentTime));
+    const max = secondsToString(Math.floor(audioElem.duration));
     const percentage = (audioElem.currentTime / audioElem.duration) * 100;
 
     const timeElem = document.getElementById('progress-time');
@@ -317,6 +317,11 @@ function updateQueueHtml() {
     html += '</tbody></table>';
     const outerDiv = document.getElementById('queue');
     outerDiv.innerHTML = html;
+}
+
+function secondsToString(seconds) {
+    // https://stackoverflow.com/a/25279399/4833737
+    return new Date(1000 * seconds).toISOString().substring(14, 19);
 }
 
 // Audio normalisatie dingen gestolen met modificaties van:
