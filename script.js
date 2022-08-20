@@ -261,11 +261,11 @@ function updateQueue() {
     }
 
     if (document.queue.length < document.queueSize) {
-        downloadTrackToQueue();
+        downloadTrackToQueue(person);
     }
 }
 
-function downloadTrackToQueue() {
+function downloadTrackToQueue(person) {
     document.queueBusy = true;
     console.log('updating queue, finding track...');
     fetch(new Request('/choose_track?person=' + encodeURIComponent(person)))

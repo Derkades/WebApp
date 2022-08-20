@@ -121,7 +121,7 @@ def transcode(input_file: Path, output_file: str) -> bytes:
                '-hide_banner',
                '-loglevel', ffmpeg_loglevel,
                '-i', input_file.absolute().as_posix(),
-               '-map_metadata', '-1',  # sommige metadata kan firefox niet aan "NS_ERROR_DOM_MEDIA_METADATA_ERR", dus we halen alle metadata weg
+               '-map_metadata', '-1',  # browser heeft metadata niet nodig
                '-c:a', 'libopus',
                '-b:a', opus_bitrate,
                '-f', 'opus',
@@ -144,7 +144,7 @@ def get_track() -> Response:
     do_transcode = True
     if do_transcode:
         temp: BytesIO
-        with tempfile.NamedTemporaryFile(delete=False) as temp:
+        with tempfile.NamedTemporaryFile() as temp:
             transcode(file_path, temp.name)
             # We can't use send_file here, because the temp file is automatically deleted once outside of the 'with' block
             # Read the entire file and send it in one go, instead.
