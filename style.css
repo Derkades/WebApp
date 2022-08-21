@@ -27,6 +27,11 @@ p.secondary {
     font-size: .7em;
 }
 
+button {
+    /* waarom is dit niet standaard zo?? */
+    cursor: pointer;
+}
+
 #bg-image-2, #album-cover-2 {
     background-color: #222;
     transition: opacity 1s;
@@ -160,11 +165,35 @@ audio {
     text-align: center;
 }
 
-/* .queue-table td:nth-child(4) {
-    cursor: pointer;
-    font-size: 1.5rem;
-    font-weight: bold;
-} */
+.delete-overlay {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.delete-overlay > .icon {
+    filter: invert(1);
+    opacity: 0;
+}
+
+.delete-overlay {
+    border-radius: 100%;
+    transition: background-color .25s;
+}
+
+.delete-overlay > .icon {
+    transition: opacity .25s;
+}
+
+.delete-overlay:hover {
+    background-color: red;
+}
+
+.delete-overlay:hover > .icon {
+    opacity: 1.0;
+}
 
 .spinner {
     animation: rotate 1.25s linear infinite;
@@ -190,4 +219,28 @@ audio {
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
+}
+
+#settings-overlay {
+    position: absolute;
+    top: 3rem;
+    left: 3rem;
+    height: calc(100vh - 6rem - 2rem);
+    width: calc(100vw - 6rem - 2rem);
+    background-color: white;
+    padding: 1rem;
+    display: none;
+}
+
+#settings-open {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+}
+
+#youtube-dl-output {
+    /* Render \n as <br> */
+    white-space: pre-wrap;
+    width: min(50rem, 100%);
+    height: 10rem;
 }

@@ -13,6 +13,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('button-forward-fast').addEventListener('click', () => seek(30));
     document.getElementById('button-forward-step').addEventListener('click', liedje);
 
+    document.getElementById('settings-open').addEventListener('click', settingsOpen);
+    document.getElementById('settings-close').addEventListener('click', settingsClose);
+    document.getElementById('youtube-dl-submit').addEventListener('click', youTubeDownload);
+
     document.addEventListener('keydown', event => handleKey(event.key));
 
     updateQueueHtml();
@@ -54,7 +58,7 @@ function handleKey(key) {
             elem.checked = !elem.checked;
         }
     } else if (key === 'p' || key === ' ') {
-        playPause();
+        playPause(); // TODO fix
     } else if (key === 'ArrowRight' || key === 'f') {
         liedje();
     } else {
@@ -338,15 +342,21 @@ function removeFromQueue(index) {
 }
 
 function updateQueueHtml() {
+    const trashBase64 = document.getElementById('trash-can-base64').innerText;
+
     let html = `
         <table class="queue-table">
             <tbody>`;
     let i = 0;
     for (const queuedTrack of document.queue) {
         html += '<tr>';
-        html += '<td class="background-cover box" style="background-image: url(\'' + escapeHtml(queuedTrack.imageUrl) + '\')" onclick="removeFromQueue(' + i + ')"></td>';
-        html += '<td>' + queuedTrack.personDisplay + '</td>';
-        html += '<td>' + escapeHtml(queuedTrack.name) + '</td>';
+            html += '<td class="background-cover box" style="background-image: url(\'' + escapeHtml(queuedTrack.imageUrl) + '\')">';
+                html += '<div class="delete-overlay">'
+                    html += '<div style="background-image: url(\'' + trashBase64 + '\')" class="icon" onclick="removeFromQueue(' + i + ')"></div>';
+                html += '</div>'
+            html += '</td>';
+            html += '<td>' + queuedTrack.personDisplay + '</td>';
+            html += '<td>' + escapeHtml(queuedTrack.name) + '</td>';
         html += '</tr>';
         i++;
     }
@@ -370,6 +380,55 @@ function updateQueueHtml() {
 function secondsToString(seconds) {
     // https://stackoverflow.com/a/25279399/4833737
     return new Date(1000 * seconds).toISOString().substring(14, 19);
+}
+
+function settingsOpen() {
+    document.getElementById('settings-overlay').style.display = 'initial';
+}
+
+function settingsClose() {
+    document.getElementById('settings-overlay').style.display = 'none';
+}
+
+function youTubeDownload(event) {
+    event.preventDefault();
+
+    const output = document.getElementById('youtube-dl-output');
+    output.style.backgroundColor = '';
+    output.textContent = 'downloading...';
+
+    const spinner = document.getElementById('youtube-dl-spinner');
+    spinner.style.visibility = 'visible';
+
+    const directory = document.getElementById('youtube-dl-directory').value;
+    const url = document.getElementById('youtube-dl-url').value;
+
+    const postBody = JSON.stringify({
+        directory: directory,
+        url: url,
+    });
+
+    const headers = new Headers({
+        'Content-Type': 'application/json'
+    });
+
+    const options = {
+        method: 'POST',
+        body: postBody,
+        headers: headers
+    };
+
+    fetch(new Request('/ytdl', options)).then(response => {
+        if (response.status == 200) {
+            spinner.style.visibility = 'hidden';
+            response.json().then(json => {
+                output.textContent = 'Status code: ' + json.code + '\n--- stdout ---\n' + json.stdout + '\n--- stderr ---\n' + json.stderr;
+                output.style.backgroundColor = json.code === 0 ? 'lightgreen' : 'pink';
+            });
+        } else {
+            response.text().then(alert);
+        }
+    });
 }
 
 // Audio normalisatie dingen gestolen met modificaties van:

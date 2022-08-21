@@ -51,7 +51,7 @@
                 <h3>Muziek</h3>
 
                 <p>
-                    <span id="current-track">-</span>
+                    <span id="current-track">Downloaden...</span>
                 </p>
                 <p class="secondary">
                     Vorige: <span id="previous-track">-</span>
@@ -87,6 +87,32 @@
     </div>
 
     <div id="audio"></div>
+
+    <button id="settings-open">Open settings</button>
+
+    <div id="settings-overlay" class="box">
+        <button id="settings-close">Close settings</button>
+
+        <h3>YouTube download</h3>
+        <form>
+            <select id="youtube-dl-directory">
+                <option value="CB">CB</option>
+                <option value="DK">DK</option>
+                <option value="JK">JK</option>
+                {% for guest in guests %}
+                    <option value="Guest-{{ guest }}">{{ guest }} (Gast)</option>
+                {% endfor %}
+            </select>
+            <input id="youtube-dl-url" placeholder="https://youtube.com/watch?v=..." required>
+            <input id="youtube-dl-submit" type="submit" value="Download">
+            <div id="youtube-dl-spinner" style="visibility: hidden" class="spinner"></div>
+            <br>
+            <textarea id="youtube-dl-output">Output will show here</textarea>
+        </form>
+    </div>
+
+    {# A "variable" to be used by javascript #}
+    <span id="trash-can-base64" style="display: none">{{ assets['trash-can.svg'] }}</span>
 
     <script src="/script.js"></script>
 
