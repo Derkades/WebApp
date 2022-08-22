@@ -26,36 +26,15 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function handleKey(key) {
-    let elemId = null;
     const keyInt = parseInt(key);
     if (!isNaN(keyInt)) {
-        if (keyInt === 1) {
-            elemId = 'enable-CB';
-        } else if (keyInt == 2) {
-            elemId = 'enable-DK';
-        } else if (keyInt === 3) {
-            elemId = 'enable-JK';
-        } else if (keyInt >= 4 && keyInt <= 9) {
-            const guestBoxesElem = document.getElementById('guest-checkboxes');
-            let index = 4;
-            if (guestBoxesElem) {
-                for (const child of guestBoxesElem.children) {
-                    if (child.tagName !== "INPUT") {
-                        continue;
-                    }
-                    if (index === keyInt) {
-                        elemId = child.id;
-                        break;
-                    }
-                    index++;
-                }
+        let index = 1;
+        for (const checkbox of document.getElementsByClassName('person-checkbox')) {
+            if (index === keyInt) {
+                checkbox.checked = !checkbox.checked
+                break;
             }
-        }
-
-        console.log('number key', keyInt, 'elemId', elemId);
-        if (elemId !== null) {
-            const elem = document.getElementById(elemId);
-            elem.checked = !elem.checked;
+            index++;
         }
     } else if (key === 'p' || key === ' ') {
         playPause(); // TODO fix

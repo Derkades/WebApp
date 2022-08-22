@@ -30,12 +30,10 @@
                 <h3>Gasten</h3>
 
                 {% if guests %}
-                    <span id="guest-checkboxes">
-                        {% for person in guests %}
-                            <input type="checkbox" class="person-checkbox" id="checkbox-{{ person.dir_name }}" checked>
-                            <label for="checkbox-{{ person.dir_name }}">{{ person.display_name }}<sup>{{ loop.index + 3}}</sup> ({{ person.count_tracks() }})</label>
-                        {% endfor %}
-                    </span>
+                    {% for person in guests %}
+                        <input type="checkbox" class="person-checkbox" id="checkbox-{{ person.dir_name }}" checked>
+                        <label for="checkbox-{{ person.dir_name }}">{{ person.display_name }}<sup>{{ loop.index + 3}}</sup> ({{ person.count_tracks() }})</label>
+                    {% endfor %}
                 {% else %}
                     <p>Er zijn geen mappen voor gasten</p>
                 {% endif %}
