@@ -37,7 +37,15 @@ function handleKey(key) {
             index++;
         }
     } else if (key === 'p' || key === ' ') {
-        playPause(); // TODO fix
+        const audioElem = getAudioElement();
+        if (audioElem == null) {
+            return;
+        }
+        if (audioElem.paused) {
+            audioElem.play();
+        } else {
+            audioElem.pause();
+        }
     } else if (key === 'ArrowRight' || key === 'f') {
         liedje();
     } else {
