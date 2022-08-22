@@ -48,6 +48,10 @@ function handleKey(key) {
         }
     } else if (key === 'ArrowRight' || key === 'f') {
         liedje();
+    } else if (key === '.') {
+        seek(3);
+    } else if (key === ',') {
+        seek(-3);
     } else {
         console.log('Unhandled keypress', key)
     }
