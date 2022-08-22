@@ -84,10 +84,12 @@
 
     <div id="audio"></div>
 
-    <button id="settings-open">Open settings</button>
+    <button class="icon-button" id="settings-open">
+        <div class="icon" style="background-image: url('{{ assets['gear.svg'] }}')">
+    </button>
 
     <div id="settings-overlay" class="box">
-        <button id="settings-close">Close settings</button>
+        <button id="settings-close">Sluiten</button>
 
         <h3>Hotkeys</h3>
         <table>
@@ -108,16 +110,17 @@
         </table>
 
         <h3>YouTube download</h3>
+        Selecteer een naam, plak een link van YouTube, Soundcloud, Bandcamp, etc. en druk op <kbd>Download</kbd>.
         <form>
             <select id="youtube-dl-directory">
-                <option value="CB">CB</option>
-                <option value="DK">DK</option>
-                <option value="JK">JK</option>
-                {% for guest in guests %}
-                    <option value="Guest-{{ guest }}">{{ guest }} (Gast)</option>
+                {% for person in raphson %}
+                    <option value="{{ person.dir_name }}">{{ person.display_name }}</option>
+                {% endfor %}
+                {% for person in guests %}
+                    <option value="{{ person.dir_name }}">{{ person.display_name }} (Gast)</option>
                 {% endfor %}
             </select>
-            <input id="youtube-dl-url" placeholder="https://youtube.com/watch?v=..." required>
+            <input id="youtube-dl-url" placeholder="https://youtube.com/watch?v=...">
             <input id="youtube-dl-submit" type="submit" value="Download">
             <div id="youtube-dl-spinner" style="visibility: hidden" class="spinner"></div>
             <br>
