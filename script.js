@@ -362,7 +362,7 @@ function secondsToString(seconds) {
 }
 
 function settingsOpen() {
-    document.getElementById('settings-overlay').style.display = 'initial';
+    document.getElementById('settings-overlay').style.display = 'flex';
 }
 
 function settingsClose() {

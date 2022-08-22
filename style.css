@@ -46,7 +46,7 @@ kbd {
 }
 
 .bg-image {
-    filter: blur(8rem);
+    filter: blur(5rem);
     position: absolute;
     top: 0;
     left: 0;
@@ -106,9 +106,7 @@ input[type=checkbox] {
     width: 1.25rem;
 }
 
-.controls {
-    background: rgba(255, 255, 255, 0.35);
-    padding: 1rem;
+#left-sidebar > div > .box-controls {
     width: 40vw;
     margin: 1.25rem 0;
 }
@@ -117,10 +115,14 @@ audio {
     width: 100%;
 }
 
-.box {
+.box-rounded {
     border-radius: .5rem;
     box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
-    /* border: 2px solid white; */
+}
+
+.box-controls {
+    background: rgba(255, 255, 255, 0.5);
+    padding: 1rem;
 }
 
 .outer-bar,
@@ -145,10 +147,6 @@ audio {
 }
 
 .icon-button {
-    /* height: 3rem; */
-    /* width: 3rem; */
-    /* padding: .3rem 0 0 0; */
-    /* font-size: x-large; */
     padding: .5rem;
 }
 
@@ -231,25 +229,35 @@ audio {
 
 #settings-overlay {
     position: absolute;
-    top: 3rem;
-    left: 3rem;
-    height: calc(100vh - 6rem - 2rem);
-    width: calc(100vw - 6rem - 2rem);
-    background-color: white;
-    padding: 1rem;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
     display: none;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(2rem);
+}
+
+#settings-overlay .box {
+    background-color: white;
 }
 
 #settings-open {
     position: absolute;
     top: 1rem;
-    left: 1rem;
+    right: 1rem;
+}
+
+.hotkeys-table {
+    border-spacing: 2rem .5rem;
+    margin: 0 -2rem;
 }
 
 #youtube-dl-output {
     /* Render \n as <br> */
     white-space: pre-wrap;
-    width: min(70rem, 100%);
+    max-width: 60rem;
     height: 15rem;
     overflow: scroll;
     border: 1px solid gray;
