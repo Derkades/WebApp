@@ -173,23 +173,11 @@ function replaceAlbumImages(imageUrl) {
 function getActivePersons() {
     const active = [];
 
-    ['CB', 'DK', 'JK'].forEach(function(person) {
-        if (document.getElementById('enable-' + person).checked) {
-            active.push(person);
+    for (const checkbox of document.getElementsByClassName('person-checkbox')) {
+        const musicDirName = checkbox.id.substring(9); // remove 'checkbox-'
+        if (checkbox.checked) {
+            active.push(musicDirName);
         }
-    });
-
-    const guestBoxesElem = document.getElementById('guest-checkboxes');
-    if (guestBoxesElem) {
-        Array.from(guestBoxesElem.children).forEach(child => {
-            if (child.tagName !== "INPUT") {
-                return;
-            }
-
-            if (child.checked) {
-                active.push(child.name);
-            }
-        });
     }
 
     return active;

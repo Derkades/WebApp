@@ -3,11 +3,8 @@ import subprocess
 from pathlib import Path
 import os
 import random
-from bs4 import BeautifulSoup
 import traceback
-import requests
 import json
-import re
 from io import BytesIO
 from PIL import Image
 import mimetypes
@@ -19,6 +16,12 @@ import tempfile
 from typing import Optional, Dict
 
 from assets import Assets
+from music import Person
+import bing
+
+
+application = Flask(__name__)
+assets = Assets()
 
 
 def getenv(key: str, default: Optional[str]) -> str:
@@ -26,13 +29,6 @@ def getenv(key: str, default: Optional[str]) -> str:
         raise ValueError('Required environment variable ' + key + ' not configured.')
     return os.environ[key] if key in os.environ else default
 
-
-application = Flask(__name__)
-assets = Assets()
-
-music_dir = Path('/music')
-
-last_played = {}
 
 web_password = getenv('MUSIC_WEB_PASSWORD', None)
 ffmpeg_loglevel = getenv('MUSIC_FFMPEG_LOGLEVEL', 'info')
@@ -86,16 +82,9 @@ def player():
     if not check_password_cookie():
         return redirect('/login')
 
-    guests = [d.name[6:] for d in Path(music_dir).iterdir() if d.name.startswith('Guest-')]
-    track_counts: dict[str, int] = {}
-    for hardcode in ['CB', 'DK', 'JK']:
-        track_counts[hardcode] = sum(1 for _d in Path(music_dir, hardcode).iterdir())
-    for guest in guests:
-        track_counts[guest] = sum(1 for _d in Path(music_dir, 'Guest-' + guest).iterdir())
-
     return render_template('player.jinja2',
-                           guests=guests,
-                           track_counts=track_counts,
+                           raphson=Person.get_main(),
+                           guests=Person.get_guests(),
                            assets=assets.all_assets_dict())
 
 
@@ -104,18 +93,9 @@ def choose_track():
     if not check_password_cookie():
         return Response(None, 403)
 
-    person = request.args['person']
-    person_dir = Path(music_dir, person)
-    tracks = [f.name for f in person_dir.iterdir() if os.path.isfile(f)]
-    for attempt in range(10):
-        chosen_track = random.choice(tracks)
-        if chosen_track in last_played:
-            if datetime.now() - last_played[chosen_track] < timedelta(hours=2):
-                print(chosen_track, 'was played recently, picking a new song', flush=True)
-                continue
-        break
-
-    last_played[chosen_track] = datetime.now()
+    dir_name = request.args['person']
+    person = Person.by_dir_name(dir_name)
+    chosen_track = person.choose_track()
 
     return {
         'name': chosen_track
@@ -144,9 +124,10 @@ def get_track() -> Response:
     if not check_password_cookie():
         return Response(None, 403)
 
-    person = request.args['person']
+    person_dir_name = request.args['person']
+    person = Person.by_dir_name(person_dir_name)
     track_name = request.args['track_name']
-    file_path = Path(music_dir, person, track_name)
+    file_path = person.get_track_path(track_name)
 
     do_transcode = True
     if do_transcode:
@@ -160,61 +141,15 @@ def get_track() -> Response:
         return send_file(file_path)
 
 
-def bing_search_image(bing_query: str) -> bytes:
-    headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0'}
-    r = requests.get('https://www.bing.com/images/search',
-                     headers=headers,
-                     params={'q': bing_query,
-                             'form': 'HDRSC2',
-                             'first': '1',
-                             'scenario': 'ImageBasicHover'})
-    soup = BeautifulSoup(r.text, 'html.parser')
-    data = soup.find_all('a', {'class': 'iusc'})[0]
-    json_data = json.loads(data['m'])
-    img_link = json_data['murl']
-    r = requests.get(img_link, headers=headers)
-    return r.content
-
-
-def title_to_bing_query(title: str) -> str:
-    print('Original title:', title, flush=True)
-    title = title.lower()
-    title = title.rstrip('.mp3').rstrip('.webm')  # Remove file extensions
-    title = re.sub(r' \[[a-z0-9\-_]+\]', '', title)  # Remove youtube id suffix
-    strip_keywords = [
-        'monstercat release',
-        'nerd nation release',
-        'monstercat official music video',
-        'official audio',
-        'official video',
-        'official music video',
-        'official lyric video',
-        'official hd video',
-        'extended version',
-        'long version',
-        '[out now]',
-        'clip officiel',
-        'hq videoclip',
-        'videoclip',
-        '(visual)'
-    ]
-    for strip_keyword in strip_keywords:
-        title = title.replace(strip_keyword, '')
-    title = ''.join([c for c in title if c == ' ' or c == '-' or c >= 'a' and c <= 'z'])  # Remove special characters
-    title = title.strip()
-    print('Bing title:', title, flush=True)
-    return title
-
-
 @application.route('/get_album_cover')
 def get_album_cover() -> Response:
     if not check_password_cookie():
         return Response(None, 403)
 
     song_title = request.args['song_title']
-    bing_query = title_to_bing_query(song_title)
+    bing_query = bing.title_to_query(song_title)
     try:
-        img_bytes = bing_search_image(bing_query)
+        img_bytes = bing.image_search(bing_query)
         img = Image.open(BytesIO(img_bytes))
         img.thumbnail((1024, 1024), Image.ANTIALIAS)
         img_out = BytesIO()
@@ -237,11 +172,7 @@ def ytdl():
 
     print('ytdl', directory, url, flush=True)
 
-    result = subprocess.run(['yt-dlp', '--no-progress', '-f', '251', url],
-                            shell=False,
-                            cwd=Path(music_dir, directory),
-                            capture_output=True,
-                            text=True)
+    result = person.download(url)
 
     return {
         'code': result.returncode,
