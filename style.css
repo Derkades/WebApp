@@ -32,6 +32,14 @@ button {
     cursor: pointer;
 }
 
+kbd {
+    background-color: #222;
+    color: white;
+    padding: .2rem .4rem .1rem .4rem;
+    border-bottom: .2rem solid gray;
+    border-radius: .2rem;
+}
+
 #bg-image-2, #album-cover-2 {
     background-color: #222;
     transition: opacity 1s;
