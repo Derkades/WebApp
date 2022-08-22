@@ -16,7 +16,7 @@ import hmac
 from hmac import HMAC
 import hashlib
 import tempfile
-from typing import Optional
+from typing import Optional, Dict
 
 from assets import Assets
 
@@ -87,8 +87,15 @@ def player():
         return redirect('/login')
 
     guests = [d.name[6:] for d in Path(music_dir).iterdir() if d.name.startswith('Guest-')]
+    track_counts: dict[str, int] = {}
+    for hardcode in ['CB', 'DK', 'JK']:
+        track_counts[hardcode] = sum(1 for _d in Path(music_dir, hardcode).iterdir())
+    for guest in guests:
+        track_counts[guest] = sum(1 for _d in Path(music_dir, 'Guest-' + guest).iterdir())
+
     return render_template('player.jinja2',
                            guests=guests,
+                           track_counts=track_counts,
                            assets=assets.all_assets_dict())
 
 
