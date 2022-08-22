@@ -1,39 +1,29 @@
-from flask import Flask, request, render_template, send_file, Response, redirect
-import subprocess
-from pathlib import Path
+from typing import Optional, Dict
 import os
 import random
+import subprocess
 import traceback
 import json
-from io import BytesIO
-from PIL import Image
 import mimetypes
-from datetime import datetime, timedelta
-import hmac
-from hmac import HMAC
 import hashlib
 import tempfile
-from typing import Optional, Dict
+import hmac
+from hmac import HMAC
+from pathlib import Path
+from io import BytesIO
+from datetime import datetime, timedelta
+
+from PIL import Image
+from flask import Flask, request, render_template, send_file, Response, redirect
 
 from assets import Assets
 from music import Person
 import bing
+import settings
 
 
 application = Flask(__name__)
 assets = Assets()
-
-
-def getenv(key: str, default: Optional[str]) -> str:
-    if default is None and key not in os.environ:
-        raise ValueError('Required environment variable ' + key + ' not configured.')
-    return os.environ[key] if key in os.environ else default
-
-
-web_password = getenv('MUSIC_WEB_PASSWORD', None)
-ffmpeg_loglevel = getenv('MUSIC_FFMPEG_LOGLEVEL', 'info')
-opus_bitrate = getenv('MUSIC_OPUS_BITRATE', '96K')
-max_duration = getenv('MUSIC_MAX_DURATION', '00:08:00')
 
 
 def check_password(password: str) -> bool:
@@ -48,7 +38,7 @@ def check_password(password: str) -> bool:
     hashed_pass = hashed_pass.digest()
 
     hashed_correct = hashlib.sha256()
-    hashed_correct.update(web_password.encode())
+    hashed_correct.update(settings.web_password.encode())
     hashed_correct = hashed_correct.digest()
 
     # Constant time comparison
@@ -106,14 +96,14 @@ def transcode(input_file: Path, output_file: str) -> bytes:
     command = ['ffmpeg',
                '-y',  # overwrite existing file
                '-hide_banner',
-               '-loglevel', ffmpeg_loglevel,
+               '-loglevel', settings.ffmpeg_loglevel,
                '-i', input_file.absolute().as_posix(),
                '-map_metadata', '-1',  # browser heeft metadata niet nodig
                '-c:a', 'libopus',
-               '-b:a', opus_bitrate,
+               '-b:a', settings.opus_bitrate,
                '-f', 'opus',
                '-vbr', 'on',
-               '-t', max_duration,
+               '-t', settings.max_duration,
                '-filter:a', 'silenceremove=start_periods=1:stop_periods=1:start_threshold=-90dB:stop_threshold=-90dB:detection=1,dynaudnorm=p=0.5',
                output_file]
     subprocess.check_output(command, shell=False)
@@ -156,7 +146,7 @@ def get_album_cover() -> Response:
         img.save(img_out, format='webp', quality=80)
         img_out.seek(0)
         return send_file(img_out, mimetype='image/webp')
-    except:
+    except Exception:
         print('No bing results', flush=True)
         traceback.print_exc()
         return send_file('raphson.png')
