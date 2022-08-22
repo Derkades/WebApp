@@ -39,11 +39,11 @@ class Person:
         return Path(self.music_dir, track_name)
 
     def download(self, url: str) -> CompletedProcess:
-        result = subprocess.run(['yt-dlp', '--no-progress', '-f', '251', url],
-                                shell=False,
-                                cwd=self.music_dir,
-                                capture_output=True,
-                                text=True)
+        return subprocess.run(['yt-dlp', '--no-progress', '-f', '251', url],
+                              shell=False,
+                              cwd=self.music_dir,
+                              capture_output=True,
+                              text=True)
 
     @staticmethod
     def by_dir_name(dir_name: str) -> 'Person':

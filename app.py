@@ -160,6 +160,7 @@ def ytdl():
     directory = request.json['directory']
     url = request.json['url']
 
+    person = Person.by_dir_name(directory)
     print('ytdl', directory, url, flush=True)
 
     result = person.download(url)

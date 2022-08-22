@@ -249,6 +249,11 @@ audio {
 #youtube-dl-output {
     /* Render \n as <br> */
     white-space: pre-wrap;
-    width: min(50rem, 100%);
-    height: 10rem;
+    width: min(70rem, 100%);
+    height: 15rem;
+    overflow: scroll;
+    border: 1px solid gray;
+    border-radius: .5rem;
+    padding: .5rem;
+    margin-top: .5rem;
 }
