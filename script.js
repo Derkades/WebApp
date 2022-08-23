@@ -121,10 +121,10 @@ function liedje() {
     // Get and remove first item from queue
     const track = getTrackFromQueue();
 
-    const audioElem = createAudioElement(track.audioUrl);
+    const audioElem = createAudioElement(track.audioBlobUrl);
     replaceAudioElement(audioElem);
 
-    replaceAlbumImages(track.imageUrl)
+    replaceAlbumImages(track.imageBlobUrl)
 
     // Replace 'currently playing' text
     const currentTrackElem = document.getElementById('current-track');
@@ -243,63 +243,57 @@ function updateQueue() {
         person = getNextPerson();
     }
 
-    if (document.queue.length < document.queueSize) {
-        downloadTrackToQueue(person);
+    if (document.queue.length >= document.queueSize) {
+        return;
     }
-}
 
-function downloadTrackToQueue(person) {
     document.queueBusy = true;
-    console.log('updating queue, finding track...');
+
+    const trackData = {
+        person: person,
+        personDisplay: person.startsWith("Guest-") ? person.substring('6') : person,
+    }
+
+    console.log('queue | choose track');
+
+    // JavaScript doesn't stop execution of a promise chain in case of an error, so we need to manually
+    // pass the error down the chain by repeatedly calling Promise.reject() on errors.
     fetch(new Request('/choose_track?person=' + encodeURIComponent(person)))
+        .catch(Promise.reject)
         .then(response => response.json())
-        .then(data => {
-            console.log('updating queue, downloading track...');
-
-            const trackName = data.name;
-            const streamUrl = '/get_track?person=' + encodeURIComponent(person) + '&track_name=' + encodeURIComponent(trackName);
-            fetch(new Request(streamUrl))
-                .then(response => response.blob())
-                .then(audioBlob => {
-                    console.log('updating queue, downloading album cover...');
-                    const coverUrl = '/get_album_cover?song_title=' + encodeURIComponent(trackName);
-                    fetch(new Request(coverUrl))
-                        .then(response => response.blob())
-                        .then(imageBlob => {
-                            let personDisplay;
-                            if (person.startsWith("Guest-")) {
-                                personDisplay = person.substring('6');
-                            } else {
-                                personDisplay = person;
-                            }
-
-                            const trackData = {
-                                person: person,
-                                personDisplay: personDisplay,
-                                name: trackName,
-                                audioUrl: URL.createObjectURL(audioBlob),
-                                imageUrl: URL.createObjectURL(imageBlob),
-                            }
-
-                            document.queue.push(trackData);
-                            document.queueBusy = false;
-                            console.log('updating queue, done.');
-                            updateQueueHtml();
-                            updateQueue();
-                        });
-                });
+        .catch(Promise.reject)
+        .then(trackJson => {
+            trackData.name = trackJson.name;
+            trackData.audioStreamUrl = '/get_track?person=' + encodeURIComponent(trackData.person) + '&track_name=' + encodeURIComponent(trackData.name);
+            console.log('queue | download audio');
+            return fetch(new Request(trackData.audioStreamUrl));
+        })
+        .catch(Promise.reject)
+        .then(response => response.blob())
+        .catch(Promise.reject)
+        .then(audioBlob => {
+            trackData.audioBlobUrl = URL.createObjectURL(audioBlob);
+            trackData.imageStreamUrl = '/get_album_cover?song_title=' + encodeURIComponent(trackData.name);
+            console.log('queue | download image');
+            return fetch(new Request(trackData.imageStreamUrl));
+        })
+        .catch(Promise.reject)
+        .then(response => response.blob())
+        .catch(Promise.reject)
+        .then(imageBlob => {
+            trackData.imageBlobUrl = URL.createObjectURL(imageBlob);
+            console.log('queue | done');
+            document.queue.push(trackData);
+            document.queueBusy = false;
+            updateQueueHtml();
+            updateQueue();
+        })
+        .catch(error => {
+            document.queueBusy = false;
+            console.warn('queue | error', error);
+            setTimeout(updateQueue, 1000);
         });
 }
-
-// function clearQueue() {
-//     if (document.queueBusy) {
-//         setTimeout(clearQueue, 500);
-//         return;
-//     }
-
-//     document.queue = [];
-//     updateQueue();
-// }
 
 function getTrackFromQueue() {
     // Get and remove first element from queue
@@ -329,7 +323,7 @@ function updateQueueHtml() {
     let i = 0;
     for (const queuedTrack of document.queue) {
         html += '<tr>';
-            html += '<td class="background-cover box" style="background-image: url(\'' + escapeHtml(queuedTrack.imageUrl) + '\')">';
+            html += '<td class="background-cover box" style="background-image: url(\'' + escapeHtml(queuedTrack.imageBlobUrl) + '\')">';
                 html += '<div class="delete-overlay">'
                     html += '<div style="background-image: url(\'' + trashBase64 + '\')" class="icon" onclick="removeFromQueue(' + i + ')"></div>';
                 html += '</div>'
