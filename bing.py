@@ -5,6 +5,12 @@ from bs4 import BeautifulSoup
 
 
 def image_search(bing_query: str) -> bytes:
+    """
+    Perform image search using Bing
+    Parameters:
+        bing_query: Search query
+    Returns: Image data bytes
+    """
     headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0'}
     r = requests.get('https://www.bing.com/images/search',
                      headers=headers,
@@ -20,11 +26,22 @@ def image_search(bing_query: str) -> bytes:
     return r.content
 
 
+def is_alpha(c):
+    return c == ' ' or c == '-' or c >= 'a' and c <= 'z'
+
+
 def title_to_query(title: str) -> str:
+    """
+    Simplify track title to be a better bing search query. For example,
+    special characters, file extensions and redundant strings like
+    "official video" are removed.
+    """
     print('Original title:', title, flush=True)
     title = title.lower()
-    title = title.rstrip('.mp3').rstrip('.webm')  # Remove file extensions
-    title = re.sub(r' \[[a-z0-9\-_]+\]', '', title)  # Remove youtube id suffix
+    # Remove file extensions
+    title = title.rstrip('.mp3').rstrip('.webm')
+    # Remove YouTube id suffix
+    title = re.sub(r' \[[a-z0-9\-_]+\]', '', title)
     strip_keywords = [
         'monstercat release',
         'nerd nation release',
@@ -44,7 +61,8 @@ def title_to_query(title: str) -> str:
     ]
     for strip_keyword in strip_keywords:
         title = title.replace(strip_keyword, '')
-    title = ''.join([c for c in title if c == ' ' or c == '-' or c >= 'a' and c <= 'z'])  # Remove special characters
+    # Remove special characters
+    title = ''.join([c for c in title if is_alpha(c)])
     title = title.strip()
     print('Bing title:', title, flush=True)
     return title

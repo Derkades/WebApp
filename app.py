@@ -1,17 +1,11 @@
-from typing import Optional, Dict
-import os
-import random
+from typing import Optional
 import subprocess
 import traceback
-import json
-import mimetypes
 import hashlib
 import tempfile
 import hmac
-from hmac import HMAC
 from pathlib import Path
 from io import BytesIO
-from datetime import datetime, timedelta
 
 from PIL import Image
 from flask import Flask, request, render_template, send_file, Response, redirect
@@ -26,20 +20,15 @@ application = Flask(__name__)
 assets = Assets()
 
 
-def check_password(password: str) -> bool:
+def check_password(password: Optional[str]) -> bool:
     if password is None:
         return False
 
     # First hash passwords so they have the same length
     # otherwise compare_digest still leaks length
 
-    hashed_pass = hashlib.sha256()
-    hashed_pass.update(password.encode())
-    hashed_pass = hashed_pass.digest()
-
-    hashed_correct = hashlib.sha256()
-    hashed_correct.update(settings.web_password.encode())
-    hashed_correct = hashed_correct.digest()
+    hashed_pass = hashlib.sha256(password.encode()).digest()
+    hashed_correct = hashlib.sha256(settings.web_password.encode()).digest()
 
     # Constant time comparison
     return hmac.compare_digest(hashed_pass, hashed_correct)
@@ -92,21 +81,23 @@ def choose_track():
     }
 
 
-def transcode(input_file: Path, output_file: str) -> bytes:
-    command = ['ffmpeg',
-               '-y',  # overwrite existing file
-               '-hide_banner',
-               '-loglevel', settings.ffmpeg_loglevel,
-               '-i', input_file.absolute().as_posix(),
-               '-map_metadata', '-1',  # browser heeft metadata niet nodig
-               '-c:a', 'libopus',
-               '-b:a', settings.opus_bitrate,
-               '-f', 'opus',
-               '-vbr', 'on',
-               '-t', settings.max_duration,
-               '-filter:a', 'silenceremove=start_periods=1:stop_periods=1:start_threshold=-90dB:stop_threshold=-90dB:detection=1,dynaudnorm=p=0.5',
-               output_file]
-    subprocess.check_output(command, shell=False)
+def transcode(input_file: Path) -> bytes:
+    with tempfile.NamedTemporaryFile() as temp:
+        command = ['ffmpeg',
+                '-y',  # overwrite existing file
+                '-hide_banner',
+                '-loglevel', settings.ffmpeg_loglevel,
+                '-i', input_file.absolute().as_posix(),
+                '-map_metadata', '-1',  # browser heeft metadata niet nodig
+                '-c:a', 'libopus',
+                '-b:a', settings.opus_bitrate,
+                '-f', 'opus',
+                '-vbr', 'on',
+                '-t', settings.max_duration,
+                '-filter:a', 'silenceremove=start_periods=1:stop_periods=1:start_threshold=-90dB:stop_threshold=-90dB:detection=1,dynaudnorm=p=0.5',
+                temp.name]
+        subprocess.check_output(command, shell=False)
+        return temp.read()
 
 
 @application.route('/get_track')
@@ -121,12 +112,11 @@ def get_track() -> Response:
 
     do_transcode = True
     if do_transcode:
-        temp: BytesIO
-        with tempfile.NamedTemporaryFile() as temp:
-            transcode(file_path, temp.name)
-            # We can't use send_file here, because the temp file is automatically deleted once outside of the 'with' block
-            # Read the entire file and send it in one go, instead.
-            return Response(temp.read(), mimetype='audio/ogg')
+        audio = transcode(file_path)
+        # We can't use send_file here, because the temp file is
+        # automatically deleted once outside of the 'with' block
+        # Read the entire file and send it in one go, instead.
+        return Response(audio, mimetype='audio/ogg')
     else:
         return send_file(file_path)
 
