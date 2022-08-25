@@ -96,7 +96,7 @@ def transcode(input_file: Path) -> bytes:
     areverse,
     silenceremove=start_periods=1:start_threshold=-50dB,
     areverse,
-    dynaudnorm
+    dynaudnorm=peak=0.5
     '''
 
     # Remove whitespace and newlines
