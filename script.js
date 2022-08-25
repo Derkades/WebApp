@@ -254,43 +254,60 @@ function updateQueue() {
         personDisplay: person.startsWith("Guest-") ? person.substring('6') : person,
     }
 
-    console.log('queue | choose track');
+    console.info('queue | choose track');
+
+    function throwErr(err) {
+        throw err;
+    }
 
     // JavaScript doesn't stop execution of a promise chain in case of an error, so we need to manually
-    // pass the error down the chain by repeatedly calling Promise.reject() on errors.
+    // pass the error down the chain by repeatedly calling throwErr() on errors.
     fetch(new Request('/choose_track?person=' + encodeURIComponent(person)))
-        .catch(Promise.reject)
-        .then(response => response.json())
-        .catch(Promise.reject)
+        .then(response => {
+            if (response.status == 200) {
+                return response.json();
+            } else {
+                throw 'response code ' + response.status;
+            }
+        }, throwErr)
         .then(trackJson => {
             trackData.name = trackJson.name;
             trackData.audioStreamUrl = '/get_track?person=' + encodeURIComponent(trackData.person) + '&track_name=' + encodeURIComponent(trackData.name);
-            console.log('queue | download audio');
+            console.info('queue | download audio');
             return fetch(new Request(trackData.audioStreamUrl));
-        })
-        .catch(Promise.reject)
-        .then(response => response.blob())
-        .catch(Promise.reject)
+        }, throwErr)
+        .then(response => {
+            if (response.status == 200) {
+                return response.blob();
+            } else {
+                throw 'response code ' + response.status;
+            }
+        }, throwErr)
         .then(audioBlob => {
             trackData.audioBlobUrl = URL.createObjectURL(audioBlob);
             trackData.imageStreamUrl = '/get_album_cover?song_title=' + encodeURIComponent(trackData.name);
-            console.log('queue | download image');
+            console.info('queue | download image');
             return fetch(new Request(trackData.imageStreamUrl));
-        })
-        .catch(Promise.reject)
-        .then(response => response.blob())
-        .catch(Promise.reject)
+        }, throwErr)
+        .then(response => {
+            if (response.status == 200) {
+                return response.blob();
+            } else {
+                throw 'response code ' + response.status;
+            }
+        }, throwErr)
         .then(imageBlob => {
             trackData.imageBlobUrl = URL.createObjectURL(imageBlob);
-            console.log('queue | done');
             document.queue.push(trackData);
             document.queueBusy = false;
             updateQueueHtml();
             updateQueue();
-        })
-        .catch(error => {
+            console.info("queue | done");
+        }, throwErr)
+        .then(null, error => {
             document.queueBusy = false;
-            console.warn('queue | error', error);
+            console.warn('queue | error');
+            console.error(error);
             setTimeout(updateQueue, 1000);
         });
 }
