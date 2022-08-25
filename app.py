@@ -82,6 +82,28 @@ def choose_track():
 
 
 def transcode(input_file: Path) -> bytes:
+    # 1. Stilte aan het begin weghalen met silenceremove: https://ffmpeg.org/ffmpeg-filters.html#silenceremove
+    # 2. Audio omkeren
+    # 3. Stilte aan het eind (nu begin) weghalen
+    # 4. Audio omkeren
+    # 5. Audio normaliseren met dynaudnorm: https://ffmpeg.org/ffmpeg-filters.html#dynaudnorm
+
+    # Nu zou je zeggen dat we ook stop_periods kunnen gebruiken om stilte aan het eind weg te halen, maar
+    # dat werkt niet. Van sommige nummers (bijv. irrenhaus) werd alles eraf geknipt behalve de eerste paar
+    # seconden. Ik heb geen idee waarom, de documentatie is vaag. Oplossing: keer het nummer om, en haal
+    # nog eens stilte aan "het begin" weg.
+
+    filters = '''
+    silenceremove=start_periods=1:start_threshold=-50dB,
+    areverse,
+    silenceremove=start_periods=1:start_threshold=-50dB,
+    areverse,
+    dynaudnorm
+    '''
+
+    # Remove whitespace and newlines
+    filters = ''.join(filters.split())
+
     with tempfile.NamedTemporaryFile() as temp:
         command = ['ffmpeg',
                 '-y',  # overwrite existing file
@@ -94,7 +116,7 @@ def transcode(input_file: Path) -> bytes:
                 '-f', 'opus',
                 '-vbr', 'on',
                 '-t', settings.max_duration,
-                '-filter:a', 'silenceremove=start_periods=1:stop_periods=1:start_threshold=-90dB:stop_threshold=-90dB:detection=1,dynaudnorm=p=0.5',
+                '-filter:a', filters,
                 temp.name]
         subprocess.check_output(command, shell=False)
         return temp.read()
