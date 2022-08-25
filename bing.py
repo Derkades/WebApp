@@ -1,7 +1,10 @@
 import json
 import re
 import requests
+from io import BytesIO
+
 from bs4 import BeautifulSoup
+from PIL import Image
 
 
 def image_search(bing_query: str) -> bytes:
@@ -23,7 +26,12 @@ def image_search(bing_query: str) -> bytes:
     json_data = json.loads(data['m'])
     img_link = json_data['murl']
     r = requests.get(img_link, headers=headers)
-    return r.content
+    img = Image.open(BytesIO(r.content))
+    img.thumbnail((1024, 1024), Image.ANTIALIAS)
+    img_out = BytesIO()
+    img.save(img_out, format='webp', quality=80)
+    img_out.seek(0)
+    return img_out.read()
 
 
 def is_alpha(c):
@@ -36,7 +44,6 @@ def title_to_query(title: str) -> str:
     special characters, file extensions and redundant strings like
     "official video" are removed.
     """
-    print('Original title:', title, flush=True)
     title = title.lower()
     # Remove file extensions
     title = title.rstrip('.mp3').rstrip('.webm')
@@ -64,5 +71,4 @@ def title_to_query(title: str) -> str:
     # Remove special characters
     title = ''.join([c for c in title if is_alpha(c)])
     title = title.strip()
-    print('Bing title:', title, flush=True)
     return title

@@ -5,9 +5,7 @@ import hashlib
 import tempfile
 import hmac
 from pathlib import Path
-from io import BytesIO
 
-from PIL import Image
 from flask import Flask, request, render_template, send_file, Response, redirect
 
 from assets import Assets
@@ -150,18 +148,22 @@ def get_album_cover() -> Response:
 
     song_title = request.args['song_title']
     bing_query = bing.title_to_query(song_title)
+    print('Original title:', song_title, flush=True)
+    print('Bing title:', bing_query, flush=True)
+
     try:
-        img_bytes = bing.image_search(bing_query)
-        img = Image.open(BytesIO(img_bytes))
-        img.thumbnail((1024, 1024), Image.ANTIALIAS)
-        img_out = BytesIO()
-        img.save(img_out, format='webp', quality=80)
-        img_out.seek(0)
-        return send_file(img_out, mimetype='image/webp')
+        return Response(bing.image_search(bing_query + ' album cover'), mimetype='image/webp')
+    except Exception:
+        print('No bing results for album cover', flush=True)
+        traceback.print_exc()
+
+    try:
+        return Response(bing.image_search(bing_query), mimetype='image/webp')
     except Exception:
         print('No bing results', flush=True)
         traceback.print_exc()
-        return send_file('raphson.png')
+
+    return send_file('raphson.png')
 
 
 @application.route('/ytdl', methods=['POST'])
