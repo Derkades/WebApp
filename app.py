@@ -176,7 +176,7 @@ def get_album_cover() -> Response:
         traceback.print_exc()
 
         try:
-            webp_bytes = Response(bing.image_search(bing_query), mimetype='image/webp')
+            webp_bytes = bing.image_search(bing_query)
         except Exception:
             print('No bing results', flush=True)
             traceback.print_exc()
