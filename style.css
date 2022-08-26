@@ -1,3 +1,12 @@
+/* quicksand-regular - latin */
+@font-face {
+    font-family: 'Quicksand';
+    font-style: normal;
+    font-weight: 400;
+    src: local(''),
+         url('[[FONT_BASE64]]') format('woff2');
+  }
+
 body, html {
     height: 100vh;
     width: 100vw;
@@ -8,7 +17,8 @@ body, html {
 }
 
 h3, p, label, td, div {
-    font-family: Verdana, sans-serif;
+    font-family: 'Quicksand', Verdana, sans-serif;
+    color: white;
 }
 
 h3 {
@@ -20,7 +30,7 @@ p {
 }
 
 .secondary {
-    color: #444;
+    color: #ccc;
 }
 
 p.secondary {
@@ -106,26 +116,25 @@ input[type=checkbox] {
     width: 1.25rem;
 }
 
-.sidebar-left > div,
-.lyrics-outer {
+.sidebar-left > div {
     width: 100%;
+    max-width: 50rem;
 }
 
-.sidebar-left > div > .box-controls {
+.sidebar-left > div > .box-solid {
     margin: 1.25rem 1.5rem 1.25rem 3rem;
 }
 
 .lyrics-outer {
-    background-color: rgba(20, 20, 20, 0.3);
-    backdrop-filter: blur(8rem);
     padding: 1rem;
     margin: 0 3rem 0 1.5rem;
+    width: 100%;
 }
 
 #lyrics {
     column-count: 2;
     color: white;
-    text-shadow: .05rem .05rem .5rem black;
+    /* text-shadow: .05rem .05rem .5rem black; */
 }
 
 #sidebar-lyrics {
@@ -141,8 +150,10 @@ audio {
     box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
 }
 
-.box-controls {
-    background: rgba(255, 255, 255, 0.5);
+.box-solid {
+    background-color: rgba(20, 20, 20, 0.4);
+    /* blur is mooi maar een beetje glitchy op firefox */
+    /* backdrop-filter: blur(8rem); */
     padding: 1rem;
 }
 
@@ -152,13 +163,13 @@ audio {
 }
 
 .outer-bar {
-    border: 1px solid blue;
+    border: 1px solid #ccc;
     width: 100%;
     margin: .5rem 0;
 }
 
 #progress-bar {
-    background-color: blue;
+    background-color: #ccc;
     width: 0;
 }
 
@@ -178,7 +189,7 @@ audio {
 
 .queue-table td {
     height: 4rem;
-    font-size: .85rem;
+    font-size: .95rem;
 }
 
 /* album image column */

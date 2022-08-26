@@ -2,7 +2,7 @@
 
 document.queue = [];
 document.queueBusy = false;
-document.queueSize = 1;
+document.queueSize = 5;
 
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('button-backward-fast').addEventListener('click', () => seek(-30));
@@ -130,7 +130,9 @@ function liedje() {
     replaceAlbumImages(track.imageBlobUrl);
 
     if (track.lyrics.found) {
-        document.getElementById('lyrics').innerHTML = track.lyrics.html + '<br><br>Source: ' + escapeHtml(track.lyrics.genius_url)
+        document.getElementById('lyrics').innerHTML = track.lyrics.html + '<br><br><span class="secondary">Source: ' + escapeHtml(track.lyrics.genius_url) + '</span>'
+    } else {
+        document.getElementById('lyrics').innerHTML = '<i class="secondary">Geen lyrics gevonden</i>'
     }
 
     // Replace 'currently playing' text

@@ -4,7 +4,7 @@ import traceback
 import hashlib
 import tempfile
 import hmac
-import html
+import base64
 from pathlib import Path
 
 from flask import Flask, request, render_template, send_file, Response, redirect
@@ -220,7 +220,11 @@ def ytdl():
 
 @application.route('/style.css')
 def style() -> Response:
-    return send_file('style.css')
+    with open('style.css', 'rb') as f:
+        style: bytes = f.read()
+        style = style.replace(b'[[FONT_BASE64]]', assets.get_asset_b64('quicksand-v30-latin-regular.woff2').encode())
+
+    return Response(style, mimetype='text/css')
 
 
 @application.route('/script.js')

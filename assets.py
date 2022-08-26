@@ -13,6 +13,8 @@ class Assets:
             name = entry.name
             if name.endswith('.svg'):
                 mime = 'image/svg+xml'
+            elif name.endswith('.woff2'):
+                mime = 'font/woff2'
             else:
                 raise ValueError('unsupported assets file: ' + name)
 
