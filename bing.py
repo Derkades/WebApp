@@ -135,7 +135,10 @@ def genius_search(title: str) -> Optional[str]:
 
 
 def genius_extract_lyrics(genius_url: str) -> List[str]:
-    # Genius heeft een json object met allemaal nuttige data ergens in een <script> tag verstopt.
+    # 1. In de HTML response, zoek voor een stukje JavaScript (een string)
+    # 2. Parse deze string als JSON
+    # 3. Trek een bepaalde property uit deze JSON, en parse deze met BeautifulSoup weer als HTML
+    # 4. Soms staat lyrics in een link of in italics, de for loop maakt dat goed
     r = requests.get(genius_url)
     text = r.text
     start = text.index('window.__PRELOADED_STATE__ = JSON.parse(') + 41
