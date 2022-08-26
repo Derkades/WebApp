@@ -1,8 +1,11 @@
+from typing import Optional, Tuple, List
 import json
 import re
-import requests
+import traceback
 from io import BytesIO
+import html
 
+import requests
 from bs4 import BeautifulSoup
 from PIL import Image
 
@@ -45,8 +48,11 @@ def title_to_query(title: str) -> str:
     "official video" are removed.
     """
     title = title.lower()
-    # Remove file extensions
-    title = title.rstrip('.mp3').rstrip('.webm')
+    # Remove file extension
+    try:
+        title = title[:title.rindex('.')]
+    except ValueError:
+        pass
     # Remove YouTube id suffix
     title = re.sub(r' \[[a-z0-9\-_]+\]', '', title)
     strip_keywords = [
@@ -72,3 +78,82 @@ def title_to_query(title: str) -> str:
     title = ''.join([c for c in title if is_alpha(c)])
     title = title.strip()
     return title
+
+
+def _az_search(title: str) -> Tuple[str, str, str]:
+    # Geen idee wat dit betekent maar het is nodig
+    magic = '1f8269acd39cbe7abcacf17edc4f2221fac2ae2aa786e79129f5023819e9da42'
+
+    r = requests.get('https://search.azlyrics.com/search.php',
+                     params={'q': title,
+                             'x': magic})
+    soup = BeautifulSoup(r.text, 'html.parser')
+    links = soup.find_all('a')
+    for link in links:
+        href = link['href']
+        if href.startswith('https://www.azlyrics.com/lyrics'):
+            children = link.findChildren()
+            title = children[1].string[1:-1]
+            artist = children[2].string
+            return (href, artist, title)
+    return None
+
+
+def _az_extract_lyrics(page_url: str) -> List[str]:
+    r = requests.get(page_url)
+    soup = BeautifulSoup(r.text, 'html.parser')
+    divs = soup.find_all('div')
+    for div in divs:
+        if len(div.contents) > 2 and str(div.contents[0]) == '\n' and str(div.contents[1]).startswith('<div class="div-share noprint"'):
+            lyrics_div = div.contents[14]
+            lyrics = []
+            for content in lyrics_div.contents:
+                if str(content) != '\n' and \
+                   'prohibited by our licensing agreement' not in str(content) and \
+                   str(content) != '<br/>':
+                    lyrics.append(str(content).strip('\r').strip('\n'))
+            return lyrics
+    raise ValueError('unexpected response, couldn\'t find lyrics')
+
+
+def genius_search(title: str) -> Optional[str]:
+    r = requests.get(
+        "https://genius.com/api/search/multi",
+        params={"per_page": "1", "q": title},
+    )
+
+    search_json = r.json()
+    for section in search_json["response"]["sections"]:
+        print(section, flush=True)
+        if section['type'] == 'top_hit':
+            return section['hits'][0]['result']['url']
+
+    return None
+
+
+def genius_extract_lyrics(genius_url: str) -> List[str]:
+    # Genius heeft een json object met allemaal nuttige data ergens in een <script> tag verstopt.
+    r = requests.get(genius_url)
+    text = r.text
+    start = text.index('window.__PRELOADED_STATE__ = JSON.parse(') + 41
+    end = text.index("}');") + 1
+    info_json_string = text[start:end].replace('\\"', "\"").replace("\\'", "'").replace('\\\\', '\\').replace('\\$', '$')
+    info_json = json.loads(info_json_string)
+    lyric_html = info_json['songPage']['lyricsData']['body']['html']
+    soup = BeautifulSoup(lyric_html, 'html.parser')
+    lyrics = ''
+    br_counter = 0
+    for content in soup.find('p').contents:
+        if content.name == 'a':
+            for s in content.contents:
+                lyrics += html.escape(str(s).strip())
+        elif content.name == 'i':
+            for s in content.contents:
+                if str(s).strip() == '<br/>':
+                    lyrics += html.escape(str(s).strip())
+                else:
+                    lyrics += '<i>' + html.escape(str(s).strip()) + '</i>'
+        else:
+            lyrics += html.escape(str(content).strip())
+
+    return lyrics.split('&lt;br/&gt;')

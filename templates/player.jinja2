@@ -10,7 +10,7 @@
     <div id="bg-image-1" class="bg-image background-cover"></div>
     <div id="bg-image-2" class="bg-image background-cover fade-image-top"></div>
 
-    <div id="left-sidebar" class="sidebar">
+    <div class="sidebar sidebar-left">
 
         <div>
 
@@ -57,7 +57,7 @@
                     <div id="progress-bar"></div>
                 </div>
 
-                {% for button_name in ['backward-fast', 'backward', 'play', 'pause', 'forward', 'forward-fast', 'forward-step'] %}
+                {% for button_name in ['backward-fast', 'backward', 'play', 'pause', 'forward', 'forward-fast', 'forward-step', 'closed-captioning', 'record-vinyl'] %}
                     <button id="button-{{ button_name }}" class="icon-button">
                         <div class="icon" style="background-image: url('{{ assets[button_name + '.svg'] }}')">
                     </button>
@@ -75,10 +75,16 @@
 
     </div>
 
-    <div id="right-sidebar" class="sidebar">
+    <div class="sidebar sidebar-right" id="sidebar-album-covers">
         <div class="album-covers">
             <div id="album-cover-1" class="background-cover box-rounded"></div>
             <div id="album-cover-2" class="background-cover box-rounded fade-image-top"></div>
+        </div>
+    </div>
+
+    <div class="sidebar sidebar-right" id="sidebar-lyrics">
+        <div class="lyrics-outer box-rounded">
+            <div id="lyrics"></div>
         </div>
     </div>
 

@@ -2,7 +2,7 @@
 
 document.queue = [];
 document.queueBusy = false;
-document.queueSize = 4;
+document.queueSize = 1;
 
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('button-backward-fast').addEventListener('click', () => seek(-30));
@@ -12,6 +12,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('button-forward').addEventListener('click', () => seek(5));
     document.getElementById('button-forward-fast').addEventListener('click', () => seek(30));
     document.getElementById('button-forward-step').addEventListener('click', liedje);
+    document.getElementById('button-closed-captioning').addEventListener('click', switchLyrics);
+    document.getElementById('button-record-vinyl').addEventListener('click', switchAlbumCover);
+    document.getElementById('button-record-vinyl').style.display = 'none';
 
     document.getElementById('settings-open').addEventListener('click', settingsOpen);
     document.getElementById('settings-close').addEventListener('click', settingsClose);
@@ -124,7 +127,11 @@ function liedje() {
     const audioElem = createAudioElement(track.audioBlobUrl);
     replaceAudioElement(audioElem);
 
-    replaceAlbumImages(track.imageBlobUrl)
+    replaceAlbumImages(track.imageBlobUrl);
+
+    if (track.lyrics.found) {
+        document.getElementById('lyrics').innerHTML = track.lyrics.html + '<br><br>Source: ' + escapeHtml(track.lyrics.genius_url)
+    }
 
     // Replace 'currently playing' text
     const currentTrackElem = document.getElementById('current-track');
@@ -285,8 +292,8 @@ function updateQueue() {
         }, throwErr)
         .then(audioBlob => {
             trackData.audioBlobUrl = URL.createObjectURL(audioBlob);
+            console.info('queue | download album cover image');
             trackData.imageStreamUrl = '/get_album_cover?song_title=' + encodeURIComponent(trackData.name);
-            console.info('queue | download image');
             return fetch(new Request(trackData.imageStreamUrl));
         }, throwErr)
         .then(response => {
@@ -298,16 +305,29 @@ function updateQueue() {
         }, throwErr)
         .then(imageBlob => {
             trackData.imageBlobUrl = URL.createObjectURL(imageBlob);
+            console.info('queue | download lyrics');
+            trackData.lyricsUrl = '/get_lyrics?song_title=' + encodeURIComponent(trackData.name);
+            return fetch(new Request(trackData.lyricsUrl));
+        }, throwErr)
+        .then(response => {
+            if (response.status == 200) {
+                return response.json();
+            } else {
+                throw 'response code ' + response.status;
+            }
+        }, throwErr)
+        .then(lyricsJson => {
+            trackData.lyrics = lyricsJson;
             document.queue.push(trackData);
             document.queueBusy = false;
             updateQueueHtml();
             updateQueue();
             console.info("queue | done");
-        }, throwErr)
+        })
         .then(null, error => {
             document.queueBusy = false;
             console.warn('queue | error');
-            console.error(error);
+            console.warn(error);
             setTimeout(updateQueue, 1000);
         });
 }
@@ -419,6 +439,20 @@ function youTubeDownload(event) {
             response.text().then(alert);
         }
     });
+}
+
+function switchLyrics() {
+    document.getElementById('button-record-vinyl').style.display = '';
+    document.getElementById('button-closed-captioning').style.display = 'none';
+    document.getElementById('sidebar-lyrics').style.visibility = 'visible';
+    document.getElementById('sidebar-album-covers').style.visibility = 'hidden';
+}
+
+function switchAlbumCover() {
+    document.getElementById('button-record-vinyl').style.display = 'none';
+    document.getElementById('button-closed-captioning').style.display = '';
+    document.getElementById('sidebar-lyrics').style.visibility = 'hidden';
+    document.getElementById('sidebar-album-covers').style.visibility = 'visible';
 }
 
 // Audio normalisatie dingen gestolen met modificaties van:

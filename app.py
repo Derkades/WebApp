@@ -4,6 +4,7 @@ import traceback
 import hashlib
 import tempfile
 import hmac
+import html
 from pathlib import Path
 
 from flask import Flask, request, render_template, send_file, Response, redirect
@@ -164,6 +165,37 @@ def get_album_cover() -> Response:
         traceback.print_exc()
 
     return send_file('raphson.png')
+
+
+@application.route('/get_lyrics')
+def get_lyrics() -> Response:
+    if not check_password_cookie():
+        return Response(None, 403)
+
+    song_title = request.args['song_title']
+
+    try:
+        title = bing.title_to_query(song_title)
+        print('search genius for:', title, flush=True)
+        genius_url = bing.genius_search(title)
+        if genius_url is None:
+            print('genius search yielded no results', flush=True)
+            return Response('', 451, mimetype='text/plain')
+
+        print('found genius url:', genius_url, flush=True)
+        lyrics = bing.genius_extract_lyrics(genius_url)
+        return {
+            'found': True,
+            'genius_url': genius_url,
+            'html': '<br>\n'.join(lyrics)
+        }
+    except Exception:
+        print('Error retrieving lyrics', flush=True)
+        traceback.print_exc()
+        # return Response('', 451, mimetype='text/plain')
+        return {
+            'found': False,
+        }
 
 
 @application.route('/ytdl', methods=['POST'])
