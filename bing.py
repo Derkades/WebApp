@@ -124,7 +124,6 @@ def genius_search(title: str) -> Optional[str]:
 
     search_json = r.json()
     for section in search_json["response"]["sections"]:
-        print(section, flush=True)
         if section['type'] == 'top_hit':
             return section['hits'][0]['result']['url']
 
