@@ -2,21 +2,25 @@ from typing import Optional
 import subprocess
 import traceback
 import hashlib
-import tempfile
+import json
 import hmac
-import base64
 from pathlib import Path
 
 from flask import Flask, request, render_template, send_file, Response, redirect
 
 from assets import Assets
 from music import Person
+from cache import Cache
 import bing
 import settings
 
 
 application = Flask(__name__)
 assets = Assets()
+cache = Cache(settings.cache_dir)
+
+with open('raphson.png', 'rb') as f:
+    raphson_webp = bing.webp_thumbnail(f.read())
 
 
 def check_password(password: Optional[str]) -> bool:
@@ -81,6 +85,12 @@ def choose_track():
 
 
 def transcode(input_file: Path) -> bytes:
+    cache_object = cache.get('transcoded audio', input_file.absolute().as_posix())
+
+    if cache_object.exists():
+        print('Returning cached audio', flush=True)
+        return cache_object.retrieve()
+
     # 1. Stilte aan het begin weghalen met silenceremove: https://ffmpeg.org/ffmpeg-filters.html#silenceremove
     # 2. Audio omkeren
     # 3. Stilte aan het eind (nu begin) weghalen
@@ -103,22 +113,23 @@ def transcode(input_file: Path) -> bytes:
     # Remove whitespace and newlines
     filters = ''.join(filters.split())
 
-    with tempfile.NamedTemporaryFile() as temp:
-        command = ['ffmpeg',
-                '-y',  # overwrite existing file
-                '-hide_banner',
-                '-loglevel', settings.ffmpeg_loglevel,
-                '-i', input_file.absolute().as_posix(),
-                '-map_metadata', '-1',  # browser heeft metadata niet nodig
-                '-c:a', 'libopus',
-                '-b:a', settings.opus_bitrate,
-                '-f', 'opus',
-                '-vbr', 'on',
-                '-t', settings.max_duration,
-                '-filter:a', filters,
-                temp.name]
-        subprocess.check_output(command, shell=False)
-        return temp.read()
+    # with tempfile.NamedTemporaryFile() as temp:
+    command = ['ffmpeg',
+            '-y',  # overwrite existing file
+            '-hide_banner',
+            '-loglevel', settings.ffmpeg_loglevel,
+            '-i', input_file.absolute().as_posix(),
+            '-map_metadata', '-1',  # browser heeft metadata niet nodig
+            '-c:a', 'libopus',
+            '-b:a', settings.opus_bitrate,
+            '-f', 'opus',
+            '-vbr', 'on',
+            '-t', settings.max_duration,
+            '-filter:a', filters,
+            cache_object.path]
+    subprocess.check_output(command, shell=False)
+
+    return cache_object.retrieve()
 
 
 @application.route('/get_track')
@@ -149,30 +160,44 @@ def get_album_cover() -> Response:
 
     song_title = request.args['song_title']
     bing_query = bing.title_to_query(song_title)
+
+    cache_obj = cache.get('bing', bing_query)
+    if cache_obj.exists():
+        print('Returning cached bing image:', bing_query, flush=True)
+        return Response(cache_obj.retrieve(), mimetype='image/webp')
+
     print('Original title:', song_title, flush=True)
     print('Bing title:', bing_query, flush=True)
 
     try:
-        return Response(bing.image_search(bing_query + ' album cover'), mimetype='image/webp')
+        webp_bytes = bing.image_search(bing_query + ' album cover')
     except Exception:
         print('No bing results for album cover', flush=True)
         traceback.print_exc()
 
-    try:
-        return Response(bing.image_search(bing_query), mimetype='image/webp')
-    except Exception:
-        print('No bing results', flush=True)
-        traceback.print_exc()
+        try:
+            webp_bytes = Response(bing.image_search(bing_query), mimetype='image/webp')
+        except Exception:
+            print('No bing results', flush=True)
+            traceback.print_exc()
+            webp_bytes = raphson_webp
 
-    return send_file('raphson.png')
+    cache_obj.store(webp_bytes)
+    return Response(webp_bytes, mimetype='image/webp')
 
 
 @application.route('/get_lyrics')
-def get_lyrics() -> Response:
+def get_lyrics():
     if not check_password_cookie():
         return Response(None, 403)
 
     song_title = request.args['song_title']
+
+    cache_object = cache.get('genius', song_title)
+
+    if cache_object.exists():
+        print('Returning cached lyrics', flush=True)
+        return send_file(cache_object.path, mimetype='application/json')
 
     try:
         title = bing.title_to_query(song_title)
@@ -184,18 +209,23 @@ def get_lyrics() -> Response:
 
         print('found genius url:', genius_url, flush=True)
         lyrics = bing.genius_extract_lyrics(genius_url)
-        return {
+        json_data = {
             'found': True,
             'genius_url': genius_url,
             'html': '<br>\n'.join(lyrics)
         }
+
     except Exception:
         print('Error retrieving lyrics', flush=True)
         traceback.print_exc()
-        # return Response('', 451, mimetype='text/plain')
-        return {
+        json_data = {
             'found': False,
         }
+
+    with open(cache_object.path, 'w') as f:
+        json.dump(json_data, f)
+
+    return send_file(cache_object.path, mimetype='application/json')
 
 
 @application.route('/ytdl', methods=['POST'])

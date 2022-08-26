@@ -10,6 +10,15 @@ from bs4 import BeautifulSoup
 from PIL import Image
 
 
+def webp_thumbnail(data: bytes) -> bytes:
+    img = Image.open(BytesIO(data))
+    img.thumbnail((700, 700), Image.ANTIALIAS)
+    img_out = BytesIO()
+    img.save(img_out, format='webp', quality=80)
+    img_out.seek(0)
+    return img_out.read()
+
+
 def image_search(bing_query: str) -> bytes:
     """
     Perform image search using Bing
@@ -29,12 +38,7 @@ def image_search(bing_query: str) -> bytes:
     json_data = json.loads(data['m'])
     img_link = json_data['murl']
     r = requests.get(img_link, headers=headers)
-    img = Image.open(BytesIO(r.content))
-    img.thumbnail((1024, 1024), Image.ANTIALIAS)
-    img_out = BytesIO()
-    img.save(img_out, format='webp', quality=80)
-    img_out.seek(0)
-    return img_out.read()
+    return webp_thumbnail(r.content)
 
 
 def is_alpha(c):
@@ -80,7 +84,7 @@ def title_to_query(title: str) -> str:
     return title
 
 
-def _az_search(title: str) -> Tuple[str, str, str]:
+def _az_search(title: str) -> Optional[Tuple[str, str, str]]:
     # Geen idee wat dit betekent maar het is nodig
     magic = '1f8269acd39cbe7abcacf17edc4f2221fac2ae2aa786e79129f5023819e9da42'
 
@@ -141,7 +145,6 @@ def genius_extract_lyrics(genius_url: str) -> List[str]:
     lyric_html = info_json['songPage']['lyricsData']['body']['html']
     soup = BeautifulSoup(lyric_html, 'html.parser')
     lyrics = ''
-    br_counter = 0
     for content in soup.find('p').contents:
         if content.name == 'a':
             for s in content.contents:

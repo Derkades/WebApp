@@ -10,10 +10,9 @@ services:
       - type: bind
         source: ./music # in nextcloud /zwembad/nextcloud/data/files/...
         target: /music
-      - type: tmpfs
-        target: /tmp
-        tmpfs:
-          size: '128M'
+      - type: bind
+        source: ./cache
+        target: /cache
     user: "1000"
     environment:
       MUSIC_WEB_PASSWORD: 1234
