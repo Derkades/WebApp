@@ -132,8 +132,10 @@ input[type=checkbox] {
 }
 
 #lyrics {
-    column-count: 2;
+    /* column-count: 2; */
     color: white;
+    max-height: 80vh;
+    overflow-y: scroll;
     /* text-shadow: .05rem .05rem .5rem black; */
 }
 
