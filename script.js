@@ -5,6 +5,7 @@ document.queueBusy = false;
 document.queueSize = 5;
 
 document.addEventListener("DOMContentLoaded", () => {
+    // Playback controls
     document.getElementById('button-backward-fast').addEventListener('click', () => seek(-30));
     document.getElementById('button-backward').addEventListener('click', () => seek(-5));
     document.getElementById('button-play').addEventListener('click', play);
@@ -12,14 +13,27 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('button-forward').addEventListener('click', () => seek(5));
     document.getElementById('button-forward-fast').addEventListener('click', () => seek(30));
     document.getElementById('button-forward-step').addEventListener('click', liedje);
+
+    // Lyrics
     document.getElementById('button-closed-captioning').addEventListener('click', switchLyrics);
     document.getElementById('button-record-vinyl').addEventListener('click', switchAlbumCover);
     document.getElementById('button-record-vinyl').style.display = 'none';
 
-    document.getElementById('settings-open').addEventListener('click', settingsOpen);
-    document.getElementById('settings-close').addEventListener('click', settingsClose);
+    // Settings overlay
+    document.getElementById('settings-open').addEventListener('click', () =>
+            document.getElementById('settings-overlay').style.display = 'flex');
+    document.getElementById('settings-close').addEventListener('click', () =>
+            document.getElementById('settings-overlay').style.display = 'none');
     document.getElementById('youtube-dl-submit').addEventListener('click', youTubeDownload);
 
+    // Queue overlay
+    document.getElementById('button-square-plus').addEventListener('click', () =>
+            document.getElementById('queue-overlay').style.display = 'flex');
+    document.getElementById('queue-close').addEventListener('click', () =>
+            document.getElementById('queue-overlay').style.display = 'none');
+    document.getElementById('queue-search-perform').addEventListener('click', queueSearch);
+
+    // Hotkeys
     document.addEventListener('keydown', event => handleKey(event.key));
 
     updateQueueHtml();
@@ -237,6 +251,10 @@ function getNextPerson(currentPerson) {
     return person;
 }
 
+function throwErr(err) {
+    throw err;
+}
+
 function updateQueue() {
     if (document.queueBusy) {
         return;
@@ -265,12 +283,6 @@ function updateQueue() {
 
     console.info('queue | choose track');
 
-    function throwErr(err) {
-        throw err;
-    }
-
-    // JavaScript doesn't stop execution of a promise chain in case of an error, so we need to manually
-    // pass the error down the chain by repeatedly calling throwErr() on errors.
     fetch(new Request('/choose_track?person_dir=' + encodeURIComponent(person)))
         .then(response => {
             if (response.status == 200) {
@@ -282,11 +294,26 @@ function updateQueue() {
         .then(trackJson => {
             trackData.name = trackJson.name;
             trackData.displayName = trackJson.display_name;
-            trackData.queryString = '?person_dir=' + encodeURIComponent(trackData.person) + '&track_name=' + encodeURIComponent(trackData.name);
-            trackData.audioStreamUrl = '/get_track' + trackData.queryString;
-            console.info('queue | download audio');
-            return fetch(new Request(trackData.audioStreamUrl));
-        }, throwErr)
+            downloadAndAddToQueue(trackData, () => {
+                // On complete
+                document.queueBusy = false;
+                setTimeout(updateQueue, 500);
+            });
+        }, () => {
+            console.warn('queue | error');
+            console.warn(error);
+            document.queueBusy = false
+            setTimeout(updateQueue, 5000);
+        });
+}
+
+function downloadAndAddToQueue(trackData, onComplete) {
+    // JavaScript doesn't stop execution of a promise chain in case of an error, so we need to manually
+    // pass the error down the chain by repeatedly calling throwErr() on errors.
+    trackData.queryString = '?person_dir=' + encodeURIComponent(trackData.person) + '&track_name=' + encodeURIComponent(trackData.name);
+    trackData.audioStreamUrl = '/get_track' + trackData.queryString;
+    console.info('queue | download audio');
+    fetch(new Request(trackData.audioStreamUrl))
         .then(response => {
             if (response.status == 200) {
                 return response.blob();
@@ -323,16 +350,19 @@ function updateQueue() {
         .then(lyricsJson => {
             trackData.lyrics = lyricsJson;
             document.queue.push(trackData);
-            document.queueBusy = false;
             updateQueueHtml();
-            updateQueue();
             console.info("queue | done");
+            if (onComplete !== undefined) {
+                onComplete();
+            }
         })
         .then(null, error => {
-            document.queueBusy = false;
             console.warn('queue | error');
             console.warn(error);
             setTimeout(updateQueue, 1000);
+            if (onComplete !== undefined) {
+                onComplete();
+            }
         });
 }
 
@@ -396,14 +426,6 @@ function secondsToString(seconds) {
     return new Date(1000 * seconds).toISOString().substring(14, 19);
 }
 
-function settingsOpen() {
-    document.getElementById('settings-overlay').style.display = 'flex';
-}
-
-function settingsClose() {
-    document.getElementById('settings-overlay').style.display = 'none';
-}
-
 function youTubeDownload(event) {
     event.preventDefault();
 
@@ -457,6 +479,55 @@ function switchAlbumCover() {
     document.getElementById('button-closed-captioning').style.display = '';
     document.getElementById('sidebar-lyrics').style.visibility = 'hidden';
     document.getElementById('sidebar-album-covers').style.visibility = 'visible';
+}
+
+function queueAdd(id) {
+    const button = document.getElementById(id);
+    const trackData = {
+        person: button.dataset.personDir,
+        personDisplay: button.dataset.personDisplay,
+        name: button.dataset.trackFile,
+        displayName: button.dataset.trackDisplay,
+    };
+    downloadAndAddToQueue(trackData);
+    document.getElementById('queue-search-query').value = '';
+    document.getElementById('queue-search-results').innerHTML = '';
+    document.getElementById('queue-overlay').style.display = 'none';
+}
+
+function queueSearch() {
+    const query = document.getElementById('queue-search-query').value;
+    fetch(new Request('/search_track?query=' + encodeURIComponent(query)))
+        .then(response => {
+            if (response.status != 200) {
+                throw 'unexpected status code ' + response.status;
+            } else {
+                return response.json();
+            }
+        })
+        .then(json => {
+            let choicesHtml = ''
+            if (json.search_results.length == 0) {
+                choicesHtml += '<p>Geen resultaten</p>'
+            } else {
+                choicesHtml += ''
+                let i = 0;
+                for (const result of json.search_results) {
+                    choicesHtml += ''
+                        + '<button '
+                        + 'id="queue-choice-' + i + '" '
+                        + 'data-person-dir="' + escapeHtml(result.person_dir) + '" '
+                        + 'data-person-display="' + escapeHtml(result.person_display) + '" '
+                        + 'data-track-file="' + escapeHtml(result.track_file) + '" '
+                        + 'data-track-display="' + escapeHtml(result.track_display) + '" '
+                        + 'onclick="queueAdd(this.id);">'
+                        + '[' + escapeHtml(result.person_display) + '] ' + escapeHtml(result.track_display)
+                        + '</button><br>';
+                    i++;
+                }
+                document.getElementById('queue-search-results').innerHTML = choicesHtml;
+            }
+        })
 }
 
 // Audio normalisatie dingen gestolen met modificaties van:

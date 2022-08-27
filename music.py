@@ -120,6 +120,18 @@ class Person:
         """
         return Track(Path(self.music_dir, track_name))
 
+    def search_tracks(self, query: str, limit: int = 3) -> List[Track]:
+        # TODO levenshtein distance?
+        results: List[Track] = []
+
+        for entry in self.music_dir.iterdir():
+            if len(results) > limit:
+                break
+            if query.lower() in entry.name.lower():
+                results.append(self.track(entry.name))
+
+        return results
+
     def download(self, url: str) -> CompletedProcess:
         """
         Start a download using yt-dlp

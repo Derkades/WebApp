@@ -61,7 +61,7 @@
                     </div>
                 </div>
 
-                {% for button_name in ['backward-fast', 'backward', 'play', 'pause', 'forward', 'forward-fast', 'forward-step', 'closed-captioning', 'record-vinyl'] %}
+                {% for button_name in ['backward-fast', 'backward', 'play', 'pause', 'forward', 'forward-fast', 'forward-step', 'closed-captioning', 'record-vinyl', 'square-plus'] %}
                     <button id="button-{{ button_name }}" class="icon-button">
                         <div class="icon" style="background-image: url('{{ assets[button_name + '.svg'] }}')"></div>
                     </button>
@@ -98,11 +98,33 @@
         <div class="icon" style="background-image: url('{{ assets['gear.svg'] }}')">
     </button>
 
-    <div id="settings-overlay">
+    <div id="queue-overlay" class="full-page-overlay">
         <div class="box-rounded box-solid">
-            {# Veel te veel moeite om de 'Sluiten' knop op dezelde regel als de <h3> te krijgen... #}
             <div class="flex-space-between">
-                <h3 style="display: inline">Hotkeys</h3>
+                <h3>Nieuw nummer aan wachtrij toevoegen</h3>
+                <button id="queue-close">Sluiten</button>
+            </div>
+
+            <ol>
+                <li>Vul een korte zoekopdracht in en klik op 'Zoeken'</li>
+                <li>Selecteer een knop uit de zoekresultaten</li>
+                <li>Even wachten, het nummer wordt in de achtergrond gedownload en toegevoegd aan de wachtrij</li>
+            </ol>
+
+            <br>
+
+            <input id="queue-search-query" type="text" placeholder="zoekopdracht">
+            <button id="queue-search-perform">Zoeken</button>
+            <br>
+            <div id="queue-search-results">
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-overlay" class="full-page-overlay">
+        <div class="box-rounded box-solid">
+            <div class="flex-space-between">
+                <h3>Hotkeys</h3>
                 <button id="settings-close">Sluiten</button>
             </div>
 

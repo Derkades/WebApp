@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 import traceback
 import hashlib
 import json
@@ -7,7 +7,7 @@ import hmac
 from flask import Flask, request, render_template, send_file, Response, redirect
 
 from assets import Assets
-from music import Person
+from music import Person, Track
 import cache
 import bing
 import genius
@@ -201,8 +201,32 @@ def ytdl():
     }
 
 
+@application.route('/search_track')
+def search_track():
+    if not check_password_cookie():
+        return Response(None, 403)
+
+    query = request.args['query']
+    results = []
+    for person in Person.get_all():
+        for track in person.search_tracks(query):
+            results.append({
+                'person_dir': person.dir_name,
+                'person_display': person.display_name,
+                'track_file': track.name(),
+                'track_display': track.metadata().display_title(),
+            })
+    return {
+        'search_results': results
+    }
+
+
+
 @application.route('/style.css')
 def style() -> Response:
+    if not check_password_cookie():
+        return Response(None, 403)
+
     with open('style.css', 'rb') as f:
         stylesheet: bytes = f.read()
         stylesheet = stylesheet.replace(b'[[FONT_BASE64]]',
@@ -212,9 +236,13 @@ def style() -> Response:
 
 @application.route('/script.js')
 def script() -> Response:
+    if not check_password_cookie():
+        return Response(None, 403)
     return send_file('script.js')
 
 
 @application.route('/raphson')
 def raphson() -> Response:
+    if not check_password_cookie():
+        return Response(None, 403)
     return send_file('raphson.png')
