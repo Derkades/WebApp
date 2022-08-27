@@ -190,11 +190,9 @@ function updateProgress(audioElem) {
     const max = secondsToString(Math.floor(audioElem.duration));
     const percentage = (audioElem.currentTime / audioElem.duration) * 100;
 
-    const timeElem = document.getElementById('progress-time');
-    timeElem.innerText = current + ' / ' + max;
-
-    const barElem = document.getElementById('progress-bar');
-    barElem.style.width = percentage + '%';
+    document.getElementById('progress-time-current').innerText = current;
+    document.getElementById('progress-time-duration').innerText = max;
+    document.getElementById('progress-bar').style.width = percentage + '%';
 }
 
 function createAudioElement(sourceUrl) {

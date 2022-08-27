@@ -38,8 +38,11 @@ p.secondary {
 }
 
 button {
-    /* waarom is dit niet standaard zo?? */
-    cursor: pointer;
+    cursor: pointer; /* waarom is dit niet standaard zo? */
+    background-color: rgba(255, 255, 255, 0.3);
+    border: 1px solid white;
+    filter: invert(1);
+    border-radius: .5rem;
 }
 
 kbd {
@@ -161,13 +164,19 @@ audio {
 
 .outer-bar,
 #progress-bar {
-    height: 1em;
+    height: 1.5rem;
 }
 
 .outer-bar {
     border: 1px solid #ccc;
     width: 100%;
     margin: .5rem 0;
+    position: relative; /* required for positioning of child */
+}
+
+.outer-bar > div {
+    position: absolute;
+    top: 0;
 }
 
 #progress-bar {
@@ -175,9 +184,20 @@ audio {
     width: 0;
 }
 
-#progress-time {
-    display: inline-block;
-    padding: 0 .5rem;
+.flex-space-between {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+#progress-time-current,
+#progress-time-duration {
+    margin: 0 .25rem;
+    font-size: 1.1rem;
+}
+
+#progress-time-current {
+    color: black;
 }
 
 .icon-button {

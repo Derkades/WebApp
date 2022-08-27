@@ -55,15 +55,19 @@
 
                 <div class="outer-bar">
                     <div id="progress-bar"></div>
+                    <div class="flex-space-between">
+                        <span id="progress-time-current">--:--</span>
+                        <span id="progress-time-duration">--:--</span>
+                    </div>
                 </div>
 
                 {% for button_name in ['backward-fast', 'backward', 'play', 'pause', 'forward', 'forward-fast', 'forward-step', 'closed-captioning', 'record-vinyl'] %}
                     <button id="button-{{ button_name }}" class="icon-button">
-                        <div class="icon" style="background-image: url('{{ assets[button_name + '.svg'] }}')">
+                        <div class="icon" style="background-image: url('{{ assets[button_name + '.svg'] }}')"></div>
                     </button>
                 {% endfor %}
 
-                <span id="progress-time"></span>
+
             </div>
 
             <div class="box-rounded box-solid">
@@ -97,7 +101,7 @@
     <div id="settings-overlay">
         <div class="box-rounded box-solid">
             {# Veel te veel moeite om de 'Sluiten' knop op dezelde regel als de <h3> te krijgen... #}
-            <div style="display: flex; justify-content: space-between; width: 100%">
+            <div class="flex-space-between">
                 <h3 style="display: inline">Hotkeys</h3>
                 <button id="settings-close">Sluiten</button>
             </div>
