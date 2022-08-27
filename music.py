@@ -28,7 +28,8 @@ class Person:
         tracks = [f.name for f in self.music_dir.iterdir() if os.path.isfile(f)]
         for _attempt in range(10):
             chosen_track = random.choice(tracks)
-            if chosen_track in last_played and \
+            if 'Broccoli Fuck' in chosen_track or \
+               chosen_track in last_played and \
                datetime.now() - last_played[chosen_track] < timedelta(hours=2):
                 print(chosen_track, 'was played recently, picking a new song',
                       flush=True)

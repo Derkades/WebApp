@@ -5,22 +5,29 @@ from typing import Optional, List
 
 
 FILENAME_STRIP_KEYWORDS = [
-    'monstercat release',
-    'nerd nation release',
-    'monstercat official music video',
-    'official audio',
-    'official video',
-    'official music video',
-    'official lyric video',
-    'official hd video',
-    'extended version',
-    'long version',
-    '[out now]',
-    'clip officiel',
-    'hq videoclip',
-    'videoclip',
-    '(visual)'
-    '[original soundtrack]'
+    '(Hardstyle)',
+    '(Official Music Video)',
+    '[Official Music Video]',
+    '(Official Video)',
+    '(Official Audio)',
+    '[Official Audio]',
+    '[Official Video]',
+    '(Official Video 4K)',
+    '(Official Video HD)',
+    '[FREE DOWNLOAD]',
+    '(OFFICIAL MUSIC VIDEO)',
+    '(live)',
+    '[Radio Edit]',
+    '(Clip officiel)',
+    '(Official videoclip)',
+    '_ HQ Videoclip',
+    '[Monstercat Release]',
+    '[Monstercat Lyric Video]',
+    '[Nerd Nation Release]',
+    '[Audio]',
+    '(Remastered)',
+    '_ Napalm Records',
+    '(Lyrics)',
 ]
 
 
@@ -113,13 +120,13 @@ class Metadata:
             pass
         # Remove YouTube id suffix
         title = re.sub(r' \[[a-zA-Z0-9\-_]+\]', '', title)
+        for strip_keyword in FILENAME_STRIP_KEYWORDS:
+            title = title.replace(strip_keyword, '')
         return title
 
     def _filename_title_search(self) -> str:
         title = self._filename_title()
         title = title.lower()
-        for strip_keyword in FILENAME_STRIP_KEYWORDS:
-            title = title.replace(strip_keyword, '')
         # Remove special characters
         title = ''.join([c for c in title if is_alpha(c)])
         title = title.strip()
