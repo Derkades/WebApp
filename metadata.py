@@ -28,11 +28,19 @@ FILENAME_STRIP_KEYWORDS = [
     '(Remastered)',
     '_ Napalm Records',
     '(Lyrics)',
+    '[Official Lyric Video]',
+    '(Official Videoclip)'
 ]
 
 
 def is_alpha(c):
-    return c == ' ' or c == '-' or c >= 'a' and c <= 'z'
+    """
+    Check whether given character is alphanumeric, a dash or a space
+    """
+    return c == ' ' or \
+           c == '-' or \
+           'a' <= c <= 'z' or \
+           'A' <= c <= 'Z'
 
 
 class Metadata:
@@ -103,6 +111,10 @@ class Metadata:
 
 
     def _meta_title(self) -> Optional[str]:
+        """
+        Generate title from 'artist', 'title' and 'date' metadata
+        Returns: Generated title, or None if the track lacks the required metadata
+        """
         if self.artists and self.title:
             title = ' & '.join(self.artists) + ' - ' + self.title
             if self.date:
@@ -112,6 +124,10 @@ class Metadata:
             return None
 
     def _filename_title(self) -> str:
+        """
+        Generate title from file name
+        Returns: Title string
+        """
         title = self.path.name
         # Remove file extension
         try:
@@ -122,17 +138,25 @@ class Metadata:
         title = re.sub(r' \[[a-zA-Z0-9\-_]+\]', '', title)
         for strip_keyword in FILENAME_STRIP_KEYWORDS:
             title = title.replace(strip_keyword, '')
+        title.strip()
         return title
 
     def _filename_title_search(self) -> str:
+        """
+        Generate search title from file name. Same as _filename_title(), but
+        special characters are removed
+        """
         title = self._filename_title()
-        title = title.lower()
         # Remove special characters
         title = ''.join([c for c in title if is_alpha(c)])
         title = title.strip()
         return title
 
     def display_title(self) -> str:
+        """
+        Generate display title. It is generated using metadata if
+        present, otherwise using the file name.
+        """
         title = self._meta_title()
         if title:
             return title
@@ -140,6 +164,9 @@ class Metadata:
             return self._filename_title() + ' [~]'
 
     def _is_collection_album(self) -> bool:
+        """
+        Check whether album is a collection based on known keywords
+        """
         if self.album is None:
             raise ValueError('album name not known')
         for match in ['top 500', 'top 40', 'jaarlijsten']:
@@ -148,21 +175,27 @@ class Metadata:
         return False
 
     def album_search_queries(self):
+        """
+        Generate possible search queries to find album art
+        """
         if self.album and not self._is_collection_album():
-            yield self.album + ' album cover art'
+            yield self.album + ' cover'
             yield self.album
 
         if self.artists and self.title:
-            yield ' '.join(self.artists) + ' - ' + self.title + ' album cover art'
+            yield ' '.join(self.artists) + ' - ' + self.title + ' cover'
             yield ' '.join(self.artists) + ' - ' + self.title
 
         if self.title:
-            yield self.title + ' album cover art'
+            yield self.title + ' cover'
             yield self.title
 
         yield self._filename_title_search()
 
     def lyrics_search_queries(self):
+        """
+        Generate possible search queries to find lyrics
+        """
         if self.artists and self.title:
             yield ' '.join(self.artists) + ' - ' + self.title
 

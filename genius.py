@@ -7,6 +7,9 @@ from bs4 import BeautifulSoup
 
 
 def search(title: str) -> Optional[str]:
+    """
+    Returns: URL of genius lyrics page, or None if no page was found.
+    """
     r = requests.get(
         "https://genius.com/api/search/multi",
         params={"per_page": "1", "q": title},
@@ -21,6 +24,12 @@ def search(title: str) -> Optional[str]:
 
 
 def extract_lyrics(genius_url: str) -> List[str]:
+    """
+    Extract lyrics from the supplied Genius lyrics page
+    Parameters:
+        genius_url: Lyrics page URL
+    Returns: A list where each element is one lyrics line.
+    """
     # 1. In de HTML response, zoek voor een stukje JavaScript (een string)
     # 2. Parse deze string als JSON
     # 3. Trek een bepaalde property uit deze JSON, en parse deze met BeautifulSoup weer als HTML

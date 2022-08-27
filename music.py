@@ -21,12 +21,23 @@ class Track:
         self.path = path
 
     def name(self) -> str:
+        """
+        Returns: Full track file name
+        """
         return self.path.name
 
     def metadata(self) -> Metadata:
+        """
+        Get track metadata using ffmpeg
+        Returns: Metadata object
+        """
         return Metadata(self.path)
 
     def transcoded_audio(self) -> bytes:
+        """
+        Normalize and compress audio using ffmpeg
+        Returns: Compressed audio bytes
+        """
         in_path_abs = self.path.absolute().as_posix()
 
         cache_object = cache.get('transcoded audio', in_path_abs)
@@ -121,6 +132,13 @@ class Person:
         return Track(Path(self.music_dir, track_name))
 
     def search_tracks(self, query: str, limit: int = 3) -> List[Track]:
+        """
+        Get list of tracks matching search query
+        Parameters:
+            query: Search query
+            limit: Maximum number of results
+        Returns: List of Track objects
+        """
         # TODO levenshtein distance?
         results: List[Track] = []
 

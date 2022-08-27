@@ -1,5 +1,6 @@
 import json
 from io import BytesIO
+import sys
 
 import requests
 from bs4 import BeautifulSoup
@@ -8,12 +9,11 @@ from PIL import Image
 
 def webp_thumbnail(data: bytes) -> bytes:
     img = Image.open(BytesIO(data))
-    img.thumbnail((700, 700), Image.ANTIALIAS)
+    img.thumbnail((1024, 1024), Image.ANTIALIAS)
     img_out = BytesIO()
     img.save(img_out, format='webp', quality=80)
     img_out.seek(0)
     return img_out.read()
-
 
 def image_search(bing_query: str) -> bytes:
     """
@@ -28,10 +28,26 @@ def image_search(bing_query: str) -> bytes:
                      params={'q': bing_query,
                              'form': 'HDRSC2',
                              'first': '1',
-                             'scenario': 'ImageBasicHover'})
+                             'scenario': 'ImageBasicHover'},
+                     cookies={'SRCHHPGUSR': 'ADLT=OFF'})  # disable safe search :-)
+    print(len(r.text))
     soup = BeautifulSoup(r.text, 'html.parser')
-    data = soup.find_all('a', {'class': 'iusc'})[0]
-    json_data = json.loads(data['m'])
-    img_link = json_data['murl']
-    r = requests.get(img_link, headers=headers)
-    return webp_thumbnail(r.content)
+    results = soup.find_all('a', {'class': 'iusc'})
+    # Eerst werd hier altijd alleen de eerste gepakt, maar blijkbaar heeft soms de
+    # eerste afbeelding geen 'm' attribute. Latere afbeeldingen meestal wel!
+    for result in results:
+        try:
+            json_data = json.loads(result['m'])
+        except KeyError:
+            continue
+        img_link = json_data['murl']
+        r = requests.get(img_link, headers=headers)
+        return webp_thumbnail(r.content)
+    raise ValueError('no link with "m" attribute')
+
+
+if __name__ == '__main__':
+    query = sys.argv[1]
+    with open('test_bing_result.webp', 'wb') as test_file:
+        test_file.truncate(0)
+        test_file.write(image_search(query))

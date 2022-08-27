@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional
 import traceback
 import hashlib
 import json
@@ -7,7 +7,7 @@ import hmac
 from flask import Flask, request, render_template, send_file, Response, redirect
 
 from assets import Assets
-from music import Person, Track
+from music import Person
 import cache
 import bing
 import genius
@@ -102,7 +102,7 @@ def get_album_cover() -> Response:
     person = Person.by_dir_name(request.args['person_dir'])
     track = person.track(request.args['track_name'])
 
-    cache_obj = cache.get('bing2', person.dir_name + track.name())
+    cache_obj = cache.get('bing3', person.dir_name + track.name())
     if cache_obj.exists():
         print('Returning cached bing image', flush=True)
         return Response(cache_obj.retrieve(), mimetype='image/webp')
