@@ -73,10 +73,12 @@ class Metadata:
         # -----------------------------------------------
 
         for line in result.stdout.splitlines():
-            if line == ';FFMETADATA1':
+            try:
+                eq = line.index('=')
+            except ValueError:
                 continue
-            eq = line.index('=')
-            key = line[:eq]
+
+            key = line[:eq].lower()
             value = line[eq+1:]
             if key == 'album':
                 self.album = value
@@ -91,6 +93,7 @@ class Metadata:
 
             if debug:
                 print(key, value, sep='\t')
+
 
     def _meta_title(self) -> Optional[str]:
         if self.artists and self.title:
