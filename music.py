@@ -5,11 +5,77 @@ import os
 import random
 import subprocess
 from subprocess import CompletedProcess
+
+import cache
 from metadata import Metadata
+import settings
 
 
 music_base_dir = Path('/music')
 last_played: Dict[str, datetime] = {}
+
+
+class Track:
+
+    def __init__(self, path: Path):
+        self.path = path
+
+    def name(self) -> str:
+        return self.path.name
+
+    def metadata(self) -> Metadata:
+        return Metadata(self.path)
+
+    def transcoded_audio(self) -> bytes:
+        in_path_abs = self.path.absolute().as_posix()
+
+        cache_object = cache.get('transcoded audio', in_path_abs)
+
+        if cache_object.exists():
+            print('Returning cached audio', flush=True)
+            return cache_object.retrieve()
+
+        # 1. Stilte aan het begin weghalen met silenceremove: https://ffmpeg.org/ffmpeg-filters.html#silenceremove
+        # 2. Audio omkeren
+        # 3. Stilte aan het eind (nu begin) weghalen
+        # 4. Audio omkeren
+        # 5. Audio normaliseren met dynaudnorm: https://ffmpeg.org/ffmpeg-filters.html#dynaudnorm
+
+        # Nu zou je zeggen dat we ook stop_periods kunnen gebruiken om stilte aan het eind weg te halen, maar
+        # dat werkt niet. Van sommige nummers (bijv. irrenhaus) werd alles eraf geknipt behalve de eerste paar
+        # seconden. Ik heb geen idee waarom, de documentatie is vaag. Oplossing: keer het nummer om, en haal
+        # nog eens stilte aan "het begin" weg.
+
+        filters = '''
+        silenceremove=start_periods=1:start_threshold=-50dB,
+        areverse,
+        silenceremove=start_periods=1:start_threshold=-50dB,
+        areverse,
+        dynaudnorm=peak=0.5
+        '''
+
+        # Remove whitespace and newlines
+        filters = ''.join(filters.split())
+
+        command = ['ffmpeg',
+                '-y',  # overwrite existing file
+                '-hide_banner',
+                '-loglevel', settings.ffmpeg_loglevel,
+                '-i', in_path_abs,
+                '-map_metadata', '-1',  # browser heeft metadata niet nodig
+                '-c:a', 'libopus',
+                '-b:a', settings.opus_bitrate,
+                '-f', 'opus',
+                '-vbr', 'on',
+                '-t', settings.max_duration,
+                '-filter:a', filters,
+                cache_object.path]
+        subprocess.run(command,
+                       shell=False,
+                       check=True,
+                       capture_output=False)
+
+        return cache_object.retrieve()
 
 
 class Person:
@@ -20,7 +86,7 @@ class Person:
         self.display_name = display_name
         self.is_guest = is_guest
 
-    def choose_track(self) -> str:
+    def choose_track(self) -> Track:
         """
         Randomly choose a track from this person's music directory
         Returns: Track name
@@ -37,7 +103,7 @@ class Person:
             break
 
         last_played[chosen_track] = datetime.now()
-        return chosen_track
+        return self.track(chosen_track)
 
     def count_tracks(self) -> int:
         """
@@ -45,17 +111,14 @@ class Person:
         """
         return sum(1 for _d in self.music_dir.iterdir())
 
-    def get_track_path(self, track_name: str) -> Path:
+    def track(self, track_name: str) -> Track:
         """
-        Get the full path for a music file.
+        Get track by name
         Parameters:
-            track_name: Name of music file
-        Returns: Path object for a music file
+            track_name: Track file name
+        Returns: Track object
         """
-        return Path(self.music_dir, track_name)
-
-    def get_track_metadata(self, track_name: str) -> Metadata:
-        return Metadata(self.get_track_path(track_name))
+        return Track(Path(self.music_dir, track_name))
 
     def download(self, url: str) -> CompletedProcess:
         """

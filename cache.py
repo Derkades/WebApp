@@ -1,6 +1,7 @@
 from pathlib import Path
 import hashlib
 import os
+import settings
 
 class CacheObject:
 
@@ -24,16 +25,11 @@ class CacheObject:
             return f.read()
 
 
-class Cache:
-
-    def __init__(self, base_dir: Path):
-        self.base_dir = base_dir
-
-    def get(self, cache_type: str, name: str) -> CacheObject:
-        digest = hashlib.sha256((cache_type + name).encode()).hexdigest()
-        try:
-            Path(self.base_dir, digest[:2]).mkdir()
-        except FileExistsError:
-            pass
-        path = Path(self.base_dir, digest[:2], digest[2:])
-        return CacheObject(path)
+def get(cache_type: str, name: str) -> CacheObject:
+    digest = hashlib.sha256((cache_type + name).encode()).hexdigest()
+    try:
+        Path(settings.cache_dir, digest[:2]).mkdir()
+    except FileExistsError:
+        pass
+    path = Path(settings.cache_dir, digest[:2], digest[2:])
+    return CacheObject(path)
