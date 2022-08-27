@@ -469,15 +469,15 @@ function youTubeDownload(event) {
 function switchLyrics() {
     document.getElementById('button-record-vinyl').style.display = '';
     document.getElementById('button-closed-captioning').style.display = 'none';
-    document.getElementById('sidebar-lyrics').style.visibility = 'visible';
-    document.getElementById('sidebar-album-covers').style.visibility = 'hidden';
+    document.getElementById('sidebar-lyrics').style.display = 'flex';
+    document.getElementById('sidebar-album-covers').style.display = 'none';
 }
 
 function switchAlbumCover() {
     document.getElementById('button-record-vinyl').style.display = 'none';
     document.getElementById('button-closed-captioning').style.display = '';
-    document.getElementById('sidebar-lyrics').style.visibility = 'hidden';
-    document.getElementById('sidebar-album-covers').style.visibility = 'visible';
+    document.getElementById('sidebar-lyrics').style.display = 'none';
+    document.getElementById('sidebar-album-covers').style.display = 'flex';
 }
 
 function queueAdd(id) {
