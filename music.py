@@ -63,7 +63,7 @@ class Person:
             url: URL to download
         Returns: CompletedProcess object
         """
-        return subprocess.run(['yt-dlp', '--no-progress', '-f', '251', url],
+        return subprocess.run(['yt-dlp', '--no-progress', '-f', '251', '--add-metadata', url],
                               shell=False,
                               check=False,  # No exception on non-zero exit code
                               cwd=self.music_dir,
