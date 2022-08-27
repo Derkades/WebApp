@@ -299,7 +299,7 @@ function updateQueue() {
                 document.queueBusy = false;
                 setTimeout(updateQueue, 500);
             });
-        }, () => {
+        }, error => {
             console.warn('queue | error');
             console.warn(error);
             document.queueBusy = false
@@ -359,7 +359,6 @@ function downloadAndAddToQueue(trackData, onComplete) {
         .then(null, error => {
             console.warn('queue | error');
             console.warn(error);
-            setTimeout(updateQueue, 1000);
             if (onComplete !== undefined) {
                 onComplete();
             }
