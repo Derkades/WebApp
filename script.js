@@ -141,7 +141,7 @@ function liedje() {
     const currentTrackElem = document.getElementById('current-track');
     const previousTrackElem = document.getElementById('previous-track');
     previousTrackElem.innerText = currentTrackElem.innerText;
-    currentTrackElem.innerText = '[' + track.personDisplay + '] ' + track.name;
+    currentTrackElem.innerText = '[' + track.personDisplay + '] ' + track.displayName;
 
     updateQueue();
 }
@@ -273,7 +273,7 @@ function updateQueue() {
 
     // JavaScript doesn't stop execution of a promise chain in case of an error, so we need to manually
     // pass the error down the chain by repeatedly calling throwErr() on errors.
-    fetch(new Request('/choose_track?person=' + encodeURIComponent(person)))
+    fetch(new Request('/choose_track?person_dir=' + encodeURIComponent(person)))
         .then(response => {
             if (response.status == 200) {
                 return response.json();
@@ -283,7 +283,9 @@ function updateQueue() {
         }, throwErr)
         .then(trackJson => {
             trackData.name = trackJson.name;
-            trackData.audioStreamUrl = '/get_track?person=' + encodeURIComponent(trackData.person) + '&track_name=' + encodeURIComponent(trackData.name);
+            trackData.displayName = trackJson.display_name;
+            trackData.queryString = '?person_dir=' + encodeURIComponent(trackData.person) + '&track_name=' + encodeURIComponent(trackData.name);
+            trackData.audioStreamUrl = '/get_track' + trackData.queryString;
             console.info('queue | download audio');
             return fetch(new Request(trackData.audioStreamUrl));
         }, throwErr)
@@ -297,7 +299,7 @@ function updateQueue() {
         .then(audioBlob => {
             trackData.audioBlobUrl = URL.createObjectURL(audioBlob);
             console.info('queue | download album cover image');
-            trackData.imageStreamUrl = '/get_album_cover?song_title=' + encodeURIComponent(trackData.name);
+            trackData.imageStreamUrl = '/get_album_cover' + trackData.queryString;
             return fetch(new Request(trackData.imageStreamUrl));
         }, throwErr)
         .then(response => {
@@ -310,7 +312,7 @@ function updateQueue() {
         .then(imageBlob => {
             trackData.imageBlobUrl = URL.createObjectURL(imageBlob);
             console.info('queue | download lyrics');
-            trackData.lyricsUrl = '/get_lyrics?song_title=' + encodeURIComponent(trackData.name);
+            trackData.lyricsUrl = '/get_lyrics' + trackData.queryString;
             return fetch(new Request(trackData.lyricsUrl));
         }, throwErr)
         .then(response => {
@@ -370,7 +372,7 @@ function updateQueueHtml() {
                 html += '</div>'
             html += '</td>';
             html += '<td>' + queuedTrack.personDisplay + '</td>';
-            html += '<td>' + escapeHtml(queuedTrack.name) + '</td>';
+            html += '<td>' + escapeHtml(queuedTrack.displayName) + '</td>';
         html += '</tr>';
         i++;
     }

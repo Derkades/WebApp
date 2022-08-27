@@ -5,6 +5,7 @@ import os
 import random
 import subprocess
 from subprocess import CompletedProcess
+from metadata import Metadata
 
 
 music_base_dir = Path('/music')
@@ -51,6 +52,9 @@ class Person:
         Returns: Path object for a music file
         """
         return Path(self.music_dir, track_name)
+
+    def get_track_metadata(self, track_name: str) -> Metadata:
+        return Metadata(self.get_track_path(track_name))
 
     def download(self, url: str) -> CompletedProcess:
         """

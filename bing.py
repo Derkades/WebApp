@@ -1,7 +1,5 @@
 from typing import Optional, Tuple, List
 import json
-import re
-import traceback
 from io import BytesIO
 import html
 
@@ -39,49 +37,6 @@ def image_search(bing_query: str) -> bytes:
     img_link = json_data['murl']
     r = requests.get(img_link, headers=headers)
     return webp_thumbnail(r.content)
-
-
-def is_alpha(c):
-    return c == ' ' or c == '-' or c >= 'a' and c <= 'z'
-
-
-def title_to_query(title: str) -> str:
-    """
-    Simplify track title to be a better bing search query. For example,
-    special characters, file extensions and redundant strings like
-    "official video" are removed.
-    """
-    title = title.lower()
-    # Remove file extension
-    try:
-        title = title[:title.rindex('.')]
-    except ValueError:
-        pass
-    # Remove YouTube id suffix
-    title = re.sub(r' \[[a-z0-9\-_]+\]', '', title)
-    strip_keywords = [
-        'monstercat release',
-        'nerd nation release',
-        'monstercat official music video',
-        'official audio',
-        'official video',
-        'official music video',
-        'official lyric video',
-        'official hd video',
-        'extended version',
-        'long version',
-        '[out now]',
-        'clip officiel',
-        'hq videoclip',
-        'videoclip',
-        '(visual)'
-    ]
-    for strip_keyword in strip_keywords:
-        title = title.replace(strip_keyword, '')
-    # Remove special characters
-    title = ''.join([c for c in title if is_alpha(c)])
-    title = title.strip()
-    return title
 
 
 def _az_search(title: str) -> Optional[Tuple[str, str, str]]:

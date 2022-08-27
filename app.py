@@ -17,7 +17,7 @@ import settings
 
 application = Flask(__name__)
 assets = Assets()
-cache = Cache(settings.cache_dir)
+cache = Cache(Path(settings.cache_dir))
 
 with open('raphson.png', 'rb') as f:
     raphson_webp = bing.webp_thumbnail(f.read())
@@ -75,12 +75,14 @@ def choose_track():
     if not check_password_cookie():
         return Response(None, 403)
 
-    dir_name = request.args['person']
+    dir_name = request.args['person_dir']
     person = Person.by_dir_name(dir_name)
     chosen_track = person.choose_track()
+    meta = person.get_track_metadata(chosen_track)
 
     return {
-        'name': chosen_track
+        'name': chosen_track,
+        'display_name': meta.display_title()
     }
 
 
@@ -137,7 +139,7 @@ def get_track() -> Response:
     if not check_password_cookie():
         return Response(None, 403)
 
-    person_dir_name = request.args['person']
+    person_dir_name = request.args['person_dir']
     person = Person.by_dir_name(person_dir_name)
     track_name = request.args['track_name']
     file_path = person.get_track_path(track_name)
@@ -158,29 +160,27 @@ def get_album_cover() -> Response:
     if not check_password_cookie():
         return Response(None, 403)
 
-    song_title = request.args['song_title']
-    bing_query = bing.title_to_query(song_title)
+    person = Person.by_dir_name(request.args['person_dir'])
+    track_name = request.args['track_name']
+    meta = person.get_track_metadata(track_name)
 
-    cache_obj = cache.get('bing', bing_query)
+    cache_obj = cache.get('bing2', person.dir_name + track_name)
     if cache_obj.exists():
-        print('Returning cached bing image:', bing_query, flush=True)
+        print('Returning cached bing image', flush=True)
         return Response(cache_obj.retrieve(), mimetype='image/webp')
 
-    print('Original title:', song_title, flush=True)
-    print('Bing title:', bing_query, flush=True)
-
-    try:
-        webp_bytes = bing.image_search(bing_query + ' album cover')
-    except Exception:
-        print('No bing results for album cover', flush=True)
-        traceback.print_exc()
-
+    webp_bytes = None
+    for bing_query in meta.album_search_queries():
         try:
+            print('Searching bing:', bing_query, flush=True)
             webp_bytes = bing.image_search(bing_query)
+            break
         except Exception:
-            print('No bing results', flush=True)
+            print('No results', flush=True)
             traceback.print_exc()
-            webp_bytes = raphson_webp
+
+    if webp_bytes is None:
+        webp_bytes = raphson_webp
 
     cache_obj.store(webp_bytes)
     return Response(webp_bytes, mimetype='image/webp')
@@ -191,39 +191,51 @@ def get_lyrics():
     if not check_password_cookie():
         return Response(None, 403)
 
-    song_title = request.args['song_title']
+    person = Person.by_dir_name(request.args['person_dir'])
+    track_name = request.args['track_name']
+    meta = person.get_track_metadata(track_name)
 
-    cache_object = cache.get('genius', song_title)
+    cache_object = cache.get('genius2', person.dir_name + track_name)
 
     if cache_object.exists():
         print('Returning cached lyrics', flush=True)
         return send_file(cache_object.path, mimetype='application/json')
 
-    try:
-        title = bing.title_to_query(song_title)
-        print('search genius for:', title, flush=True)
-        genius_url = bing.genius_search(title)
-        if genius_url is None:
-            print('genius search yielded no results', flush=True)
-            return Response('', 451, mimetype='text/plain')
+    genius_url = None
+    for genius_query in meta.lyrics_search_queries():
+        print('Searching genius:', genius_query, flush=True)
+        try:
+            genius_url = bing.genius_search(genius_query)
+        except Exception:
+            print('Search error')
+            traceback.print_exc()
+        if genius_url is not None:
+            print('found genius url:', genius_url, flush=True)
+            break
 
-        print('found genius url:', genius_url, flush=True)
-        lyrics = bing.genius_extract_lyrics(genius_url)
-        json_data = {
-            'found': True,
-            'genius_url': genius_url,
-            'html': '<br>\n'.join(lyrics)
-        }
-
-    except Exception:
-        print('Error retrieving lyrics', flush=True)
-        traceback.print_exc()
-        json_data = {
+    if genius_url is None:
+        print('genius search yielded no results', flush=True)
+        genius_json = {
             'found': False,
         }
+    else:
+        try:
+            lyrics = bing.genius_extract_lyrics(genius_url)
+            genius_json = {
+                'found': True,
+                'genius_url': genius_url,
+                'html': '<br>\n'.join(lyrics)
+            }
+        except Exception:
+            print('Error retrieving lyrics', flush=True)
+            traceback.print_exc()
+            # Return not found now, but don't cache so we try again in the future when the bug is fixed
+            return {
+                'found': False
+            }
 
-    with open(cache_object.path, 'w') as f:
-        json.dump(json_data, f)
+    with open(cache_object.path, 'w', encoding='utf-8') as f:
+        json.dump(genius_json, f)
 
     return send_file(cache_object.path, mimetype='application/json')
 
