@@ -43,6 +43,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function handleKey(key) {
+    // Don't perform hotkey actions when user is typing in a text field
+    if (document.activeElement.tagName === 'INPUT') {
+        console.log('Ignoring keypress', key)
+        return;
+    }
+
     const keyInt = parseInt(key);
     if (!isNaN(keyInt)) {
         let index = 1;
