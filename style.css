@@ -304,7 +304,7 @@ audio {
 }
 
 .full-page-overlay {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
@@ -313,6 +313,7 @@ audio {
     justify-content: center;
     align-items: center;
     backdrop-filter: blur(2rem);
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 #settings-open {
