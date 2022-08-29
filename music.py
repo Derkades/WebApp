@@ -182,11 +182,12 @@ class Person:
         """
         Returns: List of Person objects for all Raphson members (CB, DK, JK)
         """
-        return [
-            Person('CB', 'CB', False),
-            Person('DK', 'DK', False),
-            Person('JK', 'JK', False),
-        ]
+        persons = []
+        for music_dir in Path(music_base_dir).iterdir():
+            if not music_dir.name.startswith('Guest-'):
+                person = Person(music_dir.name, music_dir.name, False)
+                persons.append(person)
+        return persons
 
     @staticmethod
     def get_guests() -> List['Person']:
