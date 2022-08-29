@@ -17,29 +17,24 @@
 
             <div class="box-rounded box-solid">
 
-                <h3>Raphson</h3>
+                <h3>Afspeellijsten</h3>
 
-                <span id="main-checkboxes">
-                    {% for person in raphson %}
+                {% for person in raphson %}
+                    <span class="checkbox-with-label">
                         <input type="checkbox" class="person-checkbox" id="checkbox-{{ person.dir_name }}" checked>
                         <label for="checkbox-{{ person.dir_name }}">{{ person.display_name }}<sup>{{ loop.index }}</sup> ({{ person.count_tracks() }})</label>
-                    {% endfor %}
-                </span>
-
-                <br>
-
-                <h3>Gasten</h3>
+                    </span>
+                {% endfor %}
 
                 {% if guests %}
+                    <hr>
                     {% for person in guests %}
-                        <input type="checkbox" class="person-checkbox" id="checkbox-{{ person.dir_name }}">
-                        <label for="checkbox-{{ person.dir_name }}">{{ person.display_name }}<sup>{{ loop.index + 3}}</sup> ({{ person.count_tracks() }})</label>
+                        <span class="checkbox-with-label">
+                            <input type="checkbox" class="person-checkbox" id="checkbox-{{ person.dir_name }}">
+                            <label for="checkbox-{{ person.dir_name }}">{{ person.display_name }}<sup>{{ loop.index + 3}}</sup> ({{ person.count_tracks() }})</label>
+                        </span>
                     {% endfor %}
-                {% else %}
-                    <p>Er zijn geen mappen voor gasten</p>
                 {% endif %}
-
-                <br>
 
             </div>
 

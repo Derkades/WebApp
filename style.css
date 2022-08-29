@@ -338,3 +338,11 @@ audio {
     padding: .5rem;
     margin-top: .5rem;
 }
+
+.checkbox-with-label {
+    display: inline-block;
+    margin-right: 1rem;
+    margin-bottom: .25rem;
+    margin-top: .25rem;
+    white-space: nowrap;
+}
