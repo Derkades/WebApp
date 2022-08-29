@@ -11,7 +11,7 @@ from metadata import Metadata
 import settings
 
 
-music_base_dir = Path('/music')
+music_base_dir = Path(settings.music_dir)
 last_played: Dict[str, datetime] = {}
 
 
