@@ -1,6 +1,6 @@
 from pathlib import Path
-from typing import Dict, List
-from datetime import datetime, timedelta
+from typing import List
+from datetime import datetime
 import os
 import random
 import subprocess
@@ -9,10 +9,10 @@ from subprocess import CompletedProcess
 import cache
 from metadata import Metadata
 import settings
+from keyval import conn as redis
 
 
 music_base_dir = Path(settings.music_dir)
-last_played: Dict[str, datetime] = {}
 
 
 class Track:
@@ -103,17 +103,28 @@ class Person:
         Returns: Track name
         """
         tracks = [f.name for f in self.music_dir.iterdir() if os.path.isfile(f)]
-        for _attempt in range(10):
+        current_timestamp = int(datetime.now().timestamp())
+        for attempt in range(10):
             chosen_track = random.choice(tracks)
-            if 'Broccoli Fuck' in chosen_track or \
-               chosen_track in last_played and \
-               datetime.now() - last_played[chosen_track] < timedelta(hours=2):
-                print(chosen_track, 'was played recently, picking a new song',
-                      flush=True)
+            last_played = redis.get('last_played_' + chosen_track)
+
+            if 'Broccoli Fuck' in chosen_track:
+                print(f'{chosen_track} bad, pick other song')
+
+            if last_played is not None:
+                seconds_ago = current_timestamp - int(last_played.decode())
+                if seconds_ago < 60*60*4:
+                    print(f'{chosen_track} was played {seconds_ago/3600:.2f} hours ago, picking a new song',
+                          flush=True)
                 continue
+
             break
 
-        last_played[chosen_track] = datetime.now()
+        if attempt == 10:
+            print('attempts exhausted', flush=True)
+
+        redis.set('last_played_' + chosen_track, str(current_timestamp).encode())
+
         return self.track(chosen_track)
 
     def count_tracks(self) -> int:
