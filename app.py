@@ -76,10 +76,14 @@ def choose_track():
     dir_name = request.args['person_dir']
     person = Person.by_dir_name(dir_name)
     chosen_track = person.choose_track()
+    display_name = chosen_track.metadata().display_title()
+
+    print('Chosen track:', person.dir_name, chosen_track.name(), flush=True)
+    print('Display name:', display_name, flush=True)
 
     return {
         'name': chosen_track.name(),
-        'display_name': chosen_track.metadata().display_title()
+        'display_name': display_name,
     }
 
 
