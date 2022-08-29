@@ -30,7 +30,6 @@ def image_search(bing_query: str) -> bytes:
                              'first': '1',
                              'scenario': 'ImageBasicHover'},
                      cookies={'SRCHHPGUSR': 'ADLT=OFF'})  # disable safe search :-)
-    print(len(r.text))
     soup = BeautifulSoup(r.text, 'html.parser')
     results = soup.find_all('a', {'class': 'iusc'})
     # Eerst werd hier altijd alleen de eerste gepakt, maar blijkbaar heeft soms de
