@@ -58,9 +58,9 @@ class Track:
         # nog eens stilte aan "het begin" weg.
 
         filters = '''
-        silenceremove=start_periods=1:start_threshold=-50dB,
+        silenceremove=start_periods=1:start_threshold=-70dB,
         areverse,
-        silenceremove=start_periods=1:start_threshold=-50dB,
+        silenceremove=start_periods=1:start_threshold=-70dB,
         areverse,
         dynaudnorm=peak=0.5
         '''
