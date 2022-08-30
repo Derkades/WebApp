@@ -147,6 +147,11 @@ input[type=checkbox] {
     margin: 1.25rem 0;
 }
 
+.box-queue {
+    max-height: 30rem;
+    overflow-y: scroll;
+}
+
 .lyrics-outer {
     padding: 1rem;
     width: 100%;
