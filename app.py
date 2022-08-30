@@ -260,3 +260,7 @@ def raphson() -> Response:
     if not check_password_cookie():
         return Response(None, 403)
     return Response(raphson_webp, mimetype='image/webp')
+
+@application.route('/favicon.ico')
+def favicon():
+    return send_file('favicon.ico')

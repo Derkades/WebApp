@@ -8,7 +8,7 @@ RUN pip install yt-dlp flask bs4 requests Pillow gunicorn redis musicbrainzngs
 
 RUN mkdir /app
 
-COPY *.py raphson.png script.js style.css /app/
+COPY *.py raphson.png script.js style.css favicon.ico /app/
 COPY ./templates /app/templates
 COPY ./assets /app/assets
 
