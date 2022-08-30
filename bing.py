@@ -40,7 +40,7 @@ def image_search(bing_query: str) -> bytes:
         except KeyError:
             continue
         img_link = json_data['murl']
-        r = requests.get(img_link, headers=headers)
+        r = requests.get(img_link, headers=headers, verify=False)
         return webp_thumbnail(r.content)
     raise ValueError('no link with "m" attribute')
 
