@@ -40,7 +40,7 @@ class Track:
         """
         in_path_abs = self.path.absolute().as_posix()
 
-        cache_object = cache.get('transcoded audio', in_path_abs)
+        cache_object = cache.get('transcoded audio 2', in_path_abs)
 
         if cache_object.exists():
             print('Returning cached audio', flush=True)
@@ -62,7 +62,7 @@ class Track:
         areverse,
         silenceremove=start_periods=1:start_threshold=-70dB,
         areverse,
-        dynaudnorm=peak=0.5
+        dynaudnorm=peak=0.9:targetrms=0.5
         '''
 
         # Remove whitespace and newlines
