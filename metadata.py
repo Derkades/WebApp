@@ -177,7 +177,7 @@ class Metadata:
         """
         if self.album is None:
             raise ValueError('album name not known')
-        for match in ['top 500', 'top 40', 'jaarlijsten', 'jaargang', 'super hits']:
+        for match in ['top 500', 'top 40', 'jaarlijsten', 'jaargang', 'super hits', 'the best of']:
             if match in self.album.lower():
                 return True
         return False

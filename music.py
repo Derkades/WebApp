@@ -108,6 +108,7 @@ class Person:
 
         for attempt in range(max_attempts):
             chosen_track = random.choice(tracks)
+            print(f'choose track {attempt}: {chosen_track}')
             last_played = redis.get('last_played_' + chosen_track)
 
             if 'Broccoli Fuck' in chosen_track:
@@ -126,10 +127,13 @@ class Person:
                     minimum_time_ago = 15*60  # Last 15 minutes
 
                 if seconds_ago < minimum_time_ago:
-                    print(f'{chosen_track} was played {seconds_ago/3600:.2f} hours ago, picking a new song',
+                    print(f'...was played {seconds_ago/3600:.2f} hours ago, picking a new song',
                           flush=True)
-                continue
-
+                    continue
+                else:
+                    print(f'...was played {seconds_ago/3600:.2f} hours ago')
+            else:
+                print('...was not played recently')
             break
 
         if attempt == max_attempts - 1:
