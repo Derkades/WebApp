@@ -4,7 +4,36 @@ document.queue = [];
 document.queueBusy = false;
 document.queueSize = 5;
 
+// https://www.w3schools.com/js/js_cookies.asp
+function setCookie(cname, cvalue) {
+    const d = new Date();
+    d.setTime(d.getTime() + (365*24*60*60*1000));
+    const expires = "expires="+ d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/;SameSite=Strict";
+}
+
+function getCookie(cname) {
+    const name = cname + "=";
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const ca = decodedCookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return null;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+    if (getCookie('settings-queue-size') !== null) {
+        document.queueSize = parseInt(getCookie('settings-queue-size'));
+        document.getElementById('queue-size').value = getCookie('settings-queue-size');
+    }
+
     // Playback controls
     document.getElementById('button-backward-fast').addEventListener('click', () => seek(-30));
     document.getElementById('button-backward').addEventListener('click', () => seek(-5));
@@ -25,6 +54,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('settings-close').addEventListener('click', () =>
             document.getElementById('settings-overlay').style.display = 'none');
     document.getElementById('youtube-dl-submit').addEventListener('click', youTubeDownload);
+    document.getElementById('queue-size').addEventListener('input', event => {
+        document.queueSize = parseInt(event.data);
+        setCookie('settings-queue-size', event.data);
+        updateQueue();
+    });
 
     // Queue overlay
     document.getElementById('button-square-plus').addEventListener('click', () =>

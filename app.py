@@ -52,7 +52,7 @@ def login():
             return 'Invalid password. <a href="/login">Try again</a>'
 
         response = redirect('/')
-        response.set_cookie('password', password, max_age=3600*24*30)
+        response.set_cookie('password', password, max_age=3600*24*30, samesite='Strict')
         return response
     else:
         return render_template('login.jinja2')
