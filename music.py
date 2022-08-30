@@ -79,7 +79,6 @@ class Track:
                 '-b:a', settings.opus_bitrate,
                 '-f', 'opus',
                 '-vbr', 'on',
-                # '-t', settings.max_duration,
                 '-filter:a', filters,
                 cache_object.path]
         subprocess.run(command,
@@ -114,6 +113,7 @@ class Person:
 
             if 'Broccoli Fuck' in chosen_track:
                 print(f'{chosen_track} bad, pick other song')
+                continue
 
             if last_played is not None:
                 seconds_ago = current_timestamp - int(last_played.decode())

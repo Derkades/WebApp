@@ -209,13 +209,21 @@ class Metadata:
         """
         Generate possible search queries to find album art using a general search engine
         """
-        if self.album and not self._is_collection_album():
-            yield self.album + ' cover'
-            yield self.album
+        if self.album_artist:
+            artist = self.album_artist
+        elif self.artists is not None and len(self.artists) > 0:
+            artist = ' '.join(self.artists)
+        else:
+            artist = None
 
-        if self.artists and self.title:
-            yield ' '.join(self.artists) + ' - ' + self.title + ' cover'
-            yield ' '.join(self.artists) + ' - ' + self.title
+        if artist and self.album and not self._is_collection_album():
+
+            yield artist + ' - ' + self.album + ' cover'
+            yield artist + ' - ' + self.album
+
+        if artist and self.title:
+            yield artist + ' - ' + self.title + ' cover'
+            yield artist + ' - ' + self.title
 
         if self.title:
             yield self.title + ' cover'
