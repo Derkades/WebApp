@@ -58,6 +58,7 @@ class Track:
         # nog eens stilte aan "het begin" weg.
 
         filters = '''
+        atrim=0:600,
         silenceremove=start_periods=1:start_threshold=-70dB,
         areverse,
         silenceremove=start_periods=1:start_threshold=-70dB,
@@ -78,7 +79,7 @@ class Track:
                 '-b:a', settings.opus_bitrate,
                 '-f', 'opus',
                 '-vbr', 'on',
-                '-t', settings.max_duration,
+                # '-t', settings.max_duration,
                 '-filter:a', filters,
                 cache_object.path]
         subprocess.run(command,
