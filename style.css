@@ -15,9 +15,13 @@ body, html {
     /* overflow: hidden; */
 }
 
-h3, p, label, td, div {
+h3, p, label, td, div, a {
     font-family: 'Quicksand', Verdana, sans-serif;
     color: white;
+}
+
+a {
+    color: lightblue;
 }
 
 h3 {
@@ -148,7 +152,7 @@ input[type=checkbox] {
 }
 
 .box-queue {
-    max-height: 30rem;
+    max-height: 27rem;
     overflow-y: scroll;
 }
 
@@ -321,6 +325,10 @@ audio {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
+.full-page-overlay .box-solid {
+    max-width: 60rem;
+}
+
 #settings-open {
     position: absolute;
     top: 1rem;
@@ -335,7 +343,6 @@ audio {
 #youtube-dl-output {
     /* Render \n as <br> */
     white-space: pre-wrap;
-    max-width: 60rem;
     height: 15rem;
     overflow: scroll;
     border: 1px solid gray;
