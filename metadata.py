@@ -118,7 +118,7 @@ class Metadata:
         if self.artists and self.title:
             title = ' & '.join(self.artists) + ' - ' + self.title
             if self.date:
-                title += ' [' + self.date + ']'
+                title += ' [' + self.date[:4] + ']'
             return title
         else:
             return None
