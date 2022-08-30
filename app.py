@@ -116,7 +116,8 @@ def get_album_cover() -> Response:
 
     webp_bytes = None
     try:
-        query = next(meta.lyrics_search_queries())
+        query = meta.album_release_query()
+        print('Searching MusicBrainz:', query, flush=True)
         webp_bytes = musicbrainz.get_webp_cover(query)
     except Exception:
         print('Error retrieving album art from musicbrainz', flush=True)

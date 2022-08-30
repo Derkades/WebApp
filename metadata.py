@@ -29,7 +29,8 @@ FILENAME_STRIP_KEYWORDS = [
     '_ Napalm Records',
     '(Lyrics)',
     '[Official Lyric Video]',
-    '(Official Videoclip)'
+    '(Official Videoclip)',
+    '(Visual)',
 ]
 
 
@@ -104,7 +105,7 @@ class Metadata:
             elif key == 'date':
                 self.date = value
             elif key == 'album_artist':
-                self.album_arist = value
+                self.album_artist = value
 
             if debug:
                 print(key, value, sep='\t')
@@ -174,9 +175,32 @@ class Metadata:
                 return True
         return False
 
+    def album_release_query(self):
+        """
+        Get album search query for a music search engine like MusicBrainz
+        """
+        if self.album_artist:
+            artist = self.album_artist
+        elif self.artists is not None and len(self.artists) > 0:
+            artist = ' '.join(self.artists)
+        else:
+            artist = None
+
+        if self.album and self._is_collection_album():
+            album = self.album
+        elif self.title:
+            album = self.title
+        else:
+            album = None
+
+        if artist and album:
+            return artist + ' - ' + album
+        else:
+            return self._filename_title_search()
+
     def album_search_queries(self):
         """
-        Generate possible search queries to find album art
+        Generate possible search queries to find album art using a general search engine
         """
         if self.album and not self._is_collection_album():
             yield self.album + ' cover'
