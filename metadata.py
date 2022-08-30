@@ -31,7 +31,15 @@ FILENAME_STRIP_KEYWORDS = [
     '[Official Lyric Video]',
     '(Official Videoclip)',
     '(Visual)',
+    '(long version)',
+    ' HD',
 ]
+
+
+def strip_keywords(inp: str) -> str:
+    for strip_keyword in FILENAME_STRIP_KEYWORDS:
+        inp = inp.replace(strip_keyword, '')
+    return inp
 
 
 def is_alpha(c):
@@ -101,7 +109,7 @@ class Metadata:
             elif key == 'artist':
                 self.artists = value.split('/')
             elif key == 'title':
-                self.title = value
+                self.title = strip_keywords(value).strip()
             elif key == 'date':
                 self.date = value
             elif key == 'album_artist':
@@ -137,8 +145,7 @@ class Metadata:
             pass
         # Remove YouTube id suffix
         title = re.sub(r' \[[a-zA-Z0-9\-_]+\]', '', title)
-        for strip_keyword in FILENAME_STRIP_KEYWORDS:
-            title = title.replace(strip_keyword, '')
+        title = strip_keywords(title)
         title.strip()
         return title
 
@@ -186,7 +193,7 @@ class Metadata:
         else:
             artist = None
 
-        if self.album and self._is_collection_album():
+        if self.album and not self._is_collection_album():
             album = self.album
         elif self.title:
             album = self.title
