@@ -258,4 +258,4 @@ def script() -> Response:
 def raphson() -> Response:
     if not check_password_cookie():
         return Response(None, 403)
-    return send_file('raphson.png')
+    return Response(raphson_webp, mimetype='image/webp')
