@@ -1,4 +1,5 @@
-downloads/
-music/
-cache/
-*.mp3
+__pycache__/
+/downloads/
+/music/
+/cache/
+/*.webp

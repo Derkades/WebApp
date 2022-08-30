@@ -12,6 +12,7 @@ import cache
 import bing
 import genius
 import settings
+import musicbrainz
 
 
 application = Flask(__name__)
@@ -106,22 +107,30 @@ def get_album_cover() -> Response:
     person = Person.by_dir_name(request.args['person_dir'])
     track = person.track(request.args['track_name'])
 
-    cache_obj = cache.get('bing3', person.dir_name + track.name())
+    cache_obj = cache.get('album_art', person.dir_name + track.name())
     if cache_obj.exists():
-        print('Returning cached bing image', flush=True)
+        print('Returning cached image', flush=True)
         return Response(cache_obj.retrieve(), mimetype='image/webp')
 
     meta = track.metadata()
 
     webp_bytes = None
-    for bing_query in meta.album_search_queries():
-        try:
-            print('Searching bing:', bing_query, flush=True)
-            webp_bytes = bing.image_search(bing_query)
-            break
-        except Exception:
-            print('No results', flush=True)
-            traceback.print_exc()
+    try:
+        query = next(meta.lyrics_search_queries())
+        webp_bytes = musicbrainz.get_webp_cover(query)
+    except Exception:
+        print('Error retrieving album art from musicbrainz', flush=True)
+        traceback.print_exc()
+
+    if webp_bytes is None:
+        for query in meta.album_search_queries():
+            try:
+                print('Searching bing:', query, flush=True)
+                webp_bytes = bing.image_search(query)
+                break
+            except Exception:
+                print('No bing results', flush=True)
+                traceback.print_exc()
 
     if webp_bytes is None:
         webp_bytes = raphson_webp
