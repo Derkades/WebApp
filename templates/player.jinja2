@@ -57,7 +57,7 @@
                     </div>
                 </div>
 
-                {% for button_name in ['backward-fast', 'backward', 'play', 'pause', 'forward', 'forward-fast', 'forward-step', 'closed-captioning', 'record-vinyl', 'square-plus'] %}
+                {% for button_name in ['backward-fast', 'backward', 'play', 'pause', 'forward', 'forward-fast', 'forward-step', 'closed-captioning', 'record-vinyl', 'square-plus', 'gear'] %}
                     <button id="button-{{ button_name }}" class="icon-button">
                         <div class="icon" style="background-image: url('{{ assets[button_name + '.svg'] }}')"></div>
                     </button>
@@ -89,10 +89,6 @@
     </div>
 
     <div id="audio"></div>
-
-    <button class="icon-button" id="settings-open">
-        <div class="icon" style="background-image: url('{{ assets['gear.svg'] }}')">
-    </button>
 
     <div id="queue-overlay" class="full-page-overlay">
         <div class="box-rounded box-solid">

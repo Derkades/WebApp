@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('button-record-vinyl').style.display = 'none';
 
     // Settings overlay
-    document.getElementById('settings-open').addEventListener('click', () =>
+    document.getElementById('button-gear').addEventListener('click', () =>
             document.getElementById('settings-overlay').style.display = 'flex');
     document.getElementById('settings-close').addEventListener('click', () =>
             document.getElementById('settings-overlay').style.display = 'none');
