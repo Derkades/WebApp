@@ -70,7 +70,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Hotkeys
     document.addEventListener('keydown', event => handleKey(event.key));
 
-    updateQueueHtml();
     updateQueue();
     liedje();
     setInterval(showCorrectPlayPauseButton, 50);
@@ -299,6 +298,8 @@ function updateQueue() {
     if (document.queueBusy) {
         return;
     }
+
+    updateQueueHtml();
 
     let person;
 
