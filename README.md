@@ -6,7 +6,7 @@ Music player for communities (hacker spaces, maker spaces).
 
 - Per-person playlists, can be toggled individually
 - During shuffle play, tracks are chosen from each directory in fair round-robin fashion.
-- Album cover automatically fetched using web scraper
+- Album cover automatically fetched using MusicBrainz or Bing web scraper
 - Lyrics automatically fetched using web scraper
 - Songs are downloaded in the background, switching to a next track is instant
 - Responsive design, made for desktop and mobile
@@ -15,6 +15,7 @@ Music player for communities (hacker spaces, maker spaces).
 - Touch-friendly interface
 - Hotkeys for most common actions
 - No JavaScript or CSS frameworks, the web interface makes no requests to third party domains
+- Audio is RMS-normalized and silence is trimmed from the start and end
 
 ## Development environment
 
@@ -77,6 +78,8 @@ This project is using many open source software and libraries, such as:
 - Pillow
 - Python requests
 - Font Awesome
+- MusicBrainz (musicbrainzngs)
+- Redis
 - Docker, docker compose
 
 It also relies on some other parties for web scraping, who shall not be named.
