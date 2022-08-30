@@ -104,7 +104,9 @@ class Person:
         """
         tracks = [f.name for f in self.music_dir.iterdir() if os.path.isfile(f)]
         current_timestamp = int(datetime.now().timestamp())
-        for attempt in range(10):
+        max_attempts = 20
+
+        for attempt in range(max_attempts):
             chosen_track = random.choice(tracks)
             last_played = redis.get('last_played_' + chosen_track)
 
@@ -113,14 +115,24 @@ class Person:
 
             if last_played is not None:
                 seconds_ago = current_timestamp - int(last_played.decode())
-                if seconds_ago < 60*60*4:
+
+                if attempt < 5:
+                    minimum_time_ago = 60*60*5  # Last 5 hours
+                elif attempt < 10:
+                    minimum_time_ago = 60*60*4  # Last 2 hours
+                elif attempt < 15:
+                    minimum_time_ago = 60*60  # Last hour
+                else:
+                    minimum_time_ago = 15*60  # Last 15 minutes
+
+                if seconds_ago < minimum_time_ago:
                     print(f'{chosen_track} was played {seconds_ago/3600:.2f} hours ago, picking a new song',
                           flush=True)
                 continue
 
             break
 
-        if attempt == 10:
+        if attempt == max_attempts - 1:
             print('attempts exhausted', flush=True)
 
         redis.set('last_played_' + chosen_track, str(current_timestamp).encode())
