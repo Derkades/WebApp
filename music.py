@@ -41,10 +41,10 @@ class Track:
         in_path_abs = self.path.absolute().as_posix()
 
         cache_object = cache.get('transcoded audio 2', in_path_abs)
-
-        if cache_object.exists():
+        cached_data = cache_object.retrieve()
+        if cached_data is not None:
             print('Returning cached audio', flush=True)
-            return cache_object.retrieve()
+            return cached_data
 
         # 1. Stilte aan het begin weghalen met silenceremove: https://ffmpeg.org/ffmpeg-filters.html#silenceremove
         # 2. Audio omkeren
@@ -80,13 +80,19 @@ class Track:
                 '-f', 'opus',
                 '-vbr', 'on',
                 '-filter:a', filters,
-                cache_object.path]
+                cache_object.data_path.absolute().as_posix()]
         subprocess.run(command,
                        shell=False,
                        check=True,
                        capture_output=False)
 
-        return cache_object.retrieve()
+        cache_object.update_checksum()
+        cached_data = cache_object.retrieve()
+
+        if cached_data is None:
+            raise ValueError("cached data should not be null, we've just written to it")
+
+        return cached_data
 
 
 class Person:

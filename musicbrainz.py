@@ -42,6 +42,9 @@ def get_webp_cover(title: str) -> Optional[bytes]:
 
 if __name__ == '__main__':
     cover = get_webp_cover('europe - the final countdown')
-    with open('musicbrainz_cover_test.webp', 'wb') as f:
-        f.truncate(0)
-        f.write(cover)
+    if cover is None:
+        print('no cover returned')
+    else:
+        with open('musicbrainz_cover_test.webp', 'wb') as f:
+            f.truncate(0)
+            f.write(cover)

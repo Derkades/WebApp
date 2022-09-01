@@ -108,9 +108,10 @@ def get_album_cover() -> Response:
     track = person.track(request.args['track_name'])
 
     cache_obj = cache.get('album_art', person.dir_name + track.name())
-    if cache_obj.exists():
+    cached_data = cache_obj.retrieve()
+    if cached_data is not None:
         print('Returning cached image', flush=True)
-        return Response(cache_obj.retrieve(), mimetype='image/webp')
+        return Response(cached_data, mimetype='image/webp')
 
     meta = track.metadata()
 
@@ -149,10 +150,11 @@ def get_lyrics():
     track = person.track(request.args['track_name'])
 
     cache_object = cache.get('genius2', person.dir_name + track.name())
+    cached_data = cache_object.retrieve()
 
-    if cache_object.exists():
+    if cached_data is not None:
         print('Returning cached lyrics', flush=True)
-        return send_file(cache_object.path, mimetype='application/json')
+        return Response(cached_data, mimetype='application/json')
 
     meta = track.metadata()
 
@@ -189,10 +191,10 @@ def get_lyrics():
                 'found': False
             }
 
-    with open(cache_object.path, 'w', encoding='utf-8') as f:
-        json.dump(genius_json, f)
+    json_bytes = json.dumps(genius_json).encode()
+    cache_object.store(json_bytes)
 
-    return send_file(cache_object.path, mimetype='application/json')
+    return Response(json_bytes, mimetype='application/json')
 
 
 @application.route('/ytdl', methods=['POST'])
@@ -260,6 +262,7 @@ def raphson() -> Response:
     if not check_password_cookie():
         return Response(None, 403)
     return Response(raphson_webp, mimetype='image/webp')
+
 
 @application.route('/favicon.ico')
 def favicon():
