@@ -100,7 +100,7 @@ kbd {
         position: absolute;
         top: 0;
         width: calc(50vw - 3rem);
-        height: calc(100vh - 3rem);
+        height: calc(100vh);
     }
 
     .lyrics-outer {
