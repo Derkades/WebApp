@@ -4,6 +4,7 @@ document.queue = [];
 document.queueBusy = false;
 document.queueSize = 5;
 document.quality = 'high';
+document.maxSearchListSize = 100;
 
 // https://www.w3schools.com/js/js_cookies.asp
 function setCookie(cname, cvalue) {
@@ -585,14 +586,13 @@ function searchTrackList() {
                         + 'onclick="queueAdd(this.id);">'
                         + '[' + escapeHtml(personJson.display_name) + '] ' + escapeHtml(track.display)
                         + '</button><br>';
+                    i++;
                 }
 
-                if (i > 10) {
+                if (i > document.maxSearchListSize) {
                     outputHtml += '...en meer';
                     break outer;
                 }
-
-                i++;
             }
 
         }

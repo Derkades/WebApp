@@ -127,7 +127,7 @@ class Person:
             last_played = redis.get('last_played_' + chosen_track)
 
             if 'Broccoli Fuck' in chosen_track:
-                log.info('%s bad, pick other song', chosen_track)
+                log.info('...bad, pick other song')
                 continue
 
             if last_played is not None:
