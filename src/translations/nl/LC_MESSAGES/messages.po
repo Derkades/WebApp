@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-09-02 14:30+0200\n"
-"PO-Revision-Date: 2022-09-02 14:29+0200\n"
+"POT-Creation-Date: 2022-09-02 18:39+0200\n"
+"PO-Revision-Date: 2022-09-02 18:39+0200\n"
 "Last-Translator: \n"
 "Language: nl\n"
 "Language-Team: nl <LL@li.org>\n"
@@ -54,75 +54,63 @@ msgstr "Wachtrij"
 msgid "Add track to queue (experimental)"
 msgstr "Nummer aan wachtrij toevoegen (experimenteel)"
 
-#: src/templates/player.jinja2:98 src/templates/player.jinja2:127
+#: src/templates/player.jinja2:98 src/templates/player.jinja2:124
 msgid "Close"
 msgstr "Sluiten"
 
-#: src/templates/player.jinja2:108
-msgid ""
-"Enter a short search query and click 'Search' (can take a while, be "
-"patient and don't click again!)"
-msgstr ""
-"Vul een korte zoekopdracht in en klik op 'Zoeken' (kan lang duren, heb "
-"geduld en klik niet meerdere keren!)"
+#: src/templates/player.jinja2:102
+msgid "Everyone"
+msgstr "Iedereen"
 
-#: src/templates/player.jinja2:109
-msgid "Press one of the buttons in the search results"
-msgstr "Selecteer een knop uit de zoekresultaten"
+#: src/templates/player.jinja2:107
+msgid "Guest"
+msgstr "Gast"
 
-#: src/templates/player.jinja2:110
-msgid ""
-"Please wait, the track will be downloaded in the background and added to "
-"the queue"
-msgstr ""
-"Even wachten, het nummer wordt in de achtergrond gedownload en toegevoegd"
-" aan de wachtrij"
+#: src/templates/player.jinja2:111
+msgid "Search query"
+msgstr "Zoekopdracht"
 
-#: src/templates/player.jinja2:116
-msgid "Search"
-msgstr "Zoeken"
-
-#: src/templates/player.jinja2:126
+#: src/templates/player.jinja2:122
 msgid "Hotkeys"
 msgstr "Hete toetsen"
 
-#: src/templates/player.jinja2:133
+#: src/templates/player.jinja2:131
 msgid "Toggle playlists"
 msgstr "Afspeellijsten in-/uitschakelen"
 
-#: src/templates/player.jinja2:137
+#: src/templates/player.jinja2:135
 msgid "Next track"
 msgstr "Volgend nummer"
 
-#: src/templates/player.jinja2:141
+#: src/templates/player.jinja2:139
 msgid "Seek in track (don't use shift)"
 msgstr "Navigeer door nummer (gebruik geen shift)"
 
-#: src/templates/player.jinja2:146
+#: src/templates/player.jinja2:144
 msgid "Settings"
 msgstr "Instellingen"
 
-#: src/templates/player.jinja2:149
+#: src/templates/player.jinja2:147
 msgid "Minimum queue length"
 msgstr "Minimum wachtrijlengte"
 
-#: src/templates/player.jinja2:153
+#: src/templates/player.jinja2:151
 msgid "High (VBR 96kb/s 48kHz Opus)"
 msgstr "Hoog (VBR 96kb/s 48kHz Opus)"
 
-#: src/templates/player.jinja2:154
+#: src/templates/player.jinja2:152
 msgid "Low (VBR 64kb/s 48kHz Opus)"
 msgstr "Laag (VBR 64kb/s 48kHz Opus)"
 
-#: src/templates/player.jinja2:156
+#: src/templates/player.jinja2:154
 msgid "Audio quality"
 msgstr "Audiokwaliteit"
 
-#: src/templates/player.jinja2:160
+#: src/templates/player.jinja2:158
 msgid "YouTube download"
 msgstr "YouTube download"
 
-#: src/templates/player.jinja2:161
+#: src/templates/player.jinja2:159
 msgid ""
 "Select a name and paste a link from YouTube, Soundcloud, Bandcamp, etc. "
 "Finally, press <kbd>Download</kbd>."
@@ -130,15 +118,15 @@ msgstr ""
 "Selecteer een naam en plak een link van YouTube, Soundcloud, Bandcamp, "
 "etc. Druk dan op <kbd>Download</kbd>."
 
-#: src/templates/player.jinja2:175
+#: src/templates/player.jinja2:173
 msgid "yt-dlp output will appear here"
 msgstr "hier komt output van yt-dlp"
 
-#: src/templates/player.jinja2:178
+#: src/templates/player.jinja2:176
 msgid "Credits"
 msgstr "Credits"
 
-#: src/templates/player.jinja2:179
+#: src/templates/player.jinja2:177
 #, python-format
 msgid ""
 "<a href=\"%(gh)s\">Super fancy music player 2.0</a> is a project largely "
@@ -152,4 +140,29 @@ msgstr ""
 "target=\"_blank\">Super fancy music player</a> van <a "
 "href=\"%(daniel_gh)s\" target=\"_blank\">Daniël Koomen</a>. Veel "
 "luisterplezier!"
+
+#~ msgid ""
+#~ "Enter a short search query and "
+#~ "click 'Search' (can take a while, "
+#~ "be patient and don't click again!)"
+#~ msgstr ""
+#~ "Vul een korte zoekopdracht in en "
+#~ "klik op 'Zoeken' (kan lang duren, "
+#~ "heb geduld en klik niet meerdere "
+#~ "keren!)"
+
+#~ msgid "Press one of the buttons in the search results"
+#~ msgstr "Selecteer een knop uit de zoekresultaten"
+
+#~ msgid ""
+#~ "Please wait, the track will be "
+#~ "downloaded in the background and added"
+#~ " to the queue"
+#~ msgstr ""
+#~ "Even wachten, het nummer wordt in "
+#~ "de achtergrond gedownload en toegevoegd "
+#~ "aan de wachtrij"
+
+#~ msgid "Search"
+#~ msgstr "Zoeken"
 
