@@ -9,7 +9,6 @@ from pathlib import Path
 
 from flask import Flask, request, render_template, Response, redirect
 from flask_babel import Babel
-from flask_babel import gettext
 
 from assets import Assets
 from music import Person
@@ -289,5 +288,4 @@ def raphson() -> Response:
 @babel.localeselector
 def get_locale():
     # TODO language from cookie
-
-    return request.accept_languages.best_match(['en', 'nl'])
+    return request.accept_languages.best_match(['nl', 'nl-NL', 'nl-BE', 'en'])[:2]

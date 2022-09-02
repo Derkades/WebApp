@@ -1,0 +1,155 @@
+# Dutch translations for PROJECT.
+# Copyright (C) 2022 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2022-09-02 14:30+0200\n"
+"PO-Revision-Date: 2022-09-02 14:29+0200\n"
+"Last-Translator: \n"
+"Language: nl\n"
+"Language-Team: nl <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.8.0\n"
+
+#: src/templates/login.jinja2:28
+msgid "Please log in to get access to"
+msgstr "Gelieve in te loggen om toegang te krijgen tot"
+
+#: src/templates/login.jinja2:38
+msgid "Invalid password"
+msgstr "Ongeldig wachtwoord"
+
+#: src/templates/login.jinja2:44
+msgid "Log in"
+msgstr "Inloggen"
+
+#: src/templates/player.jinja2:21
+msgid "Playlists"
+msgstr "Afspeellijsten"
+
+#: src/templates/player.jinja2:44
+msgid "Playback"
+msgstr "Muziek"
+
+#: src/templates/player.jinja2:47
+msgid "Waiting for music in queue..."
+msgstr "Wachten op muziek in wachtrij..."
+
+#: src/templates/player.jinja2:50
+msgid "Prevously: "
+msgstr "Vorige: "
+
+#: src/templates/player.jinja2:71
+msgid "Queue"
+msgstr "Wachtrij"
+
+#: src/templates/player.jinja2:97
+msgid "Add track to queue (experimental)"
+msgstr "Nummer aan wachtrij toevoegen (experimenteel)"
+
+#: src/templates/player.jinja2:98 src/templates/player.jinja2:127
+msgid "Close"
+msgstr "Sluiten"
+
+#: src/templates/player.jinja2:108
+msgid ""
+"Enter a short search query and click 'Search' (can take a while, be "
+"patient and don't click again!)"
+msgstr ""
+"Vul een korte zoekopdracht in en klik op 'Zoeken' (kan lang duren, heb "
+"geduld en klik niet meerdere keren!)"
+
+#: src/templates/player.jinja2:109
+msgid "Press one of the buttons in the search results"
+msgstr "Selecteer een knop uit de zoekresultaten"
+
+#: src/templates/player.jinja2:110
+msgid ""
+"Please wait, the track will be downloaded in the background and added to "
+"the queue"
+msgstr ""
+"Even wachten, het nummer wordt in de achtergrond gedownload en toegevoegd"
+" aan de wachtrij"
+
+#: src/templates/player.jinja2:116
+msgid "Search"
+msgstr "Zoeken"
+
+#: src/templates/player.jinja2:126
+msgid "Hotkeys"
+msgstr "Hete toetsen"
+
+#: src/templates/player.jinja2:133
+msgid "Toggle playlists"
+msgstr "Afspeellijsten in-/uitschakelen"
+
+#: src/templates/player.jinja2:137
+msgid "Next track"
+msgstr "Volgend nummer"
+
+#: src/templates/player.jinja2:141
+msgid "Seek in track (don't use shift)"
+msgstr "Navigeer door nummer (gebruik geen shift)"
+
+#: src/templates/player.jinja2:146
+msgid "Settings"
+msgstr "Instellingen"
+
+#: src/templates/player.jinja2:149
+msgid "Minimum queue length"
+msgstr "Minimum wachtrijlengte"
+
+#: src/templates/player.jinja2:153
+msgid "High (VBR 96kb/s 48kHz Opus)"
+msgstr "Hoog (VBR 96kb/s 48kHz Opus)"
+
+#: src/templates/player.jinja2:154
+msgid "Low (VBR 64kb/s 48kHz Opus)"
+msgstr "Laag (VBR 64kb/s 48kHz Opus)"
+
+#: src/templates/player.jinja2:156
+msgid "Audio quality"
+msgstr "Audiokwaliteit"
+
+#: src/templates/player.jinja2:160
+msgid "YouTube download"
+msgstr "YouTube download"
+
+#: src/templates/player.jinja2:161
+msgid ""
+"Select a name and paste a link from YouTube, Soundcloud, Bandcamp, etc. "
+"Finally, press <kbd>Download</kbd>."
+msgstr ""
+"Selecteer een naam en plak een link van YouTube, Soundcloud, Bandcamp, "
+"etc. Druk dan op <kbd>Download</kbd>."
+
+#: src/templates/player.jinja2:175
+msgid "yt-dlp output will appear here"
+msgstr "hier komt output van yt-dlp"
+
+#: src/templates/player.jinja2:178
+msgid "Credits"
+msgstr "Credits"
+
+#: src/templates/player.jinja2:179
+#, python-format
+msgid ""
+"<a href=\"%(gh)s\">Super fancy music player 2.0</a> is a project largely "
+"made by <a href=\"%(robin_gh)s\">Robin Slot</a>, inspired by the awesome "
+"<a href=\"%(insp_gh)s\" target=\"_blank\">Super fancy music player</a> by"
+" <a href=\"%(daniel_gh)s\" target=\"_blank\">Daniël Koomen</a>. Enjoy!"
+msgstr ""
+"<a href=\"%(gh)s\">Super fancy music player 2.0</a> is een project "
+"grotendeels gemaakt door <a href=\"%(robin_gh)s\">Robin Slot</a>, "
+"geïnspireerd door de geweldige <a href=\"%(insp_gh)s\" "
+"target=\"_blank\">Super fancy music player</a> van <a "
+"href=\"%(daniel_gh)s\" target=\"_blank\">Daniël Koomen</a>. Veel "
+"luisterplezier!"
+

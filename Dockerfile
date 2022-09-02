@@ -7,10 +7,11 @@ RUN apt-get update && \
 RUN pip install yt-dlp flask Flask-Babel bs4 requests Pillow gunicorn redis musicbrainzngs
 
 RUN mkdir /app
-
-COPY ./src /app
-
 WORKDIR /app
+
+COPY ./src .
+
+RUN pybabel compile -d translations
 
 ENV PYTHONUNBUFFERED=1
 

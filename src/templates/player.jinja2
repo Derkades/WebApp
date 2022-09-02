@@ -18,7 +18,7 @@
 
             <div class="box-rounded box-solid">
 
-                <h3>Afspeellijsten</h3>
+                <h3>{% trans %}Playlists{% endtrans %}</h3>
 
                 {% for person in raphson %}
                     <span class="checkbox-with-label">
@@ -41,13 +41,13 @@
 
             <div class="box-rounded box-solid">
 
-                <h3>Muziek</h3>
+                <h3>{% trans %}Playback{% endtrans %}</h3>
 
                 <p>
-                    <span id="current-track">Wachten op muziek in wachtrij...</span>
+                    <span id="current-track">{% trans %}Waiting for music in queue...{% endtrans %}</span>
                 </p>
                 <p class="secondary">
-                    Vorige: <span id="previous-track">-</span>
+                    {% trans %}Prevously: {% endtrans %} <span id="previous-track">-</span>
                 </p>
 
                 <div class="outer-bar">
@@ -68,7 +68,7 @@
             </div>
 
             <div class="box-rounded box-solid box-queue">
-                <h3>Wachtrij</h3>
+                <h3>{% trans %}Queue{% endtrans %}</h3>
                 <div id="queue"></div>
             </div>
 
@@ -94,20 +94,26 @@
     <div id="queue-overlay" class="full-page-overlay">
         <div class="box-rounded box-solid">
             <div class="flex-space-between">
-                <h3>Nieuw nummer aan wachtrij toevoegen (experimenteel)</h3>
-                <button id="queue-close">Sluiten</button>
+                <h3>{% trans %}Add track to queue (experimental){% endtrans %}</h3>
+                <button id="queue-close">{% trans %}Close{% endtrans %}</button>
             </div>
 
+            {# <ol>
+                <li></li>
+                <li></li>
+                <li></li>
+            </ol> #}
+
             <ol>
-                <li>Vul een korte zoekopdracht in en klik op 'Zoeken' (kan lang duren, heb geduld en klik niet meerdere keren!)</li>
-                <li>Selecteer een knop uit de zoekresultaten</li>
-                <li>Even wachten, het nummer wordt in de achtergrond gedownload en toegevoegd aan de wachtrij</li>
+                <li>{% trans %}Enter a short search query and click 'Search' (can take a while, be patient and don't click again!){% endtrans %}</li>
+                <li>{% trans %}Press one of the buttons in the search results{% endtrans %}<li>
+                <li>{% trans %}Please wait, the track will be downloaded in the background and added to the queue{% endtrans %}</li>
             </ol>
 
             <br>
 
             <input id="queue-search-query" type="text" placeholder="zoekopdracht">
-            <button id="queue-search-perform">Zoeken</button>
+            <button id="queue-search-perform">{% trans %}Search{% endtrans %}</button>
             <br>
             <div id="queue-search-results">
             </div>
@@ -117,42 +123,42 @@
     <div id="settings-overlay" class="full-page-overlay">
         <div class="box-rounded box-solid">
             <div class="flex-space-between">
-                <h3>Hotkeys</h3>
-                <button id="settings-close">Sluiten</button>
+                <h3>{% trans %}Hotkeys{% endtrans %}</h3>
+                <button id="settings-close">{% trans %}Close{% endtrans %}</button>
             </div>
-
             <table class="hotkeys-table">
                 <tbody>
                     <tr>
                         <td><kbd>1</kbd> - <kbd>9</kbd></td>
-                        <td>checkboxes van personen</td>
+                        <td>{% trans %}Toggle playlists{% endtrans %}</td>
                     </tr>
                     <tr>
                         <td><kbd>ArrowRight</kbd> / <kbd>f</kbd></td>
-                        <td>volgend nummer</td>
+                        <td>{% trans %}Next track{% endtrans %}</td>
                     </tr>
                     <tr>
                         <td><kbd>&lt;</kbd> / <kbd>&gt;</kbd>
-                        <td>seek (geen shift indrukken)</td>
+                        <td>{% trans %}Seek in track (don't use shift){% endtrans %}</td>
                     </tr>
                 </tbody>
             </table>
 
-            <h3>Settings</h3>
+            <h3>{% trans %}Settings{% endtrans %}</h3>
             <div>
                 <input type="number" value="5" style="width: 3rem;" id="queue-size">
-                <label for="queue-size">Minimale wachtrijlengte</label>
+                <label for="queue-size">{% trans %}Minimum queue length{% endtrans %}</label>
             </div>
             <div>
                 <select id="audio-quality">
-                    <option value="high" selected>Hoog (VBR 96kb/s 48kHz Opus)</option>
-                    <option value="low">Laag (VBR 64kb/s 48kHz  Opus)</option>
+                    <option value="high" selected>{% trans %}High (VBR 96kb/s 48kHz Opus){% endtrans %}</option>
+                    <option value="low">{% trans %}Low (VBR 64kb/s 48kHz Opus){% endtrans %}</option>
                 </select>
-                <label for="audio-quality">Audiokwaliteit</label>
+                <label for="audio-quality">{% trans %}Audio quality{% endtrans %}</label>
             </div>
 
-            <h3>YouTube download</h3>
-            Selecteer een naam, plak een link van YouTube, Soundcloud, Bandcamp, etc. en druk op <kbd>Download</kbd>.
+
+            <h3>{% trans %}YouTube download{% endtrans %}</h3>
+            {% trans %}Select a name and paste a link from YouTube, Soundcloud, Bandcamp, etc. Finally, press <kbd>Download</kbd>.{% endtrans %}
             <form>
                 <select id="youtube-dl-directory">
                     {% for person in raphson %}
@@ -166,14 +172,16 @@
                 <input id="youtube-dl-submit" type="submit" value="Download">
                 <div id="youtube-dl-spinner" style="visibility: hidden" class="spinner"></div>
                 <br>
-                <div id="youtube-dl-output">Output komt hier</div>
+                <div id="youtube-dl-output">{% trans %}yt-dlp output will appear here{% endtrans %}</div>
             </form>
 
-            <h3>Credits</h3>
-            <a href="https://github.com/DanielKoomen/WebApp">Super fancy music player 2.0</a> is een
-            project (grotendeels) gemaakt door <a href="https://github.com/Derkades">Robin Slot</a>,
-            geïnspireerd door de geweldige <a href="https://github.com/DanielKoomen/MusicPlayer" target="_blank">Super fancy music player</a>
-            van <a href="https://github.com/DanielKoomen" target="_blank">Daniël Koomen</a>. Veel luisterplezier!
+            <h3>{% trans %}Credits{% endtrans %}</h3>
+            {% trans trimmed gh="https://github.com/DanielKoomen/WebApp", robin_gh="https://github.com/Derkades", insp_gh="https://github.com/DanielKoomen/MusicPlayer", daniel_gh="https://github.com/DanielKoomen" %}
+            <a href="{{gh}}">Super fancy music player 2.0</a> is a project largely made by
+            <a href="{{robin_gh}}">Robin Slot</a>, inspired by the awesome
+            <a href="{{insp_gh}}" target="_blank">Super fancy music player</a> by
+            <a href="{{daniel_gh}}" target="_blank">Daniël Koomen</a>. Enjoy!
+            {% endtrans %}
         </div>
     </div>
 

@@ -25,7 +25,7 @@
 </head>
 <body>
     <p>
-        Gelieve in te loggen om toegang te krijgen tot
+        {% trans %}Please log in to get access to{% endtrans %}
     </p>
 
     <span class="fancy">Super fancy music player 2.0</span>
@@ -35,13 +35,13 @@
     <br>
 
     {% if invalid_password %}
-        verkeerd wachtwoord
+        {% trans %}Invalid password{% endtrans %}
         <br><br>
     {% endif %}
 
     <form method="POST">
         <input type="password" name="password" autofocus>
-        <input type="submit" value="inloggen">
+        <input type="submit" value="{% trans %}Log in{% endtrans %}">
     </form>
 
 </body>
