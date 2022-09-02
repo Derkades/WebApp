@@ -46,6 +46,7 @@ button {
     border: 1px solid white;
     filter: invert(1);
     border-radius: .5rem;
+    padding: .5rem;
 }
 
 kbd {
