@@ -354,6 +354,11 @@ audio {
     white-space: nowrap;
 }
 
+#track-list-output {
+    max-height: 40rem;
+    overflow-y: scroll;
+}
+
 /* https://codepen.io/Ragnarokkr/pen/DWQPPM */
 .vignette {
     position: fixed;
