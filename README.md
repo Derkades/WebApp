@@ -17,17 +17,9 @@ Music player for communities (hacker spaces, maker spaces).
 - No JavaScript or CSS frameworks, the web interface makes no requests to third party domains
 - Audio is RMS-normalized and silence is trimmed from the start and end
 
-## Development environment
-
-```
-docker compose up --build
-```
-
-## Production deployment
-
-Prebuilt container image: `ghcr.io/danielkoomen/webapp`.
-
 ## Usage
+
+Prebuilt container image: `ghcr.io/danielkoomen/webapp`. Take the `docker-compose.yaml` file in this repository as an example, replacing `build` with an `image`.
 
 ### `MUSIC_MUSIC_DIR` (default `/music`)
 
@@ -66,6 +58,35 @@ This directory is used to store the result of time-consuming operations, like tr
 ### `MUSIC_WEB_PASSWORD` (not set by default)
 
 Set an optional password to access the web interface. Strongly recommended if exposed to the internet.
+
+## Development
+
+With docker and docker-compose-plugin installed, run the following command to start a local testing server:
+```
+docker compose up --build
+```
+
+Before doing so, you will need to create a music and cache directory. You may need to change `user` in the docker compose file if your user is not using the default id of 1000.
+
+### Using babel for translations
+
+In templates:
+```
+{% trans %}Something in English{% endtrans %}
+```
+
+In Python:
+```
+from flask_babel import gettext as _
+
+translated_string = _("Something in English")
+```
+
+### Translating from English to other languages
+
+1. Run `./update-translations.sh`
+2. Edit the `messages.po` file in `src/translations/<language_code>/LC_MESSAGES/` using a text editor or PO editor like Poedit. To create a new language, run: `pybabel init -i messages.pot -d src/translations -l <language_code>`
+3. Run `./update-translations.sh` again to ensure the language files are in a consistent format.
 
 ## Made possible by open source software
 
