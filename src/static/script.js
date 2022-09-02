@@ -595,11 +595,13 @@ function searchTrackList() {
     for (const personJson of document.trackList) {
         if (person === 'everyone' || person === personJson.dir_name) {
             for (const track of personJson.tracks) {
-                let score;
+                let score = 0;
 
                 if (query !== '') {
-                    score = track.file.length - levenshtein(track.file.toLowerCase(), query);
+                    score += track.file.length - levenshtein(track.file.toLowerCase(), query);
+                    score += track.display.length - levenshtein(track.display.toLowerCase(), query);
 
+                    // Boost exact matches
                     if (track.file.toLowerCase().includes(query)) {
                         score *= 2;
                     }
