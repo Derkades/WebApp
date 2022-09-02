@@ -185,7 +185,7 @@ class Metadata:
         if title:
             return title
         else:
-            return self._filename_title() + ' [~]'
+            return self._filename_title() + ' ~'
 
     def _is_collection_album(self) -> bool:
         """
