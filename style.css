@@ -63,7 +63,7 @@ kbd {
 
 .bg-image {
     filter: blur(5rem);
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
 
