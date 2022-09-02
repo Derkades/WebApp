@@ -2,6 +2,10 @@ from pathlib import Path
 import subprocess
 import re
 from typing import Optional, List
+import logging
+
+
+log = logging.getLogger('app.cache')
 
 
 FILENAME_STRIP_KEYWORDS = [
@@ -76,8 +80,8 @@ class Metadata:
                                 capture_output=True,
                                 text=True)
         except subprocess.CalledProcessError as ex:
-            print('metadata read error')
-            print('stderr: ', ex.stderr)
+            log.warning('metadata read error')
+            log.warning('stderr: %s', ex.stderr)
             return
 
         # Example output:

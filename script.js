@@ -3,6 +3,7 @@
 document.queue = [];
 document.queueBusy = false;
 document.queueSize = 5;
+document.quality = 'high';
 
 // https://www.w3schools.com/js/js_cookies.asp
 function setCookie(cname, cvalue) {
@@ -352,7 +353,7 @@ function downloadAndAddToQueue(trackData, onComplete) {
     // JavaScript doesn't stop execution of a promise chain in case of an error, so we need to manually
     // pass the error down the chain by repeatedly calling throwErr() on errors.
     trackData.queryString = '?person_dir=' + encodeURIComponent(trackData.person) + '&track_name=' + encodeURIComponent(trackData.name);
-    trackData.audioStreamUrl = '/get_track' + trackData.queryString;
+    trackData.audioStreamUrl = '/get_track' + trackData.queryString + '&quality=' + encodeURIComponent(document.quality);
     console.info('queue | download audio');
     fetch(new Request(trackData.audioStreamUrl))
         .then(response => {

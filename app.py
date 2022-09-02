@@ -3,6 +3,8 @@ import traceback
 import hashlib
 import json
 import hmac
+from logging.config import dictConfig
+import logging
 
 from flask import Flask, request, render_template, send_file, Response, redirect
 
@@ -15,8 +17,28 @@ import settings
 import musicbrainz
 
 
+dictConfig({
+    'version': 1,
+    'formatters': {'default': {
+        'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+    }},
+    'handlers': {'wsgi': {
+        'class': 'logging.StreamHandler',
+        'stream': 'ext://flask.logging.wsgi_errors_stream',
+        'formatter': 'default'
+    }},
+    'root': {
+        'level': settings.log_level,
+        'handlers': ['wsgi']
+    },
+    'disable_existing_loggers': False,
+})
+
+
 application = Flask(__name__)
 assets = Assets()
+log = logging.getLogger('app')
+
 
 with open('raphson.png', 'rb') as f:
     raphson_webp = bing.webp_thumbnail(f.read())
@@ -79,8 +101,8 @@ def choose_track():
     chosen_track = person.choose_track()
     display_name = chosen_track.metadata().display_title()
 
-    print('Chosen track:', person.dir_name, chosen_track.name(), flush=True)
-    print('Display name:', display_name, flush=True)
+    log.info('Chosen track: [%s] %s', person.dir_name, chosen_track.name())
+    log.info('Display name: %s', display_name)
 
     return {
         'name': chosen_track.name(),
@@ -93,9 +115,11 @@ def get_track() -> Response:
     if not check_password_cookie():
         return Response(None, 403)
 
+    quality = request.args['quality'] if 'quality' in request.args else 'high'
+
     person = Person.by_dir_name(request.args['person_dir'])
     track = person.track(request.args['track_name'])
-    audio = track.transcoded_audio()
+    audio = track.transcoded_audio(quality)
     return Response(audio, mimetype='audio/ogg')
 
 
@@ -110,7 +134,7 @@ def get_album_cover() -> Response:
     cache_obj = cache.get('album_art', person.dir_name + track.name())
     cached_data = cache_obj.retrieve()
     if cached_data is not None:
-        print('Returning cached image', flush=True)
+        log.info('Returning cached image')
         return Response(cached_data, mimetype='image/webp')
 
     meta = track.metadata()
@@ -118,20 +142,20 @@ def get_album_cover() -> Response:
     webp_bytes = None
     try:
         query = meta.album_release_query()
-        print('Searching MusicBrainz:', query, flush=True)
+        log.info('Searching MusicBrainz: %s', query)
         webp_bytes = musicbrainz.get_webp_cover(query)
     except Exception:
-        print('Error retrieving album art from musicbrainz', flush=True)
+        log.info('Error retrieving album art from musicbrainz')
         traceback.print_exc()
 
     if webp_bytes is None:
         for query in meta.album_search_queries():
             try:
-                print('Searching bing:', query, flush=True)
+                log.info('Searching bing: %s', query)
                 webp_bytes = bing.image_search(query)
                 break
             except Exception:
-                print('No bing results', flush=True)
+                log.info('No bing results')
                 traceback.print_exc()
 
     if webp_bytes is None:
@@ -153,25 +177,25 @@ def get_lyrics():
     cached_data = cache_object.retrieve()
 
     if cached_data is not None:
-        print('Returning cached lyrics', flush=True)
+        log.info('Returning cached lyrics')
         return Response(cached_data, mimetype='application/json')
 
     meta = track.metadata()
 
     genius_url = None
     for genius_query in meta.lyrics_search_queries():
-        print('Searching genius:', genius_query, flush=True)
+        log.info('Searching genius: %s', genius_query)
         try:
             genius_url = genius.search(genius_query)
         except Exception:
-            print('Search error')
+            log.info('Search error')
             traceback.print_exc()
         if genius_url is not None:
-            print('found genius url:', genius_url, flush=True)
+            log.info('found genius url: %s', genius_url)
             break
 
     if genius_url is None:
-        print('genius search yielded no results', flush=True)
+        log.info('Genius search yielded no results')
         genius_json = {
             'found': False,
         }
@@ -184,7 +208,7 @@ def get_lyrics():
                 'html': '<br>\n'.join(lyrics)
             }
         except Exception:
-            print('Error retrieving lyrics', flush=True)
+            log.info('Error retrieving lyrics')
             traceback.print_exc()
             # Return not found now, but don't cache so we try again in the future when the bug is fixed
             return {
@@ -206,7 +230,7 @@ def ytdl():
     url = request.json['url']
 
     person = Person.by_dir_name(directory)
-    print('ytdl', directory, url, flush=True)
+    log.info('ytdl %s %s', directory, url)
 
     result = person.download(url)
 
@@ -243,8 +267,8 @@ def style() -> Response:
     if not check_password_cookie():
         return Response(None, 403)
 
-    with open('style.css', 'rb') as f:
-        stylesheet: bytes = f.read()
+    with open('style.css', 'rb') as style_file:
+        stylesheet: bytes = style_file.read()
         stylesheet = stylesheet.replace(b'[[FONT_BASE64]]',
                                         assets.get_asset_b64('quicksand-v30-latin-regular.woff2').encode())
     return Response(stylesheet, mimetype='text/css')

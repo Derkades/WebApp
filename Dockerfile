@@ -14,5 +14,12 @@ COPY ./assets /app/assets
 
 WORKDIR /app
 
-# ENTRYPOINT ["flask", "run", "--host", "0.0.0.0"]
-ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:8080", "--workers", "4", "--threads", "4", "app"]
+ENV PYTHONUNBUFFERED=1
+
+ENTRYPOINT ["gunicorn", \
+    "-b", "0.0.0.0:8080", \
+    "--workers", "4", \
+    "--threads", "4", \
+    "--log-level", "INFO", \
+    "--access-logfile", "-", \
+    "app"]

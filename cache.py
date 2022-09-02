@@ -2,7 +2,11 @@ from typing import Optional
 from pathlib import Path
 import hashlib
 import os
+import logging
+
 import settings
+
+log = logging.getLogger('app.cache')
 
 class CacheObject:
 
@@ -36,7 +40,7 @@ class CacheObject:
             data = f.read()
 
         if not self.check_checksum(data):
-            print('Checksum mismatch! Deleting cache file', flush=True)
+            log.warning('Checksum mismatch! Deleting cache file')
             self.data_path.unlink()
             if self.checksum_path is not None:
                 try:
@@ -105,7 +109,7 @@ def get(cache_type: str, name: str) -> CacheObject:
     legacy_digest = _digest(cache_type + name)
     legacy_path = _path(legacy_digest)
     if legacy_path.exists():
-        print(f'Legacy cache file {cache_type}-{name}: {legacy_path.as_posix()}', flush=True)
+        log.info('Legacy cache file %s-%s: %s', cache_type, name, legacy_path.as_posix())
         return CacheObject(legacy_path, None)
 
     data_digest = _digest(cache_type + name + 'data')

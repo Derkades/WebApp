@@ -4,6 +4,7 @@
     "python.linting.pylintArgs": [
         "--max-line-length=120",
         "--disable=missing-class-docstring,missing-module-docstring,broad-except",
+        "--generated-members=application.logger"
     ],
     "python.linting.mypyEnabled": true,
     "python.linting.mypyArgs": [

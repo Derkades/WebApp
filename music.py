@@ -5,6 +5,7 @@ import os
 import random
 import subprocess
 from subprocess import CompletedProcess
+import logging
 
 import cache
 from metadata import Metadata
@@ -13,6 +14,7 @@ from keyval import conn as redis
 
 
 music_base_dir = Path(settings.music_dir)
+log = logging.getLogger('app.music')
 
 
 class Track:
@@ -33,17 +35,22 @@ class Track:
         """
         return Metadata(self.path)
 
-    def transcoded_audio(self) -> bytes:
+    def transcoded_audio(self, quality) -> bytes:
         """
         Normalize and compress audio using ffmpeg
         Returns: Compressed audio bytes
         """
+        if quality not in {'low', 'high'}:
+            raise ValueError('Invalid quality', quality)
+
+        bitrate = settings.opus_bitrate_low if quality == 'low' else settings.opus_bitrate_high
+
         in_path_abs = self.path.absolute().as_posix()
 
-        cache_object = cache.get('transcoded audio 2', in_path_abs)
+        cache_object = cache.get('transcoded audio', in_path_abs + bitrate)
         cached_data = cache_object.retrieve()
         if cached_data is not None:
-            print('Returning cached audio', flush=True)
+            log.info('Returning cached audio')
             return cached_data
 
         # 1. Stilte aan het begin weghalen met silenceremove: https://ffmpeg.org/ffmpeg-filters.html#silenceremove
@@ -63,7 +70,8 @@ class Track:
         areverse,
         silenceremove=start_periods=1:start_threshold=-70dB,
         areverse,
-        dynaudnorm=peak=0.9:targetrms=0.5
+        dynaudnorm=targetrms=0.3:gausssize=100,
+        afade
         '''
 
         # Remove whitespace and newlines
@@ -76,7 +84,7 @@ class Track:
                 '-i', in_path_abs,
                 '-map_metadata', '-1',  # browser heeft metadata niet nodig
                 '-c:a', 'libopus',
-                '-b:a', settings.opus_bitrate,
+                '-b:a', bitrate,
                 '-f', 'opus',
                 '-vbr', 'on',
                 '-filter:a', filters,
@@ -114,11 +122,11 @@ class Person:
 
         for attempt in range(max_attempts):
             chosen_track = random.choice(tracks)
-            print(f'choose track {attempt}: {chosen_track}')
+            log.info('choose track %s: %s', attempt, chosen_track)
             last_played = redis.get('last_played_' + chosen_track)
 
             if 'Broccoli Fuck' in chosen_track:
-                print(f'{chosen_track} bad, pick other song')
+                log.info('%s bad, pick other song', chosen_track)
                 continue
 
             if last_played is not None:
@@ -134,17 +142,16 @@ class Person:
                     minimum_time_ago = 15*60  # Last 15 minutes
 
                 if seconds_ago < minimum_time_ago:
-                    print(f'...was played {seconds_ago/3600:.2f} hours ago, picking a new song',
-                          flush=True)
+                    log.info('...was played %.2f hours ago, picking a new song', seconds_ago/3600)
                     continue
                 else:
-                    print(f'...was played {seconds_ago/3600:.2f} hours ago')
+                    log.info('...was played %.2f hours ago', seconds_ago/3600)
             else:
-                print('...was not played recently')
+                log.info('...was not played recently')
             break
 
         if attempt == max_attempts - 1:
-            print('attempts exhausted', flush=True)
+            log.info('Attempts exhausted')
 
         redis.set('last_played_' + chosen_track, str(current_timestamp).encode())
 
