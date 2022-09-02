@@ -58,6 +58,7 @@ class Track:
         # 3. Stilte aan het eind (nu begin) weghalen
         # 4. Audio omkeren
         # 5. Audio normaliseren met dynaudnorm: https://ffmpeg.org/ffmpeg-filters.html#dynaudnorm
+        # 6. Audio fade-in met afade: https://ffmpeg.org/ffmpeg-filters.html#afade-1
 
         # Nu zou je zeggen dat we ook stop_periods kunnen gebruiken om stilte aan het eind weg te halen, maar
         # dat werkt niet. Van sommige nummers (bijv. irrenhaus) werd alles eraf geknipt behalve de eerste paar
@@ -70,7 +71,7 @@ class Track:
         areverse,
         silenceremove=start_periods=1:start_threshold=-70dB,
         areverse,
-        dynaudnorm=targetrms=0.3:gausssize=100,
+        dynaudnorm=targetrms=0.3:gausssize=101,
         afade
         '''
 
