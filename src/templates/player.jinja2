@@ -98,24 +98,20 @@
                 <button id="queue-close">{% trans %}Close{% endtrans %}</button>
             </div>
 
-            {# <ol>
-                <li></li>
-                <li></li>
-                <li></li>
-            </ol> #}
+            <select id="track-list-person">
+                <option value="everyone">{% trans %}Everyone{% endtrans %}</option>
+                {% for person in raphson %}
+                    <option value="{{ person.dir_name }}">{{ person.display_name }}</option>
+                {% endfor %}
+                {% for person in guests %}
+                    <option value="{{ person.dir_name }}">{{ person.display_name }} ({% trans %}Guest{% endtrans%})</option>
+                {% endfor %}
+            </select>
 
-            <ol>
-                <li>{% trans %}Enter a short search query and click 'Search' (can take a while, be patient and don't click again!){% endtrans %}</li>
-                <li>{% trans %}Press one of the buttons in the search results{% endtrans %}<li>
-                <li>{% trans %}Please wait, the track will be downloaded in the background and added to the queue{% endtrans %}</li>
-            </ol>
+            <input id="track-list-query" type="text" placeholder="{% trans %}Search query{% endtrans %}">
 
-            <br>
+            <div id="track-list-output">
 
-            <input id="queue-search-query" type="text" placeholder="zoekopdracht">
-            <button id="queue-search-perform">{% trans %}Search{% endtrans %}</button>
-            <br>
-            <div id="queue-search-results">
             </div>
         </div>
     </div>

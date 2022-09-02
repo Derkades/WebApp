@@ -265,6 +265,27 @@ def search_track():
     }
 
 
+@application.route('/track_list')
+def track_list():
+    if not check_password_cookie():
+        return Response(None, 403)
+
+    response = {'persons': []}
+    for person in Person.get_all():
+        person_json = {
+            'dir_name': person.dir_name,
+            'display_name': person.display_name,
+            'tracks': [],
+        }
+        for track in person.tracks():
+            person_json['tracks'].append({
+                'file': track.name(),
+                'display': track.metadata().display_title(),
+            })
+        response['persons'].append(person_json)
+
+    return response
+
 
 @application.route('/style.css')
 def style() -> Response:

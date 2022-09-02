@@ -77,7 +77,8 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById('queue-overlay').style.display = 'flex');
     document.getElementById('queue-close').addEventListener('click', () =>
             document.getElementById('queue-overlay').style.display = 'none');
-    document.getElementById('queue-search-perform').addEventListener('click', queueSearch);
+    document.getElementById('track-list-person').addEventListener('input', searchTrackList);
+    document.getElementById('track-list-query').addEventListener('input', searchTrackList);
 
     // Hotkeys
     document.addEventListener('keydown', event => handleKey(event.key));
@@ -85,6 +86,8 @@ document.addEventListener("DOMContentLoaded", () => {
     updateQueue();
     liedje();
     setInterval(showCorrectPlayPauseButton, 50);
+    initTrackList();
+    searchTrackList();
 });
 
 function handleKey(key) {
@@ -533,6 +536,15 @@ function switchAlbumCover() {
     document.getElementById('sidebar-album-covers').style.display = 'flex';
 }
 
+function initTrackList() {
+    fetch(new Request('/track_list'))
+        .then(response => response.json())
+        .then(json => {
+            document.trackList = json.persons
+            searchTrackList();
+        });
+}
+
 function queueAdd(id) {
     const button = document.getElementById(id);
     const trackData = {
@@ -542,44 +554,51 @@ function queueAdd(id) {
         displayName: button.dataset.trackDisplay,
     };
     downloadAndAddToQueue(trackData);
-    document.getElementById('queue-search-query').value = '';
-    document.getElementById('queue-search-results').innerHTML = '';
     document.getElementById('queue-overlay').style.display = 'none';
 }
 
-function queueSearch() {
-    const query = document.getElementById('queue-search-query').value;
-    fetch(new Request('/search_track?query=' + encodeURIComponent(query)))
-        .then(response => {
-            if (response.status != 200) {
-                throw 'unexpected status code ' + response.status;
-            } else {
-                return response.json();
-            }
-        })
-        .then(json => {
-            let choicesHtml = ''
-            if (json.search_results.length == 0) {
-                choicesHtml += '<p>Geen resultaten</p>'
-            } else {
-                choicesHtml += ''
-                let i = 0;
-                for (const result of json.search_results) {
-                    choicesHtml += ''
+function searchTrackList() {
+    if (document.trackList === undefined) {
+        document.getElementById('track-list-output').textContent = 'Track list is still loading, please wait...';
+        return;
+    }
+
+    const person = document.getElementById('track-list-person').value;
+    const query = document.getElementById('track-list-query').value.trim().toLowerCase();
+
+    let outputHtml = '';
+    let i = 0;
+    outer:
+    for (const personJson of document.trackList) {
+        if (person === 'everyone' || person === personJson.dir_name) {
+            for (const track of personJson.tracks) {
+                if (query === '' ||
+                        track.file.toLowerCase().includes(query) ||
+                        track.display.toLowerCase().includes(query)) {
+                    outputHtml += ''
                         + '<button '
                         + 'id="queue-choice-' + i + '" '
-                        + 'data-person-dir="' + escapeHtml(result.person_dir) + '" '
-                        + 'data-person-display="' + escapeHtml(result.person_display) + '" '
-                        + 'data-track-file="' + escapeHtml(result.track_file) + '" '
-                        + 'data-track-display="' + escapeHtml(result.track_display) + '" '
+                        + 'data-person-dir="' + escapeHtml(personJson.dir_name) + '" '
+                        + 'data-person-display="' + escapeHtml(personJson.display_name) + '" '
+                        + 'data-track-file="' + escapeHtml(track.file) + '" '
+                        + 'data-track-display="' + escapeHtml(track.display) + '" '
                         + 'onclick="queueAdd(this.id);">'
-                        + '[' + escapeHtml(result.person_display) + '] ' + escapeHtml(result.track_display)
+                        + '[' + escapeHtml(personJson.display_name) + '] ' + escapeHtml(track.display)
                         + '</button><br>';
-                    i++;
                 }
-                document.getElementById('queue-search-results').innerHTML = choicesHtml;
+
+                if (i > 10) {
+                    outputHtml += '...en meer';
+                    break outer;
+                }
+
+                i++;
             }
-        })
+
+        }
+    }
+
+    document.getElementById('track-list-output').innerHTML = outputHtml;
 }
 
 // Audio normalisatie dingen gestolen met modificaties van:

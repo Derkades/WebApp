@@ -173,6 +173,12 @@ class Person:
         """
         return Track(Path(self.music_dir, track_name))
 
+    def tracks(self) -> List[Track]:
+        """
+        Get all this person's tracks as a list of Track objects
+        """
+        return [Track(entry) for entry in self.music_dir.iterdir()]
+
     def search_tracks(self, query: str, limit: int = 3) -> List[Track]:
         """
         Get list of tracks matching search query
