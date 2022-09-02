@@ -30,6 +30,29 @@ function getCookie(cname) {
     return null;
 }
 
+// https://www.tutorialspoint.com/levenshtein-distance-in-javascript
+function levenshtein(str1, str2) {
+    const track = Array(str2.length + 1).fill(null).map(() =>
+    Array(str1.length + 1).fill(null));
+    for (let i = 0; i <= str1.length; i += 1) {
+       track[0][i] = i;
+    }
+    for (let j = 0; j <= str2.length; j += 1) {
+       track[j][0] = j;
+    }
+    for (let j = 1; j <= str2.length; j += 1) {
+       for (let i = 1; i <= str1.length; i += 1) {
+          const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
+          track[j][i] = Math.min(
+             track[j][i - 1] + 1,
+             track[j - 1][i] + 1,
+             track[j - 1][i - 1] + indicator,
+          );
+       }
+    }
+    return track[str2.length][str1.length];
+ };
+
 document.addEventListener("DOMContentLoaded", () => {
     const cookieQueueSize = getCookie('settings-queue-size');
     if (cookieQueueSize !== null) {
@@ -567,35 +590,65 @@ function searchTrackList() {
     const person = document.getElementById('track-list-person').value;
     const query = document.getElementById('track-list-query').value.trim().toLowerCase();
 
-    let outputHtml = '';
-    let i = 0;
-    outer:
+    const tracks = [];
+
     for (const personJson of document.trackList) {
         if (person === 'everyone' || person === personJson.dir_name) {
             for (const track of personJson.tracks) {
-                if (query === '' ||
-                        track.file.toLowerCase().includes(query) ||
-                        track.display.toLowerCase().includes(query)) {
-                    outputHtml += ''
-                        + '<button '
-                        + 'id="queue-choice-' + i + '" '
-                        + 'data-person-dir="' + escapeHtml(personJson.dir_name) + '" '
-                        + 'data-person-display="' + escapeHtml(personJson.display_name) + '" '
-                        + 'data-track-file="' + escapeHtml(track.file) + '" '
-                        + 'data-track-display="' + escapeHtml(track.display) + '" '
-                        + 'onclick="queueAdd(this.id);">'
-                        + '[' + escapeHtml(personJson.display_name) + '] ' + escapeHtml(track.display)
-                        + '</button><br>';
-                    i++;
+                let score;
+
+                if (query !== '') {
+                    score = track.file.length - levenshtein(track.file.toLowerCase(), query);
+
+                    if (track.file.toLowerCase().includes(query)) {
+                        score *= 2;
+                    }
+
+                    if (track.display.toLowerCase().includes(query)) {
+                        score *= 2;
+                    }
+                } else {
+                    // No query, display all
+                    score = 1;
                 }
 
-                if (i > document.maxSearchListSize) {
-                    outputHtml += '...en meer';
-                    break outer;
+                if (score > 0) {
+                    tracks.push({
+                        personDir: personJson.dir_name,
+                        personDisplay: personJson.display_name,
+                        trackFile: track.file,
+                        trackDisplay: track.display,
+                        score: score,
+                    });
                 }
             }
 
         }
+    }
+
+    tracks.sort((a, b) => b.score - a.score);
+
+    let i = 0;
+    let outputHtml = '';
+    for (const track of tracks) {
+        outputHtml += ''
+            + '<button '
+            + 'id="queue-choice-' + i + '" '
+            + 'data-person-dir="' + escapeHtml(track.personDir) + '" '
+            + 'data-person-display="' + escapeHtml(track.personDisplay) + '" '
+            + 'data-track-file="' + escapeHtml(track.trackFile) + '" '
+            + 'data-track-display="' + escapeHtml(track.trackDisplay) + '" '
+            + 'onclick="queueAdd(this.id);">'
+            + '[' + escapeHtml(track.personDisplay) + '] ' + escapeHtml(track.trackDisplay)
+            + '</button><br>';
+
+
+        if (i > document.maxSearchListSize) {
+            outputHtml += '...en meer';
+            break;
+        }
+
+        i++;
     }
 
     document.getElementById('track-list-output').innerHTML = outputHtml;
