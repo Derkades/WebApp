@@ -4,6 +4,8 @@ import re
 from typing import Optional, List
 import logging
 
+import keyval
+
 
 log = logging.getLogger('app.cache')
 
@@ -66,23 +68,31 @@ class Metadata:
         self.date: Optional[str] = None
         self.album_artist: Optional[str] = None
 
-        command = [
-            'ffmpeg',
-            '-loglevel', 'error',
-            '-i', path.absolute().as_posix(),
-            '-f', 'ffmetadata',
-            '-'
-        ]
-        try:
-            result = subprocess.run(command,
-                                shell=False,
-                                check=True,
-                                capture_output=True,
-                                text=True)
-        except subprocess.CalledProcessError as ex:
-            log.warning('metadata read error')
-            log.warning('stderr: %s', ex.stderr)
-            return
+        cache_key = 'metadata' + path.absolute().as_posix()
+        output_bytes = keyval.conn.get(cache_key)
+        if output_bytes is not None:
+            output_string = output_bytes.decode()
+        else:
+            command = [
+                'ffmpeg',
+                '-loglevel', 'error',
+                '-i', path.absolute().as_posix(),
+                '-f', 'ffmetadata',
+                '-'
+            ]
+            try:
+                result = subprocess.run(command,
+                                    shell=False,
+                                    check=True,
+                                    capture_output=True,
+                                    text=True)
+            except subprocess.CalledProcessError as ex:
+                log.warning('metadata read error')
+                log.warning('stderr: %s', ex.stderr)
+                return
+
+            output_string: str = result.stdout
+            keyval.conn.set(cache_key, output_string)
 
         # Example output:
         # -----------------------------------------------
@@ -100,7 +110,7 @@ class Metadata:
         # subprocess.run()
         # -----------------------------------------------
 
-        for line in result.stdout.splitlines():
+        for line in output_string.splitlines():
             try:
                 eq = line.index('=')
             except ValueError:
