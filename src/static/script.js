@@ -450,9 +450,9 @@ function updateQueueHtml() {
     let i = 0;
     for (const queuedTrack of document.queue) {
         html += '<tr>';
-            html += '<td class="background-cover box" style="background-image: url(\'' + escapeHtml(queuedTrack.imageBlobUrl) + '\')">';
+            html += '<td class="background-cover box" style="background-image: url(\'' + escapeHtml(queuedTrack.imageBlobUrl) + '\')" onclick="removeFromQueue(' + i + ')">';
                 html += '<div class="delete-overlay">'
-                    html += '<div style="background-image: url(\'' + trashBase64 + '\')" class="icon" onclick="removeFromQueue(' + i + ')"></div>';
+                    html += '<div style="background-image: url(\'' + trashBase64 + '\')" class="icon"></div>';
                 html += '</div>'
             html += '</td>';
             html += '<td>' + queuedTrack.personDisplay + '</td>';
