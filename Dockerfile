@@ -19,6 +19,5 @@ ENTRYPOINT ["gunicorn", \
     "-b", "0.0.0.0:8080", \
     "--workers", "4", \
     "--threads", "4", \
-    "--log-level", "INFO", \
-    "--access-logfile", "-", \
+    # "--access-logfile", "-", \
     "app"]

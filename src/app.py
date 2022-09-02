@@ -105,9 +105,6 @@ def choose_track():
     chosen_track = person.choose_track()
     display_name = chosen_track.metadata().display_title()
 
-    log.info('Chosen track: [%s] %s', person.dir_name, chosen_track.name())
-    log.info('Display name: %s', display_name)
-
     return {
         'name': chosen_track.name(),
         'display_name': display_name,

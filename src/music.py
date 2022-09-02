@@ -112,51 +112,45 @@ class Person:
         self.display_name = display_name
         self.is_guest = is_guest
 
-    def choose_track(self) -> Track:
+    def choose_track(self, choices=20) -> Track:
         """
         Randomly choose a track from this person's music directory
         Returns: Track name
         """
         tracks = [f.name for f in self.music_dir.iterdir() if os.path.isfile(f)]
         current_timestamp = int(datetime.now().timestamp())
-        max_attempts = 20
 
-        for attempt in range(max_attempts):
-            chosen_track = random.choice(tracks)
-            log.info('choose track %s: %s', attempt, chosen_track)
-            last_played = redis.get('last_played_' + chosen_track)
+        # Randomly choose some amount of tracks, then pick the track that was played the longest ago
 
-            if 'Broccoli Fuck' in chosen_track:
-                log.info('...bad, pick other song')
-                continue
+        best_track = None
+        best_time = None
 
-            if last_played is not None:
-                seconds_ago = current_timestamp - int(last_played.decode())
+        for track in random.choices(tracks, k=choices):
+            last_played_b = redis.get('last_played_' + track)
 
-                if attempt < 5:
-                    minimum_time_ago = 60*60*5  # Last 5 hours
-                elif attempt < 10:
-                    minimum_time_ago = 60*60*4  # Last 2 hours
-                elif attempt < 15:
-                    minimum_time_ago = 60*60  # Last hour
-                else:
-                    minimum_time_ago = 15*60  # Last 15 minutes
+            if last_played_b is None:
+                best_track = track
+                best_time = 0
+                break
 
-                if seconds_ago < minimum_time_ago:
-                    log.info('...was played %.2f hours ago, picking a new song', seconds_ago/3600)
-                    continue
-                else:
-                    log.info('...was played %.2f hours ago', seconds_ago/3600)
-            else:
-                log.info('...was not played recently')
-            break
+            last_played = int(last_played_b.decode())
 
-        if attempt == max_attempts - 1:
-            log.info('Attempts exhausted')
+            if best_time is None or last_played < best_time:
+                best_track = track
+                best_time = last_played
 
-        redis.set('last_played_' + chosen_track, str(current_timestamp).encode())
+        if best_track is None:
+            raise ValueError()
 
-        return self.track(chosen_track)
+        if best_time == 0:
+            log.info('Chosen track: %s (never played)', best_track)
+        else:
+            hours_ago = (current_timestamp - best_time) / 3600
+            log.info('Chosen track: %s (last played %.2f hours ago)', best_track, hours_ago)
+
+        redis.set('last_played_' + best_track, str(current_timestamp).encode())
+
+        return self.track(best_track)
 
     def count_tracks(self) -> int:
         """
