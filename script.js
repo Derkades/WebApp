@@ -30,9 +30,16 @@ function getCookie(cname) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    if (getCookie('settings-queue-size') !== null) {
-        document.queueSize = parseInt(getCookie('settings-queue-size'));
-        document.getElementById('queue-size').value = getCookie('settings-queue-size');
+    const cookieQueueSize = getCookie('settings-queue-size');
+    if (cookieQueueSize !== null) {
+        document.queueSize = parseInt(cookieQueueSize);
+        document.getElementById('queue-size').value = cookieQueueSize;
+    }
+
+    const cookieAudioQuality = getCookie('settings-audio-quality')
+    if (cookieAudioQuality !== null) {
+        document.quality = cookieAudioQuality;
+        document.getElementById('audio-quality').value = cookieAudioQuality
     }
 
     // Playback controls
@@ -59,6 +66,10 @@ document.addEventListener("DOMContentLoaded", () => {
         document.queueSize = parseInt(event.data);
         setCookie('settings-queue-size', event.data);
         updateQueue();
+    });
+    document.getElementById('audio-quality').addEventListener('input', event => {
+        document.quality = event.target.value;
+        setCookie('settings-audio-quality', document.quality);
     });
 
     // Queue overlay

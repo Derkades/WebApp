@@ -139,8 +139,17 @@
             </table>
 
             <h3>Settings</h3>
-            <input type="number" value="5" style="width: 3rem;" id="queue-size">
-            <label for="queue-size">Minimale grootte van wachtrij</label>
+            <div>
+                <input type="number" value="5" style="width: 3rem;" id="queue-size">
+                <label for="queue-size">Minimale wachtrijlengte</label>
+            </div>
+            <div>
+                <select id="audio-quality">
+                    <option value="high" selected>Hoog (VBR 96kb/s 48kHz Opus)</option>
+                    <option value="low">Laag (VBR 64kb/s 48kHz  Opus)</option>
+                </select>
+                <label for="audio-quality">Audiokwaliteit</label>
+            </div>
 
             <h3>YouTube download</h3>
             Selecteer een naam, plak een link van YouTube, Soundcloud, Bandcamp, etc. en druk op <kbd>Download</kbd>.
