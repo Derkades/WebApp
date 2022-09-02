@@ -6,7 +6,7 @@ import base64
 class Assets:
 
     def __init__(self):
-        self.assets_dir = Path('assets')
+        self.assets_dir = Path('assets-b64')
         self.assets: Dict[str, str] = {}
 
         for entry in self.assets_dir.iterdir():

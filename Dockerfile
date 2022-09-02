@@ -4,13 +4,11 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install yt-dlp flask bs4 requests Pillow gunicorn redis musicbrainzngs
+RUN pip install yt-dlp flask Flask-Babel bs4 requests Pillow gunicorn redis musicbrainzngs
 
 RUN mkdir /app
 
-COPY *.py raphson.png script.js style.css favicon.ico /app/
-COPY ./templates /app/templates
-COPY ./assets /app/assets
+COPY ./src /app
 
 WORKDIR /app
 

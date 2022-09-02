@@ -5,8 +5,11 @@ import json
 import hmac
 from logging.config import dictConfig
 import logging
+from pathlib import Path
 
-from flask import Flask, request, render_template, send_file, Response, redirect
+from flask import Flask, request, render_template, Response, redirect
+from flask_babel import Babel
+from flask_babel import gettext
 
 from assets import Assets
 from music import Person
@@ -35,13 +38,15 @@ dictConfig({
 })
 
 
-application = Flask(__name__)
+application = Flask(__name__, template_folder=Path('templates'))
+babel = Babel(application)
 assets = Assets()
 log = logging.getLogger('app')
+assets_dir = Path('static')
 
 
-with open('raphson.png', 'rb') as f:
-    raphson_webp = bing.webp_thumbnail(f.read())
+with open(Path(assets_dir, 'raphson.png'), 'rb') as raphson_png:
+    raphson_webp = bing.webp_thumbnail(raphson_png.read())
 
 
 def check_password(password: Optional[str]) -> bool:
@@ -71,13 +76,13 @@ def login():
         password = request.form['password']
 
         if not check_password(password):
-            return 'Invalid password. <a href="/login">Try again</a>'
+            return render_template('login.jinja2', invalid_password=True)
 
         response = redirect('/')
         response.set_cookie('password', password, max_age=3600*24*30, samesite='Strict')
         return response
     else:
-        return render_template('login.jinja2')
+        return render_template('login.jinja2', invalid_password=False)
 
 
 @application.route('/')
@@ -267,18 +272,11 @@ def style() -> Response:
     if not check_password_cookie():
         return Response(None, 403)
 
-    with open('style.css', 'rb') as style_file:
+    with open(Path(assets_dir, 'style.css'), 'rb') as style_file:
         stylesheet: bytes = style_file.read()
         stylesheet = stylesheet.replace(b'[[FONT_BASE64]]',
                                         assets.get_asset_b64('quicksand-v30-latin-regular.woff2').encode())
     return Response(stylesheet, mimetype='text/css')
-
-
-@application.route('/script.js')
-def script() -> Response:
-    if not check_password_cookie():
-        return Response(None, 403)
-    return send_file('script.js')
 
 
 @application.route('/raphson')
@@ -288,6 +286,8 @@ def raphson() -> Response:
     return Response(raphson_webp, mimetype='image/webp')
 
 
-@application.route('/favicon.ico')
-def favicon():
-    return send_file('favicon.ico')
+@babel.localeselector
+def get_locale():
+    # TODO language from cookie
+
+    return request.accept_languages.best_match(['en', 'nl'])
