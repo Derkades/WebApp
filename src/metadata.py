@@ -33,6 +33,7 @@ FILENAME_STRIP_KEYWORDS = [
     '[Audio]',
     '(Remastered)',
     '_ Napalm Records',
+    '| Napalm Records'
     '(Lyrics)',
     '[Official Lyric Video]',
     '(Official Videoclip)',
@@ -121,7 +122,8 @@ class Metadata:
             if key == 'album':
                 self.album = value
             elif key == 'artist':
-                self.artists = value.split('/')
+                # Split by / and \;
+                self.artists = re.split(r'\/|\\;', value)
             elif key == 'title':
                 self.title = strip_keywords(value).strip()
             elif key == 'date':
