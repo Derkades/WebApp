@@ -377,11 +377,11 @@ function throwErr(err) {
 }
 
 function updateQueue() {
+    updateQueueHtml();
+
     if (document.queueBusy) {
         return;
     }
-
-    updateQueueHtml();
 
     let person;
 
