@@ -60,7 +60,7 @@ kbd {
 
 #bg-image-2, #album-cover-2 {
     background-color: #222;
-    transition: opacity 1s;
+    transition: opacity .2s;
 }
 
 .bg-image {

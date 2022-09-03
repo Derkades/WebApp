@@ -286,27 +286,27 @@ function previous() {
 function replaceAlbumImages(imageUrl) {
     const cssUrl = 'url("' + imageUrl + '")';
 
-    const bg1 = document.getElementById('bg-image-1');
-    const bg2 = document.getElementById('bg-image-2');
-    const fg1 = document.getElementById('album-cover-1');
-    const fg2 = document.getElementById('album-cover-2');
+    const bgBottom = document.getElementById('bg-image-1');
+    const bgTop = document.getElementById('bg-image-2');
+    const fgBottom = document.getElementById('album-cover-1');
+    const fgTop = document.getElementById('album-cover-2');
 
-    // Set bottom (1) to new image
-    bg1.style.backgroundImage = cssUrl;
-    fg1.style.backgroundImage = cssUrl;
+    // Set bottom to new image
+    bgBottom.style.backgroundImage = cssUrl;
+    fgBottom.style.backgroundImage = cssUrl;
 
-    // Slowly fade out old image (2)
-    bg2.style.opacity = 0;
-    fg2.style.opacity = 0;
+    // Slowly fade out old top image
+    bgTop.style.opacity = 0;
+    fgTop.style.opacity = 0;
 
     setTimeout(() => {
-        // To prepare for next replacement, move bottom image (1) to top image (2)
-        bg2.style.backgroundImage = cssUrl;
-        fg2.style.backgroundImage = cssUrl;
+        // To prepare for next replacement, move bottom image to top image
+        bgTop.style.backgroundImage = cssUrl;
+        fgTop.style.backgroundImage = cssUrl;
         // Make it visible
-        bg2.style.opacity = 1;
-        fg2.style.opacity = 1;
-    }, 1000);
+        bgTop.style.opacity = 1;
+        fgTop.style.opacity = 1;
+    }, 200);
 }
 
 function getActivePersons() {
