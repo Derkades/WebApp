@@ -159,7 +159,7 @@ input[type=checkbox] {
 
 .box-queue {
     max-height: 27rem;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .lyrics-outer {
@@ -171,7 +171,7 @@ input[type=checkbox] {
     /* column-count: 2; */
     color: white;
     max-height: 80vh;
-    overflow-y: scroll;
+    overflow-y: auto;
     /* text-shadow: .05rem .05rem .5rem black; */
 }
 
@@ -344,7 +344,7 @@ audio {
     /* Render \n as <br> */
     white-space: pre-wrap;
     height: 15rem;
-    overflow: scroll;
+    overflow: auto;
     border: 1px solid gray;
     border-radius: .5rem;
     padding: .5rem;
@@ -361,7 +361,7 @@ audio {
 
 #track-list-output {
     max-height: 40rem;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 /* https://codepen.io/Ragnarokkr/pen/DWQPPM */
