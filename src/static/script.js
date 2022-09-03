@@ -71,12 +71,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Playback controls
     document.getElementById('button-backward-step').addEventListener('click', previous);
-    document.getElementById('button-backward-fast').addEventListener('click', () => seek(-30));
-    document.getElementById('button-backward').addEventListener('click', () => seek(-5));
+    // document.getElementById('button-backward-fast').addEventListener('click', () => seek(-30));
+    document.getElementById('button-backward').addEventListener('click', () => seek(-10));
     document.getElementById('button-play').addEventListener('click', play);
     document.getElementById('button-pause').addEventListener('click', pause);
-    document.getElementById('button-forward').addEventListener('click', () => seek(5));
-    document.getElementById('button-forward-fast').addEventListener('click', () => seek(30));
+    document.getElementById('button-forward').addEventListener('click', () => seek(10));
+    // document.getElementById('button-forward-fast').addEventListener('click', () => seek(30));
     document.getElementById('button-forward-step').addEventListener('click', next);
 
     // Lyrics
