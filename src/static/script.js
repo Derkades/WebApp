@@ -1,8 +1,11 @@
 "use strict";
 
 document.queue = [];
+document.current = null;
+document.history = [];
 document.queueBusy = false;
 document.queueSize = 5;
+document.historySize = 10;
 document.quality = 'high';
 document.maxSearchListSize = 500;
 
@@ -51,7 +54,7 @@ function levenshtein(str1, str2) {
        }
     }
     return track[str2.length][str1.length];
- };
+};
 
 document.addEventListener("DOMContentLoaded", () => {
     const cookieQueueSize = getCookie('settings-queue-size');
@@ -67,13 +70,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Playback controls
+    document.getElementById('button-backward-step').addEventListener('click', previous);
     document.getElementById('button-backward-fast').addEventListener('click', () => seek(-30));
     document.getElementById('button-backward').addEventListener('click', () => seek(-5));
     document.getElementById('button-play').addEventListener('click', play);
     document.getElementById('button-pause').addEventListener('click', pause);
     document.getElementById('button-forward').addEventListener('click', () => seek(5));
     document.getElementById('button-forward-fast').addEventListener('click', () => seek(30));
-    document.getElementById('button-forward-step').addEventListener('click', liedje);
+    document.getElementById('button-forward-step').addEventListener('click', next);
 
     // Lyrics
     document.getElementById('button-closed-captioning').addEventListener('click', switchLyrics);
@@ -108,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener('keydown', event => handleKey(event.key));
 
     updateQueue();
-    liedje();
+    next();
     setInterval(showCorrectPlayPauseButton, 50);
     initTrackList();
     searchTrackList();
@@ -206,16 +210,9 @@ function seek(delta) {
     }
 }
 
-function liedje() {
-    if (document.queue.length === 0) {
-        console.log('queue is empty, trying again later');
-        setTimeout(liedje, 1000);
-        return;
-    }
-
-    // Get and remove first item from queue
-    const track = getTrackFromQueue();
-
+// Replace audio player, album cover, and lyrics according to document.current track info
+function updateTrackHtml() {
+    const track = document.current;
     const audioElem = createAudioElement(track.audioBlobUrl);
     replaceAudioElement(audioElem);
 
@@ -229,13 +226,59 @@ function liedje() {
         document.getElementById('lyrics').innerHTML = '<i class="secondary">Geen lyrics gevonden</i>'
     }
 
-    // Replace 'currently playing' text
-    const currentTrackElem = document.getElementById('current-track');
-    const previousTrackElem = document.getElementById('previous-track');
-    previousTrackElem.innerText = currentTrackElem.innerText;
-    currentTrackElem.innerText = '[' + track.personDisplay + '] ' + track.displayName;
+    document.getElementById('current-track').textContent = '[' + track.personDisplay + '] ' + track.displayName;
+
+    if (document.history.length > 0) {
+        const previousTrack = document.history[document.history.length - 1];
+        document.getElementById('previous-track').textContent = '[' + previousTrack.personDisplay + '] ' + previousTrack.displayName;
+    } else {
+        document.getElementById('previous-track').textContent = '-';
+    }
+}
+
+function next() {
+    if (document.queue.length === 0) {
+        console.log('queue is empty, trying again later');
+        setTimeout(next, 1000);
+        return;
+    }
+
+    // Add current track to history
+    if (document.current !== null) {
+        document.history.push(document.current);
+        // If history exceeded maximum length, remove first (oldest) element
+        if (document.history.length > document.historySize) {
+            document.history.shift();
+        }
+    }
+
+    // Replace current track with first item from queue
+    document.current = document.queue.shift();
 
     updateQueue();
+    updateTrackHtml();
+}
+
+function previous() {
+    const audioElem = getAudioElement();
+
+    // Skip to beginning of current track first
+    if (audioElem !== null && (audioElem.currentTime > 15 || document.history.length == 0)) {
+        audioElem.currentTime = 0;
+        return;
+    }
+
+    if (document.history.length == 0) {
+        return;
+    }
+
+    // Move current track to beginning of queue
+    document.queue.unshift(document.current);
+    // Replace current track with last track in history
+    document.current = document.history.pop();
+
+    updateQueue();
+    updateTrackHtml();
 }
 
 function replaceAlbumImages(imageUrl) {
@@ -293,7 +336,7 @@ function createAudioElement(sourceUrl) {
     sourceElem.src = sourceUrl;
     audioElem.appendChild(sourceElem);
     audioElem.setAttribute('autoplay', '');
-    audioElem.onended = liedje;
+    audioElem.onended = next;
     audioElem.ontimeupdate = () => updateProgress(audioElem);
     return audioElem;
 }
@@ -443,13 +486,6 @@ function downloadAndAddToQueue(trackData, onComplete) {
                 onComplete();
             }
         });
-}
-
-function getTrackFromQueue() {
-    // Get and remove first element from queue
-    const track = document.queue.shift();
-    updateQueueHtml();
-    return track;
 }
 
 function escapeHtml(unescaped) {
