@@ -145,8 +145,10 @@ function handleKey(key) {
         } else {
             audioElem.pause();
         }
-    } else if (key === 'ArrowRight' || key === 'f') {
-        liedje();
+    } else if (key === 'ArrowLeft') {
+        previous();
+    } else if (key === 'ArrowRight') {
+        next();
     } else if (key === '.') {
         seek(3);
     } else if (key === ',') {
