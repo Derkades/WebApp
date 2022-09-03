@@ -152,6 +152,11 @@ input[type=checkbox] {
     margin: 1.25rem 0;
 }
 
+#guest-playlists {
+    max-height: 11rem;
+    overflow-y: auto;
+}
+
 .box-queue {
     max-height: 27rem;
     overflow-y: scroll;
