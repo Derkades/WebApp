@@ -206,8 +206,11 @@ function seek(delta) {
         return;
     }
     const newTime = audioElem.currentTime + delta;
-    if (delta > 0 && newTime < audioElem.duration ||
-        delta < 0 && newTime > 0) {
+    if (newTime < 0) {
+        audioElem.currentTime = 0;
+    } else if (newTime > audioElem.duration) {
+        audioElem.currentTime = audioElem.duration;
+    } else {
         audioElem.currentTime = newTime;
     }
 }
