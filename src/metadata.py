@@ -43,6 +43,17 @@ FILENAME_STRIP_KEYWORDS = [
 ]
 
 
+COLLECTION_KEYWORDS = [
+    'top 500',
+    'top 100',
+    'top 40',
+    'jaarlijsten',
+    'jaargang',
+    'super hits',
+    'the best of',
+]
+
+
 def strip_keywords(inp: str) -> str:
     for strip_keyword in FILENAME_STRIP_KEYWORDS:
         inp = inp.replace(strip_keyword, '')
@@ -193,8 +204,8 @@ class Metadata:
         """
         if self.album is None:
             raise ValueError('album name not known')
-        for match in ['top 500', 'top 40', 'jaarlijsten', 'jaargang', 'super hits', 'the best of']:
-            if match in self.album.lower():
+        for keyword in COLLECTION_KEYWORDS:
+            if keyword in self.album.lower():
                 return True
         return False
 
