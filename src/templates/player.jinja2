@@ -97,7 +97,7 @@
     <div id="queue-overlay" class="full-page-overlay">
         <div class="box-rounded box-solid">
             <div class="flex-space-between">
-                <h3>{% trans %}Add track to queue (experimental){% endtrans %}</h3>
+                <h3>{% trans %}Add track to queue{% endtrans %}</h3>
                 <span>
                     <button id="queue-close">{% trans %}Close{% endtrans %}</button>
                 </span>
@@ -175,8 +175,8 @@
                         <option value="{{ person.dir_name }}">{{ person.display_name }} (Gast)</option>
                     {% endfor %}
                 </select>
-                <input id="youtube-dl-url" placeholder="https://youtube.com/watch?v=...">
-                <input id="youtube-dl-submit" type="submit" value="Download">
+                <input id="youtube-dl-url" type="text" placeholder="https://youtube.com/watch?v=..." size="45">
+                <input id="youtube-dl-submit" type="submit" value="{% trans %}Download{% endtrans %}">
                 <div id="youtube-dl-spinner" style="visibility: hidden" class="spinner"></div>
                 <br>
                 <div id="youtube-dl-output">{% trans %}yt-dlp output will appear here{% endtrans %}</div>

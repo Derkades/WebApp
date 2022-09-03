@@ -41,13 +41,31 @@ p.secondary {
     font-size: .7em;
 }
 
+.icon-button {
+    padding: .4rem;
+    margin: 0;
+}
+
+.icon-button > .icon {
+    filter: invert(1);
+}
+
 button {
     cursor: pointer; /* waarom is dit niet standaard zo? */
-    background-color: rgba(255, 255, 255, 0.3);
-    border: 1px solid white;
-    filter: invert(1);
+}
+
+select, button, input[type=text], input[type=number], input[type=submit] {
+    padding: .3rem;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid black;
     border-radius: .5rem;
-    padding: .5rem;
+    color: white;
+    margin-right: .3rem;
+    margin-bottom: .3rem;
+}
+
+input::placeholder {
+    color: #ccc;
 }
 
 kbd {
@@ -238,10 +256,6 @@ audio {
     color: black;
 }
 
-.icon-button {
-    padding: .4rem;
-}
-
 .queue-table {
     width: 100%;
     border-spacing: .5rem;
@@ -342,9 +356,9 @@ audio {
 }
 
 #youtube-dl-output {
-    /* Render \n as <br> */
-    white-space: pre-wrap;
-    height: 15rem;
+    white-space: pre-wrap; /* Render \n as <br> */
+    min-height: 5rem;
+    max-height: 15rem;
     overflow: auto;
     border: 1px solid gray;
     border-radius: .5rem;
