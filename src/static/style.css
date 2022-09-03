@@ -364,3 +364,7 @@ audio {
     max-height: 40rem;
     overflow-y: auto;
 }
+
+#volume-slider {
+    width: 7rem;
+}

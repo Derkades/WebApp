@@ -8,6 +8,7 @@ document.queueSize = 5;
 document.historySize = 10;
 document.quality = 'high';
 document.maxSearchListSize = 500;
+document.volume = 50;
 
 // https://www.w3schools.com/js/js_cookies.asp
 function setCookie(cname, cvalue) {
@@ -63,11 +64,17 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('queue-size').value = cookieQueueSize;
     }
 
-    const cookieAudioQuality = getCookie('settings-audio-quality')
+    const cookieAudioQuality = getCookie('settings-audio-quality');
     if (cookieAudioQuality !== null) {
         document.quality = cookieAudioQuality;
         document.getElementById('audio-quality').value = cookieAudioQuality
     }
+
+    const cookieVolume = getCookie('settings-volume');
+    if (cookieVolume !== null) {
+        document.volume = parseInt(cookieVolume);
+    }
+    document.getElementById('volume-slider').value = document.volume;
 
     // Playback controls
     document.getElementById('button-backward-step').addEventListener('click', previous);
@@ -78,6 +85,14 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('button-forward').addEventListener('click', () => seek(10));
     // document.getElementById('button-forward-fast').addEventListener('click', () => seek(30));
     document.getElementById('button-forward-step').addEventListener('click', next);
+    document.getElementById('volume-slider').addEventListener('input', event => {
+        document.volume = event.target.value;
+        setCookie('settings-volume', document.volume);
+        const audioElem = getAudioElement();
+        if (audioElem !== null) {
+            audioElem.volume = getTransformedVolume();
+        }
+    });
 
     // Lyrics
     document.getElementById('button-closed-captioning').addEventListener('click', switchLyrics);
@@ -335,14 +350,22 @@ function updateProgress(audioElem) {
     document.getElementById('progress-bar').style.width = percentage + '%';
 }
 
+function getTransformedVolume() {
+    // https://www.dr-lex.be/info-stuff/volumecontrols.html
+    // According to this article, x^4 seems to be a pretty good approximation of the perceived loudness curve
+    const e = 4;
+    return document.volume ** e / 100 ** e;
+}
+
 function createAudioElement(sourceUrl) {
     const audioElem = document.createElement('audio');
-    const sourceElem = document.createElement('source');
-    sourceElem.src = sourceUrl;
-    audioElem.appendChild(sourceElem);
+    audioElem.volume = getTransformedVolume();
     audioElem.setAttribute('autoplay', '');
     audioElem.onended = next;
     audioElem.ontimeupdate = () => updateProgress(audioElem);
+    const sourceElem = document.createElement('source');
+    sourceElem.src = sourceUrl;
+    audioElem.appendChild(sourceElem);
     return audioElem;
 }
 
