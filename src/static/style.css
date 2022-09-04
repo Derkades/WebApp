@@ -348,7 +348,7 @@ audio {
     justify-content: center;
     align-items: center;
     backdrop-filter: blur(2rem);
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, .3);
 }
 
 .full-page-overlay .box-solid {
