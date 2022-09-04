@@ -306,4 +306,5 @@ def raphson() -> Response:
 @babel.localeselector
 def get_locale():
     # TODO language from cookie
-    return request.accept_languages.best_match(['nl', 'nl-NL', 'nl-BE', 'en'])[:2]
+    lang = request.accept_languages.best_match(['nl', 'nl-NL', 'nl-BE', 'en'])
+    return lang[:2] if lang is not None else 'en'
