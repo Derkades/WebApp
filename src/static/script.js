@@ -72,6 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
     next();
     setInterval(showCorrectPlayPauseButton, 50);
     initTrackList();
+    setInterval(initTrackList, 5*60*1000); // Refresh every 5 minutes
     searchTrackList();
 });
 
@@ -689,7 +690,7 @@ function queueAdd(id) {
 
 function searchTrackList() {
     if (document.trackList === undefined) {
-        document.getElementById('track-list-output').textContent = 'Track list is still loading, please wait...';
+        document.getElementById('track-list-output').textContent = 'Track list is still loading, please wait... If this takes longer than a minute, please check the console for errors.';
         return;
     }
 
