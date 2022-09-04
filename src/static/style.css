@@ -50,8 +50,12 @@ p.secondary {
     filter: invert(1);
 }
 
-button {
-    cursor: pointer; /* waarom is dit niet standaard zo? */
+input[type=range] {
+    cursor: ew-resize;
+}
+
+select, button, input[type=submit], input[type=checkbox] {
+    cursor: pointer;
 }
 
 select, button, input[type=text], input[type=number], input[type=submit] {
