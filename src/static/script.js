@@ -12,7 +12,6 @@ document.queueSize = 5;
 document.historySize = 10;
 document.quality = 'high';
 document.maxSearchListSize = 500;
-document.volume = 50;
 
 // ##############################################
 //                Initialization
@@ -33,9 +32,8 @@ function initializeConfigurationFromCookies() {
 
     const cookieVolume = getCookie('settings-volume');
     if (cookieVolume !== null) {
-        document.volume = parseInt(cookieVolume);
+        document.getElementById('volume-slider').value  = parseInt(cookieVolume);
     }
-    document.getElementById('volume-slider').value = document.volume;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -51,8 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // document.getElementById('button-forward-fast').addEventListener('click', () => seek(30));
     document.getElementById('button-forward-step').addEventListener('click', next);
     document.getElementById('volume-slider').addEventListener('input', event => {
-        document.volume = event.target.value;
-        setCookie('settings-volume', document.volume);
+        setCookie('settings-volume', event.target.value);
         const audioElem = getAudioElement();
         if (audioElem !== null) {
             audioElem.volume = getTransformedVolume();
@@ -298,7 +295,7 @@ function getTransformedVolume() {
     // https://www.dr-lex.be/info-stuff/volumecontrols.html
     // According to this article, x^4 seems to be a pretty good approximation of the perceived loudness curve
     const e = 4;
-    return document.volume ** e / 100 ** e;
+    return document.getElementById('volume-slider').value ** e / 100 ** e;
 }
 
 function createAudioElement(sourceUrl) {
