@@ -16,7 +16,7 @@ body {
     /* overflow: hidden; */
 }
 
-h3, p, label, td, div, a {
+h3, p, label, td, div, a, .progress-time {
     font-family: 'Quicksand', Verdana, sans-serif;
     color: white;
 }
@@ -224,6 +224,7 @@ audio {
     width: 100%;
     margin: .5rem 0;
     position: relative; /* required for positioning of child */
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
 .outer-bar > div {
@@ -246,14 +247,10 @@ audio {
     display: inline;
 }
 
-#progress-time-current,
-#progress-time-duration {
+.progress-time {
     margin: 0 .25rem;
     font-size: 1.1rem;
-}
-
-#progress-time-current {
-    color: black;
+    mix-blend-mode: difference;
 }
 
 #queue-table {
