@@ -1,5 +1,9 @@
 "use strict";
 
+// ##############################################
+//                Configuration
+// ##############################################
+
 document.queue = [];
 document.current = null;
 document.history = [];
@@ -10,54 +14,11 @@ document.quality = 'high';
 document.maxSearchListSize = 500;
 document.volume = 50;
 
-// https://www.w3schools.com/js/js_cookies.asp
-function setCookie(cname, cvalue) {
-    const d = new Date();
-    d.setTime(d.getTime() + (365*24*60*60*1000));
-    const expires = "expires="+ d.toUTCString();
-    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/;SameSite=Strict";
-}
+// ##############################################
+//                Initialization
+// ##############################################
 
-function getCookie(cname) {
-    const name = cname + "=";
-    const decodedCookie = decodeURIComponent(document.cookie);
-    const ca = decodedCookie.split(';');
-    for(let i = 0; i < ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) == ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) == 0) {
-            return c.substring(name.length, c.length);
-        }
-    }
-    return null;
-}
-
-// https://www.tutorialspoint.com/levenshtein-distance-in-javascript
-function levenshtein(str1, str2) {
-    const track = Array(str2.length + 1).fill(null).map(() =>
-    Array(str1.length + 1).fill(null));
-    for (let i = 0; i <= str1.length; i += 1) {
-       track[0][i] = i;
-    }
-    for (let j = 0; j <= str2.length; j += 1) {
-       track[j][0] = j;
-    }
-    for (let j = 1; j <= str2.length; j += 1) {
-       for (let i = 1; i <= str1.length; i += 1) {
-          const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
-          track[j][i] = Math.min(
-             track[j][i - 1] + 1,
-             track[j - 1][i] + 1,
-             track[j - 1][i - 1] + indicator,
-          );
-       }
-    }
-    return track[str2.length][str1.length];
-};
-
-document.addEventListener("DOMContentLoaded", () => {
+function initializeConfigurationFromCookies() {
     const cookieQueueSize = getCookie('settings-queue-size');
     if (cookieQueueSize !== null) {
         document.queueSize = parseInt(cookieQueueSize);
@@ -75,6 +36,10 @@ document.addEventListener("DOMContentLoaded", () => {
         document.volume = parseInt(cookieVolume);
     }
     document.getElementById('volume-slider').value = document.volume;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    initializeConfigurationFromCookies();
 
     // Playback controls
     document.getElementById('button-backward-step').addEventListener('click', previous);
@@ -136,6 +101,10 @@ document.addEventListener("DOMContentLoaded", () => {
     searchTrackList();
 });
 
+// ##############################################
+//                    Hotkeys
+// ##############################################
+
 function handleKey(key) {
     // Don't perform hotkey actions when user is typing in a text field
     if (document.activeElement.tagName === 'INPUT') {
@@ -154,15 +123,7 @@ function handleKey(key) {
             index++;
         }
     } else if (key === 'p' || key === ' ') {
-        const audioElem = getAudioElement();
-        if (audioElem == null) {
-            return;
-        }
-        if (audioElem.paused) {
-            audioElem.play();
-        } else {
-            audioElem.pause();
-        }
+        playPause();
     } else if (key === 'ArrowLeft') {
         previous();
     } else if (key === 'ArrowRight') {
@@ -175,6 +136,10 @@ function handleKey(key) {
         console.log('Unhandled keypress', key)
     }
 }
+
+// ##############################################
+//        Audio element & playback controls
+// ##############################################
 
 function getAudioElement() {
     const audioDiv = document.getElementById('audio');
@@ -206,6 +171,18 @@ function pause() {
     audioElem.pause();
 }
 
+function playPause() {
+    const audioElem = getAudioElement();
+    if (audioElem == null) {
+        return;
+    }
+    if (audioElem.paused) {
+        audioElem.play();
+    } else {
+        audioElem.pause();
+    }
+}
+
 function showCorrectPlayPauseButton() {
     const audioElem = getAudioElement();
     if (audioElem == null || audioElem.paused) {
@@ -215,7 +192,6 @@ function showCorrectPlayPauseButton() {
         document.getElementById('button-play').style.display = 'none';
         document.getElementById('button-pause').style.display = '';
     }
-
 }
 
 function seek(delta) {
@@ -230,32 +206,6 @@ function seek(delta) {
         audioElem.currentTime = audioElem.duration;
     } else {
         audioElem.currentTime = newTime;
-    }
-}
-
-// Replace audio player, album cover, and lyrics according to document.current track info
-function updateTrackHtml() {
-    const track = document.current;
-    const audioElem = createAudioElement(track.audioBlobUrl);
-    replaceAudioElement(audioElem);
-
-    replaceAlbumImages(track.imageBlobUrl);
-
-    if (track.lyrics.found) {
-        // track.lyrics.html is already escaped by backend, and only contains some safe HTML that we should not escape
-        const source = '<a class="secondary" href="' + escapeHtml(track.lyrics.genius_url) + '" target="_blank">Source</a>'
-        document.getElementById('lyrics').innerHTML = track.lyrics.html + '<br><br>' + source;
-    } else {
-        document.getElementById('lyrics').innerHTML = '<i class="secondary">Geen lyrics gevonden</i>'
-    }
-
-    document.getElementById('current-track').textContent = '[' + track.personDisplay + '] ' + track.displayName;
-
-    if (document.history.length > 0) {
-        const previousTrack = document.history[document.history.length - 1];
-        document.getElementById('previous-track').textContent = '[' + previousTrack.personDisplay + '] ' + previousTrack.displayName;
-    } else {
-        document.getElementById('previous-track').textContent = '-';
     }
 }
 
@@ -304,43 +254,34 @@ function previous() {
     updateTrackHtml();
 }
 
-function replaceAlbumImages(imageUrl) {
-    const cssUrl = 'url("' + imageUrl + '")';
+// ##############################################
+//      Album cover, lyrics and audio HTML
+// ##############################################
 
-    const bgBottom = document.getElementById('bg-image-1');
-    const bgTop = document.getElementById('bg-image-2');
-    const fgBottom = document.getElementById('album-cover-1');
-    const fgTop = document.getElementById('album-cover-2');
+// Replace audio player, album cover, and lyrics according to document.current track info
+function updateTrackHtml() {
+    const track = document.current;
+    const audioElem = createAudioElement(track.audioBlobUrl);
+    replaceAudioElement(audioElem);
 
-    // Set bottom to new image
-    bgBottom.style.backgroundImage = cssUrl;
-    fgBottom.style.backgroundImage = cssUrl;
+    replaceAlbumImages(track.imageBlobUrl);
 
-    // Slowly fade out old top image
-    bgTop.style.opacity = 0;
-    fgTop.style.opacity = 0;
-
-    setTimeout(() => {
-        // To prepare for next replacement, move bottom image to top image
-        bgTop.style.backgroundImage = cssUrl;
-        fgTop.style.backgroundImage = cssUrl;
-        // Make it visible
-        bgTop.style.opacity = 1;
-        fgTop.style.opacity = 1;
-    }, 200);
-}
-
-function getActivePersons() {
-    const active = [];
-
-    for (const checkbox of document.getElementsByClassName('person-checkbox')) {
-        const musicDirName = checkbox.id.substring(9); // remove 'checkbox-'
-        if (checkbox.checked) {
-            active.push(musicDirName);
-        }
+    if (track.lyrics.found) {
+        // track.lyrics.html is already escaped by backend, and only contains some safe HTML that we should not escape
+        const source = '<a class="secondary" href="' + escapeHtml(track.lyrics.genius_url) + '" target="_blank">Source</a>'
+        document.getElementById('lyrics').innerHTML = track.lyrics.html + '<br><br>' + source;
+    } else {
+        document.getElementById('lyrics').innerHTML = '<i class="secondary">Geen lyrics gevonden</i>'
     }
 
-    return active;
+    document.getElementById('current-track').textContent = '[' + track.personDisplay + '] ' + track.displayName;
+
+    if (document.history.length > 0) {
+        const previousTrack = document.history[document.history.length - 1];
+        document.getElementById('previous-track').textContent = '[' + previousTrack.personDisplay + '] ' + previousTrack.displayName;
+    } else {
+        document.getElementById('previous-track').textContent = '-';
+    }
 }
 
 function updateProgress(audioElem) {
@@ -372,8 +313,63 @@ function createAudioElement(sourceUrl) {
     return audioElem;
 }
 
-function choice(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
+function replaceAlbumImages(imageUrl) {
+    const cssUrl = 'url("' + imageUrl + '")';
+
+    const bgBottom = document.getElementById('bg-image-1');
+    const bgTop = document.getElementById('bg-image-2');
+    const fgBottom = document.getElementById('album-cover-1');
+    const fgTop = document.getElementById('album-cover-2');
+
+    // Set bottom to new image
+    bgBottom.style.backgroundImage = cssUrl;
+    fgBottom.style.backgroundImage = cssUrl;
+
+    // Slowly fade out old top image
+    bgTop.style.opacity = 0;
+    fgTop.style.opacity = 0;
+
+    setTimeout(() => {
+        // To prepare for next replacement, move bottom image to top image
+        bgTop.style.backgroundImage = cssUrl;
+        fgTop.style.backgroundImage = cssUrl;
+        // Make it visible
+        bgTop.style.opacity = 1;
+        fgTop.style.opacity = 1;
+    }, 200);
+}
+
+// Display lyrics, instead of album art
+function switchLyrics() {
+    document.getElementById('button-record-vinyl').style.display = '';
+    document.getElementById('button-closed-captioning').style.display = 'none';
+    document.getElementById('sidebar-lyrics').style.display = 'flex';
+    document.getElementById('sidebar-album-covers').style.display = 'none';
+}
+
+// Display album art, instead of lyrics
+function switchAlbumCover() {
+    document.getElementById('button-record-vinyl').style.display = 'none';
+    document.getElementById('button-closed-captioning').style.display = '';
+    document.getElementById('sidebar-lyrics').style.display = 'none';
+    document.getElementById('sidebar-album-covers').style.display = 'flex';
+}
+
+// ##############################################
+//              Queue (playlists)
+// ##############################################
+
+function getActivePersons() {
+    const active = [];
+
+    for (const checkbox of document.getElementsByClassName('person-checkbox')) {
+        const musicDirName = checkbox.id.substring(9); // remove 'checkbox-'
+        if (checkbox.checked) {
+            active.push(musicDirName);
+        }
+    }
+
+    return active;
 }
 
 function getNextPerson(currentPerson) {
@@ -403,9 +399,9 @@ function getNextPerson(currentPerson) {
     return person;
 }
 
-function throwErr(err) {
-    throw err;
-}
+// ##############################################
+//           Queue (downloading tracks)
+// ##############################################
 
 function updateQueue() {
     updateQueueHtml();
@@ -519,17 +515,15 @@ function downloadAndAddToQueue(trackData, onComplete) {
         });
 }
 
-function escapeHtml(unescaped) {
-    const p = document.createElement("p");
-    p.textContent = unescaped;
-    return p.innerHTML;
-}
-
 function removeFromQueue(index) {
     document.queue.splice(index, 1);
     updateQueueHtml();
     updateQueue();
 }
+
+// ##############################################
+//                  Queue HTML
+// ##############################################
 
 function updateQueueHtml() {
     const trashBase64 = document.getElementById('trash-can-base64').innerText;
@@ -567,10 +561,69 @@ function updateQueueHtml() {
     dragDropTable(document.getElementById("queue-table"));
 }
 
-function secondsToString(seconds) {
-    // https://stackoverflow.com/a/25279399/4833737
-    return new Date(1000 * seconds).toISOString().substring(14, 19);
+// Based on https://code-boxx.com/drag-drop-sortable-list-javascript/
+// Modified to work with table and document.queue
+function dragDropTable(target) {
+    let items = target.getElementsByTagName("tr");
+    let current = null; // Element that is being dragged
+
+    for (let row of items) {
+        row.draggable = true; // Make draggable
+
+        // The .hint and .active classes are purely cosmetic, they may be styled using css
+
+        row.ondragstart = (ev) => {
+            current = row;
+            for (let it of items) {
+                if (it != current) {
+                    it.classList.add("hint");
+                }
+            }
+        };
+
+        row.ondragenter = (ev) => {
+            if (row != current) {
+                row.classList.add("active");
+            }
+        };
+
+        row.ondragleave = () => {
+            row.classList.remove("active");
+        };
+
+        row.ondragend = () => {
+            for (let it of items) {
+                it.classList.remove("hint");
+                it.classList.remove("active");
+            }
+        };
+
+        row.ondragover = (evt) => {
+            evt.preventDefault();
+        };
+
+        row.ondrop = (evt) => {
+            evt.preventDefault();
+            if (row == current) {
+                // No need to do anything if row was put back in same location
+                return;
+            }
+
+            const currentPos = current.dataset.queuePos;
+            const targetPos = row.dataset.queuePos;
+            // Remove current (being dragged) track from queue
+            const track = document.queue.splice(currentPos, 1)[0];
+            // Add it to the place it was dropped
+            document.queue.splice(targetPos, 0, track);
+            // Now re-render the table
+            updateQueueHtml();
+        };
+    }
 }
+
+// ##############################################
+//          Settings, YouTube download
+// ##############################################
 
 function youTubeDownload(event) {
     event.preventDefault();
@@ -613,19 +666,9 @@ function youTubeDownload(event) {
     });
 }
 
-function switchLyrics() {
-    document.getElementById('button-record-vinyl').style.display = '';
-    document.getElementById('button-closed-captioning').style.display = 'none';
-    document.getElementById('sidebar-lyrics').style.display = 'flex';
-    document.getElementById('sidebar-album-covers').style.display = 'none';
-}
-
-function switchAlbumCover() {
-    document.getElementById('button-record-vinyl').style.display = 'none';
-    document.getElementById('button-closed-captioning').style.display = '';
-    document.getElementById('sidebar-lyrics').style.display = 'none';
-    document.getElementById('sidebar-album-covers').style.display = 'flex';
-}
+// ##############################################
+//          Track list, add to queue
+// ##############################################
 
 function initTrackList() {
     fetch(new Request('/track_list'))
@@ -723,62 +766,72 @@ function searchTrackList() {
     document.getElementById('track-list-output').innerHTML = outputHtml;
 }
 
-// Based on https://code-boxx.com/drag-drop-sortable-list-javascript/
-// Modified to work with table and document.queue
-function dragDropTable(target) {
-    let items = target.getElementsByTagName("tr");
-    let current = null; // Element that is being dragged
+// ##############################################
+//               Utility functions
+// ##############################################
 
-    for (let row of items) {
-        row.draggable = true; // Make draggable
-
-        // The .hint and .active classes are purely cosmetic, they may be styled using css
-
-        row.ondragstart = (ev) => {
-            current = row;
-            for (let it of items) {
-                if (it != current) {
-                    it.classList.add("hint");
-                }
-            }
-        };
-
-        row.ondragenter = (ev) => {
-            if (row != current) {
-                row.classList.add("active");
-            }
-        };
-
-        row.ondragleave = () => {
-            row.classList.remove("active");
-        };
-
-        row.ondragend = () => {
-            for (let it of items) {
-                it.classList.remove("hint");
-                it.classList.remove("active");
-            }
-        };
-
-        row.ondragover = (evt) => {
-            evt.preventDefault();
-        };
-
-        row.ondrop = (evt) => {
-            evt.preventDefault();
-            if (row == current) {
-                // No need to do anything if row was put back in same location
-                return;
-            }
-
-            const currentPos = current.dataset.queuePos;
-            const targetPos = row.dataset.queuePos;
-            // Remove current (being dragged) track from queue
-            const track = document.queue.splice(currentPos, 1)[0];
-            // Add it to the place it was dropped
-            document.queue.splice(targetPos, 0, track);
-            // Now re-render the table
-            updateQueueHtml();
-        };
-    }
+function choice(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
 }
+
+function throwErr(err) {
+    throw err;
+}
+
+function escapeHtml(unescaped) {
+    const p = document.createElement("p");
+    p.textContent = unescaped;
+    return p.innerHTML;
+}
+
+function secondsToString(seconds) {
+    // https://stackoverflow.com/a/25279399/4833737
+    return new Date(1000 * seconds).toISOString().substring(14, 19);
+}
+
+// https://www.w3schools.com/js/js_cookies.asp
+function setCookie(cname, cvalue) {
+    const d = new Date();
+    d.setTime(d.getTime() + (365*24*60*60*1000));
+    const expires = "expires="+ d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/;SameSite=Strict";
+}
+
+function getCookie(cname) {
+    const name = cname + "=";
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const ca = decodedCookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return null;
+}
+
+// https://www.tutorialspoint.com/levenshtein-distance-in-javascript
+function levenshtein(str1, str2) {
+    const track = Array(str2.length + 1).fill(null).map(() =>
+    Array(str1.length + 1).fill(null));
+    for (let i = 0; i <= str1.length; i += 1) {
+       track[0][i] = i;
+    }
+    for (let j = 0; j <= str2.length; j += 1) {
+       track[j][0] = j;
+    }
+    for (let j = 1; j <= str2.length; j += 1) {
+       for (let i = 1; i <= str1.length; i += 1) {
+          const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
+          track[j][i] = Math.min(
+             track[j][i - 1] + 1,
+             track[j - 1][i] + 1,
+             track[j - 1][i - 1] + indicator,
+          );
+       }
+    }
+    return track[str2.length][str1.length];
+};
