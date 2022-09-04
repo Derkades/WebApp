@@ -256,25 +256,29 @@ audio {
     color: black;
 }
 
-.queue-table {
+#queue-table {
     width: 100%;
     border-spacing: .5rem;
 }
 
-.queue-table td {
+#queue-table td {
     height: 4rem;
     font-size: .95rem;
 }
 
 /* album image column */
-.queue-table td:first-child {
+#queue-table td:first-child {
     width: 4rem;
     cursor: pointer;
 }
 
-.queue-table td.downloading,
-.queue-table td:nth-child(2) {
+#queue-table td.downloading,
+#queue-table td:nth-child(2) {
     text-align: center;
+}
+
+#queue-table tr.active {
+    background: darkgoldenrod;
 }
 
 .delete-overlay {

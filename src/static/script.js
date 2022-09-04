@@ -94,6 +94,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Queue
+    updateQueue();
+
     // Lyrics
     document.getElementById('button-closed-captioning').addEventListener('click', switchLyrics);
     document.getElementById('button-record-vinyl').addEventListener('click', switchAlbumCover);
@@ -126,7 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Hotkeys
     document.addEventListener('keydown', event => handleKey(event.key));
 
-    updateQueue();
+
     next();
     setInterval(showCorrectPlayPauseButton, 50);
     initTrackList();
@@ -531,12 +534,10 @@ function removeFromQueue(index) {
 function updateQueueHtml() {
     const trashBase64 = document.getElementById('trash-can-base64').innerText;
 
-    let html = `
-        <table class="queue-table">
-            <tbody>`;
+    let html = ''
     let i = 0;
     for (const queuedTrack of document.queue) {
-        html += '<tr>';
+        html += '<tr data-queue-pos="' + i + '">';
             html += '<td class="background-cover box" style="background-image: url(\'' + escapeHtml(queuedTrack.imageBlobUrl) + '\')" onclick="removeFromQueue(' + i + ')">';
                 html += '<div class="delete-overlay">'
                     html += '<div style="background-image: url(\'' + trashBase64 + '\')" class="icon"></div>';
@@ -550,7 +551,8 @@ function updateQueueHtml() {
 
     let first = true;
     while (i < document.queueSize) {
-        html += '<tr><td colspan="3" class="secondary downloading">';
+        html += '<tr data-queue-pos="' + i + '">'
+        html += '<td colspan="3" class="secondary downloading">';
         if (first) {
             first = false;
             html += '<span class="spinner" id="queue-spinner"></span>';
@@ -559,9 +561,10 @@ function updateQueueHtml() {
         i++;
     }
 
-    html += '</tbody></table>';
-    const outerDiv = document.getElementById('queue');
+    const outerDiv = document.getElementById('queue-table');
     outerDiv.innerHTML = html;
+    // Add events to <tr> elements
+    dragDropTable(document.getElementById("queue-table"));
 }
 
 function secondsToString(seconds) {
@@ -718,4 +721,64 @@ function searchTrackList() {
     }
 
     document.getElementById('track-list-output').innerHTML = outputHtml;
+}
+
+// Based on https://code-boxx.com/drag-drop-sortable-list-javascript/
+// Modified to work with table and document.queue
+function dragDropTable(target) {
+    let items = target.getElementsByTagName("tr");
+    let current = null; // Element that is being dragged
+
+    for (let row of items) {
+        row.draggable = true; // Make draggable
+
+        // The .hint and .active classes are purely cosmetic, they may be styled using css
+
+        row.ondragstart = (ev) => {
+            current = row;
+            for (let it of items) {
+                if (it != current) {
+                    it.classList.add("hint");
+                }
+            }
+        };
+
+        row.ondragenter = (ev) => {
+            if (row != current) {
+                row.classList.add("active");
+            }
+        };
+
+        row.ondragleave = () => {
+            row.classList.remove("active");
+        };
+
+        row.ondragend = () => {
+            for (let it of items) {
+                it.classList.remove("hint");
+                it.classList.remove("active");
+            }
+        };
+
+        row.ondragover = (evt) => {
+            evt.preventDefault();
+        };
+
+        row.ondrop = (evt) => {
+            evt.preventDefault();
+            if (row == current) {
+                // No need to do anything if row was put back in same location
+                return;
+            }
+
+            const currentPos = current.dataset.queuePos;
+            const targetPos = row.dataset.queuePos;
+            // Remove current (being dragged) track from queue
+            const track = document.queue.splice(currentPos, 1)[0];
+            // Add it to the place it was dropped
+            document.queue.splice(targetPos, 0, track);
+            // Now re-render the table
+            updateQueueHtml();
+        };
+    }
 }
