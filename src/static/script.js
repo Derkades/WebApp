@@ -8,33 +8,12 @@ document.queue = [];
 document.current = null;
 document.history = [];
 document.queueBusy = false;
-document.queueSize = 5;
 document.historySize = 10;
-document.quality = 'high';
 document.maxSearchListSize = 500;
 
 // ##############################################
 //                Initialization
 // ##############################################
-
-function initializeConfigurationFromCookies() {
-    const cookieQueueSize = getCookie('settings-queue-size');
-    if (cookieQueueSize !== null) {
-        document.queueSize = parseInt(cookieQueueSize);
-        document.getElementById('queue-size').value = cookieQueueSize;
-    }
-
-    const cookieAudioQuality = getCookie('settings-audio-quality');
-    if (cookieAudioQuality !== null) {
-        document.quality = cookieAudioQuality;
-        document.getElementById('audio-quality').value = cookieAudioQuality
-    }
-
-    const cookieVolume = getCookie('settings-volume');
-    if (cookieVolume !== null) {
-        document.getElementById('volume-slider').value  = parseInt(cookieVolume);
-    }
-}
 
 document.addEventListener("DOMContentLoaded", () => {
     initializeConfigurationFromCookies();
@@ -71,13 +50,11 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById('settings-overlay').style.display = 'none');
     document.getElementById('youtube-dl-submit').addEventListener('click', youTubeDownload);
     document.getElementById('queue-size').addEventListener('input', event => {
-        document.queueSize = parseInt(event.data);
         setCookie('settings-queue-size', event.data);
         updateQueue();
     });
     document.getElementById('audio-quality').addEventListener('input', event => {
-        document.quality = event.target.value;
-        setCookie('settings-audio-quality', document.quality);
+        setCookie('settings-audio-quality', event.target.value);
     });
 
     // Queue overlay
@@ -97,6 +74,23 @@ document.addEventListener("DOMContentLoaded", () => {
     initTrackList();
     searchTrackList();
 });
+
+// ##############################################
+//               Cookie loading
+// ##############################################
+
+function cookieToInput(cname, elemId) {
+    const value = getCookie(cname);
+    if (value !== null) {
+        document.getElementById(elemId).value = value;
+    }
+}
+
+function initializeConfigurationFromCookies() {
+    cookieToInput('settings-queue-size', 'queue-size');
+    cookieToInput('settings-audio-quality', 'audio-quality');
+    cookieToInput('settings-volume', 'volume-slider');
+}
 
 // ##############################################
 //                    Hotkeys
@@ -417,7 +411,9 @@ function updateQueue() {
         person = getNextPerson();
     }
 
-    if (document.queue.length >= document.queueSize) {
+    const minQueueSize = parseInt(document.getElementById('queue-size').value);
+
+    if (document.queue.length >= minQueueSize) {
         return;
     }
 
@@ -458,7 +454,8 @@ function downloadAndAddToQueue(trackData, onComplete) {
     // JavaScript doesn't stop execution of a promise chain in case of an error, so we need to manually
     // pass the error down the chain by repeatedly calling throwErr() on errors.
     trackData.queryString = '?person_dir=' + encodeURIComponent(trackData.person) + '&track_name=' + encodeURIComponent(trackData.name);
-    trackData.audioStreamUrl = '/get_track' + trackData.queryString + '&quality=' + encodeURIComponent(document.quality);
+    const quality = encodeURIComponent(document.getElementById('audio-quality').value);
+    trackData.audioStreamUrl = '/get_track' + trackData.queryString + '&quality=' + quality;
     console.info('queue | download audio');
     fetch(new Request(trackData.audioStreamUrl))
         .then(response => {
@@ -540,8 +537,10 @@ function updateQueueHtml() {
         i++;
     }
 
+    const minQueueSize = parseInt(document.getElementById('queue-size').value)
+
     let first = true;
-    while (i < document.queueSize) {
+    while (i < minQueueSize) {
         html += '<tr data-queue-pos="' + i + '">'
         html += '<td colspan="3" class="secondary downloading">';
         if (first) {
