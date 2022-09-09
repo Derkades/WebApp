@@ -3,6 +3,7 @@ from pathlib import Path
 import hashlib
 import os
 import logging
+import random
 
 import settings
 
@@ -110,7 +111,11 @@ def get(cache_type: str, name: str) -> CacheObject:
     legacy_path = _path(legacy_digest)
     if legacy_path.exists():
         log.info('Legacy cache file %s-%s: %s', cache_type, name, legacy_path.as_posix())
-        return CacheObject(legacy_path, None)
+        if random.random() > 0.1:
+            return CacheObject(legacy_path, None)
+        else:
+            log.info('Deleting legacy cache file')
+            legacy_path.unlink()
 
     data_digest = _digest(cache_type + name + 'data')
     checksum_digest = _digest(cache_type + name + 'checksum')
