@@ -70,6 +70,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // Hotkeys
     document.addEventListener('keydown', event => handleKey(event.key));
 
+    setInterval(() => {
+        if (document.queueBusy) {
+            document.getElementsByTagName("body")[0].style.cursor = 'progress';
+        } else {
+            document.getElementsByTagName("body")[0].style.cursor = '';
+        }
+    }, 100);
 
     next();
     setInterval(showCorrectPlayPauseButton, 50);
@@ -434,7 +441,7 @@ function updateQueue() {
 
     downloadAndAddToQueue(trackData).then(() => {
         document.queueBusy = false;
-        setTimeout(updateQueue, 500);
+        updateQueue();
     }, error => {
         console.warn('queue | error');
         console.warn(error);
