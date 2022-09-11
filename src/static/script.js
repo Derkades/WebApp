@@ -1,7 +1,7 @@
 "use strict";
 
 // ##############################################
-//                Configuration
+//       Configuration & global variables
 // ##############################################
 
 document.queue = [];
@@ -10,6 +10,8 @@ document.history = [];
 document.queueBusy = false;
 document.historySize = 10;
 document.maxSearchListSize = 500;
+document.lastChosenPlaylist = null;
+document.playlistOverrides = [];
 
 // ##############################################
 //                Initialization
@@ -203,7 +205,7 @@ function seek(delta) {
 
 function next() {
     if (document.queue.length === 0) {
-        console.log('queue is empty, trying again later');
+        console.log('music | queue is empty, trying again later');
         setTimeout(next, 1000);
         return;
     }
@@ -371,9 +373,8 @@ function getNextPerson(currentPerson) {
 
     if (active.length === 0) {
         // No one is selected
-        // eigenlijk zou er een error moeten komen, maar voor nu kiezen we DK
-        person = "DK";
-    } else if (currentPerson === undefined) {
+        return null;
+    } else if (currentPerson === null) {
         // No person chosen yet, choose random person
         person = choice(active);
     } else {
@@ -404,12 +405,17 @@ function updateQueue() {
 
     let person;
 
-    if (document.queue.length > 0) {
-        const lastTrack = document.queue[document.queue.length - 1];
-        const lastPerson = lastTrack.person;
-        person = getNextPerson(lastPerson);
+    if (document.playlistOverrides.length > 0) {
+        person = document.playlistOverrides.pop();
     } else {
-        person = getNextPerson();
+        person = getNextPerson(document.lastChosenPlaylist);
+    }
+
+    if (person === null) {
+        console.warn('queue | no playlists selected, trying again later');
+        // TODO Display warning in queue
+        setTimeout(updateQueue, 500);
+        return;
     }
 
     const minQueueSize = parseInt(document.getElementById('queue-size').value);
@@ -480,6 +486,8 @@ async function downloadAndAddToQueue(trackData) {
 }
 
 function removeFromQueue(index) {
+    const trackData = document.queue[index];
+    document.playlistOverrides.push(trackData.person);
     document.queue.splice(index, 1);
     updateQueueHtml();
     updateQueue();
