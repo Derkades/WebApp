@@ -429,11 +429,8 @@ function updateQueue() {
 
     fetch('/choose_track?person_dir=' + encodeURIComponent(person))
         .then(response => {
-            if (response.status == 200) {
-                return response.json();
-            } else {
-                throw 'response code ' + response.status;
-            }
+            checkResponseCode(response);
+            return response.json();
         }, throwErr)
         .then(trackJson => {
             trackData.name = trackJson.name;
@@ -460,11 +457,8 @@ function downloadAndAddToQueue(trackData, onComplete) {
     console.info('queue | download audio');
     fetch(trackData.audioStreamUrl)
         .then(response => {
-            if (response.status == 200) {
-                return response.blob();
-            } else {
-                throw 'response code ' + response.status;
-            }
+            checkResponseCode(response);
+            return response.blob();
         }, throwErr)
         .then(audioBlob => {
             trackData.audioBlobUrl = URL.createObjectURL(audioBlob);
@@ -473,11 +467,8 @@ function downloadAndAddToQueue(trackData, onComplete) {
             return fetch(trackData.imageStreamUrl);
         }, throwErr)
         .then(response => {
-            if (response.status == 200) {
-                return response.blob();
-            } else {
-                throw 'response code ' + response.status;
-            }
+            checkResponseCode(response);
+            return response.blob();
         }, throwErr)
         .then(imageBlob => {
             trackData.imageBlobUrl = URL.createObjectURL(imageBlob);
@@ -486,11 +477,8 @@ function downloadAndAddToQueue(trackData, onComplete) {
             return fetch(trackData.lyricsUrl);
         }, throwErr)
         .then(response => {
-            if (response.status == 200) {
-                return response.json();
-            } else {
-                throw 'response code ' + response.status;
-            }
+            checkResponseCode(response);
+            return response.json();
         }, throwErr)
         .then(lyricsJson => {
             trackData.lyrics = lyricsJson;
@@ -773,6 +761,12 @@ function choice(arr) {
 
 function throwErr(err) {
     throw err;
+}
+
+function checkResponseCode(response) {
+    if (response.status != 200) {
+        throw 'response code ' + response.status;
+    }
 }
 
 function escapeHtml(unescaped) {
