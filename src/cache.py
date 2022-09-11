@@ -1,9 +1,7 @@
 from typing import Optional
 from pathlib import Path
 import hashlib
-import os
 import logging
-import random
 
 import settings
 
@@ -11,7 +9,7 @@ log = logging.getLogger('app.cache')
 
 class CacheObject:
 
-    def __init__(self, data_path: Path, checksum_path: Optional[Path]):
+    def __init__(self, data_path: Path, checksum_path: Path):
         self.data_path = data_path
         self.checksum_path = checksum_path
 
@@ -23,10 +21,9 @@ class CacheObject:
             data_file.truncate(len(data))
             data_file.write(data)
 
-        if self.checksum_path is not None:
-            checksum = hashlib.sha256(data).digest()
-            with open(self.checksum_path, 'wb') as checksum_file:
-                checksum_file.write(checksum)
+        checksum = hashlib.sha256(data).digest()
+        with open(self.checksum_path, 'wb') as checksum_file:
+            checksum_file.write(checksum)
 
 
     def retrieve(self) -> Optional[bytes]:
@@ -43,11 +40,10 @@ class CacheObject:
         if not self.check_checksum(data):
             log.warning('Checksum mismatch! Deleting cache file')
             self.data_path.unlink()
-            if self.checksum_path is not None:
-                try:
-                    self.checksum_path.unlink()
-                except FileNotFoundError:
-                    pass
+            try:
+                self.checksum_path.unlink()
+            except FileNotFoundError:
+                pass
             return None
 
         return data
@@ -64,20 +60,14 @@ class CacheObject:
         Calculate checksum from data file and write it to checksum file. To be used when
         manually writing to the file, instead of using store()
         """
-        if self.checksum_path is not None:
-            checksum: bytes = self.get_checksum()
-            with open(self.checksum_path, 'wb') as checksum_file:
-                checksum_file.write(checksum)
+        checksum: bytes = self.get_checksum()
+        with open(self.checksum_path, 'wb') as checksum_file:
+            checksum_file.write(checksum)
 
     def check_checksum(self, data: bytes) -> bool:
         """
         Calculate checksum for given data, and verify that it matches the checksum file
         """
-        if self.checksum_path is None:
-            # Legacy cache file without checksum file
-            # Assume it's fine if file size is non-zero
-            return os.stat(self.data_path).st_size > 0
-
         if not self.checksum_path.exists():
             return False
 
@@ -107,16 +97,6 @@ def get(cache_type: str, name: str) -> CacheObject:
     """
     Get CacheObject instance by name
     """
-    legacy_digest = _digest(cache_type + name)
-    legacy_path = _path(legacy_digest)
-    if legacy_path.exists():
-        log.info('Legacy cache file %s-%s: %s', cache_type, name, legacy_path.as_posix())
-        if random.random() > 0.1:
-            return CacheObject(legacy_path, None)
-        else:
-            log.info('Deleting legacy cache file')
-            legacy_path.unlink()
-
     data_digest = _digest(cache_type + name + 'data')
     checksum_digest = _digest(cache_type + name + 'checksum')
     data_path = _path(data_digest)
