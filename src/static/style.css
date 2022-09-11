@@ -11,9 +11,6 @@ body {
     width: 100vw;
     margin: 0;
     background-color: black;
-
-    /* De scale: 1.1 voor #bg-image veroorzaakt scroll bars, geen idee hoe ik dat moet fixen. Verberg ze gewoon! */
-    /* overflow: hidden; */
 }
 
 h3, p, label, td, div, a, .progress-time {
@@ -265,6 +262,7 @@ audio {
 #queue-table td {
     height: 4rem;
     font-size: .95rem;
+    cursor: grab;
 }
 
 /* album image column */
