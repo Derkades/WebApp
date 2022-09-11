@@ -21,10 +21,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Playback controls
     document.getElementById('button-backward-step').addEventListener('click', previous);
     // document.getElementById('button-backward-fast').addEventListener('click', () => seek(-30));
-    document.getElementById('button-backward').addEventListener('click', () => seek(-10));
+    document.getElementById('button-backward').addEventListener('click', () => seek(-15));
     document.getElementById('button-play').addEventListener('click', play);
     document.getElementById('button-pause').addEventListener('click', pause);
-    document.getElementById('button-forward').addEventListener('click', () => seek(10));
+    document.getElementById('button-forward').addEventListener('click', () => seek(15));
     // document.getElementById('button-forward-fast').addEventListener('click', () => seek(30));
     document.getElementById('button-forward-step').addEventListener('click', next);
     document.getElementById('volume-slider').addEventListener('input', event => {
@@ -423,7 +423,7 @@ function updateQueue() {
     const trackData = {
         person: person,
         personDisplay: person.startsWith("Guest-") ? person.substring('6') : person,
-        name: null, // choose random
+        path: null, // choose random
     }
 
     downloadAndAddToQueue(trackData).then(() => {
@@ -439,29 +439,27 @@ function updateQueue() {
 
 async function downloadAndAddToQueue(trackData) {
     // If no specific track is specified, first choose random track
-    if (trackData.name === null) {
+    if (trackData.path === null) {
         console.info('queue | choose track');
         const chooseResponse = await fetch('/choose_track?person_dir=' + encodeURIComponent(trackData.person));
         checkResponseCode(chooseResponse);
         const trackJson = await chooseResponse.json();
-        trackData.name = trackJson.name;
+        trackData.path = trackJson.path;
         trackData.displayName = trackJson.display_name;
     }
 
-    trackData.queryString = '?person_dir=' + encodeURIComponent(trackData.person) + '&track_name=' + encodeURIComponent(trackData.name);
-    const quality = encodeURIComponent(document.getElementById('audio-quality').value);
-    trackData.audioStreamUrl = '/get_track' + trackData.queryString + '&quality=' + quality;
-
     // Get track audio
     console.info('queue | download audio');
-    const trackResponse = await fetch(trackData.audioStreamUrl);
+    const encodedQuality = encodeURIComponent(document.getElementById('audio-quality').value);
+    const encodedPath = encodeURIComponent(trackData.path);
+    const trackResponse = await fetch('/get_track?track_path=' + encodedPath + '&quality=' + encodedQuality);
     checkResponseCode(trackResponse);
     const audioBlob = await trackResponse.blob();
     trackData.audioBlobUrl = URL.createObjectURL(audioBlob);
 
     // Get cover image
     console.info('queue | download album cover image');
-    trackData.imageStreamUrl = '/get_album_cover' + trackData.queryString;
+    trackData.imageStreamUrl = '/get_album_cover?track_path=' + encodedPath;
     const coverResponse = await fetch(trackData.imageStreamUrl);
     checkResponseCode(coverResponse);
     const imageBlob = await coverResponse.blob();
@@ -469,7 +467,7 @@ async function downloadAndAddToQueue(trackData) {
 
     // Get lyrics
     console.info('queue | download lyrics');
-    trackData.lyricsUrl = '/get_lyrics' + trackData.queryString;
+    trackData.lyricsUrl = '/get_lyrics?track_path=' + encodedPath;
     const lyricsResponse = await fetch(trackData.lyricsUrl);
     checkResponseCode(lyricsResponse);
     const lyricsJson = await lyricsResponse.json();
@@ -652,7 +650,7 @@ function queueAdd(id) {
     const trackData = {
         person: button.dataset.personDir,
         personDisplay: button.dataset.personDisplay,
-        name: button.dataset.trackFile,
+        path: button.dataset.trackFile,
         displayName: button.dataset.trackDisplay,
     };
     downloadAndAddToQueue(trackData);

@@ -11,7 +11,7 @@ from flask import Flask, request, render_template, Response, redirect
 from flask_babel import Babel
 
 from assets import Assets
-from music import Person
+from music import Person, Track
 import cache
 import bing
 import genius
@@ -106,7 +106,7 @@ def choose_track():
     display_name = chosen_track.metadata().display_title()
 
     return {
-        'name': chosen_track.name(),
+        'path': chosen_track.relpath(),
         'display_name': display_name,
     }
 
@@ -118,8 +118,7 @@ def get_track() -> Response:
 
     quality = request.args['quality'] if 'quality' in request.args else 'high'
 
-    person = Person.by_dir_name(request.args['person_dir'])
-    track = person.track(request.args['track_name'])
+    track = Track.by_relpath(request.args['track_path'])
     audio = track.transcoded_audio(quality)
     return Response(audio, mimetype='audio/ogg')
 
@@ -129,10 +128,9 @@ def get_album_cover() -> Response:
     if not check_password_cookie():
         return Response(None, 403)
 
-    person = Person.by_dir_name(request.args['person_dir'])
-    track = person.track(request.args['track_name'])
+    track = Track.by_relpath(request.args['track_path'])
 
-    cache_obj = cache.get('album_art', person.dir_name + track.name())
+    cache_obj = cache.get('album_art', track.relpath())
     cached_data = cache_obj.retrieve()
     if cached_data is not None:
         log.info('Returning cached image')
@@ -171,10 +169,9 @@ def get_lyrics():
     if not check_password_cookie():
         return Response(None, 403)
 
-    person = Person.by_dir_name(request.args['person_dir'])
-    track = person.track(request.args['track_name'])
+    track = Track.by_relpath(request.args['track_path'])
 
-    cache_object = cache.get('genius2', person.dir_name + track.name())
+    cache_object = cache.get('genius2', track.relpath())
     cached_data = cache_object.retrieve()
 
     if cached_data is not None:
@@ -276,7 +273,7 @@ def track_list():
         }
         for track in person.tracks():
             person_json['tracks'].append({
-                'file': track.name(),
+                'file': track.relpath(),
                 'display': track.metadata().display_title(),
             })
         response['persons'].append(person_json)

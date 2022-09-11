@@ -1,7 +1,6 @@
 from pathlib import Path
-from typing import List
+from typing import List, Iterator
 from datetime import datetime
-import os
 import random
 import subprocess
 from subprocess import CompletedProcess
@@ -13,8 +12,19 @@ import settings
 from keyval import conn as redis
 
 
-music_base_dir = Path(settings.music_dir)
+music_base_dir = Path(settings.music_dir).absolute()
 log = logging.getLogger('app.music')
+
+
+MUSIC_EXTENSIONS = [
+    'mp3',
+    'flac',
+    'ogg',
+    'webm',
+    'mkv',
+    'wma',
+    'm4a',
+]
 
 
 class Track:
@@ -22,11 +32,15 @@ class Track:
     def __init__(self, path: Path):
         self.path = path
 
-    def name(self) -> str:
+        # Prevent directory traversal
+        if not path.is_relative_to(music_base_dir):
+            raise Exception()
+
+    def relpath(self) -> str:
         """
-        Returns: Full track file name
+        Returns: Track path, excluding base directory
         """
-        return self.path.name
+        return self.path.absolute().as_posix()[len(music_base_dir.as_posix())+1:]
 
     def metadata(self) -> Metadata:
         """
@@ -103,6 +117,10 @@ class Track:
 
         return cached_data
 
+    @staticmethod
+    def by_relpath(relpath: str) -> 'Track':
+        return Track(Path(music_base_dir, relpath))
+
 
 class Person:
 
@@ -112,12 +130,17 @@ class Person:
         self.display_name = display_name
         self.is_guest = is_guest
 
+    def track_paths(self) -> Iterator[Path]:
+        for ext in MUSIC_EXTENSIONS:
+            for path in self.music_dir.glob('**/*.' + ext):
+                yield path
+
     def choose_track(self, choices=20) -> Track:
         """
         Randomly choose a track from this person's music directory
         Returns: Track name
         """
-        tracks = [f.name for f in self.music_dir.iterdir() if os.path.isfile(f)]
+        tracks = list(self.track_paths())
         current_timestamp = int(datetime.now().timestamp())
 
         # Randomly choose some amount of tracks, then pick the track that was played the longest ago
@@ -126,7 +149,7 @@ class Person:
         best_time = None
 
         for track in random.choices(tracks, k=choices):
-            last_played_b = redis.get('last_played_' + track)
+            last_played_b = redis.get('last_played_' + track.as_posix())
 
             if last_played_b is None:
                 best_track = track
@@ -148,30 +171,28 @@ class Person:
             hours_ago = (current_timestamp - best_time) / 3600
             log.info('Chosen track: %s (last played %.2f hours ago)', best_track, hours_ago)
 
-        redis.set('last_played_' + best_track, str(current_timestamp).encode())
+        redis.set('last_played_' + best_track.as_posix(), str(current_timestamp).encode())
 
-        return self.track(best_track)
+        return Track(best_track)
 
     def count_tracks(self) -> int:
         """
         Returns: Number of tracks in this person's music directory
         """
-        return sum(1 for _d in self.music_dir.iterdir())
+        return sum(1 for _d in self.track_paths())
 
-    def track(self, track_name: str) -> Track:
-        """
-        Get track by name
-        Parameters:
-            track_name: Track file name
-        Returns: Track object
-        """
-        return Track(Path(self.music_dir, track_name))
+    def has_music(self) -> bool:
+        try:
+            next(self.track_paths())
+            return True
+        except StopIteration:
+            return False
 
     def tracks(self) -> List[Track]:
         """
         Get all this person's tracks as a list of Track objects
         """
-        return [Track(entry) for entry in self.music_dir.iterdir()]
+        return [Track(entry) for entry in self.track_paths()]
 
     def search_tracks(self, query: str, limit: int = 3) -> List[Track]:
         """
@@ -184,11 +205,11 @@ class Person:
         # TODO levenshtein distance?
         results: List[Track] = []
 
-        for entry in self.music_dir.iterdir():
+        for path in self.track_paths():
             if len(results) > limit:
                 break
-            if query.lower() in entry.name.lower():
-                results.append(self.track(entry.name))
+            if query.lower() in path.name.lower():
+                results.append(Track(path))
 
         return results
 
@@ -233,7 +254,8 @@ class Person:
         for music_dir in Path(music_base_dir).iterdir():
             if not music_dir.name.startswith('Guest-'):
                 person = Person(music_dir.name, music_dir.name, False)
-                persons.append(person)
+                if person.has_music():
+                    persons.append(person)
         return persons
 
     @staticmethod
@@ -246,7 +268,8 @@ class Person:
         for music_dir in Path(music_base_dir).iterdir():
             if music_dir.name.startswith('Guest-'):
                 person = Person(music_dir.name, music_dir.name[6:], True)
-                persons.append(person)
+                if person.has_music():
+                    persons.append(person)
         return persons
 
     @staticmethod
