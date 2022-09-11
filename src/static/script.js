@@ -423,79 +423,62 @@ function updateQueue() {
     const trackData = {
         person: person,
         personDisplay: person.startsWith("Guest-") ? person.substring('6') : person,
+        name: null, // choose random
     }
 
-    console.info('queue | choose track');
-
-    fetch('/choose_track?person_dir=' + encodeURIComponent(person))
-        .then(response => {
-            checkResponseCode(response);
-            return response.json();
-        }, throwErr)
-        .then(trackJson => {
-            trackData.name = trackJson.name;
-            trackData.displayName = trackJson.display_name;
-            downloadAndAddToQueue(trackData, () => {
-                // On complete
-                document.queueBusy = false;
-                setTimeout(updateQueue, 500);
-            });
-        }, error => {
-            console.warn('queue | error');
-            console.warn(error);
-            document.queueBusy = false
-            setTimeout(updateQueue, 5000);
-        });
+    downloadAndAddToQueue(trackData).then(() => {
+        document.queueBusy = false;
+        setTimeout(updateQueue, 500);
+    }, error => {
+        console.warn('queue | error');
+        console.warn(error);
+        document.queueBusy = false
+        setTimeout(updateQueue, 5000);
+    });
 }
 
-function downloadAndAddToQueue(trackData, onComplete) {
-    // JavaScript doesn't stop execution of a promise chain in case of an error, so we need to manually
-    // pass the error down the chain by repeatedly calling throwErr() on errors.
+async function downloadAndAddToQueue(trackData) {
+    // If no specific track is specified, first choose random track
+    if (trackData.name === null) {
+        console.info('queue | choose track');
+        const chooseResponse = await fetch('/choose_track?person_dir=' + encodeURIComponent(trackData.person));
+        checkResponseCode(chooseResponse);
+        const trackJson = await chooseResponse.json();
+        trackData.name = trackJson.name;
+        trackData.displayName = trackJson.display_name;
+    }
+
     trackData.queryString = '?person_dir=' + encodeURIComponent(trackData.person) + '&track_name=' + encodeURIComponent(trackData.name);
     const quality = encodeURIComponent(document.getElementById('audio-quality').value);
     trackData.audioStreamUrl = '/get_track' + trackData.queryString + '&quality=' + quality;
+
+    // Get track audio
     console.info('queue | download audio');
-    fetch(trackData.audioStreamUrl)
-        .then(response => {
-            checkResponseCode(response);
-            return response.blob();
-        }, throwErr)
-        .then(audioBlob => {
-            trackData.audioBlobUrl = URL.createObjectURL(audioBlob);
-            console.info('queue | download album cover image');
-            trackData.imageStreamUrl = '/get_album_cover' + trackData.queryString;
-            return fetch(trackData.imageStreamUrl);
-        }, throwErr)
-        .then(response => {
-            checkResponseCode(response);
-            return response.blob();
-        }, throwErr)
-        .then(imageBlob => {
-            trackData.imageBlobUrl = URL.createObjectURL(imageBlob);
-            console.info('queue | download lyrics');
-            trackData.lyricsUrl = '/get_lyrics' + trackData.queryString;
-            return fetch(trackData.lyricsUrl);
-        }, throwErr)
-        .then(response => {
-            checkResponseCode(response);
-            return response.json();
-        }, throwErr)
-        .then(lyricsJson => {
-            trackData.lyrics = lyricsJson;
-            document.queue.push(trackData);
-            updateQueueHtml();
-            console.info("queue | done");
-            if (onComplete !== undefined) {
-                onComplete();
-            }
-        })
-        .then(null, error => {
-            console.warn('queue | error');
-            console.warn(error);
-            if (onComplete !== undefined) {
-                onComplete();
-            }
-        });
+    const trackResponse = await fetch(trackData.audioStreamUrl);
+    checkResponseCode(trackResponse);
+    const audioBlob = await trackResponse.blob();
+    trackData.audioBlobUrl = URL.createObjectURL(audioBlob);
+
+    // Get cover image
+    console.info('queue | download album cover image');
+    trackData.imageStreamUrl = '/get_album_cover' + trackData.queryString;
+    const coverResponse = await fetch(trackData.imageStreamUrl);
+    checkResponseCode(coverResponse);
+    const imageBlob = await coverResponse.blob();
+    trackData.imageBlobUrl = URL.createObjectURL(imageBlob);
+
+    // Get lyrics
+    console.info('queue | download lyrics');
+    trackData.lyricsUrl = '/get_lyrics' + trackData.queryString;
+    const lyricsResponse = await fetch(trackData.lyricsUrl);
+    checkResponseCode(lyricsResponse);
+    const lyricsJson = await lyricsResponse.json();
+    trackData.lyrics = lyricsJson;
+
+    // Finalize
+    document.queue.push(trackData);
+    updateQueueHtml();
+    console.info("queue | done");
 }
 
 function removeFromQueue(index) {
@@ -656,7 +639,7 @@ function youTubeDownload(event) {
 // ##############################################
 
 function initTrackList() {
-    fetch(new Request('/track_list'))
+    fetch('/track_list')
         .then(response => response.json())
         .then(json => {
             document.trackList = json.persons
@@ -757,10 +740,6 @@ function searchTrackList() {
 
 function choice(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
-}
-
-function throwErr(err) {
-    throw err;
 }
 
 function checkResponseCode(response) {
