@@ -427,7 +427,7 @@ function updateQueue() {
 
     console.info('queue | choose track');
 
-    fetch(new Request('/choose_track?person_dir=' + encodeURIComponent(person)))
+    fetch('/choose_track?person_dir=' + encodeURIComponent(person))
         .then(response => {
             if (response.status == 200) {
                 return response.json();
@@ -458,7 +458,7 @@ function downloadAndAddToQueue(trackData, onComplete) {
     const quality = encodeURIComponent(document.getElementById('audio-quality').value);
     trackData.audioStreamUrl = '/get_track' + trackData.queryString + '&quality=' + quality;
     console.info('queue | download audio');
-    fetch(new Request(trackData.audioStreamUrl))
+    fetch(trackData.audioStreamUrl)
         .then(response => {
             if (response.status == 200) {
                 return response.blob();
@@ -470,7 +470,7 @@ function downloadAndAddToQueue(trackData, onComplete) {
             trackData.audioBlobUrl = URL.createObjectURL(audioBlob);
             console.info('queue | download album cover image');
             trackData.imageStreamUrl = '/get_album_cover' + trackData.queryString;
-            return fetch(new Request(trackData.imageStreamUrl));
+            return fetch(trackData.imageStreamUrl);
         }, throwErr)
         .then(response => {
             if (response.status == 200) {
@@ -483,7 +483,7 @@ function downloadAndAddToQueue(trackData, onComplete) {
             trackData.imageBlobUrl = URL.createObjectURL(imageBlob);
             console.info('queue | download lyrics');
             trackData.lyricsUrl = '/get_lyrics' + trackData.queryString;
-            return fetch(new Request(trackData.lyricsUrl));
+            return fetch(trackData.lyricsUrl);
         }, throwErr)
         .then(response => {
             if (response.status == 200) {
