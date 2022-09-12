@@ -122,7 +122,7 @@ class Track:
         return Track(Path(music_base_dir, relpath))
 
 
-class Person:
+class Playlist:
 
     def __init__(self, dir_name: str, display_name: str, is_guest: bool):
         self.music_dir = Path(music_base_dir, dir_name)
@@ -137,7 +137,7 @@ class Person:
 
     def choose_track(self, choices=20) -> Track:
         """
-        Randomly choose a track from this person's music directory
+        Randomly choose a track from this playlist directory
         Returns: Track name
         """
         tracks = list(self.track_paths())
@@ -177,7 +177,7 @@ class Person:
 
     def count_tracks(self) -> int:
         """
-        Returns: Number of tracks in this person's music directory
+        Returns: Number of tracks in this playlists's music directory
         """
         return sum(1 for _d in self.track_paths())
 
@@ -190,7 +190,7 @@ class Person:
 
     def tracks(self) -> List[Track]:
         """
-        Get all this person's tracks as a list of Track objects
+        Get all tracks in this playlist as a list of Track objects
         """
         return [Track(entry) for entry in self.track_paths()]
 
@@ -233,48 +233,48 @@ class Person:
                               text=True)
 
     @staticmethod
-    def by_dir_name(dir_name: str) -> 'Person':
+    def by_dir_name(dir_name: str) -> 'Playlist':
         """
-        Get person object from the name of a music directory.
+        Get playlist object from the name of a music directory.
         Parameters:
             dir_name: Name of directory
-        Returns: Person instance
+        Returns: Playlist instance
         """
         if dir_name.startswith('Guest-'):
-            return Person(dir_name, dir_name[6:], True)
+            return Playlist(dir_name, dir_name[6:], True)
         else:
-            return Person(dir_name, dir_name, False)
+            return Playlist(dir_name, dir_name, False)
 
     @staticmethod
-    def get_main() -> List['Person']:
+    def get_main() -> List['Playlist']:
         """
-        Returns: List of Person objects for all Raphson members (CB, DK, JK)
+        Returns: List of Playlist objects for all Raphson members (CB, DK, JK)
         """
-        persons = []
+        playlists = []
         for music_dir in Path(music_base_dir).iterdir():
             if not music_dir.name.startswith('Guest-'):
-                person = Person(music_dir.name, music_dir.name, False)
-                if person.has_music():
-                    persons.append(person)
-        return persons
+                playlist = Playlist(music_dir.name, music_dir.name, False)
+                if playlist.has_music():
+                    playlists.append(playlist)
+        return playlists
 
     @staticmethod
-    def get_guests() -> List['Person']:
+    def get_guests() -> List['Playlist']:
         """
-        Returns: List of Person objects for guests, generated dynamically from
+        Returns: List of Playlist objects for guests, generated dynamically from
                  directory names
         """
-        persons = []
+        playlists = []
         for music_dir in Path(music_base_dir).iterdir():
             if music_dir.name.startswith('Guest-'):
-                person = Person(music_dir.name, music_dir.name[6:], True)
-                if person.has_music():
-                    persons.append(person)
-        return persons
+                playlist = Playlist(music_dir.name, music_dir.name[6:], True)
+                if playlist.has_music():
+                    playlists.append(playlist)
+        return playlists
 
     @staticmethod
-    def get_all() -> List['Person']:
+    def get_all() -> List['Playlist']:
         """
         Returns: Concatenation of get_main() and get_guests()
         """
-        return [*Person.get_main(), *Person.get_guests()]
+        return [*Playlist.get_main(), *Playlist.get_guests()]

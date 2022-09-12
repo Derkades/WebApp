@@ -21,20 +21,20 @@
                 <h3>{% trans %}Playlists{% endtrans %}</h3>
 
                 <div>
-                    {% for person in raphson %}
+                    {% for playlist in main_playlists %}
                         <span class="checkbox-with-label">
-                            <input type="checkbox" class="person-checkbox" id="checkbox-{{ person.dir_name }}" checked>
-                            <label for="checkbox-{{ person.dir_name }}">{{ person.display_name }}<sup>{{ loop.index }}</sup> ({{ person.count_tracks() }})</label>
+                            <input type="checkbox" class="playlist-checkbox" id="checkbox-{{ playlist.dir_name }}" checked>
+                            <label for="checkbox-{{ playlist.dir_name }}">{{ playlist.display_name }}<sup>{{ loop.index }}</sup> ({{ playlist.count_tracks() }})</label>
                         </span>
                     {% endfor %}
                 </div>
 
                 <div id="guest-playlists">
                     {% if guests %}
-                        {% for person in guests %}
+                        {% for playlist in guest_playlists %}
                             <span class="checkbox-with-label">
-                                <input type="checkbox" class="person-checkbox" id="checkbox-{{ person.dir_name }}">
-                                <label for="checkbox-{{ person.dir_name }}">{{ person.display_name }}<sup>{{ loop.index + 3}}</sup> ({{ person.count_tracks() }})</label>
+                                <input type="checkbox" class="playlist-checkbox" id="checkbox-{{ playlist.dir_name }}">
+                                <label for="checkbox-{{ playlist.dir_name }}">{{ playlist.display_name }}<sup>{{ loop.index + 3}}</sup> ({{ playlist.count_tracks() }})</label>
                             </span>
                         {% endfor %}
                     {% endif %}
@@ -103,13 +103,13 @@
                 </span>
             </div>
 
-            <select id="track-list-person">
+            <select id="track-list-playlist">
                 <option value="everyone">{% trans %}Everyone{% endtrans %}</option>
-                {% for person in raphson %}
-                    <option value="{{ person.dir_name }}">{{ person.display_name }}</option>
+                {% for playlist in main_playlists %}
+                    <option value="{{ playlist.dir_name }}">{{ playlist.display_name }}</option>
                 {% endfor %}
-                {% for person in guests %}
-                    <option value="{{ person.dir_name }}">{{ person.display_name }} ({% trans %}Guest{% endtrans%})</option>
+                {% for playlist in guest_playlists %}
+                    <option value="{{ playlist.dir_name }}">{{ playlist.display_name }} ({% trans %}Guest{% endtrans%})</option>
                 {% endfor %}
             </select>
 
@@ -168,11 +168,11 @@
             {% trans %}Select a name and paste a link from YouTube, Soundcloud, Bandcamp, etc. Finally, press <kbd>Download</kbd>.{% endtrans %}
             <form>
                 <select id="youtube-dl-directory">
-                    {% for person in raphson %}
-                        <option value="{{ person.dir_name }}">{{ person.display_name }}</option>
+                    {% for playlist in main_playlists %}
+                        <option value="{{ playlist.dir_name }}">{{ playlist.display_name }}</option>
                     {% endfor %}
-                    {% for person in guests %}
-                        <option value="{{ person.dir_name }}">{{ person.display_name }} (Gast)</option>
+                    {% for playlist in guest_playlists %}
+                        <option value="{{ playlist.dir_name }}">{{ playlist.display_name }} (Gast)</option>
                     {% endfor %}
                 </select>
                 <input id="youtube-dl-url" type="text" placeholder="https://youtube.com/watch?v=..." size="45">

@@ -23,7 +23,7 @@ Prebuilt container image: `ghcr.io/danielkoomen/webapp`. Take the `docker-compos
 
 ### `MUSIC_MUSIC_DIR` (default `/music`)
 
-This directory should contain one subdirectory for each person. Directory names may be prefixed with `Guest-` to mark the person as a guest. Place audio files in these person directories. Creating directories inside person directories is not supported at this time.
+This directory should contain one subdirectory for each playlist. Directory names may be prefixed with `Guest-` to mark the playlist as a guest. Place audio files in these playlist directories. Creating directories inside playlist directories is not supported at this time.
 
 An example:
 

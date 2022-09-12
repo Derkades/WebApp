@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById('queue-overlay').style.display = 'flex');
     document.getElementById('queue-close').addEventListener('click', () =>
             document.getElementById('queue-overlay').style.display = 'none');
-    document.getElementById('track-list-person').addEventListener('input', searchTrackList);
+    document.getElementById('track-list-playlist').addEventListener('input', searchTrackList);
     document.getElementById('track-list-query').addEventListener('input', searchTrackList);
 
     // Hotkeys
@@ -116,7 +116,7 @@ function handleKey(key) {
     const keyInt = parseInt(key);
     if (!isNaN(keyInt)) {
         let index = 1;
-        for (const checkbox of document.getElementsByClassName('person-checkbox')) {
+        for (const checkbox of document.getElementsByClassName('playlist-checkbox')) {
             if (index === keyInt) {
                 checkbox.checked = !checkbox.checked
                 break;
@@ -275,11 +275,11 @@ function updateTrackHtml() {
         document.getElementById('lyrics').innerHTML = '<i class="secondary">Geen lyrics gevonden</i>'
     }
 
-    document.getElementById('current-track').textContent = '[' + track.personDisplay + '] ' + track.displayName;
+    document.getElementById('current-track').textContent = '[' + track.playlistDisplay + '] ' + track.displayName;
 
     if (document.history.length > 0) {
         const previousTrack = document.history[document.history.length - 1];
-        document.getElementById('previous-track').textContent = '[' + previousTrack.personDisplay + '] ' + previousTrack.displayName;
+        document.getElementById('previous-track').textContent = '[' + previousTrack.playlistDisplay + '] ' + previousTrack.displayName;
     } else {
         document.getElementById('previous-track').textContent = '-';
     }
@@ -360,10 +360,10 @@ function switchAlbumCover() {
 //              Queue (playlists)
 // ##############################################
 
-function getActivePersons() {
+function getActivePlaylists() {
     const active = [];
 
-    for (const checkbox of document.getElementsByClassName('person-checkbox')) {
+    for (const checkbox of document.getElementsByClassName('playlist-checkbox')) {
         const musicDirName = checkbox.id.substring(9); // remove 'checkbox-'
         if (checkbox.checked) {
             active.push(musicDirName);
@@ -373,30 +373,30 @@ function getActivePersons() {
     return active;
 }
 
-function getNextPerson(currentPerson) {
-    const active = getActivePersons();
+function getNextPlaylist(currentPlaylist) {
+    const active = getActivePlaylists();
 
-    let person;
+    let playlist;
 
     if (active.length === 0) {
         // No one is selected
         return null;
-    } else if (currentPerson === null) {
-        // No person chosen yet, choose random person
-        person = choice(active);
+    } else if (currentPlaylist === null) {
+        // No playlist chosen yet, choose random playlist
+        playlist = choice(active);
     } else {
-        const currentIndex = active.indexOf(currentPerson);
+        const currentIndex = active.indexOf(currentPlaylist);
         if (currentIndex === -1) {
-            // Current person is no longer active, we don't know the logical next person
-            // Choose random person
-            person = choice(active);
+            // Current playlist is no longer active, we don't know the logical next playlist
+            // Choose random playlist
+            playlist = choice(active);
         } else {
-            // Choose next person in list, wrapping around if at the end
-            person = active[(currentIndex + 1) % active.length];
+            // Choose next playlist in list, wrapping around if at the end
+            playlist = active[(currentIndex + 1) % active.length];
         }
     }
 
-    return person;
+    return playlist;
 }
 
 // ##############################################
@@ -410,15 +410,15 @@ function updateQueue() {
         return;
     }
 
-    let person;
+    let playlist;
 
     if (document.playlistOverrides.length > 0) {
-        person = document.playlistOverrides.pop();
+        playlist = document.playlistOverrides.pop();
     } else {
-        person = getNextPerson(document.lastChosenPlaylist);
+        playlist = getNextPlaylist(document.lastChosenPlaylist);
     }
 
-    if (person === null) {
+    if (playlist === null) {
         console.warn('queue | no playlists selected, trying again later');
         // TODO Display warning in queue
         setTimeout(updateQueue, 500);
@@ -434,8 +434,8 @@ function updateQueue() {
     document.queueBusy = true;
 
     const trackData = {
-        person: person,
-        personDisplay: person.startsWith("Guest-") ? person.substring('6') : person,
+        playlist: playlist,
+        playlistDisplay: playlist.startsWith("Guest-") ? playlist.substring('6') : playlist,
         path: null, // choose random
     }
 
@@ -454,7 +454,7 @@ async function downloadAndAddToQueue(trackData) {
     // If no specific track is specified, first choose random track
     if (trackData.path === null) {
         console.info('queue | choose track');
-        const chooseResponse = await fetch('/choose_track?person_dir=' + encodeURIComponent(trackData.person));
+        const chooseResponse = await fetch('/choose_track?playlist_dir=' + encodeURIComponent(trackData.playlist));
         checkResponseCode(chooseResponse);
         const trackJson = await chooseResponse.json();
         trackData.path = trackJson.path;
@@ -494,7 +494,7 @@ async function downloadAndAddToQueue(trackData) {
 
 function removeFromQueue(index) {
     const trackData = document.queue[index];
-    document.playlistOverrides.push(trackData.person);
+    document.playlistOverrides.push(trackData.playlist);
     document.queue.splice(index, 1);
     updateQueueHtml();
     updateQueue();
@@ -516,7 +516,7 @@ function updateQueueHtml() {
                     html += '<div style="background-image: url(\'' + trashBase64 + '\')" class="icon"></div>';
                 html += '</div>'
             html += '</td>';
-            html += '<td>' + queuedTrack.personDisplay + '</td>';
+            html += '<td>' + queuedTrack.playlistDisplay + '</td>';
             html += '<td>' + escapeHtml(queuedTrack.displayName) + '</td>';
         html += '</tr>';
         i++;
@@ -655,7 +655,7 @@ function initTrackList() {
     fetch('/track_list')
         .then(response => response.json())
         .then(json => {
-            document.trackList = json.persons
+            document.trackList = json.playlists
             searchTrackList();
         });
 }
@@ -663,8 +663,8 @@ function initTrackList() {
 function queueAdd(id) {
     const button = document.getElementById(id);
     const trackData = {
-        person: button.dataset.personDir,
-        personDisplay: button.dataset.personDisplay,
+        playlist: button.dataset.playlistDir,
+        playlistDisplay: button.dataset.playlistDisplay,
         path: button.dataset.trackFile,
         displayName: button.dataset.trackDisplay,
     };
@@ -678,14 +678,14 @@ function searchTrackList() {
         return;
     }
 
-    const person = document.getElementById('track-list-person').value;
+    const playlist = document.getElementById('track-list-playlist').value;
     const query = document.getElementById('track-list-query').value.trim().toLowerCase();
 
     const tracks = [];
 
-    for (const personJson of document.trackList) {
-        if (person === 'everyone' || person === personJson.dir_name) {
-            for (const track of personJson.tracks) {
+    for (const playlistJson of document.trackList) {
+        if (playlist === 'everyone' || playlist === playlistJson.dir_name) {
+            for (const track of playlistJson.tracks) {
                 let score = 0;
 
                 if (query !== '') {
@@ -707,8 +707,8 @@ function searchTrackList() {
 
                 if (score > 0) {
                     tracks.push({
-                        personDir: personJson.dir_name,
-                        personDisplay: personJson.display_name,
+                        playlistDir: playlistJson.dir_name,
+                        playlistDisplay: playlistJson.display_name,
                         trackFile: track.file,
                         trackDisplay: track.display,
                         score: score,
@@ -727,12 +727,12 @@ function searchTrackList() {
         outputHtml += ''
             + '<button '
             + 'id="queue-choice-' + i + '" '
-            + 'data-person-dir="' + escapeHtml(track.personDir) + '" '
-            + 'data-person-display="' + escapeHtml(track.personDisplay) + '" '
+            + 'data-playlist-dir="' + escapeHtml(track.playlistDir) + '" '
+            + 'data-playlist-display="' + escapeHtml(track.playlistDisplay) + '" '
             + 'data-track-file="' + escapeHtml(track.trackFile) + '" '
             + 'data-track-display="' + escapeHtml(track.trackDisplay) + '" '
             + 'onclick="queueAdd(this.id);">'
-            + '[' + escapeHtml(track.personDisplay) + '] ' + escapeHtml(track.trackDisplay)
+            + '[' + escapeHtml(track.playlistDisplay) + '] ' + escapeHtml(track.trackDisplay)
             + '</button><br>';
 
 

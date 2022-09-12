@@ -11,7 +11,7 @@ from flask import Flask, request, render_template, Response, redirect
 from flask_babel import Babel
 
 from assets import Assets
-from music import Person, Track
+from music import Playlist, Track
 import cache
 import bing
 import genius
@@ -90,8 +90,8 @@ def player():
         return redirect('/login')
 
     return render_template('player.jinja2',
-                           raphson=Person.get_main(),
-                           guests=Person.get_guests(),
+                           main_playlists=Playlist.get_main(),
+                           guest_playlists=Playlist.get_guests(),
                            assets=assets.all_assets_dict())
 
 
@@ -100,9 +100,9 @@ def choose_track():
     if not check_password_cookie():
         return Response(None, 403)
 
-    dir_name = request.args['person_dir']
-    person = Person.by_dir_name(dir_name)
-    chosen_track = person.choose_track()
+    dir_name = request.args['playlist_dir']
+    playlist = Playlist.by_dir_name(dir_name)
+    chosen_track = playlist.choose_track()
     display_name = chosen_track.metadata().display_title()
 
     return {
@@ -227,10 +227,10 @@ def ytdl():
     directory = request.json['directory']
     url = request.json['url']
 
-    person = Person.by_dir_name(directory)
+    playlist = Playlist.by_dir_name(directory)
     log.info('ytdl %s %s', directory, url)
 
-    result = person.download(url)
+    result = playlist.download(url)
 
     return {
         'code': result.returncode,
@@ -246,11 +246,11 @@ def search_track():
 
     query = request.args['query']
     results = []
-    for person in Person.get_all():
-        for track in person.search_tracks(query):
+    for playlist in Playlist.get_all():
+        for track in playlist.search_tracks(query):
             results.append({
-                'person_dir': person.dir_name,
-                'person_display': person.display_name,
+                'playlist_dir': playlist.dir_name,
+                'playlist_display': playlist.display_name,
                 'track_file': track.name(),
                 'track_display': track.metadata().display_title(),
             })
@@ -264,19 +264,19 @@ def track_list():
     if not check_password_cookie():
         return Response(None, 403)
 
-    response = {'persons': []}
-    for person in Person.get_all():
-        person_json = {
-            'dir_name': person.dir_name,
-            'display_name': person.display_name,
+    response = {'playlists': []}
+    for playlist in Playlist.get_all():
+        playlist_json = {
+            'dir_name': playlist.dir_name,
+            'display_name': playlist.display_name,
             'tracks': [],
         }
-        for track in person.tracks():
-            person_json['tracks'].append({
+        for track in playlist.tracks():
+            playlist_json['tracks'].append({
                 'file': track.relpath(),
                 'display': track.metadata().display_title(),
             })
-        response['persons'].append(person_json)
+        response['playlists'].append(playlist_json)
 
     return response
 
