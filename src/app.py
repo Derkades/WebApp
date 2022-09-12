@@ -6,6 +6,7 @@ import hmac
 from logging.config import dictConfig
 import logging
 from pathlib import Path
+from datetime import datetime, timedelta
 
 from flask import Flask, request, render_template, Response, redirect
 from flask_babel import Babel
@@ -263,20 +264,43 @@ def search_track():
 def track_list():
     if not check_password_cookie():
         return Response(None, 403)
-
-    response = {'playlists': []}
-    for playlist in Playlist.get_all():
-        playlist_json = {
+    
+    response = {
+        'playlists': {},
+        'tracks': [],
+        'index': 0,
+        'partial': False,
+    }
+    
+    playlists = Playlist.get_all()
+    
+    for playlist in playlists:
+        response['playlists'][playlist.dir_name] = {
             'dir_name': playlist.dir_name,
             'display_name': playlist.display_name,
-            'tracks': [],
+            'track_count': playlist.count_tracks(),
         }
+        
+    max_seconds = 5
+    skip_to_index = int(request.args['skip']) if 'skip' in request.args else 0
+    start_time = datetime.now()
+    
+    for playlist in playlists:
         for track in playlist.tracks():
-            playlist_json['tracks'].append({
-                'file': track.relpath(),
-                'display': track.metadata().display_title(),
-            })
-        response['playlists'].append(playlist_json)
+            if skip_to_index <= response['index']:
+                meta = track.metadata()
+                response['tracks'].append({
+                    'playlist': playlist.dir_name,
+                    'playlist_display': playlist.display_name,
+                    'file': track.relpath(),
+                    'display': meta.display_title(),
+                })
+                
+            if response['index'] % 10 == 0 and datetime.now() - start_time > timedelta(seconds=max_seconds):
+                response['partial'] = True
+                return response
+                
+            response['index'] += 1
 
     return response
 

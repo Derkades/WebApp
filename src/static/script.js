@@ -12,6 +12,8 @@ document.historySize = 10;
 document.maxSearchListSize = 500;
 document.lastChosenPlaylist = null;
 document.playlistOverrides = [];
+document.persons = null;
+document.tracks = null;
 
 // ##############################################
 //                Initialization
@@ -651,13 +653,25 @@ function youTubeDownload(event) {
 //          Track list, add to queue
 // ##############################################
 
-function initTrackList() {
-    fetch('/track_list')
-        .then(response => response.json())
-        .then(json => {
-            document.trackList = json.playlists
-            searchTrackList();
-        });
+async function initTrackList(skip = 0) {
+    console.info('requesting track list, from track ' + skip);
+    const response = await fetch('/track_list?skip=' + skip);
+    const json = await response.json();
+    document.playlists = json.playlists;
+    if (skip === 0) {
+        document.tracks = json.tracks;
+    } else {
+        for (const track of json.tracks) {
+            document.tracks.push(track);
+        }
+    }
+
+    if (json.partial) {
+        setTimeout(() => initTrackList(json.index + 1), 100);
+    }
+
+    // Update search
+    searchTrackList();
 }
 
 function queueAdd(id) {
@@ -673,7 +687,7 @@ function queueAdd(id) {
 }
 
 function searchTrackList() {
-    if (document.trackList === undefined) {
+    if (document.tracks === null) {
         document.getElementById('track-list-output').textContent = 'Track list is still loading, please wait... If this takes longer than a minute, please check the console for errors.';
         return;
     }
@@ -683,39 +697,36 @@ function searchTrackList() {
 
     const tracks = [];
 
-    for (const playlistJson of document.trackList) {
-        if (playlist === 'everyone' || playlist === playlistJson.dir_name) {
-            for (const track of playlistJson.tracks) {
-                let score = 0;
+    for (const track of document.tracks) {
+        if (playlist === 'everyone' || playlist === track.playlist) {
+            let score = 0;
 
-                if (query !== '') {
-                    score += track.file.length - levenshtein(track.file.toLowerCase(), query);
-                    score += track.display.length - levenshtein(track.display.toLowerCase(), query);
+            if (query !== '') {
+                score += track.file.length - levenshtein(track.file.toLowerCase(), query);
+                score += track.display.length - levenshtein(track.display.toLowerCase(), query);
 
-                    // Boost exact matches
-                    if (track.file.toLowerCase().includes(query)) {
-                        score *= 2;
-                    }
-
-                    if (track.display.toLowerCase().includes(query)) {
-                        score *= 2;
-                    }
-                } else {
-                    // No query, display all
-                    score = 1;
+                // Boost exact matches
+                if (track.file.toLowerCase().includes(query)) {
+                    score *= 2;
                 }
 
-                if (score > 0) {
-                    tracks.push({
-                        playlistDir: playlistJson.dir_name,
-                        playlistDisplay: playlistJson.display_name,
-                        trackFile: track.file,
-                        trackDisplay: track.display,
-                        score: score,
-                    });
+                if (track.display.toLowerCase().includes(query)) {
+                    score *= 2;
                 }
+            } else {
+                // No query, display all
+                score = 1;
             }
 
+            if (score > 0) {
+                tracks.push({
+                    playlistDir: track.playlist,
+                    playlistDisplay: track.playlist_display_name,
+                    trackFile: track.file,
+                    trackDisplay: track.display,
+                    score: score,
+                });
+            }
         }
     }
 
