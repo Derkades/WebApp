@@ -26,6 +26,10 @@ def _get_image_url(release_id: str) -> Optional[str]:
     return None
 
 def get_webp_cover(title: str) -> Optional[bytes]:
+    """
+    Get album cover (compressed webp format) for the given song title
+    Returns: Image bytes, or None of no album cover was found.
+    """
     release = _search_release(title)
     if release is None:
         return None

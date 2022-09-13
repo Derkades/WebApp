@@ -119,6 +119,9 @@ class Track:
 
     @staticmethod
     def by_relpath(relpath: str) -> 'Track':
+        """
+        Find track by relative path
+        """
         return Track(Path(music_base_dir, relpath))
 
 
@@ -131,6 +134,10 @@ class Playlist:
         self.is_guest = is_guest
 
     def track_paths(self) -> Iterator[Path]:
+        """
+        Scan playlist directory recursively for tracks
+        Returns: Paths iterator
+        """
         for ext in MUSIC_EXTENSIONS:
             for path in self.music_dir.glob('**/*.' + ext):
                 yield path
@@ -182,6 +189,9 @@ class Playlist:
         return sum(1 for _d in self.track_paths())
 
     def has_music(self) -> bool:
+        """
+        Returns: Whether this playlist contains at least one music file
+        """
         try:
             next(self.track_paths())
             return True

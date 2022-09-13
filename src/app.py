@@ -50,6 +50,9 @@ with open(Path(assets_dir, 'raphson.png'), 'rb') as raphson_png:
 
 
 def check_password(password: Optional[str]) -> bool:
+    """
+    Check whether the provided password matches the correct password
+    """
     if password is None:
         return False
 
@@ -69,6 +72,10 @@ def check_password_cookie() -> bool:
 
 @application.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+    Login route. Serve login page for GET requests, and accepts password input for POST requests.
+    If the provided password is invalid, the login template is rendered with invalid_password=True
+    """
     if request.method == 'POST':
         if 'password' not in request.form:
             return 'invalid form input'
@@ -87,6 +94,9 @@ def login():
 
 @application.route('/')
 def player():
+    """
+    Main player page. Serves player.jinja2 template file.
+    """
     if not check_password_cookie():
         return redirect('/login')
 
@@ -98,6 +108,9 @@ def player():
 
 @application.route('/choose_track', methods=['GET'])
 def choose_track():
+    """
+    Choose random track from the provided playlist directory.
+    """ 
     if not check_password_cookie():
         return Response(None, 403)
 
@@ -114,6 +127,9 @@ def choose_track():
 
 @application.route('/get_track')
 def get_track() -> Response:
+    """
+    Get transcoded audio for the given track path.
+    """
     if not check_password_cookie():
         return Response(None, 403)
 
@@ -126,6 +142,9 @@ def get_track() -> Response:
 
 @application.route('/get_album_cover')
 def get_album_cover() -> Response:
+    """
+    Get album cover image for the provided track path.
+    """
     if not check_password_cookie():
         return Response(None, 403)
 
@@ -167,6 +186,9 @@ def get_album_cover() -> Response:
 
 @application.route('/get_lyrics')
 def get_lyrics():
+    """
+    Get lyrics for the provided track path.
+    """
     if not check_password_cookie():
         return Response(None, 403)
 
@@ -222,6 +244,9 @@ def get_lyrics():
 
 @application.route('/ytdl', methods=['POST'])
 def ytdl():
+    """
+    Use yt-dlp to download the provided URL to a playlist directory
+    """
     if not check_password_cookie():
         return Response(None, 403)
 
@@ -242,6 +267,9 @@ def ytdl():
 
 @application.route('/search_track')
 def search_track():
+    """
+    Search playlist directories for the provided query
+    """
     if not check_password_cookie():
         return Response(None, 403)
 
@@ -262,6 +290,10 @@ def search_track():
 
 @application.route('/track_list')
 def track_list():
+    """
+    Return list of playlists and tracks. If it takes too long to load metadata for all tracks,
+    a partial result is returned.
+    """
     if not check_password_cookie():
         return Response(None, 403)
     
@@ -308,6 +340,9 @@ def track_list():
 
 @application.route('/style.css')
 def style() -> Response:
+    """
+    Serve stylesheet, with placeholders replaced
+    """
     if not check_password_cookie():
         return Response(None, 403)
 
@@ -320,6 +355,9 @@ def style() -> Response:
 
 @application.route('/raphson')
 def raphson() -> Response:
+    """
+    Serve raphson logo image
+    """
     if not check_password_cookie():
         return Response(None, 403)
     return Response(raphson_webp, mimetype='image/webp')
@@ -327,6 +365,9 @@ def raphson() -> Response:
 
 @babel.localeselector
 def get_locale():
+    """
+    Get locale preference from HTTP headers
+    """
     # TODO language from cookie
     lang = request.accept_languages.best_match(['nl', 'nl-NL', 'nl-BE', 'en'])
     return lang[:2] if lang is not None else 'en'
