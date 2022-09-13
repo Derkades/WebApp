@@ -429,7 +429,11 @@ function updateQueue() {
         return;
     }
 
-    const minQueueSize = parseInt(document.getElementById('queue-size').value);
+    let minQueueSize = parseInt(document.getElementById('queue-size').value);
+
+    if (!isFinite(minQueueSize)) {
+        minQueueSize = 1;
+    }
 
     if (document.queue.length >= minQueueSize) {
         return;
