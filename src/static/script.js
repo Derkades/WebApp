@@ -421,6 +421,8 @@ function updateQueue() {
         playlist = getNextPlaylist(document.lastChosenPlaylist);
     }
 
+    document.lastChosenPlaylist = playlist;
+
     if (playlist === null) {
         console.info('queue | no playlists selected, trying again later');
         // TODO Display warning in queue
@@ -658,41 +660,47 @@ function youTubeDownload(event) {
 //          Track list, add to queue
 // ##############################################
 
-async function initTrackList(skip = 0) {
+function initTrackList(skip = 0) {
     console.info('requesting track list, from track ' + skip);
-    const response = await fetch('/track_list?skip=' + skip);
-    const json = await response.json();
+    (async function() {
+        const response = await fetch('/track_list?skip=' + skip);
+        const json = await response.json();
 
-    document.playlists = json.playlists;
-    document.mainPlaylists = [];
-    document.guestPlaylists = [];
-    for (const dir_name in document.playlists) {
-        // TODO sort alphabetically by display name
-        const playlist = document.playlists[dir_name];
-        if (playlist.guest) {
-            document.guestPlaylists.push(playlist);
+        document.playlists = json.playlists;
+        document.mainPlaylists = [];
+        document.guestPlaylists = [];
+        for (const dir_name in document.playlists) {
+            // TODO sort alphabetically by display name
+            const playlist = document.playlists[dir_name];
+            if (playlist.guest) {
+                document.guestPlaylists.push(playlist);
+            } else {
+                document.mainPlaylists.push(playlist);
+            }
+        }
+
+        if (skip === 0) {
+            document.tracks = json.tracks;
         } else {
-            document.mainPlaylists.push(playlist);
+            for (const track of json.tracks) {
+                document.tracks.push(track);
+            }
         }
-    }
 
-    if (skip === 0) {
-        document.tracks = json.tracks;
-    } else {
-        for (const track of json.tracks) {
-            document.tracks.push(track);
+        if (json.partial) {
+            setTimeout(() => initTrackList(json.index + 1), 100);
+        } else {
+            setTimeout(initTrackList, 60_000)
         }
-    }
 
-    if (json.partial) {
-        setTimeout(() => initTrackList(json.index + 1), 100);
-    } else {
-        setTimeout(initTrackList, 60_000)
-    }
-
-    // Update HTML depending on document.playlists and document.tracks
-    updatePlaylistCheckboxHtml();
-    searchTrackList();
+        // Update HTML depending on document.playlists and document.tracks
+        updatePlaylistCheckboxHtml();
+        searchTrackList();
+    })().catch(err => {
+        console.warn('track list | error');
+        console.warn(err);
+        setTimeout(initTrackList, 1000);
+    });
 }
 
 function getCheckbox(playlist, index) {
