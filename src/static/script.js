@@ -696,26 +696,68 @@ async function initTrackList(skip = 0) {
     searchTrackList();
 }
 
-function getCheckbox(playlist, index, guest) {
-    return '' +
-        '<span class="checkbox-with-label">' +
-            '<input type="checkbox" class="playlist-checkbox" id="checkbox-' + playlist.dir_name + '" ' + (guest ? '' : 'checked') + '>' +
-            '<label for="checkbox-' + playlist.dir_name + '">' + playlist.display_name + '<sup>' + index + '</sup> (' + playlist.track_count + ')</label>' +
-        '</span>'; 
+function getCheckbox(playlist, index) {
+    const span = document.createElement("span");
+    span.classList.add("checkbox-with-label");
+
+    const input = document.createElement("input");
+    input.type = 'checkbox';
+    input.classList.add('playlist-checkbox');
+    input.id = 'checkbox-' + playlist.dir_name;
+    // Attempt to restore state from cookie
+    const savedState = getSavedCheckboxState();
+    if (savedState === null) {
+        // If no saved state, check if not guest
+        input.checked = !playlist.guest
+    } else {
+        input.checked = savedState.indexOf(playlist.dir_name) !== -1;
+    }
+    input.onclick = saveCheckboxState;
+
+    const label = document.createElement("label");
+    label.attributes.for = "checkbox-" + playlist.dir_name;
+    label.textContent = playlist.display_name;
+    const sup = document.createElement('sup');
+    sup.textContent = index;
+    label.replaceChildren(
+        playlist.display_name,
+        sup,
+        ' (' + playlist.track_count + ')'
+    );
+
+    span.appendChild(input);
+    span.appendChild(label);
+
+    return span;
 }
 
 function updatePlaylistCheckboxHtml() {
     let index = 1;
-    let html = '<div>';
+    const mainDiv = document.createElement('div');
     for (const playlist of document.mainPlaylists) {
-        html += getCheckbox(playlist, index++, false);
+        mainDiv.appendChild(getCheckbox(playlist, index++));
     }
-    html += '</div><div class="guest-checkboxes">'
+    const guestDiv = document.createElement('div');
+    guestDiv.classList.add('guest-checkboxes');
     for (const playlist of document.guestPlaylists) {
-        html += getCheckbox(playlist, index++, true);
+        guestDiv.appendChild(getCheckbox(playlist, index++));
     }
-    html += '</div>'
-    document.getElementById('playlist-checkboxes').innerHTML = html;
+    const parent = document.getElementById('playlist-checkboxes');
+    parent.replaceChildren(mainDiv, guestDiv);
+}
+
+function saveCheckboxState() {
+    setCookie('enabled-playlists', getActivePlaylists().join('~'));
+}
+
+function getSavedCheckboxState() {
+    const cookie = getCookie('enabled-playlists');
+    if (cookie === null) {
+        return null;
+    } else {
+        console.info('loading checkbox state: ' + cookie);
+        return cookie.split('~');
+    }
 }
 
 // TODO use this for track download and search dropdowns 
