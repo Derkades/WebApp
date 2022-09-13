@@ -54,14 +54,25 @@ class Track:
         Normalize and compress audio using ffmpeg
         Returns: Compressed audio bytes
         """
-        if quality not in {'low', 'high'}:
-            raise ValueError('Invalid quality', quality)
 
-        bitrate = settings.opus_bitrate_low if quality == 'low' else settings.opus_bitrate_high
+        if quality == 'verylow':
+            bitrate = '32k'
+            channels = 1
+            samplerate = 24000
+        elif quality == 'low':
+            bitrate = '64k'
+            channels = 2
+            samplerate = 48000
+        elif quality == 'high':
+            bitrate = '96k'
+            channels = 2
+            samplerate = 48000
+        else:
+            raise ValueError('Invalid quality', quality)
 
         in_path_abs = self.path.absolute().as_posix()
 
-        cache_object = cache.get('transcoded audio', in_path_abs + bitrate)
+        cache_object = cache.get('transcoded audio4', in_path_abs + bitrate)
         cached_data = cache_object.retrieve()
         if cached_data is not None:
             log.info('Returning cached audio')
@@ -98,11 +109,14 @@ class Track:
                 '-loglevel', settings.ffmpeg_loglevel,
                 '-i', in_path_abs,
                 '-map_metadata', '-1',  # browser heeft metadata niet nodig
+                '-filter:a', filters,
+                '-ar', str(samplerate),
                 '-c:a', 'libopus',
                 '-b:a', bitrate,
                 '-f', 'opus',
                 '-vbr', 'on',
-                '-filter:a', filters,
+                '-frame_duration', '60',
+                '-ac', str(channels),
                 cache_object.data_path.absolute().as_posix()]
         subprocess.run(command,
                        shell=False,

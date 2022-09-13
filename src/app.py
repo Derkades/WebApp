@@ -110,7 +110,7 @@ def player():
 def choose_track():
     """
     Choose random track from the provided playlist directory.
-    """ 
+    """
     if not check_password_cookie():
         return Response(None, 403)
 
@@ -296,16 +296,16 @@ def track_list():
     """
     if not check_password_cookie():
         return Response(None, 403)
-    
+
     response = {
         'playlists': {},
         'tracks': [],
         'index': 0,
         'partial': False,
     }
-    
+
     playlists = Playlist.get_all()
-    
+
     for playlist in playlists:
         response['playlists'][playlist.dir_name] = {
             'dir_name': playlist.dir_name,
@@ -313,11 +313,11 @@ def track_list():
             'track_count': playlist.count_tracks(),
             'guest': playlist.is_guest,
         }
-        
+
     max_seconds = 5
     skip_to_index = int(request.args['skip']) if 'skip' in request.args else 0
     start_time = datetime.now()
-    
+
     for playlist in playlists:
         for track in playlist.tracks():
             if skip_to_index <= response['index']:
@@ -328,11 +328,11 @@ def track_list():
                     'file': track.relpath(),
                     'display': meta.display_title(),
                 })
-                
-            if response['index'] % 10 == 0 and datetime.now() - start_time > timedelta(seconds=max_seconds):
+
+            if datetime.now() - start_time > timedelta(seconds=max_seconds):
                 response['partial'] = True
                 return response
-                
+
             response['index'] += 1
 
     return response
