@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-09-02 18:39+0200\n"
-"PO-Revision-Date: 2022-09-02 18:39+0200\n"
+"POT-Creation-Date: 2022-09-13 18:26+0200\n"
+"PO-Revision-Date: 2022-09-13 18:26+0200\n"
 "Last-Translator: \n"
 "Language: nl\n"
 "Language-Team: nl <LL@li.org>\n"
@@ -34,83 +34,95 @@ msgstr "Inloggen"
 msgid "Playlists"
 msgstr "Afspeellijsten"
 
-#: src/templates/player.jinja2:44
+#: src/templates/player.jinja2:24
+msgid "Loading..."
+msgstr "Laden..."
+
+#: src/templates/player.jinja2:30
 msgid "Playback"
 msgstr "Muziek"
 
-#: src/templates/player.jinja2:47
+#: src/templates/player.jinja2:33
 msgid "Waiting for music in queue..."
 msgstr "Wachten op muziek in wachtrij..."
 
-#: src/templates/player.jinja2:50
-msgid "Prevously: "
+#: src/templates/player.jinja2:36
+msgid "Previously: "
 msgstr "Vorige: "
 
-#: src/templates/player.jinja2:71
+#: src/templates/player.jinja2:58
 msgid "Queue"
 msgstr "Wachtrij"
 
-#: src/templates/player.jinja2:97
-msgid "Add track to queue (experimental)"
-msgstr "Nummer aan wachtrij toevoegen (experimenteel)"
+#: src/templates/player.jinja2:84
+msgid "Add track to queue"
+msgstr "Nummer toevoegen aan wachtrij"
 
-#: src/templates/player.jinja2:98 src/templates/player.jinja2:124
+#: src/templates/player.jinja2:86 src/templates/player.jinja2:113
 msgid "Close"
 msgstr "Sluiten"
 
-#: src/templates/player.jinja2:102
+#: src/templates/player.jinja2:91
 msgid "Everyone"
 msgstr "Iedereen"
 
-#: src/templates/player.jinja2:107
+#: src/templates/player.jinja2:96
 msgid "Guest"
 msgstr "Gast"
 
-#: src/templates/player.jinja2:111
+#: src/templates/player.jinja2:100
 msgid "Search query"
 msgstr "Zoekopdracht"
 
-#: src/templates/player.jinja2:122
+#: src/templates/player.jinja2:111
 msgid "Hotkeys"
 msgstr "Hete toetsen"
 
-#: src/templates/player.jinja2:131
+#: src/templates/player.jinja2:120
 msgid "Toggle playlists"
 msgstr "Afspeellijsten in-/uitschakelen"
 
-#: src/templates/player.jinja2:135
+#: src/templates/player.jinja2:124
+msgid "Previous track"
+msgstr "Vorig nummer"
+
+#: src/templates/player.jinja2:128
 msgid "Next track"
 msgstr "Volgend nummer"
 
-#: src/templates/player.jinja2:139
+#: src/templates/player.jinja2:132
 msgid "Seek in track (don't use shift)"
 msgstr "Navigeer door nummer (gebruik geen shift)"
 
-#: src/templates/player.jinja2:144
+#: src/templates/player.jinja2:137
 msgid "Settings"
 msgstr "Instellingen"
 
-#: src/templates/player.jinja2:147
+#: src/templates/player.jinja2:140
 msgid "Minimum queue length"
 msgstr "Minimum wachtrijlengte"
 
-#: src/templates/player.jinja2:151
-msgid "High (VBR 96kb/s 48kHz Opus)"
-msgstr "Hoog (VBR 96kb/s 48kHz Opus)"
+#: src/templates/player.jinja2:144
+msgid "Potato (VBR 32kb/s 24kHz Mono Opus)"
+msgstr "Aardappel (VBR 32kb/s 24kHz Mono Opus)"
 
-#: src/templates/player.jinja2:152
-msgid "Low (VBR 64kb/s 48kHz Opus)"
-msgstr "Laag (VBR 64kb/s 48kHz Opus)"
+#: src/templates/player.jinja2:145
+msgid "Low (VBR 64kb/s 48kHz Opus Stereo Opus)"
+msgstr "Laag (VBR 64kb/s 48kHz Opus Stereo Opus)"
 
-#: src/templates/player.jinja2:154
+#: src/templates/player.jinja2:146
+msgid "High (VBR 96kb/s 48kHz Stereo Opus)"
+msgstr "Hoog (VBR 96kb/s 48kHz Stereo Opus)"
+
+#: src/templates/player.jinja2:148
 msgid "Audio quality"
 msgstr "Audiokwaliteit"
 
-#: src/templates/player.jinja2:158
+#: src/templates/player.jinja2:152
 msgid "YouTube download"
 msgstr "YouTube download"
 
-#: src/templates/player.jinja2:159
+#: src/templates/player.jinja2:153
 msgid ""
 "Select a name and paste a link from YouTube, Soundcloud, Bandcamp, etc. "
 "Finally, press <kbd>Download</kbd>."
@@ -118,15 +130,19 @@ msgstr ""
 "Selecteer een naam en plak een link van YouTube, Soundcloud, Bandcamp, "
 "etc. Druk dan op <kbd>Download</kbd>."
 
-#: src/templates/player.jinja2:173
+#: src/templates/player.jinja2:164
+msgid "Download"
+msgstr "Download"
+
+#: src/templates/player.jinja2:167
 msgid "yt-dlp output will appear here"
 msgstr "hier komt output van yt-dlp"
 
-#: src/templates/player.jinja2:176
+#: src/templates/player.jinja2:170
 msgid "Credits"
 msgstr "Credits"
 
-#: src/templates/player.jinja2:177
+#: src/templates/player.jinja2:171
 #, python-format
 msgid ""
 "<a href=\"%(gh)s\">Super fancy music player 2.0</a> is a project largely "
@@ -165,4 +181,16 @@ msgstr ""
 
 #~ msgid "Search"
 #~ msgstr "Zoeken"
+
+#~ msgid "Prevously: "
+#~ msgstr "Vorige: "
+
+#~ msgid "Add track to queue (experimental)"
+#~ msgstr "Nummer aan wachtrij toevoegen (experimenteel)"
+
+#~ msgid "High (VBR 96kb/s 48kHz Opus)"
+#~ msgstr "Hoog (VBR 96kb/s 48kHz Opus)"
+
+#~ msgid "Low (VBR 64kb/s 48kHz Opus)"
+#~ msgstr "Laag (VBR 64kb/s 48kHz Opus)"
 
