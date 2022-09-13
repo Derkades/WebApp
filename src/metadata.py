@@ -44,6 +44,7 @@ FILENAME_STRIP_KEYWORDS = [
 
 
 COLLECTION_KEYWORDS = [
+    'top 2000',
     'top 500',
     'top 100',
     'top 40',
