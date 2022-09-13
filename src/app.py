@@ -279,6 +279,7 @@ def track_list():
             'dir_name': playlist.dir_name,
             'display_name': playlist.display_name,
             'track_count': playlist.count_tracks(),
+            'guest': playlist.is_guest,
         }
         
     max_seconds = 5

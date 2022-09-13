@@ -172,7 +172,7 @@ input[type=checkbox] {
     margin: 1.25rem 0;
 }
 
-#guest-playlists {
+.guest-checkboxes {
     max-height: 11rem;
     overflow-y: auto;
 }

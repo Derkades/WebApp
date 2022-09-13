@@ -1,7 +1,7 @@
 "use strict";
 
 // ##############################################
-//       Configuration & global variables
+//           Configuration & state
 // ##############################################
 
 document.queue = [];
@@ -12,7 +12,9 @@ document.historySize = 10;
 document.maxSearchListSize = 500;
 document.lastChosenPlaylist = null;
 document.playlistOverrides = [];
-document.persons = null;
+document.playlists = null;
+document.mainPlaylists = [];
+document.guestPlaylists = [];
 document.tracks = null;
 
 // ##############################################
@@ -421,7 +423,7 @@ function updateQueue() {
     }
 
     if (playlist === null) {
-        console.warn('queue | no playlists selected, trying again later');
+        console.info('queue | no playlists selected, trying again later');
         // TODO Display warning in queue
         setTimeout(updateQueue, 500);
         return;
@@ -657,7 +659,20 @@ async function initTrackList(skip = 0) {
     console.info('requesting track list, from track ' + skip);
     const response = await fetch('/track_list?skip=' + skip);
     const json = await response.json();
+
     document.playlists = json.playlists;
+    document.mainPlaylists = [];
+    document.guestPlaylists = [];
+    for (const dir_name in document.playlists) {
+        // TODO sort alphabetically by display name
+        const playlist = document.playlists[dir_name];
+        if (playlist.guest) {
+            document.guestPlaylists.push(playlist);
+        } else {
+            document.mainPlaylists.push(playlist);
+        }
+    }
+    
     if (skip === 0) {
         document.tracks = json.tracks;
     } else {
@@ -668,10 +683,48 @@ async function initTrackList(skip = 0) {
 
     if (json.partial) {
         setTimeout(() => initTrackList(json.index + 1), 100);
+    } else {
+        setTimeout(initTrackList, 60_000)
     }
 
-    // Update search
+    // Update HTML depending on document.playlists and document.tracks
+    updatePlaylistCheckboxHtml();
     searchTrackList();
+}
+
+function getCheckbox(playlist, index) {
+    return '' +
+        '<span class="checkbox-with-label">' +
+            '<input type="checkbox" class="playlist-checkbox" id="checkbox-' + playlist.dir_name + '" checked>' +
+            '<label for="checkbox-' + playlist.dir_name + '">' + playlist.display_name + '<sup>' + index + '</sup> (' + playlist.track_count + ')</label>' +
+        '</span>'; 
+}
+
+function updatePlaylistCheckboxHtml() {
+    let index = 0;
+    let html = '<div>';
+    for (const playlist of document.mainPlaylists) {
+        html += getCheckbox(playlist, index++);
+    }
+    html += '</div><div class="guest-checkboxes">'
+    for (const playlist of document.guestPlaylists) {
+        html += getCheckbox(playlist, index++);
+    }
+    html += '</div>'
+    document.getElementById('playlist-checkboxes').innerHTML = html;
+}
+
+// TODO use this for track download and search dropdowns 
+function createPlaylistDropdown() {
+    const select = document.createElement("select");
+    for (const dir_name in document.playlists) {
+        const playlist = document.playlists[dir_name];
+        const option = document.createElement("option");
+        option.value = playlist.dir_name;
+        option.textContent = playlist.display_name;
+        select.appendChild(option);
+    }
+    return select;
 }
 
 function queueAdd(id) {

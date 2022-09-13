@@ -20,24 +20,8 @@
 
                 <h3>{% trans %}Playlists{% endtrans %}</h3>
 
-                <div>
-                    {% for playlist in main_playlists %}
-                        <span class="checkbox-with-label">
-                            <input type="checkbox" class="playlist-checkbox" id="checkbox-{{ playlist.dir_name }}" checked>
-                            <label for="checkbox-{{ playlist.dir_name }}">{{ playlist.display_name }}<sup>{{ loop.index }}</sup> ({{ playlist.count_tracks() }})</label>
-                        </span>
-                    {% endfor %}
-                </div>
-
-                <div id="guest-playlists">
-                    {% if guests %}
-                        {% for playlist in guest_playlists %}
-                            <span class="checkbox-with-label">
-                                <input type="checkbox" class="playlist-checkbox" id="checkbox-{{ playlist.dir_name }}">
-                                <label for="checkbox-{{ playlist.dir_name }}">{{ playlist.display_name }}<sup>{{ loop.index + 3}}</sup> ({{ playlist.count_tracks() }})</label>
-                            </span>
-                        {% endfor %}
-                    {% endif %}
+                <div id="playlist-checkboxes">
+                    {% trans %}Loading...{% endtrans %}
                 </div>
             </div>
 
