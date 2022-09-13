@@ -72,7 +72,7 @@ class Track:
 
         in_path_abs = self.path.absolute().as_posix()
 
-        cache_object = cache.get('transcoded audio4', in_path_abs + bitrate)
+        cache_object = cache.get('transcoded audio', in_path_abs + bitrate)
         cached_data = cache_object.retrieve()
         if cached_data is not None:
             log.info('Returning cached audio')
