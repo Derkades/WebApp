@@ -692,23 +692,23 @@ async function initTrackList(skip = 0) {
     searchTrackList();
 }
 
-function getCheckbox(playlist, index) {
+function getCheckbox(playlist, index, guest) {
     return '' +
         '<span class="checkbox-with-label">' +
-            '<input type="checkbox" class="playlist-checkbox" id="checkbox-' + playlist.dir_name + '" checked>' +
+            '<input type="checkbox" class="playlist-checkbox" id="checkbox-' + playlist.dir_name + '" ' + (guest ? '' : 'checked') + '>' +
             '<label for="checkbox-' + playlist.dir_name + '">' + playlist.display_name + '<sup>' + index + '</sup> (' + playlist.track_count + ')</label>' +
         '</span>'; 
 }
 
 function updatePlaylistCheckboxHtml() {
-    let index = 0;
+    let index = 1;
     let html = '<div>';
     for (const playlist of document.mainPlaylists) {
-        html += getCheckbox(playlist, index++);
+        html += getCheckbox(playlist, index++, false);
     }
     html += '</div><div class="guest-checkboxes">'
     for (const playlist of document.guestPlaylists) {
-        html += getCheckbox(playlist, index++);
+        html += getCheckbox(playlist, index++, true);
     }
     html += '</div>'
     document.getElementById('playlist-checkboxes').innerHTML = html;
@@ -774,7 +774,7 @@ function searchTrackList() {
             if (score > 0) {
                 tracks.push({
                     playlistDir: track.playlist,
-                    playlistDisplay: track.playlist_display_name,
+                    playlistDisplay: track.playlist_display,
                     trackFile: track.file,
                     trackDisplay: track.display,
                     score: score,
