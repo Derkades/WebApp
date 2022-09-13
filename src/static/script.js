@@ -85,7 +85,6 @@ document.addEventListener("DOMContentLoaded", () => {
     next();
     setInterval(showCorrectPlayPauseButton, 50);
     initTrackList();
-    setInterval(initTrackList, 5*60*1000); // Refresh every 5 minutes
     searchTrackList();
 });
 
@@ -676,7 +675,7 @@ async function initTrackList(skip = 0) {
             document.mainPlaylists.push(playlist);
         }
     }
-    
+
     if (skip === 0) {
         document.tracks = json.tracks;
     } else {
@@ -760,7 +759,7 @@ function getSavedCheckboxState() {
     }
 }
 
-// TODO use this for track download and search dropdowns 
+// TODO use this for track download and search dropdowns
 function createPlaylistDropdown() {
     const select = document.createElement("select");
     for (const dir_name in document.playlists) {
