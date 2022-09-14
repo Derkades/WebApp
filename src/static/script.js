@@ -116,6 +116,7 @@ function handleKey(key) {
         for (const checkbox of document.getElementsByClassName('playlist-checkbox')) {
             if (index === keyInt) {
                 checkbox.checked = !checkbox.checked
+                saveCheckboxState();
                 break;
             }
             index++;
