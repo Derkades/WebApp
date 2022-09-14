@@ -147,7 +147,13 @@
                 </select>
                 <label for="audio-quality">{% trans %}Audio quality{% endtrans %}</label>
             </div>
-
+            <div>
+                <select id="queue-removal-behaviour">
+                    <option value="same" selected>{% trans %}New track from same playlist{% endtrans %}</option>
+                    <option value="roundrobin">{% trans %}New track from next round-robin playlist{% endtrans %}</option>
+                </select>
+                <label for="queue-removal-behaviour">{% trans %}Queue removal behaviour{% endtrans %}</label>
+            </div>
 
             <h3>{% trans %}YouTube download{% endtrans %}</h3>
             {% trans %}Select a name and paste a link from YouTube, Soundcloud, Bandcamp, etc. Finally, press <kbd>Download</kbd>.{% endtrans %}

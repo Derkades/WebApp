@@ -62,6 +62,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('audio-quality').addEventListener('input', event => {
         setCookie('settings-audio-quality', event.target.value);
     });
+    document.getElementById('queue-removal-behaviour').addEventListener('input', event => {
+        setCookie('queue-removal-behaviour', event.target.value);
+    });
 
     // Queue overlay
     document.getElementById('button-square-plus').addEventListener('click', () =>
@@ -103,6 +106,7 @@ function initializeConfigurationFromCookies() {
     cookieToInput('settings-queue-size', 'queue-size');
     cookieToInput('settings-audio-quality', 'audio-quality');
     cookieToInput('settings-volume', 'volume-slider');
+    cookieToInput('settings-queue-removal-behaviour', 'queue-removal-behaviour');
 }
 
 // ##############################################
@@ -413,23 +417,6 @@ function updateQueue() {
         return;
     }
 
-    let playlist;
-
-    if (document.playlistOverrides.length > 0) {
-        playlist = document.playlistOverrides.pop();
-    } else {
-        playlist = getNextPlaylist(document.lastChosenPlaylist);
-    }
-
-    document.lastChosenPlaylist = playlist;
-
-    if (playlist === null) {
-        console.info('queue | no playlists selected, trying again later');
-        // TODO Display warning in queue
-        setTimeout(updateQueue, 500);
-        return;
-    }
-
     let minQueueSize = parseInt(document.getElementById('queue-size').value);
 
     if (!isFinite(minQueueSize)) {
@@ -437,6 +424,24 @@ function updateQueue() {
     }
 
     if (document.queue.length >= minQueueSize) {
+        return;
+    }
+
+    let playlist;
+
+    if (document.playlistOverrides.length > 0) {
+        playlist = document.playlistOverrides.pop();
+        console.info('queue | override: ' + playlist)
+    } else {
+        playlist = getNextPlaylist(document.lastChosenPlaylist);
+        console.info('queue | round robin: ' + document.lastChosenPlaylist + ' -> ' + playlist)
+        document.lastChosenPlaylist = playlist;
+    }
+
+    if (playlist === null) {
+        console.info('queue | no playlists selected, trying again later');
+        // TODO Display warning in queue
+        setTimeout(updateQueue, 500);
         return;
     }
 
@@ -503,7 +508,12 @@ async function downloadAndAddToQueue(trackData) {
 
 function removeFromQueue(index) {
     const trackData = document.queue[index];
-    document.playlistOverrides.push(trackData.playlist);
+    const removalBehaviour = document.getElementById('queue-removal-behaviour').value;
+    if (removalBehaviour === 'same') {
+        document.playlistOverrides.push(trackData.playlist);
+    } else if (removalBehaviour !== 'roundrobin') {
+        console.warn('unexpected removal behaviour: ' + removalBehaviour);
+    }
     document.queue.splice(index, 1);
     updateQueueHtml();
     updateQueue();
