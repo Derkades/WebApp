@@ -67,14 +67,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Hotkeys
     document.addEventListener('keydown', event => handleKey(event.key));
 
-    setInterval(() => {
-        if (document.queueBusy) {
-            document.getElementsByTagName("body")[0].style.cursor = 'progress';
-        } else {
-            document.getElementsByTagName("body")[0].style.cursor = '';
-        }
-    }, 100);
-
     next();
     setInterval(showCorrectPlayPauseButton, 50);
     initTrackList();
@@ -483,20 +475,34 @@ async function downloadAndAddToQueue(trackData) {
     trackData.audioBlobUrl = URL.createObjectURL(audioBlob);
 
     // Get cover image
-    console.info('queue | download album cover image');
-    trackData.imageStreamUrl = '/get_album_cover?track_path=' + encodedPath;
-    const coverResponse = await fetch(trackData.imageStreamUrl);
-    checkResponseCode(coverResponse);
-    const imageBlob = await coverResponse.blob();
-    trackData.imageBlobUrl = URL.createObjectURL(imageBlob);
+    if (encodedQuality === 'verylow') {
+        console.info('queue | using raphson image to save data');
+        trackData.imageStreamUrl = '/raphson';
+        trackData.imageBlobUrl = '/raphson';
+    } else {
+        console.info('queue | download album cover image');
+        trackData.imageStreamUrl = '/get_album_cover?track_path=' + encodedPath;
+        const coverResponse = await fetch(trackData.imageStreamUrl);
+        checkResponseCode(coverResponse);
+        const imageBlob = await coverResponse.blob();
+        trackData.imageBlobUrl = URL.createObjectURL(imageBlob);
+    }
 
     // Get lyrics
-    console.info('queue | download lyrics');
-    trackData.lyricsUrl = '/get_lyrics?track_path=' + encodedPath;
-    const lyricsResponse = await fetch(trackData.lyricsUrl);
-    checkResponseCode(lyricsResponse);
-    const lyricsJson = await lyricsResponse.json();
-    trackData.lyrics = lyricsJson;
+    if (encodedQuality === 'verylow') {
+        trackData.lyrics = {
+            found: true,
+            genius_url: null,
+            html: "<i>Lyrics were not downloaded to save data</i>",
+        };
+    } else {
+        console.info('queue | download lyrics');
+        trackData.lyricsUrl = '/get_lyrics?track_path=' + encodedPath;
+        const lyricsResponse = await fetch(trackData.lyricsUrl);
+        checkResponseCode(lyricsResponse);
+        const lyricsJson = await lyricsResponse.json();
+        trackData.lyrics = lyricsJson;
+    }
 
     // Finalize
     document.queue.push(trackData);
@@ -522,6 +528,8 @@ function removeFromQueue(index) {
 // ##############################################
 
 function updateQueueHtml() {
+    document.getElementsByTagName("body")[0].style.cursor = document.queueBusy ? 'progress' : '';
+
     const trashBase64 = document.getElementById('trash-can-base64').innerText;
 
     let html = ''
@@ -711,7 +719,7 @@ function initTrackList(skip = 0) {
     });
 }
 
-function getCheckbox(playlist, index) {
+function createPlaylistCheckbox(playlist, index) {
     const span = document.createElement("span");
     span.classList.add("checkbox-with-label");
 
@@ -750,12 +758,12 @@ function updatePlaylistCheckboxHtml() {
     let index = 1;
     const mainDiv = document.createElement('div');
     for (const playlist of document.mainPlaylists) {
-        mainDiv.appendChild(getCheckbox(playlist, index++));
+        mainDiv.appendChild(createPlaylistCheckbox(playlist, index++));
     }
     const guestDiv = document.createElement('div');
     guestDiv.classList.add('guest-checkboxes');
     for (const playlist of document.guestPlaylists) {
-        guestDiv.appendChild(getCheckbox(playlist, index++));
+        guestDiv.appendChild(createPlaylistCheckbox(playlist, index++));
     }
     const parent = document.getElementById('playlist-checkboxes');
     parent.replaceChildren(mainDiv, guestDiv);
