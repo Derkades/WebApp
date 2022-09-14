@@ -770,7 +770,6 @@ function getSavedCheckboxState() {
     if (cookie === null) {
         return null;
     } else {
-        console.info('loading checkbox state: ' + cookie);
         return cookie.split('~');
     }
 }
