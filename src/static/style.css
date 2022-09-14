@@ -382,7 +382,7 @@ audio {
     overflow-y: auto;
 }
 
-#volume-slider {
+#settings-volume {
     width: 7rem;
 }
 

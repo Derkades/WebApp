@@ -22,7 +22,7 @@ document.tracks = null;
 // ##############################################
 
 document.addEventListener("DOMContentLoaded", () => {
-    initializeConfigurationFromCookies();
+    syncCookiesWithInputs();
 
     // Playback controls
     document.getElementById('button-backward-step').addEventListener('click', previous);
@@ -33,8 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('button-forward').addEventListener('click', () => seek(15));
     // document.getElementById('button-forward-fast').addEventListener('click', () => seek(30));
     document.getElementById('button-forward-step').addEventListener('click', next);
-    document.getElementById('volume-slider').addEventListener('input', event => {
-        setCookie('settings-volume', event.target.value);
+    document.getElementById('settings-volume').addEventListener('input', event => {
         const audioElem = getAudioElement();
         if (audioElem !== null) {
             audioElem.volume = getTransformedVolume();
@@ -55,16 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('settings-close').addEventListener('click', () =>
             document.getElementById('settings-overlay').style.display = 'none');
     document.getElementById('youtube-dl-submit').addEventListener('click', youTubeDownload);
-    document.getElementById('queue-size').addEventListener('input', event => {
-        setCookie('settings-queue-size', event.data);
-        updateQueue();
-    });
-    document.getElementById('audio-quality').addEventListener('input', event => {
-        setCookie('settings-audio-quality', event.target.value);
-    });
-    document.getElementById('queue-removal-behaviour').addEventListener('input', event => {
-        setCookie('queue-removal-behaviour', event.target.value);
-    });
+    document.getElementById('settings-queue-size').addEventListener('input', () => updateQueue());
 
     // Queue overlay
     document.getElementById('button-square-plus').addEventListener('click', () =>
@@ -95,18 +85,26 @@ document.addEventListener("DOMContentLoaded", () => {
 //               Cookie loading
 // ##############################################
 
-function cookieToInput(cname, elemId) {
-    const value = getCookie(cname);
+function syncCookieWithInput(elemId) {
+    // If cookie exists, set input value to cookie value
+    const value = getCookie(elemId);
     if (value !== null) {
         document.getElementById(elemId).value = value;
     }
+
+    // If input value is updated, set cookie accordingly
+    document.getElementById(elemId).addEventListener('input', event => {
+        setCookie(elemId, event.target.value);
+    });
 }
 
-function initializeConfigurationFromCookies() {
-    cookieToInput('settings-queue-size', 'queue-size');
-    cookieToInput('settings-audio-quality', 'audio-quality');
-    cookieToInput('settings-volume', 'volume-slider');
-    cookieToInput('settings-queue-removal-behaviour', 'queue-removal-behaviour');
+function syncCookiesWithInputs() {
+    [
+        'settings-queue-size',
+        'settings-audio-quality',
+        'settings-volume',
+        'settings-queue-removal-behaviour',
+    ].forEach(syncCookieWithInput);
 }
 
 // ##############################################
@@ -306,7 +304,7 @@ function getTransformedVolume() {
     // https://www.dr-lex.be/info-stuff/volumecontrols.html
     // According to this article, x^4 seems to be a pretty good approximation of the perceived loudness curve
     const e = 4;
-    return document.getElementById('volume-slider').value ** e / 100 ** e;
+    return document.getElementById('settings-volume').value ** e / 100 ** e;
 }
 
 function createAudioElement(sourceUrl) {
@@ -417,7 +415,7 @@ function updateQueue() {
         return;
     }
 
-    let minQueueSize = parseInt(document.getElementById('queue-size').value);
+    let minQueueSize = parseInt(document.getElementById('settings-queue-size').value);
 
     if (!isFinite(minQueueSize)) {
         minQueueSize = 1;
@@ -477,7 +475,7 @@ async function downloadAndAddToQueue(trackData) {
 
     // Get track audio
     console.info('queue | download audio');
-    const encodedQuality = encodeURIComponent(document.getElementById('audio-quality').value);
+    const encodedQuality = encodeURIComponent(document.getElementById('settings-audio-quality').value);
     const encodedPath = encodeURIComponent(trackData.path);
     const trackResponse = await fetch('/get_track?track_path=' + encodedPath + '&quality=' + encodedQuality);
     checkResponseCode(trackResponse);
@@ -508,7 +506,7 @@ async function downloadAndAddToQueue(trackData) {
 
 function removeFromQueue(index) {
     const trackData = document.queue[index];
-    const removalBehaviour = document.getElementById('queue-removal-behaviour').value;
+    const removalBehaviour = document.getElementById('settings-queue-removal-behaviour').value;
     if (removalBehaviour === 'same') {
         document.playlistOverrides.push(trackData.playlist);
     } else if (removalBehaviour !== 'roundrobin') {
@@ -541,7 +539,7 @@ function updateQueueHtml() {
         i++;
     }
 
-    const minQueueSize = parseInt(document.getElementById('queue-size').value)
+    const minQueueSize = parseInt(document.getElementById('settings-queue-size').value)
 
     let first = true;
     while (i < minQueueSize) {
