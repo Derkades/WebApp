@@ -69,7 +69,8 @@ def is_alpha(c):
     return c == ' ' or \
            c == '-' or \
            'a' <= c <= 'z' or \
-           'A' <= c <= 'Z'
+           'A' <= c <= 'Z' or \
+           '0' <= c <= '9'
 
 
 class Metadata:
