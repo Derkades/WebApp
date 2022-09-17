@@ -97,7 +97,11 @@ def get_lyrics(query: str) -> Optional[Lyrics]:
         log.info('Search error')
         traceback.print_exc()
         # Return not found now, but don't cache so we try again in the future when the bug is fixed
-        return None
+        return {
+            'found': True,
+            'source_url': None,
+            'lyrics': ['Error during lyrics search, please report this issue if it persists.'],
+        }
 
     if genius_url is None:
         log.info('No lyrics found')
@@ -111,8 +115,12 @@ def get_lyrics(query: str) -> Optional[Lyrics]:
     except Exception:
         log.info('Error retrieving lyrics')
         traceback.print_exc()
-        # Return not found now, but don't cache so we try again in the future when the bug is fixed
-        return {'found': False}
+        # Don't cache so we try again in the future when the bug is fixed
+        return {
+            'found': True,
+            'source_url': genius_url,
+            'lyrics': ['Error retrieving lyrics, please report this issue. Make sure to include the source URL in your report.'],
+        }
 
     cache_object.store_json({
         'found': True,

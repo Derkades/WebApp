@@ -41,6 +41,7 @@ FILENAME_STRIP_KEYWORDS = [
     '(long version)',
     ' HD',
     '(Single Edit)',
+    '(official video)',
 ]
 
 
