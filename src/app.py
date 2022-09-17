@@ -194,7 +194,7 @@ def get_lyrics():
 
     track = Track.by_relpath(request.args['track_path'])
 
-    cache_object = cache.get('genius2', track.relpath())
+    cache_object = cache.get('genius3', track.relpath())
     cached_data = cache_object.retrieve()
 
     if cached_data is not None:

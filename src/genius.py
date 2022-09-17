@@ -18,7 +18,9 @@ def search(title: str) -> Optional[str]:
     search_json = r.json()
     for section in search_json["response"]["sections"]:
         if section['type'] == 'top_hit':
-            return section['hits'][0]['result']['url']
+            for hit in section['hits']:
+                if hit['index'] == 'song':
+                    return hit['result']['url']
 
     return None
 
@@ -57,3 +59,7 @@ def extract_lyrics(genius_url: str) -> List[str]:
             lyrics += html.escape(str(content).strip())
 
     return lyrics.split('&lt;br/&gt;')
+
+
+if __name__ == '__main__':
+    print(search('Tom Misch & Yussef Dayes - Nightrider (feat. Freddie Gibbs)'))
