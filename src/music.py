@@ -246,8 +246,8 @@ class Playlist:
         """
         return subprocess.run(['yt-dlp',
                                '--no-progress',
-                               '--remux-video', 'ogg',
-                               '-f', '251',
+                               '-f', 'bestaudio',
+                               '--remux-video', 'webm>ogg/mp3>mp3/mka',
                                '--add-metadata',
                                url],
                               shell=False,
