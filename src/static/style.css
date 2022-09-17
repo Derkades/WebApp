@@ -350,7 +350,8 @@ audio {
 }
 
 .full-page-overlay .box-solid {
-    max-width: 60rem;
+    min-width: min(60vw, 50rem);
+    max-width: 50rem;
 }
 
 .hotkeys-table {
