@@ -665,7 +665,7 @@ function youTubeDownload(event) {
             spinner.style.visibility = 'hidden';
             response.json().then(json => {
                 output.textContent = 'Status code: ' + json.code + '\n--- stdout ---\n' + json.stdout + '\n--- stderr ---\n' + json.stderr;
-                output.style.backgroundColor = json.code === 0 ? 'lightgreen' : 'pink';
+                output.style.backgroundColor = json.code === 0 ? 'darkgreen' : 'darkred';
             });
         } else {
             response.text().then(alert);
