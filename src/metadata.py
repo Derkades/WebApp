@@ -40,6 +40,7 @@ FILENAME_STRIP_KEYWORDS = [
     '(Visual)',
     '(long version)',
     ' HD',
+    '(Single Edit)',
 ]
 
 
