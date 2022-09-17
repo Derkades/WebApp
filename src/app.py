@@ -193,53 +193,18 @@ def get_lyrics():
         return Response(None, 403)
 
     track = Track.by_relpath(request.args['track_path'])
-
-    cache_object = cache.get('genius3', track.relpath())
-    cached_data = cache_object.retrieve()
-
-    if cached_data is not None:
-        log.info('Returning cached lyrics')
-        return Response(cached_data, mimetype='application/json')
-
     meta = track.metadata()
 
-    genius_url = None
-    for genius_query in meta.lyrics_search_queries():
-        log.info('Searching genius: %s', genius_query)
-        try:
-            genius_url = genius.search(genius_query)
-        except Exception:
-            log.info('Search error')
-            traceback.print_exc()
-        if genius_url is not None:
-            log.info('found genius url: %s', genius_url)
-            break
-
-    if genius_url is None:
-        log.info('Genius search yielded no results')
-        genius_json = {
-            'found': False,
-        }
-    else:
-        try:
-            lyrics = genius.extract_lyrics(genius_url)
-            genius_json = {
-                'found': True,
-                'genius_url': genius_url,
-                'html': '<br>\n'.join(lyrics)
-            }
-        except Exception:
-            log.info('Error retrieving lyrics')
-            traceback.print_exc()
-            # Return not found now, but don't cache so we try again in the future when the bug is fixed
+    for search_query in meta.lyrics_search_queries():
+        lyrics = genius.get_lyrics(search_query)
+        if lyrics is not None:
             return {
-                'found': False
+                'found': True,
+                'genius_url': lyrics.source_url,
+                'html': lyrics.lyrics_html(),
             }
 
-    json_bytes = json.dumps(genius_json).encode()
-    cache_object.store(json_bytes)
-
-    return Response(json_bytes, mimetype='application/json')
+    return {'found': False}
 
 
 @application.route('/ytdl', methods=['POST'])

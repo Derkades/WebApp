@@ -2,6 +2,7 @@ from typing import Optional
 from pathlib import Path
 import hashlib
 import logging
+import json
 
 import settings
 
@@ -26,6 +27,12 @@ class CacheObject:
             checksum_file.write(checksum)
 
 
+    def store_json(self, data):
+        """
+        Dump object as json, encode as utf-8 and then use store()
+        """
+        self.store(json.dumps(data).encode())
+
     def retrieve(self) -> Optional[bytes]:
         """
         Retrieve data from cache file. Returns None if cache file does not exist
@@ -47,6 +54,16 @@ class CacheObject:
             return None
 
         return data
+
+    def retrieve_json(self):
+        """
+        Retrieve bytes, if exists decode and return object
+        """
+        data = self.retrieve()
+        if data is None:
+            return None
+        else:
+            return json.loads(data.decode())
 
     def get_checksum(self) -> bytes:
         """

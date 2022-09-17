@@ -1,12 +1,29 @@
 from typing import Optional, List
 import json
 import html
+import logging
+import traceback
+from dataclasses import dataclass
+
+import cache
 
 import requests
 from bs4 import BeautifulSoup
 
 
-def search(title: str) -> Optional[str]:
+log = logging.getLogger('app.genius')
+
+
+@dataclass
+class Lyrics:
+    source_url: str
+    lyrics: List[str]
+
+    def lyrics_html(self):
+        return '<br>\n'.join(self.lyrics)
+
+
+def _search(title: str) -> Optional[str]:
     """
     Returns: URL of genius lyrics page, or None if no page was found.
     """
@@ -25,7 +42,7 @@ def search(title: str) -> Optional[str]:
     return None
 
 
-def extract_lyrics(genius_url: str) -> List[str]:
+def _extract_lyrics(genius_url: str) -> List[str]:
     """
     Extract lyrics from the supplied Genius lyrics page
     Parameters:
@@ -61,5 +78,46 @@ def extract_lyrics(genius_url: str) -> List[str]:
     return lyrics.split('&lt;br/&gt;')
 
 
-if __name__ == '__main__':
-    print(search('Tom Misch & Yussef Dayes - Nightrider (feat. Freddie Gibbs)'))
+def get_lyrics(query: str) -> Optional[Lyrics]:
+    cache_object = cache.get('genius', query)
+    cached_data = cache_object.retrieve_json()
+
+    if cached_data is not None:
+        if not cached_data['found']:
+            log.info('Returning no lyrics, from cache')
+            return None
+
+        log.info('Returning cached lyrics')
+        return Lyrics(cached_data['source_url'], cached_data['lyrics'])
+
+    log.info('Searching lyrics: %s', query)
+    try:
+        genius_url = _search(query)
+    except Exception:
+        log.info('Search error')
+        traceback.print_exc()
+        # Return not found now, but don't cache so we try again in the future when the bug is fixed
+        return None
+
+    if genius_url is None:
+        log.info('No lyrics found')
+        cache_object.store_json({'found': False})
+        return None
+
+    log.info('Found URL: %s', genius_url)
+
+    try:
+        lyrics = _extract_lyrics(genius_url)
+    except Exception:
+        log.info('Error retrieving lyrics')
+        traceback.print_exc()
+        # Return not found now, but don't cache so we try again in the future when the bug is fixed
+        return {'found': False}
+
+    cache_object.store_json({
+        'found': True,
+        'source_url': genius_url,
+        'lyrics': lyrics,
+    })
+
+    return Lyrics(genius_url, lyrics)
