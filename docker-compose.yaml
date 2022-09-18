@@ -17,6 +17,7 @@ services:
     user: "1000"
     environment:
       MUSIC_WEB_PASSWORD: 1234
+      MUSIC_REDIS_HOST: redis
 
   redis:
     image: redis

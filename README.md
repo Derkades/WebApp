@@ -59,6 +59,10 @@ This directory is used to store the result of time-consuming operations, like tr
 
 Set an optional password to access the web interface. Strongly recommended if exposed to the internet.
 
+### `MUSIC_REDIS_HOST` / `MUSIC_REDIS_PORT`
+
+Connection details for Redis server. Defaults to `localhost`, port `6379`.
+
 ## Development
 
 With docker and docker-compose-plugin installed, run the following command to start a local testing server:

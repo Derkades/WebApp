@@ -1,5 +1,6 @@
+import settings
+
 import redis
 
 
-# TODO configurable
-conn = redis.Redis('redis', port=6379, db=0)
+conn = redis.Redis(settings.redis_host, port=settings.redis_port, db=0)

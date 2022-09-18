@@ -505,7 +505,7 @@ async function downloadAndAddToQueue(trackData, top=false) {
         trackData.lyrics = lyricsJson;
     }
 
-    // Finalize
+    // Add track to queue and update HTML
     if (top) {
         document.queue.unshift(trackData);
     } else {
