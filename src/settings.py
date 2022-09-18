@@ -18,8 +18,6 @@ def getenv(key: str, default: Optional[str]) -> str:
 
 web_password = getenv('MUSIC_WEB_PASSWORD', None)
 ffmpeg_loglevel = getenv('MUSIC_FFMPEG_LOGLEVEL', 'info')
-opus_bitrate_high = getenv('MUSIC_OPUS_BITRATE_HIGH', '96K')
-opus_bitrate_low = getenv('MUSIC_OPUS_BITRATE_HIGH', '64K')
 cache_dir = getenv('MUSIC_CACHE_DIR', '/cache')
 music_dir = getenv('MUSIC_MUSIC_DIR', '/music')
 log_level = getenv('MUSIC_LOG_LEVEL', 'INFO')
