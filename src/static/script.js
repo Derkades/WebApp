@@ -455,7 +455,7 @@ function updateQueue() {
     });
 }
 
-async function downloadAndAddToQueue(trackData) {
+async function downloadAndAddToQueue(trackData, top=false) {
     // If no specific track is specified, first choose random track
     if (trackData.path === null) {
         console.info('queue | choose track');
@@ -506,7 +506,11 @@ async function downloadAndAddToQueue(trackData) {
     }
 
     // Finalize
-    document.queue.push(trackData);
+    if (top) {
+        document.queue.unshift(trackData);
+    } else {
+        document.queue.push(trackData);
+    }
     updateQueueHtml();
     console.info("queue | done");
 }
@@ -804,7 +808,7 @@ function queueAdd(id) {
         path: button.dataset.trackFile,
         displayName: button.dataset.trackDisplay,
     };
-    downloadAndAddToQueue(trackData);
+    downloadAndAddToQueue(trackData, true);
     document.getElementById('queue-overlay').style.display = 'none';
 }
 
