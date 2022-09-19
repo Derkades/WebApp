@@ -96,15 +96,15 @@ translated_string = _("Something in English")
 
 This project is using many open source software and libraries, such as:
 
-- Flask
-- BeautifulSoup
-- Gunicorn
+- [Flask](https://flask.palletsprojects.com)
+- [BeautifulSoup](https://pypi.org/project/beautifulsoup4)
+- [Gunicorn](https://gunicorn.org)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
-- Pillow
-- Python requests
-- [Material Design Icons](https://materialdesignicons.com/)
-- [MusicBrainz](musicbrainz.org/) (musicbrainzngs)
-- Redis
-- Docker, docker compose
+- [Pillow](https://pillow.readthedocs.io)
+- [Requests](https://pypi.org/project/requests)
+- [Material Design Icons](https://materialdesignicons.com)
+- [MusicBrainz](https://musicbrainz.org) (musicbrainzngs)
+- [Redis](https://redis.io)
+- [Docker, docker compose](https://docs.docker.com/get-docker)
 
 It also relies on some other parties for web scraping, who shall not be named.
