@@ -44,7 +44,7 @@
                     </div>
                 </div>
 
-                {% for button_name in ['backward-step', 'backward', 'play', 'pause', 'forward', 'forward-step', 'closed-captioning', 'record-vinyl', 'gear'] %}
+                {% for button_name in ['backward-step', 'backward', 'play', 'pause', 'forward', 'forward-step', 'microphone', 'record-vinyl', 'gear'] %}
                     <button id="button-{{ button_name }}" class="icon-button">
                         <div class="icon" style="background-image: url('{{ assets[button_name + '.svg'] }}')"></div>
                     </button>

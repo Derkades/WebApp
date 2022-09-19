@@ -54,6 +54,7 @@ COLLECTION_KEYWORDS = [
     'jaargang',
     'super hits',
     'the best of',
+    'het beste uit'
 ]
 
 

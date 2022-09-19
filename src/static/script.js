@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updateQueue();
 
     // Lyrics
-    document.getElementById('button-closed-captioning').addEventListener('click', switchLyrics);
+    document.getElementById('button-microphone').addEventListener('click', switchLyrics);
     document.getElementById('button-record-vinyl').addEventListener('click', switchAlbumCover);
     document.getElementById('button-record-vinyl').style.display = 'none';
 
@@ -344,7 +344,7 @@ function replaceAlbumImages(imageUrl) {
 // Display lyrics, instead of album art
 function switchLyrics() {
     document.getElementById('button-record-vinyl').style.display = '';
-    document.getElementById('button-closed-captioning').style.display = 'none';
+    document.getElementById('button-microphone').style.display = 'none';
     document.getElementById('sidebar-lyrics').style.display = 'flex';
     document.getElementById('sidebar-album-covers').style.display = 'none';
 }
@@ -352,7 +352,7 @@ function switchLyrics() {
 // Display album art, instead of lyrics
 function switchAlbumCover() {
     document.getElementById('button-record-vinyl').style.display = 'none';
-    document.getElementById('button-closed-captioning').style.display = '';
+    document.getElementById('button-microphone').style.display = '';
     document.getElementById('sidebar-lyrics').style.display = 'none';
     document.getElementById('sidebar-album-covers').style.display = 'flex';
 }
