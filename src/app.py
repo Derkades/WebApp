@@ -1,7 +1,6 @@
 from typing import Optional
 import traceback
 import hashlib
-import json
 import hmac
 from logging.config import dictConfig
 import logging
@@ -325,7 +324,10 @@ def raphson() -> Response:
     """
     if not check_password_cookie():
         return Response(None, 403)
-    return Response(raphson_webp, mimetype='image/webp')
+    
+    response = Response(raphson_webp, mimetype='image/webp')
+    response.cache_control.max_age = 24*3600
+    return response
 
 
 @babel.localeselector
