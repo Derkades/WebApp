@@ -50,8 +50,12 @@
                     </button>
                 {% endfor %}
 
-                <input type="range" min="0" max="100" value="50" id="settings-volume">
-
+                {% if mobile %}
+                    {# 'data-restore=false' ensures volume is not overwritten from cookie #}
+                    <input type="hidden" value="100" id="settings-volume" data-restore="false">
+                {% else %}
+                    <input type="range" min="0" max="100" value="50" id="settings-volume">
+                {% endif %}
             </div>
 
             <div class="box-rounded box-solid box-queue">

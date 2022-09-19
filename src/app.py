@@ -99,10 +99,17 @@ def player():
     if not check_password_cookie():
         return redirect('/login')
 
+    mobile = False
+    if 'User-Agent' in request.headers:
+        user_agent = request.headers['User-Agent']
+        if 'Android' in user_agent or 'iOS' in user_agent:
+            mobile = True
+
     return render_template('player.jinja2',
                            main_playlists=Playlist.get_main(),
                            guest_playlists=Playlist.get_guests(),
-                           assets=assets.all_assets_dict())
+                           assets=assets.all_assets_dict(),
+                           mobile=mobile)
 
 
 @application.route('/choose_track', methods=['GET'])
@@ -324,7 +331,7 @@ def raphson() -> Response:
     """
     if not check_password_cookie():
         return Response(None, 403)
-    
+
     response = Response(raphson_webp, mimetype='image/webp')
     response.cache_control.max_age = 24*3600
     return response

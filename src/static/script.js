@@ -79,14 +79,20 @@ document.addEventListener("DOMContentLoaded", () => {
 // ##############################################
 
 function syncCookieWithInput(elemId) {
+    const elem = document.getElementById(elemId);
+
+    if (elem.dataset.restore === 'false') {
+        return;
+    }
+
     // If cookie exists, set input value to cookie value
     const value = getCookie(elemId);
     if (value !== null) {
-        document.getElementById(elemId).value = value;
+        elem.value = value;
     }
 
     // If input value is updated, set cookie accordingly
-    document.getElementById(elemId).addEventListener('input', event => {
+    elem.addEventListener('input', event => {
         setCookie(elemId, event.target.value);
     });
 }
