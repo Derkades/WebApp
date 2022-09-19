@@ -99,11 +99,11 @@ This project is using many open source software and libraries, such as:
 - Flask
 - BeautifulSoup
 - Gunicorn
-- yt-dlp
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 - Pillow
 - Python requests
-- Font Awesome
-- MusicBrainz (musicbrainzngs)
+- [Material Design Icons](https://materialdesignicons.com/)
+- [MusicBrainz](musicbrainz.org/) (musicbrainzngs)
 - Redis
 - Docker, docker compose
 

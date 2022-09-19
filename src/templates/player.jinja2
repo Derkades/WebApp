@@ -44,7 +44,7 @@
                     </div>
                 </div>
 
-                {% for button_name in ['backward-step', 'backward', 'play', 'pause', 'forward', 'forward-step', 'microphone', 'record-vinyl', 'gear'] %}
+                {% for button_name in ['skip-previous', 'rewind', 'play', 'pause', 'fast-forward', 'skip-next', 'microphone', 'album', 'gear'] %}
                     <button id="button-{{ button_name }}" class="icon-button">
                         <div class="icon" style="background-image: url('{{ assets[button_name + '.svg'] }}')"></div>
                     </button>
@@ -58,7 +58,7 @@
                 <div class="flex-space-between">
                     <h3>{% trans %}Queue{% endtrans %} (<span id="current-queue-size">0</span>)</h3>
                     <button id="button-queue-add" class="icon-button">
-                        <div class="icon" style="background-image: url('{{ assets['square-plus.svg'] }}')"></div>
+                        <div class="icon" style="background-image: url('{{ assets['playlist-plus.svg'] }}')"></div>
                     </button>
                 </div>
                 <table id="queue-table"></table>
@@ -88,7 +88,9 @@
             <div class="flex-space-between">
                 <h3>{% trans %}Add track to queue{% endtrans %}</h3>
                 <span>
-                    <button id="queue-close">{% trans %}Close{% endtrans %}</button>
+                    <button id="queue-close" class="icon-button">
+                        <div class="icon" style="background-image: url('{{ assets['close.svg'] }}')"></div>
+                    </button>
                 </span>
             </div>
 
@@ -115,7 +117,9 @@
             <div class="flex-space-between">
                 <h3>{% trans %}Hotkeys{% endtrans %}</h3>
                 <span>
-                    <button id="settings-close">{% trans %}Close{% endtrans %}</button>
+                    <button id="settings-close" class="icon-button">
+                        <div class="icon" style="background-image: url('{{ assets['close.svg'] }}')"></div>
+                    </button>
                 </span>
             </div>
             <table class="hotkeys-table">
@@ -200,7 +204,7 @@
     <div class="vignette"></div>
 
     {# A "variable" to be used by javascript #}
-    <span id="trash-can-base64" style="display: none">{{ assets['trash-can.svg'] }}</span>
+    <span id="delete-base64" style="display: none">{{ assets['delete.svg'] }}</span>
 
     <script src="/static/script.js"></script>
 

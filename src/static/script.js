@@ -28,14 +28,12 @@ document.addEventListener("DOMContentLoaded", () => {
     syncCookiesWithInputs();
 
     // Playback controls
-    document.getElementById('button-backward-step').addEventListener('click', previous);
-    // document.getElementById('button-backward-fast').addEventListener('click', () => seek(-30));
-    document.getElementById('button-backward').addEventListener('click', () => seek(-15));
+    document.getElementById('button-skip-previous').addEventListener('click', previous);
+    document.getElementById('button-rewind').addEventListener('click', () => seek(-15));
     document.getElementById('button-play').addEventListener('click', play);
     document.getElementById('button-pause').addEventListener('click', pause);
-    document.getElementById('button-forward').addEventListener('click', () => seek(15));
-    // document.getElementById('button-forward-fast').addEventListener('click', () => seek(30));
-    document.getElementById('button-forward-step').addEventListener('click', next);
+    document.getElementById('button-fast-forward').addEventListener('click', () => seek(15));
+    document.getElementById('button-skip-next').addEventListener('click', next);
     document.getElementById('settings-volume').addEventListener('input', event => {
         const audioElem = getAudioElement();
         if (audioElem !== null) {
@@ -48,8 +46,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Lyrics
     document.getElementById('button-microphone').addEventListener('click', switchLyrics);
-    document.getElementById('button-record-vinyl').addEventListener('click', switchAlbumCover);
-    document.getElementById('button-record-vinyl').style.display = 'none';
+    document.getElementById('button-album').addEventListener('click', switchAlbumCover);
+    document.getElementById('button-album').style.display = 'none';
 
     // Settings overlay
     document.getElementById('button-gear').addEventListener('click', () =>
@@ -343,7 +341,7 @@ function replaceAlbumImages(imageUrl) {
 
 // Display lyrics, instead of album art
 function switchLyrics() {
-    document.getElementById('button-record-vinyl').style.display = '';
+    document.getElementById('button-album').style.display = '';
     document.getElementById('button-microphone').style.display = 'none';
     document.getElementById('sidebar-lyrics').style.display = 'flex';
     document.getElementById('sidebar-album-covers').style.display = 'none';
@@ -351,7 +349,7 @@ function switchLyrics() {
 
 // Display album art, instead of lyrics
 function switchAlbumCover() {
-    document.getElementById('button-record-vinyl').style.display = 'none';
+    document.getElementById('button-album').style.display = 'none';
     document.getElementById('button-microphone').style.display = '';
     document.getElementById('sidebar-lyrics').style.display = 'none';
     document.getElementById('sidebar-album-covers').style.display = 'flex';
@@ -553,7 +551,7 @@ function updateQueueHtml() {
 
     document.getElementById('current-queue-size').textContent = state.queue.length;
 
-    const trashBase64 = document.getElementById('trash-can-base64').innerText;
+    const trashBase64 = document.getElementById('delete-base64').innerText;
 
     let html = ''
     let i = 0;
