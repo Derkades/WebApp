@@ -535,6 +535,8 @@ function removeFromQueue(index) {
 function updateQueueHtml() {
     document.getElementsByTagName("body")[0].style.cursor = document.queueBusy ? 'progress' : '';
 
+    document.getElementById('current-queue-size').textContent = document.queue.length;
+
     const trashBase64 = document.getElementById('trash-can-base64').innerText;
 
     let html = ''
