@@ -401,6 +401,18 @@ function getNextPlaylist(currentPlaylist) {
 //           Queue (downloading tracks)
 // ##############################################
 
+function hideLoadingOverlay() {
+    if (document.loadingOverlayHidden) {
+        return;
+    }
+    document.loadingOverlayHidden = true;
+    const overlay = document.getElementById('loading-overlay');
+    overlay.style.opacity = 0;
+    setTimeout(() => {
+        overlay.style.display = 'none';
+    }, 500);
+}
+
 function updateQueue() {
     updateQueueHtml();
 
@@ -512,6 +524,7 @@ async function downloadAndAddToQueue(trackData, top=false) {
         document.queue.push(trackData);
     }
     updateQueueHtml();
+    hideLoadingOverlay();
     console.info("queue | done");
 }
 
