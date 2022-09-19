@@ -4,18 +4,21 @@
 //           Configuration & state
 // ##############################################
 
-document.queue = [];
-document.current = null;
-document.history = [];
-document.queueBusy = false;
-document.historySize = 10;
-document.maxSearchListSize = 500;
-document.lastChosenPlaylist = null;
-document.playlistOverrides = [];
-document.playlists = null;
-document.mainPlaylists = [];
-document.guestPlaylists = [];
-document.tracks = null;
+const state = {
+    queue: [],
+    current: null,
+    history: [],
+    queueBusy: false,
+    historySize: 10,
+    maxSearchListSize: 500,
+    lastChosenPlaylist: null,
+    playlistOverrides: [],
+    playlists: null,
+    mainPlaylists: [],
+    guestPlaylists: [],
+    tracks: null,
+    loadingOverlayHidden: false,
+}
 
 // ##############################################
 //                Initialization
@@ -209,23 +212,23 @@ function seek(delta) {
 }
 
 function next() {
-    if (document.queue.length === 0) {
+    if (state.queue.length === 0) {
         console.log('music | queue is empty, trying again later');
         setTimeout(next, 1000);
         return;
     }
 
     // Add current track to history
-    if (document.current !== null) {
-        document.history.push(document.current);
+    if (state.current !== null) {
+        state.history.push(state.current);
         // If history exceeded maximum length, remove first (oldest) element
-        if (document.history.length > document.historySize) {
-            document.history.shift();
+        if (state.history.length > state.historySize) {
+            state.history.shift();
         }
     }
 
     // Replace current track with first item from queue
-    document.current = document.queue.shift();
+    state.current = state.queue.shift();
 
     updateQueue();
     updateTrackHtml();
@@ -235,19 +238,19 @@ function previous() {
     const audioElem = getAudioElement();
 
     // Skip to beginning of current track first
-    if (audioElem !== null && (audioElem.currentTime > 15 || document.history.length == 0)) {
+    if (audioElem !== null && (audioElem.currentTime > 15 || state.history.length == 0)) {
         audioElem.currentTime = 0;
         return;
     }
 
-    if (document.history.length == 0) {
+    if (state.history.length == 0) {
         return;
     }
 
     // Move current track to beginning of queue
-    document.queue.unshift(document.current);
+    state.queue.unshift(state.current);
     // Replace current track with last track in history
-    document.current = document.history.pop();
+    state.current = state.history.pop();
 
     updateQueue();
     updateTrackHtml();
@@ -257,9 +260,9 @@ function previous() {
 //      Album cover, lyrics and audio HTML
 // ##############################################
 
-// Replace audio player, album cover, and lyrics according to document.current track info
+// Replace audio player, album cover, and lyrics according to state.current track info
 function updateTrackHtml() {
-    const track = document.current;
+    const track = state.current;
     const audioElem = createAudioElement(track.audioBlobUrl);
     replaceAudioElement(audioElem);
 
@@ -275,8 +278,8 @@ function updateTrackHtml() {
 
     document.getElementById('current-track').textContent = '[' + track.playlistDisplay + '] ' + track.displayName;
 
-    if (document.history.length > 0) {
-        const previousTrack = document.history[document.history.length - 1];
+    if (state.history.length > 0) {
+        const previousTrack = state.history[state.history.length - 1];
         document.getElementById('previous-track').textContent = '[' + previousTrack.playlistDisplay + '] ' + previousTrack.displayName;
     } else {
         document.getElementById('previous-track').textContent = '-';
@@ -402,10 +405,10 @@ function getNextPlaylist(currentPlaylist) {
 // ##############################################
 
 function hideLoadingOverlay() {
-    if (document.loadingOverlayHidden) {
+    if (state.loadingOverlayHidden) {
         return;
     }
-    document.loadingOverlayHidden = true;
+    state.loadingOverlayHidden = true;
     const overlay = document.getElementById('loading-overlay');
     overlay.style.opacity = 0;
     setTimeout(() => {
@@ -416,7 +419,7 @@ function hideLoadingOverlay() {
 function updateQueue() {
     updateQueueHtml();
 
-    if (document.queueBusy) {
+    if (state.queueBusy) {
         return;
     }
 
@@ -426,19 +429,19 @@ function updateQueue() {
         minQueueSize = 1;
     }
 
-    if (document.queue.length >= minQueueSize) {
+    if (state.queue.length >= minQueueSize) {
         return;
     }
 
     let playlist;
 
-    if (document.playlistOverrides.length > 0) {
-        playlist = document.playlistOverrides.pop();
+    if (state.playlistOverrides.length > 0) {
+        playlist = state.playlistOverrides.pop();
         console.info('queue | override: ' + playlist)
     } else {
-        playlist = getNextPlaylist(document.lastChosenPlaylist);
-        console.info('queue | round robin: ' + document.lastChosenPlaylist + ' -> ' + playlist)
-        document.lastChosenPlaylist = playlist;
+        playlist = getNextPlaylist(state.lastChosenPlaylist);
+        console.info('queue | round robin: ' + state.lastChosenPlaylist + ' -> ' + playlist)
+        state.lastChosenPlaylist = playlist;
     }
 
     if (playlist === null) {
@@ -448,7 +451,7 @@ function updateQueue() {
         return;
     }
 
-    document.queueBusy = true;
+    state.queueBusy = true;
 
     const trackData = {
         playlist: playlist,
@@ -457,12 +460,12 @@ function updateQueue() {
     }
 
     downloadAndAddToQueue(trackData).then(() => {
-        document.queueBusy = false;
+        state.queueBusy = false;
         updateQueue();
     }, error => {
         console.warn('queue | error');
         console.warn(error);
-        document.queueBusy = false
+        state.queueBusy = false
         setTimeout(updateQueue, 5000);
     });
 }
@@ -519,9 +522,9 @@ async function downloadAndAddToQueue(trackData, top=false) {
 
     // Add track to queue and update HTML
     if (top) {
-        document.queue.unshift(trackData);
+        state.queue.unshift(trackData);
     } else {
-        document.queue.push(trackData);
+        state.queue.push(trackData);
     }
     updateQueueHtml();
     hideLoadingOverlay();
@@ -529,14 +532,14 @@ async function downloadAndAddToQueue(trackData, top=false) {
 }
 
 function removeFromQueue(index) {
-    const trackData = document.queue[index];
+    const trackData = state.queue[index];
     const removalBehaviour = document.getElementById('settings-queue-removal-behaviour').value;
     if (removalBehaviour === 'same') {
-        document.playlistOverrides.push(trackData.playlist);
+        state.playlistOverrides.push(trackData.playlist);
     } else if (removalBehaviour !== 'roundrobin') {
         console.warn('unexpected removal behaviour: ' + removalBehaviour);
     }
-    document.queue.splice(index, 1);
+    state.queue.splice(index, 1);
     updateQueueHtml();
     updateQueue();
 }
@@ -546,15 +549,15 @@ function removeFromQueue(index) {
 // ##############################################
 
 function updateQueueHtml() {
-    document.getElementsByTagName("body")[0].style.cursor = document.queueBusy ? 'progress' : '';
+    document.getElementsByTagName("body")[0].style.cursor = state.queueBusy ? 'progress' : '';
 
-    document.getElementById('current-queue-size').textContent = document.queue.length;
+    document.getElementById('current-queue-size').textContent = state.queue.length;
 
     const trashBase64 = document.getElementById('trash-can-base64').innerText;
 
     let html = ''
     let i = 0;
-    for (const queuedTrack of document.queue) {
+    for (const queuedTrack of state.queue) {
         html += '<tr data-queue-pos="' + i + '">';
             html += '<td class="background-cover box" style="background-image: url(\'' + escapeHtml(queuedTrack.imageBlobUrl) + '\')" onclick="removeFromQueue(' + i + ')">';
                 html += '<div class="delete-overlay">'
@@ -588,7 +591,7 @@ function updateQueueHtml() {
 }
 
 // Based on https://code-boxx.com/drag-drop-sortable-list-javascript/
-// Modified to work with table and document.queue
+// Modified to work with table and state.queue
 function dragDropTable(target) {
     let items = target.getElementsByTagName("tr");
     let current = null; // Element that is being dragged
@@ -638,9 +641,9 @@ function dragDropTable(target) {
             const currentPos = current.dataset.queuePos;
             const targetPos = row.dataset.queuePos;
             // Remove current (being dragged) track from queue
-            const track = document.queue.splice(currentPos, 1)[0];
+            const track = state.queue.splice(currentPos, 1)[0];
             // Add it to the place it was dropped
-            document.queue.splice(targetPos, 0, track);
+            state.queue.splice(targetPos, 0, track);
             // Now re-render the table
             updateQueueHtml();
         };
@@ -702,24 +705,24 @@ function initTrackList(skip = 0) {
         const response = await fetch('/track_list?skip=' + skip);
         const json = await response.json();
 
-        document.playlists = json.playlists;
-        document.mainPlaylists = [];
-        document.guestPlaylists = [];
-        for (const dir_name in document.playlists) {
+        state.playlists = json.playlists;
+        state.mainPlaylists = [];
+        state.guestPlaylists = [];
+        for (const dir_name in state.playlists) {
             // TODO sort alphabetically by display name
-            const playlist = document.playlists[dir_name];
+            const playlist = state.playlists[dir_name];
             if (playlist.guest) {
-                document.guestPlaylists.push(playlist);
+                state.guestPlaylists.push(playlist);
             } else {
-                document.mainPlaylists.push(playlist);
+                state.mainPlaylists.push(playlist);
             }
         }
 
         if (skip === 0) {
-            document.tracks = json.tracks;
+            state.tracks = json.tracks;
         } else {
             for (const track of json.tracks) {
-                document.tracks.push(track);
+                state.tracks.push(track);
             }
         }
 
@@ -729,7 +732,7 @@ function initTrackList(skip = 0) {
             setTimeout(initTrackList, 60_000)
         }
 
-        // Update HTML depending on document.playlists and document.tracks
+        // Update HTML depending on state.playlists and state.tracks
         updatePlaylistCheckboxHtml();
         searchTrackList();
     })().catch(err => {
@@ -777,12 +780,12 @@ function createPlaylistCheckbox(playlist, index) {
 function updatePlaylistCheckboxHtml() {
     let index = 1;
     const mainDiv = document.createElement('div');
-    for (const playlist of document.mainPlaylists) {
+    for (const playlist of state.mainPlaylists) {
         mainDiv.appendChild(createPlaylistCheckbox(playlist, index++));
     }
     const guestDiv = document.createElement('div');
     guestDiv.classList.add('guest-checkboxes');
-    for (const playlist of document.guestPlaylists) {
+    for (const playlist of state.guestPlaylists) {
         guestDiv.appendChild(createPlaylistCheckbox(playlist, index++));
     }
     const parent = document.getElementById('playlist-checkboxes');
@@ -805,8 +808,8 @@ function getSavedCheckboxState() {
 // TODO use this for track download and search dropdowns
 function createPlaylistDropdown() {
     const select = document.createElement("select");
-    for (const dir_name in document.playlists) {
-        const playlist = document.playlists[dir_name];
+    for (const dir_name in state.playlists) {
+        const playlist = state.playlists[dir_name];
         const option = document.createElement("option");
         option.value = playlist.dir_name;
         option.textContent = playlist.display_name;
@@ -828,7 +831,7 @@ function queueAdd(id) {
 }
 
 function searchTrackList() {
-    if (document.tracks === null) {
+    if (state.tracks === null) {
         document.getElementById('track-list-output').textContent = 'Track list is still loading, please wait... If this takes longer than a minute, please check the console for errors.';
         return;
     }
@@ -838,7 +841,7 @@ function searchTrackList() {
 
     const tracks = [];
 
-    for (const track of document.tracks) {
+    for (const track of state.tracks) {
         if (playlist === 'everyone' || playlist === track.playlist) {
             let score = 0;
 
@@ -888,7 +891,7 @@ function searchTrackList() {
             + '</button><br>';
 
 
-        if (i > document.maxSearchListSize) {
+        if (i > state.maxSearchListSize) {
             outputHtml += '...en meer';
             break;
         }
