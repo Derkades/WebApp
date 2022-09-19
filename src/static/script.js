@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('settings-queue-size').addEventListener('input', () => updateQueue());
 
     // Queue overlay
-    document.getElementById('button-square-plus').addEventListener('click', () =>
+    document.getElementById('button-queue-add').addEventListener('click', () =>
             document.getElementById('queue-overlay').style.display = 'flex');
     document.getElementById('queue-close').addEventListener('click', () =>
             document.getElementById('queue-overlay').style.display = 'none');

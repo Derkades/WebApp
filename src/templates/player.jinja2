@@ -44,7 +44,7 @@
                     </div>
                 </div>
 
-                {% for button_name in ['backward-step', 'backward', 'play', 'pause', 'forward', 'forward-step', 'closed-captioning', 'record-vinyl', 'square-plus', 'gear'] %}
+                {% for button_name in ['backward-step', 'backward', 'play', 'pause', 'forward', 'forward-step', 'closed-captioning', 'record-vinyl', 'gear'] %}
                     <button id="button-{{ button_name }}" class="icon-button">
                         <div class="icon" style="background-image: url('{{ assets[button_name + '.svg'] }}')"></div>
                     </button>
@@ -55,7 +55,12 @@
             </div>
 
             <div class="box-rounded box-solid box-queue">
-                <h3>{% trans %}Queue{% endtrans %} (<span id="current-queue-size">0</span>)</h3>
+                <div class="flex-space-between">
+                    <h3>{% trans %}Queue{% endtrans %} (<span id="current-queue-size">0</span>)</h3>
+                    <button id="button-queue-add" class="icon-button">
+                        <div class="icon" style="background-image: url('{{ assets['square-plus.svg'] }}')"></div>
+                    </button>
+                </div>
                 <table id="queue-table"></table>
             </div>
 
