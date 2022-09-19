@@ -16,7 +16,7 @@ log = logging.getLogger('app.genius')
 
 @dataclass
 class Lyrics:
-    source_url: str
+    source_url: Optional[str]
     lyrics: List[str]
 
     def lyrics_html(self):
@@ -30,6 +30,7 @@ def _search(title: str) -> Optional[str]:
     r = requests.get(
         "https://genius.com/api/search/multi",
         params={"per_page": "1", "q": title},
+        headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0'}
     )
 
     search_json = r.json()
@@ -53,12 +54,18 @@ def _extract_lyrics(genius_url: str) -> List[str]:
     # 2. Parse deze string als JSON
     # 3. Trek een bepaalde property uit deze JSON, en parse deze met BeautifulSoup weer als HTML
     # 4. Soms staat lyrics in een link of in italics, de for loop maakt dat goed
-    r = requests.get(genius_url)
+    r = requests.get(genius_url,
+                     headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0'})
     text = r.text
     start = text.index('window.__PRELOADED_STATE__ = JSON.parse(') + 41
     end = text.index("}');") + 1
-    info_json_string = text[start:end].replace('\\"', "\"").replace("\\'", "'").replace('\\\\', '\\').replace('\\$', '$')
-    info_json = json.loads(info_json_string)
+    info_json_string = text[start:end].replace('\\"', "\"").replace("\\'", "'").replace('\\\\', '\\').replace('\\$', '$').replace('\\`', '`')
+    try:
+        info_json = json.loads(info_json_string)
+    except json.decoder.JSONDecodeError as e:
+        log.info('Error retrieving lyrics: json decode error at %s', e.pos)
+        log.info('Neighbouring text: "%s"', info_json_string[e.pos-10:e.pos+10])
+        raise e
     lyric_html = info_json['songPage']['lyricsData']['body']['html']
     soup = BeautifulSoup(lyric_html, 'html.parser')
     lyrics = ''
@@ -97,11 +104,7 @@ def get_lyrics(query: str) -> Optional[Lyrics]:
         log.info('Search error')
         traceback.print_exc()
         # Return not found now, but don't cache so we try again in the future when the bug is fixed
-        return {
-            'found': True,
-            'source_url': None,
-            'lyrics': ['Error during lyrics search, please report this issue if it persists.'],
-        }
+        return Lyrics(None, ['Error during lyrics search, please report this issue if it persists.'])
 
     if genius_url is None:
         log.info('No lyrics found')
@@ -116,11 +119,7 @@ def get_lyrics(query: str) -> Optional[Lyrics]:
         log.info('Error retrieving lyrics')
         traceback.print_exc()
         # Don't cache so we try again in the future when the bug is fixed
-        return {
-            'found': True,
-            'source_url': genius_url,
-            'lyrics': ['Error retrieving lyrics, please report this issue. Make sure to include the source URL in your report.'],
-        }
+        return Lyrics(genius_url, ['Error retrieving lyrics, please report this issue. Make sure to include the source URL in your report. Please look at the logs for a more detailed message, if you are able to.'])
 
     cache_object.store_json({
         'found': True,
