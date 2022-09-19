@@ -359,6 +359,16 @@ audio {
 .full-page-overlay .box-solid {
     min-width: min(60vw, 50rem);
     max-width: 50rem;
+    /* 3rem to compensate for margin, 2rem to compensate for padding */
+    max-height: min(60rem, calc(100vh - 3rem - 2rem));
+    margin: 1.5rem;
+    /* prevent children from overflowing parent */
+    display: flex;
+    flex-direction: column;
+}
+
+.scroll {
+    overflow-y: auto;
 }
 
 #loading-overlay {
@@ -398,7 +408,6 @@ audio {
 
 #track-list-output {
     max-height: 40rem;
-    overflow-y: auto;
 }
 
 #settings-volume {

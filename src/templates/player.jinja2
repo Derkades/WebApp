@@ -98,19 +98,21 @@
                 </span>
             </div>
 
-            <select id="track-list-playlist">
-                <option value="everyone">{% trans %}Everyone{% endtrans %}</option>
-                {% for playlist in main_playlists %}
-                    <option value="{{ playlist.dir_name }}">{{ playlist.display_name }}</option>
-                {% endfor %}
-                {% for playlist in guest_playlists %}
-                    <option value="{{ playlist.dir_name }}">{{ playlist.display_name }} ({% trans %}Guest{% endtrans%})</option>
-                {% endfor %}
-            </select>
+            <div class="scroll">
 
-            <input id="track-list-query" type="text" placeholder="{% trans %}Search query{% endtrans %}">
+                <select id="track-list-playlist">
+                    <option value="everyone">{% trans %}Everyone{% endtrans %}</option>
+                    {% for playlist in main_playlists %}
+                        <option value="{{ playlist.dir_name }}">{{ playlist.display_name }}</option>
+                    {% endfor %}
+                    {% for playlist in guest_playlists %}
+                        <option value="{{ playlist.dir_name }}">{{ playlist.display_name }} ({% trans %}Guest{% endtrans%})</option>
+                    {% endfor %}
+                </select>
 
-            <div id="track-list-output">
+                <input id="track-list-query" type="text" placeholder="{% trans %}Search query{% endtrans %}">
+
+                <div id="track-list-output"></div>
 
             </div>
         </div>
@@ -119,80 +121,85 @@
     <div id="settings-overlay" class="full-page-overlay">
         <div class="box-rounded box-solid">
             <div class="flex-space-between">
-                <h3>{% trans %}Hotkeys{% endtrans %}</h3>
+                <h3>{% trans %}Settings{% endtrans %}</h3>
                 <span>
                     <button id="settings-close" class="icon-button">
                         <div class="icon" style="background-image: url('{{ assets['close.svg'] }}')"></div>
                     </button>
                 </span>
             </div>
-            <table class="hotkeys-table">
-                <tbody>
-                    <tr>
-                        <td><kbd>1</kbd> - <kbd>9</kbd></td>
-                        <td>{% trans %}Toggle playlists{% endtrans %}</td>
-                    </tr>
-                    <tr>
-                        <td><kbd>←</kbd></td>
-                        <td>{% trans %}Previous track{% endtrans %}</td>
-                    </tr>
-                    <tr>
-                        <td><kbd>→</kbd></td>
-                        <td>{% trans %}Next track{% endtrans %}</td>
-                    </tr>
-                    <tr>
-                        <td><kbd>&lt;</kbd> / <kbd>&gt;</kbd>
-                        <td>{% trans %}Seek in track (don't use shift){% endtrans %}</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="scroll">
+                <h4>{% trans %}Hotkeys{% endtrans %}</h4>
+                <table class="hotkeys-table">
+                    <tbody>
+                        <tr>
+                            <td><kbd>1</kbd> - <kbd>9</kbd></td>
+                            <td>{% trans %}Toggle playlists{% endtrans %}</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>←</kbd></td>
+                            <td>{% trans %}Previous track{% endtrans %}</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>→</kbd></td>
+                            <td>{% trans %}Next track{% endtrans %}</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>&lt;</kbd> / <kbd>&gt;</kbd>
+                            <td>{% trans %}Seek in track (don't use shift){% endtrans %}</td>
+                        </tr>
+                    </tbody>
+                </table>
 
-            <h3>{% trans %}Settings{% endtrans %}</h3>
-            <div>
-                <input type="number" value="4" style="width: 3rem;" id="settings-queue-size">
-                <label for="settings-queue-size">{% trans %}Minimum queue length{% endtrans %}</label>
-            </div>
-            <div>
-                <select id="settings-audio-quality">
-                    <option value="verylow">{% trans %}Potato (~15MB per hour){% endtrans %}</option>
-                    <option value="low">{% trans %}Low (~35MB per hour){% endtrans %}</option>
-                    <option value="high" selected>{% trans %}High (~50MB per hour){% endtrans %}</option>
-                </select>
-                <label for="settings-audio-quality">{% trans %}Audio quality{% endtrans %}</label>
-            </div>
-            <div>
-                <select id="settings-queue-removal-behaviour">
-                    <option value="same" selected>{% trans %}New track from same playlist{% endtrans %}</option>
-                    <option value="roundrobin">{% trans %}New track from next round-robin playlist{% endtrans %}</option>
-                </select>
-                <label for="settings-queue-removal-behaviour">{% trans %}Queue removal behaviour{% endtrans %}</label>
-            </div>
+                <h4>{% trans %}Settings{% endtrans %}</h4>
+                <div>
+                    <input type="number" value="4" style="width: 3rem;" id="settings-queue-size">
+                    <label for="settings-queue-size">{% trans %}Minimum queue length{% endtrans %}</label>
+                </div>
+                <div>
+                    <select id="settings-audio-quality">
+                        <option value="verylow">{% trans %}Potato (~15MB per hour){% endtrans %}</option>
+                        <option value="low">{% trans %}Low (~35MB per hour){% endtrans %}</option>
+                        <option value="high" selected>{% trans %}High (~50MB per hour){% endtrans %}</option>
+                    </select>
+                    <label for="settings-audio-quality">{% trans %}Audio quality{% endtrans %}</label>
+                </div>
+                <div>
+                    <select id="settings-queue-removal-behaviour">
+                        <option value="same" selected>{% trans %}New track from same playlist{% endtrans %}</option>
+                        <option value="roundrobin">{% trans %}New track from next round-robin playlist{% endtrans %}</option>
+                    </select>
+                    <label for="settings-queue-removal-behaviour">{% trans %}Queue removal behaviour{% endtrans %}</label>
+                </div>
 
-            <h3>{% trans %}YouTube download{% endtrans %}</h3>
-            {% trans %}Select a name and paste a link from YouTube, Soundcloud, Bandcamp, etc. Finally, press <kbd>Download</kbd>.{% endtrans %}
-            <form>
-                <select id="youtube-dl-directory">
-                    {% for playlist in main_playlists %}
-                        <option value="{{ playlist.dir_name }}">{{ playlist.display_name }}</option>
-                    {% endfor %}
-                    {% for playlist in guest_playlists %}
-                        <option value="{{ playlist.dir_name }}">{{ playlist.display_name }} (Gast)</option>
-                    {% endfor %}
-                </select>
-                <input id="youtube-dl-url" type="text" placeholder="https://youtube.com/watch?v=..." size="45">
-                <input id="youtube-dl-submit" type="submit" value="{% trans %}Download{% endtrans %}">
-                <div id="youtube-dl-spinner" style="visibility: hidden" class="spinner"></div>
-                <br>
-                <div id="youtube-dl-output">{% trans %}yt-dlp output will appear here{% endtrans %}</div>
-            </form>
+                <h4>{% trans %}YouTube download{% endtrans %}</h4>
+                {% trans %}Select a name and paste a link from YouTube, Soundcloud, Bandcamp, etc. Finally, press <kbd>Download</kbd>.{% endtrans %}
+                <form>
+                    <select id="youtube-dl-directory">
+                        {% for playlist in main_playlists %}
+                            <option value="{{ playlist.dir_name }}">{{ playlist.display_name }}</option>
+                        {% endfor %}
+                        {% for playlist in guest_playlists %}
+                            <option value="{{ playlist.dir_name }}">{{ playlist.display_name }} (Gast)</option>
+                        {% endfor %}
+                    </select>
+                    <input id="youtube-dl-url" type="text" placeholder="https://youtube.com/watch?v=..." size="45">
+                    <input id="youtube-dl-submit" type="submit" value="{% trans %}Download{% endtrans %}">
+                    <div id="youtube-dl-spinner" style="visibility: hidden" class="spinner"></div>
+                    <br>
+                    <div id="youtube-dl-output">{% trans %}yt-dlp output will appear here{% endtrans %}</div>
+                </form>
 
-            <h3>{% trans %}Credits{% endtrans %}</h3>
-            {% trans trimmed gh="https://github.com/DanielKoomen/WebApp", robin_gh="https://github.com/Derkades", insp_gh="https://github.com/DanielKoomen/MusicPlayer", daniel_gh="https://github.com/DanielKoomen" %}
-            <a href="{{gh}}">Super fancy music player 2.0</a> is a project largely made by
-            <a href="{{robin_gh}}">Robin Slot</a>, inspired by the awesome
-            <a href="{{insp_gh}}" target="_blank">Super fancy music player</a> by
-            <a href="{{daniel_gh}}" target="_blank">Daniël Koomen</a>. Enjoy!
-            {% endtrans %}
+                <h4>{% trans %}Credits{% endtrans %}</h4>
+                <p>
+                    {% trans trimmed gh="https://github.com/DanielKoomen/WebApp", robin_gh="https://github.com/Derkades", insp_gh="https://github.com/DanielKoomen/MusicPlayer", daniel_gh="https://github.com/DanielKoomen" %}
+                    <a href="{{gh}}">Super fancy music player 2.0</a> is a project largely made by
+                    <a href="{{robin_gh}}">Robin Slot</a>, inspired by the awesome
+                    <a href="{{insp_gh}}" target="_blank">Super fancy music player</a> by
+                    <a href="{{daniel_gh}}" target="_blank">Daniël Koomen</a>. Enjoy!
+                    {% endtrans %}
+                </p>
+            </div>
         </div>
     </div>
 
