@@ -24,6 +24,7 @@ MUSIC_EXTENSIONS = [
     'mkv',
     'wma',
     'm4a',
+    'wav',
 ]
 
 
@@ -123,6 +124,7 @@ class Track:
                        check=True,
                        capture_output=False)
 
+        # TODO only read data once
         cache_object.update_checksum()
         cached_data = cache_object.retrieve()
 
