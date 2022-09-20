@@ -10,7 +10,8 @@ log = logging.getLogger('app.cache')
 
 class CacheObject:
 
-    def __init__(self, data_path: Path, checksum_path: Path):
+    def __init__(self, cache_id: str, data_path: Path, checksum_path: Path):
+        self.cache_id = cache_id
         self.data_path = data_path
         self.checksum_path = checksum_path
 
@@ -114,10 +115,11 @@ def get(cache_type: str, name: str) -> CacheObject:
     """
     Get CacheObject instance by name
     """
-    data_digest = _digest(cache_type + name + 'data')
-    checksum_digest = _digest(cache_type + name + 'checksum')
+    cache_id = cache_type + name
+    data_digest = _digest(cache_id + 'data')
+    checksum_digest = _digest(cache_id + 'checksum')
     data_path = _path(data_digest)
     checksum_path = _path(checksum_digest)
     _mkparent(data_path)
     _mkparent(checksum_path)
-    return CacheObject(data_path, checksum_path)
+    return CacheObject(cache_id, data_path, checksum_path)

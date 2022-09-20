@@ -4,7 +4,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install yt-dlp flask Flask-Babel bs4 requests Pillow gunicorn redis musicbrainzngs
+RUN pip install yt-dlp flask Flask-Babel bs4 requests Pillow gunicorn redis musicbrainzngs lxml pillow-avif-plugin
 
 RUN mkdir /app
 WORKDIR /app

@@ -1,13 +1,18 @@
 from typing import Optional
+import logging
+import traceback
+import urllib
 
 import requests
 import musicbrainzngs
 
 import bing
+import cache
 
 
 musicbrainzngs.set_useragent('Super fancy music player 2.0', 0.1, 'https://github.com/DanielKoomen/WebApp')
 
+log = logging.getLogger('app.musicbrainz')
 
 def _search_release(title: str) -> Optional[str]:
     r = musicbrainzngs.search_releases(title)['release-list']
@@ -18,37 +23,53 @@ def _search_release(title: str) -> Optional[str]:
 
 
 def _get_image_url(release_id: str) -> Optional[str]:
-    images = musicbrainzngs.get_image_list(release_id)['images']
+    try:
+        images = musicbrainzngs.get_image_list(release_id)['images']
 
-    for image in images:
-        if image['front']:
-            return image['image']
-    return None
+        for image in images:
+            if image['front']:
+                return image['image']
+        return None
+    except musicbrainzngs.musicbrainz.ResponseError as ex:
+        if isinstance(ex.cause, urllib.error.HTTPError) and ex.cause.code == 404:
+            return None
+        raise ex
 
-def get_webp_cover(title: str) -> Optional[bytes]:
+def get_cover(title: str) -> Optional[bytes]:
     """
-    Get album cover (compressed webp format) for the given song title
+    Get album cover for the given song title
     Returns: Image bytes, or None of no album cover was found.
     """
-    release = _search_release(title)
-    if release is None:
+    cache_obj = cache.get('musicbrainz cover', title)
+    cache_data = cache_obj.retrieve()
+
+    if cache_data is not None:
+        if cache_data == b'magic_no_cover':
+            log.info('Returning no cover, from cache')
+            return None
+        log.info('Returning cover from cache')
+        return cache_data
+
+    try:
+        release = _search_release(title)
+        if release is None:
+            log.info('No release found')
+            cache_obj.store(b'magic_no_cover')
+            return None
+
+        image_url = _get_image_url(release)
+
+        if image_url is None:
+            log.info('Release has no cover image attached')
+            cache_obj.store(b'magic_no_cover')
+            return None
+
+        r = requests.get(image_url)
+        image_bytes = r.content
+        cache_obj.store(image_bytes)
+        log.info('Found suitable cover art')
+        return image_bytes
+    except Exception as e:
+        log.info('Error retrieving album art from musicbrainz: %s', e)
+        traceback.print_exc()
         return None
-
-    image_url = _get_image_url(release)
-
-    if image_url is None:
-        return None
-
-    r = requests.get(image_url)
-    image_bytes = r.content
-    return bing.webp_thumbnail(image_bytes)
-
-
-if __name__ == '__main__':
-    cover = get_webp_cover('europe - the final countdown')
-    if cover is None:
-        print('no cover returned')
-    else:
-        with open('musicbrainz_cover_test.webp', 'wb') as f:
-            f.truncate(0)
-            f.write(cover)

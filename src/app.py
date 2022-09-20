@@ -1,5 +1,4 @@
-from typing import Optional
-import traceback
+from typing import Optional, Tuple
 import hashlib
 import hmac
 from logging.config import dictConfig
@@ -11,11 +10,12 @@ from flask import Flask, request, render_template, Response, redirect
 from flask_babel import Babel
 
 from assets import Assets
-from music import Playlist, Track
-import cache
 import bing
+import cache
 import genius
+import image
 import settings
+from music import Playlist, Track, Metadata
 import musicbrainz
 
 
@@ -42,10 +42,7 @@ babel = Babel(application)
 assets = Assets()
 log = logging.getLogger('app')
 assets_dir = Path('static')
-
-
-with open(Path(assets_dir, 'raphson.png'), 'rb') as raphson_png:
-    raphson_webp = bing.webp_thumbnail(raphson_png.read())
+raphson_png_path = Path(assets_dir, 'raphson.png')
 
 
 def check_password(password: Optional[str]) -> bool:
@@ -146,6 +143,22 @@ def get_track() -> Response:
     return Response(audio, mimetype='audio/ogg')
 
 
+def get_cover_bytes(meta: Metadata) -> Optional[bytes]:
+    log.info('Finding cover for: %s', meta.path)
+
+    # Try MusicBrainz first
+    mb_query = meta.album_release_query()
+    if image_bytes := musicbrainz.get_cover(mb_query):
+        return image_bytes
+
+    # Otherwise try bing
+    for query in meta.album_search_queries():
+        if image_bytes := bing.image_search(query):
+            return image_bytes
+
+    log.info('No suitable cover found')
+    return None
+
 @application.route('/get_album_cover')
 def get_album_cover() -> Response:
     """
@@ -156,38 +169,15 @@ def get_album_cover() -> Response:
 
     track = Track.by_relpath(request.args['track_path'])
 
-    cache_obj = cache.get('album_art', track.relpath())
-    cached_data = cache_obj.retrieve()
-    if cached_data is not None:
-        log.info('Returning cached image')
-        return Response(cached_data, mimetype='image/webp')
+    def get_img():
+        meta = track.metadata()
+        return get_cover_bytes(meta)
 
-    meta = track.metadata()
+    img_format = get_img_format()
 
-    webp_bytes = None
-    try:
-        query = meta.album_release_query()
-        log.info('Searching MusicBrainz: %s', query)
-        webp_bytes = musicbrainz.get_webp_cover(query)
-    except Exception:
-        log.info('Error retrieving album art from musicbrainz')
-        traceback.print_exc()
+    comp_bytes = image.thumbnail(get_img, track.relpath(), img_format[6:], 700)
 
-    if webp_bytes is None:
-        for query in meta.album_search_queries():
-            try:
-                log.info('Searching bing: %s', query)
-                webp_bytes = bing.image_search(query)
-                break
-            except Exception:
-                log.info('No bing results')
-                traceback.print_exc()
-
-    if webp_bytes is None:
-        webp_bytes = raphson_webp
-
-    cache_obj.store(webp_bytes)
-    return Response(webp_bytes, mimetype='image/webp')
+    return Response(comp_bytes, mimetype=img_format)
 
 
 @application.route('/get_lyrics')
@@ -332,7 +322,9 @@ def raphson() -> Response:
     if not check_password_cookie():
         return Response(None, 403)
 
-    response = Response(raphson_webp, mimetype='image/webp')
+    img_format = get_img_format()
+    thumb = image.thumbnail(raphson_png_path, 'raphson', img_format[6:], 512)
+    response = Response(thumb, mimetype=img_format)
     response.cache_control.max_age = 24*3600
     return response
 
@@ -345,3 +337,13 @@ def get_locale():
     # TODO language from cookie
     lang = request.accept_languages.best_match(['nl', 'nl-NL', 'nl-BE', 'en'])
     return lang[:2] if lang is not None else 'en'
+
+
+def get_img_format():
+    """
+    Get preferred image format
+    """
+    if 'Accept' in request.headers and 'image/avif' in request.headers['Accept']:
+        return 'image/avif'
+    else:
+        return 'image/webp'
