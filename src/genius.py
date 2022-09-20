@@ -67,7 +67,7 @@ def _extract_lyrics(genius_url: str) -> List[str]:
         log.info('Neighbouring text: "%s"', info_json_string[e.pos-10:e.pos+10])
         raise e
     lyric_html = info_json['songPage']['lyricsData']['body']['html']
-    soup = BeautifulSoup(lyric_html, 'html.parser')
+    soup = BeautifulSoup(lyric_html, 'lxml')
     lyrics = ''
     for content in soup.find('p').contents:
         if content.name == 'a':

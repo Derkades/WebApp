@@ -39,7 +39,7 @@ def image_search(bing_query: str) -> Optional[bytes]:
                                 'first': '1',
                                 'scenario': 'ImageBasicHover'},
                         cookies={'SRCHHPGUSR': 'ADLT=OFF'})  # disable safe search :-)
-        soup = BeautifulSoup(r.text, 'html.parser')
+        soup = BeautifulSoup(r.text, 'lxml')
         results = soup.find_all('a', {'class': 'iusc'})
         # Eerst werd hier altijd alleen de eerste gepakt, maar blijkbaar heeft soms de
         # eerste afbeelding geen 'm' attribute. Latere afbeeldingen meestal wel!

@@ -5,7 +5,7 @@ def az_search(title: str) -> Optional[Tuple[str, str, str]]:
     r = requests.get('https://search.azlyrics.com/search.php',
                      params={'q': title,
                              'x': magic})
-    soup = BeautifulSoup(r.text, 'html.parser')
+    soup = BeautifulSoup(r.text, 'lxml')
     links = soup.find_all('a')
     for link in links:
         href = link['href']
@@ -19,7 +19,7 @@ def az_search(title: str) -> Optional[Tuple[str, str, str]]:
 
 def az_extract_lyrics(page_url: str) -> List[str]:
     r = requests.get(page_url)
-    soup = BeautifulSoup(r.text, 'html.parser')
+    soup = BeautifulSoup(r.text, 'lxml')
     divs = soup.find_all('div')
     for div in divs:
         if len(div.contents) > 2 and str(div.contents[0]) == '\n' and str(div.contents[1]).startswith('<div class="div-share noprint"'):
