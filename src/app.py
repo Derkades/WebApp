@@ -144,6 +144,12 @@ def get_track() -> Response:
 
 
 def get_cover_bytes(meta: Metadata) -> Optional[bytes]:
+    """
+    Find album cover using MusicBrainz or Bing.
+    Parameters:
+        meta: Track metadata
+    Returns: Album cover image bytes, or None if MusicBrainz nor bing found an image.
+    """
     log.info('Finding cover for: %s', meta.path)
 
     # Try MusicBrainz first
@@ -171,7 +177,12 @@ def get_album_cover() -> Response:
 
     def get_img():
         meta = track.metadata()
-        return get_cover_bytes(meta)
+        img = get_cover_bytes(meta)
+        if img:
+            return img
+        else:
+            with open(raphson_png_path, 'rb') as raphson_png_f:
+                return raphson_png_f.read()
 
     img_format = get_img_format()
 
