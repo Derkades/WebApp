@@ -118,25 +118,26 @@ class Metadata:
         data = json.loads(output_bytes.decode())['format']
 
         self.duration = int(float(data['duration']))
-        tags = data['tags']
+        if 'tags' in data:
+            tags = data['tags']
 
-        if 'album' in tags:
-            self.album = tags['album']
+            if 'album' in tags:
+                self.album = tags['album']
 
-        if 'artist' in tags:
-            # Split by / and \;
-            # TODO are these still used as separators, now that we've switched to ffprobe?
-            self.artists = re.split(r'\/|\\;', tags['artist'])
+            if 'artist' in tags:
+                # Split by / and \;
+                # TODO are these still used as separators, now that we've switched to ffprobe?
+                self.artists = re.split(r'\/|\\;', tags['artist'])
 
-        if 'title' in tags:
-            self.title = strip_keywords(tags['title']).strip()
+            if 'title' in tags:
+                self.title = strip_keywords(tags['title']).strip()
 
-        if 'date' in tags:
-            self.date = tags['date']
-            self.year = self.date[:4]
+            if 'date' in tags:
+                self.date = tags['date']
+                self.year = self.date[:4]
 
-        if 'album_artist' in tags:
-            self.album_artist = tags['album_artist']
+            if 'album_artist' in tags:
+                self.album_artist = tags['album_artist']
 
     def _meta_title(self) -> Optional[str]:
         """
