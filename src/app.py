@@ -299,6 +299,7 @@ def track_list():
                     'playlist_display': playlist.display_name,
                     'file': track.relpath(),
                     'display': meta.display_title(),
+                    'duration': meta.duration(),
                 })
 
             if datetime.now() - start_time > timedelta(seconds=max_seconds):
