@@ -3,6 +3,7 @@ import subprocess
 import re
 from typing import Optional, List
 import logging
+import json
 
 import keyval
 
@@ -80,79 +81,62 @@ def is_alpha(c):
 
 class Metadata:
 
-    def __init__(self, path: Path, debug = False):
-        self.path = path
-        self.artists: Optional[List[str]] = None
-        self.album: Optional[str] = None
-        self.title: Optional[str] = None
-        self.date: Optional[str] = None
-        self.album_artist: Optional[str] = None
+    path: str
+    duration: int
+    artists: Optional[List[str]] = None
+    album: Optional[str] = None
+    title: Optional[str] = None
+    date: Optional[str] = None
+    year: Optional[str] = None
+    album_artist: Optional[str] = None
 
-        cache_key = 'metadata' + path.absolute().as_posix()
+    def __init__(self, path: Path):
+        self.path = path
+
+        cache_key = 'ffprobe' + path.absolute().as_posix()
         output_bytes = keyval.conn.get(cache_key)
-        if output_bytes is not None:
-            output_string = output_bytes.decode()
-        else:
+        if output_bytes is None:
             command = [
-                'ffmpeg',
-                '-loglevel', 'error',
-                '-i', path.absolute().as_posix(),
-                '-f', 'ffmetadata',
-                '-'
+                'ffprobe',
+                '-print_format', 'json',
+                '-show_entries', 'format',
+                path.absolute().as_posix(),
             ]
             try:
                 result = subprocess.run(command,
-                                    shell=False,
-                                    check=True,
-                                    capture_output=True,
-                                    text=True)
+                                        shell=False,
+                                        check=True,
+                                        capture_output=True)
             except subprocess.CalledProcessError as ex:
                 log.warning('metadata read error')
                 log.warning('stderr: %s', ex.stderr)
                 return
 
-            output_string: str = result.stdout
-            keyval.conn.set(cache_key, output_string)
+            output_bytes = result.stdout
+            keyval.conn.set(cache_key, output_bytes)
 
-        # Example output:
-        # -----------------------------------------------
-        # ;FFMETADATA1
-        # encoded_by=Switch Trial Version © NCH Software
-        # comment=
-        # track=3
-        # album=Elevator Music For An Elevated Mood
-        # artist=Cory Wong/Dave Koz
-        # album_artist=Cory Wong
-        # title=Restoration (feat. Dave Koz)
-        # genre=Jazz
-        # date=2020
-        # encoder=Lavf58.76.100
-        # subprocess.run()
-        # -----------------------------------------------
+        data = json.loads(output_bytes.decode())['format']
 
-        for line in output_string.splitlines():
-            try:
-                eq = line.index('=')
-            except ValueError:
-                continue
+        self.duration = int(float(data['duration']))
+        tags = data['tags']
 
-            key = line[:eq].lower()
-            value = line[eq+1:]
-            if key == 'album':
-                self.album = value
-            elif key == 'artist':
-                # Split by / and \;
-                self.artists = re.split(r'\/|\\;', value)
-            elif key == 'title':
-                self.title = strip_keywords(value).strip()
-            elif key == 'date':
-                self.date = value
-            elif key == 'album_artist':
-                self.album_artist = value
+        if 'album' in tags:
+            self.album = tags['album']
 
-            if debug:
-                print(key, value, sep='\t')
+        if 'artist' in tags:
+            # Split by / and \;
+            # TODO are these still used as separators, now that we've switched to ffprobe?
+            self.artists = re.split(r'\/|\\;', tags['artist'])
 
+        if 'title' in tags:
+            self.title = strip_keywords(tags['title']).strip()
+
+        if 'date' in tags:
+            self.date = tags['date']
+            self.year = self.date[:4]
+
+        if 'album_artist' in tags:
+            self.album_artist = tags['album_artist']
 
     def _meta_title(self) -> Optional[str]:
         """
@@ -161,8 +145,8 @@ class Metadata:
         """
         if self.artists and self.title:
             title = ' & '.join(self.artists) + ' - ' + self.title
-            if self.date:
-                title += ' [' + self.date[:4] + ']'
+            if self.year:
+                title += ' [' + self.year + ']'
             return title
         else:
             return None
@@ -274,11 +258,3 @@ class Metadata:
             yield ' '.join(self.artists) + ' - ' + self.title
 
         yield self._filename_title_search()
-
-
-if __name__ == '__main__':
-    meta = Metadata(Path('music', 'Guest-Robin', '03. Restoration (feat. Dave Koz).mp3'), debug = True)
-    print('---------------------')
-    print(meta.display_title())
-    print(list(meta.album_search_queries()))
-    print(list(meta.lyrics_search_queries()))
