@@ -119,25 +119,27 @@ class Metadata:
 
         self.duration = int(float(data['duration']))
         if 'tags' in data:
-            tags = data['tags']
+            for name, value in data['tags'].items():
+                # sometimes ffprobe returns tags in uppercase
+                name = name.lower()
 
-            if 'album' in tags:
-                self.album = tags['album']
+                if name == 'album':
+                    self.album = value
 
-            if 'artist' in tags:
-                # Split by / and \;
-                # TODO are these still used as separators, now that we've switched to ffprobe?
-                self.artists = re.split(r'\/|\\;', tags['artist'])
+                if name == 'artist':
+                    # Split by / and \;
+                    # TODO are these still used as separators, now that we've switched to ffprobe?
+                    self.artists = re.split(r'\/|\\;', value)
 
-            if 'title' in tags:
-                self.title = strip_keywords(tags['title']).strip()
+                if name == 'title':
+                    self.title = strip_keywords(value).strip()
 
-            if 'date' in tags:
-                self.date = tags['date']
-                self.year = self.date[:4]
+                if name == 'date':
+                    self.date = value
+                    self.year = value[:4]
 
-            if 'album_artist' in tags:
-                self.album_artist = tags['album_artist']
+                if name == 'album_artist':
+                    self.album_artist = value
 
     def _meta_title(self) -> Optional[str]:
         """
