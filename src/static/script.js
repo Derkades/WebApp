@@ -741,7 +741,7 @@ function initTrackList(skip = 0) {
     })().catch(err => {
         console.warn('track list | error');
         console.warn(err);
-        setTimeout(initTrackList, 1000);
+        setTimeout(() => initTrackList(skip), 1000);
     });
 }
 
