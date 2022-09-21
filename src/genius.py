@@ -62,10 +62,10 @@ def _extract_lyrics(genius_url: str) -> List[str]:
     info_json_string = text[start:end].replace('\\"', "\"").replace("\\'", "'").replace('\\\\', '\\').replace('\\$', '$').replace('\\`', '`')
     try:
         info_json = json.loads(info_json_string)
-    except json.decoder.JSONDecodeError as e:
-        log.info('Error retrieving lyrics: json decode error at %s', e.pos)
-        log.info('Neighbouring text: "%s"', info_json_string[e.pos-10:e.pos+10])
-        raise e
+    except json.decoder.JSONDecodeError as ex:
+        log.info('Error retrieving lyrics: json decode error at %s', ex.pos)
+        log.info('Neighbouring text: "%s"', info_json_string[ex.pos-20:ex.pos+20])
+        raise ex
     lyric_html = info_json['songPage']['lyricsData']['body']['html']
     soup = BeautifulSoup(lyric_html, 'lxml')
     lyrics = ''
@@ -86,6 +86,13 @@ def _extract_lyrics(genius_url: str) -> List[str]:
 
 
 def get_lyrics(query: str) -> Optional[Lyrics]:
+    """
+    Search for the given query, then extract lyrics from that page (if found). This function
+    will return lyrics from cache if it has been cached before.
+    Parameters:
+        query: Search query
+    Returns: Lyrics object, or None if no lyrics were found
+    """
     cache_object = cache.get('genius', query)
     cached_data = cache_object.retrieve_json()
 

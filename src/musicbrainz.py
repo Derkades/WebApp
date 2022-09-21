@@ -15,6 +15,9 @@ musicbrainzngs.set_useragent('Super fancy music player 2.0', 0.1, 'https://githu
 log = logging.getLogger('app.musicbrainz')
 
 def _search_release(title: str) -> Optional[str]:
+    """
+    Search for a release id using the provided search query
+    """
     r = musicbrainzngs.search_releases(title)['release-list']
     if len(r) > 0:
         return r[0]['id']
@@ -23,6 +26,9 @@ def _search_release(title: str) -> Optional[str]:
 
 
 def _get_image_url(release_id: str) -> Optional[str]:
+    """
+    Get album cover URL from MusicBrainz release id
+    """
     try:
         images = musicbrainzngs.get_image_list(release_id)['images']
 

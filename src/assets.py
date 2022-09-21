@@ -23,7 +23,13 @@ class Assets:
                 self.assets[name] = f'data:{mime};charset=utf-8;base64,{b64}'
 
     def get_asset_b64(self, name: str) -> str:
+        """
+        Get asset, css-compatible base64 encoded string
+        """
         return self.assets[name]
 
-    def all_assets_dict(self):
+    def all_assets_dict(self) -> Dict[str, str]:
+        """
+        Returns: Dictionary of all assets, css base64 encoded
+        """
         return self.assets

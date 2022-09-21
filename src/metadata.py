@@ -59,6 +59,9 @@ COLLECTION_KEYWORDS = [
 
 
 def strip_keywords(inp: str) -> str:
+    """
+    Remove undesirable keywords from title, as a result of being downloaded from the internet.
+    """
     for strip_keyword in FILENAME_STRIP_KEYWORDS:
         inp = inp.replace(strip_keyword, '')
     return inp

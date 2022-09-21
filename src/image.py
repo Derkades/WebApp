@@ -15,6 +15,14 @@ log = logging.getLogger('app.image')
 def thumbnail(input_img: Union[Path, bytes, Callable], cache_id: str, thumb_format: str, thumb_resolution: int) -> bytes:
     """
     Generate thumbnail, making use of cache.
+    Parameters:
+        input_img: Input image, either a path, image bytes, or a function that returns image bytes.
+        cache_id: A cache identifier string to uniquely identify this image. If a cache object exists
+                  with this cache id (and the same thumbnail settings), a thumbnail is returned from cache.
+        thumb_format: Image format, 'avif' or 'webp'
+        thumb_resolution: Thumbnail height and width. Note that the resulting thumbnail may not necessarily be
+                          square, it will still have the same aspect ratio as the original image.
+    Returns: Compressed thumbnail image bytes.
     """
     thumb_quality = 60 if thumb_format == 'avif' else 80
     cache_id += thumb_format + str(thumb_quality) + str(thumb_resolution)
