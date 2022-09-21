@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Super fancy music player 2.0</title>
     <link rel="icon" href="/static/favicon.ico">
-    <link rel="stylesheet" href="/style.css">
+    {% assets "style.scss", filters="pyscss,cssmin", output="gen/styles.css" %}
+        <link rel="stylesheet" href="{{ ASSET_URL }}">
+    {% endassets %}
 </head>
 <body>
 
@@ -218,7 +220,12 @@
     {# A "variable" to be used by javascript #}
     <span id="delete-base64" style="display: none">{{ assets['delete.svg'] }}</span>
 
-    <script src="/static/script.js"></script>
+
+    <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+
+    {% assets "js/*.js", filters="jsmin", output="gen/packed.js" %}
+        <script src="{{ ASSET_URL }}"></script>
+    {% endassets %}
 
 </body>
 </html>

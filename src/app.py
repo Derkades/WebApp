@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional
 import hashlib
 import hmac
 from logging.config import dictConfig
@@ -7,11 +7,11 @@ from pathlib import Path
 from datetime import datetime, timedelta
 
 from flask import Flask, request, render_template, Response, redirect
+import flask_assets
 from flask_babel import Babel
 
 from assets import Assets
 import bing
-import cache
 import genius
 import image
 import settings
@@ -39,6 +39,7 @@ dictConfig({
 
 application = Flask(__name__, template_folder=Path('templates'))
 babel = Babel(application)
+flask_assets.Environment(application)
 assets = Assets()
 log = logging.getLogger('app')
 assets_dir = Path('static')
@@ -306,21 +307,6 @@ def track_list():
             response['index'] += 1
 
     return response
-
-
-@application.route('/style.css')
-def style() -> Response:
-    """
-    Serve stylesheet, with placeholders replaced
-    """
-    if not check_password_cookie():
-        return Response(None, 403)
-
-    with open(Path(assets_dir, 'style.css'), 'rb') as style_file:
-        stylesheet: bytes = style_file.read()
-        stylesheet = stylesheet.replace(b'[[FONT_BASE64]]',
-                                        assets.get_asset_b64('quicksand-v30-latin-regular.woff2').encode())
-    return Response(stylesheet, mimetype='text/css')
 
 
 @application.route('/raphson')

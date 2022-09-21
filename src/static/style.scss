@@ -2,9 +2,8 @@
     font-family: 'Quicksand';
     font-style: normal;
     font-weight: 400;
-    src: local(''),
-         url('[[FONT_BASE64]]') format('woff2');
-  }
+    src: url('/static/quicksand-v30-latin-regular.woff2') format('woff2');
+}
 
 body {
     height: 100vh;
@@ -41,10 +40,6 @@ p.secondary {
 .icon-button {
     padding: .25rem;
     margin: 0;
-}
-
-.icon-button > .icon {
-    filter: invert(1);
 }
 
 input[type=range] {
@@ -300,7 +295,6 @@ audio {
 }
 
 .delete-overlay > .icon {
-    filter: invert(1);
     opacity: 0;
 }
 
@@ -352,6 +346,11 @@ audio {
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
+    filter: invert(1);
+}
+
+h4 > .icon {
+    display: inline-block;
 }
 
 .full-page-overlay {
@@ -371,7 +370,7 @@ audio {
     min-width: min(60vw, 50rem);
     max-width: 50rem;
     /* 3rem to compensate for margin, 2rem to compensate for padding */
-    max-height: min(60rem, calc(100vh - 3rem - 2rem));
+    max-height: \min(60rem, calc(100vh - 3rem - 2rem));
     margin: 1.5rem;
     /* prevent children from overflowing parent */
     display: flex;

@@ -1,0 +1,15 @@
+yt-dlp
+flask
+flask-babel
+flask-assets
+jsmin
+pyscss
+cssmin
+bs4
+requests
+pillow
+gunicorn
+redis
+musicbrainzngs
+lxml
+pillow-avif-plugin
