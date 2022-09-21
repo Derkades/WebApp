@@ -123,8 +123,8 @@ def choose_track():
     display_name = chosen_track.metadata().display_title()
 
     return {
-        'path': chosen_track.relpath(),
-        'display_name': display_name,
+        'file': chosen_track.relpath(),
+        'display': display_name,
     }
 
 
@@ -138,7 +138,7 @@ def get_track() -> Response:
 
     quality = request.args['quality'] if 'quality' in request.args else 'high'
 
-    track = Track.by_relpath(request.args['track_path'])
+    track = Track.by_relpath(request.args['path'])
     audio = track.transcoded_audio(quality)
     return Response(audio, mimetype='audio/ogg')
 
@@ -173,7 +173,7 @@ def get_album_cover() -> Response:
     if not check_password_cookie():
         return Response(None, 403)
 
-    track = Track.by_relpath(request.args['track_path'])
+    track = Track.by_relpath(request.args['path'])
 
     def get_img():
         meta = track.metadata()
@@ -199,7 +199,7 @@ def get_lyrics():
     if not check_password_cookie():
         return Response(None, 403)
 
-    track = Track.by_relpath(request.args['track_path'])
+    track = Track.by_relpath(request.args['path'])
     meta = track.metadata()
 
     for search_query in meta.lyrics_search_queries():
@@ -299,7 +299,7 @@ def track_list():
                     'playlist_display': playlist.display_name,
                     'file': track.relpath(),
                     'display': meta.display_title(),
-                    'duration': meta.duration(),
+                    'duration': meta.duration,
                 })
 
             if datetime.now() - start_time > timedelta(seconds=max_seconds):

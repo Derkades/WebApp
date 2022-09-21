@@ -280,11 +280,11 @@ function updateTrackHtml() {
         document.getElementById('lyrics').innerHTML = '<i class="secondary">Geen lyrics gevonden</i>'
     }
 
-    document.getElementById('current-track').textContent = '[' + track.playlistDisplay + '] ' + track.displayName;
+    document.getElementById('current-track').textContent = '[' + track.playlist_display + '] ' + track.display;
 
     if (state.history.length > 0) {
         const previousTrack = state.history[state.history.length - 1];
-        document.getElementById('previous-track').textContent = '[' + previousTrack.playlistDisplay + '] ' + previousTrack.displayName;
+        document.getElementById('previous-track').textContent = '[' + previousTrack.playlist_display + '] ' + previousTrack.display;
     } else {
         document.getElementById('previous-track').textContent = '-';
     }
@@ -459,8 +459,8 @@ function updateQueue() {
 
     const trackData = {
         playlist: playlist,
-        playlistDisplay: playlist.startsWith("Guest-") ? playlist.substring('6') : playlist,
-        path: null, // choose random
+        playlist_display: playlist.startsWith("Guest-") ? playlist.substring('6') : playlist,
+        file: null, // choose random
     }
 
     downloadAndAddToQueue(trackData).then(() => {
@@ -474,61 +474,60 @@ function updateQueue() {
     });
 }
 
-async function downloadAndAddToQueue(trackData, top=false) {
+async function downloadAndAddToQueue(track, top=false) {
     // If no specific track is specified, first choose random track
-    if (trackData.path === null) {
+    if (track.file === null) {
         console.info('queue | choose track');
-        const chooseResponse = await fetch('/choose_track?playlist_dir=' + encodeURIComponent(trackData.playlist));
+        const chooseResponse = await fetch('/choose_track?playlist_dir=' + encodeURIComponent(track.playlist));
         checkResponseCode(chooseResponse);
         const trackJson = await chooseResponse.json();
-        trackData.path = trackJson.path;
-        trackData.displayName = trackJson.display_name;
+        track.file = trackJson.file;
+        track.display = trackJson.display;
     }
 
     // Get track audio
     console.info('queue | download audio');
     const encodedQuality = encodeURIComponent(document.getElementById('settings-audio-quality').value);
-    const encodedPath = encodeURIComponent(trackData.path);
-    const trackResponse = await fetch('/get_track?track_path=' + encodedPath + '&quality=' + encodedQuality);
+    const trackResponse = await fetch('/get_track?path=' + encodeURIComponent(track.file) + '&quality=' + encodedQuality);
     checkResponseCode(trackResponse);
     const audioBlob = await trackResponse.blob();
-    trackData.audioBlobUrl = URL.createObjectURL(audioBlob);
+    track.audioBlobUrl = URL.createObjectURL(audioBlob);
 
     // Get cover image
     if (encodedQuality === 'verylow') {
         console.info('queue | using raphson image to save data');
-        trackData.imageStreamUrl = '/raphson';
-        trackData.imageBlobUrl = '/raphson';
+        track.imageStreamUrl = '/raphson';
+        track.imageBlobUrl = '/raphson';
     } else {
         console.info('queue | download album cover image');
-        trackData.imageStreamUrl = '/get_album_cover?track_path=' + encodedPath;
-        const coverResponse = await fetch(trackData.imageStreamUrl);
+        track.imageStreamUrl = '/get_album_cover?path=' + encodeURIComponent(track.file);
+        const coverResponse = await fetch(track.imageStreamUrl);
         checkResponseCode(coverResponse);
         const imageBlob = await coverResponse.blob();
-        trackData.imageBlobUrl = URL.createObjectURL(imageBlob);
+        track.imageBlobUrl = URL.createObjectURL(imageBlob);
     }
 
     // Get lyrics
     if (encodedQuality === 'verylow') {
-        trackData.lyrics = {
+        track.lyrics = {
             found: true,
             genius_url: null,
             html: "<i>Lyrics were not downloaded to save data</i>",
         };
     } else {
         console.info('queue | download lyrics');
-        trackData.lyricsUrl = '/get_lyrics?track_path=' + encodedPath;
-        const lyricsResponse = await fetch(trackData.lyricsUrl);
+        track.lyricsUrl = '/get_lyrics?path=' + encodeURIComponent(track.file);
+        const lyricsResponse = await fetch(track.lyricsUrl);
         checkResponseCode(lyricsResponse);
         const lyricsJson = await lyricsResponse.json();
-        trackData.lyrics = lyricsJson;
+        track.lyrics = lyricsJson;
     }
 
     // Add track to queue and update HTML
     if (top) {
-        state.queue.unshift(trackData);
+        state.queue.unshift(track);
     } else {
-        state.queue.push(trackData);
+        state.queue.push(track);
     }
     updateQueueHtml();
     hideLoadingOverlay();
@@ -568,8 +567,8 @@ function updateQueueHtml() {
                     html += '<div style="background-image: url(\'' + trashBase64 + '\')" class="icon"></div>';
                 html += '</div>'
             html += '</td>';
-            html += '<td>' + queuedTrack.playlistDisplay + '</td>';
-            html += '<td>' + escapeHtml(queuedTrack.displayName) + '</td>';
+            html += '<td>' + queuedTrack.playlist_display + '</td>';
+            html += '<td>' + escapeHtml(queuedTrack.display) + '</td>';
         html += '</tr>';
         i++;
     }
@@ -822,15 +821,26 @@ function createPlaylistDropdown() {
     return select;
 }
 
+function findTrackByFile(file) {
+    for (const track of state.tracks) {
+        if (track.file === file) {
+            return track;
+        }
+    }
+    return null;
+}
+
 function queueAdd(id) {
     const button = document.getElementById(id);
-    const trackData = {
-        playlist: button.dataset.playlistDir,
-        playlistDisplay: button.dataset.playlistDisplay,
-        path: button.dataset.trackFile,
-        displayName: button.dataset.trackDisplay,
-    };
-    downloadAndAddToQueue(trackData, true);
+    const file = button.dataset.track;
+    const track = findTrackByFile(file);
+
+    if (track === null) {
+        console.error('track not found in track list: ' + file)
+        return;
+    }
+
+    downloadAndAddToQueue(track, true);
     document.getElementById('queue-overlay').style.display = 'none';
 }
 
@@ -886,10 +896,7 @@ function searchTrackList() {
         outputHtml += ''
             + '<button '
             + 'id="queue-choice-' + i + '" '
-            + 'data-playlist-dir="' + escapeHtml(track.playlistDir) + '" '
-            + 'data-playlist-display="' + escapeHtml(track.playlistDisplay) + '" '
-            + 'data-track-file="' + escapeHtml(track.trackFile) + '" '
-            + 'data-track-display="' + escapeHtml(track.trackDisplay) + '" '
+            + 'data-track="' + escapeHtml(track.trackFile) + '" '
             + 'onclick="queueAdd(this.id);">'
             + '[' + escapeHtml(track.playlistDisplay) + '] ' + escapeHtml(track.trackDisplay)
             + '</button><br>';
