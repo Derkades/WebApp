@@ -29,10 +29,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Playback controls
     document.getElementById('button-skip-previous').addEventListener('click', previous);
-    document.getElementById('button-rewind').addEventListener('click', () => seek(-15));
+    document.getElementById('button-rewind-15').addEventListener('click', () => seek(-15));
     document.getElementById('button-play').addEventListener('click', play);
     document.getElementById('button-pause').addEventListener('click', pause);
-    document.getElementById('button-fast-forward').addEventListener('click', () => seek(15));
+    document.getElementById('button-fast-forward-15').addEventListener('click', () => seek(15));
     document.getElementById('button-skip-next').addEventListener('click', next);
     document.getElementById('settings-volume').addEventListener('input', event => {
         const audioElem = getAudioElement();
