@@ -41,15 +41,23 @@ def thumbnail(input_img: Union[Path, bytes, Callable], cache_id: str, thumb_form
         input_img = input_img()
     elif isinstance(input_img, bytes):
         pass
+    elif input_img is None:
+        log.warning('input_img is None, using fallback for id: %s', cache_id)
     else:
         raise ValueError('invalid image type: ' + type(input_img))
 
-    img = Image.open(BytesIO(input_img))
-    img.thumbnail((thumb_resolution, thumb_resolution), Image.ANTIALIAS)
-    img_out = BytesIO()
-    img.save(img_out, format=thumb_format, quality=thumb_quality)
-    img_out.seek(0)
-    comp_bytes = img_out.read()
+    if input_img is not None:
+        try:
+            img = Image.open(BytesIO(input_img))
+            img.thumbnail((thumb_resolution, thumb_resolution), Image.ANTIALIAS)
+            img_out = BytesIO()
+            img.save(img_out, format=thumb_format, quality=thumb_quality)
+            img_out.seek(0)
+            comp_bytes = img_out.read()
 
-    cache_obj.store(comp_bytes)
-    return comp_bytes
+            cache_obj.store(comp_bytes)
+            return comp_bytes
+        except Exception as ex:
+            log.warning('Error during thumbnail generation: %s', ex)
+
+    return thumbnail(Path('static', 'raphson.png'), 'raphson', thumb_format, thumb_resolution)

@@ -178,11 +178,7 @@ def get_album_cover() -> Response:
     def get_img():
         meta = track.metadata()
         img = get_cover_bytes(meta)
-        if img:
-            return img
-        else:
-            with open(raphson_png_path, 'rb') as raphson_png_f:
-                return raphson_png_f.read()
+        return img
 
     img_format = get_img_format()
 
