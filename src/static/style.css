@@ -97,7 +97,7 @@ kbd {
 }
 
 .bg-image-blurred {
-    filter: blur(5rem);
+    filter: blur(3.5rem);
 }
 
 .background-cover,
