@@ -120,11 +120,12 @@ def choose_track():
     dir_name = request.args['playlist_dir']
     playlist = Playlist.by_dir_name(dir_name)
     chosen_track = playlist.choose_track()
-    display_name = chosen_track.metadata().display_title()
+    meta = chosen_track.metadata()
 
     return {
         'file': chosen_track.relpath(),
-        'display': display_name,
+        'display': meta.display_title(),
+        'duration': meta.duration,
     }
 
 

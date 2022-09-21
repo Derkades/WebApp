@@ -483,6 +483,7 @@ async function downloadAndAddToQueue(track, top=false) {
         const trackJson = await chooseResponse.json();
         track.file = trackJson.file;
         track.display = trackJson.display;
+        track.duration = trackJson.duration;
     }
 
     // Get track audio
@@ -554,7 +555,12 @@ function removeFromQueue(index) {
 function updateQueueHtml() {
     document.getElementsByTagName("body")[0].style.cursor = state.queueBusy ? 'progress' : '';
 
-    document.getElementById('current-queue-size').textContent = state.queue.length;
+    let totalQueueDuration = 0;
+    for (const queuedTrack of state.queue) {
+        totalQueueDuration += queuedTrack.duration;
+    }
+
+    document.getElementById('current-queue-size').textContent = state.queue.length + ' - ' + secondsToString(totalQueueDuration);
 
     const trashBase64 = document.getElementById('delete-base64').innerText;
 
