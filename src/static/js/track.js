@@ -1,6 +1,6 @@
-function findTrackByFile(file) {
+function findTrackByPath(path) {
     for (const track of state.tracks) {
-        if (track.file === file) {
+        if (track.path === path) {
             return track;
         }
     }

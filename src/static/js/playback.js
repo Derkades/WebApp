@@ -31,9 +31,11 @@ function showCorrectPlayPauseButton() {
     if (audioElem == null || audioElem.paused) {
         document.getElementById('button-pause').style.display = 'none';
         document.getElementById('button-play').style.display = '';
+        navigator.mediaSession.playbackState = 'paused';
     } else {
         document.getElementById('button-play').style.display = 'none';
         document.getElementById('button-pause').style.display = '';
+        navigator.mediaSession.playbackState = 'playing';
     }
 }
 
@@ -105,6 +107,12 @@ function updateProgress(audioElem) {
     document.getElementById('progress-time-current').innerText = current;
     document.getElementById('progress-time-duration').innerText = max;
     document.getElementById('progress-bar').style.width = percentage + '%';
+
+    navigator.mediaSession.setPositionState({
+        duration: audioElem.duration,
+        position: audioElem.currentTime,
+        playbackRate: audioElem.playbackRate,
+    });
 }
 
 function getTransformedVolume() {
@@ -141,6 +149,14 @@ function updateTrackHtml() {
     replaceAudioElement(audioElem);
 
     replaceAlbumImages(track.imageBlobUrl);
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+        title: track.title !== null ? track.title : track.display,
+        album: track.album !== null ? track.album : 'Unknown Album',
+        artist: track.artists !== null ? track.artists.join(' & ') : 'Unknown Artist',
+        // For some unknown reason this does not work. A question on stackoverflow mentions only JPEG works, but in my testing it doesn't either
+        artwork: [{src: track.imageBlobUrl}],
+    });
 
     if (track.lyrics.found) {
         // track.lyrics.html is already escaped by backend, and only contains some safe HTML that we should not escape

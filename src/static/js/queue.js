@@ -47,13 +47,7 @@ function updateQueue() {
 
     state.queueBusy = true;
 
-    const trackData = {
-        playlist: playlist,
-        playlist_display: playlist.startsWith("Guest-") ? playlist.substring('6') : playlist,
-        file: null, // choose random
-    }
-
-    downloadAndAddToQueue(trackData).then(() => {
+    downloadRandomAndAddToQueue(playlist).then(() => {
         state.queueBusy = false;
         updateQueue();
     }, error => {
@@ -64,20 +58,25 @@ function updateQueue() {
     });
 }
 
-async function downloadAndAddToQueue(track, top=false) {
-    // If no specific track is specified, first choose random track
-    if (track.file === null) {
-        console.info('queue | choose track');
-        const chooseResponse = await fetch('/choose_track?playlist_dir=' + encodeURIComponent(track.playlist));
-        checkResponseCode(chooseResponse);
-        const trackJson = await chooseResponse.json();
-        track.file = trackJson.file;
-        track.display = trackJson.display;
-        track.duration = trackJson.duration;
+async function downloadRandomAndAddToQueue(playlist) {
+    console.info('queue | choose track');
+    const chooseResponse = await fetch('/choose_track?playlist_dir=' + encodeURIComponent(playlist));
+    checkResponseCode(chooseResponse);
+    const path = (await chooseResponse.json()).path;
+
+    // Find track info for this file
+    const track = findTrackByPath(path);
+
+    if (track === null) {
+        throw Error('Track does not exist in local list: ' + path);
     }
 
+    await downloadAndAddToQueue(track);
+}
+
+async function downloadAndAddToQueue(track) {
     const encodedQuality = encodeURIComponent(document.getElementById('settings-audio-quality').value);
-    const encodedPath = encodeURIComponent(track.file);
+    const encodedPath = encodeURIComponent(track.path);
 
     // Get track audio
     console.info('queue | download audio');
@@ -251,14 +250,14 @@ function dragDropTable(target) {
 
 function searchTrackList() {
     if (state.tracks === null) {
-        document.getElementById('track-list-output').textContent = 'Track list is still loading, please wait... If this takes longer than a minute, please check the console for errors.';
+        document.getElementById('track-list-output').textContent = 'Track list is still loading, please wait... If this takes longer than 10 seconds, please check the console for errors.';
         return;
     }
 
     const playlist = document.getElementById('track-list-playlist').value;
     const query = document.getElementById('track-list-query').value.trim().toLowerCase();
 
-    const tracks = [];
+    const scoredTracks = [];
 
     for (const track of state.tracks) {
         if (playlist === 'everyone' || playlist === track.playlist) {
@@ -282,28 +281,26 @@ function searchTrackList() {
             }
 
             if (score > 0) {
-                tracks.push({
-                    playlistDir: track.playlist,
-                    playlistDisplay: track.playlist_display,
-                    trackFile: track.file,
-                    trackDisplay: track.display,
+                scoredTracks.push({
                     score: score,
+                    track: track,
                 });
             }
         }
     }
 
-    tracks.sort((a, b) => b.score - a.score);
+    scoredTracks.sort((a, b) => b.score - a.score);
 
     let i = 0;
     let outputHtml = '';
-    for (const track of tracks) {
+    for (const scoredTrack of scoredTracks) {
+        const track = scoredTrack.track
         outputHtml += ''
             + '<button '
             + 'id="queue-choice-' + i + '" '
-            + 'data-track="' + escapeHtml(track.trackFile) + '" '
+            + 'data-path="' + escapeHtml(track.path) + '" '
             + 'onclick="searchTrackListQueueAdd(this.id);">'
-            + '[' + escapeHtml(track.playlistDisplay) + '] ' + escapeHtml(track.trackDisplay)
+            + '[' + escapeHtml(track.playlist_display) + '] ' + escapeHtml(track.display)
             + '</button><br>';
 
 
@@ -320,14 +317,14 @@ function searchTrackList() {
 
 function searchTrackListQueueAdd(id) {
     const button = document.getElementById(id);
-    const file = button.dataset.track;
-    const track = findTrackByFile(file);
+    const path = button.dataset.path;
+    const track = findTrackByPath(path);
 
     if (track === null) {
         console.error('track not found in track list: ' + file);
         return;
     }
 
-    downloadAndAddToQueue(track, true);
+    downloadAndAddToQueue(track);
     document.getElementById('queue-overlay').style.display = 'none';
 }

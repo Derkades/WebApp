@@ -15,14 +15,17 @@ QUALITY_TABLE = {
     'high': {
         'avif': 100,
         'webp': 100,
+        'jpeg': 100,
     },
     'low': {
         'avif': 60,
         'webp': 70,
+        'jpeg': 70,
     },
     'verylow': {
         'avif': 50,
         'webp': 50,
+        'jpeg': 50,
     }
 }
 

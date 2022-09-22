@@ -58,6 +58,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // Hotkeys
     document.addEventListener('keydown', event => handleKey(event.key));
 
+    navigator.mediaSession.setActionHandler('play', play);
+    navigator.mediaSession.setActionHandler('pause', pause);
+    navigator.mediaSession.setActionHandler('seekbackward', () => seek(-15));
+    navigator.mediaSession.setActionHandler('seekforward', () => seek(15));
+    navigator.mediaSession.setActionHandler('previoustrack', previous);
+    navigator.mediaSession.setActionHandler('nexttrack', next);
+
     next();
     setInterval(showCorrectPlayPauseButton, 50);
     initTrackList();

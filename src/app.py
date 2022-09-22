@@ -121,12 +121,9 @@ def choose_track():
     dir_name = request.args['playlist_dir']
     playlist = Playlist.by_dir_name(dir_name)
     chosen_track = playlist.choose_track()
-    meta = chosen_track.metadata()
 
     return {
-        'file': chosen_track.relpath(),
-        'display': meta.display_title(),
-        'duration': meta.duration,
+        'path': chosen_track.relpath(),
     }
 
 
@@ -271,12 +268,15 @@ def track_list():
             if skip_to_index <= response['index']:
                 meta = track.metadata()
                 response['tracks'].append({
+                    'path': track.relpath(),
+                    'display': meta.display_title(),
                     'playlist': playlist.dir_name,
                     'playlist_display': playlist.display_name,
-                    'file': track.relpath(),
-                    'display': meta.display_title(),
                     'duration': meta.duration,
-                    'genres': track.metadata().genres,
+                    'genres': meta.genres,
+                    'title': meta.title,
+                    'artists': meta.artists,
+                    'album': meta.album,
                 })
 
             if datetime.now() - start_time > timedelta(seconds=max_seconds):
