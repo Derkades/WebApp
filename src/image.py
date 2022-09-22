@@ -76,3 +76,15 @@ def thumbnail(input_img: Union[Path, bytes, Callable], cache_id: str, thumb_form
             log.warning('Error during thumbnail generation: %s', ex)
 
     return thumbnail(Path('static', 'raphson.png'), 'raphson', thumb_format, thumb_resolution)
+
+
+def check_valid(input_img: bytes) -> bool:
+    """
+    Ensure an image is valid by loading it with Pillow
+    """
+    try:
+        Image.open(BytesIO(input_img))
+        return True
+    except Exception as ex:
+        log.info('Corrupt image: %s', ex)
+        return False

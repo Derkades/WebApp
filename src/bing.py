@@ -8,8 +8,8 @@ import requests
 from bs4 import BeautifulSoup
 
 import cache
+import image
 import settings
-
 
 log = logging.getLogger("app.bing")
 
@@ -50,31 +50,40 @@ def image_search(bing_query: str) -> Optional[bytes]:
         max_consider_images = 5
         best_image = None
         for result in results:
-            if 'm' not in result:
-                continue
+            try:
+                m_attr = result['m']
+            except KeyError:
+                log.info('Skipping result without "m" attribute: %s', result)
 
-            image_url = json.loads(result['m'])['murl']
+            image_url = json.loads(m_attr)['murl']
 
-            log.info('Downloading image: %s', image_url)
+            log.info('Downloading image (%s left): %s', max_consider_images, image_url)
 
             try:
                 resp = requests.get(image_url, headers=headers)
                 if resp.status_code != 200:
-                    log.info('Status code %s, skipping', r.status_code)
+                    log.info('Status code %s, skipping', resp.status_code)
                     continue
                 img_bytes = resp.content
+
+                if not image.check_valid(img_bytes):
+                    continue
+
                 if best_image is None or len(img_bytes) > len(best_image):
                     best_image = img_bytes
-                    max_consider_images -= 1
-                    if max_consider_images == 0:
-                        break
+
+                max_consider_images -= 1
+                if max_consider_images == 0:
+                    break
             except Exception as ex:
                 log.info('Exception while downloading image, skipping. %s', ex)
 
         if best_image is None:
             cache_obj.store(b'magic_no_results')
+            log.info('No image found')
         else:
             cache_obj.store(best_image)
+            log.info('Found image, %.2fMiB', len(best_image)/1024/1024)
 
         return best_image
     except Exception:
