@@ -130,9 +130,8 @@ class Metadata:
                     self.album = value
 
                 if name == 'artist':
-                    # Split by / and \;
-                    # TODO are these still used as separators, now that we've switched to ffprobe?
-                    self.artists = re.split(r'\/|\\;', value)
+                    # Split by / and ;
+                    self.artists = re.split(r'\/|;', value)
 
                 if name == 'title':
                     self.title = strip_keywords(value).strip()
