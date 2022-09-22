@@ -220,25 +220,6 @@ class Playlist:
         """
         return [Track(entry) for entry in self.track_paths()]
 
-    def search_tracks(self, query: str, limit: int = 3) -> List[Track]:
-        """
-        Get list of tracks matching search query
-        Parameters:
-            query: Search query
-            limit: Maximum number of results
-        Returns: List of Track objects
-        """
-        # TODO levenshtein distance?
-        results: List[Track] = []
-
-        for path in self.track_paths():
-            if len(results) > limit:
-                break
-            if query.lower() in path.name.lower():
-                results.append(Track(path))
-
-        return results
-
     def download(self, url: str) -> CompletedProcess:
         """
         Start a download using yt-dlp

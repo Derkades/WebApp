@@ -236,29 +236,6 @@ def ytdl():
     }
 
 
-@application.route('/search_track')
-def search_track():
-    """
-    Search playlist directories for the provided query
-    """
-    if not check_password_cookie():
-        return Response(None, 403)
-
-    query = request.args['query']
-    results = []
-    for playlist in Playlist.get_all():
-        for track in playlist.search_tracks(query):
-            results.append({
-                'playlist_dir': playlist.dir_name,
-                'playlist_display': playlist.display_name,
-                'track_file': track.name(),
-                'track_display': track.metadata().display_title(),
-            })
-    return {
-        'search_results': results
-    }
-
-
 @application.route('/track_list')
 def track_list():
     """
