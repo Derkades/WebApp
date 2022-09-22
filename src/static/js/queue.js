@@ -154,7 +154,7 @@ function updateQueueHtml() {
     let i = 0;
     for (const queuedTrack of state.queue) {
         html += '<tr data-queue-pos="' + i + '">';
-            html += '<td class="background-cover box" style="background-image: url(\'' + escapeHtml(queuedTrack.imageBlobUrl) + '\')" onclick="removeFromQueue(' + i + ')">';
+            html += '<td class="box" style="background-image: url(\'' + escapeHtml(queuedTrack.imageBlobUrl) + '\')" onclick="removeFromQueue(' + i + ')">';
                 html += '<div class="delete-overlay">'
                     html += '<div style="background-image: url(\'' + trashBase64 + '\')" class="icon"></div>';
                 html += '</div>'
