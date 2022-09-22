@@ -26,6 +26,9 @@ def image_search(bing_query: str) -> Optional[bytes]:
     cache_obj = cache.get('bing', bing_query)
     cache_data = cache_obj.retrieve()
     if cache_data:
+        if cache_data == b'magic_no_results':
+            log.info('Returning no result, from cache: %s', bing_query)
+            return None
         log.info('Returning bing result from cache: %s', bing_query)
         return cache_data
 
@@ -41,28 +44,42 @@ def image_search(bing_query: str) -> Optional[bytes]:
                         cookies={'SRCHHPGUSR': 'ADLT=OFF'})  # disable safe search :-)
         soup = BeautifulSoup(r.text, 'lxml')
         results = soup.find_all('a', {'class': 'iusc'})
-        # Eerst werd hier altijd alleen de eerste gepakt, maar blijkbaar heeft soms de
-        # eerste afbeelding geen 'm' attribute. Latere afbeeldingen meestal wel!
+
+        # Try all results, looking for the image of the largest size (which is probably the highest quality image)
+        # Some images have no 'm' attribute for some reason, skip those.
+
+        max_consider_images = 5
+        best_image = None
         for result in results:
-            try:
-                json_data = json.loads(result['m'])
-            except KeyError:
+            if 'm' not in result:
                 continue
-            img_link = json_data['murl']
+
+            image_url = json.loads(result['m'])['murl']
+
+            log.info('Downloading image: %s', image_url)
+
             try:
-                resp = requests.get(img_link, headers=headers)
+                resp = requests.get(image_url, headers=headers)
                 if resp.status_code != 200:
-                    log.info('status code %s, trying next image', r.status_code)
+                    log.info('Status code %s, skipping', r.status_code)
                     continue
                 img_bytes = resp.content
-                cache_obj.store(img_bytes)
-                return img_bytes
+                if best_image is None or len(img_bytes) > len(best_image):
+                    best_image = img_bytes
+                    max_consider_images -= 1
+                    if max_consider_images == 0:
+                        break
             except Exception as ex:
-                log.info('exception while downloading image, trying next image. %s', ex)
+                log.info('Exception while downloading image, skipping. %s', ex)
 
-        raise ValueError('no link with "m" attribute')
+        if best_image is None:
+            cache_obj.store(b'magic_no_results')
+        else:
+            cache_obj.store(best_image)
+
+        return best_image
     except Exception:
-        log.info('No bing results')
+        log.info('Error during bing search. This is probably a bug.')
         traceback.print_exc()
         return None
 
