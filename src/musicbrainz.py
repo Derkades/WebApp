@@ -6,7 +6,6 @@ import urllib
 import requests
 import musicbrainzngs
 
-import bing
 import cache
 
 

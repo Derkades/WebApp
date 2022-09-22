@@ -1,5 +1,4 @@
 import json
-from io import BytesIO
 import sys
 import logging
 import traceback
@@ -7,9 +6,9 @@ from typing import Optional
 
 import requests
 from bs4 import BeautifulSoup
-from PIL import Image
 
 import cache
+import settings
 
 
 log = logging.getLogger("app.bing")
@@ -34,7 +33,7 @@ def image_search(bing_query: str) -> Optional[bytes]:
 
     log.info('Searching bing: %s', bing_query)
     try:
-        headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0'}
+        headers = {'User-Agent': settings.webscraping_user_agent}
         r = requests.get('https://www.bing.com/images/search',
                         headers=headers,
                         params={'q': bing_query,

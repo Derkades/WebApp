@@ -5,10 +5,11 @@ import logging
 import traceback
 from dataclasses import dataclass
 
-import cache
-
 import requests
 from bs4 import BeautifulSoup
+
+import cache
+import settings
 
 
 log = logging.getLogger('app.genius')
@@ -30,7 +31,7 @@ def _search(title: str) -> Optional[str]:
     r = requests.get(
         "https://genius.com/api/search/multi",
         params={"per_page": "1", "q": title},
-        headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0'}
+        headers={'User-Agent': settings.webscraping_user_agent}
     )
 
     search_json = r.json()
@@ -55,7 +56,7 @@ def _extract_lyrics(genius_url: str) -> List[str]:
     # 3. Trek een bepaalde property uit deze JSON, en parse deze met BeautifulSoup weer als HTML
     # 4. Soms staat lyrics in een link of in italics, de for loop maakt dat goed
     r = requests.get(genius_url,
-                     headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0'})
+                     headers={'User-Agent': settings.webscraping_user_agent})
     text = r.text
     start = text.index('window.__PRELOADED_STATE__ = JSON.parse(') + 41
     end = text.index("}');") + 1
