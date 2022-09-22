@@ -184,7 +184,8 @@ def get_album_cover() -> Response:
 
     img_format = get_img_format()
 
-    comp_bytes = image.thumbnail(get_img, track.relpath(), img_format[6:], 700)
+    comp_bytes = image.thumbnail(get_img, track.relpath(), img_format[6:], 700,
+                                 thumb_quality=request.args['quality'])
 
     return Response(comp_bytes, mimetype=img_format)
 

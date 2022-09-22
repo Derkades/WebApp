@@ -76,10 +76,12 @@ async function downloadAndAddToQueue(track, top=false) {
         track.duration = trackJson.duration;
     }
 
+    const encodedQuality = encodeURIComponent(document.getElementById('settings-audio-quality').value);
+    const encodedPath = encodeURIComponent(track.file);
+
     // Get track audio
     console.info('queue | download audio');
-    const encodedQuality = encodeURIComponent(document.getElementById('settings-audio-quality').value);
-    const trackResponse = await fetch('/get_track?path=' + encodeURIComponent(track.file) + '&quality=' + encodedQuality);
+    const trackResponse = await fetch('/get_track?path=' + encodedPath + '&quality=' + encodedQuality);
     checkResponseCode(trackResponse);
     const audioBlob = await trackResponse.blob();
     track.audioBlobUrl = URL.createObjectURL(audioBlob);
@@ -91,7 +93,7 @@ async function downloadAndAddToQueue(track, top=false) {
         track.imageBlobUrl = '/raphson';
     } else {
         console.info('queue | download album cover image');
-        track.imageStreamUrl = '/get_album_cover?path=' + encodeURIComponent(track.file);
+        track.imageStreamUrl = '/get_album_cover?path=' + encodedPath + '&quality=' + encodedQuality;
         const coverResponse = await fetch(track.imageStreamUrl);
         checkResponseCode(coverResponse);
         const imageBlob = await coverResponse.blob();
@@ -107,7 +109,7 @@ async function downloadAndAddToQueue(track, top=false) {
         };
     } else {
         console.info('queue | download lyrics');
-        track.lyricsUrl = '/get_lyrics?path=' + encodeURIComponent(track.file);
+        track.lyricsUrl = '/get_lyrics?path=' + encodedPath;
         const lyricsResponse = await fetch(track.lyricsUrl);
         checkResponseCode(lyricsResponse);
         const lyricsJson = await lyricsResponse.json();

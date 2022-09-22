@@ -11,8 +11,23 @@ import cache
 
 log = logging.getLogger('app.image')
 
+QUALITY_TABLE = {
+    'high': {
+        'avif': 100,
+        'webp': 100,
+    },
+    'low': {
+        'avif': 60,
+        'webp': 70,
+    },
+    'verylow': {
+        'avif': 50,
+        'webp': 50,
+    }
+}
 
-def thumbnail(input_img: Union[Path, bytes, Callable], cache_id: str, thumb_format: str, thumb_resolution: int) -> bytes:
+
+def thumbnail(input_img: Union[Path, bytes, Callable], cache_id: str, thumb_format: str, thumb_resolution: int, thumb_quality = 'high') -> bytes:
     """
     Generate thumbnail, making use of cache.
     Parameters:
@@ -24,8 +39,8 @@ def thumbnail(input_img: Union[Path, bytes, Callable], cache_id: str, thumb_form
                           square, it will still have the same aspect ratio as the original image.
     Returns: Compressed thumbnail image bytes.
     """
-    thumb_quality = 60 if thumb_format == 'avif' else 80
-    cache_id += thumb_format + str(thumb_quality) + str(thumb_resolution)
+    thumb_quality_percent = QUALITY_TABLE[thumb_quality][thumb_format]
+    cache_id += thumb_format + str(thumb_quality_percent) + str(thumb_resolution)
     cache_obj = cache.get('thumbnail', cache_id)
     cache_data = cache_obj.retrieve()
     if cache_data is not None:
@@ -51,7 +66,7 @@ def thumbnail(input_img: Union[Path, bytes, Callable], cache_id: str, thumb_form
             img = Image.open(BytesIO(input_img))
             img.thumbnail((thumb_resolution, thumb_resolution), Image.ANTIALIAS)
             img_out = BytesIO()
-            img.save(img_out, format=thumb_format, quality=thumb_quality)
+            img.save(img_out, format=thumb_format, quality=thumb_quality_percent)
             img_out.seek(0)
             comp_bytes = img_out.read()
 
