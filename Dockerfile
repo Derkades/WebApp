@@ -12,6 +12,9 @@ WORKDIR /app
 
 COPY ./src .
 
+# TODO Find a better way to make '/app/static/.webassets-cache' etc others writable
+RUN chmod -R 777 /app/static
+
 RUN pybabel compile -d translations
 
 ENV PYTHONUNBUFFERED=1
