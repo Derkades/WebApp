@@ -299,6 +299,7 @@ def track_list():
                     'file': track.relpath(),
                     'display': meta.display_title(),
                     'duration': meta.duration,
+                    'genres': track.metadata().genres,
                 })
 
             if datetime.now() - start_time > timedelta(seconds=max_seconds):

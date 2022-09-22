@@ -90,6 +90,7 @@ class Metadata:
     date: Optional[str] = None
     year: Optional[str] = None
     album_artist: Optional[str] = None
+    genres: List[str]
 
     def __init__(self, path: Path):
         self.path = path
@@ -119,6 +120,7 @@ class Metadata:
         data = json.loads(output_bytes.decode())['format']
 
         self.duration = int(float(data['duration']))
+        self.genres = []
         if 'tags' in data:
             for name, value in data['tags'].items():
                 # sometimes ffprobe returns tags in uppercase
@@ -141,6 +143,10 @@ class Metadata:
 
                 if name == 'album_artist':
                     self.album_artist = value
+
+                if name == 'genre':
+                    # TODO Allow multiple genres, split by some character
+                    self.genres.append(value)
 
     def _meta_title(self) -> Optional[str]:
         """
