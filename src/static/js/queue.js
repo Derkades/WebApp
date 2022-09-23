@@ -74,7 +74,7 @@ async function downloadRandomAndAddToQueue(playlist) {
     await downloadAndAddToQueue(track);
 }
 
-async function downloadAndAddToQueue(track) {
+async function downloadAndAddToQueue(track, top = false) {
     const encodedQuality = encodeURIComponent(document.getElementById('settings-audio-quality').value);
     const encodedPath = encodeURIComponent(track.path);
 
@@ -245,8 +245,6 @@ function dragDropTable(target) {
     }
 }
 
-
-
 function searchTrackList() {
     if (state.tracks === null) {
         document.getElementById('track-list-output').textContent = 'Track list is still loading, please wait... If this takes longer than 10 seconds, please check the console for errors.';
@@ -324,6 +322,6 @@ function searchTrackListQueueAdd(id) {
         return;
     }
 
-    downloadAndAddToQueue(track);
+    downloadAndAddToQueue(track, true);
     document.getElementById('queue-overlay').style.display = 'none';
 }
