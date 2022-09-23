@@ -71,13 +71,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     navigator.mediaSession.setActionHandler('play', play);
     navigator.mediaSession.setActionHandler('pause', pause);
-    navigator.mediaSession.setActionHandler('seekbackward', () => seek(-15));
-    navigator.mediaSession.setActionHandler('seekforward', () => seek(15));
+    navigator.mediaSession.setActionHandler('seekto', callback => {
+        const audio = getAudioElement();
+        if (audio != null) {
+            audio.currentTime = callback.seekTime;
+        }
+    });
     navigator.mediaSession.setActionHandler('previoustrack', previous);
     navigator.mediaSession.setActionHandler('nexttrack', next);
 
     next();
-    setInterval(showCorrectPlayPauseButton, 50);
+    setInterval(updateMediaSession, 500);
+    setInterval(updateMediaSessionPosition, 5000);
     initTrackList();
     searchTrackList();
 });

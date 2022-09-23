@@ -3,7 +3,7 @@ function play() {
     if (audioElem == null) {
         return;
     }
-    audioElem.play();
+    audioElem.play().then(updateMediaSession);
 }
 
 function pause() {
@@ -11,7 +11,8 @@ function pause() {
     if (audioElem == null) {
         return;
     }
-    audioElem.pause();
+    audioElem.pause()
+    updateMediaSession()
 }
 
 function playPause() {
@@ -20,22 +21,68 @@ function playPause() {
         return;
     }
     if (audioElem.paused) {
-        audioElem.play();
+        play();
     } else {
-        audioElem.pause();
+        pause();
     }
 }
 
-function showCorrectPlayPauseButton() {
+function updateMediaSession() {
     const audioElem = getAudioElement();
+
     if (audioElem == null || audioElem.paused) {
         document.getElementById('button-pause').style.display = 'none';
         document.getElementById('button-play').style.display = '';
-        navigator.mediaSession.playbackState = 'paused';
     } else {
         document.getElementById('button-play').style.display = 'none';
         document.getElementById('button-pause').style.display = '';
+    }
+
+    if (audioElem == null) {
+        navigator.mediaSession.playbackState = 'none';
+        return;
+    }
+
+    if (audioElem.paused) {
+        navigator.mediaSession.playbackState = 'paused';
+    } else {
         navigator.mediaSession.playbackState = 'playing';
+    }
+
+    if (isFinite(audioElem.duration) && isFinite(audioElem.currentTime)) {
+        const current = secondsToString(Math.floor(audioElem.currentTime));
+        const max = secondsToString(Math.floor(audioElem.duration));
+        const percentage = (audioElem.currentTime / audioElem.duration) * 100;
+
+        document.getElementById('progress-time-current').innerText = current;
+        document.getElementById('progress-time-duration').innerText = max;
+        document.getElementById('progress-bar').style.width = percentage + '%';
+    }
+
+    const track = state.current;
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+        title: track.title !== null ? track.title : track.display,
+        album: track.album !== null ? track.album : 'Unknown Album',
+        artist: track.artists !== null ? track.artists.join(' & ') : 'Unknown Artist',
+        // For some unknown reason this does not work everywhere. For example, it works on Chromium
+        // mobile and desktop, but not the KDE media player widget with Firefox or Chromium.
+        // Firefox mobile doesn't seem to support the MediaSession API at all.
+        artwork: [{src: track.imageBlobUrl}],
+    });
+}
+
+function updateMediaSessionPosition() {
+    const audioElem = getAudioElement();
+    if (audioElem !== null &&
+            isFinite(audioElem.duration) &&
+            isFinite(audioElem.currentTime) &&
+            isFinite(audioElem.playbackRate)) {
+        navigator.mediaSession.setPositionState({
+            duration: audioElem.duration,
+            playbackRate: audioElem.playbackRate,
+            position: audioElem.currentTime,
+        });
     }
 }
 
@@ -52,6 +99,8 @@ function seek(delta) {
     } else {
         audioElem.currentTime = newTime;
     }
+
+    updateMediaSessionPosition();
 }
 
 function next() {
@@ -99,22 +148,6 @@ function previous() {
     updateTrackHtml();
 }
 
-function updateProgress(audioElem) {
-    const current = secondsToString(Math.floor(audioElem.currentTime));
-    const max = secondsToString(Math.floor(audioElem.duration));
-    const percentage = (audioElem.currentTime / audioElem.duration) * 100;
-
-    document.getElementById('progress-time-current').innerText = current;
-    document.getElementById('progress-time-duration').innerText = max;
-    document.getElementById('progress-bar').style.width = percentage + '%';
-
-    navigator.mediaSession.setPositionState({
-        duration: audioElem.duration,
-        position: audioElem.currentTime,
-        playbackRate: audioElem.playbackRate,
-    });
-}
-
 function getTransformedVolume() {
     // https://www.dr-lex.be/info-stuff/volumecontrols.html
     // According to this article, x^4 seems to be a pretty good approximation of the perceived loudness curve
@@ -127,7 +160,6 @@ function createAudioElement(sourceUrl) {
     audioElem.volume = getTransformedVolume();
     audioElem.setAttribute('autoplay', '');
     audioElem.onended = next;
-    audioElem.ontimeupdate = () => updateProgress(audioElem);
     const sourceElem = document.createElement('source');
     sourceElem.src = sourceUrl;
     audioElem.appendChild(sourceElem);
@@ -149,14 +181,6 @@ function updateTrackHtml() {
     replaceAudioElement(audioElem);
 
     replaceAlbumImages(track.imageBlobUrl);
-
-    navigator.mediaSession.metadata = new MediaMetadata({
-        title: track.title !== null ? track.title : track.display,
-        album: track.album !== null ? track.album : 'Unknown Album',
-        artist: track.artists !== null ? track.artists.join(' & ') : 'Unknown Artist',
-        // For some unknown reason this does not work. A question on stackoverflow mentions only JPEG works, but in my testing it doesn't either
-        artwork: [{src: track.imageBlobUrl}],
-    });
 
     if (track.lyrics.found) {
         // track.lyrics.html is already escaped by backend, and only contains some safe HTML that we should not escape
