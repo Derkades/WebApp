@@ -122,7 +122,6 @@ async function downloadAndAddToQueue(track) {
         state.queue.push(track);
     }
     updateQueueHtml();
-    hideLoadingOverlay();
     console.info("queue | done");
 }
 

@@ -247,6 +247,11 @@ audio {
     width: 0;
 }
 
+.flex-content-center {
+    display: flex;
+    justify-content: center;
+}
+
 .flex-space-between {
     width: 100%;
     display: flex;

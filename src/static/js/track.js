@@ -37,7 +37,8 @@ function initTrackList(skip = 0) {
         if (json.partial) {
             setTimeout(() => initTrackList(json.index + 1), 100);
         } else {
-            setTimeout(initTrackList, 60_000)
+            setTimeout(initTrackList, 60_000);
+            hideLoadingOverlay();
         }
 
         // Update HTML depending on state.playlists and state.tracks
