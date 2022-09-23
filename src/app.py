@@ -203,7 +203,7 @@ def get_lyrics():
         if lyrics is not None:
             return {
                 'found': True,
-                'genius_url': lyrics.source_url,
+                'source': lyrics.source_url,
                 'html': lyrics.lyrics_html(),
             }
 
@@ -273,7 +273,7 @@ def track_list():
                     'playlist': playlist.dir_name,
                     'playlist_display': playlist.display_name,
                     'duration': meta.duration,
-                    'genres': meta.genres,
+                    'tags': meta.genres,
                     'title': meta.title,
                     'artists': meta.artists,
                     'album': meta.album,
@@ -317,7 +317,12 @@ def get_img_format():
     """
     Get preferred image format
     """
-    if 'Accept' in request.headers and 'image/avif' in request.headers['Accept']:
-        return 'image/avif'
-    else:
-        return 'image/webp'
+    if 'Accept' in request.headers:
+        accept = request.headers['Accept']
+        for mime in ['image-avif', 'image/webp']:
+            if mime in accept:
+                return mime
+
+    # Once webp is working in Accept header for all image requests, this can be changed to jpeg
+    # For now assume the browser supports WEBP to avoid always sending JPEG
+    return 'image/webp'

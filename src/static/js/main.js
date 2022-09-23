@@ -40,20 +40,31 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('button-album').style.display = 'none';
 
     // Settings overlay
-    document.getElementById('button-gear').addEventListener('click', () =>
-            document.getElementById('settings-overlay').style.display = 'flex');
-    document.getElementById('settings-close').addEventListener('click', () =>
-            document.getElementById('settings-overlay').style.display = 'none');
     document.getElementById('youtube-dl-submit').addEventListener('click', youTubeDownload);
     document.getElementById('settings-queue-size').addEventListener('input', () => updateQueue());
 
     // Queue overlay
-    document.getElementById('button-queue-add').addEventListener('click', () =>
-            document.getElementById('queue-overlay').style.display = 'flex');
-    document.getElementById('queue-close').addEventListener('click', () =>
-            document.getElementById('queue-overlay').style.display = 'none');
     document.getElementById('track-list-playlist').addEventListener('input', searchTrackList);
     document.getElementById('track-list-query').addEventListener('input', searchTrackList);
+
+    // Dialog open buttons
+    for (const elem of document.getElementsByClassName('dialog-overlay')) {
+        const openButton = document.getElementById('open-' + elem.id);
+        if (openButton === null) {
+            console.warn('Dialog ' + elem.id + ' has no open button');
+            continue;
+        }
+        openButton.addEventListener('click', () => elem.style.display = 'flex');
+    };
+
+    // Dialog close buttons
+    for (const elem of document.getElementsByClassName('dialog-close-button')) {
+        elem.addEventListener('click', () => {
+            for (const elem of document.getElementsByClassName('dialog-overlay')) {
+                elem.style.display = 'none';
+            }
+        });
+    }
 
     // Hotkeys
     document.addEventListener('keydown', event => handleKey(event.key));

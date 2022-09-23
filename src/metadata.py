@@ -80,6 +80,16 @@ def is_alpha(c):
            '0' <= c <= '9'
 
 
+def split_meta_list(meta_list):
+    # Split by / and ;
+    # Trim whitespace, ignore empty strings
+    entries = []
+    for entry in re.split(r'\/|;', meta_list):
+        if entry.strip() != '':
+            entries.append(entry.strip())
+    return entries
+
+
 class Metadata:
 
     path: str
@@ -130,8 +140,7 @@ class Metadata:
                     self.album = value
 
                 if name == 'artist':
-                    # Split by / and ;
-                    self.artists = re.split(r'\/|;', value)
+                    self.artists = split_meta_list(value)
 
                 if name == 'title':
                     self.title = strip_keywords(value).strip()
@@ -144,8 +153,7 @@ class Metadata:
                     self.album_artist = value
 
                 if name == 'genre':
-                    # TODO Allow multiple genres, split by some character
-                    self.genres.append(value)
+                    self.genres = split_meta_list(value)
 
     def _meta_title(self) -> Optional[str]:
         """

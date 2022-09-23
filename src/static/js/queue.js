@@ -88,12 +88,12 @@ async function downloadAndAddToQueue(track) {
     // Get cover image
     if (encodedQuality === 'verylow') {
         console.info('queue | using raphson image to save data');
-        track.imageStreamUrl = '/raphson';
+        track.imageUrl = '/raphson';
         track.imageBlobUrl = '/raphson';
     } else {
         console.info('queue | download album cover image');
-        track.imageStreamUrl = '/get_album_cover?path=' + encodedPath + '&quality=' + encodedQuality;
-        const coverResponse = await fetch(track.imageStreamUrl);
+        track.imageUrl = '/get_album_cover?path=' + encodedPath + '&quality=' + encodedQuality;
+        const coverResponse = await fetch(track.imageUrl);
         checkResponseCode(coverResponse);
         const imageBlob = await coverResponse.blob();
         track.imageBlobUrl = URL.createObjectURL(imageBlob);
@@ -103,7 +103,7 @@ async function downloadAndAddToQueue(track) {
     if (encodedQuality === 'verylow') {
         track.lyrics = {
             found: true,
-            genius_url: null,
+            source: null,
             html: "<i>Lyrics were not downloaded to save data</i>",
         };
     } else {
@@ -127,10 +127,10 @@ async function downloadAndAddToQueue(track) {
 }
 
 function removeFromQueue(index) {
-    const trackData = state.queue[index];
+    const track = state.queue[index];
     const removalBehaviour = document.getElementById('settings-queue-removal-behaviour').value;
     if (removalBehaviour === 'same') {
-        state.playlistOverrides.push(trackData.playlist);
+        state.playlistOverrides.push(track.playlist);
     } else if (removalBehaviour !== 'roundrobin') {
         console.warn('unexpected removal behaviour: ' + removalBehaviour);
     }

@@ -1,3 +1,24 @@
+{% macro icon_button(id, icon) %}
+    <button id="{{ id }}" class="icon-button">
+        <div class="icon" style="background-image: url('{{ assets[icon + '.svg'] }}')"></div>
+    </button>
+{% endmacro %}
+
+{% macro dialog_close_button() %}
+    <button class="dialog-close-button icon-button">
+        <div class="icon" style="background-image: url('{{ assets['close.svg'] }}')"></div>
+    </button>
+{% endmacro %}
+
+{% macro dialog_header(title) %}
+    <div class="flex-space-between">
+        <h3>{{ title }}</h3>
+        <span>
+            {{ dialog_close_button() }}
+        </span>
+    </div>
+{% endmacro %}
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -47,11 +68,14 @@
                     </div>
                 </div>
 
-                {% for button_name in ['skip-previous', 'rewind-15', 'play', 'pause', 'fast-forward-15', 'skip-next', 'microphone', 'album', 'gear'] %}
+                {% for button_name in ['skip-previous', 'rewind-15', 'play', 'pause', 'fast-forward-15', 'skip-next', 'microphone', 'album'] %}
                     <button id="button-{{ button_name }}" class="icon-button">
                         <div class="icon" style="background-image: url('{{ assets[button_name + '.svg'] }}')"></div>
                     </button>
                 {% endfor %}
+
+                {{ icon_button('open-dialog-settings', 'gear') }}
+                {{ icon_button('open-dialog-tags', 'tag-multiple') }}
 
                 {% if mobile %}
                     {# 'data-restore=false' ensures volume is not overwritten from cookie #}
@@ -64,9 +88,7 @@
             <div class="box-rounded box-solid box-queue">
                 <div class="flex-space-between">
                     <h3>{% trans %}Queue{% endtrans %} (<span id="current-queue-size">0</span>)</h3>
-                    <button id="button-queue-add" class="icon-button">
-                        <div class="icon" style="background-image: url('{{ assets['playlist-plus.svg'] }}')"></div>
-                    </button>
+                    {{ icon_button('open-dialog-queue', 'playlist-plus') }}
                 </div>
                 <table id="queue-table"></table>
             </div>
@@ -90,16 +112,9 @@
 
     <div id="audio"></div>
 
-    <div id="queue-overlay" class="full-page-overlay">
+    <div id="dialog-queue" class="full-page-overlay dialog-overlay">
         <div class="box-rounded box-solid">
-            <div class="flex-space-between">
-                <h3>{% trans %}Add track to queue{% endtrans %}</h3>
-                <span>
-                    <button id="queue-close" class="icon-button">
-                        <div class="icon" style="background-image: url('{{ assets['close.svg'] }}')"></div>
-                    </button>
-                </span>
-            </div>
+            {{ dialog_header(gettext('Add track to queue')) }}
 
             <div class="scroll">
 
@@ -121,16 +136,9 @@
         </div>
     </div>
 
-    <div id="settings-overlay" class="full-page-overlay">
+    <div id="dialog-settings" class="full-page-overlay dialog-overlay">
         <div class="box-rounded box-solid">
-            <div class="flex-space-between">
-                <h3>{% trans %}Settings{% endtrans %}</h3>
-                <span>
-                    <button id="settings-close" class="icon-button">
-                        <div class="icon" style="background-image: url('{{ assets['close.svg'] }}')"></div>
-                    </button>
-                </span>
-            </div>
+            {{ dialog_header(gettext('Settings')) }}
             <div class="scroll">
                 <h4>{% trans %}Hotkeys{% endtrans %}</h4>
                 <table class="hotkeys-table">
@@ -202,6 +210,16 @@
                     <a href="{{daniel_gh}}" target="_blank">Daniël Koomen</a>. Enjoy!
                     {% endtrans %}
                 </p>
+            </div>
+        </div>
+    </div>
+
+    <div id="dialog-tags" class="full-page-overlay dialog-overlay">
+        <div class="box-rounded box-solid">
+            {{ dialog_header(gettext('Tags')) }}
+
+            <div class="scroll" id="tag-checkboxes">
+
             </div>
         </div>
     </div>

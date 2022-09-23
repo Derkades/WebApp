@@ -160,7 +160,7 @@ function updateTrackHtml() {
 
     if (track.lyrics.found) {
         // track.lyrics.html is already escaped by backend, and only contains some safe HTML that we should not escape
-        const source = '<a class="secondary" href="' + escapeHtml(track.lyrics.genius_url) + '" target="_blank">Source</a>'
+        const source = '<a class="secondary" href="' + escapeHtml(track.lyrics.source) + '" target="_blank">Source</a>'
         document.getElementById('lyrics').innerHTML = track.lyrics.html + '<br><br>' + source;
     } else {
         document.getElementById('lyrics').innerHTML = '<i class="secondary">Geen lyrics gevonden</i>'
