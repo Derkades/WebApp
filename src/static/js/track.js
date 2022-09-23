@@ -44,6 +44,7 @@ function initTrackList(skip = 0) {
         // Update HTML depending on state.playlists and state.tracks
         updatePlaylistCheckboxHtml();
         searchTrackList();
+        createPlaylistDropdowns();
         updateTagCheckboxes();
     })().catch(err => {
         console.warn('track list | error');

@@ -100,15 +100,21 @@ function getSavedCheckboxState() {
     }
 }
 
-// TODO use this for track download and search dropdowns
-function createPlaylistDropdown() {
-    const select = document.createElement("select");
-    for (const dir_name in state.playlists) {
-        const playlist = state.playlists[dir_name];
-        const option = document.createElement("option");
-        option.value = playlist.dir_name;
-        option.textContent = playlist.display_name;
-        select.appendChild(option);
+function createPlaylistDropdowns() {
+    for (const select of document.getElementsByClassName("playlist-select")) {
+        // Remove all children except the ones that should be kept
+        for (const child of select.children) {
+            if (child.dataset.keep !== 'true') {
+                select.removeChild(child);
+            }
+        }
+
+        for (const dir_name in state.playlists) {
+            const playlist = state.playlists[dir_name];
+            const option = document.createElement('option');
+            option.value = playlist.dir_name;
+            option.textContent = playlist.display_name;
+            select.appendChild(option);
+        }
     }
-    return select;
 }
