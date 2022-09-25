@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Iterator
+from typing import List, Iterator, Optional, Dict
 from datetime import datetime
 import random
 import subprocess
@@ -7,12 +7,12 @@ from subprocess import CompletedProcess
 import logging
 
 import cache
-from metadata import Metadata
+import db
+import metadata
 import settings
 from keyval import conn as redis
 
 
-music_base_dir = Path(settings.music_dir).absolute()
 log = logging.getLogger('app.music')
 
 
@@ -28,27 +28,35 @@ MUSIC_EXTENSIONS = [
 ]
 
 
+def to_relpath(path: Path) -> str:
+    """
+    Returns: Relative path as string, excluding base music directory
+    """
+    return path.absolute().as_posix()[len(Path(settings.music_dir).absolute().as_posix())+1:]
+
+
+def scan_music(path) -> Iterator[Path]:
+    """
+    Scan playlist directory recursively for tracks
+    Returns: Paths iterator
+    """
+    for ext in MUSIC_EXTENSIONS:
+        for track_path in path.glob('**/*.' + ext):
+            yield track_path
+
+
 class Track:
 
-    def __init__(self, path: Path):
-        self.path = path
+    def __init__(self, relpath: str):
+        self.relpath = relpath
+        self.path = Path(settings.music_dir, relpath)
 
         # Prevent directory traversal
-        if not path.is_relative_to(music_base_dir):
+        if not self.path.is_relative_to(Path(settings.music_dir)):
             raise Exception()
 
-    def relpath(self) -> str:
-        """
-        Returns: Track path, excluding base directory
-        """
-        return self.path.absolute().as_posix()[len(music_base_dir.as_posix())+1:]
-
-    def metadata(self) -> Metadata:
-        """
-        Get track metadata using ffmpeg
-        Returns: Metadata object
-        """
-        return Metadata(self.path)
+    def metadata(self):
+        return metadata.cached(self.relpath)
 
     def transcoded_audio(self, quality) -> bytes:
         """
@@ -138,32 +146,29 @@ class Track:
         """
         Find track by relative path
         """
-        return Track(Path(music_base_dir, relpath))
+        return Track(relpath)
 
 
 class Playlist:
 
-    def __init__(self, dir_name: str, display_name: str, is_guest: bool):
-        self.music_dir = Path(music_base_dir, dir_name)
-        self.dir_name = dir_name
-        self.display_name = display_name
-        self.is_guest = is_guest
+    def __init__(self, path: Path):
+        self.path = path
+        self.relpath = to_relpath(path)
+        with db.get() as conn:
+            row = conn.execute('SELECT name, guest FROM playlist WHERE path=?',
+                               (self.relpath,)).fetchone()
+            self.name, self.guest = row
+            self.track_count = conn.execute('SELECT COUNT(*) FROM track WHERE playlist=?',
+                                            (self.relpath,)).fetchone()[0]
 
-    def track_paths(self) -> Iterator[Path]:
-        """
-        Scan playlist directory recursively for tracks
-        Returns: Paths iterator
-        """
-        for ext in MUSIC_EXTENSIONS:
-            for path in self.music_dir.glob('**/*.' + ext):
-                yield path
-
-    def choose_track(self, choices=20) -> Track:
+    def choose_track(self, choices=20, tag_mode=None, tags=None) -> Track:
         """
         Randomly choose a track from this playlist directory
         Returns: Track name
         """
-        tracks = list(self.track_paths())
+        # TODO filter tags
+
+        tracks = self.tracks_relpaths()
         current_timestamp = int(datetime.now().timestamp())
 
         # Randomly choose some amount of tracks, then pick the track that was played the longest ago
@@ -172,7 +177,7 @@ class Playlist:
         best_time = None
 
         for track in random.choices(tracks, k=choices):
-            last_played_b = redis.get('last_played_' + track.as_posix())
+            last_played_b = redis.get('last_played_' + track)
 
             if last_played_b is None:
                 best_track = track
@@ -194,31 +199,29 @@ class Playlist:
             hours_ago = (current_timestamp - best_time) / 3600
             log.info('Chosen track: %s (last played %.2f hours ago)', best_track, hours_ago)
 
-        redis.set('last_played_' + best_track.as_posix(), str(current_timestamp).encode())
+        redis.set('last_played_' + best_track, str(current_timestamp).encode())
 
         return Track(best_track)
 
-    def count_tracks(self) -> int:
-        """
-        Returns: Number of tracks in this playlists's music directory
-        """
-        return sum(1 for _d in self.track_paths())
+    def tracks_relpaths(self, where: Optional[str] = None, where_params: Optional[List[str]] = None) -> List[str]:
+        query = 'SELECT path FROM track WHERE playlist=?'
+        params = [self.relpath]
+        if where is not None:
+            query += ' AND ' + where
+            params.extend(where_params)
 
-    def has_music(self) -> bool:
-        """
-        Returns: Whether this playlist contains at least one music file
-        """
-        try:
-            next(self.track_paths())
-            return True
-        except StopIteration:
-            return False
+        log.info('Getting track list: %s', query)
 
-    def tracks(self) -> List[Track]:
+        with db.get() as conn:
+            rows = conn.execute(query, params).fetchall()
+            return [row[0] for row in rows]
+
+    def tracks(self, *args, **kwargs) -> List[Track]:
         """
         Get all tracks in this playlist as a list of Track objects
         """
-        return [Track(entry) for entry in self.track_paths()]
+        paths = self.tracks_relpaths(*args, **kwargs)
+        return [Track(path) for path in paths]
 
     def download(self, url: str) -> CompletedProcess:
         """
@@ -235,53 +238,30 @@ class Playlist:
                                url],
                               shell=False,
                               check=False,  # No exception on non-zero exit code
-                              cwd=self.music_dir,
+                              cwd=self.path,
                               capture_output=True,
                               text=True)
 
-    @staticmethod
-    def by_dir_name(dir_name: str) -> 'Playlist':
-        """
-        Get playlist object from the name of a music directory.
-        Parameters:
-            dir_name: Name of directory
-        Returns: Playlist instance
-        """
-        if dir_name.startswith('Guest-'):
-            return Playlist(dir_name, dir_name[6:], True)
-        else:
-            return Playlist(dir_name, dir_name, False)
 
-    @staticmethod
-    def get_main() -> List['Playlist']:
-        """
-        Returns: List of Playlist objects for all Raphson members (CB, DK, JK)
-        """
-        playlists = []
-        for music_dir in Path(music_base_dir).iterdir():
-            if not music_dir.name.startswith('Guest-'):
-                playlist = Playlist(music_dir.name, music_dir.name, False)
-                if playlist.has_music():
-                    playlists.append(playlist)
-        return playlists
+def playlist(dir_name: str) -> Playlist:
+    """
+    Get playlist object from the name of a music directory.
+    Parameters:
+        dir_name: Name of directory
+    Returns: Playlist instance
+    """
+    return Playlist(Path(settings.music_dir, dir_name))
 
-    @staticmethod
-    def get_guests() -> List['Playlist']:
-        """
-        Returns: List of Playlist objects for guests, generated dynamically from
-                 directory names
-        """
-        playlists = []
-        for music_dir in Path(music_base_dir).iterdir():
-            if music_dir.name.startswith('Guest-'):
-                playlist = Playlist(music_dir.name, music_dir.name[6:], True)
-                if playlist.has_music():
-                    playlists.append(playlist)
-        return playlists
+def playlists(guest: Optional[bool] = None) -> List[Playlist]:
+    if guest is None:
+        query = 'SELECT path FROM playlist'
+    elif guest is True:
+        query = 'SELECT path FROM playlist WHERE guest=1'
+    elif guest is False:
+        query = 'SELECT path FROM playlist WHERE guest=0'
+    else:
+        raise ValueError()
 
-    @staticmethod
-    def get_all() -> List['Playlist']:
-        """
-        Returns: Concatenation of get_main() and get_guests()
-        """
-        return [*Playlist.get_main(), *Playlist.get_guests()]
+    with db.get() as conn:
+        rows = conn.execute(query).fetchall()
+        return [Playlist(Path(settings.music_dir, row[0])) for row in rows]

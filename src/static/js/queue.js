@@ -60,7 +60,7 @@ function updateQueue() {
 
 async function downloadRandomAndAddToQueue(playlist) {
     console.info('queue | choose track');
-    const chooseResponse = await fetch('/choose_track?playlist_dir=' + encodeURIComponent(playlist));
+    const chooseResponse = await fetch('/choose_track?playlist_dir=' + encodeURIComponent(playlist) + '&' + getTagFilter());
     checkResponseCode(chooseResponse);
     const path = (await chooseResponse.json()).path;
 

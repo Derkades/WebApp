@@ -14,6 +14,9 @@ services:
       - type: bind
         source: ./cache
         target: /cache
+      - type: bind
+        source: ./data
+        target: /data
     user: "1000"
     environment:
       MUSIC_WEB_PASSWORD: 1234

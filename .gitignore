@@ -5,3 +5,4 @@ __pycache__/
 /*.webp
 messages.pot
 *.mo
+*.db
