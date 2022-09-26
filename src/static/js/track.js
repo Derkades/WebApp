@@ -57,7 +57,7 @@ function getTrackDisplayHtml(track) {
 
             const artistHtml = document.createElement('a');
             artistHtml.textContent = artist;
-            artistHtml.onclick = () => browseArtist(artist);
+            artistHtml.onclick = () => dialog.browseArtist(artist);
             html.append(artistHtml);
         }
 
@@ -66,7 +66,7 @@ function getTrackDisplayHtml(track) {
         const titleHtml = document.createElement('a');
         titleHtml.textContent = track.title;
         if (track.album !== null) {
-            titleHtml.onclick = () => browseAlbum(track.album);
+            titleHtml.onclick = () => dialog.browseAlbum(track.album);
         }
         html.append(titleHtml);
 
