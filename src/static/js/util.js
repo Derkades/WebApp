@@ -15,8 +15,12 @@ function escapeHtml(unescaped) {
 }
 
 function secondsToString(seconds) {
-    // https://stackoverflow.com/a/25279399/4833737
-    return new Date(1000 * seconds).toISOString().substring(14, 19);
+    const hhmmss =  new Date(1000 * seconds).toISOString().substring(11, 19);
+    if (hhmmss.startsWith('00:')) {
+        return hhmmss.substring(3);
+    } else {
+        return hhmmss;
+    }
 }
 
 // https://www.w3schools.com/js/js_cookies.asp
