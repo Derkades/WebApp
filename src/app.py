@@ -243,14 +243,13 @@ def track_list():
             'guest': playlist.guest,
         }
 
-    start_time = datetime.now()
-
     for playlist in playlists:
         for track in playlist.tracks():
             meta = track.metadata()
             response['tracks'].append({
                 'path': track.relpath,
                 'display': meta.display_title(),
+                'display_file': meta.filename_title(),
                 'playlist': playlist.relpath,
                 'playlist_display': playlist.name,
                 'duration': meta.duration,
@@ -258,6 +257,9 @@ def track_list():
                 'title': meta.title,
                 'artists': meta.artists,
                 'album': meta.album,
+                'album_artist': meta.album_artist,
+                'album_index': meta.album_index,
+                'year': meta.year,
             })
 
     return response

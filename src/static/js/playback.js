@@ -190,7 +190,7 @@ function updateTrackHtml() {
         document.getElementById('lyrics').innerHTML = '<i class="secondary">Geen lyrics gevonden</i>'
     }
 
-    document.getElementById('current-track').textContent = '[' + track.playlist_display + '] ' + track.display;
+    document.getElementById('current-track').replaceChildren(getTrackDisplayHtml(track));
 
     if (state.history.length > 0) {
         const previousTrack = state.history[state.history.length - 1];

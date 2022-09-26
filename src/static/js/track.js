@@ -42,3 +42,39 @@ function initTrackList() {
         setTimeout(initTrackList, 1000);
     });
 }
+
+function getTrackDisplayHtml(track) {
+    const html = document.createElement('span')
+    html.classList.add('track-display-html')
+    if (track.artists !== null && track.title !== null) {
+        let first = true;
+        for (const artist of track.artists) {
+            if (first) {
+                first = false;
+            } else {
+                html.append(' & ');
+            }
+
+            const artistHtml = document.createElement('a');
+            artistHtml.textContent = artist;
+            artistHtml.onclick = () => browseArtist(artist);
+            html.append(artistHtml);
+        }
+
+        html.append(' - ');
+
+        const titleHtml = document.createElement('a');
+        titleHtml.textContent = track.title;
+        if (track.album !== null) {
+            titleHtml.onclick = () => browseAlbum(track.album);
+        }
+        html.append(titleHtml);
+
+        if (track.year !== null) {
+            html.append(' [' + track.year + ']');
+        }
+    } else {
+        html.textContent = track.display_file;
+    }
+    return html;
+}

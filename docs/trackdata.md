@@ -3,6 +3,7 @@
 A track data object contains the following fields:
 * `path` Relative path to music file
 * `display` Display name
+* `display_file` Fallback display string generated from file name
 * `playlist` Relative path to playlist
 * `playlist_display` Playlist display name
 * `duration` Track duration
@@ -10,6 +11,9 @@ A track data object contains the following fields:
 * `title` Track title or null
 * `artists` Track artists or null
 * `album` Track album or null
+* `album_artist`
+* `album_index`
+* `year`
 
 It is returned by the `/track_list` API endpoint. It is then stored by the frontend in `state.tracks`.
 

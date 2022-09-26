@@ -137,7 +137,7 @@ class Metadata:
         else:
             return None
 
-    def _filename_title(self) -> str:
+    def filename_title(self) -> str:
         """
         Generate title from file name
         Returns: Title string
@@ -159,7 +159,7 @@ class Metadata:
         Generate search title from file name. Same as _filename_title(), but
         special characters are removed
         """
-        title = self._filename_title()
+        title = self.filename_title()
         # Remove special characters
         title = ''.join([c for c in title if is_alpha(c)])
         title = title.strip()
@@ -174,7 +174,7 @@ class Metadata:
         if title:
             return title
         else:
-            return self._filename_title() + ' ~'
+            return self.filename_title() + ' ~'
 
     def _is_collection_album(self) -> bool:
         """
