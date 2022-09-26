@@ -74,7 +74,7 @@ function getTrackDisplayHtml(track) {
             html.append(' [' + track.year + ']');
         }
     } else {
-        html.textContent = track.display_file;
+        html.textContent = track.display_file + ' ~';
     }
     return html;
 }
