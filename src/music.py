@@ -232,6 +232,7 @@ class Playlist:
                                '-f', 'bestaudio',
                                '--remux-video', 'webm>ogg/mp3>mp3/mka',
                                '--add-metadata',
+                               '--no-playlist',
                                url],
                               shell=False,
                               check=False,  # No exception on non-zero exit code
