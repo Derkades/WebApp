@@ -66,7 +66,7 @@ function getTrackDisplayHtml(track) {
         const titleHtml = document.createElement('a');
         titleHtml.textContent = track.title;
         if (track.album !== null) {
-            titleHtml.onclick = () => dialog.browseAlbum(track.album);
+            titleHtml.onclick = () => dialog.browseAlbum(track.album, track.album_artist);
         }
         html.append(titleHtml);
 

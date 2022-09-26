@@ -12,9 +12,9 @@ const dialog = {
     open: () => {
         document.getElementById('dialog-browse').style.display = 'flex';
     },
-    browse: (value, filterFunc) => {
+    browse: (title, filterFunc) => {
         dialog.open();
-        dialog.setHeader(value);
+        dialog.setHeader(title);
         const tracks = [];
         for (const track of state.tracks) {
             if (filterFunc(track)) {
@@ -37,8 +37,14 @@ const dialog = {
         }
         );
     },
-    browseAlbum: albumName => {
-        dialog.browse(albumName, track => track.album === albumName);
+    browseAlbum: (albumName, albumArtistName) => {
+        let title;
+        if (albumArtistName === null) {
+            title = albumName
+        } else {
+            title = albumArtistName + ' - ' + albumName;
+        }
+        dialog.browse(title, track => track.album === albumName);
     },
     generateTrackList: tracks => {
         // TODO two buttons, top of queue bottom of queue
