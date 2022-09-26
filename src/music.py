@@ -165,7 +165,7 @@ class Playlist:
         Randomly choose a track from this playlist directory
         Returns: Track name
         """
-        query = 'SELECT path FROM track WHERE playlist=?'
+        query = 'SELECT path, last_played FROM track WHERE playlist=?'
         params = [self.relpath]
         if tag_mode == 'allow':
             query += ' AND (' + ' OR '.join(len(tags) * ['? IN (SELECT tag FROM track_tag WHERE track = path)']) + ')'
@@ -177,43 +177,22 @@ class Playlist:
         query += ' ORDER BY RANDOM()'
         query += ' LIMIT ' + str(int(choices))
 
+        # From randomly ordered 20 tracks, choose one that was last played longest ago
+        query = 'SELECT * FROM (' + query + ') ORDER BY last_played ASC LIMIT 1'
+
         with db.get() as conn:
-            rows = conn.execute(query, params).fetchall()
-            tracks = [row[0] for row in rows]
+            track, last_played = conn.execute(query, params).fetchone()
 
-        current_timestamp = int(datetime.now().timestamp())
+            current_timestamp = int(datetime.now().timestamp())
+            if last_played == 0:
+                log.info('Chosen track: %s (never played)', track)
+            else:
+                hours_ago = (current_timestamp - last_played) / 3600
+                log.info('Chosen track: %s (last played %.2f hours ago)', track, hours_ago)
 
-        # Randomly choose some amount of tracks, then pick the track that was played the longest ago
+            conn.execute('UPDATE track SET last_played=? WHERE path=?', (current_timestamp, track))
 
-        best_track = None
-        best_time = None
-
-        for track in tracks:
-            last_played_b = redis.get('last_played_' + track)
-
-            if last_played_b is None:
-                best_track = track
-                best_time = 0
-                break
-
-            last_played = int(last_played_b.decode())
-
-            if best_time is None or last_played < best_time:
-                best_track = track
-                best_time = last_played
-
-        if best_track is None:
-            raise ValueError()
-
-        if best_time == 0:
-            log.info('Chosen track: %s (never played)', best_track)
-        else:
-            hours_ago = (current_timestamp - best_time) / 3600
-            log.info('Chosen track: %s (last played %.2f hours ago)', best_track, hours_ago)
-
-        redis.set('last_played_' + best_track, str(current_timestamp).encode())
-
-        return Track(best_track)
+        return Track(track)
 
     def tracks(self, *args, **kwargs) -> List[Track]:
         """

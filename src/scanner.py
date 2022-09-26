@@ -7,9 +7,14 @@ import music
 import settings
 import logconfig
 
+
 log = logging.getLogger('app.scanner')
 
+
 def create_tables(conn):
+    """
+    Initialise SQLite database with tables
+    """
     # TODO enable strict mode after updating to newer sqlite version
     conn.execute('PRAGMA foreign_keys = ON;')
 
@@ -31,6 +36,7 @@ def create_tables(conn):
                     album_artist TEXT NULL,
                     album_index INT NULL,
                     year INT NULL,
+                    last_played INT DEFAULT 0,
                     FOREIGN KEY (playlist) REFERENCES playlist(path) ON DELETE CASCADE
                 )
                 """)
@@ -54,7 +60,12 @@ def create_tables(conn):
                 """)
 
 def rebuild_music_database(conn):
+    """
+    Scan disk for playlist and tracks, and create the corresponding rows
+    in playlist, track, artist and tag tables. Previous table content is deleted.
+    """
     conn.execute('DELETE FROM track_artist')
+    conn.execute('DELETE FROM track_tag')
     conn.execute('DELETE FROM track')
     conn.execute('DELETE FROM playlist')
 
@@ -105,7 +116,7 @@ def rebuild_music_database(conn):
 
     conn.executemany('INSERT INTO playlist VALUES (?, ?, ?)',
                      playlist_insert)
-    conn.executemany('INSERT INTO track VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    conn.executemany('INSERT INTO track (path, playlist, duration, title, album, album_artist, album_index, year) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
                      track_insert)
     conn.executemany('INSERT INTO track_artist VALUES (?, ?)',
                      artist_insert)
