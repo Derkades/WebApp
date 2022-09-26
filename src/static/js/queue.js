@@ -323,5 +323,5 @@ function searchTrackListQueueAdd(id) {
     }
 
     downloadAndAddToQueue(track, true);
-    document.getElementById('queue-overlay').style.display = 'none';
+    document.getElementById('dialog-queue').style.display = 'none';
 }
