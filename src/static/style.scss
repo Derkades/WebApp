@@ -383,8 +383,10 @@ h4 > .icon {
 }
 
 .full-page-overlay .box-solid {
-    min-width: min(60vw, 50rem);
-    max-width: 50rem;
+    min-width: 60vw;
+    max-width: 90vw;
+    min-height: 60vh;
+    max-height: 90vh;
     /* 3rem to compensate for margin, 2rem to compensate for padding */
     max-height: \min(60rem, calc(100vh - 3rem - 2rem));
     margin: 1.5rem;
