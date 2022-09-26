@@ -231,8 +231,6 @@ def track_list():
     response = {
         'playlists': {},
         'tracks': [],
-        'index': 0,
-        'partial': False,
     }
 
     playlists = music.playlists()
@@ -245,31 +243,22 @@ def track_list():
             'guest': playlist.guest,
         }
 
-    max_seconds = 5
-    skip_to_index = int(request.args['skip']) if 'skip' in request.args else 0
     start_time = datetime.now()
 
     for playlist in playlists:
         for track in playlist.tracks():
-            if skip_to_index <= response['index']:
-                meta = track.metadata()
-                response['tracks'].append({
-                    'path': track.relpath,
-                    'display': meta.display_title(),
-                    'playlist': playlist.relpath,
-                    'playlist_display': playlist.name,
-                    'duration': meta.duration,
-                    'tags': meta.tags,
-                    'title': meta.title,
-                    'artists': meta.artists,
-                    'album': meta.album,
-                })
-
-            if datetime.now() - start_time > timedelta(seconds=max_seconds):
-                response['partial'] = True
-                return response
-
-            response['index'] += 1
+            meta = track.metadata()
+            response['tracks'].append({
+                'path': track.relpath,
+                'display': meta.display_title(),
+                'playlist': playlist.relpath,
+                'playlist_display': playlist.name,
+                'duration': meta.duration,
+                'tags': meta.tags,
+                'title': meta.title,
+                'artists': meta.artists,
+                'album': meta.album,
+            })
 
     return response
 

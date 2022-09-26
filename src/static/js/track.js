@@ -7,10 +7,10 @@ function findTrackByPath(path) {
     return null;
 }
 
-function initTrackList(skip = 0) {
-    console.info('requesting track list, from track ' + skip);
+function initTrackList() {
+    console.info('Requesting track list');
     (async function() {
-        const response = await fetch('/track_list?skip=' + skip);
+        const response = await fetch('/track_list');
         const json = await response.json();
 
         state.playlists = json.playlists;
@@ -26,20 +26,10 @@ function initTrackList(skip = 0) {
             }
         }
 
-        if (skip === 0) {
-            state.tracks = json.tracks;
-        } else {
-            for (const track of json.tracks) {
-                state.tracks.push(track);
-            }
-        }
+        state.tracks = json.tracks;
 
-        if (json.partial) {
-            setTimeout(() => initTrackList(json.index + 1), 100);
-        } else {
-            setTimeout(initTrackList, 60_000);
-            hideLoadingOverlay();
-        }
+        setTimeout(initTrackList, 60_000);
+        hideLoadingOverlay();
 
         // Update HTML depending on state.playlists and state.tracks
         updatePlaylistCheckboxHtml();
@@ -49,6 +39,6 @@ function initTrackList(skip = 0) {
     })().catch(err => {
         console.warn('track list | error');
         console.warn(err);
-        setTimeout(() => initTrackList(skip), 1000);
+        setTimeout(initTrackList, 1000);
     });
 }
