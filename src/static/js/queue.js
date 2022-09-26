@@ -150,37 +150,56 @@ function updateQueueHtml() {
 
     const trashBase64 = document.getElementById('delete-base64').innerText;
 
-    let html = ''
+    const rows = [];
     let i = 0;
     for (const queuedTrack of state.queue) {
-        html += '<tr data-queue-pos="' + i + '">';
-            html += '<td class="box" style="background-image: url(\'' + escapeHtml(queuedTrack.imageBlobUrl) + '\')" onclick="removeFromQueue(' + i + ')">';
-                html += '<div class="delete-overlay">'
-                    html += '<div style="background-image: url(\'' + trashBase64 + '\')" class="icon"></div>';
-                html += '</div>'
-            html += '</td>';
-            html += '<td>' + queuedTrack.playlist_display + '</td>';
-            html += '<td>' + escapeHtml(queuedTrack.display) + '</td>';
-        html += '</tr>';
+        const tdCover = document.createElement('td');
+        tdCover.classList.add('box-rounded');
+        tdCover.style.backgroundImage = 'url("' + queuedTrack.imageBlobUrl + '")';
+        tdCover.onclick = () => removeFromQueue(i);
+        const deleteOverlay = document.createElement('div');
+        deleteOverlay.classList.add('delete-overlay');
+        const trashDiv = document.createElement('div');
+        trashDiv.style.backgroundImage = "url('" + trashBase64 + "')";
+        trashDiv.classList.add('icon');
+        deleteOverlay.appendChild(trashDiv);
+        tdCover.appendChild(deleteOverlay);
+
+        const tdPlaylist = document.createElement('td');
+        tdPlaylist.textContent = queuedTrack.playlist_display;
+
+        const tdTrack = document.createElement('td');
+        tdTrack.appendChild(getTrackDisplayHtml(queuedTrack));
+
+        const row = document.createElement('tr');
+        row.dataset.queuePos = i;
+        row.appendChild(tdCover);
+        row.appendChild(tdPlaylist);
+        row.appendChild(tdTrack);
+
+        rows.push(row);
         i++;
     }
 
     const minQueueSize = parseInt(document.getElementById('settings-queue-size').value)
 
-    let first = true;
-    while (i < minQueueSize) {
-        html += '<tr data-queue-pos="' + i + '">'
-        html += '<td colspan="3" class="secondary downloading">';
-        if (first) {
-            first = false;
-            html += '<span class="spinner" id="queue-spinner"></span>';
-        }
-        html += '</td></tr>';
-        i++;
+    if (i < minQueueSize) {
+        const td = document.createElement('td');
+        td.colSpan = 3;
+        td.classList.add('secondary', 'downloading');
+        const spinner = document.createElement('span');
+        spinner.classList.add('spinner');
+        spinner.id = 'queue-spinner';
+        td.appendChild(spinner);
+
+        const row = document.createElement('tr');
+        row.appendChild(td);
+
+        rows.push(row);
     }
 
     const outerDiv = document.getElementById('queue-table');
-    outerDiv.innerHTML = html;
+    outerDiv.replaceChildren(...rows);
     // Add events to <tr> elements
     dragDropTable(document.getElementById("queue-table"));
 }

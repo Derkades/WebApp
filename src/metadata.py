@@ -250,7 +250,6 @@ def probe(path: Path) -> Metadata:
     """
     Create Metadata object by running ffprobe on a file
     """
-    cache_key = 'ffprobe' + path.absolute().as_posix()
     command = [
         'ffprobe',
         '-print_format', 'json',
