@@ -215,25 +215,13 @@ class Playlist:
 
         return Track(best_track)
 
-    def tracks_relpaths(self, where: Optional[str] = None, where_params: Optional[List[str]] = None) -> List[str]:
-        query = 'SELECT path FROM track WHERE playlist=?'
-        params = [self.relpath]
-        if where is not None:
-            query += ' AND ' + where
-            params.extend(where_params)
-
-        log.info('Getting track list: %s', query)
-
-        with db.get() as conn:
-            rows = conn.execute(query, params).fetchall()
-            return [row[0] for row in rows]
-
     def tracks(self, *args, **kwargs) -> List[Track]:
         """
         Get all tracks in this playlist as a list of Track objects
         """
-        paths = self.tracks_relpaths(*args, **kwargs)
-        return [Track(path) for path in paths]
+        with db.get() as conn:
+            rows = conn.execute('SELECT path FROM track WHERE playlist=?', (self.relpath,)).fetchall()
+            return [Track(row[0]) for row in rows]
 
     def download(self, url: str) -> CompletedProcess:
         """
