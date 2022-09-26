@@ -1,5 +1,6 @@
 from pathlib import Path
 import logging
+from multiprocessing import Pool
 
 import db
 import metadata
@@ -59,72 +60,79 @@ def create_tables(conn):
                 )
                 """)
 
-def rebuild_music_database(conn):
-    """
-    Scan disk for playlist and tracks, and create the corresponding rows
-    in playlist, track, artist and tag tables. Previous table content is deleted.
-    """
-    conn.execute('DELETE FROM track_artist')
-    conn.execute('DELETE FROM track_tag')
-    conn.execute('DELETE FROM track')
-    conn.execute('DELETE FROM playlist')
+def scan_playlist(playlist_path: Path):
+    if playlist_path.name.startswith('Guest-'):
+        playlist_name = playlist_path.name[6:]
+        playlist_guest = True
+    else:
+        playlist_name = playlist_path.name
+        playlist_guest = False
 
-    playlist_insert = []
+    playlist_dir_name = playlist_path.name
+
+    with db.get() as conn:
+        conn.execute('INSERT INTO playlist VALUES (?, ?, ?)',
+                    (playlist_dir_name, playlist_name, playlist_guest))
+
+    log.info('Started scanning playlist %s', playlist_dir_name)
+
     track_insert = []
     artist_insert = []
     tag_insert = []
 
-    for playlist_path in Path(settings.music_dir).iterdir():
-        if playlist_path.name.startswith('Guest-'):
-            playlist_name = playlist_path.name[6:]
-            playlist_guest = True
-        else:
-            playlist_name = playlist_path.name
-            playlist_guest = False
-
-        playlist_dir_name = playlist_path.name
-        playlist_insert.append((playlist_dir_name, playlist_name, playlist_guest))
-
-        log.info('Scanning playlist %s', playlist_dir_name)
-
-        # TODO recursive
-        for track_path in playlist_path.iterdir():
-            track_relpath = music.to_relpath(track_path)
-            meta = metadata.probe(track_path)
-            track_insert.append((
-                track_relpath,
-                playlist_dir_name,
-                meta.duration,
-                meta.title,
-                meta.album,
-                meta.album_artist,
-                meta.album_index,
-                meta.year,
-            ))
-            artists = meta.artists
-            if artists is not None:
-                for artist in artists:
-                    artist_insert.append((
-                        track_relpath,
-                        artist,
-                    ))
-            for tag in meta.tags:
-                tag_insert.append((
+    # TODO recursive
+    for track_path in playlist_path.iterdir():
+        track_relpath = music.to_relpath(track_path)
+        meta = metadata.probe(track_path)
+        track_insert.append((
+            track_relpath,
+            playlist_dir_name,
+            meta.duration,
+            meta.title,
+            meta.album,
+            meta.album_artist,
+            meta.album_index,
+            meta.year,
+        ))
+        artists = meta.artists
+        if artists is not None:
+            for artist in artists:
+                artist_insert.append((
                     track_relpath,
-                    tag,
+                    artist,
                 ))
+        for tag in meta.tags:
+            tag_insert.append((
+                track_relpath,
+                tag,
+            ))
 
-    conn.executemany('INSERT INTO playlist VALUES (?, ?, ?)',
-                     playlist_insert)
-    conn.executemany('INSERT INTO track (path, playlist, duration, title, album, album_artist, album_index, year) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-                     track_insert)
-    conn.executemany('INSERT INTO track_artist VALUES (?, ?)',
-                     artist_insert)
-    conn.executemany('INSERT INTO track_tag VALUES (?, ?)',
-                     tag_insert)
+    with db.get() as conn:
+        conn.executemany('INSERT INTO track (path, playlist, duration, title, album, album_artist, album_index, year) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                        track_insert)
+        conn.executemany('INSERT INTO track_artist VALUES (?, ?)',
+                        artist_insert)
+        conn.executemany('INSERT INTO track_tag VALUES (?, ?)',
+                        tag_insert)
 
+def rebuild_music_database():
+    """
+    Scan disk for playlist and tracks, and create the corresponding rows
+    in playlist, track, artist and tag tables. Previous table content is deleted.
+    """
+    with db.get() as conn:
+        conn.execute('DELETE FROM track_artist')
+        conn.execute('DELETE FROM track_tag')
+        conn.execute('DELETE FROM track')
+        conn.execute('DELETE FROM playlist')
+
+    with Pool(4) as pool:
+        for _result in pool.imap_unordered(scan_playlist, Path(settings.music_dir).iterdir()):
+            pass
+
+    log.info('Done scanning playlists')
 
 if __name__ == '__main__':
     with db.get() as conn:
         create_tables(conn)
-        rebuild_music_database(conn)
+    rebuild_music_database()
