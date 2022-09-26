@@ -103,8 +103,10 @@ def choose_track():
         return Response(None, 403)
 
     dir_name = request.args['playlist_dir']
+    tag_mode = request.args['tag_mode']
+    tags = request.args['tags'].split(';')
     playlist = music.playlist(dir_name)
-    chosen_track = playlist.choose_track()
+    chosen_track = playlist.choose_track(tag_mode=tag_mode, tags=tags)
 
     return {
         'path': chosen_track.relpath,

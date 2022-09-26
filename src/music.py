@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import List, Iterator, Optional, Dict
 from datetime import datetime
-import random
 import subprocess
 from subprocess import CompletedProcess
 import logging
@@ -166,9 +165,22 @@ class Playlist:
         Randomly choose a track from this playlist directory
         Returns: Track name
         """
-        # TODO filter tags
+        query = 'SELECT path FROM track WHERE playlist=?'
+        params = [self.relpath]
+        if tag_mode == 'allow':
+            query += ' AND (' + ' OR '.join(len(tags) * ['? IN (SELECT tag FROM track_tag WHERE track = path)']) + ')'
+            params.extend(tags)
+        elif tag_mode == 'deny':
+            query += ' AND (' + ' AND '.join(len(tags) * ['? NOT IN (SELECT tag FROM track_tag WHERE track = path)']) + ')'
+            params.extend(tags)
 
-        tracks = self.tracks_relpaths()
+        query += ' ORDER BY RANDOM()'
+        query += ' LIMIT ' + str(int(choices))
+
+        with db.get() as conn:
+            rows = conn.execute(query, params).fetchall()
+            tracks = [row[0] for row in rows]
+
         current_timestamp = int(datetime.now().timestamp())
 
         # Randomly choose some amount of tracks, then pick the track that was played the longest ago
@@ -176,7 +188,7 @@ class Playlist:
         best_track = None
         best_time = None
 
-        for track in random.choices(tracks, k=choices):
+        for track in tracks:
             last_played_b = redis.get('last_played_' + track)
 
             if last_played_b is None:
