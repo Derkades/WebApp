@@ -288,40 +288,10 @@ function searchTrackList() {
 
     scoredTracks.sort((a, b) => b.score - a.score);
 
-    let i = 0;
-    let outputHtml = '';
+    const tracks = [];
     for (const scoredTrack of scoredTracks) {
-        const track = scoredTrack.track
-        outputHtml += ''
-            + '<button '
-            + 'id="queue-choice-' + i + '" '
-            + 'data-path="' + escapeHtml(track.path) + '" '
-            + 'onclick="searchTrackListQueueAdd(this.id);">'
-            + '[' + escapeHtml(track.playlist_display) + '] ' + escapeHtml(track.display)
-            + '</button><br>';
-
-
-        if (i > state.maxSearchListSize) {
-            outputHtml += '...';
-            break;
-        }
-
-        i++;
+        tracks.push(scoredTrack.track);
     }
 
-    document.getElementById('track-list-output').innerHTML = outputHtml;
-}
-
-function searchTrackListQueueAdd(id) {
-    const button = document.getElementById(id);
-    const path = button.dataset.path;
-    const track = findTrackByPath(path);
-
-    if (track === null) {
-        console.error('track not found in track list: ' + file);
-        return;
-    }
-
-    downloadAndAddToQueue(track, true);
-    document.getElementById('dialog-queue').style.display = 'none';
+    document.getElementById('track-list-output').replaceChildren(browse.generateTrackList(tracks))
 }

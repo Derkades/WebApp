@@ -194,7 +194,7 @@ function updateTrackHtml() {
 
     if (state.history.length > 0) {
         const previousTrack = state.history[state.history.length - 1];
-        document.getElementById('previous-track').textContent = '[' + previousTrack.playlist_display + '] ' + previousTrack.display;
+        document.getElementById('previous-track').replaceChildren(getTrackDisplayHtml(previousTrack));
     } else {
         document.getElementById('previous-track').textContent = '-';
     }

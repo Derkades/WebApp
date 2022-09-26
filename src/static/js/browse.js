@@ -1,4 +1,4 @@
-const dialog = {
+const browse = {
     setHeader: textContent => {
         const outerDiv = document.getElementById('dialog-browse');
         const innerDiv = outerDiv.children[0];
@@ -10,21 +10,24 @@ const dialog = {
         document.getElementById('browse-content').replaceChildren(...children);
     },
     open: () => {
+        for (const dialog of document.getElementsByClassName('dialog-overlay')) {
+            dialog.style.display = 'none';
+        }
         document.getElementById('dialog-browse').style.display = 'flex';
     },
     browse: (title, filterFunc) => {
-        dialog.open();
-        dialog.setHeader(title);
+        browse.open();
+        browse.setHeader(title);
         const tracks = [];
         for (const track of state.tracks) {
             if (filterFunc(track)) {
                 tracks.push(track);
             }
         }
-        dialog.setContent([dialog.generateTrackList(tracks)]);
+        browse.setContent([browse.generateTrackList(tracks)]);
     },
     browseArtist: artistName => {
-        dialog.browse(artistName, track => {
+        browse.browse(artistName, track => {
             if (track.artists === null) {
                 return false;
             }
@@ -44,7 +47,7 @@ const dialog = {
         } else {
             title = albumArtistName + ' - ' + albumName;
         }
-        dialog.browse(title, track => track.album === albumName);
+        browse.browse(title, track => track.album === albumName);
     },
     generateTrackList: tracks => {
         // TODO two buttons, top of queue bottom of queue
@@ -57,6 +60,7 @@ const dialog = {
         const hcolAdd = document.createElement('th');
         headerRow.replaceChildren(hcolPlaylist, hcolTitle, hcolAdd);
 
+        let i = 0;
         for (const track of tracks) {
             const dataRow = document.createElement('tr');
             const colPlaylist = document.createElement('td');
@@ -70,6 +74,10 @@ const dialog = {
             colAdd.replaceChildren(addButton);
             dataRow.replaceChildren(colPlaylist, colTitle, colAdd);
             table.appendChild(dataRow);
+            if (i++ > state.maxTrackListSize) {
+                break;
+            }
+
         }
         return table;
     }
