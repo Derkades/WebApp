@@ -27,6 +27,12 @@ h3, p, label, td, div, a, .progress-time {
 
 a {
     color: lightblue;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+    cursor: pointer;
 }
 
 .sidebar-left h3 {
