@@ -9,7 +9,6 @@ import cache
 import db
 import metadata
 import settings
-from keyval import conn as redis
 
 
 log = logging.getLogger('app.music')

@@ -6,7 +6,6 @@ services:
     ports:
       - 127.0.0.1:8080:8080
     build: .
-    depends_on: [redis]
     volumes:
       - type: bind
         source: ./music # in nextcloud /zwembad/nextcloud/data/files/...
@@ -20,7 +19,3 @@ services:
     user: "1000"
     environment:
       MUSIC_WEB_PASSWORD: 1234
-      MUSIC_REDIS_HOST: redis
-
-  redis:
-    image: redis

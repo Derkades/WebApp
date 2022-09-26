@@ -5,7 +5,6 @@ from typing import Optional, List
 import logging
 import json
 
-import keyval
 import db
 import music
 
@@ -252,26 +251,23 @@ def probe(path: Path) -> Metadata:
     Create Metadata object by running ffprobe on a file
     """
     cache_key = 'ffprobe' + path.absolute().as_posix()
-    output_bytes = keyval.conn.get(cache_key)
-    if output_bytes is None:
-        command = [
-            'ffprobe',
-            '-print_format', 'json',
-            '-show_entries', 'format',
-            path.absolute().as_posix(),
-        ]
-        try:
-            result = subprocess.run(command,
-                                    shell=False,
-                                    check=True,
-                                    capture_output=True)
-        except subprocess.CalledProcessError as ex:
-            log.warning('metadata read error')
-            log.warning('stderr: %s', ex.stderr)
-            return
+    command = [
+        'ffprobe',
+        '-print_format', 'json',
+        '-show_entries', 'format',
+        path.absolute().as_posix(),
+    ]
+    try:
+        result = subprocess.run(command,
+                                shell=False,
+                                check=True,
+                                capture_output=True)
+    except subprocess.CalledProcessError as ex:
+        log.warning('metadata read error')
+        log.warning('stderr: %s', ex.stderr)
+        return
 
-        output_bytes = result.stdout
-        keyval.conn.set(cache_key, output_bytes)
+    output_bytes = result.stdout
 
     data = json.loads(output_bytes.decode())['format']
 
