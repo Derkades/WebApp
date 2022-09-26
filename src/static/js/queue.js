@@ -60,7 +60,7 @@ function updateQueue() {
 
 async function downloadRandomAndAddToQueue(playlist) {
     console.info('queue | choose track');
-    const chooseResponse = await fetch('/choose_track?playlist_dir=' + encodeURIComponent(playlist));
+    const chooseResponse = await fetch('/choose_track?playlist_dir=' + encodeURIComponent(playlist) + '&' + getTagFilter());
     checkResponseCode(chooseResponse);
     const path = (await chooseResponse.json()).path;
 
@@ -261,11 +261,11 @@ function searchTrackList() {
             let score = 0;
 
             if (query !== '') {
-                score += track.file.length - levenshtein(track.file.toLowerCase(), query);
+                score += track.path.length - levenshtein(track.path.toLowerCase(), query);
                 score += track.display.length - levenshtein(track.display.toLowerCase(), query);
 
                 // Boost exact matches
-                if (track.file.toLowerCase().includes(query)) {
+                if (track.path.toLowerCase().includes(query)) {
                     score *= 2;
                 }
 

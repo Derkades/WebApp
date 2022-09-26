@@ -9,7 +9,6 @@ bs4
 requests
 pillow
 gunicorn
-redis
 musicbrainzngs
 lxml
 pillow-avif-plugin

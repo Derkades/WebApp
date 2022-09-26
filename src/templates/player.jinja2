@@ -205,8 +205,12 @@
         <div class="box-rounded box-solid">
             {{ dialog_header(gettext('Tags')) }}
 
-            <div class="scroll" id="tag-checkboxes">
-
+            <div class="scroll">
+                <select id="tag-mode">
+                    <option value="allow">{% trans %}Only choose tracks with enabled tags (tracks without tags are never chosen){% endtrans %}</option>
+                    <option value="deny" selected>{% trans %}Don't choose tracks with disabled tags (tracks with enabled tags or no tags are chosen){% endtrans %}</option>
+                </select>{% trans %}Tag mode{% endtrans %}
+                <div id="tag-checkboxes"></div>
             </div>
         </div>
     </div>

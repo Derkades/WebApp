@@ -5,7 +5,8 @@ from typing import Optional, List
 import logging
 import json
 
-import keyval
+import db
+import music
 
 
 log = logging.getLogger('app.cache')
@@ -92,7 +93,7 @@ def split_meta_list(meta_list):
 
 class Metadata:
 
-    path: str
+    relpath: str
     duration: int
     artists: Optional[List[str]] = None
     album: Optional[str] = None
@@ -100,60 +101,28 @@ class Metadata:
     date: Optional[str] = None
     year: Optional[str] = None
     album_artist: Optional[str] = None
-    genres: List[str]
+    album_index: Optional[int] = None
+    tags: List[str]
 
-    def __init__(self, path: Path):
-        self.path = path
-
-        cache_key = 'ffprobe' + path.absolute().as_posix()
-        output_bytes = keyval.conn.get(cache_key)
-        if output_bytes is None:
-            command = [
-                'ffprobe',
-                '-print_format', 'json',
-                '-show_entries', 'format',
-                path.absolute().as_posix(),
-            ]
-            try:
-                result = subprocess.run(command,
-                                        shell=False,
-                                        check=True,
-                                        capture_output=True)
-            except subprocess.CalledProcessError as ex:
-                log.warning('metadata read error')
-                log.warning('stderr: %s', ex.stderr)
-                return
-
-            output_bytes = result.stdout
-            keyval.conn.set(cache_key, output_bytes)
-
-        data = json.loads(output_bytes.decode())['format']
-
-        self.duration = int(float(data['duration']))
-        self.genres = []
-        if 'tags' in data:
-            for name, value in data['tags'].items():
-                # sometimes ffprobe returns tags in uppercase
-                name = name.lower()
-
-                if name == 'album':
-                    self.album = value
-
-                if name == 'artist':
-                    self.artists = split_meta_list(value)
-
-                if name == 'title':
-                    self.title = strip_keywords(value).strip()
-
-                if name == 'date':
-                    self.date = value
-                    self.year = value[:4]
-
-                if name == 'album_artist':
-                    self.album_artist = value
-
-                if name == 'genre':
-                    self.genres = split_meta_list(value)
+    def __init__(self,
+                 relpath: str,
+                 duration: str,
+                 artists: Optional[List[str]],
+                 album: Optional[str],
+                 title: Optional[str],
+                 year: Optional[str],
+                 album_artist: Optional[str],
+                 album_index: Optional[int],
+                 tags: List[str]):
+        self.relpath = relpath
+        self.duration = duration
+        self.artists = artists
+        self.album = album
+        self.title = title
+        self.year = year
+        self.album_artist = album_artist
+        self.album_index = album_index
+        self.tags = tags
 
     def _meta_title(self) -> Optional[str]:
         """
@@ -163,7 +132,7 @@ class Metadata:
         if self.artists and self.title:
             title = ' & '.join(self.artists) + ' - ' + self.title
             if self.year:
-                title += ' [' + self.year + ']'
+                title += ' [' + str(self.year) + ']'
             return title
         else:
             return None
@@ -173,7 +142,7 @@ class Metadata:
         Generate title from file name
         Returns: Title string
         """
-        title = self.path.name
+        title = self.relpath.split('/')[-1]
         # Remove file extension
         try:
             title = title[:title.rindex('.')]
@@ -275,3 +244,86 @@ class Metadata:
             yield ' '.join(self.artists) + ' - ' + self.title
 
         yield self._filename_title_search()
+
+
+def probe(path: Path) -> Metadata:
+    """
+    Create Metadata object by running ffprobe on a file
+    """
+    cache_key = 'ffprobe' + path.absolute().as_posix()
+    command = [
+        'ffprobe',
+        '-print_format', 'json',
+        '-show_entries', 'format',
+        path.absolute().as_posix(),
+    ]
+    try:
+        result = subprocess.run(command,
+                                shell=False,
+                                check=True,
+                                capture_output=True)
+    except subprocess.CalledProcessError as ex:
+        log.warning('metadata read error')
+        log.warning('stderr: %s', ex.stderr)
+        return
+
+    output_bytes = result.stdout
+
+    data = json.loads(output_bytes.decode())['format']
+
+    duration = int(float(data['duration']))
+    artists = None
+    album = None
+    title = None
+    year = None
+    album_artist = None
+    album_index = None
+    tags = []
+
+    if 'tags' in data:
+        for name, value in data['tags'].items():
+            # sometimes ffprobe returns tags in uppercase
+            name = name.lower()
+
+            if name == 'album':
+                album = value
+
+            if name == 'artist':
+                artists = split_meta_list(value)
+
+            if name == 'title':
+                title = strip_keywords(value).strip()
+
+            if name == 'date':
+                year = value[:4]
+
+            if name == 'album_artist':
+                album_artist = value
+
+            if name == 'track':
+                album_index = int(value)
+
+            if name == 'genre':
+                tags = split_meta_list(value)
+
+    return Metadata(music.to_relpath, duration, artists, album, title, year, album_artist, album_index, tags)
+
+
+def cached(relpath: str) -> Metadata:
+    """
+    Create Metadata object from database contents
+    """
+    query = 'SELECT duration, title, album, album_artist, album_index, year FROM track WHERE path=?'
+    with db.get() as conn:
+        duration, title, album, album_artist, album_index, year = conn.execute(query, (relpath,)).fetchone()
+
+    with db.get() as conn:
+        rows = conn.execute('SELECT artist FROM track_artist WHERE track=?', (relpath,)).fetchall()
+        artists = [row[0] for row in rows]
+        if len(artists) == 0:
+            artists = None
+
+        rows = conn.execute('SELECT tag FROM track_tag WHERE track=?', (relpath,)).fetchall()
+        tags = [row[0] for row in rows]
+
+        return Metadata(relpath, duration, artists, album, title, year, album_artist, album_index, tags)

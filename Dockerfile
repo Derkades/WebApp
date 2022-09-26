@@ -19,9 +19,4 @@ RUN pybabel compile -d translations
 
 ENV PYTHONUNBUFFERED=1
 
-ENTRYPOINT ["gunicorn", \
-    "-b", "0.0.0.0:8080", \
-    "--workers", "4", \
-    "--threads", "4", \
-    # "--access-logfile", "-", \
-    "app"]
+ENTRYPOINT ["./entrypoint.sh"]

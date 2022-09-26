@@ -104,7 +104,7 @@ This project is using many open source software and libraries, such as:
 - [Requests](https://pypi.org/project/requests)
 - [Material Design Icons](https://materialdesignicons.com)
 - [MusicBrainz](https://musicbrainz.org) (musicbrainzngs)
-- [Redis](https://redis.io)
+- [sqlite3](https://docs.python.org/3/library/sqlite3.html)
 - [Docker, docker compose](https://docs.docker.com/get-docker)
 
 It also relies on some other parties for web scraping, who shall not be named.

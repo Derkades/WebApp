@@ -1,7 +1,6 @@
 from typing import Optional
 import hashlib
 import hmac
-from logging.config import dictConfig
 import logging
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -15,26 +14,11 @@ import bing
 import genius
 import image
 import settings
-from music import Playlist, Track, Metadata
+import music
+import logconfig
+from metadata import Metadata
+from music import Track
 import musicbrainz
-
-
-dictConfig({
-    'version': 1,
-    'formatters': {'default': {
-        'format': '[%(asctime)s] [%(process)d] [%(levelname)s] [%(module)s] %(message)s',
-    }},
-    'handlers': {'wsgi': {
-        'class': 'logging.StreamHandler',
-        'stream': 'ext://flask.logging.wsgi_errors_stream',
-        'formatter': 'default'
-    }},
-    'root': {
-        'level': settings.log_level,
-        'handlers': ['wsgi']
-    },
-    'disable_existing_loggers': False,
-})
 
 
 application = Flask(__name__, template_folder=Path('templates'))
@@ -104,8 +88,8 @@ def player():
             mobile = True
 
     return render_template('player.jinja2',
-                           main_playlists=Playlist.get_main(),
-                           guest_playlists=Playlist.get_guests(),
+                           main_playlists=music.playlists(guest=False),
+                           guest_playlists=music.playlists(guest=True),
                            assets=assets.all_assets_dict(),
                            mobile=mobile)
 
@@ -119,11 +103,13 @@ def choose_track():
         return Response(None, 403)
 
     dir_name = request.args['playlist_dir']
-    playlist = Playlist.by_dir_name(dir_name)
-    chosen_track = playlist.choose_track()
+    tag_mode = request.args['tag_mode']
+    tags = request.args['tags'].split(';')
+    playlist = music.playlist(dir_name)
+    chosen_track = playlist.choose_track(tag_mode=tag_mode, tags=tags)
 
     return {
-        'path': chosen_track.relpath(),
+        'path': chosen_track.relpath,
     }
 
 
@@ -149,7 +135,7 @@ def get_cover_bytes(meta: Metadata) -> Optional[bytes]:
         meta: Track metadata
     Returns: Album cover image bytes, or None if MusicBrainz nor bing found an image.
     """
-    log.info('Finding cover for: %s', meta.path)
+    log.info('Finding cover for: %s', meta.relpath)
 
     # Try MusicBrainz first
     mb_query = meta.album_release_query()
@@ -181,7 +167,7 @@ def get_album_cover() -> Response:
 
     img_format = get_img_format()
 
-    comp_bytes = image.thumbnail(get_img, track.relpath(), img_format[6:], 700,
+    comp_bytes = image.thumbnail(get_img, track.relpath, img_format[6:], 700,
                                  thumb_quality=request.args['quality'])
 
     return Response(comp_bytes, mimetype=img_format)
@@ -195,7 +181,7 @@ def get_lyrics():
     if not check_password_cookie():
         return Response(None, 403)
 
-    track = Track.by_relpath(request.args['path'])
+    track = music.Track(request.args['path'])
     meta = track.metadata()
 
     for search_query in meta.lyrics_search_queries():
@@ -221,7 +207,7 @@ def ytdl():
     directory = request.json['directory']
     url = request.json['url']
 
-    playlist = Playlist.by_dir_name(directory)
+    playlist = music.playlist(directory)
     log.info('ytdl %s %s', directory, url)
 
     result = playlist.download(url)
@@ -249,14 +235,14 @@ def track_list():
         'partial': False,
     }
 
-    playlists = Playlist.get_all()
+    playlists = music.playlists()
 
     for playlist in playlists:
-        response['playlists'][playlist.dir_name] = {
-            'dir_name': playlist.dir_name,
-            'display_name': playlist.display_name,
-            'track_count': playlist.count_tracks(),
-            'guest': playlist.is_guest,
+        response['playlists'][playlist.relpath] = {
+            'dir_name': playlist.relpath,
+            'display_name': playlist.name,
+            'track_count': playlist.track_count,
+            'guest': playlist.guest,
         }
 
     max_seconds = 5
@@ -268,12 +254,12 @@ def track_list():
             if skip_to_index <= response['index']:
                 meta = track.metadata()
                 response['tracks'].append({
-                    'path': track.relpath(),
+                    'path': track.relpath,
                     'display': meta.display_title(),
-                    'playlist': playlist.dir_name,
-                    'playlist_display': playlist.display_name,
+                    'playlist': playlist.relpath,
+                    'playlist_display': playlist.name,
                     'duration': meta.duration,
-                    'tags': meta.genres,
+                    'tags': meta.tags,
                     'title': meta.title,
                     'artists': meta.artists,
                     'album': meta.album,
