@@ -133,7 +133,7 @@ class Metadata:
         if self.artists and self.title:
             title = ' & '.join(self.artists) + ' - ' + self.title
             if self.year:
-                title += ' [' + self.year + ']'
+                title += ' [' + str(self.year) + ']'
             return title
         else:
             return None
@@ -248,6 +248,9 @@ class Metadata:
 
 
 def probe(path: Path) -> Metadata:
+    """
+    Create Metadata object by running ffprobe on a file
+    """
     cache_key = 'ffprobe' + path.absolute().as_posix()
     output_bytes = keyval.conn.get(cache_key)
     if output_bytes is None:
@@ -311,6 +314,9 @@ def probe(path: Path) -> Metadata:
 
 
 def cached(relpath: str) -> Metadata:
+    """
+    Create Metadata object from database contents
+    """
     query = 'SELECT duration, title, album, album_artist, album_index, year FROM track WHERE path=?'
     with db.get() as conn:
         duration, title, album, album_artist, album_index, year = conn.execute(query, (relpath,)).fetchone()
@@ -324,4 +330,4 @@ def cached(relpath: str) -> Metadata:
         rows = conn.execute('SELECT tag FROM track_tag WHERE track=?', (relpath,)).fetchall()
         tags = [row[0] for row in rows]
 
-        return Metadata(relpath, duration, artists, album, title, album_artist, album_index, year, tags)
+        return Metadata(relpath, duration, artists, album, title, year, album_artist, album_index, tags)
