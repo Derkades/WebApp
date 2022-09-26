@@ -434,6 +434,14 @@ h4 > .icon {
     width: 7rem;
 }
 
+.track-list-table {
+    width: 100%;
+}
+
+.track-list-table td:nth-child(2) {
+    text-align: left;
+}
+
 /* Firefox scrollbars look good by default, style Chromium scrollbars so they look similar */
 
 ::-webkit-scrollbar {

@@ -15,17 +15,13 @@ const dialog = {
     browse: (value, filterFunc) => {
         dialog.open();
         dialog.setHeader(value);
-        const nodes = [];
+        const tracks = [];
         for (const track of state.tracks) {
-            if (!filterFunc(track)) {
-                continue;
+            if (filterFunc(track)) {
+                tracks.push(track);
             }
-
-            nodes.push(getTrackDisplayHtml(track));
-            nodes.push(document.createElement('br'));
         }
-        console.log(nodes);
-        dialog.setContent(nodes);
+        dialog.setContent([dialog.generateTrackList(tracks)]);
     },
     browseArtist: artistName => {
         dialog.browse(artistName, track => {
@@ -44,4 +40,31 @@ const dialog = {
     browseAlbum: albumName => {
         dialog.browse(albumName, track => track.album === albumName);
     },
+    generateTrackList: tracks => {
+        // TODO two buttons, top of queue bottom of queue
+        const table = document.createElement('table');
+        table.classList.add('track-list-table');
+        const headerRow = document.createElement('tr');
+        table.appendChild(headerRow);
+        const hcolPlaylist = document.createElement('th');
+        const hcolTitle = document.createElement('th');
+        const hcolAdd = document.createElement('th');
+        headerRow.replaceChildren(hcolPlaylist, hcolTitle, hcolAdd);
+
+        for (const track of tracks) {
+            const dataRow = document.createElement('tr');
+            const colPlaylist = document.createElement('td');
+            colPlaylist.textContent = track.playlist;
+            const colTitle = document.createElement('td');
+            colTitle.replaceChildren(getTrackDisplayHtml(track));
+            const colAdd = document.createElement('td');
+            const addButton = document.createElement('button'); // TODO icon button
+            addButton.textContent = 'Enqueue'
+            addButton.onclick = () => downloadAndAddToQueue(track, true);
+            colAdd.replaceChildren(addButton);
+            dataRow.replaceChildren(colPlaylist, colTitle, colAdd);
+            table.appendChild(dataRow);
+        }
+        return table;
+    }
 }
