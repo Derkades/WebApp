@@ -12,55 +12,58 @@ import logconfig
 log = logging.getLogger('app.scanner')
 
 
-def create_tables(conn):
+def create_tables():
     """
     Initialise SQLite database with tables
     """
     # TODO enable strict mode after updating to newer sqlite version
-    conn.execute('PRAGMA foreign_keys = ON;')
 
-    conn.execute("""
-                CREATE TABLE IF NOT EXISTS playlist (
-                    path TEXT NOT NULL UNIQUE PRIMARY KEY,
-                    name TEXT NOT NULL UNIQUE,
-                    guest INT NOT NULL
-                )
-                """)
+    with db.get() as conn:
+        conn.execute("""
+                    CREATE TABLE IF NOT EXISTS playlist (
+                        path TEXT NOT NULL UNIQUE PRIMARY KEY,
+                        name TEXT NOT NULL UNIQUE,
+                        guest INT NOT NULL
+                    )
+                    """)
 
-    conn.execute("""
-                CREATE TABLE IF NOT EXISTS track (
-                    path TEXT NOT NULL UNIQUE PRIMARY KEY,
-                    playlist TEXT NOT NULL,
-                    duration INT NOT NULL,
-                    title TEXT NULL,
-                    album TEXT NULL,
-                    album_artist TEXT NULL,
-                    album_index INT NULL,
-                    year INT NULL,
-                    last_played INT DEFAULT 0,
-                    FOREIGN KEY (playlist) REFERENCES playlist(path) ON DELETE CASCADE
-                )
-                """)
+        conn.execute("""
+                    CREATE TABLE IF NOT EXISTS track (
+                        path TEXT NOT NULL UNIQUE PRIMARY KEY,
+                        playlist TEXT NOT NULL,
+                        duration INT NOT NULL,
+                        title TEXT NULL,
+                        album TEXT NULL,
+                        album_artist TEXT NULL,
+                        album_index INT NULL,
+                        year INT NULL,
+                        last_played INT DEFAULT 0,
+                        FOREIGN KEY (playlist) REFERENCES playlist(path) ON DELETE CASCADE
+                    )
+                    """)
 
-    conn.execute("""
-                CREATE TABLE IF NOT EXISTS track_artist (
-                    track TEXT NOT NULL,
-                    artist TEXT NOT NULL,
-                    FOREIGN KEY (track) REFERENCES track(path) ON DELETE CASCADE,
-                    UNIQUE (track, artist)
-                )
-                """)
+        conn.execute("""
+                    CREATE TABLE IF NOT EXISTS track_artist (
+                        track TEXT NOT NULL,
+                        artist TEXT NOT NULL,
+                        FOREIGN KEY (track) REFERENCES track(path) ON DELETE CASCADE,
+                        UNIQUE (track, artist)
+                    )
+                    """)
 
-    conn.execute("""
-                CREATE TABLE IF NOT EXISTS track_tag (
-                    track TEXT NOT NULL,
-                    tag TEXT NOT NULL,
-                    FOREIGN KEY (track) REFERENCES track(path) ON DELETE CASCADE,
-                    UNIQUE (track, tag)
-                )
-                """)
+        conn.execute("""
+                    CREATE TABLE IF NOT EXISTS track_tag (
+                        track TEXT NOT NULL,
+                        tag TEXT NOT NULL,
+                        FOREIGN KEY (track) REFERENCES track(path) ON DELETE CASCADE,
+                        UNIQUE (track, tag)
+                    )
+                    """)
 
 def scan_playlist(playlist_path: Path):
+    """
+    Scan provided playlist directory for music, and write tracks with metadata to database.
+    """
     if playlist_path.name.startswith('Guest-'):
         playlist_name = playlist_path.name[6:]
         playlist_guest = True
@@ -80,8 +83,7 @@ def scan_playlist(playlist_path: Path):
     artist_insert = []
     tag_insert = []
 
-    # TODO recursive
-    for track_path in playlist_path.iterdir():
+    for track_path in music.scan_music(playlist_path):
         track_relpath = music.to_relpath(track_path)
         meta = metadata.probe(track_path)
         track_insert.append((
@@ -133,6 +135,5 @@ def rebuild_music_database():
     log.info('Done scanning playlists')
 
 if __name__ == '__main__':
-    with db.get() as conn:
-        create_tables(conn)
+    create_tables()
     rebuild_music_database()
