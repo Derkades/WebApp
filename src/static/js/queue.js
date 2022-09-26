@@ -261,11 +261,11 @@ function searchTrackList() {
             let score = 0;
 
             if (query !== '') {
-                score += track.file.length - levenshtein(track.file.toLowerCase(), query);
+                score += track.path.length - levenshtein(track.path.toLowerCase(), query);
                 score += track.display.length - levenshtein(track.display.toLowerCase(), query);
 
                 // Boost exact matches
-                if (track.file.toLowerCase().includes(query)) {
+                if (track.path.toLowerCase().includes(query)) {
                     score *= 2;
                 }
 
