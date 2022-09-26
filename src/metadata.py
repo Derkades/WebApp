@@ -295,13 +295,19 @@ def probe(path: Path) -> Metadata:
                 title = strip_keywords(value).strip()
 
             if name == 'date':
-                year = value[:4]
+                try:
+                    year = int(value[:4])
+                except ValueError:
+                    log.warning('Invalid year %s', value)
 
             if name == 'album_artist':
                 album_artist = value
 
             if name == 'track':
-                album_index = int(value)
+                try:
+                    album_index = int(value.split('/')[0])
+                except ValueError:
+                    log.warning('Invalid album_index %s', value)
 
             if name == 'genre':
                 tags = split_meta_list(value)
