@@ -156,7 +156,8 @@ function updateQueueHtml() {
         const tdCover = document.createElement('td');
         tdCover.classList.add('box-rounded');
         tdCover.style.backgroundImage = 'url("' + queuedTrack.imageBlobUrl + '")';
-        tdCover.onclick = () => removeFromQueue(i);
+        const rememberI = i;
+        tdCover.onclick = () => removeFromQueue(rememberI);
         const deleteOverlay = document.createElement('div');
         deleteOverlay.classList.add('delete-overlay');
         const trashDiv = document.createElement('div');
