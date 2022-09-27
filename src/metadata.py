@@ -82,8 +82,9 @@ def is_alpha(c):
 
 
 def split_meta_list(meta_list):
-    # Split by / and ;
-    # Trim whitespace, ignore empty strings
+    """
+    Split list (stored as string in metadata) by slash and semicolon
+    """
     entries = []
     for entry in re.split(r'\/|;', meta_list):
         if entry.strip() != '':
@@ -99,18 +100,18 @@ class Metadata:
     album: Optional[str] = None
     title: Optional[str] = None
     date: Optional[str] = None
-    year: Optional[str] = None
+    year: Optional[int] = None
     album_artist: Optional[str] = None
     album_index: Optional[int] = None
     tags: List[str]
 
     def __init__(self,
                  relpath: str,
-                 duration: str,
+                 duration: int,
                  artists: Optional[List[str]],
                  album: Optional[str],
                  title: Optional[str],
-                 year: Optional[str],
+                 year: Optional[int],
                  album_artist: Optional[str],
                  album_index: Optional[int],
                  tags: List[str]):
@@ -256,15 +257,11 @@ def probe(path: Path) -> Metadata:
         '-show_entries', 'format',
         path.absolute().as_posix(),
     ]
-    try:
-        result = subprocess.run(command,
-                                shell=False,
-                                check=True,
-                                capture_output=True)
-    except subprocess.CalledProcessError as ex:
-        log.warning('metadata read error')
-        log.warning('stderr: %s', ex.stderr)
-        return
+
+    result = subprocess.run(command,
+                            shell=False,
+                            check=True,
+                            capture_output=True)
 
     output_bytes = result.stdout
 
@@ -311,7 +308,7 @@ def probe(path: Path) -> Metadata:
             if name == 'genre':
                 tags = split_meta_list(value)
 
-    return Metadata(music.to_relpath, duration, artists, album, title, year, album_artist, album_index, tags)
+    return Metadata(music.to_relpath(path), duration, artists, album, title, year, album_artist, album_index, tags)
 
 
 def cached(relpath: str) -> Metadata:
@@ -324,9 +321,10 @@ def cached(relpath: str) -> Metadata:
 
     with db.get() as conn:
         rows = conn.execute('SELECT artist FROM track_artist WHERE track=?', (relpath,)).fetchall()
-        artists = [row[0] for row in rows]
-        if len(artists) == 0:
+        if len(rows) == 0:
             artists = None
+        else:
+            artists = [row[0] for row in rows]
 
         rows = conn.execute('SELECT tag FROM track_tag WHERE track=?', (relpath,)).fetchall()
         tags = [row[0] for row in rows]

@@ -95,6 +95,11 @@ def image_search(bing_query: str) -> Optional[bytes]:
 
 if __name__ == '__main__':
     query = sys.argv[1]
+    result_bytes = image_search(query)
+    if result_bytes is None:
+        print('no result found')
+        sys.exit(1)
+
     with open('test_bing_result.webp', 'wb') as test_file:
         test_file.truncate(0)
-        test_file.write(image_search(query))
+        test_file.write(result_bytes)

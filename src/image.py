@@ -1,4 +1,4 @@
-from typing import Union, Callable
+from typing import Union, Callable, Optional
 from io import BytesIO
 from pathlib import Path
 import logging
@@ -52,21 +52,24 @@ def thumbnail(input_img: Union[Path, bytes, Callable], cache_id: str, thumb_form
 
     log.info('Generating thumbnail: %s', cache_id)
 
+    input_bytes: Optional[bytes]
+
     if isinstance(input_img, Path):
         with open(input_img, 'rb') as inp_img_f:
-            input_img = inp_img_f.read()
+            input_bytes = inp_img_f.read()
     elif callable(input_img):
-        input_img = input_img()
+        input_bytes = input_img()
     elif isinstance(input_img, bytes):
-        pass
+        input_bytes = input_img
     elif input_img is None:
         log.warning('input_img is None, using fallback for id: %s', cache_id)
+        input_bytes = None
     else:
         raise ValueError('invalid image type: ' + type(input_img))
 
-    if input_img is not None:
+    if input_bytes is not None:
         try:
-            img = Image.open(BytesIO(input_img))
+            img = Image.open(BytesIO(input_bytes))
             img.thumbnail((thumb_resolution, thumb_resolution), Image.ANTIALIAS)
             img_out = BytesIO()
             img.save(img_out, format=thumb_format, quality=thumb_quality_percent)

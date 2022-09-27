@@ -3,7 +3,6 @@ import hashlib
 import hmac
 import logging
 from pathlib import Path
-from datetime import datetime, timedelta
 
 from flask import Flask, request, render_template, Response, redirect
 import flask_assets
@@ -21,7 +20,7 @@ from music import Track
 import musicbrainz
 
 
-application = Flask(__name__, template_folder=Path('templates'))
+application = Flask(__name__, template_folder='templates')
 babel = Babel(application)
 flask_assets.Environment(application)
 assets = Assets()
