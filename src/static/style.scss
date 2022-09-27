@@ -159,11 +159,11 @@ kbd {
 
 @media screen and (max-width: 999px) {
     .sidebar {
-        padding: 0 2rem;
+        padding: 0 1rem;
     }
 
     .sidebar-right {
-        padding-bottom: 2rem;
+        padding-bottom: 1rem;
     }
 }
 
@@ -184,7 +184,7 @@ input[type=checkbox] {
 }
 
 .sidebar-left > div > .box-solid {
-    margin: 1.25rem 0;
+    margin: 1rem 0;
 }
 
 .guest-checkboxes {
@@ -275,6 +275,8 @@ audio {
 #queue-table {
     width: 100%;
     border-spacing: .5rem;
+    margin-left: -.5rem;
+    width: calc(100% + 1rem);
 }
 
 #queue-table td {
