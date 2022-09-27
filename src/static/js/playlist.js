@@ -103,11 +103,14 @@ function getSavedCheckboxState() {
 function createPlaylistDropdowns() {
     for (const select of document.getElementsByClassName("playlist-select")) {
         // Remove all children except the ones that should be kept
+        const keptChildren = []
         for (const child of select.children) {
-            if (child.dataset.keep !== 'true') {
-                select.removeChild(child);
+            if (child.dataset.keep === 'true') {
+                keptChildren.push(child);
+                continue;
             }
         }
+        select.replaceChildren(...keptChildren);
 
         for (const dir_name in state.playlists) {
             const playlist = state.playlists[dir_name];
