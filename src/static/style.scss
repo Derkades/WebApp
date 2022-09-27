@@ -224,9 +224,7 @@ audio {
 }
 
 .box-solid {
-    background-color: rgba(20, 20, 20, 0.4);
-    /* blur is mooi maar een beetje glitchy op firefox */
-    /* backdrop-filter: blur(8rem); */
+    background-color: rgba(20, 20, 20, 0.5);
     padding: 1rem;
 }
 
@@ -379,16 +377,16 @@ h4 > .icon {
     justify-content: center;
     align-items: center;
     backdrop-filter: blur(2rem);
-    background-color: rgba(0, 0, 0, .3);
 }
 
 .full-page-overlay .box-solid {
+    /* blur backdrop filter doesn't work on firefox <=102, make the box darker or text won't be readable */
+    /* the current ESR is 102, when the next ESR is released this can be removed */
+    background-color: rgba(20, 20, 20, 0.9);
     min-width: 60vw;
     max-width: 90vw;
     min-height: 60vh;
     max-height: 90vh;
-    /* 3rem to compensate for margin, 2rem to compensate for padding */
-    max-height: \min(60rem, calc(100vh - 3rem - 2rem));
     margin: 1.5rem;
     /* prevent children from overflowing parent */
     display: flex;
