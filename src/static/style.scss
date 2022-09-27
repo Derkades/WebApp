@@ -18,16 +18,25 @@ body {
     width: 100vw;
     margin: 0;
     background-color: black;
+    color: white;
+}
+
+body.light {
+    background-color: white;
+    color: black;
 }
 
 h3, p, label, td, div, a, .progress-time {
     font-family: 'Quicksand', Verdana, sans-serif;
-    color: white;
 }
 
 a {
     color: lightblue;
     text-decoration: none;
+}
+
+body.light a {
+    color: darkblue;
 }
 
 a:hover {
@@ -45,6 +54,10 @@ p {
 
 .secondary {
     color: #ccc;
+}
+
+body.light .secondary {
+    color: #303030;
 }
 
 p.secondary {
@@ -74,8 +87,22 @@ select, button, input[type=text], input[type=number], input[type=submit] {
     margin-bottom: .3rem;
 }
 
+body.light select,
+body.light button,
+body.light input[type=text],
+body.light input[type=number],
+body.light input[type=submit] {
+    background-color: rgba(255, 255, 255, 0.3);
+    border: 1px solid #505050;
+    color: black;
+}
+
 input::placeholder {
     color: #ccc;
+}
+
+body.light input::placeholder {
+    color: #505050;
 }
 
 kbd {
@@ -203,8 +230,6 @@ input[type=checkbox] {
 }
 
 #lyrics {
-    /* column-count: 2; */
-    color: white;
     max-height: 80vh;
     overflow-y: auto;
     /* text-shadow: .05rem .05rem .5rem black; */
@@ -228,6 +253,10 @@ audio {
     padding: 1rem;
 }
 
+body.light .box-solid {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
 .outer-bar,
 #progress-bar {
     height: 1.5rem;
@@ -241,6 +270,11 @@ audio {
     background-color: rgba(0, 0, 0, 0.4);
 }
 
+body.light .outer-bar {
+    border: 1px solid #202020;
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
 .outer-bar > div {
     position: absolute;
     top: 0;
@@ -249,6 +283,10 @@ audio {
 #progress-bar {
     background-color: #ccc;
     width: 0;
+}
+
+body.light #progress-bar {
+    background-color: #202020;
 }
 
 .flex-content-center {
@@ -270,6 +308,10 @@ audio {
     margin: 0 .25rem;
     font-size: 1.1rem;
     mix-blend-mode: difference;
+}
+
+body.light .progress-time {
+    filter: invert(1);
 }
 
 #queue-table {
@@ -365,6 +407,10 @@ audio {
     filter: invert(1);
 }
 
+body.light .icon {
+    filter: none;
+}
+
 h4 > .icon {
     display: inline-block;
 }
@@ -393,6 +439,10 @@ h4 > .icon {
     /* prevent children from overflowing parent */
     display: flex;
     flex-direction: column;
+}
+
+body.light .full-page-overlay .box-solid {
+    background-color: rgba(255, 255, 255, 0.9);
 }
 
 .scroll {
