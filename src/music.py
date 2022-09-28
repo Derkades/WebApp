@@ -214,6 +214,7 @@ class Playlist:
                                '--remux-video', 'webm>ogg/mp3>mp3/mka',
                                '--add-metadata',
                                '--no-playlist',
+                               '--paths', 'temp:/tmp',
                                url],
                               shell=False,
                               check=False,  # No exception on non-zero exit code
