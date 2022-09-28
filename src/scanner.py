@@ -1,7 +1,7 @@
 from pathlib import Path
 import logging
 from multiprocessing import Pool
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 import db
 import metadata
@@ -12,7 +12,7 @@ import settings
 log = logging.getLogger('app.scanner')
 
 
-def scan_tracks(paths: List[Tuple[Path, Path]]):
+def _scan_tracks(paths: List[Tuple[Path, Path]]):
     """
     Get metadata for provided tracks, and write it to the database.
     """
@@ -48,13 +48,11 @@ def scan_tracks(paths: List[Tuple[Path, Path]]):
 
     return track_insert, artist_insert, tag_insert
 
-def rebuild_music_database():
+def rebuild_music_database(only_playlist: Optional[str] = None):
     """
     Scan disk for playlist and tracks, and create the corresponding rows
     in playlist, track, artist and tag tables. Previous table content is deleted.
     """
-    log.info('Scanning tracks...')
-
     tracks = []
 
     playlist_insert = []
@@ -62,7 +60,16 @@ def rebuild_music_database():
     artist_insert = []
     tag_insert = []
 
-    for playlist_path in Path(settings.music_dir).iterdir():
+    if only_playlist is not None:
+        playlist_paths = [Path(settings.music_dir, only_playlist)]
+        if not playlist_paths[0].is_dir():
+            raise ValueError('Requested playlist directory does not exist (or is not a directory)')
+        log.info('Scanning tracks for playlist %s...', only_playlist)
+    else:
+        playlist_paths = Path(settings.music_dir).iterdir()
+        log.info('Scanning tracks for all playlists...')
+
+    for playlist_path in playlist_paths:
         if playlist_path.name.startswith('Guest-'):
             playlist_name = playlist_path.name[6:]
             playlist_guest = True
@@ -91,20 +98,20 @@ def rebuild_music_database():
 
     with Pool(settings.scanner_processes) as pool:
         processed = 0
-        for tracks, artists, tags in pool.imap_unordered(scan_tracks, chunks):
-            track_insert.extend(tracks)
-            artist_insert.extend(artists)
-            tag_insert.extend(tags)
-            processed += len(tracks)
+        for result_tracks, result_artists, result_tags in pool.imap_unordered(_scan_tracks, chunks):
+            track_insert.extend(result_tracks)
+            artist_insert.extend(result_artists)
+            tag_insert.extend(result_tags)
+            processed += len(result_tracks)
             log.info('Scanned %s / %s', processed, len(tracks))
 
     log.info('Done scanning tracks. Inserting into database...')
 
     with db.get() as conn:
-        conn.execute('DELETE FROM track_artist')
-        conn.execute('DELETE FROM track_tag')
-        conn.execute('DELETE FROM track')
-        conn.execute('DELETE FROM playlist')
+        if only_playlist:
+            conn.execute('DELETE FROM playlist WHERE path=?', (only_playlist,))
+        else:
+            conn.execute('DELETE FROM playlist')
 
         conn.executemany('INSERT INTO playlist VALUES (?, ?, ?)',
                          playlist_insert)

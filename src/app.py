@@ -12,11 +12,12 @@ from assets import Assets
 import bing
 import genius
 import image
-import settings
-import music
 from metadata import Metadata
+import music
 from music import Track
 import musicbrainz
+import scanner
+import settings
 
 
 app = Flask(__name__, template_folder='templates')
@@ -261,6 +262,22 @@ def track_list():
             })
 
     return response
+
+
+@app.route('/scan_music')
+def scan_music():
+    """
+    Scans all playlists for new music
+    """
+    if not check_password_cookie():
+        return Response(None, 403)
+
+    if 'playlist' in request.args:
+        scanner.rebuild_music_database(only_playlist=request.args['playlist'])
+    else:
+        scanner.rebuild_music_database()
+
+    return Response(None, 200)
 
 
 @app.route('/raphson')
