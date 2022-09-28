@@ -7,7 +7,7 @@ function findTrackByPath(path) {
     return null;
 }
 
-function initTrackList() {
+function updateLocalTrackList() {
     console.info('Requesting track list');
     (async function() {
         const response = await fetch('/track_list');
@@ -28,7 +28,6 @@ function initTrackList() {
 
         state.tracks = json.tracks;
 
-        setTimeout(initTrackList, 60_000);
         hideLoadingOverlay();
 
         // Update HTML depending on state.playlists and state.tracks
@@ -39,8 +38,13 @@ function initTrackList() {
     })().catch(err => {
         console.warn('track list | error');
         console.warn(err);
-        setTimeout(initTrackList, 1000);
+        setTimeout(updateLocalTrackList, 1000);
     });
+}
+
+async function scanPlaylist(playlist) {
+    const response = await fetch('/scan_music?playlist=' + encodeURIComponent(playlist))
+    checkResponseCode(response);
 }
 
 function getTrackDisplayHtml(track) {

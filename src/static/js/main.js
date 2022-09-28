@@ -83,6 +83,6 @@ document.addEventListener("DOMContentLoaded", () => {
     next();
     setInterval(updateMediaSession, 500);
     setInterval(updateMediaSessionPosition, 5000);
-    initTrackList();
+    updateLocalTrackList();
     searchTrackList();
 });

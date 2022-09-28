@@ -39,30 +39,37 @@ function youTubeDownload(event) {
     const directory = document.getElementById('youtube-dl-directory').value;
     const url = document.getElementById('youtube-dl-url').value;
 
-    const postBody = JSON.stringify({
-        directory: directory,
-        url: url,
-    });
-
-    const headers = new Headers({
-        'Content-Type': 'application/json'
-    });
-
-    const options = {
-        method: 'POST',
-        body: postBody,
-        headers: headers
-    };
-
-    fetch(new Request('/ytdl', options)).then(response => {
-        if (response.status == 200) {
-            spinner.style.visibility = 'hidden';
-            response.json().then(json => {
-                output.textContent = 'Status code: ' + json.code + '\n--- stdout ---\n' + json.stdout + '\n--- stderr ---\n' + json.stderr;
-                output.style.backgroundColor = json.code === 0 ? 'darkgreen' : 'darkred';
-            });
+    (async function(){
+        const options = {
+            method: 'POST',
+            body: JSON.stringify({
+                directory: directory,
+                url: url,
+            }),
+            headers: new Headers({
+                'Content-Type': 'application/json'
+            }),
+        };
+        const response = await fetch(new Request('/ytdl', options));
+        checkResponseCode(response);
+        const json = await response.json();
+        output.textContent = 'Status code: ' + json.code + '\n--- stdout ---\n' + json.stdout + '\n--- stderr ---\n' + json.stderr;
+        if (json.code == 0) {
+            output.append('\n--- javascript ---\n')
+            output.append('Scanning playlist...\n');
+            await scanPlaylist(directory);
+            output.append('Done, updating local track list...\n');
+            updateLocalTrackList();
+            output.append('Done!');
+            output.style.backgroundColor = 'darkgreen';
         } else {
-            response.text().then(alert);
+            output.style.backgroundColor = 'darkred';
         }
+    })().then(() => {
+        spinner.style.visibility = 'hidden';
+    }).catch(err => {
+        console.error(err);
+        spinner.style.visibility = 'hidden';
+        alert('error, check console');
     });
 }
