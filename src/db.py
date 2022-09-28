@@ -43,7 +43,6 @@ def create_tables():
                         album_artist TEXT NULL,
                         album_index INT NULL,
                         year INT NULL,
-                        last_played INT DEFAULT 0,
                         FOREIGN KEY (playlist) REFERENCES playlist(path) ON DELETE CASCADE
                     )
                     """)
@@ -63,6 +62,14 @@ def create_tables():
                         tag TEXT NOT NULL,
                         FOREIGN KEY (track) REFERENCES track(path) ON DELETE CASCADE,
                         UNIQUE (track, tag)
+                    )
+                    """)
+
+        # Like the track table but for persistent data. Unlike the regular track table, this table is not emptied at every startup.
+        conn.execute("""
+                    CREATE TABLE IF NOT EXISTS track_persistent (
+                        path TEXT NOT NULL UNIQUE PRIMARY KEY,
+                        last_played INT NOT NULL DEFAULT 0
                     )
                     """)
 

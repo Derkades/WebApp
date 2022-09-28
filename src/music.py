@@ -154,22 +154,27 @@ class Playlist:
             self.track_count = conn.execute('SELECT COUNT(*) FROM track WHERE playlist=?',
                                             (self.relpath,)).fetchone()[0]
 
-    def choose_track(self, choices=20, tag_mode=None, tags=None) -> Track:
+    def choose_track(self, tag_mode=None, tags=None) -> Track:
         """
         Randomly choose a track from this playlist directory
         Returns: Track name
         """
-        query = 'SELECT path, last_played FROM track WHERE playlist=?'
+        query = """
+                SELECT track.path, last_played
+                FROM track
+                INNER JOIN track_persistent ON track.path = track_persistent.path
+                WHERE track.playlist=?
+                """
         params = [self.relpath]
         if tag_mode == 'allow':
-            query += ' AND (' + ' OR '.join(len(tags) * ['? IN (SELECT tag FROM track_tag WHERE track = path)']) + ')'
+            query += ' AND (' + ' OR '.join(len(tags) * ['? IN (SELECT tag FROM track_tag WHERE track = track.path)']) + ')'
             params.extend(tags)
         elif tag_mode == 'deny':
-            query += ' AND (' + ' AND '.join(len(tags) * ['? NOT IN (SELECT tag FROM track_tag WHERE track = path)']) + ')'
+            query += ' AND (' + ' AND '.join(len(tags) * ['? NOT IN (SELECT tag FROM track_tag WHERE track = track.path)']) + ')'
             params.extend(tags)
 
         query += ' ORDER BY RANDOM()'
-        query += ' LIMIT ' + str(int(choices))
+        query += ' LIMIT 50'
 
         # From randomly ordered 20 tracks, choose one that was last played longest ago
         query = 'SELECT * FROM (' + query + ') ORDER BY last_played ASC LIMIT 1'
@@ -184,7 +189,7 @@ class Playlist:
                 hours_ago = (current_timestamp - last_played) / 3600
                 log.info('Chosen track: %s (last played %.2f hours ago)', track, hours_ago)
 
-            conn.execute('UPDATE track SET last_played=? WHERE path=?', (current_timestamp, track))
+            conn.execute('UPDATE track_persistent SET last_played = ? WHERE path=?', (current_timestamp, track))
 
         return Track(track)
 

@@ -23,30 +23,32 @@ def _scan_tracks(paths: List[Tuple[Path, Path]]):
     for playlist_path, track_path in paths:
         track_relpath = music.to_relpath(track_path)
         meta = metadata.probe(track_path)
-        track_insert.append((
-            track_relpath,
-            playlist_path.name,
-            meta.duration,
-            meta.title,
-            meta.album,
-            meta.album_artist,
-            meta.album_index,
-            meta.year,
-        ))
+        track_insert.append({'path': track_relpath,
+                             'playlist': playlist_path.name,
+                             'duration': meta.duration,
+                             'title': meta.title,
+                             'album': meta.album,
+                             'album_artist': meta.album_artist,
+                             'album_index': meta.album_index,
+                             'year': meta.year})
         artists = meta.artists
         if artists is not None:
             for artist in artists:
-                artist_insert.append((
-                    track_relpath,
-                    artist,
-                ))
+                artist_insert.append({'track': track_relpath,
+                                      'artist': artist})
         for tag in meta.tags:
-            tag_insert.append((
-                track_relpath,
-                tag,
-            ))
+            tag_insert.append({'track': track_relpath,
+                               'tag': tag})
 
     return track_insert, artist_insert, tag_insert
+
+# def upsert(conn, table: str, values: List[Dict[str, Any]]):
+#     keys = list(values[0].keys())
+#     query = 'INSERT INTO ' + table + ' (' + ', '.join(keys) + ') '
+#     query += 'VALUES (' + ', '.join([':' + key for key in keys]) + ') '
+#     query += 'ON CONFLICT(' + keys[0] + ') DO UPDATE '
+#     query += 'SET ' + ', '.join([f'{key}=:{key}' for key in keys[1:]])
+#     conn.executemany(query, values)
 
 def rebuild_music_database(only_playlist: Optional[str] = None):
     """
@@ -55,10 +57,10 @@ def rebuild_music_database(only_playlist: Optional[str] = None):
     """
     tracks = []
 
-    playlist_insert = []
-    track_insert = []
-    artist_insert = []
-    tag_insert = []
+    playlist_insert = [] # path, name, guest
+    track_insert = [] # path, playlist, duration, title, album_artist, album_index, year
+    artist_insert = [] # track, artist
+    tag_insert = [] # track, tag
 
     if only_playlist is not None:
         playlist_paths = [Path(settings.music_dir, only_playlist)]
@@ -79,7 +81,9 @@ def rebuild_music_database(only_playlist: Optional[str] = None):
 
         playlist_dir_name = playlist_path.name
 
-        playlist_insert.append((playlist_dir_name, playlist_name, playlist_guest))
+        playlist_insert.append({'path': playlist_dir_name,
+                                'name': playlist_name,
+                                'guest': playlist_guest})
 
         for track_path in music.scan_music(playlist_path):
             tracks.append((playlist_path, track_path))
@@ -113,16 +117,25 @@ def rebuild_music_database(only_playlist: Optional[str] = None):
         else:
             conn.execute('DELETE FROM playlist')
 
-        conn.executemany('INSERT INTO playlist VALUES (?, ?, ?)',
+        conn.executemany('INSERT INTO playlist VALUES (:path, :name, :guest)',
                          playlist_insert)
-        conn.executemany('INSERT INTO track (path, playlist, duration, title, album, album_artist, album_index, year) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-                        track_insert)
-        conn.executemany('INSERT INTO track_artist VALUES (?, ?)',
+        conn.executemany('''
+                         INSERT INTO track (path, playlist, duration, title, album, album_artist, album_index, year)
+                         VALUES (:path, :playlist, :duration, :title, :album, :album_artist, :album_index, :year)
+                         ''', track_insert)
+        conn.executemany('INSERT INTO track_artist VALUES (:track, :artist)',
                         artist_insert)
-        conn.executemany('INSERT INTO track_tag VALUES (?, ?)',
+        conn.executemany('INSERT INTO track_tag VALUES (:track, :tag)',
                         tag_insert)
 
-    log.info('Done!')
+        conn.executemany('INSERT OR IGNORE INTO track_persistent (path) VALUES (:path)', track_insert)
+
+        if only_playlist is None:
+            count = conn.execute('DELETE FROM track_persistent WHERE path NOT IN (' + (','.join(len(track_insert) * ['?'])) + ')',
+                                 [track['path'] for track in track_insert]).rowcount
+            log.info('Deleted %s tracks from persistent data', count)
+
+    log.info('Done.')
 
 if __name__ == '__main__':
     import logconfig
