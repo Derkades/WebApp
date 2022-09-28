@@ -46,15 +46,7 @@ def scan_tracks(paths: List[Tuple[Path, Path]]):
                 tag,
             ))
 
-    with db.get() as conn:
-        conn.executemany('INSERT INTO track (path, playlist, duration, title, album, album_artist, album_index, year) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-                        track_insert)
-        conn.executemany('INSERT INTO track_artist VALUES (?, ?)',
-                        artist_insert)
-        conn.executemany('INSERT INTO track_tag VALUES (?, ?)',
-                        tag_insert)
-
-    return len(paths)
+    return track_insert, artist_insert, tag_insert
 
 def rebuild_music_database():
     """
@@ -65,27 +57,25 @@ def rebuild_music_database():
 
     tracks = []
 
-    with db.get() as conn:
-        conn.execute('DELETE FROM track_artist')
-        conn.execute('DELETE FROM track_tag')
-        conn.execute('DELETE FROM track')
-        conn.execute('DELETE FROM playlist')
+    playlist_insert = []
+    track_insert = []
+    artist_insert = []
+    tag_insert = []
 
-        for playlist_path in Path(settings.music_dir).iterdir():
-            if playlist_path.name.startswith('Guest-'):
-                playlist_name = playlist_path.name[6:]
-                playlist_guest = True
-            else:
-                playlist_name = playlist_path.name
-                playlist_guest = False
+    for playlist_path in Path(settings.music_dir).iterdir():
+        if playlist_path.name.startswith('Guest-'):
+            playlist_name = playlist_path.name[6:]
+            playlist_guest = True
+        else:
+            playlist_name = playlist_path.name
+            playlist_guest = False
 
-            playlist_dir_name = playlist_path.name
+        playlist_dir_name = playlist_path.name
 
-            conn.execute('INSERT INTO playlist VALUES (?, ?, ?)',
-                    (playlist_dir_name, playlist_name, playlist_guest))
+        playlist_insert.append((playlist_dir_name, playlist_name, playlist_guest))
 
-            for track_path in music.scan_music(playlist_path):
-                tracks.append((playlist_path, track_path))
+        for track_path in music.scan_music(playlist_path):
+            tracks.append((playlist_path, track_path))
 
     chunk_size = 5 if len(tracks) < 50*settings.scanner_processes else 50
 
@@ -101,11 +91,31 @@ def rebuild_music_database():
 
     with Pool(settings.scanner_processes) as pool:
         processed = 0
-        for result in pool.imap_unordered(scan_tracks, chunks):
-            processed += result
+        for tracks, artists, tags in pool.imap_unordered(scan_tracks, chunks):
+            track_insert.extend(tracks)
+            artist_insert.extend(artists)
+            tag_insert.extend(tags)
+            processed += len(tracks)
             log.info('Scanned %s / %s', processed, len(tracks))
 
-    log.info('Done scanning tracks')
+    log.info('Done scanning tracks. Inserting into database...')
+
+    with db.get() as conn:
+        conn.execute('DELETE FROM track_artist')
+        conn.execute('DELETE FROM track_tag')
+        conn.execute('DELETE FROM track')
+        conn.execute('DELETE FROM playlist')
+
+        conn.executemany('INSERT INTO playlist VALUES (?, ?, ?)',
+                         playlist_insert)
+        conn.executemany('INSERT INTO track (path, playlist, duration, title, album, album_artist, album_index, year) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                        track_insert)
+        conn.executemany('INSERT INTO track_artist VALUES (?, ?)',
+                        artist_insert)
+        conn.executemany('INSERT INTO track_tag VALUES (?, ?)',
+                        tag_insert)
+
+    log.info('Done!')
 
 if __name__ == '__main__':
     import logconfig
