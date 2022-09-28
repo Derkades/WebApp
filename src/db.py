@@ -69,4 +69,5 @@ def create_tables():
 
 if __name__ == '__main__':
     import logconfig
+    logconfig.apply()
     create_tables()

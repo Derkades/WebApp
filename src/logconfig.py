@@ -1,20 +1,45 @@
-import logging.config
-
 import settings
 
-logging.config.dictConfig({
+
+LOGCONFIG_DICT = {
     'version': 1,
-    'formatters': {'default': {
-        'format': '[%(asctime)s] [%(process)d] [%(levelname)s] [%(module)s] %(message)s',
-    }},
-    'handlers': {'wsgi': {
-        'class': 'logging.StreamHandler',
-        'stream': 'ext://flask.logging.wsgi_errors_stream',
-        'formatter': 'default'
-    }},
+    'formatters': {
+        'default': {
+            'format': '[%(asctime)s] [%(process)d] [%(levelname)s] [%(module)s] %(message)s',
+        }
+    },
+    'handlers': {
+        'stdout': {
+            'class': 'logging.StreamHandler',
+            'stream': 'ext://sys.stdout',
+            'formatter': 'default'
+        },
+    },
+    'loggers': {
+        'app': {
+            'level': settings.log_level,
+            'handlers': ['stdout'],
+        },
+        'gunicorn.error': {
+            'level': settings.log_level,
+            'handlers': ['stdout'],
+        },
+        'gunicorn.access': {
+            'level': settings.log_level,
+            'handlers': ['stdout'],
+        },
+    },
     'root': {
         'level': settings.log_level,
-        'handlers': ['wsgi']
+        'handlers': [],
     },
-    'disable_existing_loggers': False,
-})
+    'disable_existing_loggers': True,
+}
+
+
+def apply():
+    """
+    Apply dictionary config
+    """
+    import logging.config  # pylint: disable=import-outside-toplevel
+    logging.config.dictConfig(LOGCONFIG_DICT)

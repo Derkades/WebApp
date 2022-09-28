@@ -4,7 +4,7 @@ from pathlib import Path
 import logging
 
 from PIL import Image
-import pillow_avif  # register AVIF plugin
+import pillow_avif  # register AVIF plugin - pylint: disable=unused-import
 
 import cache
 

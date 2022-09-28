@@ -14,7 +14,6 @@ import genius
 import image
 import settings
 import music
-import logconfig
 from metadata import Metadata
 from music import Track
 import musicbrainz

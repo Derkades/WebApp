@@ -109,4 +109,5 @@ def rebuild_music_database():
 
 if __name__ == '__main__':
     import logconfig
+    logconfig.apply()
     rebuild_music_database()
