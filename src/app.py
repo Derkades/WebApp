@@ -85,8 +85,6 @@ def player():
             mobile = True
 
     return render_template('player.jinja2',
-                           main_playlists=music.playlists(guest=False),
-                           guest_playlists=music.playlists(guest=True),
                            mobile=mobile)
 
 
