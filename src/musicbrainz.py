@@ -7,11 +7,13 @@ import requests
 import musicbrainzngs
 
 import cache
+import image
 
 
 musicbrainzngs.set_useragent('Super fancy music player 2.0', 0.1, 'https://github.com/DanielKoomen/WebApp')
 
 log = logging.getLogger('app.musicbrainz')
+
 
 def _search_release(title: str) -> Optional[str]:
     """
@@ -71,6 +73,11 @@ def get_cover(title: str) -> Optional[bytes]:
 
         r = requests.get(image_url)
         image_bytes = r.content
+
+        if not image.check_valid(image_bytes):
+            log.warning('Returned image seems to be corrupt')
+            return None
+
         cache_obj.store(image_bytes)
         log.info('Found suitable cover art')
         return image_bytes
