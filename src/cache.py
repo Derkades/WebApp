@@ -42,8 +42,8 @@ class CacheObject:
         if not self.data_path.exists():
             return None
 
-        with open(self.data_path, 'rb') as f:
-            data = f.read()
+        with open(self.data_path, 'rb') as data_file:
+            data = data_file.read()
 
         if not self.check_checksum(data):
             log.warning('Checksum mismatch! Deleting cache file')
@@ -56,6 +56,24 @@ class CacheObject:
 
         return data
 
+    def retrieve_overwrite_checksum(self) -> bytes:
+        """
+        Retrieve data from cache file. Checksum is ignored, instead it is updated with what it
+        should be. This function should only be used if you've just written to the file!
+        """
+        if not self.data_path.exists():
+            raise ValueError('Cache file does not exist')
+
+        with open(self.data_path, 'rb') as data_file:
+            data = data_file.read()
+
+        checksum = hashlib.sha256(data).digest()
+
+        with open(self.checksum_path, 'wb') as checksum_file:
+            checksum_file.write(checksum)
+
+        return data
+
     def retrieve_json(self):
         """
         Retrieve bytes, if exists decode and return object
@@ -65,22 +83,6 @@ class CacheObject:
             return None
         else:
             return json.loads(data.decode())
-
-    def get_checksum(self) -> bytes:
-        """
-        Compute checksum from file data
-        """
-        with open(self.data_path, 'rb',) as data_file:
-            return hashlib.sha256(data_file.read()).digest()
-
-    def update_checksum(self) -> None:
-        """
-        Calculate checksum from data file and write it to checksum file. To be used when
-        manually writing to the file, instead of using store()
-        """
-        checksum: bytes = self.get_checksum()
-        with open(self.checksum_path, 'wb') as checksum_file:
-            checksum_file.write(checksum)
 
     def check_checksum(self, data: bytes) -> bool:
         """

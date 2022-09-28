@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Iterator, Optional, Dict
+from typing import List, Iterator, Optional
 from datetime import datetime
 import subprocess
 from subprocess import CompletedProcess
@@ -130,12 +130,7 @@ class Track:
                        check=True,
                        capture_output=False)
 
-        # TODO only read data once
-        cache_object.update_checksum()
-        cached_data = cache_object.retrieve()
-
-        if cached_data is None:
-            raise ValueError("cached data should not be null, we've just written to it")
+        cached_data = cache_object.retrieve_overwrite_checksum()
 
         return cached_data
 
