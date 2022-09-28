@@ -7,59 +7,10 @@ import db
 import metadata
 import music
 import settings
-import logconfig
 
 
 log = logging.getLogger('app.scanner')
 
-
-def create_tables():
-    """
-    Initialise SQLite database with tables
-    """
-    # TODO enable strict mode after updating to newer sqlite version
-
-    with db.get() as conn:
-        conn.execute("""
-                    CREATE TABLE IF NOT EXISTS playlist (
-                        path TEXT NOT NULL UNIQUE PRIMARY KEY,
-                        name TEXT NOT NULL UNIQUE,
-                        guest INT NOT NULL
-                    )
-                    """)
-
-        conn.execute("""
-                    CREATE TABLE IF NOT EXISTS track (
-                        path TEXT NOT NULL UNIQUE PRIMARY KEY,
-                        playlist TEXT NOT NULL,
-                        duration INT NOT NULL,
-                        title TEXT NULL,
-                        album TEXT NULL,
-                        album_artist TEXT NULL,
-                        album_index INT NULL,
-                        year INT NULL,
-                        last_played INT DEFAULT 0,
-                        FOREIGN KEY (playlist) REFERENCES playlist(path) ON DELETE CASCADE
-                    )
-                    """)
-
-        conn.execute("""
-                    CREATE TABLE IF NOT EXISTS track_artist (
-                        track TEXT NOT NULL,
-                        artist TEXT NOT NULL,
-                        FOREIGN KEY (track) REFERENCES track(path) ON DELETE CASCADE,
-                        UNIQUE (track, artist)
-                    )
-                    """)
-
-        conn.execute("""
-                    CREATE TABLE IF NOT EXISTS track_tag (
-                        track TEXT NOT NULL,
-                        tag TEXT NOT NULL,
-                        FOREIGN KEY (track) REFERENCES track(path) ON DELETE CASCADE,
-                        UNIQUE (track, tag)
-                    )
-                    """)
 
 def scan_tracks(paths: List[Tuple[Path, Path]]):
     """
@@ -157,5 +108,5 @@ def rebuild_music_database():
     log.info('Done scanning tracks')
 
 if __name__ == '__main__':
-    create_tables()
+    import logconfig
     rebuild_music_database()
