@@ -19,9 +19,9 @@ from music import Track
 import musicbrainz
 
 
-application = Flask(__name__, template_folder='templates')
-babel = Babel(application)
-flask_assets.Environment(application)
+app = Flask(__name__, template_folder='templates')
+babel = Babel(app)
+flask_assets.Environment(app)
 assets = Assets()
 log = logging.getLogger('app')
 assets_dir = Path('static')
@@ -49,7 +49,7 @@ def check_password_cookie() -> bool:
     return check_password(request.cookies.get('password'))
 
 
-@application.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     """
     Login route. Serve login page for GET requests, and accepts password input for POST requests.
@@ -71,7 +71,7 @@ def login():
         return render_template('login.jinja2', invalid_password=False)
 
 
-@application.route('/')
+@app.route('/')
 def player():
     """
     Main player page. Serves player.jinja2 template file.
@@ -92,7 +92,7 @@ def player():
                            mobile=mobile)
 
 
-@application.route('/choose_track', methods=['GET'])
+@app.route('/choose_track', methods=['GET'])
 def choose_track():
     """
     Choose random track from the provided playlist directory.
@@ -111,7 +111,7 @@ def choose_track():
     }
 
 
-@application.route('/get_track')
+@app.route('/get_track')
 def get_track() -> Response:
     """
     Get transcoded audio for the given track path.
@@ -148,7 +148,7 @@ def get_cover_bytes(meta: Metadata) -> Optional[bytes]:
     log.info('No suitable cover found')
     return None
 
-@application.route('/get_album_cover')
+@app.route('/get_album_cover')
 def get_album_cover() -> Response:
     """
     Get album cover image for the provided track path.
@@ -171,7 +171,7 @@ def get_album_cover() -> Response:
     return Response(comp_bytes, mimetype=img_format)
 
 
-@application.route('/get_lyrics')
+@app.route('/get_lyrics')
 def get_lyrics():
     """
     Get lyrics for the provided track path.
@@ -194,7 +194,7 @@ def get_lyrics():
     return {'found': False}
 
 
-@application.route('/ytdl', methods=['POST'])
+@app.route('/ytdl', methods=['POST'])
 def ytdl():
     """
     Use yt-dlp to download the provided URL to a playlist directory
@@ -217,7 +217,7 @@ def ytdl():
     }
 
 
-@application.route('/track_list')
+@app.route('/track_list')
 def track_list():
     """
     Return list of playlists and tracks. If it takes too long to load metadata for all tracks,
@@ -263,7 +263,7 @@ def track_list():
     return response
 
 
-@application.route('/raphson')
+@app.route('/raphson')
 def raphson() -> Response:
     """
     Serve raphson logo image
