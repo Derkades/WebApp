@@ -23,6 +23,7 @@ function syncCookiesWithInputs() {
         'settings-audio-quality',
         'settings-volume',
         'settings-queue-removal-behaviour',
+        'settings-theme',
     ].forEach(syncCookieWithInput);
 }
 
@@ -72,4 +73,15 @@ function youTubeDownload(event) {
         spinner.style.visibility = 'hidden';
         alert('error, check console');
     });
+}
+
+function applyTheme() {
+    const select = document.getElementById('settings-theme');
+    if (select.value === 'dark') {
+        document.getElementsByTagName('body')[0].classList.remove('light');
+    } else if (select.value === 'light') {
+        document.getElementsByTagName('body')[0].classList.add('light');
+    } else {
+        console.warn('unexpected theme setting: ' + select.value)
+    }
 }

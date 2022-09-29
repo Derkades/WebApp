@@ -16,6 +16,7 @@ const state = {
 
 document.addEventListener("DOMContentLoaded", () => {
     syncCookiesWithInputs();
+    applyTheme();
 
     // Playback controls
     document.getElementById('button-skip-previous').addEventListener('click', previous);
@@ -41,7 +42,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Settings overlay
     document.getElementById('youtube-dl-submit').addEventListener('click', youTubeDownload);
-    document.getElementById('settings-queue-size').addEventListener('input', () => updateQueue());
+    document.getElementById('settings-queue-size').addEventListener('input', updateQueue);
+    document.getElementById('settings-theme').addEventListener('input', applyTheme)
 
     // Queue overlay
     document.getElementById('track-list-playlist').addEventListener('input', searchTrackList);
