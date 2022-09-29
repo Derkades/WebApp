@@ -20,7 +20,13 @@ function updateTagCheckboxes() {
         newChildren.push(checkbox);
         const label = document.createElement('label');
         label.htmlFor = checkbox.id;
-        label.textContent = tag;
+        const link = document.createElement('a');
+        link.textContent = tag;
+        link.onclick = event => {
+            event.preventDefault();
+            browse.browseTag(tag);
+        };
+        label.appendChild(link);
         newChildren.push(label);
         newChildren.push(document.createElement('br'));
         i++;

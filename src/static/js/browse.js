@@ -27,27 +27,14 @@ const browse = {
         browse.setContent([browse.generateTrackList(tracks)]);
     },
     browseArtist: artistName => {
-        browse.browse(artistName, track => {
-            if (track.artists === null) {
-                return false;
-            }
-            for (const artist of track.artists) {
-                if (artist === artistName) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        );
+        browse.browse(artistName, track => track.artists !== null && track.artists.indexOf(artist) !== 0);
     },
     browseAlbum: (albumName, albumArtistName) => {
-        let title;
-        if (albumArtistName === null) {
-            title = albumName
-        } else {
-            title = albumArtistName + ' - ' + albumName;
-        }
+        const title = albumArtistName === null ? albumName : albumArtistName + ' - ' + albumName;
         browse.browse(title, track => track.album === albumName);
+    },
+    browseTag: (tagName) => {
+        browse.browse(tagName, track => track.tags.indexOf(tagName) !== -1)
     },
     generateTrackList: tracks => {
         // TODO two buttons, top of queue bottom of queue
