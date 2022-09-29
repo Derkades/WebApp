@@ -27,7 +27,7 @@ const browse = {
         browse.setContent([browse.generateTrackList(tracks)]);
     },
     browseArtist: artistName => {
-        browse.browse(artistName, track => track.artists !== null && track.artists.indexOf(artist) !== 0);
+        browse.browse(artistName, track => track.artists !== null && track.artists.indexOf(artistName) !== -1);
     },
     browseAlbum: (albumName, albumArtistName) => {
         const title = albumArtistName === null ? albumName : albumArtistName + ' - ' + albumName;
