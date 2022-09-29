@@ -3,7 +3,7 @@ const state = {
     current: null,
     history: [],
     queueBusy: false,
-    historySize: 10,
+    historySize: 20,
     maxTrackListSize: 500,
     lastChosenPlaylist: null,
     playlistOverrides: [],
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Settings overlay
     document.getElementById('youtube-dl-submit').addEventListener('click', youTubeDownload);
     document.getElementById('settings-queue-size').addEventListener('input', updateQueue);
-    document.getElementById('settings-theme').addEventListener('input', applyTheme)
+    document.getElementById('settings-theme').addEventListener('input', applyTheme);
 
     // Queue overlay
     document.getElementById('track-list-playlist').addEventListener('input', searchTrackList);
