@@ -17,6 +17,7 @@ const state = {
 document.addEventListener("DOMContentLoaded", () => {
     syncCookiesWithInputs();
     applyTheme();
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
 
     // Playback controls
     document.getElementById('button-skip-previous').addEventListener('click', previous);
