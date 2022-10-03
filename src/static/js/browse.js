@@ -37,7 +37,6 @@ const browse = {
         browse.browse(tagName, track => track.tags.indexOf(tagName) !== -1)
     },
     generateTrackList: tracks => {
-        // TODO two buttons, top of queue bottom of queue
         const table = document.createElement('table');
         table.classList.add('track-list-table');
         const headerRow = document.createElement('tr');

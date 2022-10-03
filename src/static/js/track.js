@@ -43,6 +43,7 @@ function updateLocalTrackList() {
 }
 
 async function scanPlaylist(playlist) {
+    // TODO POST request
     const response = await fetch('/scan_music?playlist=' + encodeURIComponent(playlist))
     checkResponseCode(response);
 }

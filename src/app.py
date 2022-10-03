@@ -277,6 +277,15 @@ def scan_music():
     return Response(None, 200)
 
 
+@app.route('/update_metadata', methods=['POST'])
+def update_metadata():
+    if not check_password_cookie():
+        return Response(403)
+
+    print(request.get_json())
+    return Response(None, 200)
+
+
 @app.route('/raphson')
 def raphson() -> Response:
     """

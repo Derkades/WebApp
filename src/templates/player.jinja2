@@ -74,6 +74,9 @@
 
                 {{ icon_button('open-dialog-settings', 'gear') }}
                 {{ icon_button('open-dialog-tags', 'tag-multiple') }}
+                {# TODO pencil icon #}
+                {# {{ icon_button('open-dialog-editor', 'gear') }} #}
+                <button onclick="editor.open()">edit</button>
 
                 {% if mobile %}
                     {# 'data-restore=false' ensures volume is not overwritten from cookie #}
@@ -225,6 +228,36 @@
         <div class="box-rounded box-solid">
             {{ dialog_header('placeholder') }}
             <div id="browse-content" class="scroll"></div>
+        </div>
+    </div>
+
+    <div id="dialog-editor" class="full-page-overlay dialog-overlay">
+        <div class="box-rounded box-solid">
+            {{ dialog_header(gettext('Metadata editor')) }}
+            <div id="editor-content" class="scroll">
+                <div>
+                    <input type="text" id="editor-title" value="">
+                    <label for="editor-title">{% trans %}Title{% endtrans %}</label>
+                </div>
+                <div>
+                    <input type="text" id="editor-album" value="">
+                    <label for="editor-album">{% trans %}Album{% endtrans %}</label>
+                </div>
+                <div>
+                    <input type="text" id="editor-artists" value="">
+                    <label for="editor-artists">{% trans %}Artists{% endtrans %}</label>
+                </div>
+                <div>
+                    <input type="text" id="editor-album-artist" value="">
+                    <label for="editor-album-artist">{% trans %}Album artist{% endtrans %}</label>
+                </div>
+                <div>
+                    <input type="text" id="editor-tags" value="">
+                    <label for="editor-album-tags">{% trans %}Tags{% endtrans %}</label>
+                </div>
+
+                <button onclick="editor.save()">Save</button>
+            </div>
         </div>
     </div>
 
