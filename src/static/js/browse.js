@@ -44,22 +44,30 @@ const browse = {
         table.appendChild(headerRow);
         const hcolPlaylist = document.createElement('th');
         const hcolTitle = document.createElement('th');
-        const hcolAdd = document.createElement('th');
-        headerRow.replaceChildren(hcolPlaylist, hcolTitle, hcolAdd);
+        const hcolAddTop = document.createElement('th');
+        const hcolAddBottom = document.createElement('th');
+        headerRow.replaceChildren(hcolPlaylist, hcolTitle, hcolAddTop, hcolAddBottom);
 
         let i = 0;
         for (const track of tracks) {
-            const dataRow = document.createElement('tr');
             const colPlaylist = document.createElement('td');
             colPlaylist.textContent = track.playlist;
+
             const colTitle = document.createElement('td');
             colTitle.replaceChildren(getTrackDisplayHtml(track));
-            const colAdd = document.createElement('td');
-            const addButton = document.createElement('button'); // TODO icon button
-            addButton.textContent = 'Enqueue'
-            addButton.onclick = () => downloadAndAddToQueue(track, true);
-            colAdd.replaceChildren(addButton);
-            dataRow.replaceChildren(colPlaylist, colTitle, colAdd);
+
+            const colAddTop = document.createElement('td');
+            const addTopButton = createIconButton('playlist-plus-top.png');
+            addTopButton.onclick = () => downloadAndAddToQueue(track, true);
+            colAddTop.replaceChildren(addTopButton);
+
+            const colAddBottom = document.createElement('td');
+            const addButton = createIconButton('playlist-plus.svg');
+            colAddBottom.onclick = () => downloadAndAddToQueue(track);
+            colAddBottom.replaceChildren(addButton);
+
+            const dataRow = document.createElement('tr');
+            dataRow.replaceChildren(colPlaylist, colTitle, colAddTop, colAddBottom);
             table.appendChild(dataRow);
             if (i++ > state.maxTrackListSize) {
                 break;

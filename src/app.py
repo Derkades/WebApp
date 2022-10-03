@@ -8,7 +8,6 @@ from flask import Flask, request, render_template, Response, redirect
 import flask_assets
 from flask_babel import Babel
 
-from assets import Assets
 import bing
 import genius
 import image
@@ -23,7 +22,6 @@ import settings
 app = Flask(__name__, template_folder='templates')
 babel = Babel(app)
 flask_assets.Environment(app)
-assets = Assets()
 log = logging.getLogger('app')
 assets_dir = Path('static')
 raphson_png_path = Path(assets_dir, 'raphson.png')
@@ -89,7 +87,6 @@ def player():
     return render_template('player.jinja2',
                            main_playlists=music.playlists(guest=False),
                            guest_playlists=music.playlists(guest=True),
-                           assets=assets.all_assets_dict(),
                            mobile=mobile)
 
 

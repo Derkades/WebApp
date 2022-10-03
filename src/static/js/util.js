@@ -1,3 +1,13 @@
+function createIconButton(iconName) {
+    const button = document.createElement('button');
+    button.classList.add('icon-button');
+    const icon = document.createElement('div');
+    icon.classList.add('icon');
+    icon.style.backgroundImage = "url('/static/icon/" + iconName + "')";
+    button.appendChild(icon);
+    return button;
+}
+
 function choice(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
 }

@@ -1,12 +1,12 @@
 {% macro icon_button(id, icon) %}
     <button id="{{ id }}" class="icon-button">
-        <div class="icon" style="background-image: url('{{ assets[icon + '.svg'] }}')"></div>
+        <div class="icon" style="background-image: url('/static/icon/{{icon}}.svg')"></div>
     </button>
 {% endmacro %}
 
 {% macro dialog_close_button() %}
     <button class="dialog-close-button icon-button">
-        <div class="icon" style="background-image: url('{{ assets['close.svg'] }}')"></div>
+        <div class="icon" style="background-image: url('/static/icon/close.svg')"></div>
     </button>
 {% endmacro %}
 
@@ -69,9 +69,7 @@
                 </div>
 
                 {% for button_name in ['skip-previous', 'rewind-15', 'play', 'pause', 'fast-forward-15', 'skip-next', 'microphone', 'album'] %}
-                    <button id="button-{{ button_name }}" class="icon-button">
-                        <div class="icon" style="background-image: url('{{ assets[button_name + '.svg'] }}')"></div>
-                    </button>
+                    {{ icon_button('button-' + button_name, button_name) }}
                 {% endfor %}
 
                 {{ icon_button('open-dialog-settings', 'gear') }}
@@ -244,9 +242,6 @@
     </div>
 
     <div class="vignette"></div>
-
-    {# A "variable" to be used by javascript #}
-    <span id="delete-base64" style="display: none">{{ assets['delete.svg'] }}</span>
 
     {% assets "js/*.js", filters="jsmin", output="gen/packed.js" %}
         <script src="{{ ASSET_URL }}"></script>

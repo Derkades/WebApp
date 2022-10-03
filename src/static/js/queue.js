@@ -148,8 +148,6 @@ function updateQueueHtml() {
 
     document.getElementById('current-queue-size').textContent = state.queue.length + ' - ' + secondsToString(totalQueueDuration);
 
-    const trashBase64 = document.getElementById('delete-base64').innerText;
-
     const rows = [];
     let i = 0;
     for (const queuedTrack of state.queue) {
@@ -160,10 +158,10 @@ function updateQueueHtml() {
         tdCover.onclick = () => removeFromQueue(rememberI);
         const deleteOverlay = document.createElement('div');
         deleteOverlay.classList.add('delete-overlay');
-        const trashDiv = document.createElement('div');
-        trashDiv.style.backgroundImage = "url('" + trashBase64 + "')";
-        trashDiv.classList.add('icon');
-        deleteOverlay.appendChild(trashDiv);
+        const deleteDiv = document.createElement('div');
+        deleteDiv.style.backgroundImage = "url('/static/icon/delete.svg')";
+        deleteDiv.classList.add('icon');
+        deleteOverlay.appendChild(deleteDiv);
         tdCover.appendChild(deleteOverlay);
 
         const tdPlaylist = document.createElement('td');
