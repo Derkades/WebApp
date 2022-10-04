@@ -62,11 +62,14 @@ function getTrackDisplayHtml(track) {
 
         html.append(' - ');
 
-        const titleHtml = document.createElement('a');
-        titleHtml.textContent = track.title;
+        let titleHtml;
         if (track.album !== null) {
+            titleHtml = document.createElement('a');;
             titleHtml.onclick = () => browse.browseAlbum(track.album, track.album_artist);
+        } else {
+            titleHtml = document.createElement('span');
         }
+        titleHtml.textContent = track.title;
         html.append(titleHtml);
 
         if (track.year !== null) {
