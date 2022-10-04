@@ -10,10 +10,7 @@ const browse = {
         document.getElementById('browse-content').replaceChildren(...children);
     },
     open: () => {
-        for (const dialog of document.getElementsByClassName('dialog-overlay')) {
-            dialog.style.display = 'none';
-        }
-        document.getElementById('dialog-browse').style.display = 'flex';
+        dialog.open('dialog-browse');
     },
     browse: (title, filterFunc) => {
         browse.open();

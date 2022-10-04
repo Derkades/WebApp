@@ -50,24 +50,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('track-list-playlist').addEventListener('input', searchTrackList);
     document.getElementById('track-list-query').addEventListener('input', searchTrackList);
 
-    // Dialog open buttons
-    for (const elem of document.getElementsByClassName('dialog-overlay')) {
-        const openButton = document.getElementById('open-' + elem.id);
-        if (openButton === null) {
-            console.warn('Dialog ' + elem.id + ' has no open button');
-            continue;
-        }
-        openButton.addEventListener('click', () => elem.style.display = 'flex');
-    };
-
-    // Dialog close buttons
-    for (const elem of document.getElementsByClassName('dialog-close-button')) {
-        elem.addEventListener('click', () => {
-            for (const elem of document.getElementsByClassName('dialog-overlay')) {
-                elem.style.display = 'none';
-            }
-        });
-    }
+    // Dialogs
+    dialog.registerEvents();
 
     // Hotkeys
     document.addEventListener('keydown', event => handleKey(event.key));

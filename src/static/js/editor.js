@@ -9,7 +9,7 @@ const editor = {
         document.getElementById('editor-album-artist').value = track.album_artist;
         document.getElementById('editor-tags').value = track.tags.join('/');
 
-        document.getElementById('dialog-editor').style.display = 'flex';
+        dialog.open('dialog-editor');
     },
     getValue: (id, list = false) => {
         let value = document.getElementById(id).value;
@@ -39,7 +39,8 @@ const editor = {
         );
         checkResponseCode(response);
 
-        document.getElementById('dialog-editor').style.display = 'none';
+        dialog.close('dialog-editor');
+
         alert('Saved!');
     },
 };
