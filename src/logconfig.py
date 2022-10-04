@@ -5,7 +5,8 @@ LOGCONFIG_DICT = {
     'version': 1,
     'formatters': {
         'default': {
-            'format': '[%(asctime)s] [%(process)d] [%(levelname)s] [%(module)s] %(message)s',
+            'format': '%(asctime)s [%(process)d] [%(levelname)s] [%(module)s] %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S %Z',
         }
     },
     'handlers': {
