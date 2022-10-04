@@ -64,7 +64,7 @@ const browse = {
             colAddBottom.replaceChildren(addButton);
 
             const colEdit = document.createElement('td');
-            const editButton = createIconButton('gear.svg'); // TODO pencil icon
+            const editButton = createIconButton('pencil.svg');
             editButton.onclick = () => editor.open(track);
             colEdit.replaceChildren(editButton);
 

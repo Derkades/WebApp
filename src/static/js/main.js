@@ -50,6 +50,14 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('track-list-playlist').addEventListener('input', searchTrackList);
     document.getElementById('track-list-query').addEventListener('input', searchTrackList);
 
+    // Editor
+    document.getElementById('button-edit').addEventListener('click', () => {
+        if (state.current !== null) {
+            editor.open(state.current);
+        }
+    });
+    document.getElementById('editor-save').addEventListener('click', editor.save);
+
     // Dialogs
     dialog.registerEvents();
 

@@ -1,8 +1,8 @@
 const editor = {
     currentlyEditingPath: null,
     open: (track) => {
-        if (track === undefined) {
-            track = state.current;
+        if (track == null) {
+            throw new Error('Track is null');
         }
         editor.currentlyEditingPath = track.path;
         document.getElementById('editor-title').value = track.title;
