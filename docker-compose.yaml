@@ -19,3 +19,4 @@ services:
     user: "1000"
     environment:
       MUSIC_WEB_PASSWORD: 1234
+      TZ: Europe/Amsterdam
