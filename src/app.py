@@ -279,10 +279,23 @@ def scan_music():
 
 @app.route('/update_metadata', methods=['POST'])
 def update_metadata():
+    """
+    Endpoint to update track metadata
+    """
     if not check_password_cookie():
         return Response(403)
 
-    print(request.get_json())
+    payload = request.get_json()
+    track = Track(payload['path'])
+    meta_dict = {
+        'title': payload['metadata']['title'],
+        'album': payload['metadata']['album'],
+        'artist': '/'.join(payload['metadata']['artists']),
+        'album_artist': payload['metadata']['album_artist'],
+        'genre': '/'.join(payload['metadata']['tags']),
+    }
+    track.write_metadata(meta_dict)
+
     return Response(None, 200)
 
 

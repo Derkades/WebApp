@@ -1,9 +1,11 @@
 from pathlib import Path
-from typing import List, Iterator, Optional
+from typing import List, Iterator, Optional, Dict
 from datetime import datetime
 import subprocess
 from subprocess import CompletedProcess
 import logging
+import tempfile
+import shutil
 
 import cache
 import db
@@ -125,14 +127,32 @@ class Track:
                 '-frame_duration', '60',
                 '-ac', str(channels),
                 cache_object.data_path.absolute().as_posix()]
-        subprocess.run(command,
-                       shell=False,
-                       check=True,
-                       capture_output=False)
+        subprocess.run(command, shell=False, check=True, capture_output=False)
 
         cached_data = cache_object.retrieve_overwrite_checksum()
 
         return cached_data
+
+    def write_metadata(self, meta_dict: Dict[str, str]):
+        """
+        Write metadata to file
+        """
+        with tempfile.NamedTemporaryFile() as temp_file:
+            command = [
+                'ffmpeg',
+                '-y',
+                '-hide_banner',
+                '-i', self.path.absolute().as_posix(),
+                '-codec', 'copy',
+            ]
+            for key, value in meta_dict.items():
+                command.extend(('-metadata', key + '=' + ('' if value is None else value)))
+            command.extend(('-f', self.path.name.split('.')[-1]))
+            command.append(temp_file.name)
+
+            log.info('Writing metadata: %s', str(command))
+            subprocess.run(command, shell=False, check=True, capture_output=False)
+            shutil.copy(temp_file.name, self.path)
 
     @staticmethod
     def by_relpath(relpath: str) -> 'Track':

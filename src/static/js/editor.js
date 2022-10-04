@@ -1,8 +1,10 @@
 const editor = {
+    currentlyEditingPath: null,
     open: (track) => {
         if (track === undefined) {
             track = state.current;
         }
+        editor.currentlyEditingPath = track.path;
         document.getElementById('editor-title').value = track.title;
         document.getElementById('editor-album').value = track.album;
         document.getElementById('editor-artists').value = track.artists !== null ? track.artists.join('/') : '';
@@ -18,7 +20,7 @@ const editor = {
             for (let i = 0; i < list.length; i++) {
                 list[i] = list[i].trim();
             }
-            return list;
+            return list
         } else {
             value = value.trim();
             return value === '' ? null : value;
@@ -26,12 +28,17 @@ const editor = {
     },
     save: async function() {
         const payload = {
-            title: editor.getValue('editor-title'),
-            album: editor.getValue('editor-album'),
-            artists: editor.getValue('editor-artists', true),
-            album_artist: editor.getValue('editor-album-artist'),
-            tags: editor.getValue('editor-tags', true),
+            path: editor.currentlyEditingPath,
+                metadata: {
+                title: editor.getValue('editor-title'),
+                album: editor.getValue('editor-album'),
+                artists: editor.getValue('editor-artists', true),
+                album_artist: editor.getValue('editor-album-artist'),
+                tags: editor.getValue('editor-tags', true),
+            }
         }
+
+        editor.currentlyEditingPath = null;
 
         const response = await fetch(
             '/update_metadata',
@@ -41,6 +48,6 @@ const editor = {
 
         dialog.close('dialog-editor');
 
-        alert('Saved!');
+        alert('Saved! Please note that new metadata is only written to disk and not updated in the app yet.');
     },
 };
