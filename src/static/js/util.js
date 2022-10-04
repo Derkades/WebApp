@@ -1,9 +1,12 @@
-function createIconButton(iconName) {
+function createIconButton(iconName, classes) {
     const button = document.createElement('button');
     button.classList.add('icon-button');
     const icon = document.createElement('div');
     icon.classList.add('icon');
     icon.style.backgroundImage = "url('/static/icon/" + iconName + "')";
+    if (classes !== undefined) {
+        icon.classList.add(...classes);
+    }
     button.appendChild(icon);
     return button;
 }

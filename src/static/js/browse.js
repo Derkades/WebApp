@@ -54,7 +54,7 @@ const browse = {
             colTitle.replaceChildren(getTrackDisplayHtml(track));
 
             const colAddTop = document.createElement('td');
-            const addTopButton = createIconButton('playlist-plus-top.svg');
+            const addTopButton = createIconButton('playlist-plus.svg', ['vflip']);
             addTopButton.onclick = () => downloadAndAddToQueue(track, true);
             colAddTop.replaceChildren(addTopButton);
 
