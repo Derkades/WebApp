@@ -30,6 +30,7 @@ const editor = {
             album: editor.getValue('editor-album'),
             artists: editor.getValue('editor-artists', true),
             album_artist: editor.getValue('editor-album-artist'),
+            tags: editor.getValue('editor-tags', true),
         }
 
         const response = await fetch(
@@ -37,6 +38,8 @@ const editor = {
             {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)}
         );
         checkResponseCode(response);
-        alert('saving not implemented yet');
+
+        document.getElementById('dialog-editor').style.display = 'none';
+        alert('Saved!');
     },
 };

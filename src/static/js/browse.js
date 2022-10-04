@@ -45,7 +45,8 @@ const browse = {
         const hcolTitle = document.createElement('th');
         const hcolAddTop = document.createElement('th');
         const hcolAddBottom = document.createElement('th');
-        headerRow.replaceChildren(hcolPlaylist, hcolTitle, hcolAddTop, hcolAddBottom);
+        const hcolEdit = document.createElement('th')
+        headerRow.replaceChildren(hcolPlaylist, hcolTitle, hcolAddTop, hcolAddBottom, hcolEdit);
 
         let i = 0;
         for (const track of tracks) {
@@ -62,11 +63,16 @@ const browse = {
 
             const colAddBottom = document.createElement('td');
             const addButton = createIconButton('playlist-plus.svg');
-            colAddBottom.onclick = () => downloadAndAddToQueue(track);
+            addButton.onclick = () => downloadAndAddToQueue(track);
             colAddBottom.replaceChildren(addButton);
 
+            const colEdit = document.createElement('td');
+            const editButton = createIconButton('gear.svg'); // TODO pencil icon
+            editButton.onclick = () => editor.open(track);
+            colEdit.replaceChildren(editButton);
+
             const dataRow = document.createElement('tr');
-            dataRow.replaceChildren(colPlaylist, colTitle, colAddTop, colAddBottom);
+            dataRow.replaceChildren(colPlaylist, colTitle, colAddTop, colAddBottom, colEdit);
             table.appendChild(dataRow);
             if (i++ > state.maxTrackListSize) {
                 break;
