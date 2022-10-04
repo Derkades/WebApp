@@ -509,6 +509,12 @@ body.light .full-page-overlay .box-solid {
     transform: scaleY(-1);
 }
 
+#visualiser {
+    position: absolute;
+    bottom: 0;
+    z-index: 1;
+}
+
 /* Firefox scrollbars look good by default, style Chromium scrollbars so they look similar */
 
 ::-webkit-scrollbar {

@@ -1,4 +1,5 @@
 const dialog = {
+    baseIndex: 100,
     openDialogs: [],
     registerEvents: () => {
         // Dialog open buttons
@@ -34,12 +35,12 @@ const dialog = {
             let i = 1;
             for (const openDialog of newOpenDialogs) {
                 console.log(openDialog);
-                document.getElementById(openDialog).style.zIndex = i++;
+                document.getElementById(openDialog).style.zIndex = dialog.baseIndex + i++;
             }
             dialog.openDialogs = newOpenDialogs;
         } else {
             dialog.openDialogs.push(idToOpen);
-            dialogToOpen.style.zIndex = dialog.openDialogs.length;
+            dialogToOpen.style.zIndex = dialog.baseIndex + dialog.openDialogs.length;
             dialogToOpen.classList.remove('hidden');
         }
     },
@@ -50,7 +51,7 @@ const dialog = {
                 document.getElementById(id).classList.add('hidden');
             } else {
                 newOpenDialogs.push(id);
-                document.getElementById(id).style.zIndex = newOpenDialogs.length;
+                document.getElementById(id).style.zIndex = dialog.baseIndex + newOpenDialogs.length;
             }
         }
         dialog.openDialogs = newOpenDialogs;
