@@ -113,7 +113,7 @@
 
     <div id="audio"></div>
 
-    <div id="dialog-queue" class="full-page-overlay dialog-overlay">
+    <div id="dialog-queue" class="full-page-overlay hidden dialog-overlay">
         <div class="box-rounded box-solid">
             {{ dialog_header('dialog-queue', gettext('Add track to queue')) }}
 
@@ -131,7 +131,7 @@
         </div>
     </div>
 
-    <div id="dialog-settings" class="full-page-overlay dialog-overlay">
+    <div id="dialog-settings" class="full-page-overlay hidden dialog-overlay">
         <div class="box-rounded box-solid">
             {{ dialog_header('dialog-settings', gettext('Settings')) }}
             <div class="scroll">
@@ -210,7 +210,7 @@
         </div>
     </div>
 
-    <div id="dialog-tags" class="full-page-overlay dialog-overlay">
+    <div id="dialog-tags" class="full-page-overlay hidden dialog-overlay">
         <div class="box-rounded box-solid">
             {{ dialog_header('dialog-tags', gettext('Tags')) }}
 
@@ -224,14 +224,14 @@
         </div>
     </div>
 
-    <div id="dialog-browse" class="full-page-overlay dialog-overlay">
+    <div id="dialog-browse" class="full-page-overlay hidden dialog-overlay">
         <div class="box-rounded box-solid">
             {{ dialog_header('dialog-browse', 'placeholder') }}
             <div id="browse-content" class="scroll"></div>
         </div>
     </div>
 
-    <div id="dialog-editor" class="full-page-overlay dialog-overlay">
+    <div id="dialog-editor" class="full-page-overlay hidden dialog-overlay">
         <div class="box-rounded box-solid">
             {{ dialog_header('dialog-editor', gettext('Metadata editor')) }}
             <div id="editor-content" class="scroll">
@@ -256,7 +256,9 @@
                     <label for="editor-album-tags">{% trans %}Tags{% endtrans %}</label>
                 </div>
 
-                <button onclick="editor.save()">Save</button>
+                <button onclick="editor.save()" id="editor-save">Save</button>
+                <p id="editor-writing" class="hidden">{% trans %}Writing metadata...{% endtrans %}</p>
+                <p id="editor-reloading" class="hidden">{% trans %}Reloading tracks...{% endtrans %}</p>
             </div>
         </div>
     </div>

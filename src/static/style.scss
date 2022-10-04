@@ -421,10 +421,11 @@ h4 > .icon {
     left: 0;
     height: 100vh;
     width: 100vw;
-    display: none;
+    display: flex;
     justify-content: center;
     align-items: center;
     backdrop-filter: blur(2rem);
+    pointer-events: none; // Allow closing dialogs behind top dialog
 }
 
 .full-page-overlay .box-solid {
@@ -436,9 +437,10 @@ h4 > .icon {
     min-height: 60vh;
     max-height: 90vh;
     margin: 1.5rem;
-    /* prevent children from overflowing parent */
+    // prevent children from overflowing parent
     display: flex;
     flex-direction: column;
+    pointer-events: initial; // Re-enable click events for the actual box
 }
 
 body.light .full-page-overlay .box-solid {
@@ -450,7 +452,6 @@ body.light .full-page-overlay .box-solid {
 }
 
 #loading-overlay {
-    display: flex;
     background-color: #171717;
     transition: opacity .5s;
 }
@@ -498,6 +499,10 @@ body.light .full-page-overlay .box-solid {
 
 .track-list-table td:nth-child(2) {
     text-align: left;
+}
+
+.hidden {
+    display: none;
 }
 
 /* Firefox scrollbars look good by default, style Chromium scrollbars so they look similar */

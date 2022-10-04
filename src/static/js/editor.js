@@ -40,14 +40,23 @@ const editor = {
 
         editor.currentlyEditingPath = null;
 
+        document.getElementById('editor-save').classList.add("hidden");
+        document.getElementById('editor-writing').classList.remove("hidden");
+
         const response = await fetch(
             '/update_metadata',
             {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)}
         );
         checkResponseCode(response);
 
-        dialog.close('dialog-editor');
+        document.getElementById('editor-writing').classList.add('hidden');
+        document.getElementById('editor-reloading').classList.remove('hidden');
 
-        alert('Saved! Please note that new metadata is only written to disk and not updated in the app yet.');
+        await updateLocalTrackList();
+
+        document.getElementById('editor-reloading').classList.add('hidden');
+        document.getElementById('editor-save').classList.remove('hidden');
+
+        dialog.close('dialog-editor');
     },
 };

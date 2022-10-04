@@ -6,7 +6,7 @@ function hideLoadingOverlay() {
     const overlay = document.getElementById('loading-overlay');
     overlay.style.opacity = 0;
     setTimeout(() => {
-        overlay.style.display = 'none';
+        overlay.classList.add('hidden');
     }, 500);
 }
 

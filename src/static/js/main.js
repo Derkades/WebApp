@@ -70,6 +70,10 @@ document.addEventListener("DOMContentLoaded", () => {
     next();
     setInterval(updateMediaSession, 500);
     setInterval(updateMediaSessionPosition, 5000);
-    updateLocalTrackList();
+    updateLocalTrackList().catch(err => {
+        console.warn('track list | error');
+        console.warn(err);
+        setTimeout(updateLocalTrackList, 1000);
+    });
     searchTrackList();
 });

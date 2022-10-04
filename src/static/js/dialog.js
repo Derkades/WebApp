@@ -40,14 +40,14 @@ const dialog = {
         } else {
             dialog.openDialogs.push(idToOpen);
             dialogToOpen.style.zIndex = dialog.openDialogs.length;
-            dialogToOpen.style.display = 'flex';
+            dialogToOpen.classList.remove('hidden');
         }
     },
     close: (idToClose) => {
         const newOpenDialogs = [];
         for (const id of dialog.openDialogs) {
             if (idToClose === id) {
-                document.getElementById(id).style.display = 'none';
+                document.getElementById(id).classList.add('hidden');
             } else {
                 newOpenDialogs.push(id);
                 document.getElementById(id).style.zIndex = newOpenDialogs.length;

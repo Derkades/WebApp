@@ -7,39 +7,33 @@ function findTrackByPath(path) {
     return null;
 }
 
-function updateLocalTrackList() {
+async function updateLocalTrackList() {
     console.info('Requesting track list');
-    (async function() {
-        const response = await fetch('/track_list');
-        const json = await response.json();
+    const response = await fetch('/track_list');
+    const json = await response.json();
 
-        state.playlists = json.playlists;
-        state.mainPlaylists = [];
-        state.guestPlaylists = [];
-        for (const dir_name in state.playlists) {
-            // TODO sort alphabetically by display name
-            const playlist = state.playlists[dir_name];
-            if (playlist.guest) {
-                state.guestPlaylists.push(playlist);
-            } else {
-                state.mainPlaylists.push(playlist);
-            }
+    state.playlists = json.playlists;
+    state.mainPlaylists = [];
+    state.guestPlaylists = [];
+    for (const dir_name in state.playlists) {
+        // TODO sort alphabetically by display name
+        const playlist = state.playlists[dir_name];
+        if (playlist.guest) {
+            state.guestPlaylists.push(playlist);
+        } else {
+            state.mainPlaylists.push(playlist);
         }
+    }
 
-        state.tracks = json.tracks;
+    state.tracks = json.tracks;
 
-        hideLoadingOverlay();
+    hideLoadingOverlay();
 
-        // Update HTML depending on state.playlists and state.tracks
-        updatePlaylistCheckboxHtml();
-        searchTrackList();
-        createPlaylistDropdowns();
-        updateTagCheckboxes();
-    })().catch(err => {
-        console.warn('track list | error');
-        console.warn(err);
-        setTimeout(updateLocalTrackList, 1000);
-    });
+    // Update HTML depending on state.playlists and state.tracks
+    updatePlaylistCheckboxHtml();
+    searchTrackList();
+    createPlaylistDropdowns();
+    updateTagCheckboxes();
 }
 
 async function scanPlaylist(playlist) {

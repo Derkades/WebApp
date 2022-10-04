@@ -60,7 +60,7 @@ function youTubeDownload(event) {
             output.append('Scanning playlist...\n');
             await scanPlaylist(directory);
             output.append('Done, updating local track list...\n');
-            updateLocalTrackList();
+            await updateLocalTrackList();
             output.append('Done!');
             output.style.backgroundColor = 'darkgreen';
         } else {
