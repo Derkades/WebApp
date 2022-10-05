@@ -513,6 +513,8 @@ body.light .full-page-overlay .box-solid {
     position: absolute;
     bottom: 0;
     z-index: 1;
+    height: 20vh;
+    width: 100vw;
 }
 
 /* Firefox scrollbars look good by default, style Chromium scrollbars so they look similar */
