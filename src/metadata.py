@@ -28,7 +28,7 @@ FILENAME_STRIP_KEYWORDS = [
     '[Radio Edit]',
     '(Clip officiel)',
     '(Official videoclip)',
-    '_ HQ Videoclip',
+    'HQ Videoclip',
     '[Monstercat Release]',
     '[Monstercat Lyric Video]',
     '[Nerd Nation Release]',
@@ -44,6 +44,10 @@ FILENAME_STRIP_KEYWORDS = [
     ' HD',
     '(Single Edit)',
     '(official video)',
+    'High Quality',
+    '[OUT NOW]',
+    '(Dance Video)',
+    'Offisiell video',
 ]
 
 
