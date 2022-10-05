@@ -43,8 +43,8 @@ async function scanPlaylist(playlist) {
 }
 
 function getTrackDisplayHtml(track) {
-    const html = document.createElement('span')
-    html.classList.add('track-display-html')
+    const html = document.createElement('span');
+    html.classList.add('track-display-html');
     if (track.artists !== null && track.title !== null) {
         let first = true;
         for (const artist of track.artists) {
@@ -76,6 +76,7 @@ function getTrackDisplayHtml(track) {
             html.append(' [' + track.year + ']');
         }
     } else {
+        // Use half-decent display name generated from file name by python backend
         html.textContent = track.display_file + ' ~';
     }
     return html;

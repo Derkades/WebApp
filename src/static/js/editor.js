@@ -27,6 +27,7 @@ const editor = {
         }
     },
     save: async function() {
+        // POST body for request
         const payload = {
             path: editor.currentlyEditingPath,
                 metadata: {
@@ -40,23 +41,27 @@ const editor = {
 
         editor.currentlyEditingPath = null;
 
+        // Loading text
         document.getElementById('editor-save').classList.add("hidden");
         document.getElementById('editor-writing').classList.remove("hidden");
 
+        // Make request to update metadata
         const response = await fetch(
             '/update_metadata',
             {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)}
         );
         checkResponseCode(response);
 
+        // Different loading text
         document.getElementById('editor-writing').classList.add('hidden');
         document.getElementById('editor-reloading').classList.remove('hidden');
 
+        // Need to update local track list now, so metadata editor reflects changes
         await updateLocalTrackList();
 
+        // Close dialog, and restore save button
+        dialog.close('dialog-editor');
         document.getElementById('editor-reloading').classList.add('hidden');
         document.getElementById('editor-save').classList.remove('hidden');
-
-        dialog.close('dialog-editor');
     },
 };

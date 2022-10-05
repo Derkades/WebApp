@@ -214,7 +214,7 @@ function dragDropTable(target) {
 
         // The .hint and .active classes are purely cosmetic, they may be styled using css
 
-        row.ondragstart = (ev) => {
+        row.ondragstart = () => {
             current = row;
             for (let it of items) {
                 if (it != current) {
@@ -223,15 +223,13 @@ function dragDropTable(target) {
             }
         };
 
-        row.ondragenter = (ev) => {
+        row.ondragenter = () => {
             if (row != current) {
                 row.classList.add("active");
             }
         };
 
-        row.ondragleave = () => {
-            row.classList.remove("active");
-        };
+        row.ondragleave = () => row.classList.remove("active");
 
         row.ondragend = () => {
             for (let it of items) {
@@ -240,12 +238,11 @@ function dragDropTable(target) {
             }
         };
 
-        row.ondragover = (evt) => {
-            evt.preventDefault();
-        };
+        row.ondragover = event => event.preventDefault();
 
-        row.ondrop = (evt) => {
-            evt.preventDefault();
+        row.ondrop = (event) => {
+            event.preventDefault();
+
             if (row == current) {
                 // No need to do anything if row was put back in same location
                 return;
@@ -263,61 +260,53 @@ function dragDropTable(target) {
     }
 }
 
+function getSearchScore(track, playlist, query) {
+    if (playlist === 'everyone' || playlist === track.playlist) {
+        const matchProperties = [track.path, track.display, ...track.tags];
+        if (track.album !== null) {
+            matchProperties.push(track.album);
+        }
+        if (track.artists !== null) {
+            matchProperties.push(track.artists.join(' & '));
+        }
+        if (track.album_artist !== null) {
+            matchProperties.push(track.album_artist);
+        }
+
+        if (query !== '') {
+            let score = 0;
+            for (const matchProperty of matchProperties) {
+                let partialScore = matchProperty.length - levenshtein(matchProperty.toLowerCase(), query);
+                // Boost exact matches
+                if (matchProperty.toLowerCase().includes(query)) {
+                    partialScore *= 2;
+                }
+                score += partialScore;
+            }
+            return score;
+        } else {
+            // No query, same score for all tracks
+            return 1;
+        }
+    }
+}
+
 function searchTrackList() {
     if (state.tracks === null) {
         document.getElementById('track-list-output').textContent = 'Track list is still loading, please wait... If this takes longer than 10 seconds, please check the console for errors.';
         return;
     }
 
+    // Playlist filter (or 'everyone')
     const playlist = document.getElementById('track-list-playlist').value;
+    // Search query text field
     const query = document.getElementById('track-list-query').value.trim().toLowerCase();
 
-    const scoredTracks = [];
-
-    for (const track of state.tracks) {
-        if (playlist === 'everyone' || playlist === track.playlist) {
-            let score = 0;
-
-            const matchProperties = [track.path, track.display, ...track.tags];
-            if (track.album !== null) {
-                matchProperties.push(track.album);
-            }
-            if (track.artists !== null) {
-                matchProperties.push(track.artists.join(' & '));
-            }
-            if (track.album_artist !== null) {
-                matchProperties.push(track.album_artist);
-            }
-
-            if (query !== '') {
-                for (const matchProperty of matchProperties) {
-                    let partialScore = matchProperty.length - levenshtein(matchProperty.toLowerCase(), query);
-                    // Boost exact matches
-                    if (matchProperty.toLowerCase().includes(query)) {
-                        partialScore *= 2;
-                    }
-                    score += partialScore;
-                }
-            } else {
-                // No query, display all
-                score = 1;
-            }
-
-            if (score > 0) {
-                scoredTracks.push({
-                    score: score,
-                    track: track,
-                });
-            }
-        }
-    }
-
-    scoredTracks.sort((a, b) => b.score - a.score);
-
-    const tracks = [];
-    for (const scoredTrack of scoredTracks) {
-        tracks.push(scoredTrack.track);
-    }
+    // Assign score to all tracks, then sort tracks by score. Finally, get original track object back.
+    const tracks = state.tracks
+            .map(track => { return {track: track, score: getSearchScore(track, playlist, query)}})
+            .sort((a, b) => b.score - a.score)
+            .map(sortedTrack => sortedTrack.track);
 
     document.getElementById('track-list-output').replaceChildren(browse.generateTrackList(tracks))
 }

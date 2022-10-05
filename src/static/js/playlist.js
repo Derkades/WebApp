@@ -59,7 +59,9 @@ function createPlaylistCheckbox(playlist, index) {
     label.attributes.for = "checkbox-" + playlist.dir_name;
     label.textContent = playlist.display_name;
     const sup = document.createElement('sup');
-    sup.textContent = index;
+    if (index < 10) { // Assume number keys higher than 9 don't exist
+        sup.textContent = index;
+    }
     label.replaceChildren(
         playlist.display_name,
         sup,
