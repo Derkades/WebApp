@@ -278,17 +278,25 @@ function searchTrackList() {
         if (playlist === 'everyone' || playlist === track.playlist) {
             let score = 0;
 
+            const matchProperties = [track.path, track.display, ...track.tags];
+            if (track.album !== null) {
+                matchProperties.push(track.album);
+            }
+            if (track.artists !== null) {
+                matchProperties.push(track.artists.join(' & '));
+            }
+            if (track.album_artist !== null) {
+                matchProperties.push(track.album_artist);
+            }
+
             if (query !== '') {
-                score += track.path.length - levenshtein(track.path.toLowerCase(), query);
-                score += track.display.length - levenshtein(track.display.toLowerCase(), query);
-
-                // Boost exact matches
-                if (track.path.toLowerCase().includes(query)) {
-                    score *= 2;
-                }
-
-                if (track.display.toLowerCase().includes(query)) {
-                    score *= 2;
+                for (const matchProperty of matchProperties) {
+                    let partialScore = matchProperty.length - levenshtein(matchProperty.toLowerCase(), query);
+                    // Boost exact matches
+                    if (matchProperty.toLowerCase().includes(query)) {
+                        partialScore *= 2;
+                    }
+                    score += partialScore;
                 }
             } else {
                 // No query, display all
