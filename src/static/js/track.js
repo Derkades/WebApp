@@ -42,9 +42,17 @@ async function scanPlaylist(playlist) {
     checkResponseCode(response);
 }
 
-function getTrackDisplayHtml(track) {
+function getTrackDisplayHtml(track, showPlaylist = false) {
     const html = document.createElement('span');
     html.classList.add('track-display-html');
+
+    if (showPlaylist) {
+        const playlistHtml = document.createElement('a');
+        playlistHtml.onclick = () => browse.browsePlaylist(track.playlist);
+        playlistHtml.textContent = track.playlist_display;
+        html.append(playlistHtml, ': ');
+    }
+
     if (track.artists !== null && track.title !== null) {
         let first = true;
         for (const artist of track.artists) {

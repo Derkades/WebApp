@@ -190,11 +190,11 @@ function updateTrackHtml() {
         document.getElementById('lyrics').innerHTML = '<i class="secondary">Geen lyrics gevonden</i>'
     }
 
-    document.getElementById('current-track').replaceChildren(getTrackDisplayHtml(track));
+    document.getElementById('current-track').replaceChildren(getTrackDisplayHtml(track, true));
 
     if (state.history.length > 0) {
         const previousTrack = state.history[state.history.length - 1];
-        document.getElementById('previous-track').replaceChildren(getTrackDisplayHtml(previousTrack));
+        document.getElementById('previous-track').replaceChildren(getTrackDisplayHtml(previousTrack, true));
     } else {
         document.getElementById('previous-track').textContent = '-';
     }

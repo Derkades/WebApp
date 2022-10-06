@@ -33,6 +33,13 @@ const browse = {
     browseTag: (tagName) => {
         browse.browse(tagName, track => track.tags.indexOf(tagName) !== -1)
     },
+    browsePlaylist: playlist => {
+        // TODO migrate to standard browse view
+        document.getElementById('track-list-playlist').value = playlist;
+        document.getElementById('track-list-query').value = '';
+        searchTrackList();
+        dialog.open('dialog-queue');
+    },
     generateTrackList: tracks => {
         const table = document.createElement('table');
         table.classList.add('track-list-table');
