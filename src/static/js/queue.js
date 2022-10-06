@@ -164,8 +164,11 @@ function updateQueueHtml() {
         deleteOverlay.appendChild(deleteDiv);
         tdCover.appendChild(deleteOverlay);
 
+        const aPlaylist = document.createElement('a');
+        aPlaylist.textContent = queuedTrack.playlist_display;
+        aPlaylist.onclick = () => browse.browsePlaylist(queuedTrack.playlist);
         const tdPlaylist = document.createElement('td');
-        tdPlaylist.textContent = queuedTrack.playlist_display;
+        tdPlaylist.append(aPlaylist);
 
         const tdTrack = document.createElement('td');
         tdTrack.appendChild(getTrackDisplayHtml(queuedTrack));
