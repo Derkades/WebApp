@@ -169,8 +169,9 @@ class Track:
             conn.execute('DELETE FROM track_artist WHERE track=?', (self.relpath,))
             conn.execute('DELETE FROM track_tag WHERE track=?', (self.relpath,))
 
-            artist_insert = [(self.relpath, artist) for artist in meta.artists]
-            conn.executemany(('INSERT INTO track_artist (track, artist) VALUES (?, ?)'), artist_insert)
+            if meta.artists is not None:
+                artist_insert = [(self.relpath, artist) for artist in meta.artists]
+                conn.executemany(('INSERT INTO track_artist (track, artist) VALUES (?, ?)'), artist_insert)
 
             tag_insert = [(self.relpath, tag) for tag in meta.tags]
             conn.executemany(('INSERT INTO track_tag (track, tag) VALUES (?, ?)'), tag_insert)
