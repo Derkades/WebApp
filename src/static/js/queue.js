@@ -307,6 +307,7 @@ function searchTrackList() {
 
     // Assign score to all tracks, then sort tracks by score. Finally, get original track object back.
     const tracks = state.tracks
+            .filter(track => playlist === 'everyone' || track.playlist === playlist)
             .map(track => { return {track: track, score: getSearchScore(track, playlist, query)}})
             .sort((a, b) => b.score - a.score)
             .map(sortedTrack => sortedTrack.track);
