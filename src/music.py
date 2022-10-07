@@ -102,8 +102,8 @@ class Track:
         # seconden. Ik heb geen idee waarom, de documentatie is vaag. Oplossing: keer het nummer om, en haal
         # nog eens stilte aan "het begin" weg.
 
-        filters = '''
-        atrim=0:600,
+        filters = f'''
+        atrim=0:{settings.track_limit_seconds},
         silenceremove=start_periods=1:start_threshold=-70dB,
         areverse,
         silenceremove=start_periods=1:start_threshold=-70dB,
