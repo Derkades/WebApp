@@ -56,6 +56,9 @@ class Track:
             raise Exception()
 
     def metadata(self):
+        """
+        Returns: Cached metadata for this track, as a Metadata object
+        """
         return metadata.cached(self.relpath)
 
     def transcoded_audio(self, quality) -> bytes:
@@ -196,10 +199,13 @@ class Playlist:
             self.track_count = conn.execute('SELECT COUNT(*) FROM track WHERE playlist=?',
                                             (self.relpath,)).fetchone()[0]
 
-    def choose_track(self, tag_mode=None, tags=None) -> Track:
+    def choose_track(self, tag_mode, tags: List[str]) -> Track:
         """
         Randomly choose a track from this playlist directory
-        Returns: Track name
+        Args:
+            tag_mode: 'allow' or 'deny'
+            tags: List of tags
+        Returns: Track object
         """
         query = """
                 SELECT track.path, last_played
@@ -246,7 +252,7 @@ class Playlist:
     def download(self, url: str) -> CompletedProcess:
         """
         Start a download using yt-dlp
-        Parameters:
+        Args:
             url: URL to download
         Returns: CompletedProcess object
         """
@@ -268,13 +274,20 @@ class Playlist:
 def playlist(dir_name: str) -> Playlist:
     """
     Get playlist object from the name of a music directory.
-    Parameters:
+    Args:
         dir_name: Name of directory
     Returns: Playlist instance
     """
     return Playlist(Path(settings.music_dir, dir_name))
 
 def playlists(guest: Optional[bool] = None) -> List[Playlist]:
+    """
+    List playlists
+    Args:
+        guest: True to list only list guest playlist, False for non-guest
+               playlists, None for both.
+    Returns: List of Playlist objects
+    """
     if guest is None:
         query = 'SELECT path FROM playlist'
     elif guest is True:

@@ -1,7 +1,7 @@
 from pathlib import Path
 import subprocess
 import re
-from typing import Optional, List
+from typing import Optional, List, Iterator
 import logging
 import json
 
@@ -192,7 +192,7 @@ class Metadata:
                 return True
         return False
 
-    def album_release_query(self):
+    def album_release_query(self) -> str:
         """
         Get album search query for a music search engine like MusicBrainz
         """
@@ -215,7 +215,7 @@ class Metadata:
         else:
             return self._filename_title_search()
 
-    def album_search_queries(self):
+    def album_search_queries(self) -> Iterator[str]:
         """
         Generate possible search queries to find album art using a general search engine
         """
@@ -241,7 +241,7 @@ class Metadata:
 
         yield self._filename_title_search()
 
-    def lyrics_search_queries(self):
+    def lyrics_search_queries(self) -> Iterator[str]:
         """
         Generate possible search queries to find lyrics
         """
@@ -254,6 +254,9 @@ class Metadata:
 def probe(path: Path) -> Metadata:
     """
     Create Metadata object by running ffprobe on a file
+    Args:
+        path: Path to file
+    Returns: Metadata object
     """
     command = [
         'ffprobe',

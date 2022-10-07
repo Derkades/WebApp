@@ -1,7 +1,7 @@
 from pathlib import Path
 import logging
 from multiprocessing import Pool
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Iterable
 
 import db
 import metadata
@@ -50,7 +50,7 @@ def _scan_tracks(paths: List[Tuple[Path, Path]]):
 #     query += 'SET ' + ', '.join([f'{key}=:{key}' for key in keys[1:]])
 #     conn.executemany(query, values)
 
-def rebuild_music_database(only_playlist: Optional[str] = None):
+def rebuild_music_database(only_playlist: Optional[str] = None) -> None:
     """
     Scan disk for playlist and tracks, and create the corresponding rows
     in playlist, track, artist and tag tables. Previous table content is deleted.
@@ -61,6 +61,8 @@ def rebuild_music_database(only_playlist: Optional[str] = None):
     track_insert = [] # path, playlist, duration, title, album_artist, album_index, year
     artist_insert = [] # track, artist
     tag_insert = [] # track, tag
+
+    playlist_paths: Iterable[Path]
 
     if only_playlist is not None:
         playlist_paths = [Path(settings.music_dir, only_playlist)]
