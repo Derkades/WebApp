@@ -58,16 +58,20 @@ const browse = {
         const headerRow = document.createElement('tr');
         table.appendChild(headerRow);
         const hcolPlaylist = document.createElement('th');
+        const hcolDuration = document.createElement('th');
         const hcolTitle = document.createElement('th');
         const hcolAddTop = document.createElement('th');
         const hcolAddBottom = document.createElement('th');
         const hcolEdit = document.createElement('th')
-        headerRow.replaceChildren(hcolPlaylist, hcolTitle, hcolAddTop, hcolAddBottom, hcolEdit);
+        headerRow.replaceChildren(hcolPlaylist, hcolDuration, hcolTitle, hcolAddTop, hcolAddBottom, hcolEdit);
 
         let i = 0;
         for (const track of tracks) {
             const colPlaylist = document.createElement('td');
             colPlaylist.textContent = track.playlist;
+
+            const colDuration = document.createElement('td');
+            colDuration.append(secondsToString(track.duration));
 
             const colTitle = document.createElement('td');
             colTitle.replaceChildren(getTrackDisplayHtml(track));
@@ -88,7 +92,7 @@ const browse = {
             colEdit.replaceChildren(editButton);
 
             const dataRow = document.createElement('tr');
-            dataRow.replaceChildren(colPlaylist, colTitle, colAddTop, colAddBottom, colEdit);
+            dataRow.replaceChildren(colPlaylist, colDuration, colTitle, colAddTop, colAddBottom, colEdit);
             table.appendChild(dataRow);
             if (i++ > state.maxTrackListSize) {
                 break;
