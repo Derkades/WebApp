@@ -47,8 +47,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('settings-theme').addEventListener('input', applyTheme);
 
     // Queue overlay
-    document.getElementById('track-list-playlist').addEventListener('input', searchTrackList);
-    document.getElementById('track-list-query').addEventListener('input', searchTrackList);
+    document.getElementById('browse-filter-playlist').addEventListener('input', browse.updateCurrentView);
+    document.getElementById('browse-filter-query').addEventListener('input', browse.updateCurrentView);
+    document.getElementById('browse-all').addEventListener('click', browse.browseAll);
 
     // Editor
     document.getElementById('button-edit').addEventListener('click', () => {
@@ -83,5 +84,4 @@ document.addEventListener("DOMContentLoaded", () => {
         console.warn(err);
         setTimeout(updateLocalTrackList, 1000);
     });
-    searchTrackList();
 });

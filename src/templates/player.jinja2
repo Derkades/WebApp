@@ -87,7 +87,7 @@
             <div class="box-rounded box-solid box-queue">
                 <div class="flex-space-between">
                     <h3>{% trans %}Queue{% endtrans %} (<span id="current-queue-size">0</span>)</h3>
-                    {{ icon_button('open-dialog-queue', 'playlist-plus') }}
+                    {{ icon_button('browse-all', 'playlist-plus') }}
                 </div>
                 <table id="queue-table"></table>
             </div>
@@ -106,26 +106,6 @@
     <div class="sidebar sidebar-right" id="sidebar-lyrics">
         <div class="lyrics-outer box-rounded box-solid">
             <div id="lyrics"></div>
-        </div>
-    </div>
-
-    <div id="audio"></div>
-
-    <div id="dialog-queue" class="full-page-overlay hidden dialog-overlay">
-        <div class="box-rounded box-solid">
-            {{ dialog_header('dialog-queue', gettext('Add track to queue')) }}
-
-            <div class="scroll">
-
-                <select id="track-list-playlist" class="playlist-select playlist-select-everyone">
-                    <option value="everyone" data-keep="true">{% trans %}Everyone{% endtrans %}</option>
-                </select>
-
-                <input id="track-list-query" type="text" placeholder="{% trans %}Search query{% endtrans %}">
-
-                <div id="track-list-output"></div>
-
-            </div>
         </div>
     </div>
 
@@ -225,7 +205,15 @@
     <div id="dialog-browse" class="full-page-overlay hidden dialog-overlay">
         <div class="box-rounded box-solid">
             {{ dialog_header('dialog-browse', 'placeholder') }}
-            <div id="browse-content" class="scroll"></div>
+            <div class="scroll">
+                <select id="browse-filter-playlist" class="playlist-select playlist-select-everyone">
+                    <option value="everyone" data-keep="true">{% trans %}Everyone{% endtrans %}</option>
+                </select>
+
+                <input id="browse-filter-query" type="text" placeholder="{% trans %}Search query{% endtrans %}">
+
+                <div id="browse-content"></div>
+            </div>
         </div>
     </div>
 
@@ -277,6 +265,8 @@
     </div>
 
     <canvas id="visualiser"></canvas>
+
+    <div id="audio"></div>
 
     <div class="vignette"></div>
 

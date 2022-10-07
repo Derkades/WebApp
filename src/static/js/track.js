@@ -31,7 +31,7 @@ async function updateLocalTrackList() {
 
     // Update HTML depending on state.playlists and state.tracks
     updatePlaylistCheckboxHtml();
-    searchTrackList();
+    browse.updateCurrentView();
     createPlaylistDropdowns();
     updateTagCheckboxes();
 }
