@@ -4,7 +4,7 @@ const state = {
     history: [],
     queueBusy: false,
     historySize: 20,
-    maxTrackListSize: 500,
+    maxTrackListSize: 250,
     lastChosenPlaylist: null,
     playlistOverrides: [],
     playlists: null,
