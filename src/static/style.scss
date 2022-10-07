@@ -304,6 +304,10 @@ body.light #progress-bar {
     display: inline;
 }
 
+.flex-space-between > span > h3 {
+    margin: .75rem 0;
+}
+
 .progress-time {
     margin: 0 .25rem;
     font-size: 1.1rem;

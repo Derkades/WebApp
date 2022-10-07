@@ -1,31 +1,38 @@
 const browse = {
-    currentFilterFunc: null,
+    history: [],
     setHeader: textContent => {
-        const outerDiv = document.getElementById('dialog-browse');
-        const innerDiv = outerDiv.children[0];
-        const headerDiv = innerDiv.children[0];
-        const header = headerDiv.children[0];
-        header.textContent = textContent;
+        document.getElementById('dialog-browse').getElementsByTagName('h3')[0].textContent = textContent;
     },
-    setContent: children => {
-        document.getElementById('browse-content').replaceChildren(...children);
+    setContent: child => {
+        document.getElementById('browse-content').replaceChildren(child);
     },
     open: () => {
         dialog.open('dialog-browse');
     },
-    browse: (title, filterFunc) => {
-        console.log('browse', title, filterFunc);
+    browse: (title, filter) => {
         browse.open();
         browse.setHeader(title);
-        browse.currentFilterFunc = filterFunc;
+        browse.history.push({
+            title: title,
+            filter: filter,
+        });
         browse.updateCurrentView();
     },
     updateCurrentView: () => {
-        if (browse.currentFilterFunc === null) {
+        if (browse.history.length === 0) {
             return;
         }
-        const tracks = browse.filterTracks(state.tracks, browse.currentFilterFunc);
-        browse.setContent([browse.generateTrackList(tracks)]);
+        const current = browse.history[browse.history.length - 1];
+        browse.setHeader(current.title);
+        const tracks = browse.filterTracks(state.tracks, current.filter);
+        browse.setContent(browse.generateTrackList(tracks));
+    },
+    back: () => {
+        if (browse.history.length < 2) {
+            return;
+        }
+        browse.history.pop();
+        browse.updateCurrentView();
     },
     browseArtist: artistName => {
         browse.browse('Artist: ' + artistName, track => track.artists !== null && track.artists.indexOf(artistName) !== -1);

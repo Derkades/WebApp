@@ -50,6 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('browse-filter-playlist').addEventListener('input', browse.updateCurrentView);
     document.getElementById('browse-filter-query').addEventListener('input', browse.updateCurrentView);
     document.getElementById('browse-all').addEventListener('click', browse.browseAll);
+    document.getElementById('browse-back').addEventListener('click', browse.back);
 
     // Editor
     document.getElementById('button-edit').addEventListener('click', () => {

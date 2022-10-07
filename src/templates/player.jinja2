@@ -10,9 +10,16 @@
     </button>
 {% endmacro %}
 
-{% macro dialog_header(id, title) %}
+{% macro dialog_header(id, title, back_id = None) %}
     <div class="flex-space-between">
-        <h3>{{ title }}</h3>
+        {% if back_id %}
+            <span>
+                {{ icon_button(back_id, 'arrow-left') }}
+            </span>
+        {% endif %}
+        <span>
+            <h3>{{ title }}</h3>
+        </span>
         <span>
             {{ dialog_close_button(id) }}
         </span>
@@ -204,7 +211,7 @@
 
     <div id="dialog-browse" class="full-page-overlay hidden dialog-overlay">
         <div class="box-rounded box-solid">
-            {{ dialog_header('dialog-browse', 'placeholder') }}
+            {{ dialog_header('dialog-browse', 'placeholder', back_id='browse-back') }}
             <div class="scroll">
                 <select id="browse-filter-playlist" class="playlist-select playlist-select-everyone">
                     <option value="everyone" data-keep="true">{% trans %}Everyone{% endtrans %}</option>
