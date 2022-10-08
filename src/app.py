@@ -1,6 +1,7 @@
 from typing import Optional
 import logging
 from pathlib import Path
+from dataclasses import dataclass
 
 from flask import Flask, request, render_template, Response, redirect
 import flask_assets
@@ -26,27 +27,39 @@ assets_dir = Path('static')
 raphson_png_path = Path(assets_dir, 'raphson.png')
 
 
-def check_password(username: Optional[str], password: Optional[str]) -> bool:
+@dataclass
+class User:
+    username: str
+    admin: bool
+
+
+def check_password(username: Optional[str], password: Optional[str]) -> Optional[User]:
     """
     Check whether the provided password matches the correct password
     """
     if username is None or password is None:
-        return False
+        return None
 
     with db.users() as conn:
-        result = conn.execute('SELECT password FROM user WHERE username=?', (username,)).fetchone()
+        result = conn.execute('SELECT password,admin FROM user WHERE username=?', (username,)).fetchone()
 
         if result is None:
             log.warning("Login attempt with non-existent username: '%s'", username)
-            return
+            return None
+
+        hashed_password, is_admin = result
+
+        if not bcrypt.checkpw(password.encode(), hashed_password.encode()):
+            return None
+
+        return User(username, is_admin)
 
 
-        hashed_password, = result
-        return bcrypt.checkpw(password.encode(), hashed_password.encode())
-
-
-def check_password_cookie() -> bool:
-    return check_password(request.cookies.get('username'), request.cookies.get('password'))
+def check_password_cookie(require_admin: bool = False) -> Optional[User]:
+    user = check_password(request.cookies.get('username'), request.cookies.get('password'))
+    if require_admin and not user.admin:
+        return None
+    return user
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -81,7 +94,8 @@ def player():
     """
     Main player page. Serves player.jinja2 template file.
     """
-    if not check_password_cookie():
+    user = check_password_cookie()
+    if user is None:
         return redirect('/login')
 
     mobile = False
@@ -91,6 +105,7 @@ def player():
             mobile = True
 
     return render_template('player.jinja2',
+                           user_is_admin=user.admin,
                            mobile=mobile)
 
 
@@ -201,7 +216,7 @@ def ytdl():
     """
     Use yt-dlp to download the provided URL to a playlist directory
     """
-    if not check_password_cookie():
+    if not check_password_cookie(require_admin=True):
         return Response(None, 403)
 
     directory = request.json['directory']
@@ -270,7 +285,7 @@ def scan_music():
     """
     Scans all playlists for new music
     """
-    if not check_password_cookie():
+    if not check_password_cookie(require_admin=True):
         return Response(None, 403)
 
     if 'playlist' in request.args:
@@ -287,7 +302,7 @@ def update_metadata():
     Endpoint to update track metadata
     """
     if not check_password_cookie():
-        return Response(403)
+        return Response(None, 403)
 
     payload = request.get_json()
     track = Track(payload['path'])

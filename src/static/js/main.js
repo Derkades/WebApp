@@ -42,7 +42,12 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('button-album').style.display = 'none';
 
     // Settings overlay
-    document.getElementById('youtube-dl-submit').addEventListener('click', youTubeDownload);
+    const downloadSubmit = document.getElementById('youtube-dl-submit');
+    if (downloadSubmit !== null) {
+        document.getElementById('youtube-dl-submit').addEventListener('click', youTubeDownload);
+    } else {
+        console.warn('Downloader submit button missing from page, this is normal if you are not an admin user');
+    }
     document.getElementById('settings-queue-size').addEventListener('input', updateQueue);
     document.getElementById('settings-theme').addEventListener('input', applyTheme);
 
@@ -53,12 +58,17 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('browse-back').addEventListener('click', browse.back);
 
     // Editor
-    document.getElementById('button-edit').addEventListener('click', () => {
-        if (state.current !== null) {
-            editor.open(state.current);
-        }
-    });
-    document.getElementById('editor-save').addEventListener('click', editor.save);
+    const editorButton = document.getElementById('button-edit');
+    if (editorButton !== null) {
+        editorButton.addEventListener('click', () => {
+            if (state.current !== null) {
+                editor.open(state.current);
+            }
+        });
+        document.getElementById('editor-save').addEventListener('click', editor.save);
+    } else {
+        console.warn('Editor button missing from page, this is normal if you are not an admin user');
+    }
 
     // Dialogs
     dialog.registerEvents();
