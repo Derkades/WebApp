@@ -1,14 +1,14 @@
 from typing import Optional
-import hashlib
-import hmac
 import logging
 from pathlib import Path
 
 from flask import Flask, request, render_template, Response, redirect
 import flask_assets
 from flask_babel import Babel
+import bcrypt
 
 import bing
+import db
 import genius
 import image
 from metadata import Metadata
@@ -16,7 +16,6 @@ import music
 from music import Track
 import musicbrainz
 import scanner
-import settings
 
 
 app = Flask(__name__, template_folder='templates')
@@ -27,25 +26,27 @@ assets_dir = Path('static')
 raphson_png_path = Path(assets_dir, 'raphson.png')
 
 
-def check_password(password: Optional[str]) -> bool:
+def check_password(username: Optional[str], password: Optional[str]) -> bool:
     """
     Check whether the provided password matches the correct password
     """
-    if password is None:
+    if username is None or password is None:
         return False
 
-    # First hash passwords so they have the same length
-    # otherwise compare_digest still leaks length
+    with db.users() as conn:
+        result = conn.execute('SELECT password FROM user WHERE username=?', (username,)).fetchone()
 
-    hashed_pass = hashlib.sha256(password.encode()).digest()
-    hashed_correct = hashlib.sha256(settings.web_password.encode()).digest()
+        if result is None:
+            log.warning("Login attempt with non-existent username: '%s'", username)
+            return
 
-    # Constant time comparison
-    return hmac.compare_digest(hashed_pass, hashed_correct)
+
+        hashed_password, = result
+        return bcrypt.checkpw(password.encode(), hashed_password.encode())
 
 
 def check_password_cookie() -> bool:
-    return check_password(request.cookies.get('password'))
+    return check_password(request.cookies.get('username'), request.cookies.get('password'))
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -58,15 +59,20 @@ def login():
         if 'password' not in request.form:
             return 'invalid form input'
 
+        username = request.form['username']
         password = request.form['password']
 
-        if not check_password(password):
+        if not check_password(username, password):
             return render_template('login.jinja2', invalid_password=True)
 
         response = redirect('/')
+        response.set_cookie('username', username, max_age=3600*24*30, samesite='Strict')
         response.set_cookie('password', password, max_age=3600*24*30, samesite='Strict')
         return response
     else:
+        if check_password_cookie():
+            return redirect('/')
+
         return render_template('login.jinja2', invalid_password=False)
 
 

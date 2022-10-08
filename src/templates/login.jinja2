@@ -21,6 +21,10 @@
             bottom: .4em;
             }
         }
+
+        input {
+            margin: 3px 0;
+        }
     </style>
 </head>
 <body>
@@ -35,12 +39,15 @@
     <br>
 
     {% if invalid_password %}
-        {% trans %}Invalid password{% endtrans %}
+        {% trans %}Invalid username or password{% endtrans %}
         <br><br>
     {% endif %}
 
     <form method="POST">
-        <input type="password" name="password" autofocus>
+        <label for="username">{% trans %}Username{% endtrans %}</label><br>
+        <input type="text" name="username" id="username" autofocus><br>
+        <label for="password">{% trans %}Password{% endtrans %}</label><br>
+        <input type="password" name="password" id="password"><br>
         <input type="submit" value="{% trans %}Log in{% endtrans %}">
     </form>
 

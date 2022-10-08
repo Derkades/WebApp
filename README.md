@@ -55,10 +55,6 @@ Don't worry about removing strings like "(Official Audio)" from song titles, the
 
 This directory is used to store the result of time-consuming operations, like transcoding audio or web scraping for album art. It may be emptied at any time as long as the application is not running.
 
-### `MUSIC_WEB_PASSWORD` (not set by default)
-
-Set an optional password to access the web interface. Strongly recommended if exposed to the internet.
-
 ### `MUSIC_REDIS_HOST` / `MUSIC_REDIS_PORT`
 
 Connection details for Redis server. Defaults to `localhost`, port `6379`.

@@ -16,7 +16,6 @@ def getenv(key: str, default: Optional[str]) -> str:
         raise ValueError('Required environment variable ' + key + ' not configured.')
 
 
-web_password = getenv('MUSIC_WEB_PASSWORD', None)
 ffmpeg_loglevel = getenv('MUSIC_FFMPEG_LOGLEVEL', 'info')
 cache_dir = getenv('MUSIC_CACHE_DIR', '/cache')
 music_dir = getenv('MUSIC_MUSIC_DIR', '/music')

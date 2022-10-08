@@ -14,7 +14,7 @@ def handle_useradd(args):
     is_admin = int(args.admin)
     password = input('Enter password:')
 
-    hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+    hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
     with db.users() as conn:
         conn.execute('INSERT INTO user (username, password, admin) VALUES (?, ?, ?)',
