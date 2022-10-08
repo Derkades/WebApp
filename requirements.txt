@@ -12,3 +12,4 @@ gunicorn
 musicbrainzngs
 lxml
 pillow-avif-plugin
+bcrypt~=4.0.0
