@@ -80,7 +80,6 @@
                 {% endfor %}
 
                 {{ icon_button('open-dialog-settings', 'gear') }}
-                {{ icon_button('open-dialog-tags', 'tag-multiple') }}
                 {{ icon_button('button-edit', 'pencil') }}
 
                 {% if mobile %}
@@ -94,7 +93,10 @@
             <div class="box-rounded box-solid box-queue">
                 <div class="flex-space-between">
                     <h3>{% trans %}Queue{% endtrans %} (<span id="current-queue-size">0</span>)</h3>
-                    {{ icon_button('browse-all', 'playlist-plus') }}
+                    <div>
+                        {{ icon_button('open-dialog-tags', 'tag-multiple') }}
+                        {{ icon_button('browse-all', 'playlist-plus') }}
+                    </div>
                 </div>
                 <table id="queue-table"></table>
             </div>
