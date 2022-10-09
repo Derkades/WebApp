@@ -85,7 +85,7 @@ function getTrackDisplayHtml(track, showPlaylist = false) {
         }
     } else {
         // Use half-decent display name generated from file name by python backend
-        html.textContent = track.display_file + ' ~';
+        html.append(track.display_file + ' ~');
     }
     return html;
 }
