@@ -35,22 +35,25 @@ const browse = {
         browse.updateCurrentView();
     },
     browseArtist: artistName => {
-        browse.browse('Artist: ' + artistName, track => track.artists !== null && track.artists.indexOf(artistName) !== -1);
+        const artistText = document.getElementById('trans-artist').textContent;
+        browse.browse(artistText + artistName, track => track.artists !== null && track.artists.indexOf(artistName) !== -1);
     },
     browseAlbum: (albumName, albumArtistName) => {
+        const albumText = document.getElementById('trans-album').textContent;
         const title = albumArtistName === null ? albumName : albumArtistName + ' - ' + albumName;
-        browse.browse('Album: ' + title, track => track.album === albumName);
+        browse.browse(albumText + title, track => track.album === albumName);
     },
     browseTag: (tagName) => {
-        browse.browse('Tag: ' + tagName, track => track.tags.indexOf(tagName) !== -1)
+        const tagText = document.getElementById('trans-tag').textContent;
+        browse.browse(tagText + tagName, track => track.tags.indexOf(tagName) !== -1)
     },
     browsePlaylist: playlist => {
         document.getElementById('browse-filter-playlist').value = playlist;
         browse.browseAll();
     },
     browseAll: () => {
-        // TODO translation
-        browse.browse('All tracks', () => true);
+        const allText = document.getElementById('trans-all-tracks').textContent;
+        browse.browse(allText, () => true);
     },
     generateTrackList: tracks => {
         const table = document.createElement('table');
