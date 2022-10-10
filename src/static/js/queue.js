@@ -151,18 +151,10 @@ function updateQueueHtml() {
     const rows = [];
     let i = 0;
     for (const queuedTrack of state.queue) {
-        const tdCover = document.createElement('td');
-        tdCover.classList.add('box-rounded');
+        const tdCover = document.getElementById('template-td-cover').content.cloneNode(true).firstElementChild;
         tdCover.style.backgroundImage = 'url("' + queuedTrack.imageBlobUrl + '")';
         const rememberI = i;
         tdCover.onclick = () => removeFromQueue(rememberI);
-        const deleteOverlay = document.createElement('div');
-        deleteOverlay.classList.add('delete-overlay');
-        const deleteDiv = document.createElement('div');
-        deleteDiv.style.backgroundImage = "url('/static/icon/delete.svg')";
-        deleteDiv.classList.add('icon');
-        deleteOverlay.appendChild(deleteDiv);
-        tdCover.appendChild(deleteOverlay);
 
         const aPlaylist = document.createElement('a');
         aPlaylist.textContent = queuedTrack.playlist_display;
@@ -186,18 +178,7 @@ function updateQueueHtml() {
     const minQueueSize = parseInt(document.getElementById('settings-queue-size').value)
 
     if (i < minQueueSize) {
-        const td = document.createElement('td');
-        td.colSpan = 3;
-        td.classList.add('secondary', 'downloading');
-        const spinner = document.createElement('span');
-        spinner.classList.add('spinner');
-        spinner.id = 'queue-spinner';
-        td.appendChild(spinner);
-
-        const row = document.createElement('tr');
-        row.appendChild(td);
-
-        rows.push(row);
+        rows.push(document.getElementById('template-queue-spinner').content.cloneNode(true));
     }
 
     const outerDiv = document.getElementById('queue-table');

@@ -293,6 +293,20 @@
     <div class="hidden" id="trans-album">{% trans %}Album:{% endtrans %}</div>
     <div class="hidden" id="trans-tag">{% trans %}Tag:{% endtrans %}</div>
     <div class="hidden" id="trans-all-tracks">{% trans %}All tracks{% endtrans %}</div>
+    <template id="template-queue-spinner">
+        <tr>
+            <td colspan="3" class="secondary downloading">
+                <span class="spinner"></span>
+            </td>
+        </tr>
+    </template>
+    <template id="template-td-cover">
+        <td class="box-rounded">
+            <div class="delete-overlay">
+                <div class="icon" style="background-image: url('/static/icon/delete.svg')"></div>
+            </div>
+        </td>
+    </template>
 
 </body>
 </html>
