@@ -52,10 +52,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('settings-theme').addEventListener('input', applyTheme);
 
     // Queue overlay
-    document.getElementById('browse-filter-playlist').addEventListener('input', browse.updateCurrentView);
-    document.getElementById('browse-filter-query').addEventListener('input', browse.updateCurrentView);
-    document.getElementById('browse-all').addEventListener('click', browse.browseAll);
-    document.getElementById('browse-back').addEventListener('click', browse.back);
+    document.getElementById('browse-filter-playlist').addEventListener('input', () => browse.updateCurrentView());
+    document.getElementById('browse-filter-query').addEventListener('input', () => browse.updateCurrentView());
+    document.getElementById('browse-all').addEventListener('click', () => browse.browseAll());
+    document.getElementById('browse-back').addEventListener('click', () => browse.back());
 
     // Editor
     const editorButton = document.getElementById('button-edit');

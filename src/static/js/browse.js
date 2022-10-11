@@ -1,61 +1,76 @@
-const browse = {
-    history: [],
-    setHeader: textContent => {
+class Browse {
+    #history;
+    constructor() {
+        this.#history = [];
+    };
+
+    setHeader(textContent) {
         document.getElementById('dialog-browse').getElementsByTagName('h3')[0].textContent = textContent;
-    },
-    setContent: child => {
+    };
+
+    setContent(child) {
         document.getElementById('browse-content').replaceChildren(child);
-    },
-    open: () => {
+    };
+
+    open() {
         dialog.open('dialog-browse');
-    },
-    browse: (title, filter) => {
-        browse.open();
-        browse.setHeader(title);
-        browse.history.push({
+    };
+
+    #browse(title, filter) {
+        this.open();
+        this.setHeader(title);
+        this.#history.push({
             title: title,
             filter: filter,
         });
-        browse.updateCurrentView();
-    },
-    updateCurrentView: () => {
-        if (browse.history.length === 0) {
+        this.updateCurrentView();
+    };
+
+    updateCurrentView() {
+        if (this.#history.length === 0) {
             return;
         }
-        const current = browse.history[browse.history.length - 1];
-        browse.setHeader(current.title);
-        const tracks = browse.filterTracks(state.tracks, current.filter);
-        browse.setContent(browse.generateTrackList(tracks));
-    },
-    back: () => {
-        if (browse.history.length < 2) {
+        const current = this.#history[this.#history.length - 1];
+        this.setHeader(current.title);
+        const tracks = this.filterTracks(state.tracks, current.filter);
+        this.setContent(this.generateTrackList(tracks));
+    };
+
+    back() {
+        if (this.#history.length < 2) {
             return;
         }
-        browse.history.pop();
-        browse.updateCurrentView();
-    },
-    browseArtist: artistName => {
+        this.#history.pop();
+        this.updateCurrentView();
+    };
+
+    browseArtist(artistName) {
         const artistText = document.getElementById('trans-artist').textContent;
-        browse.browse(artistText + artistName, track => track.artists !== null && track.artists.indexOf(artistName) !== -1);
-    },
-    browseAlbum: (albumName, albumArtistName) => {
+        this.#browse(artistText + artistName, track => track.artists !== null && track.artists.indexOf(artistName) !== -1);
+    };
+
+    browseAlbum(albumName, albumArtistName) {
         const albumText = document.getElementById('trans-album').textContent;
         const title = albumArtistName === null ? albumName : albumArtistName + ' - ' + albumName;
-        browse.browse(albumText + title, track => track.album === albumName);
-    },
-    browseTag: (tagName) => {
+        this.#browse(albumText + title, track => track.album === albumName);
+    };
+
+    browseTag(tagName) {
         const tagText = document.getElementById('trans-tag').textContent;
-        browse.browse(tagText + tagName, track => track.tags.indexOf(tagName) !== -1)
-    },
-    browsePlaylist: playlist => {
+        this.#browse(tagText + tagName, track => track.tags.indexOf(tagName) !== -1)
+    };
+
+    browsePlaylist(playlist) {
         document.getElementById('browse-filter-playlist').value = playlist;
-        browse.browseAll();
-    },
-    browseAll: () => {
+        this.browseAll();
+    };
+
+    browseAll() {
         const allText = document.getElementById('trans-all-tracks').textContent;
-        browse.browse(allText, () => true);
-    },
-    generateTrackList: tracks => {
+        this.#browse(allText, () => true);
+    };
+
+    generateTrackList(tracks) {
         const table = document.createElement('table');
         table.classList.add('track-list-table');
         const headerRow = document.createElement('tr');
@@ -103,8 +118,9 @@ const browse = {
 
         }
         return table;
-    },
-    getSearchScore: (track, playlist, query) => {
+    };
+
+    getSearchScore(track, playlist, query) {
         if (playlist === 'everyone' || playlist === track.playlist) {
             const matchProperties = [track.path, track.display, ...track.tags];
             if (track.album !== null) {
@@ -133,8 +149,9 @@ const browse = {
                 return 1;
             }
         }
-    },
-    filterTracks: (tracks, customFilter) => {
+    };
+
+    filterTracks(tracks, customFilter) {
         // Playlist filter (or 'everyone')
         const playlist = document.getElementById('browse-filter-playlist').value;
         // Search query text field
@@ -144,8 +161,11 @@ const browse = {
         return tracks
                 .filter(customFilter)
                 .filter(track => playlist === 'everyone' || track.playlistPath === playlist)
-                .map(track => { return {track: track, score: browse.getSearchScore(track, playlist, query)}})
+                .map(track => { return {track: track, score: this.getSearchScore(track, playlist, query)}})
                 .sort((a, b) => b.score - a.score)
                 .map(sortedTrack => sortedTrack.track);
-    }
-}
+    };
+
+};
+
+const browse = new Browse();
