@@ -164,12 +164,7 @@ class Track {
         const queuedTrack = new QueuedTrack(this.trackData, audioBlobUrl, imageBlobUrl, lyrics);
 
         // Add track to queue and update HTML
-        if (top) {
-            state.queue.unshift(queuedTrack);
-        } else {
-            state.queue.push(queuedTrack);
-        }
-        updateQueueHtml();
+        queue.add(queuedTrack, top);
         console.info("queue | done");
     };
 };

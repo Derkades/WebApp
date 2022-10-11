@@ -59,7 +59,7 @@ function updateMediaSession() {
         document.getElementById('progress-bar').style.width = percentage + '%';
     }
 
-    const track = state.current;
+    const track = queue.currentTrack;
 
     navigator.mediaSession.metadata = new MediaMetadata({
         title: track.title !== null ? track.title : track.display,
@@ -103,51 +103,6 @@ function seek(delta) {
     updateMediaSessionPosition();
 }
 
-function next() {
-    if (state.queue.length === 0) {
-        console.log('music | queue is empty, trying again later');
-        setTimeout(next, 1000);
-        return;
-    }
-
-    // Add current track to history
-    if (state.current !== null) {
-        state.history.push(state.current);
-        // If history exceeded maximum length, remove first (oldest) element
-        if (state.history.length > state.historySize) {
-            state.history.shift();
-        }
-    }
-
-    // Replace current track with first item from queue
-    state.current = state.queue.shift();
-
-    updateQueue();
-    updateTrackHtml();
-}
-
-function previous() {
-    const audioElem = getAudioElement();
-
-    // Skip to beginning of current track first
-    if (audioElem !== null && (audioElem.currentTime > 15 || state.history.length == 0)) {
-        audioElem.currentTime = 0;
-        return;
-    }
-
-    if (state.history.length == 0) {
-        return;
-    }
-
-    // Move current track to beginning of queue
-    state.queue.unshift(state.current);
-    // Replace current track with last track in history
-    state.current = state.history.pop();
-
-    updateQueue();
-    updateTrackHtml();
-}
-
 function getTransformedVolume() {
     // https://www.dr-lex.be/info-stuff/volumecontrols.html
     // According to this article, x^4 seems to be a pretty good approximation of the perceived loudness curve
@@ -159,7 +114,7 @@ function createAudioElement(sourceUrl) {
     const audioElem = document.createElement('audio');
     audioElem.volume = getTransformedVolume();
     audioElem.setAttribute('autoplay', '');
-    audioElem.onended = next;
+    audioElem.onended = () => queue.next();
     const sourceElem = document.createElement('source');
     sourceElem.src = sourceUrl;
     audioElem.appendChild(sourceElem);
@@ -174,9 +129,9 @@ function getAudioElement() {
     return null;
 }
 
-// Replace audio player, album cover, and lyrics according to state.current track info
+// Replace audio player, album cover, and lyrics according to current track info
 function updateTrackHtml() {
-    const track = state.current;
+    const track = queue.currentTrack;
     const audioElem = createAudioElement(track.audioBlobUrl);
     replaceAudioElement(audioElem);
 
@@ -192,9 +147,9 @@ function updateTrackHtml() {
 
     document.getElementById('current-track').replaceChildren(track.displayHtml(true));
 
-    if (state.history.length > 0) {
-        const previousTrack = state.history[state.history.length - 1];
-        document.getElementById('previous-track').replaceChildren(track.displayHtml(true));
+    const previous = queue.getPreviousTrack();
+    if (previous !== null) {
+        document.getElementById('previous-track').replaceChildren(previous.displayHtml(true));
     } else {
         document.getElementById('previous-track').textContent = '-';
     }

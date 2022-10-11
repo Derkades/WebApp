@@ -1,10 +1,15 @@
-const editor = {
-    currentlyEditingPath: null,
-    open: (track) => {
+class Editor {
+    #currentlyEditingPath;
+
+    constructor() {
+        this.#currentlyEditingPath = null;
+    };
+
+    open(track) {
         if (track == null) {
             throw new Error('Track is null');
         }
-        editor.currentlyEditingPath = track.path;
+        this.#currentlyEditingPath = track.path;
         document.getElementById('editor-title').value = track.title;
         document.getElementById('editor-album').value = track.album;
         document.getElementById('editor-artists').value = track.artists !== null ? track.artists.join('/') : '';
@@ -12,8 +17,9 @@ const editor = {
         document.getElementById('editor-tags').value = track.tags.join('/');
 
         dialog.open('dialog-editor');
-    },
-    getValue: (id, list = false) => {
+    };
+
+    #getValue(id, list = false) {
         let value = document.getElementById(id).value;
         if (list) {
             const list = value.split('/');
@@ -25,21 +31,22 @@ const editor = {
             value = value.trim();
             return value === '' ? null : value;
         }
-    },
-    save: async function() {
+    };
+
+    async save() {
         // POST body for request
         const payload = {
-            path: editor.currentlyEditingPath,
+            path: this.#currentlyEditingPath,
                 metadata: {
-                title: editor.getValue('editor-title'),
-                album: editor.getValue('editor-album'),
-                artists: editor.getValue('editor-artists', true),
-                album_artist: editor.getValue('editor-album-artist'),
-                tags: editor.getValue('editor-tags', true),
+                title: this.#getValue('editor-title'),
+                album: this.#getValue('editor-album'),
+                artists: this.#getValue('editor-artists', true),
+                album_artist: this.#getValue('editor-album-artist'),
+                tags: this.#getValue('editor-tags', true),
             }
         }
 
-        editor.currentlyEditingPath = null;
+        this.#currentlyEditingPath = null;
 
         // Loading text
         document.getElementById('editor-save').classList.add("hidden");
@@ -63,5 +70,8 @@ const editor = {
         dialog.close('dialog-editor');
         document.getElementById('editor-reloading').classList.add('hidden');
         document.getElementById('editor-save').classList.remove('hidden');
-    },
+    };
+
 };
+
+const editor = new Editor();

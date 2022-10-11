@@ -1,9 +1,4 @@
 const state = {
-    queue: [],
-    current: null,
-    history: [],
-    queueBusy: false,
-    historySize: 20,
     maxTrackListSize: 250,
     lastChosenPlaylist: null,
     playlistOverrides: [],
@@ -20,13 +15,13 @@ document.addEventListener("DOMContentLoaded", () => {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
 
     // Playback controls
-    document.getElementById('button-skip-previous').addEventListener('click', previous);
+    document.getElementById('button-skip-previous').addEventListener('click', () => queue.previous());
     document.getElementById('button-rewind-15').addEventListener('click', () => seek(-15));
     document.getElementById('button-play').addEventListener('click', play);
     document.getElementById('button-pause').addEventListener('click', pause);
     document.getElementById('button-fast-forward-15').addEventListener('click', () => seek(15));
-    document.getElementById('button-skip-next').addEventListener('click', next);
-    document.getElementById('settings-volume').addEventListener('input', event => {
+    document.getElementById('button-skip-next').addEventListener('click', () => queue.next());
+    document.getElementById('settings-volume').addEventListener('input', () => {
         const audioElem = getAudioElement();
         if (audioElem !== null) {
             audioElem.volume = getTransformedVolume();
@@ -34,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Queue
-    updateQueue();
+    queue.fill();
 
     // Lyrics
     document.getElementById('button-microphone').addEventListener('click', switchLyrics);
@@ -48,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
         console.warn('Downloader submit button missing from page, this is normal if you are not an admin user');
     }
-    document.getElementById('settings-queue-size').addEventListener('input', updateQueue);
+    document.getElementById('settings-queue-size').addEventListener('input', () => queue.fill());
     document.getElementById('settings-theme').addEventListener('input', applyTheme);
 
     // Queue overlay
@@ -61,11 +56,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const editorButton = document.getElementById('button-edit');
     if (editorButton !== null) {
         editorButton.addEventListener('click', () => {
-            if (state.current !== null) {
-                editor.open(state.current);
+            if (queue.currentTrack !== null) {
+                editor.open(queue.currentTrack);
             }
         });
-        document.getElementById('editor-save').addEventListener('click', editor.save);
+        document.getElementById('editor-save').addEventListener('click', () => editor.save());
     } else {
         console.warn('Editor button missing from page, this is normal if you are not an admin user');
     }
@@ -84,10 +79,10 @@ document.addEventListener("DOMContentLoaded", () => {
             audio.currentTime = callback.seekTime;
         }
     });
-    navigator.mediaSession.setActionHandler('previoustrack', previous);
-    navigator.mediaSession.setActionHandler('nexttrack', next);
+    navigator.mediaSession.setActionHandler('previoustrack', () => queue.previous());
+    navigator.mediaSession.setActionHandler('nexttrack', () => queue.next());
 
-    next();
+    queue.next();
     setInterval(updateMediaSession, 500);
     setInterval(updateMediaSessionPosition, 5000);
     initTrackList();

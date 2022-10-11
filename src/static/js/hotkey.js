@@ -20,9 +20,9 @@ function handleKey(key) {
     } else if (key === 'p' || key === ' ') {
         playPause();
     } else if (key === 'ArrowLeft') {
-        previous();
+        queue.previous();
     } else if (key === 'ArrowRight') {
-        next();
+        queue.next();
     } else if (key === '.') {
         seek(3);
     } else if (key === ',') {
