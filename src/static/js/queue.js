@@ -65,71 +65,22 @@ async function downloadRandomAndAddToQueue(playlist) {
     const path = (await chooseResponse.json()).path;
 
     // Find track info for this file
-    const track = findTrackByPath(path);
+    const track = Track.findTrackByPath(path);
 
     if (track === null) {
         throw Error('Track does not exist in local list: ' + path);
     }
 
-    await downloadAndAddToQueue(track);
-}
-
-async function downloadAndAddToQueue(track, top = false) {
-    const encodedQuality = encodeURIComponent(document.getElementById('settings-audio-quality').value);
-    const encodedPath = encodeURIComponent(track.path);
-
-    // Get track audio
-    console.info('queue | download audio');
-    const trackResponse = await fetch('/get_track?path=' + encodedPath + '&quality=' + encodedQuality);
-    checkResponseCode(trackResponse);
-    const audioBlob = await trackResponse.blob();
-    track.audioBlobUrl = URL.createObjectURL(audioBlob);
-
-    // Get cover image
-    if (encodedQuality === 'verylow') {
-        console.info('queue | using raphson image to save data');
-        track.imageUrl = '/raphson';
-        track.imageBlobUrl = '/raphson';
-    } else {
-        console.info('queue | download album cover image');
-        track.imageUrl = '/get_album_cover?path=' + encodedPath + '&quality=' + encodedQuality;
-        const coverResponse = await fetch(track.imageUrl);
-        checkResponseCode(coverResponse);
-        const imageBlob = await coverResponse.blob();
-        track.imageBlobUrl = URL.createObjectURL(imageBlob);
-    }
-
-    // Get lyrics
-    if (encodedQuality === 'verylow') {
-        track.lyrics = {
-            found: true,
-            source: null,
-            html: "<i>Lyrics were not downloaded to save data</i>",
-        };
-    } else {
-        console.info('queue | download lyrics');
-        track.lyricsUrl = '/get_lyrics?path=' + encodedPath;
-        const lyricsResponse = await fetch(track.lyricsUrl);
-        checkResponseCode(lyricsResponse);
-        const lyricsJson = await lyricsResponse.json();
-        track.lyrics = lyricsJson;
-    }
-
-    // Add track to queue and update HTML
-    if (top) {
-        state.queue.unshift(track);
-    } else {
-        state.queue.push(track);
-    }
-    updateQueueHtml();
-    console.info("queue | done");
+    await track.downloadAndAddToQueue();
 }
 
 function removeFromQueue(index) {
     const track = state.queue[index];
     const removalBehaviour = document.getElementById('settings-queue-removal-behaviour').value;
     if (removalBehaviour === 'same') {
-        state.playlistOverrides.push(track.playlist);
+        // Add playlist to override array. Next time a track is picked, when playlistOverrides contains elements,
+        // one element is popped and used instead of choosing a random playlist.
+        state.playlistOverrides.push(track.playlistPath);
     } else if (removalBehaviour !== 'roundrobin') {
         console.warn('unexpected removal behaviour: ' + removalBehaviour);
     }
@@ -151,20 +102,24 @@ function updateQueueHtml() {
     const rows = [];
     let i = 0;
     for (const queuedTrack of state.queue) {
+        // Trash can that appears when hovering - click to remove track
         const tdCover = document.getElementById('template-td-cover').content.cloneNode(true).firstElementChild;
         tdCover.style.backgroundImage = 'url("' + queuedTrack.imageBlobUrl + '")';
         const rememberI = i;
         tdCover.onclick = () => removeFromQueue(rememberI);
 
+        // Playlist link that opens browse view
         const aPlaylist = document.createElement('a');
-        aPlaylist.textContent = queuedTrack.playlist_display;
-        aPlaylist.onclick = () => browse.browsePlaylist(queuedTrack.playlist);
+        aPlaylist.textContent = queuedTrack.playlistDisplay;
+        aPlaylist.onclick = () => browse.browsePlaylist(queuedTrack.playlistPath);
         const tdPlaylist = document.createElement('td');
         tdPlaylist.append(aPlaylist);
 
+        // Track title HTML
         const tdTrack = document.createElement('td');
-        tdTrack.appendChild(getTrackDisplayHtml(queuedTrack));
+        tdTrack.appendChild(queuedTrack.displayHtml());
 
+        // Add columns to <tr> row and add the row to the table
         const row = document.createElement('tr');
         row.dataset.queuePos = i;
         row.appendChild(tdCover);
@@ -175,8 +130,8 @@ function updateQueueHtml() {
         i++;
     }
 
-    const minQueueSize = parseInt(document.getElementById('settings-queue-size').value)
-
+    // If the queue is still loading (size smaller than target size), add a loading spinner
+    const minQueueSize = parseInt(document.getElementById('settings-queue-size').value);
     if (i < minQueueSize) {
         rows.push(document.getElementById('template-queue-spinner').content.cloneNode(true));
     }

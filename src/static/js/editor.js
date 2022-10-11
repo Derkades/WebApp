@@ -8,7 +8,7 @@ const editor = {
         document.getElementById('editor-title').value = track.title;
         document.getElementById('editor-album').value = track.album;
         document.getElementById('editor-artists').value = track.artists !== null ? track.artists.join('/') : '';
-        document.getElementById('editor-album-artist').value = track.album_artist;
+        document.getElementById('editor-album-artist').value = track.albumArtist;
         document.getElementById('editor-tags').value = track.tags.join('/');
 
         dialog.open('dialog-editor');
@@ -57,7 +57,7 @@ const editor = {
         document.getElementById('editor-reloading').classList.remove('hidden');
 
         // Need to update local track list now, so metadata editor reflects changes
-        await updateLocalTrackList();
+        await Track.updateLocalTrackList();
 
         // Close dialog, and restore save button
         dialog.close('dialog-editor');

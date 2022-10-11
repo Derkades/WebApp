@@ -58,9 +58,9 @@ function youTubeDownload(event) {
         if (json.code == 0) {
             output.append('\n--- javascript ---\n')
             output.append('Scanning playlist...\n');
-            await scanPlaylist(directory);
+            await Track.scanPlaylist(directory);
             output.append('Done, updating local track list...\n');
-            await updateLocalTrackList();
+            await Track.updateLocalTrackList();
             output.append('Done!');
             output.style.backgroundColor = 'darkgreen';
         } else {

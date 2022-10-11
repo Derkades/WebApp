@@ -90,9 +90,13 @@ document.addEventListener("DOMContentLoaded", () => {
     next();
     setInterval(updateMediaSession, 500);
     setInterval(updateMediaSessionPosition, 5000);
-    updateLocalTrackList().catch(err => {
+    initTrackList();
+});
+
+function initTrackList() {
+    Track.updateLocalTrackList().catch(err => {
         console.warn('track list | error');
         console.warn(err);
-        setTimeout(updateLocalTrackList, 1000);
+        setTimeout(initTrackList, 1000);
     });
-});
+}

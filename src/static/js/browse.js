@@ -71,22 +71,22 @@ const browse = {
         let i = 0;
         for (const track of tracks) {
             const colPlaylist = document.createElement('td');
-            colPlaylist.textContent = track.playlist;
+            colPlaylist.textContent = track.playlistDisplay;
 
             const colDuration = document.createElement('td');
             colDuration.append(secondsToString(track.duration));
 
             const colTitle = document.createElement('td');
-            colTitle.replaceChildren(getTrackDisplayHtml(track));
+            colTitle.replaceChildren(track.displayHtml());
 
             const colAddTop = document.createElement('td');
             const addTopButton = createIconButton('playlist-plus.svg', ['vflip']);
-            addTopButton.onclick = () => downloadAndAddToQueue(track, true);
+            addTopButton.onclick = () => track.downloadAndAddToQueue(true);
             colAddTop.replaceChildren(addTopButton);
 
             const colAddBottom = document.createElement('td');
             const addButton = createIconButton('playlist-plus.svg');
-            addButton.onclick = () => downloadAndAddToQueue(track);
+            addButton.onclick = () => track.downloadAndAddToQueue();
             colAddBottom.replaceChildren(addButton);
 
             const colEdit = document.createElement('td');
@@ -113,8 +113,8 @@ const browse = {
             if (track.artists !== null) {
                 matchProperties.push(track.artists.join(' & '));
             }
-            if (track.album_artist !== null) {
-                matchProperties.push(track.album_artist);
+            if (track.albumArtist !== null) {
+                matchProperties.push(track.albumArtist);
             }
 
             if (query !== '') {
@@ -143,7 +143,7 @@ const browse = {
         // Assign score to all tracks, then sort tracks by score. Finally, get original track object back.
         return tracks
                 .filter(customFilter)
-                .filter(track => playlist === 'everyone' || track.playlist === playlist)
+                .filter(track => playlist === 'everyone' || track.playlistPath === playlist)
                 .map(track => { return {track: track, score: browse.getSearchScore(track, playlist, query)}})
                 .sort((a, b) => b.score - a.score)
                 .map(sortedTrack => sortedTrack.track);
