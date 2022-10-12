@@ -352,16 +352,24 @@ def files():
     children = []
 
     for path in base_path.iterdir():
+        can_delete = True
         if path.is_dir():
             pathtype = 'dir'
+            try:
+                next(path.iterdir())
+                can_delete = False
+            except StopIteration:
+                pass
         elif music.has_music_extension(path):
             pathtype = 'music'
+            can_delete = True
         else:
             pathtype = 'file'
         children.append({
             'path': music.to_relpath(path),
             'name': path.name,
             'type': pathtype,
+            'can_delete': can_delete,
         })
 
     children = sorted(children, key=lambda x: x['name'])
@@ -382,7 +390,16 @@ def files_delete():
         return Response(None, 403)
 
     path = music.from_relpath(request.form['path'])
-    path.unlink()
+    if path.is_dir():
+        try:
+            next(path.iterdir())
+            return Response('cannot delete directory, it is not empty', 400)
+        except StopIteration:
+            # Directory contains no files
+            path.rmdir()
+    else:
+        path.unlink()
+
     return redirect('/files?path=' + urlencode(music.to_relpath(path.parent)))
 
 
