@@ -56,6 +56,13 @@
                         <input type="submit" value="{% trans %}Delete{% endtrans %}">
                     </form>
                 {% endif %}
+
+                {% if file['type'] != 'dir' %}
+                    <form method="GET" action="/files_download" class="inline-block">
+                        <input type="hidden" name="path" value="{{ file['path'] }}">
+                        <input type="submit" value="{% trans %}Download{% endtrans %}">
+                    </form>
+                {% endif %}
             </td>
         {% endfor %}
         </table>

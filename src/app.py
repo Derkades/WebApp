@@ -4,7 +4,7 @@ from pathlib import Path
 from dataclasses import dataclass
 from urllib.parse import quote as urlencode
 
-from flask import Flask, request, render_template, Response, redirect
+from flask import Flask, request, render_template, Response, redirect, send_file
 import flask_assets
 from flask_babel import Babel
 import bcrypt
@@ -476,6 +476,15 @@ def files_mkdir():
     check_filename(dirname)
     Path(path, dirname).mkdir()
     return redirect('/files?path=' + urlencode(music.to_relpath(path)))
+
+
+@app.route('/files_download')
+def files_download():
+    """
+    Download track
+    """
+    path = music.from_relpath(request.args['path'])
+    return send_file(path, as_attachment=True)
 
 
 @babel.localeselector
