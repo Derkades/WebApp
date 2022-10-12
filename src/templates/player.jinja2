@@ -1,3 +1,5 @@
+{% extends "base.jinja2" %}
+
 {% macro icon_button(id, icon) %}
     <button id="{{ id }}" class="icon-button">
         <div class="icon" style="background-image: url('/static/icon/{{icon}}.svg')"></div>
@@ -26,19 +28,17 @@
     </div>
 {% endmacro %}
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Super fancy music player 2.0</title>
-    <link rel="icon" href="/static/favicon.ico">
+{% block title %}
+    Super fancy music player 2.0
+{% endblock title %}
+
+{% block head %}
     {% assets "style.scss", filters="pyscss,cssmin", output="gen/styles.css" %}
         <link rel="stylesheet" href="{{ ASSET_URL }}">
     {% endassets %}
-</head>
-<body>
+{% endblock head %}
 
+{% block content %}
     <div id="bg-image-1" class="bg-image bg-image-blurred"></div>
     <div id="bg-image-2" class="bg-image bg-image-blurred fade-image-top"></div>
     <div class="bg-image bg-image-blurred dither"></div>
@@ -308,5 +308,4 @@
         </td>
     </template>
 
-</body>
-</html>
+{% endblock content %}
