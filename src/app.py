@@ -34,6 +34,12 @@ class User:
     admin: bool
 
 
+@dataclass
+class AuthError(Exception):
+    reason: str
+    redirect_login: bool = False
+
+
 def check_password(username: Optional[str], password: Optional[str]) -> Optional[User]:
     """
     Check whether the provided password matches the correct password
@@ -46,21 +52,34 @@ def check_password(username: Optional[str], password: Optional[str]) -> Optional
 
         if result is None:
             log.warning("Login attempt with non-existent username: '%s'", username)
-            return None
+            raise AuthError('Invalid username or password.')
 
         hashed_password, is_admin = result
 
         if not bcrypt.checkpw(password.encode(), hashed_password.encode()):
-            return None
+            raise AuthError('Invalid username or password.')
 
         return User(username, is_admin)
 
 
 def check_password_cookie(require_admin: bool = False) -> Optional[User]:
+    if 'username' not in request.cookies:
+        raise AuthError('Not logged in.')
+
     user = check_password(request.cookies.get('username'), request.cookies.get('password'))
     if require_admin and not user.admin:
-        return None
+        raise AuthError('Admin privilege is required, but your account does not have admin status.')
     return user
+
+
+@app.errorhandler(AuthError)
+def handle_auth_error(err: AuthError):
+    return Response(f'''
+                    Permission denied. Reason: {err.reason}
+                    <br>
+                    <br>
+                    <a href="/login">Login</a>
+                    ''', 403)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -84,9 +103,6 @@ def login():
         response.set_cookie('password', password, max_age=3600*24*30, samesite='Strict')
         return response
     else:
-        if check_password_cookie():
-            return redirect('/')
-
         return render_template('login.jinja2', invalid_password=False)
 
 
@@ -96,8 +112,6 @@ def player():
     Main player page. Serves player.jinja2 template file.
     """
     user = check_password_cookie()
-    if user is None:
-        return redirect('/login')
 
     mobile = False
     if 'User-Agent' in request.headers:
@@ -115,8 +129,7 @@ def choose_track():
     """
     Choose random track from the provided playlist directory.
     """
-    if not check_password_cookie():
-        return Response(None, 403)
+    check_password_cookie()
 
     dir_name = request.args['playlist_dir']
     tag_mode = request.args['tag_mode']
@@ -134,8 +147,7 @@ def get_track() -> Response:
     """
     Get transcoded audio for the given track path.
     """
-    if not check_password_cookie():
-        return Response(None, 403)
+    check_password_cookie()
 
     quality = request.args['quality'] if 'quality' in request.args else 'high'
 
@@ -171,8 +183,7 @@ def get_album_cover() -> Response:
     """
     Get album cover image for the provided track path.
     """
-    if not check_password_cookie():
-        return Response(None, 403)
+    check_password_cookie()
 
     track = Track.by_relpath(request.args['path'])
 
@@ -194,8 +205,7 @@ def get_lyrics():
     """
     Get lyrics for the provided track path.
     """
-    if not check_password_cookie():
-        return Response(None, 403)
+    check_password_cookie()
 
     track = music.Track(request.args['path'])
     meta = track.metadata()
@@ -217,8 +227,7 @@ def ytdl():
     """
     Use yt-dlp to download the provided URL to a playlist directory
     """
-    if not check_password_cookie(require_admin=True):
-        return Response(None, 403)
+    check_password_cookie(require_admin=True)
 
     directory = request.json['directory']
     url = request.json['url']
@@ -241,8 +250,7 @@ def track_list():
     Return list of playlists and tracks. If it takes too long to load metadata for all tracks,
     a partial result is returned.
     """
-    if not check_password_cookie():
-        return Response(None, 403)
+    check_password_cookie()
 
     response = {
         'playlists': {},
@@ -286,8 +294,7 @@ def scan_music():
     """
     Scans all playlists for new music
     """
-    if not check_password_cookie(require_admin=True):
-        return Response(None, 403)
+    check_password_cookie(require_admin=True)
 
     if 'playlist' in request.args:
         scanner.rebuild_music_database(only_playlist=request.args['playlist'])
@@ -302,8 +309,7 @@ def update_metadata():
     """
     Endpoint to update track metadata
     """
-    if not check_password_cookie():
-        return Response(None, 403)
+    check_password_cookie()
 
     payload = request.json
     track = Track(payload['path'])
@@ -324,8 +330,7 @@ def raphson() -> Response:
     """
     Serve raphson logo image
     """
-    if not check_password_cookie():
-        return Response(None, 403)
+    check_password_cookie()
 
     img_format = get_img_format()
     thumb = image.thumbnail(raphson_png_path, 'raphson', img_format[6:], 512)
@@ -339,8 +344,7 @@ def files():
     """
     File manager
     """
-    if not check_password_cookie():
-        return Response(None, 403)
+    check_password_cookie()
 
     if 'path' in request.args:
         base_path = music.from_relpath(request.args['path'])
@@ -386,8 +390,7 @@ def files_delete():
     """
     Delete a file
     """
-    if not check_password_cookie(require_admin=True):
-        return Response(None, 403)
+    check_password_cookie(require_admin=True)
 
     path = music.from_relpath(request.form['path'])
     if path.is_dir():
@@ -413,6 +416,8 @@ def files_upload():
     """
     Form target to upload file
     """
+    check_password_cookie(require_admin=True)
+
     upload_dir = music.from_relpath(request.form['dir'])
     uploaded_file = request.files['upload']
     check_filename(uploaded_file.filename)
@@ -425,6 +430,8 @@ def files_rename():
     """
     Page and form target to rename file
     """
+    check_password_cookie(require_admin=True)
+
     if request.method == 'POST':
         path = music.from_relpath(request.form['path'])
         new_name = request.form['new-name']
@@ -443,6 +450,8 @@ def files_mkdir():
     """
     Create directory, then enter it
     """
+    check_password_cookie(require_admin=True)
+
     path = music.from_relpath(request.form['path'])
     dirname = request.form['dirname']
     check_filename(dirname)
