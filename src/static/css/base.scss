@@ -60,11 +60,19 @@ p.secondary {
     font-size: .8em;
 }
 
-select, button, input[type=submit], input[type=checkbox] {
+select,
+button,
+input[type=submit],
+input[type=checkbox] {
     cursor: pointer;
 }
 
-select, button, input[type=text], input[type=number], input[type=submit] {
+select,
+button,
+input[type=text],
+input[type=number],
+input[type=submit],
+input[type=password] {
     padding: .3rem;
     background-color: rgba(0, 0, 0, 0.3);
     border: 1px solid black;
@@ -85,7 +93,12 @@ select, button, input[type=text], input[type=number], input[type=submit] {
 // }
 
 body.light {
-    & select, & input[type=text], & input[type=number] & input[type=submit] {
+    & select,
+    & button,
+    & input[type=text],
+    & input[type=number],
+    & input[type=submit],
+    & input[type=password] {
         background-color: rgba(255, 255, 255, 0.3);
         border: 1px solid #505050;
         color: black;
@@ -120,4 +133,21 @@ body.light .icon {
 .icon-button {
     padding: .25rem;
     margin: 0;
+}
+
+.fancy {
+    font-family: monospace;
+    color: red;
+    animation: sleutelframes 1s ease-in-out infinite;
+    position: relative;
+    font-size: 1.5em;
+}
+
+@keyframes sleutelframes {
+    0%, 100% {
+    bottom: -.4em;
+    }
+    50% {
+    bottom: .4em;
+    }
 }
