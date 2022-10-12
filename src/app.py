@@ -18,7 +18,6 @@ import music
 from music import Track
 import musicbrainz
 import scanner
-import settings
 
 
 app = Flask(__name__, template_folder='templates')
@@ -344,11 +343,10 @@ def files():
         return Response(None, 403)
 
     if 'path' in request.args:
-        base_path = Path(settings.music_dir, request.args['path'])
-        music.ensure_inside_music(base_path)
+        base_path = music.from_relpath(request.args['path'])
         parent_path_uri = urlencode(base_path.absolute().as_posix())
     else:
-        base_path = Path(settings.music_dir)
+        base_path = music.from_relpath('.')
         parent_path_uri = None
 
     children = []
@@ -361,7 +359,7 @@ def files():
         else:
             pathtype = 'file'
         children.append({
-            'path': path.absolute().as_posix(),
+            'path': music.to_relpath(path),
             'name': path.name,
             'type': pathtype,
         })
@@ -369,8 +367,8 @@ def files():
     children = sorted(children, key=lambda x: x['name'])
 
     return render_template('files.jinja2',
-                           base_path_abs=base_path.absolute().as_posix(),
-                           base_path_uri=urlencode(base_path.absolute().as_posix()),
+                           base_path=music.to_relpath(base_path),
+                           base_path_uri=urlencode(music.to_relpath(base_path)),
                            parent_path_uri=parent_path_uri,
                            files=children)
 
@@ -383,10 +381,9 @@ def files_delete():
     if not check_password_cookie(require_admin=True):
         return Response(None, 403)
 
-    path = Path(request.form['path'])
-    music.ensure_inside_music(path)
+    path = music.from_relpath(request.form['path'])
     path.unlink()
-    return redirect('/files?path=' + urlencode(path.parent.absolute().as_posix()))
+    return redirect('/files?path=' + urlencode(music.to_relpath(path.parent)))
 
 
 @app.route('/files_upload', methods=['POST'])
@@ -394,11 +391,10 @@ def files_upload():
     """
     Form target to upload file
     """
-    upload_dir = Path(request.form['dir'])
-    music.ensure_inside_music(upload_dir)
+    upload_dir = music.from_relpath(request.form['dir'])
     uploaded_file = request.files['upload']
     uploaded_file.save(Path(upload_dir, uploaded_file.filename))
-    return redirect('/files?path=' + urlencode(upload_dir.absolute().as_posix()))
+    return redirect('/files?path=' + urlencode(music.to_relpath(upload_dir)))
 
 
 @app.route('/files_rename', methods=['GET', 'POST'])
@@ -407,19 +403,17 @@ def files_rename():
     Page and form target to rename file
     """
     if request.method == 'POST':
-        path = Path(request.form['path'])
-        music.ensure_inside_music(path)
+        path = music.from_relpath(request.form['path'])
         new_name = request.form['new-name']
         if '/' in new_name or new_name == '.' or new_name == '..':
             return Response('illegal name', 400)
         path.rename(Path(path.parent, new_name))
-        return redirect('/files?path=' + urlencode(path.parent.absolute().as_posix()))
+        return redirect('/files?path=' + urlencode(music.to_relpath(path.parent)))
     else:
-        path_posix = request.args['path']
-        name = Path(path_posix).name
+        path = music.from_relpath(request.args['path'])
         return render_template('rename.jinja2',
-                               path_posix=path_posix,
-                               name=name)
+                               path=music.to_relpath(path),
+                               name=path.name)
 
 
 @babel.localeselector

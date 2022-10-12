@@ -1,15 +1,15 @@
 {% extends "base.jinja2" %}
 
 {% block title %}
-    Rename file
+    {% trans %}Rename file{% endtrans %}
 {% endblock title %}
 
 {% block content %}
 
-    <h3>Renaming file: {{ path_posix}}</h3>
+    <h3>Renaming file: {{ path }}</h3>
 
     <form method="POST">
-        <input type="hidden" name="path" value="{{ path_posix }}">
+        <input type="hidden" name="path" value="{{ path }}">
         <input type="text" name="new-name" value="{{ name }}" size="70">
         <input type="submit" value="{% trans %}Rename{% endtrans %}">
     </form>

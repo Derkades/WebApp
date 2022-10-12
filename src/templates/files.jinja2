@@ -14,7 +14,7 @@
 
 {% block content %}
 
-    <h3>Browsing: {{ base_path_abs }}</h3>
+    <h3>Browsing: {{ base_path }}</h3>
 
     {% if parent_path_uri %}
         <a href="?parent_path_uri">Parent directory</a>
@@ -53,7 +53,7 @@
 
     <h3>Upload file</h3>
     <form method="POST" action="/files_upload" enctype="multipart/form-data">
-        <input type="hidden" name="dir" value="{{ base_path_abs }}">
+        <input type="hidden" name="dir" value="{{ base_path }}">
         <input type="file" name="upload">
         <input type="submit" value="{% trans %}Upload{% endtrans %}">
     </form>

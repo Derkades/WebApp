@@ -32,7 +32,19 @@ def to_relpath(path: Path) -> str:
     """
     Returns: Relative path as string, excluding base music directory
     """
-    return path.absolute().as_posix()[len(Path(settings.music_dir).absolute().as_posix())+1:]
+    relpath = path.absolute().as_posix()[len(Path(settings.music_dir).absolute().as_posix())+1:]
+    return relpath if len(relpath) > 0 else '.'
+
+
+def from_relpath(relpath: str) -> Path:
+    """
+    Creates Path object from string path relative to music base directory, with directory
+    traversal protection.
+    """
+    path = Path(settings.music_dir, relpath)
+    if not path.is_relative_to(Path(settings.music_dir)):
+        raise Exception()
+    return path
 
 
 def scan_music(path) -> Iterator[Path]:
@@ -45,15 +57,10 @@ def scan_music(path) -> Iterator[Path]:
             yield track_path
 
 
-def ensure_inside_music(path: Path):
+def has_music_extension(path: Path) -> bool:
     """
-    Prevent directory traversal; throws an exception if provided directory is outside of music directory
+    Check if file is a music file
     """
-    if not path.is_relative_to(Path(settings.music_dir)):
-        raise Exception()
-
-
-def has_music_extension(path: Path):
     for ext in MUSIC_EXTENSIONS:
         if path.name.endswith(ext):
             return True
@@ -64,9 +71,7 @@ class Track:
 
     def __init__(self, relpath: str):
         self.relpath = relpath
-        self.path = Path(settings.music_dir, relpath)
-
-        ensure_inside_music(self.path)
+        self.path = from_relpath(relpath)
 
     def metadata(self):
         """
