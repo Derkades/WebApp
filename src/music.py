@@ -45,15 +45,28 @@ def scan_music(path) -> Iterator[Path]:
             yield track_path
 
 
+def ensure_inside_music(path: Path):
+    """
+    Prevent directory traversal; throws an exception if provided directory is outside of music directory
+    """
+    if not path.is_relative_to(Path(settings.music_dir)):
+        raise Exception()
+
+
+def has_music_extension(path: Path):
+    for ext in MUSIC_EXTENSIONS:
+        if path.name.endswith(ext):
+            return True
+    return False
+
+
 class Track:
 
     def __init__(self, relpath: str):
         self.relpath = relpath
         self.path = Path(settings.music_dir, relpath)
 
-        # Prevent directory traversal
-        if not self.path.is_relative_to(Path(settings.music_dir)):
-            raise Exception()
+        ensure_inside_music(self.path)
 
     def metadata(self):
         """

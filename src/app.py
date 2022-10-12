@@ -2,6 +2,7 @@ from typing import Optional
 import logging
 from pathlib import Path
 from dataclasses import dataclass
+from urllib.parse import quote as urlencode
 
 from flask import Flask, request, render_template, Response, redirect
 import flask_assets
@@ -17,6 +18,7 @@ import music
 from music import Track
 import musicbrainz
 import scanner
+import settings
 
 
 app = Flask(__name__, template_folder='templates')
@@ -304,7 +306,7 @@ def update_metadata():
     if not check_password_cookie():
         return Response(None, 403)
 
-    payload = request.get_json()
+    payload = request.json
     track = Track(payload['path'])
     meta_dict = {
         'title': payload['metadata']['title'],
@@ -331,6 +333,71 @@ def raphson() -> Response:
     response = Response(thumb, mimetype=img_format)
     response.cache_control.max_age = 24*3600
     return response
+
+
+@app.route('/files')
+def files():
+    """
+    File manager
+    """
+    if not check_password_cookie():
+        return Response(None, 403)
+
+    if 'path' in request.args:
+        base_path = Path(settings.music_dir, request.args['path'])
+        music.ensure_inside_music(base_path)
+        parent_path_uri = urlencode(base_path.absolute().as_posix())
+    else:
+        base_path = Path(settings.music_dir)
+        parent_path_uri = None
+
+    children = []
+
+    for path in base_path.iterdir():
+        if path.is_dir():
+            pathtype = 'dir'
+        elif music.has_music_extension(path):
+            pathtype = 'music'
+        else:
+            pathtype = 'file'
+        children.append({
+            'name': path.name,
+            'type': pathtype,
+        })
+
+    children = sorted(children, key=lambda x: x['name'])
+
+    return render_template('files.jinja2',
+                           base_path_abs=base_path.absolute().as_posix(),
+                           base_path_uri=urlencode(base_path.absolute().as_posix()),
+                           parent_path_uri=parent_path_uri,
+                           files=children)
+
+
+@app.route('/files_delete', methods=['POST'])
+def files_delete():
+    """
+    Delete a file
+    """
+    if not check_password_cookie(require_admin=True):
+        return Response(None, 403)
+
+    path = Path(request.form['path'])
+    music.ensure_inside_music(path)
+    path.unlink()
+    return redirect('/files?path=' + urlencode(path.parent.absolute().as_posix()))
+
+
+@app.route('/files_upload', methods=['POST'])
+def files_upload():
+    """
+    Form target to upload file
+    """
+    upload_dir = Path(request.form['dir'])
+    music.ensure_inside_music(upload_dir)
+    uploaded_file = request.files['upload']
+    uploaded_file.save(Path(upload_dir, uploaded_file.filename))
+    return redirect('/files?path=' + urlencode(upload_dir.absolute().as_posix()))
 
 
 @babel.localeselector
