@@ -386,6 +386,11 @@ def files_delete():
     return redirect('/files?path=' + urlencode(music.to_relpath(path.parent)))
 
 
+def check_filename(name: str) ->bool:
+    if '/' in name or name == '.' or name == '..':
+        raise ValueError('illegal name')
+
+
 @app.route('/files_upload', methods=['POST'])
 def files_upload():
     """
@@ -393,6 +398,7 @@ def files_upload():
     """
     upload_dir = music.from_relpath(request.form['dir'])
     uploaded_file = request.files['upload']
+    check_filename(uploaded_file.filename)
     uploaded_file.save(Path(upload_dir, uploaded_file.filename))
     return redirect('/files?path=' + urlencode(music.to_relpath(upload_dir)))
 
@@ -405,8 +411,7 @@ def files_rename():
     if request.method == 'POST':
         path = music.from_relpath(request.form['path'])
         new_name = request.form['new-name']
-        if '/' in new_name or new_name == '.' or new_name == '..':
-            return Response('illegal name', 400)
+        check_filename(new_name)
         path.rename(Path(path.parent, new_name))
         return redirect('/files?path=' + urlencode(music.to_relpath(path.parent)))
     else:
@@ -414,6 +419,18 @@ def files_rename():
         return render_template('rename.jinja2',
                                path=music.to_relpath(path),
                                name=path.name)
+
+
+@app.route('/files_mkdir', methods=['POST'])
+def files_mkdir():
+    """
+    Create directory, then enter it
+    """
+    path = music.from_relpath(request.form['path'])
+    dirname = request.form['dirname']
+    check_filename(dirname)
+    Path(path, dirname).mkdir()
+    return redirect('/files?path=' + urlencode(music.to_relpath(path)))
 
 
 @babel.localeselector

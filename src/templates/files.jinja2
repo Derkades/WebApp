@@ -58,4 +58,11 @@
         <input type="submit" value="{% trans %}Upload{% endtrans %}">
     </form>
 
+    <h3>Create directory</h3>
+    <form method="POST" action="/files_mkdir">
+        <input type="hidden" name="path" value="{{ base_path }}">
+        <input type="text" name="dirname">
+        <input type="submit" value="{% trans %}Create directory{% endtrans %}">
+    </form>
+
 {% endblock content %}
