@@ -1,100 +1,11 @@
-$border-radius-amount: .5rem;
-
-@font-face {
-    font-family: 'Quicksand';
-    font-style: normal;
-    font-weight: 400;
-    src: url('/static/quicksand-v30-latin-regular.woff2') format('woff2');
-}
-
-@mixin background-cover {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-}
-
-body {
-    height: 100vh;
-    width: 100vw;
-    margin: 0;
-    background-color: black;
-    color: white;
-}
-
-body.light {
-    background-color: white;
-    color: black;
-}
-
-h3, p, label, td, div, a, .progress-time {
-    font-family: 'Quicksand', Verdana, sans-serif;
-}
-
-a {
-    color: lightblue;
-    text-decoration: none;
-}
-
-body.light a {
-    color: darkblue;
-}
-
-a:hover {
-    text-decoration: underline;
-    cursor: pointer;
-}
+@import "./base.scss";
 
 .sidebar-left h3 {
     margin: .5rem 0;
 }
 
-p {
-    margin: .2rem 0;
-}
-
-.secondary {
-    color: #ccc;
-}
-
-body.light .secondary {
-    color: #303030;
-}
-
-p.secondary {
-    font-size: .8em;
-}
-
-.icon-button {
-    padding: .25rem;
-    margin: 0;
-}
-
 input[type=range] {
     cursor: ew-resize;
-}
-
-select, button, input[type=submit], input[type=checkbox] {
-    cursor: pointer;
-}
-
-select, button, input[type=text], input[type=number], input[type=submit] {
-    padding: .3rem;
-    background-color: rgba(0, 0, 0, 0.3);
-    border: 1px solid black;
-    border-radius: $border-radius-amount;
-    color: white;
-    margin-right: .3rem;
-    margin-bottom: .3rem;
-}
-
-body.light select,
-body.light button,
-body.light input[type=text],
-body.light input[type=number],
-body.light input[type=submit] {
-    background-color: rgba(255, 255, 255, 0.3);
-    border: 1px solid #505050;
-    color: black;
 }
 
 input::placeholder {
@@ -400,19 +311,6 @@ body.light .progress-time {
     to {
         transform: rotate(360deg);
     }
-}
-
-.icon {
-    height: 2rem;
-    width: 2rem;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: contain;
-    filter: invert(1);
-}
-
-body.light .icon {
-    filter: none;
 }
 
 h4 > .icon {

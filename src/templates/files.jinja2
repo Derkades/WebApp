@@ -4,65 +4,76 @@
     {% trans %}File manager{% endtrans %}
 {% endblock title %}
 
-{% block head %}
-    <style>
-        form {
-            display: inline-block;
-        }
-    </style>
-{% endblock head %}
-
 {% block content %}
+    <main>
+        <h3>Browsing: {{ base_path }}</h3>
 
-    <h3>Browsing: {{ base_path }}</h3>
-
-    {% if parent_path_uri %}
-        <a href="?parent_path_uri">Parent directory</a>
-    {% else %}
-        Parent directory
-    {% endif %}
-    <br>
-    <hr>
-    <br>
-
-    {% for file in files %}
-        {% if file['type'] == 'dir' %}
-            [D] <a href="?path={{ file['path'] }}">{{ file.name }}/</a>
-        {% elif file['type'] == 'music' %}
-            [M] <span>{{ file.name }}</span>
+        {% if parent_path_uri %}
+            <a href="?path={{ parent_path_uri }}">Parent directory</a>
         {% else %}
-            [F] <span>{{ file.name }}</span>
+            Parent directory
         {% endif %}
+        <br>
+        <hr>
+        <br>
 
-        <form method="GET" action="/files_rename">
-            <input type="hidden" name="path" value="{{ file['path'] }}">
-            <input type="submit" value="{% trans %}Rename{% endtrans %}">
+        <table>
+
+        {% for file in files %}
+            <tr>
+            {% if file['type'] == 'dir' %}
+                <td>
+                    <div class="icon" style="background-image: url('static/icon/folder.svg')"></div>
+                </td>
+                <td>
+                    <a href="?path={{ file['path'] }}">{{ file.name }}/</a>
+                </td>
+            {% elif file['type'] == 'music' %}
+                <td>
+                    <div class="icon" style="background-image: url('static/icon/music.svg')"></div>
+                </td>
+                <td>
+                    <span>{{ file.name }}</span>
+                </td>
+            {% else %}
+                <td>
+                    <div class="icon" style="background-image: url('static/icon/file-question.svg')"></div>
+                </td>
+                <td>
+                    <span>{{ file.name }}</span>
+                </td>
+            {% endif %}
+
+            <td>
+                <form method="GET" action="/files_rename" class="inline-block">
+                    <input type="hidden" name="path" value="{{ file['path'] }}">
+                    <input type="submit" value="{% trans %}Rename{% endtrans %}">
+                </form>
+
+                {% if file['can_delete'] %}
+                    <form method="POST" action="/files_delete" class="inline-block">
+                        <input type="hidden" name="path" value="{{ file['path'] }}">
+                        <input type="submit" value="{% trans %}Delete{% endtrans %}">
+                    </form>
+                {% endif %}
+            </td>
+        {% endfor %}
+        </table>
+
+        <hr>
+
+        <h3>Upload file</h3>
+        <form method="POST" action="/files_upload" enctype="multipart/form-data">
+            <input type="hidden" name="dir" value="{{ base_path }}">
+            <input type="file" name="upload">
+            <input type="submit" value="{% trans %}Upload{% endtrans %}">
         </form>
 
-        {% if file['can_delete'] %}
-            <form method="POST" action="/files_delete">
-                <input type="hidden" name="path" value="{{ file['path'] }}">
-                <input type="submit" value="{% trans %}Delete{% endtrans %}">
-            </form>
-        {% endif %}
-
-        <br>
-    {% endfor %}
-
-    <hr>
-
-    <h3>Upload file</h3>
-    <form method="POST" action="/files_upload" enctype="multipart/form-data">
-        <input type="hidden" name="dir" value="{{ base_path }}">
-        <input type="file" name="upload">
-        <input type="submit" value="{% trans %}Upload{% endtrans %}">
-    </form>
-
-    <h3>Create directory</h3>
-    <form method="POST" action="/files_mkdir">
-        <input type="hidden" name="path" value="{{ base_path }}">
-        <input type="text" name="dirname">
-        <input type="submit" value="{% trans %}Create directory{% endtrans %}">
-    </form>
-
+        <h3>Create directory</h3>
+        <form method="POST" action="/files_mkdir">
+            <input type="hidden" name="path" value="{{ base_path }}">
+            <input type="text" name="dirname">
+            <input type="submit" value="{% trans %}Create directory{% endtrans %}">
+        </form>
+    </main>
 {% endblock content %}

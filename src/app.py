@@ -86,9 +86,12 @@ def handle_auth_error(err: AuthError):
 
 
 @app.route('/')
-def main():
+def home():
+    """
+    Home page, with links to file manager and music player
+    """
     check_password_cookie()
-    return render_template('main.jinja2')
+    return render_template('home.jinja2')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -122,7 +125,7 @@ def login():
         return render_template('login.jinja2', invalid_password=False)
 
 
-@app.route('/music')
+@app.route('/player')
 def player():
     """
     Main player page. Serves player.jinja2 template file.
@@ -364,7 +367,7 @@ def files():
 
     if 'path' in request.args:
         base_path = music.from_relpath(request.args['path'])
-        parent_path_uri = urlencode(base_path.absolute().as_posix())
+        parent_path_uri = urlencode(base_path.parent.absolute().as_posix())
     else:
         base_path = music.from_relpath('.')
         parent_path_uri = None
@@ -456,7 +459,7 @@ def files_rename():
         return redirect('/files?path=' + urlencode(music.to_relpath(path.parent)))
     else:
         path = music.from_relpath(request.args['path'])
-        return render_template('rename.jinja2',
+        return render_template('files_rename.jinja2',
                                path=music.to_relpath(path),
                                name=path.name)
 

@@ -32,11 +32,11 @@
     Super fancy music player 2.0
 {% endblock title %}
 
-{% block head %}
-    {% assets "style.scss", filters="pyscss,cssmin", output="gen/styles.css" %}
+{% block styles %}
+    {% assets "css/player.scss", filters="pyscss,cssmin", output="gen/player.css" %}
         <link rel="stylesheet" href="{{ ASSET_URL }}">
     {% endassets %}
-{% endblock head %}
+{% endblock styles %}
 
 {% block content %}
     <div id="bg-image-1" class="bg-image bg-image-blurred"></div>
