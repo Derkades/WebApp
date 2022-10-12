@@ -261,7 +261,7 @@ class Playlist:
 
         return Track(track)
 
-    def tracks(self, *args, **kwargs) -> List[Track]:
+    def tracks(self) -> List[Track]:
         """
         Get all tracks in this playlist as a list of Track objects
         """
