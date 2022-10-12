@@ -41,9 +41,11 @@ def from_relpath(relpath: str) -> Path:
     Creates Path object from string path relative to music base directory, with directory
     traversal protection.
     """
-    path = Path(settings.music_dir, relpath)
+    if relpath.startswith('/'):
+        raise Exception('Relative path must not start with /')
+    path = Path(settings.music_dir, relpath).absolute()
     if not path.is_relative_to(Path(settings.music_dir)):
-        raise Exception()
+        raise Exception('Must not go outside of music base directory')
     return path
 
 

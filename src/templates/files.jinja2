@@ -6,13 +6,21 @@
 
 {% block content %}
     <main>
-        <h3>Browsing: {{ base_path }}</h3>
+        <h3>
+            {% if base_path == '.' %}
+                {% trans %}Browsing root directory{% endtrans %}
+            {% else %}
+                {% trans %}Browsing: {{ base_path }}{% endtrans %}
+            {% endif %}
+        </h3>
 
-        {% if parent_path_uri %}
-            <a href="?path={{ parent_path_uri }}">Parent directory</a>
-        {% else %}
-            Parent directory
+        {% if parent_path_uri == '.' %}
+            {# Not necessary, but looks better #}
+            <a href="/files">Parent directory</a>
+        {% elif parent_path_uri %}
+            <a href="/files?path={{ parent_path_uri }}">Parent directory</a>
         {% endif %}
+
         <br>
         <hr>
         <br>

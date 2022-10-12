@@ -367,7 +367,10 @@ def files():
 
     if 'path' in request.args:
         base_path = music.from_relpath(request.args['path'])
-        parent_path_uri = urlencode(base_path.parent.absolute().as_posix())
+        if base_path.as_posix() == '/music':
+            parent_path_uri = None
+        else:
+            parent_path_uri = urlencode(music.to_relpath(base_path.parent))
     else:
         base_path = music.from_relpath('.')
         parent_path_uri = None
