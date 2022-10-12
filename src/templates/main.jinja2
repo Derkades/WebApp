@@ -1,0 +1,10 @@
+{% extends "base.jinja2" %}
+
+{% block title %}
+    {% trans %}Home{% endtrans%}
+{% endblock title %}
+
+{% block content %}
+    <a href="/music">{% trans %}Music player{% endtrans %}</a><br>
+    <a href="/files">{% trans %}File manager{% endtrans %}</a>
+{% endblock content %}

@@ -64,7 +64,7 @@ def check_password(username: Optional[str], password: Optional[str]) -> Optional
 
 def check_password_cookie(require_admin: bool = False) -> Optional[User]:
     if 'username' not in request.cookies:
-        raise AuthError('Not logged in.')
+        raise AuthError('Not logged in.', redirect_login=True)
 
     user = check_password(request.cookies.get('username'), request.cookies.get('password'))
     if require_admin and not user.admin:
@@ -74,12 +74,21 @@ def check_password_cookie(require_admin: bool = False) -> Optional[User]:
 
 @app.errorhandler(AuthError)
 def handle_auth_error(err: AuthError):
+    if err.redirect_login:
+        return redirect('/login')
+
     return Response(f'''
                     Permission denied. Reason: {err.reason}
                     <br>
                     <br>
-                    <a href="/login">Login</a>
+                    <a href="/login">Log in</a>
                     ''', 403)
+
+
+@app.route('/')
+def main():
+    check_password_cookie()
+    return render_template('main.jinja2')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -88,6 +97,13 @@ def login():
     Login route. Serve login page for GET requests, and accepts password input for POST requests.
     If the provided password is invalid, the login template is rendered with invalid_password=True
     """
+    try:
+        check_password_cookie()
+        # User is already logged in
+        return redirect('/')
+    except AuthError:
+        pass
+
     if request.method == 'POST':
         if 'password' not in request.form:
             return 'invalid form input'
@@ -106,7 +122,7 @@ def login():
         return render_template('login.jinja2', invalid_password=False)
 
 
-@app.route('/')
+@app.route('/music')
 def player():
     """
     Main player page. Serves player.jinja2 template file.
