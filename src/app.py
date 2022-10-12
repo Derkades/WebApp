@@ -361,6 +361,7 @@ def files():
         else:
             pathtype = 'file'
         children.append({
+            'path': path.absolute().as_posix(),
             'name': path.name,
             'type': pathtype,
         })
@@ -398,6 +399,27 @@ def files_upload():
     uploaded_file = request.files['upload']
     uploaded_file.save(Path(upload_dir, uploaded_file.filename))
     return redirect('/files?path=' + urlencode(upload_dir.absolute().as_posix()))
+
+
+@app.route('/files_rename', methods=['GET', 'POST'])
+def files_rename():
+    """
+    Page and form target to rename file
+    """
+    if request.method == 'POST':
+        path = Path(request.form['path'])
+        music.ensure_inside_music(path)
+        new_name = request.form['new-name']
+        if '/' in new_name or new_name == '.' or new_name == '..':
+            return Response('illegal name', 400)
+        path.rename(Path(path.parent, new_name))
+        return redirect('/files?path=' + urlencode(path.parent.absolute().as_posix()))
+    else:
+        path_posix = request.args['path']
+        name = Path(path_posix).name
+        return render_template('rename.jinja2',
+                               path_posix=path_posix,
+                               name=name)
 
 
 @babel.localeselector
