@@ -4,6 +4,7 @@ import re
 from typing import Optional, List, Iterator
 import logging
 import json
+from dataclasses import dataclass
 
 import db
 import music
@@ -96,38 +97,18 @@ def split_meta_list(meta_list):
     return entries
 
 
+@dataclass
 class Metadata:
 
     relpath: str
     duration: int
-    artists: Optional[List[str]] = None
-    album: Optional[str] = None
-    title: Optional[str] = None
-    date: Optional[str] = None
-    year: Optional[int] = None
-    album_artist: Optional[str] = None
-    album_index: Optional[int] = None
+    artists: Optional[List[str]]
+    album: Optional[str]
+    title: Optional[str]
+    year: Optional[int]
+    album_artist: Optional[str]
+    album_index: Optional[int]
     tags: List[str]
-
-    def __init__(self,
-                 relpath: str,
-                 duration: int,
-                 artists: Optional[List[str]],
-                 album: Optional[str],
-                 title: Optional[str],
-                 year: Optional[int],
-                 album_artist: Optional[str],
-                 album_index: Optional[int],
-                 tags: List[str]):
-        self.relpath = relpath
-        self.duration = duration
-        self.artists = artists
-        self.album = album
-        self.title = title
-        self.year = year
-        self.album_artist = album_artist
-        self.album_index = album_index
-        self.tags = tags
 
     def _meta_title(self) -> Optional[str]:
         """

@@ -31,11 +31,11 @@ def _get_image_url(release_id: str) -> Optional[str]:
     Get album cover URL from MusicBrainz release id
     """
     try:
-        images = musicbrainzngs.get_image_list(release_id)['images']
+        imgs = musicbrainzngs.get_image_list(release_id)['images']
 
-        for image in images:
-            if image['front']:
-                return image['image']
+        for img in imgs:
+            if img['front']:
+                return img['image']
         return None
     except musicbrainzngs.musicbrainz.ResponseError as ex:
         if isinstance(ex.cause, urllib.error.HTTPError) and ex.cause.code == 404:
@@ -81,7 +81,7 @@ def get_cover(title: str) -> Optional[bytes]:
         cache_obj.store(image_bytes)
         log.info('Found suitable cover art')
         return image_bytes
-    except Exception as e:
-        log.info('Error retrieving album art from musicbrainz: %s', e)
+    except Exception as ex:
+        log.info('Error retrieving album art from musicbrainz: %s', ex)
         traceback.print_exc()
         return None

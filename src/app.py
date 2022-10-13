@@ -238,7 +238,7 @@ def get_lyrics():
     """
     check_password_cookie()
 
-    track = music.Track(request.args['path'])
+    track = Track.by_relpath(request.args['path'])
     meta = track.metadata()
 
     for search_query in meta.lyrics_search_queries():
@@ -328,7 +328,8 @@ def scan_music():
     check_password_cookie(require_admin=True)
 
     if 'playlist' in request.args:
-        scanner.rebuild_music_database(only_playlist=request.args['playlist'])
+        playlist = music.playlist(request.args['playlist'])
+        scanner.rebuild_music_database(only_playlist=playlist.relpath)
     else:
         scanner.rebuild_music_database()
 

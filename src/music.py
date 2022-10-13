@@ -6,6 +6,7 @@ from subprocess import CompletedProcess
 import logging
 import tempfile
 import shutil
+from dataclasses import dataclass
 
 import cache
 import db
@@ -69,11 +70,11 @@ def has_music_extension(path: Path) -> bool:
     return False
 
 
+@dataclass
 class Track:
 
-    def __init__(self, relpath: str):
-        self.relpath = relpath
-        self.path = from_relpath(relpath)
+    relpath: str
+    path: Path
 
     def metadata(self):
         """
@@ -204,20 +205,17 @@ class Track:
         """
         Find track by relative path
         """
-        return Track(relpath)
+        return Track(relpath, from_relpath(relpath))
 
 
+@dataclass
 class Playlist:
 
-    def __init__(self, path: Path):
-        self.path = path
-        self.relpath = to_relpath(path)
-        with db.get() as conn:
-            row = conn.execute('SELECT name, guest FROM playlist WHERE path=?',
-                               (self.relpath,)).fetchone()
-            self.name, self.guest = row
-            self.track_count = conn.execute('SELECT COUNT(*) FROM track WHERE playlist=?',
-                                            (self.relpath,)).fetchone()[0]
+    relpath: str
+    path: Path
+    name: str
+    guest: bool
+    track_count: int
 
     def choose_track(self, tag_mode, tags: List[str]) -> Track:
         """
@@ -259,7 +257,7 @@ class Playlist:
 
             conn.execute('UPDATE track_persistent SET last_played = ? WHERE path=?', (current_timestamp, track))
 
-        return Track(track)
+        return Track.by_relpath(track)
 
     def tracks(self) -> List[Track]:
         """
@@ -267,7 +265,7 @@ class Playlist:
         """
         with db.get() as conn:
             rows = conn.execute('SELECT path FROM track WHERE playlist=?', (self.relpath,)).fetchall()
-            return [Track(row[0]) for row in rows]
+            return [Track.by_relpath(row[0]) for row in rows]
 
     def download(self, url: str) -> CompletedProcess:
         """
@@ -291,14 +289,21 @@ class Playlist:
                               text=True)
 
 
-def playlist(dir_name: str) -> Playlist:
+def playlist(dir_name: str, reused_conn = None) -> Playlist:
     """
-    Get playlist object from the name of a music directory.
+    Get playlist object from the name of a music directory, using information from the database.
     Args:
         dir_name: Name of directory
     Returns: Playlist instance
     """
-    return Playlist(Path(settings.music_dir, dir_name))
+    path = from_relpath(dir_name)
+    with db.get() if reused_conn is None else reused_conn as conn:
+        row = conn.execute('SELECT name, guest FROM playlist WHERE path=?',
+                           (dir_name,)).fetchone()
+        name, guest = row
+        track_count = conn.execute('SELECT COUNT(*) FROM track WHERE playlist=?',
+                                   (dir_name,)).fetchone()[0]
+    return Playlist(dir_name, path, name, guest, track_count)
 
 def playlists(guest: Optional[bool] = None) -> List[Playlist]:
     """
@@ -319,4 +324,4 @@ def playlists(guest: Optional[bool] = None) -> List[Playlist]:
 
     with db.get() as conn:
         rows = conn.execute(query).fetchall()
-        return [Playlist(Path(settings.music_dir, row[0])) for row in rows]
+        return [playlist(row[0], conn) for row in rows]
