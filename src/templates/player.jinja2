@@ -104,8 +104,8 @@
                     <table id="queue-table"></table>
                 </div>
                 <div class="queue-buttons flex-space-between {% if not mobile %}hidden{% endif %}">
-                    <button id="queue-up">Up</button>
-                    <button id="queue-down">Down</button>
+                    {{ icon_button('queue-down', 'arrow-down')}}
+                    {{ icon_button('queue-up', 'arrow-up')}}
                 </div>
             </div>
 
