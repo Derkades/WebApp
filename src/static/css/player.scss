@@ -130,9 +130,12 @@ input[type=checkbox] {
     overflow-y: auto;
 }
 
-.box-queue {
+.box-queue .scroll {
     max-height: 40vh;
-    overflow-y: auto;
+}
+
+.queue-buttons {
+    margin-top: .5rem;
 }
 
 .lyrics-outer {

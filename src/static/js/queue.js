@@ -260,6 +260,23 @@ class Queue {
         this.updateHtml();
     };
 
+    scroll(direction) {
+        let delta;
+        if (direction === 'up') {
+            delta = -200;
+        } else if (direction === 'down') {
+            delta = 200;
+        } else {
+            throw new Error();
+        }
+
+        const elem = document.getElementById('queue-scroll');
+        elem.scrollBy({
+            top: delta,
+            behavior: 'smooth',
+        });
+    };
+
 };
 
 const queue = new Queue();

@@ -30,6 +30,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Queue
     queue.fill();
+    document.getElementById('queue-up').addEventListener('click', () => queue.scroll('up'));
+    document.getElementById('queue-down').addEventListener('click', () => queue.scroll('down'));
 
     // Lyrics
     document.getElementById('button-microphone').addEventListener('click', switchLyrics);

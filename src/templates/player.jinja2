@@ -100,7 +100,13 @@
                         {{ icon_button('browse-all', 'playlist-plus') }}
                     </div>
                 </div>
-                <table id="queue-table"></table>
+                <div class="scroll" id="queue-scroll">
+                    <table id="queue-table"></table>
+                </div>
+                <div class="queue-buttons flex-space-between {% if not mobile %}hidden{% endif %}">
+                    <button id="queue-up">Up</button>
+                    <button id="queue-down">Down</button>
+                </div>
             </div>
 
         </div>
