@@ -121,7 +121,7 @@ class Browse {
     };
 
     getSearchScore(track, playlist, query) {
-        if (playlist === 'everyone' || playlist === track.playlist) {
+        if (playlist === 'all' || playlist === track.playlist) {
             const matchProperties = [track.path, track.display, ...track.tags];
             if (track.album !== null) {
                 matchProperties.push(track.album);
@@ -152,7 +152,7 @@ class Browse {
     };
 
     filterTracks(tracks, customFilter) {
-        // Playlist filter (or 'everyone')
+        // Playlist filter (or 'all')
         const playlist = document.getElementById('browse-filter-playlist').value;
         // Search query text field
         const query = document.getElementById('browse-filter-query').value.trim().toLowerCase();
@@ -160,7 +160,7 @@ class Browse {
         // Assign score to all tracks, then sort tracks by score. Finally, get original track object back.
         return tracks
                 .filter(customFilter)
-                .filter(track => playlist === 'everyone' || track.playlistPath === playlist)
+                .filter(track => playlist === 'all' || track.playlistPath === playlist)
                 .map(track => { return {track: track, score: this.getSearchScore(track, playlist, query)}})
                 .sort((a, b) => b.score - a.score)
                 .map(sortedTrack => sortedTrack.track);
