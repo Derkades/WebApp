@@ -6,7 +6,7 @@ from urllib.parse import quote as urlencode
 
 from flask import Flask, request, render_template, Response, redirect, send_file
 import flask_assets
-from flask_babel import Babel
+from flask_babel import Babel, gettext as _
 import bcrypt
 
 import bing
@@ -40,9 +40,14 @@ class AuthError(Exception):
     redirect_login: bool = False
 
 
-def check_password(username: Optional[str], password: Optional[str]) -> Optional[User]:
+def check_password(username: Optional[str], password: Optional[str]) -> User:
     """
-    Check whether the provided password matches the correct password
+    Check whether the provided username and password combination corresponds to a user. If it does,
+    a user object is returned. If it does not, an AuthError is raised.
+    Args:
+        username: A username, or None
+        password: A password, or None
+    Returns: User object
     """
     if username is None or password is None:
         return None
@@ -52,37 +57,42 @@ def check_password(username: Optional[str], password: Optional[str]) -> Optional
 
         if result is None:
             log.warning("Login attempt with non-existent username: '%s'", username)
-            raise AuthError('Invalid username or password.')
+            raise AuthError(_('Invalid username or password.'))
 
         hashed_password, is_admin = result
 
         if not bcrypt.checkpw(password.encode(), hashed_password.encode()):
-            raise AuthError('Invalid username or password.')
+            raise AuthError(_('Invalid username or password.'))
 
         return User(username, is_admin)
 
 
-def check_password_cookie(require_admin: bool = False) -> Optional[User]:
+def check_password_cookie(require_admin: bool = False) -> User:
+    """
+    Check username/password stored in cookie, raising AuthError if invalid
+    Args:
+        require_admin: Set to True to raise an AuthError if user is not admin, even if
+                       username and password are valid
+    Returns: User object
+    """
     if 'username' not in request.cookies:
-        raise AuthError('Not logged in.', redirect_login=True)
+        raise AuthError(_('Not logged in.'), redirect_login=True)
 
     user = check_password(request.cookies.get('username'), request.cookies.get('password'))
     if require_admin and not user.admin:
-        raise AuthError('Admin privilege is required, but your account does not have admin status.')
+        raise AuthError(_('Admin privilege is required, but your account does not have admin status.'))
     return user
 
 
 @app.errorhandler(AuthError)
 def handle_auth_error(err: AuthError):
+    """
+    Display permission denied error page with reason, or redirect to login page
+    """
     if err.redirect_login:
         return redirect('/login')
 
-    return Response(f'''
-                    Permission denied. Reason: {err.reason}
-                    <br>
-                    <br>
-                    <a href="/login">Log in</a>
-                    ''', 403)
+    return Response(render_template('403.jinja2', reason=err.reason), 403)
 
 
 @app.route('/')
@@ -114,7 +124,9 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-        if not check_password(username, password):
+        try:
+            check_password(username, password)
+        except AuthError:
             return render_template('login.jinja2', invalid_password=True)
 
         response = redirect('/')

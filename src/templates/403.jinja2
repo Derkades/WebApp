@@ -1,0 +1,13 @@
+{% extends "base.jinja2" %}
+
+{% block title %}
+    {% trans %}Permission denied{% endtrans %}
+{% endblock title %}
+
+{% block content %}
+    <main>
+        <h3>{% trans %}Permission denied{% endtrans %}</h3>
+        <p>{{ reason }}</p><br>
+        <a href="/login">{% trans %}Log in{% endtrans %}</a>
+    </main>
+{% endblock content %}
