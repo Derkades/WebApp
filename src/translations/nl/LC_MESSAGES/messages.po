@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-09-21 20:18+0200\n"
-"PO-Revision-Date: 2022-09-21 20:18+0200\n"
+"POT-Creation-Date: 2022-10-13 11:14+0200\n"
+"PO-Revision-Date: 2022-10-13 11:13+0200\n"
 "Last-Translator: \n"
 "Language: nl\n"
 "Language-Team: nl <LL@li.org>\n"
@@ -18,119 +18,172 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.8.0\n"
 
-#: src/templates/login.jinja2:28
-msgid "Please log in to get access to"
-msgstr "Gelieve in te loggen om toegang te krijgen tot"
+#: src/templates/files.jinja2:4 src/templates/home.jinja2:10
+msgid "File manager"
+msgstr "Bestandsbeheer"
 
-#: src/templates/login.jinja2:38
-msgid "Invalid password"
-msgstr "Ongeldig wachtwoord"
+#: src/templates/files.jinja2:11
+msgid "Browsing root directory"
+msgstr "Bovenste map"
 
-#: src/templates/login.jinja2:44
+#: src/templates/files.jinja2:13
+#, python-format
+msgid "Browsing: %(dir)s"
+msgstr "Map: %(dir)s"
+
+#: src/templates/files.jinja2:58 src/templates/files_rename.jinja2:14
+msgid "Rename"
+msgstr "Hernoemen"
+
+#: src/templates/files.jinja2:64
+msgid "Delete"
+msgstr "Verwijderen"
+
+#: src/templates/files.jinja2:71 src/templates/player.jinja2:184
+msgid "Download"
+msgstr "Download"
+
+#: src/templates/files.jinja2:84
+msgid "Upload"
+msgstr "Upload"
+
+#: src/templates/files.jinja2:91
+msgid "Create directory"
+msgstr "Map aanmaken"
+
+#: src/templates/files_rename.jinja2:4
+msgid "Rename file"
+msgstr "Bestandsnaam wijzigen"
+
+#: src/templates/home.jinja2:4
+msgid "Home"
+msgstr "Home"
+
+#: src/templates/home.jinja2:9
+msgid "Music player"
+msgstr "Muziekspeler"
+
+#: src/templates/login.jinja2:4 src/templates/login.jinja2:29
 msgid "Log in"
 msgstr "Inloggen"
 
-#: src/templates/player.jinja2:22
+#: src/templates/login.jinja2:10
+msgid "Please log in to get access to"
+msgstr "Gelieve in te loggen om toegang te krijgen tot"
+
+#: src/templates/login.jinja2:20
+msgid "Invalid username or password"
+msgstr "Ongeldige gebruikersnaam of wachtwoord"
+
+#: src/templates/login.jinja2:25
+msgid "Username"
+msgstr "Gebruikersnaam"
+
+#: src/templates/login.jinja2:27
+msgid "Password"
+msgstr "Wachtwoord"
+
+#: src/templates/player.jinja2:52
 msgid "Playlists"
 msgstr "Afspeellijsten"
 
-#: src/templates/player.jinja2:25 src/templates/player.jinja2:211
+#: src/templates/player.jinja2:55 src/templates/player.jinja2:274
 msgid "Loading..."
 msgstr "Laden..."
 
-#: src/templates/player.jinja2:31
+#: src/templates/player.jinja2:61
 msgid "Playback"
 msgstr "Muziek"
 
-#: src/templates/player.jinja2:34
+#: src/templates/player.jinja2:64
 msgid "Waiting for music in queue..."
 msgstr "Wachten op muziek in wachtrij..."
 
-#: src/templates/player.jinja2:37
+#: src/templates/player.jinja2:67
 msgid "Previously: "
 msgstr "Vorige: "
 
-#: src/templates/player.jinja2:64
+#: src/templates/player.jinja2:97
 msgid "Queue"
 msgstr "Wachtrij"
 
-#: src/templates/player.jinja2:94
-msgid "Add track to queue"
-msgstr "Nummer toevoegen aan wachtrij"
-
-#: src/templates/player.jinja2:105
-msgid "Everyone"
-msgstr "Iedereen"
-
-#: src/templates/player.jinja2:110
-msgid "Guest"
-msgstr "Gast"
-
-#: src/templates/player.jinja2:114
-msgid "Search query"
-msgstr "Zoekopdracht"
-
-#: src/templates/player.jinja2:125 src/templates/player.jinja2:155
+#: src/templates/player.jinja2:125 src/templates/player.jinja2:149
 msgid "Settings"
 msgstr "Instellingen"
 
-#: src/templates/player.jinja2:133
+#: src/templates/player.jinja2:127
 msgid "Hotkeys"
 msgstr "Hete toetsen"
 
-#: src/templates/player.jinja2:138
+#: src/templates/player.jinja2:132
 msgid "Toggle playlists"
 msgstr "Afspeellijsten in-/uitschakelen"
 
-#: src/templates/player.jinja2:142
+#: src/templates/player.jinja2:136
 msgid "Previous track"
 msgstr "Vorig nummer"
 
-#: src/templates/player.jinja2:146
+#: src/templates/player.jinja2:140
 msgid "Next track"
 msgstr "Volgend nummer"
 
-#: src/templates/player.jinja2:150
+#: src/templates/player.jinja2:144
 msgid "Seek in track (don't use shift)"
 msgstr "Navigeer door nummer (gebruik geen shift)"
 
-#: src/templates/player.jinja2:158
+#: src/templates/player.jinja2:152
 msgid "Minimum queue length"
 msgstr "Minimum wachtrijlengte"
 
-#: src/templates/player.jinja2:162
+#: src/templates/player.jinja2:156
 msgid "Potato (~15MB per hour)"
 msgstr "Aardappel (~15MB per uur)"
 
-#: src/templates/player.jinja2:163
+#: src/templates/player.jinja2:157
 msgid "Low (~35MB per hour)"
 msgstr "Laag (~35MB per uur)"
 
-#: src/templates/player.jinja2:164
+#: src/templates/player.jinja2:158
 msgid "High (~50MB per hour)"
 msgstr "Hoog (~50MB per uur)"
 
-#: src/templates/player.jinja2:166
+#: src/templates/player.jinja2:160
 msgid "Audio quality"
 msgstr "Audiokwaliteit"
 
-#: src/templates/player.jinja2:170
+#: src/templates/player.jinja2:164
 msgid "New track from same playlist"
 msgstr "Nieuw nummer uit dezelfde afspeellijst"
 
-#: src/templates/player.jinja2:171
+#: src/templates/player.jinja2:165
 msgid "New track from next round-robin playlist"
 msgstr "Nieuw nummer uit de volgende afspeellijst"
 
-#: src/templates/player.jinja2:173
+#: src/templates/player.jinja2:167
 msgid "Queue removal behaviour"
 msgstr "Vervanging voor nummer uit wachtrij"
 
-#: src/templates/player.jinja2:176
+#: src/templates/player.jinja2:171
+msgid "Dark"
+msgstr "Donker"
+
+#: src/templates/player.jinja2:172
+msgid "Light"
+msgstr "Licht"
+
+#: src/templates/player.jinja2:173
+msgid "Use system preference"
+msgstr "Gebruik systeemvoorkeur"
+
+#: src/templates/player.jinja2:175
+msgid "Theme"
+msgstr "Thema"
+
+#: src/templates/player.jinja2:178
 msgid "YouTube download"
 msgstr "YouTube download"
 
-#: src/templates/player.jinja2:177
+#: src/templates/player.jinja2:180
 msgid ""
 "Select a playlist and paste a link from YouTube, Soundcloud, Bandcamp, "
 "etc. Finally, press <kbd>Download</kbd>."
@@ -138,19 +191,19 @@ msgstr ""
 "Selecteer een afspeellijst en plak een link van YouTube, Soundcloud, "
 "Bandcamp, etc. Druk dan op <kbd>Download</kbd>."
 
-#: src/templates/player.jinja2:188
-msgid "Download"
-msgstr "Download"
-
-#: src/templates/player.jinja2:191
+#: src/templates/player.jinja2:187
 msgid "yt-dlp output will appear here"
 msgstr "hier komt output van yt-dlp"
 
-#: src/templates/player.jinja2:194
+#: src/templates/player.jinja2:190
+msgid "This feature is not enabled for your user account."
+msgstr "Deze functie is niet ingeschakeld voor jouw gebruiker."
+
+#: src/templates/player.jinja2:193
 msgid "Credits"
 msgstr "Credits"
 
-#: src/templates/player.jinja2:196
+#: src/templates/player.jinja2:195
 #, python-format
 msgid ""
 "<a href=\"%(gh)s\">Super fancy music player 2.0</a> is a project largely "
@@ -164,6 +217,82 @@ msgstr ""
 "target=\"_blank\">Super fancy music player</a> van <a "
 "href=\"%(daniel_gh)s\" target=\"_blank\">Daniël Koomen</a>. Veel "
 "luisterplezier!"
+
+#: src/templates/player.jinja2:208 src/templates/player.jinja2:256
+msgid "Tags"
+msgstr "Tags"
+
+#: src/templates/player.jinja2:212
+msgid ""
+"Only choose tracks with enabled tags (tracks without tags are never "
+"chosen)"
+msgstr ""
+"Kies alleen nummers met geselecteerde tags (nummers zonder tags worden "
+"nooit gekozen)"
+
+#: src/templates/player.jinja2:213
+msgid ""
+"Don't choose tracks with disabled tags (tracks with enabled tags or no "
+"tags are chosen)"
+msgstr ""
+"Kies geen nummers met niet-geselecteerde tags (kies nummers zonder tags "
+"of met geselecteerde tags)"
+
+#: src/templates/player.jinja2:214
+msgid "Tag mode"
+msgstr "Tagmodus"
+
+#: src/templates/player.jinja2:225
+msgid "All"
+msgstr "Alles"
+
+#: src/templates/player.jinja2:228
+msgid "Search query"
+msgstr "Zoekopdracht"
+
+#: src/templates/player.jinja2:237
+msgid "Metadata editor"
+msgstr "Metadata wijzigen"
+
+#: src/templates/player.jinja2:240
+msgid "Title"
+msgstr "Titel"
+
+#: src/templates/player.jinja2:244
+msgid "Album"
+msgstr "Album"
+
+#: src/templates/player.jinja2:248
+msgid "Artists"
+msgstr "Artiesten"
+
+#: src/templates/player.jinja2:252
+msgid "Album artist"
+msgstr "Albumartiest"
+
+#: src/templates/player.jinja2:262
+msgid "Writing metadata..."
+msgstr "Metadata schrijven..."
+
+#: src/templates/player.jinja2:263
+msgid "Reloading tracks..."
+msgstr "Nummers herladen..."
+
+#: src/templates/player.jinja2:292
+msgid "Artist:"
+msgstr "Artiest:"
+
+#: src/templates/player.jinja2:293
+msgid "Album:"
+msgstr "Album:"
+
+#: src/templates/player.jinja2:294
+msgid "Tag:"
+msgstr "Tag:"
+
+#: src/templates/player.jinja2:295
+msgid "All tracks"
+msgstr "Alle nummers"
 
 #~ msgid ""
 #~ "Enter a short search query and "
@@ -222,4 +351,16 @@ msgstr ""
 #~ "Selecteer een naam en plak een "
 #~ "link van YouTube, Soundcloud, Bandcamp, "
 #~ "etc. Druk dan op <kbd>Download</kbd>."
+
+#~ msgid "Invalid password"
+#~ msgstr "Ongeldig wachtwoord"
+
+#~ msgid "Add track to queue"
+#~ msgstr "Nummer toevoegen aan wachtrij"
+
+#~ msgid "Everyone"
+#~ msgstr "Iedereen"
+
+#~ msgid "Guest"
+#~ msgstr "Gast"
 

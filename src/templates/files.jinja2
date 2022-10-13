@@ -10,7 +10,7 @@
             {% if base_path == '.' %}
                 {% trans %}Browsing root directory{% endtrans %}
             {% else %}
-                {% trans %}Browsing: {{ base_path }}{% endtrans %}
+                {% trans dir=base_path %}Browsing: {{ dir }}{% endtrans %}
             {% endif %}
         </h3>
 
