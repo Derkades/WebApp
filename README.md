@@ -16,6 +16,7 @@ Music player for communities (hacker spaces, maker spaces).
 - Hotkeys for most common actions
 - No JavaScript or CSS frameworks, the web interface makes no requests to third party domains
 - Audio is RMS-normalized and silence is trimmed from the start and end
+- File browser to download, upload, rename and delete files
 
 ## Security notice
 
@@ -89,7 +90,7 @@ In Python:
 ```
 from flask_babel import gettext as _
 
-translated_string = _("Something in English")
+translated_string = _('Something in English')
 ```
 
 ### Translating from English to other languages
@@ -102,14 +103,23 @@ translated_string = _("Something in English")
 
 This project is using many open source software and libraries, such as:
 
-- [Flask](https://flask.palletsprojects.com)
-- [BeautifulSoup](https://pypi.org/project/beautifulsoup4)
-- [Gunicorn](https://gunicorn.org)
+- [Python](https://www.python.org/)
+- [Python Gunicorn](https://gunicorn.org)
+- [Python Flask](https://flask.palletsprojects.com)
+- [Python Flask-Babel](https://python-babel.github.io/flask-babel/)
+- [Python Flask-Assets](https://flask-assets.readthedocs.io/en/latest/)
+- [Python jsmin](https://pypi.org/project/jsmin/)
+- [Python pyScss](https://github.com/Kronuz/pyScss)
+- Python cssmin
+- [Python requests](https://pypi.org/project/requests)
+- [Python BeautifulSoup](https://pypi.org/project/beautifulsoup4)
+- [Python lxml](https://pypi.org/project/beautifulsoup4)
+- [MusicBrainz](https://musicbrainz.org) and Python musicbrainzngs
+- [Python Pillow](https://pillow.readthedocs.io)
+- [Python Pillow AVIF plugin](https://pypi.org/project/pillow-avif-plugin/)
+- [Python bcrypt](https://pypi.org/project/bcrypt/)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
-- [Pillow](https://pillow.readthedocs.io)
-- [Requests](https://pypi.org/project/requests)
 - [Material Design Icons](https://materialdesignicons.com)
-- [MusicBrainz](https://musicbrainz.org) (musicbrainzngs)
 - [sqlite3](https://docs.python.org/3/library/sqlite3.html)
 - [Docker, docker compose](https://docs.docker.com/get-docker)
 
