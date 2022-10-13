@@ -7,6 +7,7 @@ from dataclasses import dataclass
 
 import requests
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 
 import cache
 import settings
@@ -69,8 +70,14 @@ def _extract_lyrics(genius_url: str) -> List[str]:
         raise ex
     lyric_html = info_json['songPage']['lyricsData']['body']['html']
     soup = BeautifulSoup(lyric_html, 'lxml')
+    p = soup.find('p')
+    assert isinstance(p, Tag)
     lyrics = ''
-    for content in soup.find('p').contents:
+    for content in p.contents:
+        if not isinstance(content, Tag):
+            lyrics += html.escape(str(content).strip())
+            continue
+
         if content.name == 'a':
             for s in content.contents:
                 lyrics += html.escape(str(s).strip())

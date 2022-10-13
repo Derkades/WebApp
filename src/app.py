@@ -50,7 +50,7 @@ def check_password(username: Optional[str], password: Optional[str]) -> User:
     Returns: User object
     """
     if username is None or password is None:
-        return None
+        raise AuthError(_('Username or password not provided'))
 
     with db.users() as conn:
         result = conn.execute('SELECT password,admin FROM user WHERE username=?', (username,)).fetchone()
@@ -440,7 +440,10 @@ def files_delete():
     return redirect('/files?path=' + urlencode(music.to_relpath(path.parent)))
 
 
-def check_filename(name: str) ->bool:
+def check_filename(name: str) -> None:
+    """
+    Ensure file name is valid, if not raise ValueError
+    """
     if '/' in name or name == '.' or name == '..':
         raise ValueError('illegal name')
 
