@@ -55,20 +55,20 @@
             <td>
                 <form method="GET" action="/files_rename" class="inline-block">
                     <input type="hidden" name="path" value="{{ file['path'] }}">
-                    <input type="submit" value="{% trans %}Rename{% endtrans %}">
+                    {{ icon_button('rename-box') }}
                 </form>
 
                 {% if file['can_delete'] %}
                     <form method="POST" action="/files_delete" class="inline-block">
                         <input type="hidden" name="path" value="{{ file['path'] }}">
-                        <input type="submit" value="{% trans %}Delete{% endtrans %}">
+                        {{ icon_button('delete') }}
                     </form>
                 {% endif %}
 
                 {% if file['type'] != 'dir' %}
                     <form method="GET" action="/files_download" class="inline-block">
                         <input type="hidden" name="path" value="{{ file['path'] }}">
-                        <input type="submit" value="{% trans %}Download{% endtrans %}">
+                        {{ icon_button('download') }}
                     </form>
                 {% endif %}
             </td>

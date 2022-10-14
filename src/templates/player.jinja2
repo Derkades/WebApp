@@ -1,11 +1,5 @@
 {% extends "base.jinja2" %}
 
-{% macro icon_button(id, icon) %}
-    <button id="{{ id }}" class="icon-button">
-        <div class="icon" style="background-image: url('/static/icon/{{icon}}.svg')"></div>
-    </button>
-{% endmacro %}
-
 {% macro dialog_close_button(id) %}
     <button class="dialog-close-button icon-button" data-for="{{id}}">
         <div class="icon" style="background-image: url('/static/icon/close.svg')"></div>
@@ -16,7 +10,7 @@
     <div class="flex-space-between">
         {% if back_id %}
             <span>
-                {{ icon_button(back_id, 'arrow-left') }}
+                {{ icon_button('arrow-left', back_id) }}
             </span>
         {% endif %}
         <span>
@@ -76,12 +70,12 @@
                 </div>
 
                 {% for button_name in ['skip-previous', 'rewind-15', 'play', 'pause', 'fast-forward-15', 'skip-next', 'microphone', 'album'] %}
-                    {{ icon_button('button-' + button_name, button_name) }}
+                    {{ icon_button(button_name, 'button-' + button_name) }}
                 {% endfor %}
 
-                {{ icon_button('open-dialog-settings', 'gear') }}
+                {{ icon_button('gear', 'open-dialog-settings') }}
                 {% if user_is_admin %}
-                    {{ icon_button('button-edit', 'pencil') }}
+                    {{ icon_button('pencil', 'button-edit') }}
                 {% endif %}
 
                 {% if mobile %}
@@ -96,16 +90,16 @@
                 <div class="flex-space-between">
                     <h3>{% trans %}Queue{% endtrans %} (<span id="current-queue-size">0</span>)</h3>
                     <div>
-                        {{ icon_button('open-dialog-tags', 'tag-multiple') }}
-                        {{ icon_button('browse-all', 'playlist-plus') }}
+                        {{ icon_button('tag-multiple', 'open-dialog-tags') }}
+                        {{ icon_button('playlist-plus', 'browse-all') }}
                     </div>
                 </div>
                 <div class="scroll" id="queue-scroll">
                     <table id="queue-table"></table>
                 </div>
                 <div class="queue-buttons flex-space-between {% if not mobile %}hidden{% endif %}">
-                    {{ icon_button('queue-down', 'arrow-down')}}
-                    {{ icon_button('queue-up', 'arrow-up')}}
+                    {{ icon_button('arrow-down', 'queue-down')}}
+                    {{ icon_button('arrow-up', 'queue-up')}}
                 </div>
             </div>
 
@@ -263,7 +257,7 @@
                     <input type="text" id="editor-tags" value="" size="50">
                 </div>
 
-                {{ icon_button('editor-save', 'content-save') }}
+                {{ icon_button('content-save', 'editor-save') }}
 
                 <p id="editor-writing" class="hidden">{% trans %}Writing metadata...{% endtrans %}</p>
                 <p id="editor-reloading" class="hidden">{% trans %}Reloading tracks...{% endtrans %}</p>

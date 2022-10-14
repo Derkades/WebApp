@@ -1,3 +1,9 @@
+{% macro icon_button(icon, id = None) %}
+    <button {% if id %}id="{{id}}"{% endif %} class="icon-button">
+        <div class="icon" style="background-image: url('/static/icon/{{icon}}.svg')"></div>
+    </button>
+{% endmacro %}
+
 <!DOCTYPE html>
 <html>
 <head>
