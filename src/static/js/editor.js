@@ -12,9 +12,9 @@ class Editor {
         this.#currentlyEditingPath = track.path;
         document.getElementById('editor-title').value = track.title;
         document.getElementById('editor-album').value = track.album;
-        document.getElementById('editor-artists').value = track.artists !== null ? track.artists.join('/') : '';
+        document.getElementById('editor-artists').value = track.artists !== null ? track.artists.join(';') : '';
         document.getElementById('editor-album-artist').value = track.albumArtist;
-        document.getElementById('editor-tags').value = track.tags.join('/');
+        document.getElementById('editor-tags').value = track.tags.join(';');
 
         dialog.open('dialog-editor');
     };
@@ -22,7 +22,7 @@ class Editor {
     #getValue(id, list = false) {
         let value = document.getElementById(id).value;
         if (list) {
-            const list = value.split('/');
+            const list = value.split(';');
             for (let i = 0; i < list.length; i++) {
                 list[i] = list[i].trim();
             }

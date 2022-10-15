@@ -88,10 +88,10 @@ def is_alpha(c):
 
 def split_meta_list(meta_list):
     """
-    Split list (stored as string in metadata) by slash and semicolon
+    Split list (stored as string in metadata) by semicolon
     """
     entries = []
-    for entry in re.split(r'\/|;', meta_list):
+    for entry in meta_list.split(';'):
         if entry.strip() != '':
             entries.append(entry.strip())
     return entries

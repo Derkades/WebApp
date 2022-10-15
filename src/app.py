@@ -348,9 +348,9 @@ def update_metadata():
     meta_dict = {
         'title': payload['metadata']['title'],
         'album': payload['metadata']['album'],
-        'artist': '/'.join(payload['metadata']['artists']),
+        'artist': '; '.join(payload['metadata']['artists']),
         'album_artist': payload['metadata']['album_artist'],
-        'genre': '/'.join(payload['metadata']['tags']),
+        'genre': '; '.join(payload['metadata']['tags']),
     }
     track.write_metadata(meta_dict)
 
