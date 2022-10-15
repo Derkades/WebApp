@@ -97,7 +97,9 @@
                 <div class="scroll" id="queue-scroll">
                     <table id="queue-table"></table>
                 </div>
-                <div class="queue-buttons flex-space-between {% if not mobile %}hidden{% endif %}">
+                {# Was a fix for a mobile scroll issue, but it seems to be fixed... #}
+                {# Instead of removing it, hide it for now until we're sure it can be removed #}
+                <div class="queue-buttons flex-space-between hidden">
                     {{ icon_button('arrow-down', 'queue-down')}}
                     {{ icon_button('arrow-up', 'queue-up')}}
                 </div>
