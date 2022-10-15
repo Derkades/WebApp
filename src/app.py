@@ -344,7 +344,7 @@ def update_metadata():
     check_password_cookie()
 
     payload = request.json
-    track = Track(payload['path'])
+    track = Track.by_relpath(payload['path'])
     meta_dict = {
         'title': payload['metadata']['title'],
         'album': payload['metadata']['album'],
