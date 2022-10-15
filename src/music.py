@@ -91,21 +91,18 @@ class Track:
         if quality == 'verylow':
             bitrate = '32k'
             channels = 1
-            samplerate = 24000
         elif quality == 'low':
             bitrate = '64k'
             channels = 2
-            samplerate = 48000
         elif quality == 'high':
-            bitrate = '96k'
+            bitrate = '128k'
             channels = 2
-            samplerate = 48000
         else:
             raise ValueError('Invalid quality', quality)
 
         in_path_abs = self.path.absolute().as_posix()
 
-        cache_object = cache.get('transcoded audio', in_path_abs + bitrate)
+        cache_object = cache.get('transcoded audio 2', in_path_abs + bitrate)
         cached_data = cache_object.retrieve()
         if cached_data is not None:
             log.info('Returning cached audio')
@@ -142,11 +139,11 @@ class Track:
                 '-loglevel', settings.ffmpeg_loglevel,
                 '-i', in_path_abs,
                 '-map_metadata', '-1',  # browser heeft metadata niet nodig
+                '-vn',  # remove video track (also used by album covers, as mjpeg stream)
                 '-filter:a', filters,
-                '-ar', str(samplerate),
                 '-c:a', 'libopus',
                 '-b:a', bitrate,
-                '-f', 'opus',
+                '-f', 'webm',
                 '-vbr', 'on',
                 '-frame_duration', '60',
                 '-ac', str(channels),

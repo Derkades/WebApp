@@ -184,7 +184,7 @@ def get_track() -> Response:
 
     track = Track.by_relpath(request.args['path'])
     audio = track.transcoded_audio(quality)
-    return Response(audio, mimetype='audio/ogg')
+    return Response(audio, mimetype='audio/webm')
 
 
 def get_cover_bytes(meta: Metadata) -> Optional[bytes]:
