@@ -19,7 +19,7 @@ class Editor {
         dialog.open('dialog-editor');
     };
 
-    #getValue(id, list = false) {
+    getValue(id, list = false) {
         let value = document.getElementById(id).value;
         if (list) {
             const list = value.split(';');
@@ -38,11 +38,11 @@ class Editor {
         const payload = {
             path: this.#currentlyEditingPath,
                 metadata: {
-                title: this.#getValue('editor-title'),
-                album: this.#getValue('editor-album'),
-                artists: this.#getValue('editor-artists', true),
-                album_artist: this.#getValue('editor-album-artist'),
-                tags: this.#getValue('editor-tags', true),
+                title: this.getValue('editor-title'),
+                album: this.getValue('editor-album'),
+                artists: this.getValue('editor-artists', true),
+                album_artist: this.getValue('editor-album-artist'),
+                tags: this.getValue('editor-tags', true),
             }
         }
 

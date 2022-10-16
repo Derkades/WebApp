@@ -16,7 +16,7 @@ class Browse {
         dialog.open('dialog-browse');
     };
 
-    #browse(title, filter) {
+    browse(title, filter) {
         this.open();
         this.setHeader(title);
         this.#history.push({
@@ -46,18 +46,18 @@ class Browse {
 
     browseArtist(artistName) {
         const artistText = document.getElementById('trans-artist').textContent;
-        this.#browse(artistText + artistName, track => track.artists !== null && track.artists.indexOf(artistName) !== -1);
+        this.browse(artistText + artistName, track => track.artists !== null && track.artists.indexOf(artistName) !== -1);
     };
 
     browseAlbum(albumName, albumArtistName) {
         const albumText = document.getElementById('trans-album').textContent;
         const title = albumArtistName === null ? albumName : albumArtistName + ' - ' + albumName;
-        this.#browse(albumText + title, track => track.album === albumName);
+        this.browse(albumText + title, track => track.album === albumName);
     };
 
     browseTag(tagName) {
         const tagText = document.getElementById('trans-tag').textContent;
-        this.#browse(tagText + tagName, track => track.tags.indexOf(tagName) !== -1)
+        this.browse(tagText + tagName, track => track.tags.indexOf(tagName) !== -1)
     };
 
     browsePlaylist(playlist) {
@@ -67,7 +67,7 @@ class Browse {
 
     browseAll() {
         const allText = document.getElementById('trans-all-tracks').textContent;
-        this.#browse(allText, () => true);
+        this.browse(allText, () => true);
     };
 
     generateTrackList(tracks) {

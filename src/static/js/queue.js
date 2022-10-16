@@ -56,7 +56,7 @@ class Queue {
 
         this.#fillBusy = true;
 
-        Queue.#downloadRandomAndAddToQueue(playlist).then(() => {
+        Queue.downloadRandomAndAddToQueue(playlist).then(() => {
             this.#fillBusy = false;
             this.fill();
         }, error => {
@@ -67,7 +67,7 @@ class Queue {
         });
     };
 
-    static async #downloadRandomAndAddToQueue(playlist) {
+    static async downloadRandomAndAddToQueue(playlist) {
         console.info('queue | choose track');
         const chooseResponse = await fetch('/choose_track?playlist_dir=' + encodeURIComponent(playlist) + '&' + getTagFilter());
         checkResponseCode(chooseResponse);
