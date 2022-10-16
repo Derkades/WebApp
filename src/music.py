@@ -82,27 +82,34 @@ class Track:
         """
         return metadata.cached(self.relpath)
 
-    def transcoded_audio(self, quality) -> bytes:
+    def transcoded_audio(self, quality, fruit) -> bytes:
         """
         Normalize and compress audio using ffmpeg
         Returns: Compressed audio bytes
         """
 
         if quality == 'verylow':
-            bitrate = '32k'
+            bit_rate = '32k'
             channels = 1
         elif quality == 'low':
-            bitrate = '64k'
+            bit_rate = '64k'
             channels = 2
         elif quality == 'high':
-            bitrate = '128k'
+            bit_rate = '128k'
             channels = 2
         else:
             raise ValueError('Invalid quality', quality)
 
+        if fruit:
+            # Special "Core Audio Format" for Safari
+            container_format = 'caf'
+        else:
+            # webm for all other browsers
+            container_format = 'webm'
+
         in_path_abs = self.path.absolute().as_posix()
 
-        cache_object = cache.get('transcoded audio 2', in_path_abs + bitrate)
+        cache_object = cache.get('audio', container_format + in_path_abs + bit_rate)
         cached_data = cache_object.retrieve()
         if cached_data is not None:
             log.info('Returning cached audio')
@@ -142,8 +149,8 @@ class Track:
                 '-vn',  # remove video track (also used by album covers, as mjpeg stream)
                 '-filter:a', filters,
                 '-c:a', 'libopus',
-                '-b:a', bitrate,
-                '-f', 'webm',
+                '-b:a', bit_rate,
+                '-f', container_format,
                 '-vbr', 'on',
                 '-frame_duration', '60',
                 '-ac', str(channels),

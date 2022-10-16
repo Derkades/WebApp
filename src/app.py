@@ -144,15 +144,9 @@ def player():
     """
     user = check_password_cookie()
 
-    mobile = False
-    if 'User-Agent' in request.headers:
-        user_agent = request.headers['User-Agent']
-        if 'Android' in user_agent or 'iOS' in user_agent:
-            mobile = True
-
     return render_template('player.jinja2',
                            user_is_admin=user.admin,
-                           mobile=mobile)
+                           mobile=is_mobile())
 
 
 @app.route('/choose_track', methods=['GET'])
@@ -183,8 +177,10 @@ def get_track() -> Response:
     quality = request.args['quality'] if 'quality' in request.args else 'high'
 
     track = Track.by_relpath(request.args['path'])
-    audio = track.transcoded_audio(quality)
-    return Response(audio, mimetype='audio/webm')
+    fruit = is_fruit()
+    audio = track.transcoded_audio(quality, fruit)
+    mime = 'audio/x-caf' if fruit else 'audio/webm'
+    return Response(audio, mimetype=mime)
 
 
 def get_cover_bytes(meta: Metadata) -> Optional[bytes]:
@@ -529,3 +525,18 @@ def get_img_format():
     # Once webp is working in Accept header for all image requests, this can be changed to jpeg
     # For now assume the browser supports WEBP to avoid always sending JPEG
     return 'image/webp'
+
+
+def is_mobile() -> bool:
+    if 'User-Agent' in request.headers:
+        user_agent = request.headers['User-Agent']
+        if 'Android' in user_agent or 'iOS' in user_agent:
+            return True
+    return False
+
+
+def is_fruit() -> bool:
+    if 'User-Agent' in request.headers:
+        if 'Safari' in request.headers['User-Agent']:
+            return True
+    return False
