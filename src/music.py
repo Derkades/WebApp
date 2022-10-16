@@ -103,7 +103,7 @@ class Track:
             bit_rate_table = {
                 'verylow': '64k',
                 'low': '128k',
-                'high': '192k',
+                'high': '256k',
             }
         else:
             # Opus in webm container for all other browsers
