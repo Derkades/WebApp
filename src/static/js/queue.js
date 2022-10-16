@@ -226,6 +226,8 @@ class Queue {
 
         this.fill();
         updateTrackHtml();
+        updateMediaSession();
+        updateMediaSessionPosition();
     };
 
     next() {
@@ -249,6 +251,8 @@ class Queue {
 
         this.fill();
         updateTrackHtml();
+        updateMediaSession();
+        updateMediaSessionPosition();
     };
 
     add(queuedTrack, top) {

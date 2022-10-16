@@ -100,6 +100,7 @@ function seek(delta) {
         audioElem.currentTime = newTime;
     }
 
+    updateMediaSession();
     updateMediaSessionPosition();
 }
 
