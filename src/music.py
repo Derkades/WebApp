@@ -88,24 +88,35 @@ class Track:
         Returns: Compressed audio bytes
         """
 
-        if quality == 'verylow':
-            bit_rate = '32k'
-            channels = 1
-        elif quality == 'low':
-            bit_rate = '64k'
-            channels = 2
-        elif quality == 'high':
-            bit_rate = '128k'
-            channels = 2
-        else:
-            raise ValueError('Invalid quality', quality)
+        channels_table = {
+            'verylow': 1,
+            'low': 2,
+            'high': 2,
+        }
 
         if fruit:
-            # Special "Core Audio Format" for Safari
-            container_format = 'caf'
+            # Special AAC audio in MP4 container for Safari. caniuse.com claims opus in CAF
+            # container is supported, but doesn't seem to work on Safari 16.0 macOS Monterey,
+            # so we'll have to use the less-efficient AAC codec at a higher bit rate.
+            container_format = 'mp4'
+            audio_codec = 'aac'
+            bit_rate_table = {
+                'verylow': '64k',
+                'low': '128k',
+                'high': '192k',
+            }
         else:
-            # webm for all other browsers
+            # Opus in webm container for all other browsers
             container_format = 'webm'
+            audio_codec = 'libopus'
+            bit_rate_table = {
+                'verylow': '32k',
+                'low': '64k',
+                'high': '128k',
+            }
+
+        channels = channels_table[quality]
+        bit_rate = bit_rate_table[quality]
 
         in_path_abs = self.path.absolute().as_posix()
 
@@ -145,10 +156,10 @@ class Track:
                 '-hide_banner',
                 '-loglevel', settings.ffmpeg_loglevel,
                 '-i', in_path_abs,
-                '-map_metadata', '-1',  # browser heeft metadata niet nodig
+                '-map_metadata', '-1',  # browser doesn't need metadata
                 '-vn',  # remove video track (also used by album covers, as mjpeg stream)
                 '-filter:a', filters,
-                '-c:a', 'libopus',
+                '-c:a', audio_codec,
                 '-b:a', bit_rate,
                 '-f', container_format,
                 '-vbr', 'on',

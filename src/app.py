@@ -179,7 +179,7 @@ def get_track() -> Response:
     track = Track.by_relpath(request.args['path'])
     fruit = is_fruit()
     audio = track.transcoded_audio(quality, fruit)
-    mime = 'audio/x-caf' if fruit else 'audio/webm'
+    mime = 'audio/mp4' if fruit else 'audio/webm'
     return Response(audio, mimetype=mime)
 
 
