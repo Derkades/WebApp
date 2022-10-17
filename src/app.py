@@ -454,9 +454,9 @@ def files_upload():
     check_password_cookie(require_admin=True)
 
     upload_dir = music.from_relpath(request.form['dir'])
-    uploaded_file = request.files['upload']
-    check_filename(uploaded_file.filename)
-    uploaded_file.save(Path(upload_dir, uploaded_file.filename))
+    for uploaded_file in request.files.getlist('upload'):
+        check_filename(uploaded_file.filename)
+        uploaded_file.save(Path(upload_dir, uploaded_file.filename))
     return redirect('/files?path=' + urlencode(music.to_relpath(upload_dir)))
 
 
