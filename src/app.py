@@ -1,16 +1,15 @@
 from typing import Optional
 import logging
 from pathlib import Path
-from dataclasses import dataclass
 from urllib.parse import quote as urlencode
 
 from flask import Flask, request, render_template, Response, redirect, send_file
 import flask_assets
-from flask_babel import Babel, gettext as _
-import bcrypt
+from flask_babel import Babel
 
+import auth
+from auth import AuthError
 import bing
-import db
 import genius
 import image
 from metadata import Metadata
@@ -28,71 +27,15 @@ assets_dir = Path('static')
 raphson_png_path = Path(assets_dir, 'raphson.png')
 
 
-@dataclass
-class User:
-    username: str
-    admin: bool
-
-
-@dataclass
-class AuthError(Exception):
-    reason: str
-    redirect_login: bool = False
-
-
-def check_password(username: Optional[str], password: Optional[str]) -> User:
-    """
-    Check whether the provided username and password combination corresponds to a user. If it does,
-    a user object is returned. If it does not, an AuthError is raised.
-    Args:
-        username: A username, or None
-        password: A password, or None
-    Returns: User object
-    """
-    if username is None or password is None:
-        raise AuthError(_('Username or password not provided'))
-
-    with db.users() as conn:
-        result = conn.execute('SELECT password,admin FROM user WHERE username=?', (username,)).fetchone()
-
-        if result is None:
-            log.warning("Login attempt with non-existent username: '%s'", username)
-            raise AuthError(_('Invalid username or password.'))
-
-        hashed_password, is_admin = result
-
-        if not bcrypt.checkpw(password.encode(), hashed_password.encode()):
-            raise AuthError(_('Invalid username or password.'))
-
-        return User(username, is_admin)
-
-
-def check_password_cookie(require_admin: bool = False) -> User:
-    """
-    Check username/password stored in cookie, raising AuthError if invalid
-    Args:
-        require_admin: Set to True to raise an AuthError if user is not admin, even if
-                       username and password are valid
-    Returns: User object
-    """
-    if 'username' not in request.cookies:
-        raise AuthError(_('Not logged in.'), redirect_login=True)
-
-    user = check_password(request.cookies.get('username'), request.cookies.get('password'))
-    if require_admin and not user.admin:
-        raise AuthError(_('Admin privilege is required, but your account does not have admin status.'))
-    return user
-
-
 @app.errorhandler(AuthError)
 def handle_auth_error(err: AuthError):
     """
     Display permission denied error page with reason, or redirect to login page
     """
-    if err.redirect_login:
+    if err.redirect:
         return redirect('/login')
 
-    return Response(render_template('403.jinja2', reason=err.reason), 403)
+    return Response(render_template('403.jinja2', reason=err.reason.message), 403)
 
 
 @app.route('/')
@@ -100,7 +43,7 @@ def home():
     """
     Home page, with links to file manager and music player
     """
-    check_password_cookie()
+    auth.verify_auth_cookie(redirect_to_login=True)
     return render_template('home.jinja2')
 
 
@@ -111,7 +54,7 @@ def login():
     If the provided password is invalid, the login template is rendered with invalid_password=True
     """
     try:
-        check_password_cookie()
+        auth.verify_auth_cookie()
         # User is already logged in
         return redirect('/')
     except AuthError:
@@ -125,13 +68,12 @@ def login():
         password = request.form['password']
 
         try:
-            check_password(username, password)
+            token = auth.log_in(username, password)
         except AuthError:
             return render_template('login.jinja2', invalid_password=True)
 
         response = redirect('/')
-        response.set_cookie('username', username, max_age=3600*24*30, samesite='Strict')
-        response.set_cookie('password', password, max_age=3600*24*30, samesite='Strict')
+        response.set_cookie('token', token, max_age=3600*24*30, samesite='Strict')
         return response
     else:
         return render_template('login.jinja2', invalid_password=False)
@@ -142,7 +84,7 @@ def player():
     """
     Main player page. Serves player.jinja2 template file.
     """
-    user = check_password_cookie()
+    user = auth.verify_auth_cookie(redirect_to_login=True)
 
     return render_template('player.jinja2',
                            user_is_admin=user.admin,
@@ -154,7 +96,7 @@ def choose_track():
     """
     Choose random track from the provided playlist directory.
     """
-    check_password_cookie()
+    auth.verify_auth_cookie()
 
     dir_name = request.args['playlist_dir']
     tag_mode = request.args['tag_mode']
@@ -172,7 +114,7 @@ def get_track() -> Response:
     """
     Get transcoded audio for the given track path.
     """
-    check_password_cookie()
+    auth.verify_auth_cookie()
 
     quality = request.args['quality'] if 'quality' in request.args else 'high'
 
@@ -210,7 +152,7 @@ def get_album_cover() -> Response:
     """
     Get album cover image for the provided track path.
     """
-    check_password_cookie()
+    auth.verify_auth_cookie()
 
     track = Track.by_relpath(request.args['path'])
 
@@ -232,7 +174,7 @@ def get_lyrics():
     """
     Get lyrics for the provided track path.
     """
-    check_password_cookie()
+    auth.verify_auth_cookie()
 
     track = Track.by_relpath(request.args['path'])
     meta = track.metadata()
@@ -254,7 +196,7 @@ def ytdl():
     """
     Use yt-dlp to download the provided URL to a playlist directory
     """
-    check_password_cookie(require_admin=True)
+    auth.verify_auth_cookie(require_admin=True)
 
     directory = request.json['directory']
     url = request.json['url']
@@ -277,7 +219,7 @@ def track_list():
     Return list of playlists and tracks. If it takes too long to load metadata for all tracks,
     a partial result is returned.
     """
-    check_password_cookie()
+    auth.verify_auth_cookie()
 
     response = {
         'playlists': {},
@@ -321,7 +263,7 @@ def scan_music():
     """
     Scans all playlists for new music
     """
-    check_password_cookie(require_admin=True)
+    auth.verify_auth_cookie(require_admin=True)
 
     if 'playlist' in request.args:
         playlist = music.playlist(request.args['playlist'])
@@ -337,7 +279,7 @@ def update_metadata():
     """
     Endpoint to update track metadata
     """
-    check_password_cookie()
+    auth.verify_auth_cookie(require_admin=True)
 
     payload = request.json
     track = Track.by_relpath(payload['path'])
@@ -358,8 +300,6 @@ def raphson() -> Response:
     """
     Serve raphson logo image
     """
-    check_password_cookie()
-
     img_format = get_img_format()
     thumb = image.thumbnail(raphson_png_path, 'raphson', img_format[6:], 512)
     response = Response(thumb, mimetype=img_format)
@@ -372,7 +312,7 @@ def files():
     """
     File manager
     """
-    check_password_cookie()
+    auth.verify_auth_cookie(redirect_to_login=True)
 
     if 'path' in request.args:
         base_path = music.from_relpath(request.args['path'])
@@ -422,7 +362,7 @@ def files_delete():
     """
     Delete a file
     """
-    check_password_cookie(require_admin=True)
+    auth.verify_auth_cookie(require_admin=True)
 
     path = music.from_relpath(request.form['path'])
     if path.is_dir():
@@ -451,7 +391,7 @@ def files_upload():
     """
     Form target to upload file
     """
-    check_password_cookie(require_admin=True)
+    auth.verify_auth_cookie(require_admin=True)
 
     upload_dir = music.from_relpath(request.form['dir'])
     for uploaded_file in request.files.getlist('upload'):
@@ -465,7 +405,7 @@ def files_rename():
     """
     Page and form target to rename file
     """
-    check_password_cookie(require_admin=True)
+    auth.verify_auth_cookie(require_admin=True)
 
     if request.method == 'POST':
         path = music.from_relpath(request.form['path'])
@@ -485,7 +425,7 @@ def files_mkdir():
     """
     Create directory, then enter it
     """
-    check_password_cookie(require_admin=True)
+    auth.verify_auth_cookie(require_admin=True)
 
     path = music.from_relpath(request.form['path'])
     dirname = request.form['dirname']
@@ -499,6 +439,7 @@ def files_download():
     """
     Download track
     """
+    auth.verify_auth_cookie()
     path = music.from_relpath(request.args['path'])
     return send_file(path, as_attachment=True)
 

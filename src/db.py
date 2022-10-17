@@ -103,6 +103,16 @@ def create_tables():
                      )
                      """)
 
+        conn.execute("""
+                     CREATE TABLE IF NOT EXISTS session (
+                         user INTEGER NOT NULL,
+                         token TEXT NOT NULL UNIQUE,
+                         creation_date INTEGER NOT NULL,
+                         last_user_agent TEXT NULL,
+                         last_address TEXT NULL,
+                         FOREIGN KEY (user) REFERENCES user(id) ON DELETE CASCADE
+                     )""")
+
 
 if __name__ == '__main__':
     import logconfig
