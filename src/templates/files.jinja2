@@ -80,7 +80,7 @@
         <h3>Upload file</h3>
         <form method="POST" action="/files_upload" enctype="multipart/form-data">
             <input type="hidden" name="dir" value="{{ base_path }}">
-            <input type="file" name="upload">
+            <input type="file" name="upload" accept="{{ music_extensions }}">
             <input type="submit" value="{% trans %}Upload{% endtrans %}">
         </form>
 

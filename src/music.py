@@ -18,14 +18,16 @@ log = logging.getLogger('app.music')
 
 
 MUSIC_EXTENSIONS = [
-    'mp3',
-    'flac',
-    'ogg',
-    'webm',
-    'mkv',
-    'wma',
-    'm4a',
-    'wav',
+    '.mp3',
+    '.flac',
+    '.ogg',
+    '.webm',
+    '.mkv',
+    '.wma',
+    '.m4a',
+    '.wav',
+    '.opus',
+    '.aac',
 ]
 
 
@@ -56,7 +58,7 @@ def scan_music(path) -> Iterator[Path]:
     Returns: Paths iterator
     """
     for ext in MUSIC_EXTENSIONS:
-        for track_path in path.glob('**/*.' + ext):
+        for track_path in path.glob('**/*' + ext):
             yield track_path
 
 

@@ -413,7 +413,8 @@ def files():
                            base_path=music.to_relpath(base_path),
                            base_path_uri=urlencode(music.to_relpath(base_path)),
                            parent_path_uri=parent_path_uri,
-                           files=children)
+                           files=children,
+                           music_extensions=','.join(music.MUSIC_EXTENSIONS))
 
 
 @app.route('/files_delete', methods=['POST'])
