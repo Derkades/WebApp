@@ -8,7 +8,7 @@ from enum import Enum, unique
 
 import bcrypt
 from flask import request
-from flask_babel import gettext as _
+from flask_babel import _
 
 import db
 
@@ -17,10 +17,72 @@ log = logging.getLogger('app.auth')
 
 
 @dataclass
+class Session:
+    rowid: int
+    token: str
+    creation_timestamp: int
+    last_user_agent: Optional[str]
+    last_address: Optional[str]
+
+    @property
+    def creation_date(self) -> str:
+        minutes_ago = (int(time.time()) - self.creation_timestamp) // 60
+        if minutes_ago < 120:
+            return _('%(minutes)d minutes ago', minutes=minutes_ago)
+
+        hours_ago = minutes_ago // 60
+        if hours_ago < 48:
+            return _('%(hours)d hours ago', hours=hours_ago)
+
+        days_ago = hours_ago // 24
+        return _('%(days)d days ago', days=days_ago)
+
+    @property
+    def last_device(self) -> Optional[str]:
+        """
+        Last device string, based on user agent string
+        """
+        if self.last_user_agent is None:
+            return None
+
+        browsers = ['Firefox', 'Safari', 'Chromium', 'Chrome', 'Vivaldi', 'Opera']
+        systems = ['Linux', 'Windows', 'macOS', 'Android', 'iOS']
+
+        for maybe_browser in browsers:
+            if maybe_browser in self.last_user_agent:
+                browser = maybe_browser
+                break
+        else:
+            browser = 'Unknown'
+
+        for maybe_system in systems:
+            if maybe_system in self.last_user_agent:
+                system = maybe_system
+                break
+        else:
+            system = 'Unknown'
+
+        return f'{browser}, {system}'
+
+
+@dataclass
 class User:
     user_id: int
     username: str
     admin: bool
+    session: Session
+
+    @property
+    def sessions(self):
+        """
+        Get all sessions for users
+        """
+        with db.users() as conn:
+            results = conn.execute("""
+                                   SELECT rowid, token, creation_date, last_user_agent, last_address
+                                   FROM session WHERE user=?
+                                   """, (self.user_id,)).fetchall()
+            return [Session(*row) for row in results]
 
 
 @unique
@@ -87,7 +149,7 @@ def log_in(username: str, password: str) -> Optional[str]:
         return token
 
 
-def verify_token(token: str) -> Optional[User]:
+def verify_token(token: str, user_agent = None, remote_addr = None) -> Optional[User]:
     """
     Verify session token, and return corresponding user
     Args:
@@ -97,7 +159,7 @@ def verify_token(token: str) -> Optional[User]:
     with db.users() as conn:
         # TODO does this introduce the possibility of a timing attack?
         result = conn.execute("""
-                              SELECT user.id, user.username, user.admin
+                              SELECT session.rowid, session.creation_date, session.last_user_agent, session.last_address, user.id, user.username, user.admin
                               FROM user JOIN session ON user.id = session.user
                               WHERE session.token=?
                               """, (token,)).fetchone()
@@ -105,8 +167,14 @@ def verify_token(token: str) -> Optional[User]:
             log.warning('Invalid auth token: %s', token)
             return None
 
-        user_id, username, admin = result
-        return User(user_id, username, admin)
+        session_rowid, session_creation_date, session_user_agent, session_address, user_id, username, admin = result
+
+        if user_agent and remote_addr:
+            conn.execute('UPDATE session SET last_user_agent=?, last_address=? WHERE rowid=?',
+                         (user_agent, remote_addr, session_rowid))
+
+        session = Session(session_rowid, token, session_creation_date, session_user_agent, session_address)
+        return User(user_id, username, admin, session)
 
 
 def verify_auth_cookie(require_admin = False, redirect_to_login = False) -> User:
@@ -118,7 +186,8 @@ def verify_auth_cookie(require_admin = False, redirect_to_login = False) -> User
         raise AuthError(AuthErrorReason.NO_TOKEN, redirect_to_login)
 
     token = request.cookies['token']
-    user = verify_token(token)
+    user_agent = request.headers['User-Agent'] if 'User-Agent' in request.headers else None
+    user = verify_token(token, user_agent, request.remote_addr)
     if user is None:
         raise AuthError(AuthErrorReason.INVALID_TOKEN, redirect_to_login)
 

@@ -19,6 +19,8 @@
             <a href="/files">Parent directory</a>
         {% elif parent_path_uri %}
             <a href="/files?path={{ parent_path_uri }}">Parent directory</a>
+        {% else %}
+            <a href="/">{% trans %}Back to home{% endtrans %}</a>
         {% endif %}
 
         <br>

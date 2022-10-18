@@ -1,0 +1,40 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+
+    <main>
+        <h3>{% trans name=user.username %}Logged in as '{{ name }}'{% endtrans %}</h3>
+
+        <a href="/">{% trans %}Back to home{% endtrans %}</a>
+
+        <h4>Sessions</h4>
+        <table style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>{% trans %}ID{% endtrans %}</th>
+                    <th>{% trans %}Creation date{% endtrans %}</th>
+                    <th>{% trans %}Last device{% endtrans %}</th>
+                    <th>{% trans %}Last address{% endtrans %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in sessions %}
+                    <tr>
+                        <td>{{ session.rowid }}</td>
+                        <td>{{ session.creation_date }}</td>
+                        <td>
+                            {% if session == user.session %}
+                                {% trans device=session.last_device %}{{ device }} (current session){%endtrans%}
+                            {% else %}
+                                {{ session.last_device }}
+                            {% endif %}
+                        </td>
+                        <td>{{ session.last_address }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+
+{% endblock content %}
+

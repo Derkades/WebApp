@@ -26,8 +26,14 @@ body.light {
     color: black;
 }
 
-h3, p, label, td, div, a, .progress-time {
+h1, h2, h3, h4, h5, h6,
+p, label, th, td, div, a,
+.progress-time {
     font-family: 'Quicksand', Verdana, sans-serif;
+}
+
+td, th {
+    text-align: left;
 }
 
 p {

@@ -444,6 +444,17 @@ def files_download():
     return send_file(path, as_attachment=True)
 
 
+@app.route('/account')
+def account():
+    """
+    Account information page
+    """
+    user = auth.verify_auth_cookie()
+    return render_template('account.jinja2',
+                           user=user,
+                           sessions=user.sessions)
+
+
 @babel.localeselector
 def get_locale():
     """
