@@ -8,7 +8,7 @@ import flask_assets
 from flask_babel import Babel
 
 import auth
-from auth import AuthError
+from auth import AuthError, RequestTokenError
 import bing
 import genius
 import image
@@ -36,6 +36,14 @@ def handle_auth_error(err: AuthError):
         return redirect('/login')
 
     return Response(render_template('403.jinja2', reason=err.reason.message), 403)
+
+
+@app.errorhandler(RequestTokenError)
+def handle_token_error(_err: RequestTokenError):
+    """
+    Return bad request
+    """
+    return Response('Invalid CSRF token', status=400)
 
 
 @app.route('/')

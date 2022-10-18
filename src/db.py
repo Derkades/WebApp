@@ -111,7 +111,18 @@ def create_tables():
                          last_user_agent TEXT NULL,
                          last_address TEXT NULL,
                          FOREIGN KEY (user) REFERENCES user(id) ON DELETE CASCADE
-                     )""")
+                     )
+                     """)
+
+        conn.execute("""
+                     CREATE TABLE IF NOT EXISTS csrf (
+                         user INTEGER NOT NULL,
+                         token TEXT NOT NULL UNIQUE,
+                         creation_date INTEGER NOT NULL,
+                         UNIQUE(user, token),
+                         FOREIGN KEY (user) REFERENCES user(id) ON DELETE CASCADE
+                     )
+                     """)
 
 
 if __name__ == '__main__':

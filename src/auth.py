@@ -112,7 +112,11 @@ class AuthError(Exception):
     redirect: bool
 
 
-def _generate_session_token() -> str:
+class RequestTokenError(Exception):
+    pass
+
+
+def _generate_token() -> str:
     return base64.b64encode(os.urandom(16)).decode()
 
 
@@ -138,7 +142,7 @@ def log_in(username: str, password: str) -> Optional[str]:
             log.warning('Failed login for user %s', username)
             return None
 
-        token = _generate_session_token()
+        token = _generate_token()
         creation_date = int(time.time())
 
         conn.execute('INSERT INTO session (user, token, creation_date) VALUES (?, ?, ?)',
@@ -196,3 +200,27 @@ def verify_auth_cookie(require_admin = False, redirect_to_login = False) -> User
 
     return user
 
+
+def get_csrf(user: User) -> str:
+    """
+    Generate CSRF token and store it for later validation
+    """
+    with db.users() as conn:
+        token = _generate_token()
+        now = int(time.time())
+        conn.execute('INSERT INTO csrf (user, token, creation_date) VALUES (?, ?, ?)',
+                     (user.user_id, token, now))
+    return token
+
+
+def verify_csrf(user: User, token: str) -> None:
+    """
+    Verify request token, raising RequestTokenException if not valid
+    """
+    with db.users() as conn:
+        # The music player page may be open for a long time, so we accept abnormally old CSRF tokens
+        week_ago = int(time.time()) - 60*60*24*7
+        result = conn.execute('SELECT token FROM session WHERE user=? AND token=? AND creation_date > ?',
+                              (user.user_id, token, week_ago))
+        if result is None:
+            raise RequestTokenError()
