@@ -186,8 +186,12 @@ class Track:
                 '-i', self.path.absolute().as_posix(),
                 '-codec', 'copy',
             ]
+            if self.path.name.endswith('ogg'):
+                meta_flag = '-metadata:s' # Set stream metadata
+            else:
+                meta_flag = '-metadata' # Set container metadata
             for key, value in meta_dict.items():
-                command.extend(('-metadata', key + '=' + ('' if value is None else value)))
+                command.extend((meta_flag, key + '=' + ('' if value is None else value)))
             command.extend(('-f', self.path.name.split('.')[-1]))
             command.append(temp_file.name)
 
