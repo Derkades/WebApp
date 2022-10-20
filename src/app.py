@@ -498,6 +498,9 @@ def is_mobile() -> bool:
 
 def is_fruit() -> bool:
     if 'User-Agent' in request.headers:
-        if 'Safari' in request.headers['User-Agent']:
+        user_agent = request.headers['User-Agent']
+        if 'Macintosh' in user_agent or \
+                'iPhone' in user_agent or \
+                'iPad' in user_agent:
             return True
     return False
