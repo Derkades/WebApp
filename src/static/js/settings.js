@@ -1,5 +1,6 @@
 function syncCookieWithInput(elemId) {
     const elem = document.getElementById(elemId);
+    const isCheckbox = elem.matches('input[type="checkbox"]');
 
     if (elem.dataset.restore === 'false') {
         return;
@@ -8,12 +9,20 @@ function syncCookieWithInput(elemId) {
     // If cookie exists, set input value to cookie value
     const value = getCookie(elemId);
     if (value !== null) {
-        elem.value = value;
+        if (isCheckbox) {
+            elem.checked = value === '1';
+        } else {
+            elem.value = value;
+        }
     }
 
     // If input value is updated, set cookie accordingly
     elem.addEventListener('input', event => {
-        setCookie(elemId, event.target.value);
+        if (isCheckbox) {
+            setCookie(elemId, event.target.checked ? '1' : '0');
+        } else {
+            setCookie(elemId, event.target.value);
+        }
     });
 }
 
@@ -24,6 +33,7 @@ function syncCookiesWithInputs() {
         'settings-volume',
         'settings-queue-removal-behaviour',
         'settings-theme',
+        'settings-meme-mode',
     ].forEach(syncCookieWithInput);
 }
 

@@ -133,7 +133,7 @@ def get_track() -> Response:
     return Response(audio, mimetype=mime)
 
 
-def get_cover_bytes(meta: Metadata) -> Optional[bytes]:
+def get_cover_bytes(meta: Metadata, meme: bool) -> Optional[bytes]:
     """
     Find album cover using MusicBrainz or Bing.
     Parameters:
@@ -141,6 +141,14 @@ def get_cover_bytes(meta: Metadata) -> Optional[bytes]:
     Returns: Album cover image bytes, or None if MusicBrainz nor bing found an image.
     """
     log.info('Finding cover for: %s', meta.relpath)
+
+    if meme:
+        query = next(meta.lyrics_search_queries()) + ' meme'
+        if '-' in query:
+            query = query[query.index('-')+1:]
+        image_bytes = bing.image_search(query)
+        if image_bytes:
+            return image_bytes
 
     # Try MusicBrainz first
     mb_query = meta.album_release_query()
@@ -163,15 +171,20 @@ def get_album_cover() -> Response:
     auth.verify_auth_cookie()
 
     track = Track.by_relpath(request.args['path'])
+    meme = 'meme' in request.args and bool(int(request.args['meme']))
 
     def get_img():
         meta = track.metadata()
-        img = get_cover_bytes(meta)
+        img = get_cover_bytes(meta, meme)
         return img
 
     img_format = get_img_format()
 
-    comp_bytes = image.thumbnail(get_img, track.relpath, img_format[6:], 700,
+    cache_id = track.relpath
+    if meme:
+        cache_id += 'meme'
+
+    comp_bytes = image.thumbnail(get_img, cache_id, img_format[6:], 700,
                                  thumb_quality=request.args['quality'])
 
     return Response(comp_bytes, mimetype=img_format)

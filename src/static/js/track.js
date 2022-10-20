@@ -141,7 +141,8 @@ class Track {
             imageBlobUrl = '/raphson';
         } else {
             console.info('queue | download album cover image');
-            const imageUrl = '/get_album_cover?path=' + encodedPath + '&quality=' + encodedQuality;
+            const meme = document.getElementById('settings-meme-mode').checked ? '1' : '0';
+            const imageUrl = '/get_album_cover?path=' + encodedPath + '&quality=' + encodedQuality + '&meme=' + meme;
             const coverResponse = await fetch(imageUrl);
             checkResponseCode(coverResponse);
             const imageBlob = await coverResponse.blob();
