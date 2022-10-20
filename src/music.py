@@ -261,9 +261,9 @@ class Playlist:
             params.extend(tags)
 
         query += ' ORDER BY RANDOM()'
-        query += ' LIMIT 50'
+        query += ' LIMIT 10'
 
-        # From randomly ordered 20 tracks, choose one that was last played longest ago
+        # From randomly ordered tracks, choose one that was last played longest ago
         query = 'SELECT * FROM (' + query + ') ORDER BY last_played ASC LIMIT 1'
 
         with db.get() as conn:
