@@ -241,8 +241,9 @@ def probe(path: Path) -> Metadata:
     """
     command = [
         'ffprobe',
+        '-show_streams',
+        '-show_format',
         '-print_format', 'json',
-        '-show_entries', 'format',
         path.absolute().as_posix(),
     ]
 
@@ -253,9 +254,9 @@ def probe(path: Path) -> Metadata:
 
     output_bytes = result.stdout
 
-    data = json.loads(output_bytes.decode())['format']
+    data = json.loads(output_bytes.decode())
 
-    duration = int(float(data['duration']))
+    duration = int(float(data['format']['duration']))
     artists = None
     album = None
     title = None
@@ -264,37 +265,46 @@ def probe(path: Path) -> Metadata:
     album_index = None
     tags = []
 
-    if 'tags' in data:
-        for name, value in data['tags'].items():
-            # sometimes ffprobe returns tags in uppercase
-            name = name.lower()
+    meta_tags = []
 
-            if name == 'album':
-                album = value
+    for stream in data['streams']:
+        if stream['codec_type'] == 'audio':
+            if 'tags' in stream:
+                meta_tags.extend(stream['tags'].items())
 
-            if name == 'artist':
-                artists = split_meta_list(value)
+    if 'tags' in data['format']:
+        meta_tags.extend(data['format']['tags'].items())
 
-            if name == 'title':
-                title = strip_keywords(value).strip()
+    for name, value in meta_tags:
+        # sometimes ffprobe returns tags in uppercase
+        name = name.lower()
 
-            if name == 'date':
-                try:
-                    year = int(value[:4])
-                except ValueError:
-                    log.warning('Invalid year %s', value)
+        if name == 'album':
+            album = value
 
-            if name == 'album_artist':
-                album_artist = value
+        if name == 'artist':
+            artists = split_meta_list(value)
 
-            if name == 'track':
-                try:
-                    album_index = int(value.split('/')[0])
-                except ValueError:
-                    log.warning('Invalid album_index %s', value)
+        if name == 'title':
+            title = strip_keywords(value).strip()
 
-            if name == 'genre':
-                tags = split_meta_list(value)
+        if name == 'date':
+            try:
+                year = int(value[:4])
+            except ValueError:
+                log.warning("Invalid year '%s' in file '%s'", value, path.absolute().as_posix())
+
+        if name == 'album_artist':
+            album_artist = value
+
+        if name == 'track':
+            try:
+                album_index = int(value.split('/')[0])
+            except ValueError:
+                log.warning("Invalid track number '%s' in file '%s'", value, path.absolute().as_posix())
+
+        if name == 'genre':
+            tags = split_meta_list(value)
 
     return Metadata(music.to_relpath(path), duration, artists, album, title, year, album_artist, album_index, tags)
 
