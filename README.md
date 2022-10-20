@@ -66,10 +66,6 @@ Don't worry about removing strings like "(Official Audio)" from song titles, the
 
 This directory is used to store the result of time-consuming operations, like transcoding audio or web scraping for album art. It may be emptied at any time as long as the application is not running.
 
-### `MUSIC_REDIS_HOST` / `MUSIC_REDIS_PORT`
-
-Connection details for Redis server. Defaults to `localhost`, port `6379`.
-
 ## Development
 
 With docker and docker-compose-plugin installed, run the following command to start a local testing server:
