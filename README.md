@@ -24,7 +24,7 @@ This is alpha-level software. While a reasonable attempt was made at good securi
 
 Some examples of missing security features:
 - No protection against cross-site request forgery.
-- Password is stored in cookie instead of a long, randomized, short-lived access token.
+- ~~Password is stored in cookie instead of a long, randomized, short-lived access token.~~ Fixed!
 - Directory traversal should be prevented but some endpoints may still be implemented incorrectly.
 - Writing to files should not be possible for non-admin users, but some endpoints may still be unprotected.
 
