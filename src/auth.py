@@ -100,9 +100,7 @@ class User:
         Verify request token, raising RequestTokenException if not valid
         """
         with db.users() as conn:
-            # The music player page may be open for a long time, so we accept abnormally old CSRF tokens
-            # TODO shorter lifetime, and refresh token in player using javascript
-            week_ago = int(time.time()) - 60*60*24*7
+            week_ago = int(time.time()) - 3600
             result = conn.execute('SELECT token FROM session WHERE user=? AND token=? AND creation_date > ?',
                                 (self.user_id, token, week_ago))
             if result is None:

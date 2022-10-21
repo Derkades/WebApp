@@ -101,6 +101,15 @@ def player():
                            csrf_token=user.get_csrf())
 
 
+@app.route('/get_csrf')
+def get_csrf():
+    """
+    Get CSRF token
+    """
+    user = auth.verify_auth_cookie()
+    return {'token': user.get_csrf()}
+
+
 @app.route('/choose_track', methods=['GET'])
 def choose_track():
     """

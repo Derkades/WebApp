@@ -88,6 +88,8 @@ document.addEventListener("DOMContentLoaded", () => {
     setInterval(updateMediaSession, 500);
     setInterval(updateMediaSessionPosition, 5000);
     initTrackList();
+
+    setInterval(refreshCsrfToken, 15*60*1000);
 });
 
 function initTrackList() {

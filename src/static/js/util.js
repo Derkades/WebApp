@@ -87,6 +87,14 @@ function getCsrfToken() {
     return document.getElementById('csrf-token').textContent;
 }
 
+async function refreshCsrfToken() {
+    const response = await fetch('/get_csrf');
+    checkResponseCode(response);
+    const json = await response.json();
+    const token = json.token;
+    document.getElementById('csrf-token').textContent = token;
+}
+
 async function jsonPost(url, postDataObject) {
     postDataObject.csrf = getCsrfToken();
     const options = {
