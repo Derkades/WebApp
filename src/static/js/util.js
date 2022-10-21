@@ -82,3 +82,21 @@ function levenshtein(str1, str2) {
     }
     return track[str2.length][str1.length];
 };
+
+function getCsrfToken() {
+    return document.getElementById('csrf-token').textContent;
+}
+
+async function jsonPost(url, postDataObject) {
+    postDataObject.csrf = getCsrfToken();
+    const options = {
+        method: 'POST',
+        body: JSON.stringify(postDataObject),
+        headers: new Headers({
+            'Content-Type': 'application/json'
+        }),
+    };
+    const response = await fetch(new Request(url, options));
+    checkResponseCode(response);
+    return response;
+}

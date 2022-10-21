@@ -43,6 +43,7 @@ def handle_token_error(_err: RequestTokenError):
     """
     Return bad request
     """
+    log.warning('Invalid CSRF token')
     return Response('Invalid CSRF token', status=400)
 
 
@@ -96,7 +97,8 @@ def player():
 
     return render_template('player.jinja2',
                            user_is_admin=user.admin,
-                           mobile=is_mobile())
+                           mobile=is_mobile(),
+                           csrf_token=user.get_csrf())
 
 
 @app.route('/choose_track', methods=['GET'])
@@ -104,7 +106,8 @@ def choose_track():
     """
     Choose random track from the provided playlist directory.
     """
-    auth.verify_auth_cookie()
+    user = auth.verify_auth_cookie()
+    user.verify_csrf(request.args['csrf'])
 
     dir_name = request.args['playlist_dir']
     tag_mode = request.args['tag_mode']
@@ -122,7 +125,8 @@ def get_track() -> Response:
     """
     Get transcoded audio for the given track path.
     """
-    auth.verify_auth_cookie()
+    user = auth.verify_auth_cookie()
+    user.verify_csrf(request.args['csrf'])
 
     quality = request.args['quality'] if 'quality' in request.args else 'high'
 
@@ -168,7 +172,8 @@ def get_album_cover() -> Response:
     """
     Get album cover image for the provided track path.
     """
-    auth.verify_auth_cookie()
+    user = auth.verify_auth_cookie()
+    user.verify_csrf(request.args['csrf'])
 
     track = Track.by_relpath(request.args['path'])
     meme = 'meme' in request.args and bool(int(request.args['meme']))
@@ -195,7 +200,8 @@ def get_lyrics():
     """
     Get lyrics for the provided track path.
     """
-    auth.verify_auth_cookie()
+    user = auth.verify_auth_cookie()
+    user.verify_csrf(request.args['csrf'])
 
     track = Track.by_relpath(request.args['path'])
     meta = track.metadata()
@@ -217,7 +223,8 @@ def ytdl():
     """
     Use yt-dlp to download the provided URL to a playlist directory
     """
-    auth.verify_auth_cookie(require_admin=True)
+    user = auth.verify_auth_cookie(require_admin=True)
+    user.verify_csrf(request.json['csrf'])
 
     directory = request.json['directory']
     url = request.json['url']
@@ -279,15 +286,16 @@ def track_list():
     return response
 
 
-@app.route('/scan_music')
+@app.route('/scan_music', methods=['POST'])
 def scan_music():
     """
     Scans all playlists for new music
     """
-    auth.verify_auth_cookie(require_admin=True)
+    user = auth.verify_auth_cookie(require_admin=True)
+    user.verify_csrf(request.json['csrf'])
 
-    if 'playlist' in request.args:
-        playlist = music.playlist(request.args['playlist'])
+    if 'playlist' in request.json:
+        playlist = music.playlist(request.json['playlist'])
         scanner.rebuild_music_database(only_playlist=playlist.relpath)
     else:
         scanner.rebuild_music_database()
@@ -300,9 +308,9 @@ def update_metadata():
     """
     Endpoint to update track metadata
     """
-    auth.verify_auth_cookie(require_admin=True)
-
+    user = auth.verify_auth_cookie(require_admin=True)
     payload = request.json
+    user.verify_csrf(payload['csrf'])
     track = Track.by_relpath(payload['path'])
     meta_dict = {
         'title': payload['metadata']['title'],
@@ -333,7 +341,7 @@ def files():
     """
     File manager
     """
-    auth.verify_auth_cookie(redirect_to_login=True)
+    user = auth.verify_auth_cookie(redirect_to_login=True)
 
     if 'path' in request.args:
         base_path = music.from_relpath(request.args['path'])
@@ -375,7 +383,8 @@ def files():
                            base_path_uri=urlencode(music.to_relpath(base_path)),
                            parent_path_uri=parent_path_uri,
                            files=children,
-                           music_extensions=','.join(music.MUSIC_EXTENSIONS))
+                           music_extensions=','.join(music.MUSIC_EXTENSIONS),
+                           csrf_token=user.get_csrf())
 
 
 @app.route('/files_delete', methods=['POST'])
@@ -383,7 +392,8 @@ def files_delete():
     """
     Delete a file
     """
-    auth.verify_auth_cookie(require_admin=True)
+    user = auth.verify_auth_cookie(require_admin=True)
+    user.verify_csrf(request.form['csrf'])
 
     path = music.from_relpath(request.form['path'])
     if path.is_dir():
@@ -412,7 +422,8 @@ def files_upload():
     """
     Form target to upload file
     """
-    auth.verify_auth_cookie(require_admin=True)
+    user = auth.verify_auth_cookie(require_admin=True)
+    user.verify_csrf(request.form['csrf'])
 
     upload_dir = music.from_relpath(request.form['dir'])
     for uploaded_file in request.files.getlist('upload'):
@@ -426,9 +437,10 @@ def files_rename():
     """
     Page and form target to rename file
     """
-    auth.verify_auth_cookie(require_admin=True)
+    user = auth.verify_auth_cookie(require_admin=True)
 
     if request.method == 'POST':
+        user.verify_csrf(request.form['csrf'])
         path = music.from_relpath(request.form['path'])
         new_name = request.form['new-name']
         check_filename(new_name)
@@ -437,6 +449,7 @@ def files_rename():
     else:
         path = music.from_relpath(request.args['path'])
         return render_template('files_rename.jinja2',
+                               csrf_token=user.get_csrf(),
                                path=music.to_relpath(path),
                                name=path.name)
 
@@ -446,7 +459,8 @@ def files_mkdir():
     """
     Create directory, then enter it
     """
-    auth.verify_auth_cookie(require_admin=True)
+    user = auth.verify_auth_cookie(require_admin=True)
+    user.verify_csrf(request.form['csrf'])
 
     path = music.from_relpath(request.form['path'])
     dirname = request.form['dirname']

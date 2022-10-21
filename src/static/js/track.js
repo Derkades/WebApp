@@ -117,18 +117,17 @@ class Track {
     };
 
     static async scanPlaylist(playlist) {
-        // TODO POST request
-        const response = await fetch('/scan_music?playlist=' + encodeURIComponent(playlist))
-        checkResponseCode(response);
+        await fetch('/scan_music', {playlist: playlist});
     };
 
     async downloadAndAddToQueue(top = false) {
         const encodedQuality = encodeURIComponent(document.getElementById('settings-audio-quality').value);
         const encodedPath = encodeURIComponent(this.path);
+        const encodedCsrf = encodeURIComponent(getCsrfToken());
 
         // Get track audio
         console.info('queue | download audio');
-        const trackResponse = await fetch('/get_track?path=' + encodedPath + '&quality=' + encodedQuality);
+        const trackResponse = await fetch('/get_track?path=' + encodedPath + '&quality=' + encodedQuality + '&csrf=' + encodedCsrf);
         checkResponseCode(trackResponse);
         const audioBlob = await trackResponse.blob();
         const audioBlobUrl = URL.createObjectURL(audioBlob);
@@ -142,7 +141,7 @@ class Track {
         } else {
             console.info('queue | download album cover image');
             const meme = document.getElementById('settings-meme-mode').checked ? '1' : '0';
-            const imageUrl = '/get_album_cover?path=' + encodedPath + '&quality=' + encodedQuality + '&meme=' + meme;
+            const imageUrl = '/get_album_cover?path=' + encodedPath + '&quality=' + encodedQuality + '&meme=' + meme + '&csrf=' + encodedCsrf;
             const coverResponse = await fetch(imageUrl);
             checkResponseCode(coverResponse);
             const imageBlob = await coverResponse.blob();
@@ -156,7 +155,7 @@ class Track {
             lyrics = new Lyrics(true, null, '<i>Lyrics were not downloaded to save data</i>');
         } else {
             console.info('queue | download lyrics');
-            const lyricsResponse = await fetch('/get_lyrics?path=' + encodedPath);
+            const lyricsResponse = await fetch('/get_lyrics?path=' + encodedPath + '&csrf=' + encodedCsrf);
             checkResponseCode(lyricsResponse);
             const lyricsJson = await lyricsResponse.json();
             lyrics = new Lyrics(lyricsJson.found, lyricsJson.source, lyricsJson.html);

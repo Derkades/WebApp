@@ -9,6 +9,7 @@
         <h3>Renaming file: {{ path }}</h3>
 
         <form method="POST">
+            <input type="hidden" name="csrf" value="{{ csrf_token }}">
             <input type="hidden" name="path" value="{{ path }}">
             <input type="text" name="new-name" value="{{ name }}" size="70">
             <input type="submit" value="{% trans %}Rename{% endtrans %}">

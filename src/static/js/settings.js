@@ -51,18 +51,7 @@ function youTubeDownload(event) {
     const url = document.getElementById('youtube-dl-url').value;
 
     (async function(){
-        const options = {
-            method: 'POST',
-            body: JSON.stringify({
-                directory: directory,
-                url: url,
-            }),
-            headers: new Headers({
-                'Content-Type': 'application/json'
-            }),
-        };
-        const response = await fetch(new Request('/ytdl', options));
-        checkResponseCode(response);
+        const response = await jsonPost('/ytdl', {directory: directory, url: url});
         const json = await response.json();
         output.textContent = 'Status code: ' + json.code + '\n--- stdout ---\n' + json.stdout + '\n--- stderr ---\n' + json.stderr;
         if (json.code == 0) {
