@@ -37,7 +37,7 @@ class Track {
 
         if (showPlaylist) {
             const playlistHtml = document.createElement('a');
-            playlistHtml.onclick = () => browse.browsePlaylist(this.playlist);
+            playlistHtml.onclick = () => browse.browsePlaylist(this.playlistPath);
             playlistHtml.textContent = this.playlistDisplay;
             html.append(playlistHtml, ': ');
         }
