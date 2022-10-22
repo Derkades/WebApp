@@ -23,7 +23,7 @@ Music player for communities (hacker spaces, maker spaces).
 This is alpha-level software. While a reasonable attempt was made at good security, the program should not be exposed to the internet without authentication.
 
 Some examples of missing security features:
-- No protection against cross-site request forgery.
+- ~~No protection against cross-site request forgery.~~ Fixed!
 - ~~Password is stored in cookie instead of a long, randomized, short-lived access token.~~ Fixed!
 - Directory traversal should be prevented but some endpoints may still be implemented incorrectly.
 - Writing to files should not be possible for non-admin users, but some endpoints may still be unprotected.
