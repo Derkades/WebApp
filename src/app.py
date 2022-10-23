@@ -198,7 +198,7 @@ def get_album_cover() -> Response:
     if meme:
         cache_id += 'meme'
 
-    comp_bytes = image.thumbnail(get_img, cache_id, img_format[6:], 700,
+    comp_bytes = image.thumbnail(get_img, cache_id, img_format[6:], None,
                                  thumb_quality=request.args['quality'])
 
     return Response(comp_bytes, mimetype=img_format)

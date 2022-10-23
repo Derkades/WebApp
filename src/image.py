@@ -29,8 +29,14 @@ QUALITY_TABLE = {
     }
 }
 
+RESOLUTION_TABLE =  {
+    'high': 2048,
+    'low': 512,
+    'verylow': 128,
+}
 
-def thumbnail(input_img: Union[Path, bytes, Callable], cache_id: str, thumb_format: str, thumb_resolution: int, thumb_quality = 'high') -> bytes:
+
+def thumbnail(input_img: Union[Path, bytes, Callable], cache_id: str, thumb_format: str, thumb_resolution: Optional[int], thumb_quality = 'high') -> bytes:
     """
     Generate thumbnail, making use of cache.
     Parameters:
@@ -40,8 +46,12 @@ def thumbnail(input_img: Union[Path, bytes, Callable], cache_id: str, thumb_form
         thumb_format: Image format, 'avif' or 'webp'
         thumb_resolution: Thumbnail height and width. Note that the resulting thumbnail may not necessarily be
                           square, it will still have the same aspect ratio as the original image.
+                          Set to None to choose a suitable resolution based on quality
+        thumb_quality: Quality level, 'high', 'low' or 'verylow'
     Returns: Compressed thumbnail image bytes.
     """
+    if thumb_resolution is None:
+        thumb_resolution = RESOLUTION_TABLE[thumb_quality]
     thumb_quality_percent = QUALITY_TABLE[thumb_quality][thumb_format]
     cache_id += thumb_format + str(thumb_quality_percent) + str(thumb_resolution)
     cache_obj = cache.get('thumbnail', cache_id)
