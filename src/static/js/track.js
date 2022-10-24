@@ -1,8 +1,8 @@
 class Track {
-    #trackData;
+    trackData;
     path;
-    #display;
-    #displayFile;
+    display;
+    displayFile;
     playlistPath;
     playlistDisplay;
     duration;
@@ -117,7 +117,8 @@ class Track {
     };
 
     static async scanPlaylist(playlist) {
-        await fetch('/scan_music', {playlist: playlist});
+        console.info('Scanning playlist: ' + playlist);
+        return jsonPost('/scan_music', {playlist: playlist});
     };
 
     async downloadAndAddToQueue(top = false) {

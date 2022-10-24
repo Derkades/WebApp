@@ -181,6 +181,13 @@
                     <label for="settings-meme-mode">{% trans %}Album cover meme mode{% endtrans %}</label>
                 </div>
 
+                <h4>{% trans %}Scan playlist{% endtrans %}</h4>
+                <div>
+                    <select id="scan-playlist" class="playlist-select"></select>
+                    <button id="scan-button">{% trans %}Scan playlist{% endtrans %}</button>
+                    <div id="scan-spinner" class="spinner hidden"></div>
+                </div>
+
                 <h4>{% trans %}YouTube download{% endtrans %}</h4>
                 {% if user_is_admin %}
                     {% trans %}Select a playlist and paste a link from YouTube, Soundcloud, Bandcamp, etc. Finally, press <kbd>Download</kbd>.{% endtrans %}
@@ -188,6 +195,7 @@
                         <select id="youtube-dl-directory" class="playlist-select"></select>
                         <input id="youtube-dl-url" type="text" placeholder="https://youtube.com/watch?v=..." size="45">
                         <input id="youtube-dl-submit" type="submit" value="{% trans %}Download{% endtrans %}">
+                        {# TODO use .hidden class #}
                         <div id="youtube-dl-spinner" style="visibility: hidden" class="spinner"></div>
                         <br>
                         <div id="youtube-dl-output">{% trans %}yt-dlp output will appear here{% endtrans %}</div>

@@ -45,6 +45,14 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
         console.warn('Downloader submit button missing from page, this is normal if you are not an admin user');
     }
+    document.getElementById('scan-button').addEventListener('click', () => (async function() {
+        const selectedPlaylist = document.getElementById('scan-playlist').value;
+        const spinner = document.getElementById('scan-spinner');
+        spinner.classList.remove('hidden');
+        await Track.scanPlaylist(selectedPlaylist);
+        await Track.updateLocalTrackList();
+        spinner.classList.add('hidden');
+    })());
     document.getElementById('settings-queue-size').addEventListener('input', () => queue.fill());
     document.getElementById('settings-theme').addEventListener('input', applyTheme);
 
