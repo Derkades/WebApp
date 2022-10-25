@@ -145,6 +145,7 @@ function updateTrackHtml() {
     } else {
         document.getElementById('lyrics').innerHTML = '<i class="secondary">Geen lyrics gevonden</i>'
     }
+    document.getElementById('lyrics').scrollTo({top: 0, behavior: 'smooth'});
 
     document.getElementById('current-track').replaceChildren(track.displayHtml(true));
 
