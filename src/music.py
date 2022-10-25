@@ -59,7 +59,8 @@ def scan_music(path) -> Iterator[Path]:
     """
     for ext in MUSIC_EXTENSIONS:
         for track_path in path.glob('**/*' + ext):
-            yield track_path
+            if not track_path.name.startswith('.trash.'):
+                yield track_path
 
 
 def has_music_extension(path: Path) -> bool:
