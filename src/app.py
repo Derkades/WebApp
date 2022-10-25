@@ -430,12 +430,25 @@ def files_rename():
     user = auth.verify_auth_cookie(require_admin=True)
 
     if request.method == 'POST':
-        user.verify_csrf(request.form['csrf'])
-        path = music.from_relpath(request.form['path'])
-        new_name = request.form['new-name']
+        if request.is_json:
+            csrf = request.json['csrf']
+            relpath = request.json['path']
+            new_name = request.json['new_name']
+        else:
+            csrf = request.form['csrf']
+            relpath = request.form['path']
+            new_name = request.form['new-name']
+
+        user.verify_csrf(csrf)
+
+        path = music.from_relpath(relpath)
         check_filename(new_name)
         path.rename(Path(path.parent, new_name))
-        return redirect('/files?path=' + urlencode(music.to_relpath(path.parent)))
+
+        if request.is_json:
+            return Response(None, 200)
+        else:
+            return redirect('/files?path=' + urlencode(music.to_relpath(path.parent)))
     else:
         path = music.from_relpath(request.args['path'])
         return render_template('files_rename.jinja2',

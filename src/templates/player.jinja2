@@ -76,6 +76,8 @@
                 {{ icon_button('gear', 'open-dialog-settings') }}
                 {% if user_is_admin %}
                     {{ icon_button('pencil', 'button-edit') }}
+                    {{ icon_button('delete', 'button-delete-track') }}
+                    <div id="delete-spinner" class="spinner hidden"></div>
                 {% endif %}
 
                 {% if mobile %}

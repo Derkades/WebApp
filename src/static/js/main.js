@@ -95,6 +95,31 @@ document.addEventListener("DOMContentLoaded", () => {
     navigator.mediaSession.setActionHandler('previoustrack', () => queue.previous());
     navigator.mediaSession.setActionHandler('nexttrack', () => queue.next());
 
+    // Delete track button
+    const deleteButton = document.getElementById('button-delete-track');
+    if (deleteButton !== null) {
+        deleteButton.addEventListener('click', () => {
+            if (queue.currentTrack === null) {
+                return;
+            }
+            const deleteSpinner = document.getElementById('delete-spinner');
+            deleteSpinner.classList.remove('hidden');
+            const path = queue.currentTrack.path;
+            const oldName = path.split('/').pop();
+            const newName = '.trash.' + oldName;
+            (async function() {
+                await jsonPost('/files_rename', {path: path, new_name: newName});
+                await Track.scanPlaylist(queue.currentTrack.playlistPath);
+                await Track.updateLocalTrackList();
+                queue.next();
+                deleteSpinner.classList.add('hidden');
+            })();
+        });
+        document.getElementById('editor-save').addEventListener('click', () => editor.save());
+    } else {
+        console.warn('Editor button missing from page, this is normal if you are not an admin user');
+    }
+
     queue.next();
     setInterval(updateMediaSession, 500);
     setInterval(updateMediaSessionPosition, 5000);
