@@ -365,6 +365,9 @@ def files():
     children = []
 
     for path in base_path.iterdir():
+        if path.name.startswith('.trash.'):
+            continue
+
         can_delete = True
         if path.is_dir():
             pathtype = 'dir'
@@ -394,28 +397,6 @@ def files():
                            files=children,
                            music_extensions=','.join(music.MUSIC_EXTENSIONS),
                            csrf_token=user.get_csrf())
-
-
-@app.route('/files_delete', methods=['POST'])
-def files_delete():
-    """
-    Delete a file
-    """
-    user = auth.verify_auth_cookie(require_admin=True)
-    user.verify_csrf(request.form['csrf'])
-
-    path = music.from_relpath(request.form['path'])
-    if path.is_dir():
-        try:
-            next(path.iterdir())
-            return Response('cannot delete directory, it is not empty', 400)
-        except StopIteration:
-            # Directory contains no files
-            path.rmdir()
-    else:
-        path.unlink()
-
-    return redirect('/files?path=' + urlencode(music.to_relpath(path.parent)))
 
 
 def check_filename(name: str) -> None:
