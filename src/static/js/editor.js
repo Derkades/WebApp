@@ -37,16 +37,14 @@ class Editor {
         // POST body for request
         const payload = {
             path: this.#currentlyEditingPath,
-                metadata: {
+            metadata: {
                 title: this.getValue('editor-title'),
                 album: this.getValue('editor-album'),
                 artists: this.getValue('editor-artists', true),
                 album_artist: this.getValue('editor-album-artist'),
                 tags: this.getValue('editor-tags', true),
-            }
-        }
-
-        this.#currentlyEditingPath = null;
+            },
+        };
 
         // Loading text
         document.getElementById('editor-save').classList.add("hidden");
@@ -66,6 +64,7 @@ class Editor {
         dialog.close('dialog-editor');
         document.getElementById('editor-reloading').classList.add('hidden');
         document.getElementById('editor-save').classList.remove('hidden');
+        this.#currentlyEditingPath = null;
     };
 
 };
