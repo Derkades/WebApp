@@ -12,7 +12,7 @@
     <link rel="icon" href="/static/favicon.ico">
     <title>{% block title %}{% endblock title %}</title>
     {% block styles %}
-        {% assets "css/base.scss", filters="pyscss,cssmin", output="gen/styles.css" %}
+        {% assets "css/base.scss", filters="pyscss,cssutils", output="gen/styles.css" %}
             <link rel="stylesheet" href="{{ ASSET_URL }}">
         {% endassets %}
     {% endblock styles %}

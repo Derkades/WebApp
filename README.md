@@ -106,7 +106,7 @@ This project is using many open source software and libraries, such as:
 - [Python Flask-Assets](https://flask-assets.readthedocs.io/en/latest/)
 - [Python jsmin](https://pypi.org/project/jsmin/)
 - [Python pyScss](https://github.com/Kronuz/pyScss)
-- Python cssmin
+- [Python cssutils](https://github.com/jaraco/cssutils)
 - [Python requests](https://pypi.org/project/requests)
 - [Python BeautifulSoup](https://pypi.org/project/beautifulsoup4)
 - [Python lxml](https://pypi.org/project/beautifulsoup4)
