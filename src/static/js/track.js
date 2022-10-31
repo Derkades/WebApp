@@ -90,7 +90,7 @@ class Track {
 
     static async updateLocalTrackList() {
         console.info('Requesting track list');
-        const response = await fetch('/track_list');
+        const response = await fetch('/track_list?csrf=' + encodeURIComponent(getCsrfToken()));
         const json = await response.json();
 
         state.playlists = json.playlists;

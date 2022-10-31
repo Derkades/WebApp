@@ -253,10 +253,10 @@ def ytdl():
 @app.route('/track_list')
 def track_list():
     """
-    Return list of playlists and tracks. If it takes too long to load metadata for all tracks,
-    a partial result is returned.
+    Return list of playlists and tracks.
     """
     auth.verify_auth_cookie()
+    auth.verify_token(request.args['csrf'])
 
     response = {
         'playlists': {},
