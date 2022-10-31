@@ -36,7 +36,7 @@ RESOLUTION_TABLE =  {
 }
 
 
-def thumbnail(input_img: Union[Path, bytes, Callable], cache_id: str, thumb_format: str, thumb_resolution: Optional[int], thumb_quality = 'high') -> bytes:
+def thumbnail(input_img: Union[Path, bytes, Callable], cache_id: str, thumb_format: str, thumb_resolution: Optional[int], thumb_quality, square) -> bytes:
     """
     Generate thumbnail, making use of cache.
     Parameters:
@@ -45,16 +45,17 @@ def thumbnail(input_img: Union[Path, bytes, Callable], cache_id: str, thumb_form
                   with this cache id (and the same thumbnail settings), a thumbnail is returned from cache.
         thumb_format: Image format, 'avif' or 'webp'
         thumb_resolution: Thumbnail height and width. Note that the resulting thumbnail may not necessarily be
-                          square, it will still have the same aspect ratio as the original image.
+                          square, it will still have the same aspect ratio as the original image unless square=True is set.
                           Set to None to choose a suitable resolution based on quality
         thumb_quality: Quality level, 'high', 'low' or 'verylow'
+        square: Whether the thumbnail should be cropped to 1:1 aspect ratio
     Returns: Compressed thumbnail image bytes.
     """
     if thumb_resolution is None:
         thumb_resolution = RESOLUTION_TABLE[thumb_quality]
     thumb_quality_percent = QUALITY_TABLE[thumb_quality][thumb_format]
     cache_id += thumb_format + str(thumb_quality_percent) + str(thumb_resolution)
-    cache_obj = cache.get('thumbnail', cache_id)
+    cache_obj = cache.get('thumbnail5', cache_id)
     cache_data = cache_obj.retrieve()
     if cache_data is not None:
         log.info('Returning thumbnail from cache: %s', cache_id)
@@ -81,6 +82,17 @@ def thumbnail(input_img: Union[Path, bytes, Callable], cache_id: str, thumb_form
         try:
             img = Image.open(BytesIO(input_bytes))
             img.thumbnail((thumb_resolution, thumb_resolution), Image.ANTIALIAS)
+
+            if square:
+                new_dim = min(img.height, img.width)
+
+                left = (img.width - new_dim) // 2
+                top = (img.height - new_dim) // 2
+                right = left + new_dim
+                bottom = top + new_dim
+
+                img = img.crop((left, top, right, bottom))
+
             img_out = BytesIO()
             img.save(img_out, format=thumb_format, quality=thumb_quality_percent)
             img_out.seek(0)
@@ -91,7 +103,8 @@ def thumbnail(input_img: Union[Path, bytes, Callable], cache_id: str, thumb_form
         except Exception as ex:
             log.warning('Error during thumbnail generation: %s', ex)
 
-    return thumbnail(Path('static', 'raphson.png'), 'raphson', thumb_format, thumb_resolution)
+    # Return fallback thumbnail if input_bytes was None or an Exception was raised
+    return thumbnail(Path('static', 'raphson.png'), 'raphson', thumb_format, thumb_resolution, thumb_quality, square)
 
 
 def check_valid(input_img: bytes) -> bool:

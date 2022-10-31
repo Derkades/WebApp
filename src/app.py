@@ -199,7 +199,7 @@ def get_album_cover() -> Response:
         cache_id += 'meme'
 
     comp_bytes = image.thumbnail(get_img, cache_id, img_format[6:], None,
-                                 thumb_quality=request.args['quality'])
+                                 request.args['quality'], not meme)
 
     return Response(comp_bytes, mimetype=img_format)
 
@@ -339,7 +339,7 @@ def raphson() -> Response:
     Serve raphson logo image
     """
     img_format = get_img_format()
-    thumb = image.thumbnail(raphson_png_path, 'raphson', img_format[6:], 512)
+    thumb = image.thumbnail(raphson_png_path, 'raphson', img_format[6:], 512, 'low', True)
     response = Response(thumb, mimetype=img_format)
     response.cache_control.max_age = 24*3600
     return response
