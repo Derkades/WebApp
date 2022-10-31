@@ -48,14 +48,15 @@ kbd {
     filter: blur(3.5rem);
 }
 
-.album-covers {
+#album-covers {
     aspect-ratio: 1 / 1; /* deze is heel nieuw, bestaat sinds 2021! */
     width: 100%;
     position: relative;
 }
 
-.album-covers > div {
+#album-covers > div {
     @include background-cover;
+    background-size: contain;
     height: 100%;
     width: 100%;
     position: absolute;
