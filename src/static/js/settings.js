@@ -45,7 +45,7 @@ function youTubeDownload(event) {
     output.textContent = 'downloading...';
 
     const spinner = document.getElementById('youtube-dl-spinner');
-    spinner.style.visibility = 'visible';
+    spinner.classList.remove('hidden');
 
     const directory = document.getElementById('youtube-dl-directory').value;
     const url = document.getElementById('youtube-dl-url').value;
@@ -66,10 +66,10 @@ function youTubeDownload(event) {
             output.style.backgroundColor = 'darkred';
         }
     })().then(() => {
-        spinner.style.visibility = 'hidden';
+        spinner.classList.add('hidden');
     }).catch(err => {
         console.error(err);
-        spinner.style.visibility = 'hidden';
+        spinner.classList.add('hidden');
         alert('error, check console');
     });
 }

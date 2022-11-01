@@ -197,8 +197,7 @@
                         <select id="youtube-dl-directory" class="playlist-select"></select>
                         <input id="youtube-dl-url" type="text" placeholder="https://youtube.com/watch?v=..." size="45">
                         <input id="youtube-dl-submit" type="submit" value="{% trans %}Download{% endtrans %}">
-                        {# TODO use .hidden class #}
-                        <div id="youtube-dl-spinner" style="visibility: hidden" class="spinner"></div>
+                        <div id="youtube-dl-spinner" class="spinner hidden"></div>
                         <br>
                         <div id="youtube-dl-output">{% trans %}yt-dlp output will appear here{% endtrans %}</div>
                     </form>
