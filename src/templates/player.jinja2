@@ -27,7 +27,7 @@
 {% endblock title %}
 
 {% block styles %}
-    {% assets "css/player.scss", filters="pyscss,cssutils", output="gen/player.css" %}
+    {% assets "css/player.scss", filters="pyscss", output="gen/player.css" %}
         <link rel="stylesheet" href="{{ ASSET_URL }}">
     {% endassets %}
 {% endblock styles %}
