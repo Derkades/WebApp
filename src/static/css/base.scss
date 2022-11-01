@@ -78,7 +78,8 @@ button,
 input[type=text],
 input[type=number],
 input[type=submit],
-input[type=password] {
+input[type=password],
+input[type=checkbox] {
     padding: .3rem;
     background-color: rgba(0, 0, 0, 0.3);
     border: 1px solid black;
@@ -86,6 +87,17 @@ input[type=password] {
     color: white;
     margin-right: .3rem;
     margin-bottom: .3rem;
+}
+
+input[type=checkbox] {
+    appearance: none; // No native checkbox design
+    height: 1rem;
+    width: 1.5rem;
+    margin-bottom: 0;
+}
+
+input[type=checkbox]:checked {
+    background-color: rgba(255, 255, 255, 0.7);
 }
 
 // body.light select,
@@ -104,10 +116,14 @@ body.light {
     & input[type=text],
     & input[type=number],
     & input[type=submit],
-    & input[type=password] {
+    & input[type=password],
+    & input[type=checkbox] {
         background-color: rgba(255, 255, 255, 0.3);
         border: 1px solid #505050;
         color: black;
+    }
+    & input[type=checkbox]:checked {
+        background-color: rgba(0, 0, 0, 0.7);
     }
 }
 

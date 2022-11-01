@@ -56,7 +56,7 @@ function createPlaylistCheckbox(playlist, index) {
     input.onclick = saveCheckboxState;
 
     const label = document.createElement("label");
-    label.attributes.for = "checkbox-" + playlist.dir_name;
+    label.htmlFor = "checkbox-" + playlist.dir_name;
     label.textContent = playlist.display_name;
     const sup = document.createElement('sup');
     if (index < 10) { // Assume number keys higher than 9 don't exist
