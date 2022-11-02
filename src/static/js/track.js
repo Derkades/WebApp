@@ -97,7 +97,6 @@ class Track {
         state.mainPlaylists = [];
         state.guestPlaylists = [];
         for (const dir_name in state.playlists) {
-            // TODO sort alphabetically by display name
             const playlist = state.playlists[dir_name];
             if (playlist.guest) {
                 state.guestPlaylists.push(playlist);
