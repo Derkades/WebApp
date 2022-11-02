@@ -115,7 +115,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 deleteSpinner.classList.add('hidden');
             })();
         });
-        document.getElementById('editor-save').addEventListener('click', () => editor.save());
     } else {
         console.warn('Editor button missing from page, this is normal if you are not an admin user');
     }
