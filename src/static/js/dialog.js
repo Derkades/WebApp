@@ -62,4 +62,9 @@ const dialog = {
             document.getElementById(id).style.zIndex = dialog.baseIndex + dialog.openDialogs.length;
         }
     },
+    closeTop: () => {
+        if (dialog.openDialogs.length > 0) {
+            dialog.close(dialog.openDialogs.pop());
+        }
+    },
 };

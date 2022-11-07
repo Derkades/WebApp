@@ -27,6 +27,8 @@ function handleKey(key) {
         seek(3);
     } else if (key === ',') {
         seek(-3);
+    } else if (key === 'Escape') {
+        dialog.closeTop();
     } else {
         console.log('Unhandled keypress', key);
     }
