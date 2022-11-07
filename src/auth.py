@@ -45,7 +45,7 @@ class Session:
         if self.last_user_agent is None:
             return None
 
-        browsers = ['Firefox', 'Safari', 'Chromium', 'Chrome', 'Vivaldi', 'Opera']
+        browsers = ['Firefox', 'Chromium', 'Chrome', 'Vivaldi', 'Opera', 'Safari']
         systems = ['Windows', 'macOS', 'Android', 'iOS', 'Linux']
 
         for maybe_browser in browsers:
