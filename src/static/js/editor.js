@@ -51,7 +51,7 @@ class Editor {
         document.getElementById('editor-writing').classList.remove("hidden");
 
         // Make request to update metadata
-        jsonPost('/update_metadata', payload);
+        await jsonPost('/update_metadata', payload);
 
         // Different loading text
         document.getElementById('editor-writing').classList.add('hidden');
