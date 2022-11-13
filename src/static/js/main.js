@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Lyrics
     document.getElementById('button-microphone').addEventListener('click', switchLyrics);
     document.getElementById('button-album').addEventListener('click', switchAlbumCover);
-    document.getElementById('button-album').style.display = 'none';
+    document.getElementById('button-album').classList.add('hidden');
 
     // Settings overlay
     const downloadSubmit = document.getElementById('youtube-dl-submit');

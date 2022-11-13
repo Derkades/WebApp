@@ -191,16 +191,16 @@ function replaceAlbumImages(imageUrl) {
 
 // Display lyrics, instead of album art
 function switchLyrics() {
-    document.getElementById('button-album').style.display = '';
-    document.getElementById('button-microphone').style.display = 'none';
-    document.getElementById('sidebar-lyrics').style.display = 'flex';
-    document.getElementById('sidebar-album-covers').style.display = 'none';
+    document.getElementById('button-album').classList.remove('hidden');
+    document.getElementById('button-microphone').classList.add('hidden');
+    document.getElementById('sidebar-lyrics').classList.remove('hidden');
+    document.getElementById('sidebar-album-covers').classList.add('hidden');
 }
 
 // Display album art, instead of lyrics
 function switchAlbumCover() {
-    document.getElementById('button-album').style.display = 'none';
-    document.getElementById('button-microphone').style.display = '';
-    document.getElementById('sidebar-lyrics').style.display = 'none';
-    document.getElementById('sidebar-album-covers').style.display = 'flex';
+    document.getElementById('button-album').classList.add('hidden');
+    document.getElementById('button-microphone').classList.remove('hidden');
+    document.getElementById('sidebar-lyrics').classList.add('hidden');
+    document.getElementById('sidebar-album-covers').classList.remove('hidden');
 }

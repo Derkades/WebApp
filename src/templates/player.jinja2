@@ -118,7 +118,7 @@
         </div>
     </div>
 
-    <div class="sidebar sidebar-right" id="sidebar-lyrics">
+    <div class="sidebar sidebar-right hidden" id="sidebar-lyrics">
         <div class="lyrics-outer box-rounded box-solid">
             <div id="lyrics"></div>
         </div>
@@ -144,8 +144,20 @@
                             <td>{% trans %}Next track{% endtrans %}</td>
                         </tr>
                         <tr>
-                            <td><kbd>&lt;</kbd> / <kbd>&gt;</kbd>
+                            <td><kbd>&lt;</kbd> / <kbd>&gt;</kbd></td>
                             <td>{% trans %}Seek in track (don't use shift){% endtrans %}</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Esc</kbd></td>
+                            <td>{% trans %}Close dialog{% endtrans %}</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>l</kbd></td>
+                            <td>{% trans %}Show lyrics{% endtrans %}</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>a</kbd></td>
+                            <td>{% trans %}Show album cover{% endtrans %}</td>
                         </tr>
                     </tbody>
                 </table>
