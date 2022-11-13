@@ -104,6 +104,19 @@ function seek(delta) {
     updateMediaSessionPosition();
 }
 
+// Seek to aboslute position in song, float 0 to 1
+function seekTo(position) {
+    const audioElem = getAudioElement();
+    if (audioElem == null) {
+        return;
+    }
+
+    audioElem.currentTime = position * audioElem.duration;
+
+    updateMediaSession();
+    updateMediaSessionPosition();
+}
+
 function getTransformedVolume() {
     // https://www.dr-lex.be/info-stuff/volumecontrols.html
     // According to this article, x^4 seems to be a pretty good approximation of the perceived loudness curve

@@ -28,6 +28,28 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Progress bar seeking
+    const onMove = event => {
+        seekTo((event.clientX - progressBar.offsetLeft) / progressBar.offsetWidth);
+        event.preventDefault(); // Prevent accidental text selection
+    };
+    const onUp = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+    };
+    const progressBar = document.getElementById('outer-progress-bar');
+    progressBar.addEventListener('mousedown', event => {
+        seekTo((event.clientX - progressBar.offsetLeft) / progressBar.offsetWidth);
+
+        // Keep updating while mouse is moving
+        document.addEventListener('mousemove', onMove);
+
+        // Unregister events on mouseup event
+        document.addEventListener('mouseup', onUp);
+
+        event.preventDefault(); // Prevent accidental text selection
+    });
+
     // Queue
     queue.fill();
     document.getElementById('queue-up').addEventListener('click', () => queue.scroll('up'));

@@ -163,25 +163,26 @@ body.light .box-solid {
     background-color: rgba(255, 255, 255, 0.5);
 }
 
-.outer-bar,
+#outer-progress-bar,
 #progress-bar {
     height: 1.5rem;
 }
 
-.outer-bar {
+#outer-progress-bar {
     border: 1px solid #ccc;
     width: 100%;
     margin: .5rem 0;
     position: relative; /* required for positioning of child */
     background-color: rgba(0, 0, 0, 0.4);
+    cursor: col-resize;
 }
 
-body.light .outer-bar {
+body.light #outer-progress-bar {
     border: 1px solid #202020;
     background-color: rgba(255, 255, 255, 0.4);
 }
 
-.outer-bar > div {
+#outer-progress-bar > div {
     position: absolute;
     top: 0;
 }
