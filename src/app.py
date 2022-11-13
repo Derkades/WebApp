@@ -76,9 +76,9 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-        try:
-            token = auth.log_in(username, password)
-        except AuthError:
+        token = auth.log_in(username, password)
+
+        if token is None:
             return render_template('login.jinja2', invalid_password=True)
 
         response = redirect('/')
