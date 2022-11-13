@@ -255,8 +255,8 @@ def track_list():
     """
     Return list of playlists and tracks.
     """
-    auth.verify_auth_cookie()
-    auth.verify_token(request.args['csrf'])
+    user = auth.verify_auth_cookie()
+    user.verify_csrf(request.args['csrf'])
 
     response = {
         'playlists': {},

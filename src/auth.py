@@ -175,7 +175,7 @@ def log_in(username: str, password: str) -> Optional[str]:
         return token
 
 
-def verify_token(token: str, user_agent = None, remote_addr = None) -> Optional[User]:
+def _verify_token(token: str, user_agent = None, remote_addr = None) -> Optional[User]:
     """
     Verify session token, and return corresponding user
     Args:
@@ -213,7 +213,7 @@ def verify_auth_cookie(require_admin = False, redirect_to_login = False) -> User
 
     token = request.cookies['token']
     user_agent = request.headers['User-Agent'] if 'User-Agent' in request.headers else None
-    user = verify_token(token, user_agent, request.remote_addr)
+    user = _verify_token(token, user_agent, request.remote_addr)
     if user is None:
         raise AuthError(AuthErrorReason.INVALID_TOKEN, redirect_to_login)
 
