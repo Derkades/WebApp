@@ -329,14 +329,12 @@ def update_metadata():
     payload = request.json
     user.verify_csrf(payload['csrf'])
     track = Track.by_relpath(payload['path'])
-    meta_dict = {
-        'title': payload['metadata']['title'],
-        'album': payload['metadata']['album'],
-        'artist': '; '.join(payload['metadata']['artists']),
-        'album_artist': payload['metadata']['album_artist'],
-        'genre': '; '.join(payload['metadata']['tags']),
-    }
-    track.write_metadata(meta_dict)
+    track.write_metadata(title=payload['metadata']['title'],
+                         album=payload['metadata']['album'],
+                         artist='; '.join(payload['metadata']['artists']),
+                         album_artist=payload['metadata']['album_artist'],
+                         genre='; '.join(payload['metadata']['tags']),
+                         date=payload['metadata']['year'])
 
     return Response(None, 200)
 

@@ -175,7 +175,7 @@ class Track:
 
         return cached_data
 
-    def write_metadata(self, meta_dict: Dict[str, str]):
+    def write_metadata(self, **meta_dict: Dict[str, str]):
         """
         Write metadata to file
         """

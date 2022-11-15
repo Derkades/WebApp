@@ -43,6 +43,7 @@ class Editor {
                 artists: this.getValue('editor-artists', true),
                 album_artist: this.getValue('editor-album-artist'),
                 tags: this.getValue('editor-tags', true),
+                year: this.getValue('editor-year'),
             },
         };
 
