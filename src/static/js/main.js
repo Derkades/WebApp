@@ -15,10 +15,10 @@ document.addEventListener("DOMContentLoaded", () => {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
 
     // Playback controls
-    document.getElementById('button-skip-previous').addEventListener('click', () => queue.previous());
+    document.getElementById('button-prev').addEventListener('click', () => queue.previous());
     document.getElementById('button-play').addEventListener('click', play);
     document.getElementById('button-pause').addEventListener('click', pause);
-    document.getElementById('button-skip-next').addEventListener('click', () => queue.next());
+    document.getElementById('button-next').addEventListener('click', () => queue.next());
     document.getElementById('settings-volume').addEventListener('input', () => {
         const audioElem = getAudioElement();
         if (audioElem !== null) {
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('queue-down').addEventListener('click', () => queue.scroll('down'));
 
     // Lyrics
-    document.getElementById('button-microphone').addEventListener('click', switchLyrics);
+    document.getElementById('button-lyrics').addEventListener('click', switchLyrics);
     document.getElementById('button-album').addEventListener('click', switchAlbumCover);
     document.getElementById('button-album').classList.add('hidden');
 

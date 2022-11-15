@@ -69,11 +69,14 @@
                     </div>
                 </div>
 
-                {% for button_name in ['skip-previous', 'play', 'pause', 'skip-next', 'microphone', 'album'] %}
-                    {{ icon_button(button_name, 'button-' + button_name) }}
-                {% endfor %}
-
+                {{ icon_button('skip-previous', 'button-prev') }}
+                {{ icon_button('play', 'button-play') }}
+                {{ icon_button('pause', 'button-pause') }}
+                {{ icon_button('skip-next', 'button-next') }}
+                {{ icon_button('microphone', 'button-lyrics') }}
+                {{ icon_button('album', 'button-album') }}
                 {{ icon_button('gear', 'open-dialog-settings') }}
+
                 {% if user_is_admin %}
                     {{ icon_button('pencil', 'button-edit') }}
                     {{ icon_button('delete', 'button-delete-track') }}
