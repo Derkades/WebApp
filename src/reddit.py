@@ -5,6 +5,7 @@ import logging
 import requests
 
 import settings
+import image
 
 
 log = logging.getLogger('app.reddit')
@@ -15,7 +16,7 @@ MEME_SUBREDDITS = [
     'memes',
     'ik_ihe',
     'wholesomememes',
-    'funny',
+    'AdviceAnimals',
 ]
 
 SUBREDDIT_ATTEMPTS = 3
@@ -69,3 +70,27 @@ def search(query: str) -> Optional[str]:
         if url is not None:
             return url
     return None
+
+
+def get_image(query: str) -> Optional[bytes]:
+    """
+    Search several subreddits for an image, and download it
+    Args:
+        query: Search query string
+    Returns: Downloaded image bytes, or None if no image was found or an error occurred
+    """
+    image_url = search(query)
+    if image_url is None:
+        return None
+
+    r = requests.get(image_url, headers={'User-Agent': settings.webscraping_user_agent})
+
+    if r.status_code != 200:
+        log.warning('Received status code %s while downloading image from Reddit', r.status_code)
+        return None
+
+    image_bytes = r.content
+
+    if not image.check_valid(image_bytes):
+        return None
+    return image_bytes

@@ -2,6 +2,7 @@ from typing import Optional
 import logging
 from pathlib import Path
 from urllib.parse import quote as urlencode
+import random
 
 from flask import Flask, request, render_template, Response, redirect, send_file
 import flask_assets
@@ -17,6 +18,7 @@ import music
 from music import Track
 import musicbrainz
 import scanner
+import reddit
 
 
 app = Flask(__name__, template_folder='templates')
@@ -156,6 +158,12 @@ def get_cover_bytes(meta: Metadata, meme: bool) -> Optional[bytes]:
     log.info('Finding cover for: %s', meta.relpath)
 
     if meme:
+        if random.random() > 0.4:
+            query = next(meta.lyrics_search_queries())
+            image_bytes = reddit.get_image(query)
+            if image_bytes:
+                return image_bytes
+
         query = next(meta.lyrics_search_queries()) + ' meme'
         if '-' in query:
             query = query[query.index('-')+1:]
@@ -196,7 +204,7 @@ def get_album_cover() -> Response:
 
     cache_id = track.relpath
     if meme:
-        cache_id += 'meme'
+        cache_id += 'meme2'
 
     comp_bytes = image.thumbnail(get_img, cache_id, img_format[6:], None,
                                  request.args['quality'], not meme)
