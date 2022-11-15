@@ -10,11 +10,12 @@ class Editor {
             throw new Error('Track is null');
         }
         this.#currentlyEditingPath = track.path;
+        document.getElementById('editor-html-title').replaceChildren(track.displayHtml());
         document.getElementById('editor-title').value = track.title;
         document.getElementById('editor-album').value = track.album;
-        document.getElementById('editor-artists').value = track.artists !== null ? track.artists.join(';') : '';
+        document.getElementById('editor-artists').value = track.artists !== null ? track.artists.join('; ') : '';
         document.getElementById('editor-album-artist').value = track.albumArtist;
-        document.getElementById('editor-tags').value = track.tags.join(';');
+        document.getElementById('editor-tags').value = track.tags.join('; ');
 
         dialog.open('dialog-editor');
     };
