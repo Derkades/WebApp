@@ -1,6 +1,6 @@
 setInterval(update, 2000);
 
-const minTimeCorrection = 0.5;
+const minTimeCorrection = 0.2;
 
 const state = {
     currentTrack: null,
@@ -12,7 +12,8 @@ async function update() {
     const currentResponse = await fetch('/radio_current');
     const currentJson = await currentResponse.json();
     document.getElementById('current').innerText = currentJson.path;
-    const currentPos = Date.now() / 1000 - currentJson.start_time;
+    const timezoneOffset = new Date().getTimezoneOffset() * 60;
+    const currentPos = (Date.now() - currentJson.start_time) / 1000 + timezoneOffset;
     document.getElementById('current-pos').innerText = currentPos;
     if (state.currentTrack === null || state.currentTrack.path != currentJson.path) {
         state.currentTrack = currentJson;
@@ -28,7 +29,7 @@ async function update() {
     if (audioElem !== undefined) {
         if (Math.abs(audioElem.currentTime - currentPos) > minTimeCorrection) {
             console.log('time correction', audioElem.currentTime, currentPos);
-            audioElem.currentTime = currentPos + minTimeCorrection / 2;
+            audioElem.currentTime = currentPos;
         }
         audioElem.play();
     }

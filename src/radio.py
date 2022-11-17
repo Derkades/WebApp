@@ -64,7 +64,7 @@ def _choose_track(conn: Connection, force_no_announcement = False) -> Track:
 
     track, last_played = fetched
 
-    current_timestamp = int(datetime.now().timestamp())
+    current_timestamp = int(datetime.utcnow().timestamp() * 1000)
     if last_played == 0:
         log.info('Chosen track: %s (never played)', track)
     else:
@@ -80,7 +80,7 @@ def _choose_new_track(conn: Connection):
     """
     Choose new track starting at random point in time
     """
-    current_time = int(datetime.now().timestamp())
+    current_time = int(datetime.utcnow().timestamp() * 1000)
     track = _choose_track(conn)
     meta = track.metadata()
     start_time = int(current_time - (meta.duration - meta.duration / 4) * random.random())
@@ -91,12 +91,12 @@ def _choose_new_track(conn: Connection):
 
 def get_current_track() -> RadioTrack:
     with db.music() as conn:
-        current_time = int(datetime.now().timestamp())
+        current_time = int(datetime.utcnow().timestamp() * 1000)
 
         last_track_info = conn.execute('''
                                        SELECT track_path, start_time, duration
                                        FROM radio_tracks
-                                       WHERE start_time <= ? AND start_time + duration > ?
+                                       WHERE start_time <= ? AND start_time + duration*1000 > ?
                                        ORDER BY start_time ASC
                                        LIMIT 1
                                        ''',
@@ -123,10 +123,10 @@ def get_current_track() -> RadioTrack:
 
 def get_next_track() -> RadioTrack:
     with db.music() as conn:
-        current_time = int(datetime.now().timestamp())
+        current_time = int(datetime.utcnow().timestamp() * 1000)
 
         current_track_info = conn.execute('''
-                                          SELECT start_time + duration AS end_time
+                                          SELECT start_time + duration*1000 AS end_time
                                           FROM radio_tracks
                                           WHERE start_time < ? AND end_time > ?
                                           ORDER BY start_time ASC
