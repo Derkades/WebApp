@@ -28,12 +28,13 @@ def _choose_track(conn: Connection) -> Track:
                 SELECT track.path, last_played
                 FROM track
                 INNER JOIN track_persistent ON track.path = track_persistent.path
+                WHERE track.playlist != ?
                 ORDER BY RANDOM()
                 LIMIT 20
             ) ORDER BY last_played ASC LIMIT 1
             """
 
-    track, last_played = conn.execute(query).fetchone()
+    track, last_played = conn.execute(query, ('Guest-WD',)).fetchone()
 
     current_timestamp = int(datetime.now().timestamp())
     if last_played == 0:

@@ -1,6 +1,6 @@
-setInterval(update, 500);
+setInterval(update, 2000);
 
-const minTimeCorrection = 0.1;
+const minTimeCorrection = 0.5;
 
 const state = {
     currentTrack: null,
@@ -24,23 +24,32 @@ async function update() {
     document.getElementById('next').textContent = nextJson.path;
     document.getElementById('next-start').textContent = nextJson.start_time;
 
-    const audioElem = document.getElementById('audio');
-    if (Math.abs(audioElem.currentTime - currentPos) > minTimeCorrection) {
-        console.log('time correction', audioElem.currentTime, currentPos);
-        audioElem.currentTime = currentPos + minTimeCorrection / 2;
+    const audioElem = document.getElementById('audio').childNodes[0];
+    if (audioElem !== undefined) {
+        if (Math.abs(audioElem.currentTime - currentPos) > minTimeCorrection) {
+            console.log('time correction', audioElem.currentTime, currentPos);
+            audioElem.currentTime = currentPos + minTimeCorrection / 2;
+        }
+        audioElem.play();
     }
 
-    updateAudioElem();
+    replaceAudioElem();
 };
 
-async function updateAudioElem() {
+async function replaceAudioElem() {
     if (!state.audioElemNeedsChange) {
         return;
     }
 
+    state.audioElemNeedsChange = false;
+
+    const audioElem = document.createElement('audio');
     console.log('replace children');
     const csrf = document.getElementById('csrf').textContent;
     const sourceElem = document.createElement('source');
     sourceElem.src = '/get_track?path=' + encodeURIComponent(state.currentTrack.path) + '&csrf=' + csrf;
-    document.getElementById('audio').replaceChildren(sourceElem);
+    audioElem.appendChild(sourceElem);
+    audioElem.controls = true;
+
+    document.getElementById('audio').replaceChildren(audioElem);
 };
