@@ -1,0 +1,18 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+    <main>
+        <h3>Radio</h3>
+
+        <audio id="audio" autoplay controls></audio><br>
+
+        Current: <span id="current"></span> @ <span id="current-pos"></span><br>
+        Next: <span id="next"></span> @ <span id="next-start"></span>
+    </main>
+
+    {% assets "js/radio.js", filters="jsmin", output="gen/radio-packed.js" %}
+        <script src="{{ ASSET_URL }}"></script>
+    {% endassets %}
+
+    <span id="csrf" class="hidden">{{ csrf }}</span>
+{% endblock content %}

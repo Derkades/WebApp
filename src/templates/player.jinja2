@@ -323,7 +323,7 @@
 
     <div class="vignette"></div>
 
-    {% assets "js/*.js", filters="jsmin", output="gen/packed.js" %}
+    {% assets "js/player/*.js", filters="jsmin", output="gen/player-packed.js" %}
         <script src="{{ ASSET_URL }}"></script>
     {% endassets %}
 

@@ -19,6 +19,8 @@ from music import Track
 import musicbrainz
 import scanner
 import reddit
+import radio
+from radio import RadioTrack
 
 
 app = Flask(__name__, template_folder='templates')
@@ -497,6 +499,35 @@ def account():
     return render_template('account.jinja2',
                            user=user,
                            sessions=user.sessions)
+
+def radio_track_response(track: RadioTrack):
+    return {
+        'path': track.track.relpath,
+        'start_time': track.start_time,
+        'duration': track.duration,
+    }
+
+
+@app.route('/radio_current')
+def radio_current():
+    auth.verify_auth_cookie()
+    track = radio.get_current_track()
+    return radio_track_response(track)
+
+
+@app.route('/radio_next')
+def radio_next():
+    auth.verify_auth_cookie()
+    track = radio.get_next_track()
+    return radio_track_response(track)
+
+
+@app.route('/radio')
+def radio_home():
+    user = auth.verify_auth_cookie()
+    csrf = user.get_csrf()
+    return render_template('radio.jinja2',
+                           csrf=csrf)
 
 
 @babel.localeselector

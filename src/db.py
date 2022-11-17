@@ -1,4 +1,5 @@
 import sqlite3
+from sqlite3 import Connection
 from pathlib import Path
 import logging
 
@@ -9,13 +10,13 @@ db_path = Path(settings.data_path, 'music.db')
 log = logging.getLogger('app.db')
 
 
-def _connect(dbname):
+def _connect(dbname: str) -> Connection:
     conn = sqlite3.connect(Path(settings.data_path, dbname + '.db'))
     conn.execute('PRAGMA foreign_keys = ON;')
     return conn
 
 
-def get():
+def get() -> Connection:
     """
     Create new SQLite database connection
     Deprecated: use music() instead
@@ -23,21 +24,21 @@ def get():
     return _connect('music')
 
 
-def music():
+def music() -> Connection:
     """
     Open music database
     """
     return _connect('music')
 
 
-def users():
+def users() -> Connection:
     """
     Open users database
     """
     return _connect('users')
 
 
-def create_tables():
+def create_tables() -> None:
     """
     Initialise SQLite database with tables
     """
@@ -92,6 +93,14 @@ def create_tables():
                         last_played INTEGER NOT NULL DEFAULT 0
                     )
                     """)
+
+        conn.execute("""
+                     CREATE TABLE IF NOT EXISTS radio_tracks (
+                         track_path TEXT NOT NULL,
+                         start_time INTEGER NOT NULL,
+                         duration INTEGER NOT NULL
+                     )
+                     """)
 
     with users() as conn:
         conn.execute("""
