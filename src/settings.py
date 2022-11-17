@@ -2,6 +2,10 @@ from typing import Optional
 from os import environ as env
 
 
+def split_by_semicolon(inp: str) -> list[str]:
+    return [s.strip() for s in inp.split(';') if s.strip() != '']
+
+
 def getenv(key: str, default: Optional[str]) -> str:
     """
     Get environment variable. If the environment variable is not set, the
@@ -24,3 +28,4 @@ webscraping_user_agent = getenv('MUSIC_WEBSCRAPING_USER_AGENT', 'Mozilla/5.0 (X1
 data_path = getenv('MUSIC_DATA_PATH', '/data')
 scanner_processes = int(getenv('MUSIC_SCANNER_PROCESSES', '6'))
 track_limit_seconds = int(getenv('MUSIC_TRACK_LIMIT_SECONDS', '600'))
+radio_playlists = split_by_semicolon(getenv('MUSIC_RADIO_PLAYLISTS', ''))

@@ -8,6 +8,7 @@ import random
 import db
 from music import Track
 from metadata import Metadata
+import settings
 
 
 log = logging.getLogger('app.radio')
@@ -28,13 +29,22 @@ def _choose_track(conn: Connection) -> Track:
                 SELECT track.path, last_played
                 FROM track
                 INNER JOIN track_persistent ON track.path = track_persistent.path
-                WHERE track.playlist != ?
+                [where_replaced_later]
                 ORDER BY RANDOM()
                 LIMIT 20
             ) ORDER BY last_played ASC LIMIT 1
             """
 
-    track, last_played = conn.execute(query, ('Guest-WD',)).fetchone()
+    if len(settings.radio_playlists) == 0:
+        where = ''
+        params = []
+        log.warning('Radio playlists not configured, choosing from all playlists')
+    else:
+        where = 'WHERE track.playlist IN (' + ','.join(['?'] * len(settings.radio_playlists)) + ')'
+        params = settings.radio_playlists
+    query = query.replace('[where_replaced_later]', where)
+
+    track, last_played = conn.execute(query, params).fetchone()
 
     current_timestamp = int(datetime.now().timestamp())
     if last_played == 0:
