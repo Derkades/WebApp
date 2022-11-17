@@ -22,7 +22,7 @@ class RadioTrack:
     duration: int
 
 
-def _choose_track(conn: Connection) -> Track:
+def _choose_track(conn: Connection, force_no_announcement = False) -> Track:
     # Select 20 random tracks, then choose track that was played longest ago
     query = """
             SELECT * FROM (
@@ -35,16 +35,34 @@ def _choose_track(conn: Connection) -> Track:
             ) ORDER BY last_played ASC LIMIT 1
             """
 
-    if len(settings.radio_playlists) == 0:
-        where = ''
-        params = []
-        log.warning('Radio playlists not configured, choosing from all playlists')
+    # TODO Configurable chance, never two announcements back-to-back
+    do_announcement = random.random() > 0.2
+
+    if do_announcement and not force_no_announcement:
+        log.info('Announcement')
+        where = 'WHERE track.playlist = ?'
+        params = (settings.radio_announcements_playlist,)
     else:
-        where = 'WHERE track.playlist IN (' + ','.join(['?'] * len(settings.radio_playlists)) + ')'
-        params = settings.radio_playlists
+        if len(settings.radio_playlists) == 0:
+            where = ''
+            params = []
+            log.warning('Radio playlists not configured, choosing from all playlists')
+        else:
+            where = 'WHERE track.playlist IN (' + ','.join(['?'] * len(settings.radio_playlists)) + ')'
+            params = settings.radio_playlists
+
     query = query.replace('[where_replaced_later]', where)
 
-    track, last_played = conn.execute(query, params).fetchone()
+    fetched = conn.execute(query, params).fetchone()
+
+    if fetched is None:
+        if do_announcement:
+            log.warning('No announcements available, choose normal track')
+            return _choose_track(conn, force_no_announcement=True)
+
+        raise ValueError('No track to choose from')
+
+    track, last_played = fetched
 
     current_timestamp = int(datetime.now().timestamp())
     if last_played == 0:
