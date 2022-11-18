@@ -16,6 +16,7 @@ class Editor {
         document.getElementById('editor-artists').value = track.artists !== null ? track.artists.join('; ') : '';
         document.getElementById('editor-album-artist').value = track.albumArtist;
         document.getElementById('editor-tags').value = track.tags.join('; ');
+        document.getElementById('editor-year').value = track.year;
 
         dialog.open('dialog-editor');
     };
