@@ -30,3 +30,4 @@ scanner_processes = int(getenv('MUSIC_SCANNER_PROCESSES', '6'))
 track_limit_seconds = int(getenv('MUSIC_TRACK_LIMIT_SECONDS', '600'))
 radio_playlists = split_by_semicolon(getenv('MUSIC_RADIO_PLAYLISTS', ''))
 radio_announcements_playlist = getenv('MUSIC_RADIO_ANNOUNCEMENTS_PLAYLIST', '')
+radio_announcement_chance = 0.2

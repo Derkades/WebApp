@@ -147,7 +147,9 @@ def get_track() -> Response:
     fruit = is_fruit()
     audio = track.transcoded_audio(quality, fruit)
     mime = 'audio/mp4' if fruit else 'audio/webm'
-    return Response(audio, mimetype=mime)
+    response = Response(audio, mimetype=mime)
+    response.accept_ranges = 'bytes'  # Workaround for Chromium bug https://stackoverflow.com/a/65804889
+    return response
 
 
 def get_cover_bytes(meta: Metadata, meme: bool) -> Optional[bytes]:

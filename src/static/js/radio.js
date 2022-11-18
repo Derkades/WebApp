@@ -1,6 +1,6 @@
 setInterval(update, 2000);
 
-const minTimeCorrection = 0.2;
+const minTimeCorrection = 1;
 
 const state = {
     currentTrack: null,

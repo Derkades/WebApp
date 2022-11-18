@@ -123,7 +123,7 @@ class Track:
 
         in_path_abs = self.path.absolute().as_posix()
 
-        cache_object = cache.get('audio', container_format + in_path_abs + bit_rate)
+        cache_object = cache.get('audio2', container_format + in_path_abs + bit_rate)
         cached_data = cache_object.retrieve()
         if cached_data is not None:
             log.info('Returning cached audio')
@@ -141,15 +141,18 @@ class Track:
         # seconden. Ik heb geen idee waarom, de documentatie is vaag. Oplossing: keer het nummer om, en haal
         # nog eens stilte aan "het begin" weg.
 
-        filters = f'''
-        atrim=0:{settings.track_limit_seconds},
-        silenceremove=start_periods=1:start_threshold=-70dB,
-        areverse,
-        silenceremove=start_periods=1:start_threshold=-70dB,
-        areverse,
-        dynaudnorm=targetrms=0.3:gausssize=101,
-        afade
-        '''
+        # filters = f'''
+        # atrim=0:{settings.track_limit_seconds},
+        # silenceremove=start_periods=1:start_threshold=-70dB,
+        # areverse,
+        # silenceremove=start_periods=1:start_threshold=-70dB,
+        # areverse,
+        # dynaudnorm=targetrms=0.3:gausssize=101,
+        # afade
+        # '''
+
+
+        filters = 'dynaudnorm=targetrms=0.3:gausssize=101'
 
         # Remove whitespace and newlines
         filters = ''.join(filters.split())
@@ -239,7 +242,7 @@ class Playlist:
     guest: bool
     track_count: int
 
-    def choose_track(self, tag_mode, tags: List[str]) -> Track:
+    def choose_track(self, tag_mode, tags: List[str], reuse_conn = None) -> Track:
         """
         Randomly choose a track from this playlist directory
         Args:
@@ -267,7 +270,7 @@ class Playlist:
         # From randomly ordered tracks, choose one that was last played longest ago
         query = 'SELECT * FROM (' + query + ') ORDER BY last_played ASC LIMIT 1'
 
-        with db.get() as conn:
+        with db.get() if reuse_conn is None else reuse_conn as conn:
             track, last_played = conn.execute(query, params).fetchone()
 
             current_timestamp = int(datetime.now().timestamp())
@@ -322,6 +325,8 @@ def playlist(dir_name: str, reused_conn = None) -> Playlist:
     with db.get() if reused_conn is None else reused_conn as conn:
         row = conn.execute('SELECT name, guest FROM playlist WHERE path=?',
                            (dir_name,)).fetchone()
+        if row is None:
+            raise ValueError('Playlist does not exist: ' + dir_name)
         name, guest = row
         track_count = conn.execute('SELECT COUNT(*) FROM track WHERE playlist=?',
                                    (dir_name,)).fetchone()[0]

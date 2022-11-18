@@ -95,10 +95,10 @@ def create_tables() -> None:
                     """)
 
         conn.execute("""
-                     CREATE TABLE IF NOT EXISTS radio_tracks (
-                         track_path TEXT NOT NULL,
+                     CREATE TABLE IF NOT EXISTS radio_track (
+                         track TEXT NOT NULL,
                          start_time INTEGER NOT NULL,
-                         duration INTEGER NOT NULL
+                         FOREIGN KEY (track) REFERENCES track(path) ON DELETE CASCADE
                      )
                      """)
 

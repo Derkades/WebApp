@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from importlib.metadata import metadata
 import logging
 from datetime import datetime
 from sqlite3 import Connection
@@ -7,6 +6,7 @@ import random
 
 import db
 from music import Track
+import music
 from metadata import Metadata
 import settings
 
@@ -22,71 +22,20 @@ class RadioTrack:
     duration: int
 
 
-def _choose_track(conn: Connection, force_no_announcement = False) -> Track:
-    # Select 20 random tracks, then choose track that was played longest ago
-    query = """
-            SELECT * FROM (
-                SELECT track.path, last_played
-                FROM track
-                INNER JOIN track_persistent ON track.path = track_persistent.path
-                [where_replaced_later]
-                ORDER BY RANDOM()
-                LIMIT 20
-            ) ORDER BY last_played ASC LIMIT 1
-            """
+def _choose_track(conn: Connection, previous_playlist = None) -> Track:
+    do_announcement = random.random() < settings.radio_announcement_chance
 
-    # TODO Configurable chance, never two announcements back-to-back
-    do_announcement = random.random() > 0.2
-
-    if do_announcement and not force_no_announcement:
-        log.info('Announcement')
-        where = 'WHERE track.playlist = ?'
-        params = (settings.radio_announcements_playlist,)
+    if do_announcement and \
+            settings.radio_announcements_playlist != '' and \
+            previous_playlist != settings.radio_announcements_playlist:
+        playlist_name = settings.radio_announcements_playlist
     else:
-        if len(settings.radio_playlists) == 0:
-            where = ''
-            params = []
-            log.warning('Radio playlists not configured, choosing from all playlists')
-        else:
-            where = 'WHERE track.playlist IN (' + ','.join(['?'] * len(settings.radio_playlists)) + ')'
-            params = settings.radio_playlists
+        playlist_candidates = [p for p in settings.radio_playlists if p != previous_playlist]
+        playlist_name = random.choice(playlist_candidates)
 
-    query = query.replace('[where_replaced_later]', where)
-
-    fetched = conn.execute(query, params).fetchone()
-
-    if fetched is None:
-        if do_announcement:
-            log.warning('No announcements available, choose normal track')
-            return _choose_track(conn, force_no_announcement=True)
-
-        raise ValueError('No track to choose from')
-
-    track, last_played = fetched
-
-    current_timestamp = int(datetime.utcnow().timestamp() * 1000)
-    if last_played == 0:
-        log.info('Chosen track: %s (never played)', track)
-    else:
-        hours_ago = (current_timestamp - last_played) / 3600
-        log.info('Chosen track: %s (last played %.2f hours ago)', track, hours_ago)
-
-    conn.execute('UPDATE track_persistent SET last_played = ? WHERE path=?', (current_timestamp, track))
-
-    return Track.by_relpath(track)
-
-
-def _choose_new_track(conn: Connection):
-    """
-    Choose new track starting at random point in time
-    """
-    current_time = int(datetime.utcnow().timestamp() * 1000)
-    track = _choose_track(conn)
-    meta = track.metadata()
-    start_time = int(current_time - (meta.duration - meta.duration / 4) * random.random())
-    conn.execute('INSERT INTO radio_tracks (track_path, start_time, duration) VALUES (?, ?, ?)',
-                    (track.relpath, start_time, meta.duration))
-    return RadioTrack(track, meta, start_time, meta.duration)
+    playlist = music.playlist(playlist_name, conn)
+    track = playlist.choose_track(None, None, reuse_conn=conn)
+    return track
 
 
 def get_current_track() -> RadioTrack:
@@ -94,8 +43,8 @@ def get_current_track() -> RadioTrack:
         current_time = int(datetime.utcnow().timestamp() * 1000)
 
         last_track_info = conn.execute('''
-                                       SELECT track_path, start_time, duration
-                                       FROM radio_tracks
+                                       SELECT track.path, radio_track.start_time, track.duration
+                                       FROM radio_track JOIN track ON radio_track.track = track.path
                                        WHERE start_time <= ? AND start_time + duration*1000 > ?
                                        ORDER BY start_time ASC
                                        LIMIT 1
@@ -105,11 +54,17 @@ def get_current_track() -> RadioTrack:
         # Normally when the radio is being actively listened to, a track will
         # have already been chosen. If this not the case, choose a track and
         # start it at a random point in time, to make it feel to the user
-        # like the radio was playing continously.
+        # like the radio was playing continuously.
 
         if last_track_info is None:
             log.info('No current song, choose track starting at random time')
-            return _choose_new_track(conn)
+            current_time = int(datetime.utcnow().timestamp() * 1000)
+            track = _choose_track(conn)
+            meta = track.metadata()
+            start_time = int(current_time - (meta.duration - meta.duration / 4) * random.random())
+            conn.execute('INSERT INTO radio_track (track, start_time) VALUES (?, ?)',
+                            (track.relpath, start_time))
+            return RadioTrack(track, meta, start_time, meta.duration)
 
         (track_path, start_time, duration) = last_track_info
 
@@ -126,19 +81,19 @@ def get_next_track() -> RadioTrack:
         current_time = int(datetime.utcnow().timestamp() * 1000)
 
         current_track_info = conn.execute('''
-                                          SELECT start_time + duration*1000 AS end_time
-                                          FROM radio_tracks
-                                          WHERE start_time < ? AND end_time > ?
-                                          ORDER BY start_time ASC
+                                          SELECT radio_track.start_time + track.duration*1000 AS end_time, track.playlist
+                                          FROM radio_track JOIN track ON radio_track.track = track.path
+                                          WHERE radio_track.start_time < ? AND end_time > ?
+                                          ORDER BY radio_track.start_time ASC
                                           LIMIT 1
                                           ''',
                                           (current_time, current_time)).fetchone()
 
         next_track_info = conn.execute('''
-                                       SELECT track_path, start_time, duration
-                                       FROM radio_tracks
-                                       WHERE start_time >= ?
-                                       ORDER BY start_time ASC
+                                       SELECT track.path, radio_track.start_time, track.duration
+                                       FROM radio_track JOIN track ON radio_track.track = track.path
+                                       WHERE radio_track.start_time >= ?
+                                       ORDER BY radio_track.start_time ASC
                                        LIMIT 1
                                        ''',
                                        (current_time,)).fetchone()
@@ -149,13 +104,13 @@ def get_next_track() -> RadioTrack:
             if current_track_info is None:
                 raise ValueError('Cannot choose next track when current track has not been chosen')
 
-            (current_track_end_time,) = current_track_info
+            (current_track_end_time, current_track_playlist) = current_track_info
 
             # Choose next track starting right after current track
-            track = _choose_track(conn)
+            track = _choose_track(conn, previous_playlist=current_track_playlist)
             meta = track.metadata()
-            conn.execute('INSERT INTO radio_tracks (track_path, start_time, duration) VALUES (?, ?, ?)',
-                            (track.relpath, current_track_end_time, meta.duration))
+            conn.execute('INSERT INTO radio_track (track, start_time) VALUES (?, ?)',
+                            (track.relpath, current_track_end_time))
             return RadioTrack(track, meta, current_track_end_time, meta.duration)
 
         log.info('Returning already chosen next track')
