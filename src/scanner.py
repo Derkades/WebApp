@@ -70,7 +70,7 @@ def rebuild_music_database(only_playlist: Optional[str] = None) -> None:
             raise ValueError('Requested playlist directory does not exist (or is not a directory)')
         log.info('Scanning tracks for playlist %s...', only_playlist)
     else:
-        playlist_paths = Path(settings.music_dir).iterdir()
+        playlist_paths = [p for p in Path(settings.music_dir).iterdir() if p.is_dir()]
         log.info('Scanning tracks for all playlists...')
 
     for playlist_path in playlist_paths:
