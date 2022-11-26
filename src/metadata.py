@@ -28,6 +28,7 @@ FILENAME_STRIP_KEYWORDS = [
     '(live)',
     '[Radio Edit]',
     '(Clip officiel)',
+    '(Audio Officiel)',
     '(Official videoclip)',
     'HQ Videoclip',
     '[Monstercat Release]',
@@ -208,7 +209,6 @@ class Metadata:
             artist = None
 
         if artist and self.album and not self._is_collection_album():
-
             yield artist + ' - ' + self.album + ' cover'
             yield artist + ' - ' + self.album
 
