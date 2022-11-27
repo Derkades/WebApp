@@ -83,7 +83,7 @@ function updatePlaylistCheckboxHtml() {
     const guestDiv = document.createElement('div');
     guestDiv.classList.add('guest-checkboxes');
     for (const playlist of state.guestPlaylists) {
-        guestDiv.appendChild(createPlaylistCheckbox(playlist, index++));
+        guestDiv.appendChild(createPlaylistCheckbox(playlist, 10));
     }
     const parent = document.getElementById('playlist-checkboxes');
     parent.replaceChildren(mainDiv, guestDiv);
