@@ -23,6 +23,7 @@ MUSIC_EXTENSIONS = [
     '.ogg',
     '.webm',
     '.mkv',
+    '.mka',
     '.wma',
     '.m4a',
     '.wav',
