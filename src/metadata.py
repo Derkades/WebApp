@@ -50,6 +50,7 @@ FILENAME_STRIP_KEYWORDS = [
     '[OUT NOW]',
     '(Dance Video)',
     'Offisiell video',
+    '[FREE DL]',
 ]
 
 
