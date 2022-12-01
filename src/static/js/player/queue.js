@@ -49,10 +49,11 @@ class Queue {
 
         if (playlist === null) {
             console.info('queue | no playlists selected, trying again later');
-            // TODO Display warning in queue
+            document.getElementById('no-playlists-selected').classList.remove('hidden');
             setTimeout(() => this.fill(), 500);
             return;
         }
+        document.getElementById('no-playlists-selected').classList.add('hidden');
 
         this.#fillBusy = true;
 
