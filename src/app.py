@@ -31,6 +31,12 @@ assets_dir = Path('static')
 raphson_png_path = Path(assets_dir, 'raphson.png')
 
 
+LANGUAGES = (
+    ('en', 'English'),
+    ('nl', 'Nederlands'),
+)
+
+
 @app.errorhandler(AuthError)
 def handle_auth_error(err: AuthError):
     """
@@ -102,7 +108,9 @@ def player():
     return render_template('player.jinja2',
                            user_is_admin=user.admin,
                            mobile=is_mobile(),
-                           csrf_token=user.get_csrf())
+                           csrf_token=user.get_csrf(),
+                           languages=LANGUAGES,
+                           language=get_language())
 
 
 @app.route('/get_csrf')
@@ -187,6 +195,7 @@ def get_cover_bytes(meta: Metadata, meme: bool) -> Optional[bytes]:
 
     log.info('No suitable cover found')
     return None
+
 
 @app.route('/get_album_cover')
 def get_album_cover() -> Response:
@@ -532,14 +541,26 @@ def radio_home():
                            csrf=csrf)
 
 
+def get_language() -> str:
+    """
+    Returns two letter language code, matching a language code in
+    the LANGUAGES constant
+    """
+    if 'settings-language' in request.cookies:
+        for language in LANGUAGES:
+            if language[0] == request.cookies['settings-language']:
+                return request.cookies['settings-language']
+
+    header_lang = request.accept_languages.best_match(['nl', 'nl-NL', 'nl-BE', 'en'])[:2]
+    return header_lang
+
+
 @babel.localeselector
 def get_locale():
     """
     Get locale preference from HTTP headers
     """
-    # TODO language from cookie
-    lang = request.accept_languages.best_match(['nl', 'nl-NL', 'nl-BE', 'en'])
-    return lang[:2] if lang is not None else 'en'
+    return get_language()
 
 
 def get_img_format():

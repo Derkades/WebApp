@@ -34,6 +34,7 @@ function syncCookiesWithInputs() {
         'settings-queue-removal-behaviour',
         'settings-theme',
         'settings-meme-mode',
+        'settings-language',
     ].forEach(syncCookieWithInput);
 }
 
