@@ -54,7 +54,15 @@ class Editor {
         document.getElementById('editor-writing').classList.remove("hidden");
 
         // Make request to update metadata
-        await jsonPost('/update_metadata', payload);
+        try {
+            await jsonPost('/update_metadata', payload);
+        } catch (e) {
+            alert('An error occurred while updating metadata.');
+            document.getElementById('editor-writing').classList.add('hidden');
+            document.getElementById('editor-save').classList.remove('hidden');
+            this.#currentlyEditingPath = null;
+            return;
+        }
 
         // Different loading text
         document.getElementById('editor-writing').classList.add('hidden');
