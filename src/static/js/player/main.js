@@ -71,7 +71,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const button = document.getElementById('scan-button');
         spinner.classList.remove('hidden');
         button.disabled = true;
-        await Track.scanPlaylist(selectedPlaylist);
+        if (selectedPlaylist !== "") {
+            await Track.scanPlaylist(selectedPlaylist);
+        } else {
+            await Track.scanPlaylist();
+        }
         await Track.updateLocalTrackList();
         spinner.classList.add('hidden');
         button.disabled = false;

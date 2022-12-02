@@ -116,8 +116,13 @@ class Track {
     };
 
     static async scanPlaylist(playlist) {
-        console.info('Scanning playlist: ' + playlist);
-        return jsonPost('/scan_music', {playlist: playlist});
+        if (playlist !== undefined) {
+            console.info('Scanning playlist: ' + playlist);
+            return jsonPost('/scan_music', {playlist: playlist});
+        } else {
+            console.info('Scanning all playlists')
+            return jsonPost('/scan_music', {});
+        }
     };
 
     async downloadAndAddToQueue(top = false) {

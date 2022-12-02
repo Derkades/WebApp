@@ -207,7 +207,9 @@
 
                 <h4>{% trans %}Scan playlist{% endtrans %}</h4>
                 <div>
-                    <select id="scan-playlist" class="playlist-select"></select>
+                    <select id="scan-playlist" class="playlist-select">
+                        <option value="" data-keep="true">{% trans %}All (find new playlists){% endtrans %}</option>
+                    </select>
                     <button id="scan-button">{% trans %}Scan playlist{% endtrans %}</button>
                     <div id="scan-spinner" class="spinner hidden"></div>
                 </div>
