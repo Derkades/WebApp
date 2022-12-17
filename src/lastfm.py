@@ -27,10 +27,8 @@ def _make_request(method: str, api_method: str, **extra_params):
     items = sorted(params.items())
     query_string = '&'.join(f'{urlencode(k)}={urlencode(v)}' for k, v in items)
     sig = b''.join(f'{k}{v}'.encode() for k, v in items if k != 'format') + settings.lastfm_api_secret.encode()
-    print('sig', sig)
     sig_digest = hashlib.md5(sig).hexdigest()
     query_string += f'&api_sig={sig_digest}'
-    print('query_string', query_string)
     if method == 'post':
         r = requests.post('https://ws.audioscrobbler.com/2.0/',
                           data=query_string,
