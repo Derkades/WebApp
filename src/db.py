@@ -113,6 +113,15 @@ def create_tables() -> None:
                      """)
 
         conn.execute("""
+                     CREATE TABLE IF NOT EXISTS user_lastfm (
+                         user INTEGER NOT NULL UNIQUE PRIMARY KEY,
+                         name TEXT NOT NULL,
+                         key TEXT NOT NULL,
+                         FOREIGN KEY (user) REFERENCES user(id) ON DELETE CASCADE
+                     )
+                     """)
+
+        conn.execute("""
                      CREATE TABLE IF NOT EXISTS session (
                          user INTEGER NOT NULL,
                          token TEXT NOT NULL UNIQUE,

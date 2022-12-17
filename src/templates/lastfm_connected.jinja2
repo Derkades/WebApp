@@ -1,0 +1,13 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+
+    <main>
+        <h3>{% trans %}last.fm account connected{% endtrans %}</h3>
+
+        <p>{% trans name=name %}Logged in as {{ name }}{% endtrans %}</p>
+
+        <p><a href="/account">{% trans %}Back to account page{{ name }}{% endtrans %}</a></p>
+    </main>
+
+{% endblock content %}

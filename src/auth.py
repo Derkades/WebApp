@@ -71,6 +71,8 @@ class User:
     username: str
     admin: bool
     session: Session
+    lastfm_name: Optional[str]
+    lastfm_key: Optional[str]
 
     @property
     def sessions(self):
@@ -185,22 +187,24 @@ def _verify_token(token: str, user_agent = None, remote_addr = None) -> Optional
     with db.users() as conn:
         # TODO does this introduce the possibility of a timing attack?
         result = conn.execute("""
-                              SELECT session.rowid, session.creation_date, session.last_user_agent, session.last_address, user.id, user.username, user.admin
-                              FROM user JOIN session ON user.id = session.user
+                              SELECT session.rowid, session.creation_date, session.last_user_agent, session.last_address, user.id, user.username, user.admin, user_lastfm.name, user_lastfm.key
+                              FROM user
+                                INNER JOIN session ON user.id = session.user
+                                LEFT JOIN user_lastfm ON user.id = user_lastfm.user
                               WHERE session.token=?
                               """, (token,)).fetchone()
         if result is None:
             log.warning('Invalid auth token: %s', token)
             return None
 
-        session_rowid, session_creation_date, session_user_agent, session_address, user_id, username, admin = result
+        session_rowid, session_creation_date, session_user_agent, session_address, user_id, username, admin, lastfm_name, lastfm_key = result
 
         if user_agent and remote_addr:
             conn.execute('UPDATE session SET last_user_agent=?, last_address=? WHERE rowid=?',
                          (user_agent, remote_addr, session_rowid))
 
         session = Session(session_rowid, token, session_creation_date, session_user_agent, session_address)
-        return User(user_id, username, admin, session)
+        return User(user_id, username, admin, session, lastfm_name, lastfm_key)
 
 
 def verify_auth_cookie(require_admin = False, redirect_to_login = False) -> User:

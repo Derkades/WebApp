@@ -7,7 +7,16 @@
 
         <a href="/">{% trans %}Back to home{% endtrans %}</a>
 
-        <h4>Sessions</h4>
+        <h4>{% trans %}Last.fm scrobbling{% endtrans%}</h4>
+        <p>
+            {% if lastfm_name %}
+                {% trans name=lastfm_name %}Connected to last.fm account: {{ name }}{% endtrans%}
+            {% else %}
+                <a href="{{ lastfm_connect_url }}">{% trans %}Connect your last.fm account{% endtrans %}</a>
+            {% endif %}
+        </p>
+
+        <h4>{% trans %}Sessions{% endtrans%}</h4>
         <table style="width: 100%;">
             <thead>
                 <tr>
@@ -37,4 +46,3 @@
     </main>
 
 {% endblock content %}
-

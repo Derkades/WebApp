@@ -13,14 +13,15 @@ from auth import AuthError, RequestTokenError
 import bing
 import genius
 import image
+import lastfm
 from metadata import Metadata
 import music
 from music import Track
 import musicbrainz
-import scanner
-import reddit
 import radio
 from radio import RadioTrack
+import reddit
+import scanner
 
 
 app = Flask(__name__, template_folder='templates')
@@ -509,7 +510,10 @@ def account():
     user = auth.verify_auth_cookie()
     return render_template('account.jinja2',
                            user=user,
-                           sessions=user.sessions)
+                           sessions=user.sessions,
+                           lastfm_name=user.lastfm_name,
+                           lastfm_key=user.lastfm_key,
+                           lastfm_connect_url=lastfm.CONNECT_URL)
 
 def radio_track_response(track: RadioTrack):
     return {
@@ -536,9 +540,20 @@ def radio_next():
 @app.route('/radio')
 def radio_home():
     user = auth.verify_auth_cookie()
-    csrf = user.get_csrf()
     return render_template('radio.jinja2',
-                           csrf=csrf)
+                           csrf=user.get_csrf())
+
+
+@app.route('/lastfm_callback')
+def lastfm_callback():
+    user = auth.verify_auth_cookie()
+    # After allowing access, last.fm sends the user to this page with an
+    # authentication token. The authentication token can only be used once,
+    # to obtain a session key. Session keys are stored in the database.
+    auth_token = request.args['token']
+    name = lastfm.obtain_session_key(user, auth_token)
+    return render_template('lastfm_connected.jinja2',
+                           name=name)
 
 
 def get_language() -> str:
