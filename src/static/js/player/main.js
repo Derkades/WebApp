@@ -1,5 +1,6 @@
 const state = {
-    maxTrackListSize: 250,
+    maxTrackListSize: 500,
+    maxTrackListSizeSearch: 25,
     lastChosenPlaylist: null,
     playlistOverrides: [],
     playlists: null,

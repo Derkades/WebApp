@@ -83,7 +83,6 @@ class Browse {
         const hcolEdit = document.createElement('th')
         headerRow.replaceChildren(hcolPlaylist, hcolDuration, hcolTitle, hcolAddTop, hcolAddBottom, hcolEdit);
 
-        let i = 0;
         for (const track of tracks) {
             const colPlaylist = document.createElement('td');
             colPlaylist.textContent = track.playlistDisplay;
@@ -112,10 +111,6 @@ class Browse {
             const dataRow = document.createElement('tr');
             dataRow.replaceChildren(colPlaylist, colDuration, colTitle, colAddTop, colAddBottom, colEdit);
             table.appendChild(dataRow);
-            if (i++ > state.maxTrackListSize) {
-                break;
-            }
-
         }
         return table;
     };
@@ -157,13 +152,24 @@ class Browse {
         // Search query text field
         const query = document.getElementById('browse-filter-query').value.trim().toLowerCase();
 
-        // Assign score to all tracks, then sort tracks by score. Finally, get original track object back.
-        return tracks
-                .filter(customFilter)
-                .filter(track => playlist === 'all' || track.playlistPath === playlist)
-                .map(track => { return {track: track, score: this.getSearchScore(track, playlist, query)}})
-                .sort((a, b) => b.score - a.score)
-                .map(sortedTrack => sortedTrack.track);
+        let combinedFilter;
+        if (playlist === 'all') {
+            combinedFilter = customFilter;
+        } else {
+            combinedFilter = track => customFilter(track) && track.playlistPath == playlist;
+        }
+
+        if (query === '') {
+            return tracks.filter(combinedFilter).slice(0, state.maxTrackListSize);
+        } else {
+            // Assign score to all tracks, then sort tracks by score. Finally, get original track object back.
+            return tracks
+                    .filter(combinedFilter)
+                    .map(track => { return {track: track, score: this.getSearchScore(track, playlist, query)}})
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, state.maxTrackListSizeSearch)
+                    .map(sortedTrack => sortedTrack.track);
+        }
     };
 
 };
