@@ -254,6 +254,7 @@ class Queue {
         updateTrackHtml();
         updateMediaSession();
         updateMediaSessionPosition();
+        lastfm.signalNewTrack();
     };
 
     add(queuedTrack, top) {
