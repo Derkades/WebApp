@@ -66,6 +66,18 @@ Don't worry about removing strings like "(Official Audio)" from song titles, the
 
 This directory is used to store the result of time-consuming operations, like transcoding audio or web scraping for album art. It may be emptied at any time as long as the application is not running.
 
+### User management
+
+Help:
+```
+docker compose exec music manage --help
+```
+
+Add an example admin user (prompts for password):
+```
+docker compose exec music manage useradd --admin example
+```
+
 ## Development
 
 With docker and docker-compose-plugin installed, run the following command to start a local testing server:
