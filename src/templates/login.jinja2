@@ -14,12 +14,12 @@
 
         <br>
         <br>
-        <br>
 
         {% if invalid_password %}
-            {% trans %}Invalid username or password{% endtrans %}
-            <br><br>
+            <p>{% trans %}Invalid username or password{% endtrans %}</p>
         {% endif %}
+
+        <br>
 
         <form method="POST">
             <label for="username">{% trans %}Username{% endtrans %}</label><br>
