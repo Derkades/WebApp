@@ -1,14 +1,19 @@
 import hashlib
 from urllib.parse import quote as urlencode
+import logging
+from typing import Optional
 
 import requests
 
 import settings
 import db
 from auth import User
+from metadata import Metadata
 
 
 CONNECT_URL = 'https://www.last.fm/api/auth/?api_key=' + settings.lastfm_api_key
+
+log = logging.getLogger('app.radio')
 
 
 def _make_request(method: str, api_method: str, **extra_params):
@@ -36,9 +41,16 @@ def _make_request(method: str, api_method: str, **extra_params):
                          headers={'User-Agent': settings.user_agent})
     else:
         raise ValueError
-    print(r.text)
+    log.info('lastfm response: %s', r.text)
     r.raise_for_status()
     return r.json()
+
+
+def _get_key(user: User) -> Optional[str]:
+    with db.users() as conn:
+        result = conn.execute('SELECT key FROM user_lastfm WHERE user=?',
+                            (user.user_id,)).fetchone()
+        return result[0] if result else None
 
 
 def obtain_session_key(user: User, auth_token: str) -> str:
@@ -57,3 +69,19 @@ def obtain_session_key(user: User, auth_token: str) -> str:
                      (user.user_id, name, key))
 
     return name
+
+
+def update_now_playing(user: User, metadata: Metadata):
+    if not metadata.artists or not metadata.title:
+        log.info('Skipped update_now_playing, missing metadata')
+        return
+
+    key = _get_key(user)
+    if not key:
+        log.info('Skipped update_now_playing, account is not linked')
+        return
+
+    _make_request('post', 'track.updateNowPlaying',
+                  artist=metadata.artists[0],
+                  track=metadata.title,
+                  sk=key)

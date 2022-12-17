@@ -556,6 +556,16 @@ def lastfm_callback():
                            name=name)
 
 
+@app.route('/lastfm_now_playing', methods=['POST'])
+def lastfm_now_playing():
+    user = auth.verify_auth_cookie()
+    user.verify_csrf(request.json['csrf'])
+    track = Track.by_relpath(request.json['track'])
+    metadata = track.metadata()
+    lastfm.update_now_playing(user, metadata)
+    return Response('ok', 200)
+
+
 def get_language() -> str:
     """
     Returns two letter language code, matching a language code in

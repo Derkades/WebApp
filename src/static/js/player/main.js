@@ -144,6 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
         console.warn('Editor button missing from page, this is normal if you are not an admin user');
     }
 
+    lastfm.init();
     queue.next();
     setInterval(updateMediaSession, 500);
     setInterval(updateMediaSessionPosition, 5000);
