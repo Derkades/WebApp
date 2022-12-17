@@ -115,34 +115,32 @@ class Browse {
         return table;
     };
 
-    getSearchScore(track, playlist, query) {
-        if (playlist === 'all' || playlist === track.playlist) {
-            const matchProperties = [track.path, track.display, ...track.tags];
-            if (track.album !== null) {
-                matchProperties.push(track.album);
-            }
-            if (track.artists !== null) {
-                matchProperties.push(track.artists.join(' & '));
-            }
-            if (track.albumArtist !== null) {
-                matchProperties.push(track.albumArtist);
-            }
+    getSearchScore(track, query) {
+        const matchProperties = [track.path, track.display, ...track.tags];
+        if (track.album !== null) {
+            matchProperties.push(track.album);
+        }
+        if (track.artists !== null) {
+            matchProperties.push(track.artists.join(' & '));
+        }
+        if (track.albumArtist !== null) {
+            matchProperties.push(track.albumArtist);
+        }
 
-            if (query !== '') {
-                let score = 0;
-                for (const matchProperty of matchProperties) {
-                    let partialScore = matchProperty.length - levenshtein(matchProperty.toLowerCase(), query);
-                    // Boost exact matches
-                    if (matchProperty.toLowerCase().includes(query)) {
-                        partialScore *= 2;
-                    }
-                    score += partialScore;
+        if (query !== '') {
+            let score = 0;
+            for (const matchProperty of matchProperties) {
+                let partialScore = matchProperty.length - levenshtein(matchProperty.toLowerCase(), query);
+                // Boost exact matches
+                if (matchProperty.toLowerCase().includes(query)) {
+                    partialScore *= 2;
                 }
-                return score;
-            } else {
-                // No query, same score for all tracks
-                return 1;
+                score += partialScore;
             }
+            return score;
+        } else {
+            // No query, same score for all tracks
+            return 1;
         }
     };
 
@@ -165,7 +163,7 @@ class Browse {
             // Assign score to all tracks, then sort tracks by score. Finally, get original track object back.
             return tracks
                     .filter(combinedFilter)
-                    .map(track => { return {track: track, score: this.getSearchScore(track, playlist, query)}})
+                    .map(track => { return {track: track, score: this.getSearchScore(track, query)}})
                     .sort((a, b) => b.score - a.score)
                     .slice(0, state.maxTrackListSizeSearch)
                     .map(sortedTrack => sortedTrack.track);
