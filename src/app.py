@@ -561,8 +561,17 @@ def lastfm_now_playing():
     user = auth.verify_auth_cookie()
     user.verify_csrf(request.json['csrf'])
     track = Track.by_relpath(request.json['track'])
-    metadata = track.metadata()
-    lastfm.update_now_playing(user, metadata)
+    lastfm.update_now_playing(user, track.metadata())
+    return Response('ok', 200)
+
+
+@app.route('/lastfm_scrobble', methods=['POST'])
+def lastfm_scrobble():
+    user = auth.verify_auth_cookie()
+    user.verify_csrf(request.json['csrf'])
+    track = Track.by_relpath(request.json['track'])
+    start_timestamp = request.json['start_timestamp']
+    lastfm.scrobble(user, track.metadata(), start_timestamp)
     return Response('ok', 200)
 
 

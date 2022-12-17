@@ -85,3 +85,21 @@ def update_now_playing(user: User, metadata: Metadata):
                   artist=metadata.artists[0],
                   track=metadata.title,
                   sk=key)
+
+
+def scrobble(user: User, metadata: Metadata, start_timestamp: int):
+    if not metadata.artists or not metadata.title:
+        log.info('Skipped scrobble, missing metadata')
+        return
+
+    key = _get_key(user)
+    if not key:
+        log.info('Skipped scrobble, account is not linked')
+        return
+
+    _make_request('post', 'track.scrobble',
+                  artist=metadata.artists[0],
+                  track=metadata.title,
+                  chosenByUser='0',
+                  timestamp=str(start_timestamp),
+                  sk=key)

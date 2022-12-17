@@ -3,6 +3,7 @@ class LastFM {
     hasScrobbled;
     playCounter;
     requiredPlayingCounter;
+    startTimestamp;
 
     constructor() {
         this.currentlyPlayingTrackPath = null;
@@ -31,6 +32,7 @@ class LastFM {
             this.hasScrobbled = false;
             this.playingCounter = 0;
             this.requiredPlayingCounter = Math.min(4*60, Math.round(track.duration / 2));
+            this.startTimestamp = Math.floor((new Date()).getTime() / 1000);
         } else {
             console.info('lastfm | track changed, not eligible for scrobbling');
             this.currentlyPlayingTrackPath = null;
@@ -61,13 +63,22 @@ class LastFM {
         // Send 'Now playing' after 5 seconds, then every 2 minutes
         if (this.playingCounter % 120 === 5) {
             console.info('lastfm | update now playing');
-            await jsonPost('/lastfm_now_playing', {track: this.currentlyPlayingTrackPath});
+            await this.updateNowPlaying();
         }
 
         if (!this.hasScrobbled && this.playingCounter > this.requiredPlayingCounter) {
             console.info('lastfm | scrobble');
             this.hasScrobbled = true;
+            await this.scrobble();
         }
+    }
+
+    async updateNowPlaying() {
+        await jsonPost('/lastfm_now_playing', {track: this.currentlyPlayingTrackPath});
+    }
+
+    async scrobble() {
+        await jsonPost('/lastfm_scrobble', {track: this.currentlyPlayingTrackPath, start_timestamp: this.startTimestamp});
     }
 }
 
