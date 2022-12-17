@@ -546,11 +546,26 @@ def radio_home():
 
 @app.route('/lastfm_callback')
 def lastfm_callback():
-    user = auth.verify_auth_cookie()
     # After allowing access, last.fm sends the user to this page with an
     # authentication token. The authentication token can only be used once,
     # to obtain a session key. Session keys are stored in the database.
+
+    # Cookies are not present here (because of cross-site redirect), so we
+    # can't save the token just yet. Add another redirect step.
+
     auth_token = request.args['token']
+    return render_template('lastfm_callback.jinja2',
+                           auth_token=auth_token)
+
+
+@app.route('/lastfm_connect', methods=['POST'])
+def lastfm_connect():
+    user = auth.verify_auth_cookie()
+    # This form does not have a CSRF token, because the user is known
+    # in the code that serves the form. Not sure how to fix this.
+    # An attacker being able to link their last.fm account is not that bad
+    # of an issue, so we'll deal with it later.
+    auth_token = request.form['auth_token']
     name = lastfm.obtain_session_key(user, auth_token)
     return render_template('lastfm_connected.jinja2',
                            name=name)

@@ -32,5 +32,5 @@ track_limit_seconds = int(getenv('MUSIC_TRACK_LIMIT_SECONDS', '600'))
 radio_playlists = split_by_semicolon(getenv('MUSIC_RADIO_PLAYLISTS', ''))
 radio_announcements_playlist = getenv('MUSIC_RADIO_ANNOUNCEMENTS_PLAYLIST', '')
 radio_announcement_chance = 0.2
-lastfm_api_key = getenv('LASTFM_API_KEY', '')
-lastfm_api_secret = getenv('LASTFM_API_SECRET', '')
+lastfm_api_key = getenv('MUSIC_LASTFM_API_KEY', '')
+lastfm_api_secret = getenv('MUSIC_LASTFM_API_SECRET', '')
