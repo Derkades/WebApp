@@ -45,7 +45,7 @@ kbd {
 
 .bg-image-blurred {
     @include background-cover;
-    filter: blur(3.5rem);
+    filter: blur(3rem);
 }
 
 #album-covers {
@@ -330,12 +330,12 @@ h4 > .icon {
 .full-page-overlay .box-solid {
     /* blur backdrop filter doesn't work on firefox <=102, make the box darker or text won't be readable */
     /* the current ESR is 102, when the next ESR is released this can be removed */
-    background-color: rgba(20, 20, 20, 0.9);
+    background-color: rgba(20, 20, 20, 0.6);
     min-width: 60vw;
-    max-width: 90vw;
+    max-width: calc(100vw - 1rem);
     min-height: 60vh;
-    max-height: 90vh;
-    margin: 1.5rem;
+    max-height: calc(100vh - 3rem); // no idea why 3rem is needed here
+    margin: .5rem;
     // prevent children from overflowing parent
     display: flex;
     flex-direction: column;
