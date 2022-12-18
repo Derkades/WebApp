@@ -84,8 +84,8 @@ function updateMediaTrackInfo() {
 
 function onTrackChange() {
     updateTrackHtml();
-    updateMediaPosition();
-    updateMediaTrackInfo()();
+    updateMediaSession();
+    updateMediaTrackInfo();
     lastfm.signalNewTrack();
 }
 
@@ -164,14 +164,22 @@ function updateTrackHtml() {
 
     replaceAlbumImages(track.imageBlobUrl);
 
+    const notFoundElem = document.getElementById('lyrics-not-found');
+    const textElem = document.getElementById('lyrics-text');
+    const sourceElem = document.getElementById('lyrics-source');
     if (track.lyrics.found) {
-        // track.lyrics.html is already escaped by backend, and only contains some safe HTML that we should not escape
-        const source = '<a class="secondary" href="' + escapeHtml(track.lyrics.source) + '" target="_blank">Source</a>'
-        document.getElementById('lyrics').innerHTML = track.lyrics.html + '<br><br>' + source;
+        notFoundElem.classList.add('hidden');
+        textElem.classList.remove('hidden');
+        sourceElem.classList.remove('hidden');
+
+        sourceElem.href = track.lyrics.source;
+        textElem.innerHTML = track.lyrics.html;
     } else {
-        document.getElementById('lyrics').innerHTML = '<i class="secondary">Geen lyrics gevonden</i>'
+        notFoundElem.classList.remove('hidden');
+        textElem.classList.add('hidden');
+        sourceElem.classList.add('hidden');
     }
-    document.getElementById('lyrics').scrollTo({top: 0, behavior: 'smooth'});
+    document.getElementById('lyrics-scroll').scrollTo({top: 0, behavior: 'smooth'});
 
     document.getElementById('current-track').replaceChildren(track.displayHtml(true));
 
@@ -185,8 +193,7 @@ function updateTrackHtml() {
 
 function replaceAudioElement(newElement) {
     const audioDiv = document.getElementById('audio');
-    audioDiv.innerHTML = '';
-    audioDiv.appendChild(newElement);
+    audioDiv.replaceChildren(newElement);
 }
 
 function replaceAlbumImages(imageUrl) {

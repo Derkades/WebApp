@@ -21,12 +21,6 @@ function checkResponseCode(response) {
     }
 }
 
-function escapeHtml(unescaped) {
-    const p = document.createElement("p");
-    p.textContent = unescaped;
-    return p.innerHTML;
-}
-
 function secondsToString(seconds) {
     const hhmmss =  new Date(1000 * seconds).toISOString().substring(11, 19);
     if (hhmmss.startsWith('00:')) {

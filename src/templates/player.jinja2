@@ -118,7 +118,14 @@
 
     <div class="sidebar sidebar-right hidden" id="sidebar-lyrics">
         <div class="lyrics-outer box-rounded box-solid">
-            <div id="lyrics"></div>
+
+            <div id="lyrics-scroll">
+                <i id="lyrics-not-found" class="secondary hidden">{% trans %}No lyrics found{% endtrans %}</i>
+                <span id="lyrics-text"></span>
+                <br>
+                <br>
+                <a id="lyrics-source" class="secondary hidden" href="#" target="_blank">{% trans %}Source{% endtrans %}</a>
+            </div>
         </div>
     </div>
 
