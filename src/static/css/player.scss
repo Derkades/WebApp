@@ -185,6 +185,7 @@ body.light #outer-progress-bar {
 #outer-progress-bar > div {
     position: absolute;
     top: 0;
+    transition: width .05s linear;
 }
 
 #progress-bar {

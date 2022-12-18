@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Progress bar seeking
     const onMove = event => {
-        seekTo((event.clientX - progressBar.offsetLeft) / progressBar.offsetWidth);
+        seekToFloat((event.clientX - progressBar.offsetLeft) / progressBar.offsetWidth);
         event.preventDefault(); // Prevent accidental text selection
     };
     const onUp = () => {
@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     const progressBar = document.getElementById('outer-progress-bar');
     progressBar.addEventListener('mousedown', event => {
-        seekTo((event.clientX - progressBar.offsetLeft) / progressBar.offsetWidth);
+        seekToFloat((event.clientX - progressBar.offsetLeft) / progressBar.offsetWidth);
 
         // Keep updating while mouse is moving
         document.addEventListener('mousemove', onMove);
@@ -109,14 +109,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Hotkeys
     document.addEventListener('keydown', event => handleKey(event.key));
 
+    // Media session events
     navigator.mediaSession.setActionHandler('play', play);
     navigator.mediaSession.setActionHandler('pause', pause);
-    navigator.mediaSession.setActionHandler('seekto', callback => {
-        const audio = getAudioElement();
-        if (audio != null) {
-            audio.currentTime = callback.seekTime;
-        }
-    });
+    navigator.mediaSession.setActionHandler('seekto', callback => seekToSeconds(callback.seekTime));
     navigator.mediaSession.setActionHandler('previoustrack', () => queue.previous());
     navigator.mediaSession.setActionHandler('nexttrack', () => queue.next());
 
@@ -146,8 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     lastfm.init();
     queue.next();
-    setInterval(updateMediaSession, 500);
-    setInterval(updateMediaSessionPosition, 5000);
+    setInterval(updateMediaSession, 1000);
     initTrackList();
 
     setInterval(refreshCsrfToken, 15*60*1000);

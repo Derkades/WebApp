@@ -225,10 +225,7 @@ class Queue {
         // Replace current track with last track in history
         this.currentTrack = this.previousTracks.pop();
 
-        this.fill();
-        updateTrackHtml();
-        updateMediaSession();
-        updateMediaSessionPosition();
+        onTrackChange();
     };
 
     next() {
@@ -250,11 +247,8 @@ class Queue {
         // Replace current track with first item from queue
         this.currentTrack = this.queuedTracks.shift();
 
+        onTrackChange();
         this.fill();
-        updateTrackHtml();
-        updateMediaSession();
-        updateMediaSessionPosition();
-        lastfm.signalNewTrack();
     };
 
     add(queuedTrack, top) {

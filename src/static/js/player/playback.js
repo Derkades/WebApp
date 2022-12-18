@@ -27,40 +27,50 @@ function playPause() {
     }
 }
 
+// Called periodically (frequently). Also called manually on some events like play/pause/seek.
 function updateMediaSession() {
     const audioElem = getAudioElement();
 
-    if (audioElem == null || audioElem.paused) {
-        document.getElementById('button-pause').style.display = 'none';
-        document.getElementById('button-play').style.display = '';
-    } else {
-        document.getElementById('button-play').style.display = 'none';
-        document.getElementById('button-pause').style.display = '';
+    const oldState = navigator.mediaSession.playbackState;
+    const newState = audioElem == null ? 'none' : (audioElem.paused ? 'paused' : 'playing');
+
+    if (newState != oldState) {
+        navigator.mediaSession.playbackState = newState;
+        if (newState == 'playing') {
+            document.getElementById('button-play').style.display = 'none';
+            document.getElementById('button-pause').style.display = '';
+        } else {
+            document.getElementById('button-pause').style.display = 'none';
+            document.getElementById('button-play').style.display = '';
+        }
     }
 
-    if (audioElem == null) {
-        navigator.mediaSession.playbackState = 'none';
-        return;
-    }
+    if (audioElem != null && isFinite(audioElem.duration) && isFinite(audioElem.currentTime) && isFinite(audioElem.playbackRate)) {
+        navigator.mediaSession.setPositionState({
+            duration: audioElem.duration,
+            playbackRate: audioElem.playbackRate,
+            position: audioElem.currentTime,
+        });
 
-    if (audioElem.paused) {
-        navigator.mediaSession.playbackState = 'paused';
-    } else {
-        navigator.mediaSession.playbackState = 'playing';
-    }
-
-    if (isFinite(audioElem.duration) && isFinite(audioElem.currentTime)) {
         const current = secondsToString(Math.floor(audioElem.currentTime));
         const max = secondsToString(Math.floor(audioElem.duration));
         const percentage = (audioElem.currentTime / audioElem.duration) * 100;
 
-        document.getElementById('progress-time-current').innerText = current;
-        document.getElementById('progress-time-duration').innerText = max;
         document.getElementById('progress-bar').style.width = percentage + '%';
+        document.getElementById('progress-time-current').innerText = current;
+        if (newState != oldState && newState == 'playing') {
+            // TODO move to updateMediaTrackInfo()
+            document.getElementById('progress-time-duration').innerText = max;
+        }
+    } else {
+        navigator.mediaSession.setPositionState({});
+        document.getElementById('progress-bar').style.width = '0';
     }
+}
 
+// Called on track change
+function updateMediaTrackInfo() {
     const track = queue.currentTrack;
-
     navigator.mediaSession.metadata = new MediaMetadata({
         title: track.title !== null ? track.title : track.display,
         album: track.album !== null ? track.album : 'Unknown Album',
@@ -72,18 +82,11 @@ function updateMediaSession() {
     });
 }
 
-function updateMediaSessionPosition() {
-    const audioElem = getAudioElement();
-    if (audioElem !== null &&
-            isFinite(audioElem.duration) &&
-            isFinite(audioElem.currentTime) &&
-            isFinite(audioElem.playbackRate)) {
-        navigator.mediaSession.setPositionState({
-            duration: audioElem.duration,
-            playbackRate: audioElem.playbackRate,
-            position: audioElem.currentTime,
-        });
-    }
+function onTrackChange() {
+    updateTrackHtml();
+    updateMediaPosition();
+    updateMediaTrackInfo()();
+    lastfm.signalNewTrack();
 }
 
 function seek(delta) {
@@ -101,11 +104,10 @@ function seek(delta) {
     }
 
     updateMediaSession();
-    updateMediaSessionPosition();
 }
 
-// Seek to aboslute position in song, float 0 to 1
-function seekTo(position) {
+// Seek to position in song, float 0 to 1
+function seekToFloat(position) {
     const audioElem = getAudioElement();
     if (audioElem == null) {
         return;
@@ -114,7 +116,18 @@ function seekTo(position) {
     audioElem.currentTime = position * audioElem.duration;
 
     updateMediaSession();
-    updateMediaSessionPosition();
+}
+
+// Seek to position in song, current time in seconds
+function seekToSeconds(position) {
+    const audioElem = getAudioElement();
+    if (audioElem == null) {
+        return;
+    }
+
+    audioElem.currentTime = position;
+
+    updateMediaSession();
 }
 
 function getTransformedVolume() {
