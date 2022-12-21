@@ -6,7 +6,6 @@ from typing import Optional
 import requests
 
 import settings
-import db
 from auth import User
 from metadata import Metadata
 
@@ -51,10 +50,9 @@ def _make_request(method: str, api_method: str, **extra_params):
 
 
 def _get_key(user: User) -> Optional[str]:
-    with db.users() as conn:
-        result = conn.execute('SELECT key FROM user_lastfm WHERE user=?',
-                            (user.user_id,)).fetchone()
-        return result[0] if result else None
+    result = user.conn.execute('SELECT key FROM user_lastfm WHERE user=?',
+                               (user.user_id,)).fetchone()
+    return result[0] if result else None
 
 
 def obtain_session_key(user: User, auth_token: str) -> str:
@@ -67,9 +65,7 @@ def obtain_session_key(user: User, auth_token: str) -> str:
     json = _make_request('get', 'auth.getSession', token=auth_token)
     name = json['session']['name']
     key = json['session']['key']
-
-    with db.users() as conn:
-        conn.execute('INSERT OR REPLACE INTO user_lastfm (user, name, key) VALUES (?, ?, ?)',
+    user.conn.execute('INSERT OR REPLACE INTO user_lastfm (user, name, key) VALUES (?, ?, ?)',
                      (user.user_id, name, key))
 
     return name
