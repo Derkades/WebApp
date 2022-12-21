@@ -74,39 +74,53 @@ class User:
     lastfm_name: Optional[str]
     lastfm_key: Optional[str]
 
-    @property
-    def sessions(self):
+    def sessions(self, reuse_conn = None):
         """
         Get all sessions for users
         """
-        with db.users() as conn:
+        with reuse_conn if reuse_conn else db.users() as conn:
             results = conn.execute("""
                                    SELECT rowid, token, creation_date, last_user_agent, last_address
                                    FROM session WHERE user=?
                                    """, (self.user_id,)).fetchall()
             return [Session(*row) for row in results]
 
-    def get_csrf(self) -> str:
+    def get_csrf(self, reuse_conn = None) -> str:
         """
         Generate CSRF token and store it for later validation
         """
-        with db.users() as conn:
+        with reuse_conn if reuse_conn else db.users() as conn:
             token = _generate_token()
             now = int(time.time())
             conn.execute('INSERT INTO csrf (user, token, creation_date) VALUES (?, ?, ?)',
                         (self.user_id, token, now))
         return token
 
-    def verify_csrf(self, token: str) -> None:
+    def verify_csrf(self, token: str, reuse_conn = None) -> None:
         """
         Verify request token, raising RequestTokenException if not valid
         """
-        with db.users() as conn:
+        with reuse_conn if reuse_conn else db.users() as conn:
             week_ago = int(time.time()) - 3600
             result = conn.execute('SELECT token FROM session WHERE user=? AND token=? AND creation_date > ?',
                                 (self.user_id, token, week_ago))
             if result is None:
                 raise RequestTokenError()
+
+    def verify_password(self, password: str, reuse_conn = None) -> bool:
+        with reuse_conn if reuse_conn else db.users() as conn:
+            result = conn.execute('SELECT password FROM user WHERE id=?', (self.user_id,)).fetchone()
+            hashed_password, = result
+            return bcrypt.checkpw(password.encode(), hashed_password.encode())
+
+    def update_password(self, new_password: str, reuse_conn = None) -> None:
+        """
+        Update user password and delete all existing sessions.
+        """
+        hashed_password = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
+        with reuse_conn if reuse_conn else db.users() as conn:
+            conn.execute('UPDATE user SET password=? WHERE id=?', (hashed_password, self.user_id))
+            conn.execute('DELETE FROM session WHERE user=?', (self.user_id,))
 
 
 @unique
@@ -177,14 +191,14 @@ def log_in(username: str, password: str) -> Optional[str]:
         return token
 
 
-def _verify_token(token: str, user_agent = None, remote_addr = None) -> Optional[User]:
+def _verify_token(token: str, user_agent = None, remote_addr = None, reuse_conn = None) -> Optional[User]:
     """
     Verify session token, and return corresponding user
     Args:
         token: Session token to verify
     Returns: User object if session token is valid, or None if invalid
     """
-    with db.users() as conn:
+    with reuse_conn if reuse_conn else db.users() as conn:
         # TODO does this introduce the possibility of a timing attack?
         result = conn.execute("""
                               SELECT session.rowid, session.creation_date, session.last_user_agent, session.last_address, user.id, user.username, user.admin, user_lastfm.name, user_lastfm.key
@@ -207,7 +221,7 @@ def _verify_token(token: str, user_agent = None, remote_addr = None) -> Optional
         return User(user_id, username, admin, session, lastfm_name, lastfm_key)
 
 
-def verify_auth_cookie(require_admin = False, redirect_to_login = False) -> User:
+def verify_auth_cookie(require_admin = False, redirect_to_login = False, reuse_conn = None) -> User:
     """
     Verify auth token sent as cookie, raising AuthError if missing or not valid
     """
@@ -217,7 +231,7 @@ def verify_auth_cookie(require_admin = False, redirect_to_login = False) -> User
 
     token = request.cookies['token']
     user_agent = request.headers['User-Agent'] if 'User-Agent' in request.headers else None
-    user = _verify_token(token, user_agent, request.remote_addr)
+    user = _verify_token(token, user_agent, request.remote_addr, reuse_conn)
     if user is None:
         raise AuthError(AuthErrorReason.INVALID_TOKEN, redirect_to_login)
 

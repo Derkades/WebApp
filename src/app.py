@@ -7,10 +7,12 @@ import random
 from flask import Flask, request, render_template, Response, redirect, send_file
 import flask_assets
 from flask_babel import Babel
+from flask_babel import _
 
 import auth
 from auth import AuthError, RequestTokenError
 import bing
+import db
 import genius
 import image
 import lastfm
@@ -507,14 +509,35 @@ def account():
     """
     Account information page
     """
-    user = auth.verify_auth_cookie()
-    return render_template('account.jinja2',
-                           user=user,
-                           sessions=user.sessions,
-                           lastfm_enabled=lastfm.is_configured(),
-                           lastfm_name=user.lastfm_name,
-                           lastfm_key=user.lastfm_key,
-                           lastfm_connect_url=lastfm.CONNECT_URL)
+    with db.users() as conn:
+        user = auth.verify_auth_cookie(reuse_conn=conn)
+        csrf_token = user.get_csrf(reuse_conn=conn)
+        sessions = user.sessions(reuse_conn=conn)
+
+        return render_template('account.jinja2',
+                               user=user,
+                               csrf_token=csrf_token,
+                               sessions=sessions,
+                               lastfm_enabled=lastfm.is_configured(),
+                               lastfm_name=user.lastfm_name,
+                               lastfm_key=user.lastfm_key,
+                               lastfm_connect_url=lastfm.CONNECT_URL)
+
+
+@app.route('/change_password_form', methods=['POST'])
+def change_password_form():
+    with db.users() as conn:
+        user = auth.verify_auth_cookie(reuse_conn=conn)
+        user.verify_csrf(request.form['csrf_token'], reuse_conn=conn)
+        if not user.verify_password(request.form['current_password']):
+            return _('Incorrect password.')
+
+        if request.form['new_password'] != request.form['repeat_new_password']:
+            return _('Repeated new passwords do not match.')
+
+        user.update_password(request.form['new_password'])
+        return _('Password updated. All sessions have been invalidated. You will need to log in again.')
+
 
 def radio_track_response(track: RadioTrack):
     return {

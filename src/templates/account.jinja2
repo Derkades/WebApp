@@ -47,6 +47,18 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        <h4>{% trans %}Change password{% endtrans %}</h4>
+        <form method="POST" action="/change_password_form">
+            <input type="hidden" value="{{ csrf_token }}" name="csrf_token">
+            Current password<br>
+            <input type="password" value="" name="current_password"><br>
+            New password<br>
+            <input type="password" value="" name="new_password"><br>
+            Repeat new password<br>
+            <input type="password" value="" name="repeat_new_password"><br>
+            <input type="submit" value="{% trans %}Change password{% endtrans %}">
+        </form>
     </main>
 
 {% endblock content %}
