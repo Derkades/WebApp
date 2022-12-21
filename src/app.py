@@ -511,6 +511,7 @@ def account():
     return render_template('account.jinja2',
                            user=user,
                            sessions=user.sessions,
+                           lastfm_enabled=lastfm.is_configured(),
                            lastfm_name=user.lastfm_name,
                            lastfm_key=user.lastfm_key,
                            lastfm_connect_url=lastfm.CONNECT_URL)

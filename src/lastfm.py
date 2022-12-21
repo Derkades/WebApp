@@ -16,6 +16,10 @@ CONNECT_URL = 'https://www.last.fm/api/auth/?api_key=' + settings.lastfm_api_key
 log = logging.getLogger('app.radio')
 
 
+def is_configured() -> bool:
+    return settings.lastfm_api_key and settings.lastfm_api_secret
+
+
 def _make_request(method: str, api_method: str, **extra_params):
     params = {
         'api_key': settings.lastfm_api_key,
@@ -32,10 +36,12 @@ def _make_request(method: str, api_method: str, **extra_params):
     if method == 'post':
         r = requests.post('https://ws.audioscrobbler.com/2.0/',
                           data=query_string,
+                          timeout=5,
                           headers={'User-Agent': settings.user_agent,
                                    'Content-Type': 'application/x-www-form-urlencoded'})
     elif method == 'get':
         r = requests.get('https://ws.audioscrobbler.com/2.0/?' + query_string,
+                         timeout=5,
                          headers={'User-Agent': settings.user_agent})
     else:
         raise ValueError
@@ -70,6 +76,10 @@ def obtain_session_key(user: User, auth_token: str) -> str:
 
 
 def update_now_playing(user: User, metadata: Metadata):
+    if not is_configured():
+        log.info('Skipped scrobble, last.fm not configured')
+        return
+
     if not metadata.artists or not metadata.title:
         log.info('Skipped update_now_playing, missing metadata')
         return
@@ -86,6 +96,10 @@ def update_now_playing(user: User, metadata: Metadata):
 
 
 def scrobble(user: User, metadata: Metadata, start_timestamp: int):
+    if not is_configured():
+        log.info('Skipped scrobble, last.fm not configured')
+        return
+
     if not metadata.artists or not metadata.title:
         log.info('Skipped scrobble, missing metadata')
         return
