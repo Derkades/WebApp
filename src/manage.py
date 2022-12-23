@@ -48,6 +48,23 @@ def handle_userlist(args):
                 log.info('- %s', username)
 
 
+def handle_passwd(args):
+    with db.users() as conn:
+        result = conn.execute('SELECT id FROM user WHERE username=?', (args.username,)).fetchone()
+        if result is None:
+            print('No user exists with the provided username')
+            return
+
+        user_id = result[0]
+
+        password = password = input('Enter new password:')
+        hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+        conn.execute('UPDATE user SET password=? WHERE id=?', (hashed_password, user_id))
+
+        print('Password updated successfully.')
+
+
 if __name__ == '__main__':
     logconfig.apply()
 
@@ -66,6 +83,9 @@ if __name__ == '__main__':
     userlist = subparsers.add_parser('userlist', help='list users')
     userlist.set_defaults(func=handle_userlist)
 
+    passwd = subparsers.add_parser('passwd', help='change password')
+    passwd.add_argument('username')
+    passwd.set_defaults(func=handle_passwd)
 
     args = parser.parse_args()
     args.func(args)
