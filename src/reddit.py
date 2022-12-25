@@ -40,6 +40,7 @@ def _search(subreddit: Optional[str], query: str) -> Optional[str]:
 
 
     r = requests.get(f'https://www.reddit.com/r/{subreddit}/search.json',
+                     timeout=10,
                      params=params,
                      headers=headers)
 
@@ -83,7 +84,9 @@ def get_image(query: str) -> Optional[bytes]:
     if image_url is None:
         return None
 
-    r = requests.get(image_url, headers={'User-Agent': settings.webscraping_user_agent})
+    r = requests.get(image_url,
+                     timeout=10,
+                     headers={'User-Agent': settings.webscraping_user_agent})
 
     if r.status_code != 200:
         log.warning('Received status code %s while downloading image from Reddit', r.status_code)

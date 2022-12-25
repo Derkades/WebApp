@@ -35,12 +35,12 @@ def _make_request(method: str, api_method: str, **extra_params):
     if method == 'post':
         r = requests.post('https://ws.audioscrobbler.com/2.0/',
                           data=query_string,
-                          timeout=5,
+                          timeout=10,
                           headers={'User-Agent': settings.user_agent,
                                    'Content-Type': 'application/x-www-form-urlencoded'})
     elif method == 'get':
         r = requests.get('https://ws.audioscrobbler.com/2.0/?' + query_string,
-                         timeout=5,
+                         timeout=10,
                          headers={'User-Agent': settings.user_agent})
     else:
         raise ValueError

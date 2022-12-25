@@ -71,7 +71,8 @@ def get_cover(title: str) -> Optional[bytes]:
             cache_obj.store(b'magic_no_cover')
             return None
 
-        r = requests.get(image_url)
+        r = requests.get(image_url,
+                         timeout=10)
         image_bytes = r.content
 
         if not image.check_valid(image_bytes):

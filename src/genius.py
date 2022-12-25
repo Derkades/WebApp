@@ -29,11 +29,10 @@ def _search(title: str) -> Optional[str]:
     """
     Returns: URL of genius lyrics page, or None if no page was found.
     """
-    r = requests.get(
-        "https://genius.com/api/search/multi",
-        params={"per_page": "1", "q": title},
-        headers={'User-Agent': settings.webscraping_user_agent}
-    )
+    r = requests.get("https://genius.com/api/search/multi",
+                     timeout=10,
+                     params={"per_page": "1", "q": title},
+                     headers={'User-Agent': settings.webscraping_user_agent})
 
     search_json = r.json()
     for section in search_json["response"]["sections"]:
@@ -57,6 +56,7 @@ def _extract_lyrics(genius_url: str) -> List[str]:
     # 3. Trek een bepaalde property uit deze JSON, en parse deze met BeautifulSoup weer als HTML
     # 4. Soms staat lyrics in een link of in italics, de for loop maakt dat goed
     r = requests.get(genius_url,
+                     timeout=10,
                      headers={'User-Agent': settings.webscraping_user_agent})
     text = r.text
     start = text.index('window.__PRELOADED_STATE__ = JSON.parse(') + 41

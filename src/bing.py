@@ -35,12 +35,13 @@ def image_search(bing_query: str) -> Optional[bytes]:
     try:
         headers = {'User-Agent': settings.webscraping_user_agent}
         r = requests.get('https://www.bing.com/images/search',
-                        headers=headers,
-                        params={'q': bing_query,
-                                'form': 'HDRSC2',
-                                'first': '1',
-                                'scenario': 'ImageBasicHover'},
-                        cookies={'SRCHHPGUSR': 'ADLT=OFF'})  # disable safe search :-)
+                         timeout=10
+                         headers=headers,
+                         params={'q': bing_query,
+                                 'form': 'HDRSC2',
+                                 'first': '1',
+                                 'scenario': 'ImageBasicHover'},
+                         cookies={'SRCHHPGUSR': 'ADLT=OFF'})  # disable safe search :-)
         soup = BeautifulSoup(r.text, 'lxml')
         results = soup.find_all('a', {'class': 'iusc'})
 
@@ -60,7 +61,9 @@ def image_search(bing_query: str) -> Optional[bytes]:
             log.info('Downloading image (%s left): %s', max_consider_images, image_url)
 
             try:
-                resp = requests.get(image_url, headers=headers)
+                resp = requests.get(image_url,
+                                    timeout=10,
+                                    headers=headers)
                 if resp.status_code != 200:
                     log.info('Status code %s, skipping', resp.status_code)
                     continue
