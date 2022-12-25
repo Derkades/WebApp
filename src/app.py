@@ -76,31 +76,31 @@ def login():
     Login route. Serve login page for GET requests, and accepts password input for POST requests.
     If the provided password is invalid, the login template is rendered with invalid_password=True
     """
-    try:
-        with db.connect() as conn:
+    with db.connect() as conn:
+        try:
             auth.verify_auth_cookie(conn)
-        # User is already logged in
-        return redirect('/')
-    except AuthError:
-        pass
+            # User is already logged in
+            return redirect('/')
+        except AuthError:
+            pass
 
-    if request.method == 'POST':
-        if 'password' not in request.form:
-            return 'invalid form input'
+        if request.method == 'POST':
+            if 'password' not in request.form:
+                return 'invalid form input'
 
-        username = request.form['username']
-        password = request.form['password']
+            username = request.form['username']
+            password = request.form['password']
 
-        token = auth.log_in(username, password)
+            token = auth.log_in(username, password)
 
-        if token is None:
-            return render_template('login.jinja2', invalid_password=True)
+            if token is None:
+                return render_template('login.jinja2', invalid_password=True)
 
-        response = redirect('/')
-        response.set_cookie('token', token, max_age=3600*24*30, samesite='Strict')
-        return response
-    else:
-        return render_template('login.jinja2', invalid_password=False)
+            response = redirect('/')
+            response.set_cookie('token', token, max_age=3600*24*30, samesite='Strict')
+            return response
+        else:
+            return render_template('login.jinja2', invalid_password=False)
 
 
 @app.route('/player')
@@ -217,22 +217,22 @@ def get_album_cover() -> Response:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.args['csrf'])
 
-    track = Track.by_relpath(request.args['path'])
-    meme = 'meme' in request.args and bool(int(request.args['meme']))
+        track = Track.by_relpath(request.args['path'])
+        meme = 'meme' in request.args and bool(int(request.args['meme']))
 
-    def get_img():
-        meta = track.metadata()
-        img = get_cover_bytes(meta, meme)
-        return img
+        def get_img():
+            meta = track.metadata(conn)
+            img = get_cover_bytes(meta, meme)
+            return img
 
-    img_format = get_img_format()
+        img_format = get_img_format()
 
-    cache_id = track.relpath
-    if meme:
-        cache_id += 'meme2'
+        cache_id = track.relpath
+        if meme:
+            cache_id += 'meme2'
 
-    comp_bytes = image.thumbnail(get_img, cache_id, img_format[6:], None,
-                                 request.args['quality'], not meme)
+        comp_bytes = image.thumbnail(get_img, cache_id, img_format[6:], None,
+                                    request.args['quality'], not meme)
 
     return Response(comp_bytes, mimetype=img_format)
 
@@ -246,8 +246,8 @@ def get_lyrics():
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.args['csrf'])
 
-    track = Track.by_relpath(request.args['path'])
-    meta = track.metadata()
+        track = Track.by_relpath(request.args['path'])
+        meta = track.metadata(conn)
 
     for search_query in meta.lyrics_search_queries():
         lyrics = genius.get_lyrics(search_query)
@@ -296,37 +296,37 @@ def track_list():
 
         playlists = music.playlists(conn)
 
-    response = {
-        'playlists': {},
-        'tracks': [],
-    }
-
-    for playlist in playlists:
-        response['playlists'][playlist.relpath] = {
-            'dir_name': playlist.relpath,
-            'display_name': playlist.name,
-            'track_count': playlist.track_count,
-            'guest': False,  # TODO remove when guest logic has been removed from frontend
+        response = {
+            'playlists': {},
+            'tracks': [],
         }
 
-    for playlist in playlists:
-        for track in playlist.tracks():
-            meta = track.metadata()
-            response['tracks'].append({
-                'path': track.relpath,
-                'display': meta.display_title(),
-                'display_file': meta.filename_title(),
-                'playlist': playlist.relpath,
-                'playlist_display': playlist.name,
-                'duration': meta.duration,
-                'tags': meta.tags,
-                'title': meta.title,
-                'artists': meta.artists,
-                'album': meta.album,
-                'album_artist': meta.album_artist,
-                'album_index': meta.album_index,
-                'year': meta.year,
-            })
+        for playlist in playlists:
+            response['playlists'][playlist.relpath] = {
+                'dir_name': playlist.relpath,
+                'display_name': playlist.name,
+                'track_count': playlist.track_count,
+                'guest': False,  # TODO remove when guest logic has been removed from frontend
+            }
+
+        for playlist in playlists:
+            for track in playlist.tracks(conn):
+                meta = track.metadata(conn)
+                response['tracks'].append({
+                    'path': track.relpath,
+                    'display': meta.display_title(),
+                    'display_file': meta.filename_title(),
+                    'playlist': playlist.relpath,
+                    'playlist_display': playlist.name,
+                    'duration': meta.duration,
+                    'tags': meta.tags,
+                    'title': meta.title,
+                    'artists': meta.artists,
+                    'album': meta.album,
+                    'album_artist': meta.album_artist,
+                    'album_index': meta.album_index,
+                    'year': meta.year,
+                })
 
     return response
 
@@ -361,13 +361,14 @@ def update_metadata():
         user = auth.verify_auth_cookie(conn, require_admin=True)
         user.verify_csrf(payload['csrf'])
 
-    track = Track.by_relpath(payload['path'])
-    track.write_metadata(title=payload['metadata']['title'],
-                         album=payload['metadata']['album'],
-                         artist='; '.join(payload['metadata']['artists']),
-                         album_artist=payload['metadata']['album_artist'],
-                         genre='; '.join(payload['metadata']['tags']),
-                         date=payload['metadata']['year'])
+        track = Track.by_relpath(payload['path'])
+        track.write_metadata(conn,
+                            title=payload['metadata']['title'],
+                            album=payload['metadata']['album'],
+                            artist='; '.join(payload['metadata']['artists']),
+                            album_artist=payload['metadata']['album_artist'],
+                            genre='; '.join(payload['metadata']['tags']),
+                            date=payload['metadata']['year'])
 
     return Response(None, 200)
 
@@ -629,7 +630,7 @@ def lastfm_now_playing():
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
         track = Track.by_relpath(request.json['track'])
-        lastfm.update_now_playing(user, track.metadata())
+        lastfm.update_now_playing(user, track.metadata(conn))
     return Response('ok', 200)
 
 
@@ -640,7 +641,7 @@ def lastfm_scrobble():
         user.verify_csrf(request.json['csrf'])
         track = Track.by_relpath(request.json['track'])
         start_timestamp = request.json['start_timestamp']
-        lastfm.scrobble(user, track.metadata(), start_timestamp)
+        lastfm.scrobble(user, track.metadata(conn), start_timestamp)
     return Response('ok', 200)
 
 

@@ -6,6 +6,7 @@ import time
 from typing import Optional
 from dataclasses import dataclass
 from enum import Enum, unique
+from sqlite3 import Connection
 
 import bcrypt
 from flask import request
@@ -162,7 +163,7 @@ def _generate_token() -> str:
     return base64.b64encode(os.urandom(16)).decode()
 
 
-def log_in(username: str, password: str) -> Optional[str]:
+def log_in(conn: Connection, username: str, password: str) -> Optional[str]:
     """
     Log in using username and password.
     Args:
@@ -170,29 +171,27 @@ def log_in(username: str, password: str) -> Optional[str]:
         password
     Returns: Session token, or None if the username+password combination is not valid
     """
+    result = conn.execute('SELECT id, password FROM user WHERE username=?', (username,)).fetchone()
 
-    with db.connect() as conn:
-        result = conn.execute('SELECT id, password FROM user WHERE username=?', (username,)).fetchone()
+    if result is None:
+        log.warning("Login attempt with non-existent username: '%s'", username)
+        return None
 
-        if result is None:
-            log.warning("Login attempt with non-existent username: '%s'", username)
-            return None
+    user_id, hashed_password = result
 
-        user_id, hashed_password = result
+    if not bcrypt.checkpw(password.encode(), hashed_password.encode()):
+        log.warning('Failed login for user %s', username)
+        return None
 
-        if not bcrypt.checkpw(password.encode(), hashed_password.encode()):
-            log.warning('Failed login for user %s', username)
-            return None
+    token = _generate_token()
+    creation_date = int(time.time())
 
-        token = _generate_token()
-        creation_date = int(time.time())
+    conn.execute('INSERT INTO session (user, token, creation_date) VALUES (?, ?, ?)',
+                    (user_id, token, creation_date))
 
-        conn.execute('INSERT INTO session (user, token, creation_date) VALUES (?, ?, ?)',
-                     (user_id, token, creation_date))
+    log.info('Successful login for user %s', username)
 
-        log.info('Successful login for user %s', username)
-
-        return token
+    return token
 
 
 def _verify_token(conn: sqlite3.Connection, token: str, user_agent = None, remote_addr = None) -> Optional[User]:

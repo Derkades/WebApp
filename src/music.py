@@ -92,13 +92,11 @@ class Track:
     relpath: str
     path: Path
 
-    def metadata(self):
+    def metadata(self, conn: Connection):
         """
         Returns: Cached metadata for this track, as a Metadata object
         """
-        # TODO Store cached connection in track object
-        with db.connect() as conn:
-            return metadata.cached(conn, self.relpath)
+        return metadata.cached(conn, self.relpath)
 
     def transcoded_audio(self, quality, fruit) -> bytes:
         """
@@ -193,7 +191,7 @@ class Track:
 
         return cached_data
 
-    def write_metadata(self, **meta_dict: Dict[str, str]):
+    def write_metadata(self, conn: Connection, **meta_dict: Dict[str, str]):
         """
         Write metadata to file
         """
@@ -218,27 +216,26 @@ class Track:
             subprocess.run(command, shell=False, check=True, capture_output=False)
             shutil.copy(temp_file.name, self.path)
 
-            self.update_database()
+            self.update_database(conn)
 
-    def update_database(self):
+    def update_database(self, conn: Connection):
         """
         Update metadata in database for this track only
         """
         meta = metadata.probe(self.path)
 
-        with db.connect() as conn:
-            conn.execute('UPDATE track SET title=?, album=?, album_artist=?, year=? WHERE path=?',
-                        (meta.title, meta.album, meta.album_artist, meta.year, self.relpath))
+        conn.execute('UPDATE track SET title=?, album=?, album_artist=?, year=? WHERE path=?',
+                    (meta.title, meta.album, meta.album_artist, meta.year, self.relpath))
 
-            conn.execute('DELETE FROM track_artist WHERE track=?', (self.relpath,))
-            conn.execute('DELETE FROM track_tag WHERE track=?', (self.relpath,))
+        conn.execute('DELETE FROM track_artist WHERE track=?', (self.relpath,))
+        conn.execute('DELETE FROM track_tag WHERE track=?', (self.relpath,))
 
-            if meta.artists is not None:
-                artist_insert = [(self.relpath, artist) for artist in meta.artists]
-                conn.executemany(('INSERT INTO track_artist (track, artist) VALUES (?, ?)'), artist_insert)
+        if meta.artists is not None:
+            artist_insert = [(self.relpath, artist) for artist in meta.artists]
+            conn.executemany(('INSERT INTO track_artist (track, artist) VALUES (?, ?)'), artist_insert)
 
-            tag_insert = [(self.relpath, tag) for tag in meta.tags]
-            conn.executemany(('INSERT INTO track_tag (track, tag) VALUES (?, ?)'), tag_insert)
+        tag_insert = [(self.relpath, tag) for tag in meta.tags]
+        conn.executemany(('INSERT INTO track_tag (track, tag) VALUES (?, ?)'), tag_insert)
 
     @staticmethod
     def by_relpath(relpath: str) -> 'Track':
@@ -296,13 +293,12 @@ class Playlist:
 
         return Track.by_relpath(track)
 
-    def tracks(self) -> List[Track]:
+    def tracks(self, conn: Connection) -> List[Track]:
         """
         Get all tracks in this playlist as a list of Track objects
         """
-        with db.connect() as conn:
-            rows = conn.execute('SELECT path FROM track WHERE playlist=?', (self.relpath,)).fetchall()
-            return [Track.by_relpath(row[0]) for row in rows]
+        rows = conn.execute('SELECT path FROM track WHERE playlist=?', (self.relpath,)).fetchall()
+        return [Track.by_relpath(row[0]) for row in rows]
 
     def download(self, url: str) -> CompletedProcess:
         """
