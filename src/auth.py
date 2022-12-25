@@ -171,7 +171,7 @@ def log_in(username: str, password: str) -> Optional[str]:
     Returns: Session token, or None if the username+password combination is not valid
     """
 
-    with db.users() as conn:
+    with db.connect() as conn:
         result = conn.execute('SELECT id, password FROM user WHERE username=?', (username,)).fetchone()
 
         if result is None:

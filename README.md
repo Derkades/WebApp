@@ -34,7 +34,7 @@ Prebuilt container image: `ghcr.io/danielkoomen/webapp`. Take the `docker-compos
 
 ### `MUSIC_MUSIC_DIR` (default `/music`)
 
-This directory should contain one subdirectory for each playlist. Directory names may be prefixed with `Guest-` to mark the playlist as a guest. Place audio files in these playlist directories. Creating directories inside playlist directories is not supported at this time.
+This directory should contain one subdirectory for each playlist. Place audio files in these playlist directories. Creating directories inside playlist directories is not supported at this time.
 
 An example:
 
@@ -48,11 +48,11 @@ music
 │   ├── 025 Midnight Oil - Beds Are Burning.mp3
 │   ├── 061 Pink Floyd - Another Brick In The Wall.mp3
 │   └── 078 Nena - Irgendwie irgendwo irgendwann (long version).mp3
-├── Guest-RS
+├── RS
 │   ├── Tom Misch & Yussef Dayes - Storm Before The Calm (feat. Kaidi Akinnibi) (Official Audio).webm
 │   ├── U & ME - Alt J (Official Audio) [RMkxrJuxRsk].webm
 │   └── Zes - Juniper [UNYiVK3Cl98].webm
-├── Guest-WD
+├── WD
 │   └── 08. Watercolors (feat. Dave Koz).mp3
 └── JK
     ├── Aerosmith - Dream On.mp3

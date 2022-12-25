@@ -5,8 +5,8 @@ from typing import Optional, List, Iterator
 import logging
 import json
 from dataclasses import dataclass
+from sqlite3 import Connection
 
-import db
 import music
 
 
@@ -310,22 +310,20 @@ def probe(path: Path) -> Metadata:
     return Metadata(music.to_relpath(path), duration, artists, album, title, year, album_artist, album_index, tags)
 
 
-def cached(relpath: str) -> Metadata:
+def cached(conn: Connection, relpath: str) -> Metadata:
     """
     Create Metadata object from database contents
     """
     query = 'SELECT duration, title, album, album_artist, album_index, year FROM track WHERE path=?'
-    with db.get() as conn:
-        duration, title, album, album_artist, album_index, year = conn.execute(query, (relpath,)).fetchone()
+    duration, title, album, album_artist, album_index, year = conn.execute(query, (relpath,)).fetchone()
 
-    with db.get() as conn:
-        rows = conn.execute('SELECT artist FROM track_artist WHERE track=?', (relpath,)).fetchall()
-        if len(rows) == 0:
-            artists = None
-        else:
-            artists = [row[0] for row in rows]
+    rows = conn.execute('SELECT artist FROM track_artist WHERE track=?', (relpath,)).fetchall()
+    if len(rows) == 0:
+        artists = None
+    else:
+        artists = [row[0] for row in rows]
 
-        rows = conn.execute('SELECT tag FROM track_tag WHERE track=?', (relpath,)).fetchall()
-        tags = [row[0] for row in rows]
+    rows = conn.execute('SELECT tag FROM track_tag WHERE track=?', (relpath,)).fetchall()
+    tags = [row[0] for row in rows]
 
-        return Metadata(relpath, duration, artists, album, title, year, album_artist, album_index, tags)
+    return Metadata(relpath, duration, artists, album, title, year, album_artist, album_index, tags)

@@ -16,26 +16,11 @@ def _connect(dbname: str) -> Connection:
     return conn
 
 
-def get() -> Connection:
+def connect() -> Connection:
     """
     Create new SQLite database connection
-    Deprecated: use music() instead
     """
     return _connect('music')
-
-
-def music() -> Connection:
-    """
-    Open music database
-    """
-    return _connect('music')
-
-
-def users() -> Connection:
-    """
-    Open users database
-    """
-    return _connect('users')
 
 
 def create_tables() -> None:
@@ -45,12 +30,11 @@ def create_tables() -> None:
     # TODO enable strict mode after updating to newer sqlite version
 
     log.info('Creating tables')
-    with music() as conn:
+    with connect() as conn:
         conn.execute("""
                     CREATE TABLE IF NOT EXISTS playlist (
                         path TEXT NOT NULL UNIQUE PRIMARY KEY,
-                        name TEXT NOT NULL UNIQUE,
-                        guest INTEGER NOT NULL
+                        name TEXT NOT NULL
                     )
                     """)
 
@@ -64,6 +48,8 @@ def create_tables() -> None:
                         album_artist TEXT NULL,
                         album_index INTEGER NULL,
                         year INTEGER NULL,
+                        mtime INTEGER NOT NULL,
+                        last_played INTEGER NOT NULL DEFAULT 0,
                         FOREIGN KEY (playlist) REFERENCES playlist(path) ON DELETE CASCADE
                     )
                     """)
@@ -86,14 +72,6 @@ def create_tables() -> None:
                     )
                     """)
 
-        # Like the track table but for persistent data. Unlike the regular track table, this table is not emptied at every startup.
-        conn.execute("""
-                    CREATE TABLE IF NOT EXISTS track_persistent (
-                        path TEXT NOT NULL UNIQUE PRIMARY KEY,
-                        last_played INTEGER NOT NULL DEFAULT 0
-                    )
-                    """)
-
         conn.execute("""
                      CREATE TABLE IF NOT EXISTS radio_track (
                          track TEXT NOT NULL,
@@ -102,7 +80,6 @@ def create_tables() -> None:
                      )
                      """)
 
-    with users() as conn:
         conn.execute("""
                      CREATE TABLE IF NOT EXISTS user (
                          id INTEGER NOT NULL UNIQUE PRIMARY KEY AUTOINCREMENT,

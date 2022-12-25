@@ -1,7 +1,6 @@
 from pathlib import Path
 import logging
-from multiprocessing import Pool
-from typing import List, Tuple, Optional, Iterable
+from sqlite3 import Connection
 
 import db
 import metadata
@@ -12,134 +11,122 @@ import settings
 log = logging.getLogger('app.scanner')
 
 
-def _scan_tracks(paths: List[Tuple[Path, Path]]):
+def scan_playlists(conn: Connection) -> set[str]:
     """
-    Get metadata for provided tracks, and write it to the database.
+    Scan playlist directories, add or remove playlists from the database
+    where necessary.
     """
-    track_insert = []
-    artist_insert = []
-    tag_insert = []
+    paths_db = {row[0] for row in conn.execute('SELECT path FROM playlist').fetchall()}
+    paths_disk = {p.name for p in Path(settings.music_dir).iterdir() if p.is_dir()}
 
-    for playlist_path, track_path in paths:
-        track_relpath = music.to_relpath(track_path)
-        meta = metadata.probe(track_path)
-        track_insert.append({'path': track_relpath,
-                             'playlist': playlist_path.name,
-                             'duration': meta.duration,
-                             'title': meta.title,
-                             'album': meta.album,
-                             'album_artist': meta.album_artist,
-                             'album_index': meta.album_index,
-                             'year': meta.year})
-        artists = meta.artists
-        if artists is not None:
-            for artist in artists:
-                artist_insert.append({'track': track_relpath,
-                                      'artist': artist})
-        for tag in meta.tags:
-            tag_insert.append({'track': track_relpath,
-                               'tag': tag})
+    add_to_db = []
 
-    return track_insert, artist_insert, tag_insert
+    for path in paths_db:
+        if path not in paths_disk:
+            log.info('Removing playlist: %s', path)
+            conn.execute('DELETE FROM playlist WHERE path=?', (path,))
 
-# def upsert(conn, table: str, values: List[Dict[str, Any]]):
-#     keys = list(values[0].keys())
-#     query = 'INSERT INTO ' + table + ' (' + ', '.join(keys) + ') '
-#     query += 'VALUES (' + ', '.join([':' + key for key in keys]) + ') '
-#     query += 'ON CONFLICT(' + keys[0] + ') DO UPDATE '
-#     query += 'SET ' + ', '.join([f'{key}=:{key}' for key in keys[1:]])
-#     conn.executemany(query, values)
+    for path in paths_disk:
+        if path not in paths_db:
+            log.info('Adding playlist: %s', path)
+            add_to_db.append({'path': path})
 
-def rebuild_music_database(only_playlist: Optional[str] = None) -> None:
+    conn.executemany('INSERT INTO playlist (path, name) VALUES (:path, :path)', add_to_db)
+
+    return paths_disk
+
+
+def query_params(relpath: str, path: Path) -> dict[str, str]:
     """
-    Scan disk for playlist and tracks, and create the corresponding rows
-    in playlist, track, artist and tag tables. Previous table content is deleted.
+    Create dictionary of track metadata, to be used as SQL query parameters
     """
-    tracks = []
+    meta = metadata.probe(path)
 
-    playlist_insert = [] # path, name, guest
-    track_insert = [] # path, playlist, duration, title, album_artist, album_index, year
-    artist_insert = [] # track, artist
-    tag_insert = [] # track, tag
-
-    playlist_paths: Iterable[Path]
-
-    if only_playlist is not None:
-        playlist_paths = [music.from_relpath(only_playlist)]
-        if not playlist_paths[0].is_dir():
-            raise ValueError('Requested playlist directory does not exist (or is not a directory)')
-        log.info('Scanning tracks for playlist %s...', only_playlist)
+    main_data = {'path': relpath,
+                 'duration': meta.duration,
+                 'title': meta.title,
+                 'album': meta.album,
+                 'album_artist': meta.album_artist,
+                 'album_index': meta.album_index,
+                 'year': meta.year}
+    if meta.artists is None:
+        artist_data = []
     else:
-        playlist_paths = [p for p in Path(settings.music_dir).iterdir() if p.is_dir()]
-        log.info('Scanning tracks for all playlists...')
+        artist_data = [{'track': relpath,
+                        'artist': artist} for artist in meta.artists]
+    tag_data = [{'track': relpath,
+                 'tag': tag} for tag in meta.tags]
 
-    for playlist_path in playlist_paths:
-        if playlist_path.name.startswith('Guest-'):
-            playlist_name = playlist_path.name[6:]
-            playlist_guest = True
-        else:
-            playlist_name = playlist_path.name
-            playlist_guest = False
+    return main_data, artist_data, tag_data
 
-        playlist_dir_name = playlist_path.name
 
-        playlist_insert.append({'path': playlist_dir_name,
-                                'name': playlist_name,
-                                'guest': playlist_guest})
+def scan_tracks(conn: Connection, playlist: str) -> None:
+    """
+    Scan for added, removed or changed tracks in a playlist.
+    """
+    log.info('Scanning playlist: %s', playlist)
 
-        for track_path in music.scan_music(playlist_path):
-            tracks.append((playlist_path, track_path))
+    paths_db: set[str] = set()
 
-    chunk_size = 5 if len(tracks) < 50*settings.scanner_processes else 50
+    for relpath, db_mtime in conn.execute('SELECT path, mtime FROM track WHERE playlist=?', (playlist,)).fetchall():
+        path = music.from_relpath(relpath)
+        if not path.exists():
+            log.info('deleting: %s', relpath)
+            conn.execute('DELETE FROM track WHERE path=?', (relpath,))
+            continue
 
-    chunks = []
-    current_chunk = []
-    for track in tracks:
-        current_chunk.append(track)
-        if len(current_chunk) > chunk_size:
-            chunks.append(current_chunk)
-            current_chunk = []
-    if len(current_chunk) > 0:
-        chunks.append(current_chunk)
+        paths_db.add(relpath)
 
-    with Pool(settings.scanner_processes) as pool:
-        processed = 0
-        for result_tracks, result_artists, result_tags in pool.imap_unordered(_scan_tracks, chunks):
-            track_insert.extend(result_tracks)
-            artist_insert.extend(result_artists)
-            tag_insert.extend(result_tags)
-            processed += len(result_tracks)
-            log.info('Scanned %s / %s', processed, len(tracks))
+        file_mtime = int(path.stat().st_mtime)
+        if file_mtime != db_mtime:
+            log.info('changed, update: %s (%s, %s)', relpath, file_mtime, db_mtime)
+            main_data, artist_data, tag_data = query_params(relpath, path)
+            conn.execute('''
+                         UPDATE track
+                         SET duration=:duration,
+                             title=:title,
+                             album=:album,
+                             album_artist=:album_artist,
+                             album_index=:album_index,
+                             year=:year,
+                             mtime=:mtime
+                         WHERE path=:path
+                        ''',
+                        {**main_data,
+                         'mtime': file_mtime})
+            conn.execute('DELETE FROM track_artist WHERE track=?', (relpath,))
+            conn.executemany('INSERT INTO track_artist (track, artist) VALUES (:track, :artist)', artist_data)
+            conn.execute('DELETE FROM track_tag WHERE track=?', (relpath,))
+            conn.executemany('INSERT INTO track_tag (track, tag) VALUES (:track, :tag)', tag_data)
 
-    log.info('Done scanning tracks. Inserting into database...')
+    for path in music.scan_playlist(playlist):
+        relpath = music.to_relpath(path)
+        if relpath not in paths_db:
+            mtime = int(path.stat().st_mtime)
+            log.info('new track, insert: %s', relpath)
+            main_data, artist_data, tag_data = query_params(relpath, path)
+            conn.execute('''
+                         INSERT INTO track (path, playlist, duration, title, album, album_artist, album_index, year, mtime)
+                         VALUES (:path, :playlist, :duration, :title, :album, :album_artist, :album_index, :year, :mtime)
+                         ''',
+                         {**main_data,
+                          'playlist': playlist,
+                          'mtime': mtime})
+            conn.executemany('INSERT INTO track_artist (track, artist) VALUES (:track, :artist)', artist_data)
+            conn.executemany('INSERT INTO track_tag (track, tag) VALUES (:track, :tag)', tag_data)
 
-    with db.get() as conn:
-        if only_playlist:
-            conn.execute('DELETE FROM playlist WHERE path=?', (only_playlist,))
-        else:
-            conn.execute('DELETE FROM playlist')
 
-        conn.executemany('INSERT INTO playlist VALUES (:path, :name, :guest)',
-                         playlist_insert)
-        conn.executemany('''
-                         INSERT INTO track (path, playlist, duration, title, album, album_artist, album_index, year)
-                         VALUES (:path, :playlist, :duration, :title, :album, :album_artist, :album_index, :year)
-                         ''', track_insert)
-        conn.executemany('INSERT INTO track_artist VALUES (:track, :artist)',
-                        artist_insert)
-        conn.executemany('INSERT INTO track_tag VALUES (:track, :tag)',
-                        tag_insert)
+def scan() -> None:
+    """
+    Main function for scanning music directory structure
+    """
+    with db.connect() as conn:
+        playlists = scan_playlists(conn)
+        for playlist in playlists:
+            scan_tracks(conn, playlist)
 
-        conn.executemany('INSERT OR IGNORE INTO track_persistent (path) VALUES (:path)', track_insert)
-
-        if only_playlist is None:
-            count = conn.execute('DELETE FROM track_persistent WHERE path NOT IN (' + (','.join(len(track_insert) * ['?'])) + ')',
-                                 [track['path'] for track in track_insert]).rowcount
-            log.info('Deleted %s tracks from persistent data', count)
-
-    log.info('Done.')
 
 if __name__ == '__main__':
     import logconfig
     logconfig.apply()
-    rebuild_music_database()
+    scan()

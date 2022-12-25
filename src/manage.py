@@ -16,7 +16,7 @@ def handle_useradd(args):
 
     hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
-    with db.users() as conn:
+    with db.connect() as conn:
         conn.execute('INSERT INTO user (username, password, admin) VALUES (?, ?, ?)',
                      (username, hashed_password, is_admin,))
 
@@ -24,7 +24,7 @@ def handle_useradd(args):
 
 
 def handle_userdel(args):
-    with db.users() as conn:
+    with db.connect() as conn:
         deleted = conn.execute('DELETE FROM user WHERE username=?', (args.username,)).rowcount
         if deleted == 0:
             log.warning('No user deleted, does the user exist?')
@@ -33,7 +33,7 @@ def handle_userdel(args):
 
 
 def handle_userlist(args):
-    with db.users() as conn:
+    with db.connect() as conn:
         result = conn.execute('SELECT username, admin FROM user')
         if result.rowcount == 0:
             log.info('No users')
@@ -49,7 +49,7 @@ def handle_userlist(args):
 
 
 def handle_passwd(args):
-    with db.users() as conn:
+    with db.connect() as conn:
         result = conn.execute('SELECT id FROM user WHERE username=?', (args.username,)).fetchone()
         if result is None:
             print('No user exists with the provided username')

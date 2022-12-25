@@ -7,6 +7,7 @@ import logging
 import tempfile
 import shutil
 from dataclasses import dataclass
+from sqlite3 import Connection
 
 import cache
 import db
@@ -53,9 +54,21 @@ def from_relpath(relpath: str) -> Path:
     return path
 
 
+def scan_playlist(playlist_path: str) -> Iterator[Path]:
+    """
+    Scan playlist for tracks, recursively
+    Args:
+        playlist_path: Playlist name
+    Returns: Paths iterator
+    """
+    yield from scan_music(from_relpath(playlist_path))
+
+
 def scan_music(path) -> Iterator[Path]:
     """
-    Scan playlist directory recursively for tracks
+    Scan directory for tracks, recursively
+    Args:
+        path: Directory Path
     Returns: Paths iterator
     """
     for ext in MUSIC_EXTENSIONS:
@@ -76,7 +89,6 @@ def has_music_extension(path: Path) -> bool:
 
 @dataclass
 class Track:
-
     relpath: str
     path: Path
 
@@ -84,7 +96,9 @@ class Track:
         """
         Returns: Cached metadata for this track, as a Metadata object
         """
-        return metadata.cached(self.relpath)
+        # TODO Store cached connection in track object
+        with db.connect() as conn:
+            return metadata.cached(conn, self.relpath)
 
     def transcoded_audio(self, quality, fruit) -> bytes:
         """
@@ -212,7 +226,7 @@ class Track:
         """
         meta = metadata.probe(self.path)
 
-        with db.get() as conn:
+        with db.connect() as conn:
             conn.execute('UPDATE track SET title=?, album=?, album_artist=?, year=? WHERE path=?',
                         (meta.title, meta.album, meta.album_artist, meta.year, self.relpath))
 
@@ -240,10 +254,9 @@ class Playlist:
     relpath: str
     path: Path
     name: str
-    guest: bool
     track_count: int
 
-    def choose_track(self, tag_mode, tags: List[str], reuse_conn = None) -> Track:
+    def choose_track(self, conn: Connection, tag_mode, tags: List[str]) -> Track:
         """
         Randomly choose a track from this playlist directory
         Args:
@@ -254,7 +267,6 @@ class Playlist:
         query = """
                 SELECT track.path, last_played
                 FROM track
-                INNER JOIN track_persistent ON track.path = track_persistent.path
                 WHERE track.playlist=?
                 """
         params = [self.relpath]
@@ -271,17 +283,16 @@ class Playlist:
         # From randomly ordered tracks, choose one that was last played longest ago
         query = 'SELECT * FROM (' + query + ') ORDER BY last_played ASC LIMIT 1'
 
-        with db.get() if reuse_conn is None else reuse_conn as conn:
-            track, last_played = conn.execute(query, params).fetchone()
+        track, last_played = conn.execute(query, params).fetchone()
 
-            current_timestamp = int(datetime.now().timestamp())
-            if last_played == 0:
-                log.info('Chosen track: %s (never played)', track)
-            else:
-                hours_ago = (current_timestamp - last_played) / 3600
-                log.info('Chosen track: %s (last played %.2f hours ago)', track, hours_ago)
+        current_timestamp = int(datetime.now().timestamp())
+        if last_played == 0:
+            log.info('Chosen track: %s (never played)', track)
+        else:
+            hours_ago = (current_timestamp - last_played) / 3600
+            log.info('Chosen track: %s (last played %.2f hours ago)', track, hours_ago)
 
-            conn.execute('UPDATE track_persistent SET last_played = ? WHERE path=?', (current_timestamp, track))
+        conn.execute('UPDATE track SET last_played = ? WHERE path=?', (current_timestamp, track))
 
         return Track.by_relpath(track)
 
@@ -289,7 +300,7 @@ class Playlist:
         """
         Get all tracks in this playlist as a list of Track objects
         """
-        with db.get() as conn:
+        with db.connect() as conn:
             rows = conn.execute('SELECT path FROM track WHERE playlist=?', (self.relpath,)).fetchall()
             return [Track.by_relpath(row[0]) for row in rows]
 
@@ -315,7 +326,7 @@ class Playlist:
                               text=True)
 
 
-def playlist(dir_name: str, reused_conn = None) -> Playlist:
+def playlist(conn: Connection, dir_name: str) -> Playlist:
     """
     Get playlist object from the name of a music directory, using information from the database.
     Args:
@@ -323,33 +334,20 @@ def playlist(dir_name: str, reused_conn = None) -> Playlist:
     Returns: Playlist instance
     """
     path = from_relpath(dir_name)
-    with db.get() if reused_conn is None else reused_conn as conn:
-        row = conn.execute('SELECT name, guest FROM playlist WHERE path=?',
-                           (dir_name,)).fetchone()
-        if row is None:
-            raise ValueError('Playlist does not exist: ' + dir_name)
-        name, guest = row
-        track_count = conn.execute('SELECT COUNT(*) FROM track WHERE playlist=?',
-                                   (dir_name,)).fetchone()[0]
-    return Playlist(dir_name, path, name, guest, track_count)
+    row = conn.execute('SELECT name FROM playlist WHERE path=?',
+                        (dir_name,)).fetchone()
+    if row is None:
+        raise ValueError('Playlist does not exist: ' + dir_name)
+    name, = row
+    track_count = conn.execute('SELECT COUNT(*) FROM track WHERE playlist=?',
+                                (dir_name,)).fetchone()[0]
+    return Playlist(dir_name, path, name, track_count)
 
-def playlists(guest: Optional[bool] = None) -> List[Playlist]:
+def playlists(conn: Connection) -> List[Playlist]:
     """
     List playlists
-    Args:
-        guest: True to list only list guest playlist, False for non-guest
-               playlists, None for both.
     Returns: List of Playlist objects
     """
-    if guest is None:
-        query = 'SELECT path FROM playlist'
-    elif guest is True:
-        query = 'SELECT path FROM playlist WHERE guest=1'
-    elif guest is False:
-        query = 'SELECT path FROM playlist WHERE guest=0'
-    else:
-        raise ValueError()
 
-    with db.get() as conn:
-        rows = conn.execute(query).fetchall()
-        return [playlist(row[0], conn) for row in rows]
+    rows = conn.execute('SELECT path FROM playlist').fetchall()
+    return [playlist(conn, row[0]) for row in rows]

@@ -65,8 +65,8 @@ def home():
     """
     Home page, with links to file manager and music player
     """
-    with db.users() as users_conn:
-        auth.verify_auth_cookie(users_conn, redirect_to_login=True)
+    with db.connect() as conn:
+        auth.verify_auth_cookie(conn, redirect_to_login=True)
     return render_template('home.jinja2')
 
 
@@ -77,8 +77,8 @@ def login():
     If the provided password is invalid, the login template is rendered with invalid_password=True
     """
     try:
-        with db.users() as users_conn:
-            auth.verify_auth_cookie(users_conn)
+        with db.connect() as conn:
+            auth.verify_auth_cookie(conn)
         # User is already logged in
         return redirect('/')
     except AuthError:
@@ -108,8 +108,8 @@ def player():
     """
     Main player page. Serves player.jinja2 template file.
     """
-    with db.users() as users_conn:
-        user = auth.verify_auth_cookie(users_conn, redirect_to_login=True)
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn, redirect_to_login=True)
         csrf_token = user.get_csrf()
 
     return render_template('player.jinja2',
@@ -125,8 +125,8 @@ def get_csrf():
     """
     Get CSRF token
     """
-    with db.users() as users_conn:
-        user = auth.verify_auth_cookie(users_conn)
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
         csrf_token = user.get_csrf()
     return {'token': csrf_token}
 
@@ -136,15 +136,15 @@ def choose_track():
     """
     Choose random track from the provided playlist directory.
     """
-    with db.users() as users_conn:
-        user = auth.verify_auth_cookie(users_conn)
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.args['csrf'])
 
-    dir_name = request.args['playlist_dir']
-    tag_mode = request.args['tag_mode']
-    tags = request.args['tags'].split(';')
-    playlist = music.playlist(dir_name)
-    chosen_track = playlist.choose_track(tag_mode=tag_mode, tags=tags)
+        dir_name = request.args['playlist_dir']
+        tag_mode = request.args['tag_mode']
+        tags = request.args['tags'].split(';')
+        playlist = music.playlist(conn, dir_name)
+        chosen_track = playlist.choose_track(conn, tag_mode=tag_mode, tags=tags)
 
     return {
         'path': chosen_track.relpath,
@@ -156,8 +156,8 @@ def get_track() -> Response:
     """
     Get transcoded audio for the given track path.
     """
-    with db.users() as users_conn:
-        user = auth.verify_auth_cookie(users_conn)
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.args['csrf'])
 
     quality = request.args['quality'] if 'quality' in request.args else 'high'
@@ -213,8 +213,8 @@ def get_album_cover() -> Response:
     """
     Get album cover image for the provided track path.
     """
-    with db.users() as users_conn:
-        user = auth.verify_auth_cookie(users_conn)
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.args['csrf'])
 
     track = Track.by_relpath(request.args['path'])
@@ -242,8 +242,8 @@ def get_lyrics():
     """
     Get lyrics for the provided track path.
     """
-    with db.users() as users_conn:
-        user = auth.verify_auth_cookie(users_conn)
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.args['csrf'])
 
     track = Track.by_relpath(request.args['path'])
@@ -266,15 +266,15 @@ def ytdl():
     """
     Use yt-dlp to download the provided URL to a playlist directory
     """
-    with db.users() as users_conn:
-        user = auth.verify_auth_cookie(users_conn, require_admin=True)
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn, require_admin=True)
         user.verify_csrf(request.json['csrf'])
 
-    directory = request.json['directory']
-    url = request.json['url']
+        directory = request.json['directory']
+        url = request.json['url']
 
-    playlist = music.playlist(directory)
-    log.info('ytdl %s %s', directory, url)
+        playlist = music.playlist(conn, directory)
+        log.info('ytdl %s %s', directory, url)
 
     result = playlist.download(url)
 
@@ -290,23 +290,23 @@ def track_list():
     """
     Return list of playlists and tracks.
     """
-    with db.users() as users_conn:
-        user = auth.verify_auth_cookie(users_conn)
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.args['csrf'])
+
+        playlists = music.playlists(conn)
 
     response = {
         'playlists': {},
         'tracks': [],
     }
 
-    playlists = music.playlists()
-
     for playlist in playlists:
         response['playlists'][playlist.relpath] = {
             'dir_name': playlist.relpath,
             'display_name': playlist.name,
             'track_count': playlist.track_count,
-            'guest': playlist.guest,
+            'guest': False,  # TODO remove when guest logic has been removed from frontend
         }
 
     for playlist in playlists:
@@ -336,15 +336,17 @@ def scan_music():
     """
     Scans all playlists for new music
     """
-    with db.users() as users_conn:
-        user = auth.verify_auth_cookie(users_conn, require_admin=True)
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn, require_admin=True)
         user.verify_csrf(request.json['csrf'])
 
-    if 'playlist' in request.json:
-        playlist = music.playlist(request.json['playlist'])
-        scanner.rebuild_music_database(only_playlist=playlist.relpath)
-    else:
-        scanner.rebuild_music_database()
+        if 'playlist' in request.json:
+            playlist = music.playlist(conn, request.json['playlist'])
+            scanner.scan_tracks(conn, playlist.relpath)
+        else:
+            playlists = scanner.scan_playlists(conn)
+            for playlist in playlists:
+                scanner.scan_tracks(conn, playlist)
 
     return Response(None, 200)
 
@@ -355,8 +357,8 @@ def update_metadata():
     Endpoint to update track metadata
     """
     payload = request.json
-    with db.users() as users_conn:
-        user = auth.verify_auth_cookie(users_conn, require_admin=True)
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn, require_admin=True)
         user.verify_csrf(payload['csrf'])
 
     track = Track.by_relpath(payload['path'])
@@ -387,8 +389,8 @@ def files():
     """
     File manager
     """
-    with db.users() as users_conn:
-        user = auth.verify_auth_cookie(users_conn, redirect_to_login=True)
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn, redirect_to_login=True)
         csrf_token = user.get_csrf()
 
     if 'path' in request.args:
@@ -451,8 +453,8 @@ def files_upload():
     """
     Form target to upload file
     """
-    with db.users() as users_conn:
-        user = auth.verify_auth_cookie(users_conn, require_admin=True)
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn, require_admin=True)
         user.verify_csrf(request.form['csrf'])
 
     upload_dir = music.from_relpath(request.form['dir'])
@@ -467,8 +469,8 @@ def files_rename():
     """
     Page and form target to rename file
     """
-    with db.users() as users_conn:
-        user = auth.verify_auth_cookie(users_conn, require_admin=True)
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn, require_admin=True)
 
         if request.method == 'POST':
             if request.is_json:
@@ -503,8 +505,8 @@ def files_mkdir():
     """
     Create directory, then enter it
     """
-    with db.users() as users_conn:
-        user = auth.verify_auth_cookie(users_conn, require_admin=True)
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn, require_admin=True)
         user.verify_csrf(request.form['csrf'])
 
     path = music.from_relpath(request.form['path'])
@@ -519,7 +521,8 @@ def files_download():
     """
     Download track
     """
-    auth.verify_auth_cookie()
+    with db.connect() as conn:
+        auth.verify_auth_cookie(conn)
     path = music.from_relpath(request.args['path'])
     return send_file(path, as_attachment=True)
 
@@ -529,8 +532,8 @@ def account():
     """
     Account information page
     """
-    with db.users() as users_conn:
-        user = auth.verify_auth_cookie(users_conn)
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
         csrf_token = user.get_csrf()
         sessions = user.sessions()
 
@@ -546,8 +549,8 @@ def account():
 
 @app.route('/change_password_form', methods=['POST'])
 def change_password_form():
-    with db.users() as users_conn:
-        user = auth.verify_auth_cookie(users_conn)
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.form['csrf_token'])
         if not user.verify_password(request.form['current_password']):
             return _('Incorrect password.')
@@ -569,24 +572,24 @@ def radio_track_response(track: RadioTrack):
 
 @app.route('/radio_current')
 def radio_current():
-    with db.users() as users_conn:
-        auth.verify_auth_cookie(users_conn)
-    track = radio.get_current_track()
+    with db.connect() as conn:
+        auth.verify_auth_cookie(conn)
+        track = radio.get_current_track(conn)
     return radio_track_response(track)
 
 
 @app.route('/radio_next')
 def radio_next():
-    with db.users() as users_conn:
-        auth.verify_auth_cookie(users_conn)
-    track = radio.get_next_track()
+    with db.connect() as conn:
+        auth.verify_auth_cookie(conn)
+        track = radio.get_next_track(conn)
     return radio_track_response(track)
 
 
 @app.route('/radio')
 def radio_home():
-    with db.users() as users_conn:
-        user = auth.verify_auth_cookie(users_conn)
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
         csrf_token=user.get_csrf()
     return render_template('radio.jinja2',
                            csrf=csrf_token)
@@ -608,8 +611,8 @@ def lastfm_callback():
 
 @app.route('/lastfm_connect', methods=['POST'])
 def lastfm_connect():
-    with db.users() as users_conn:
-        user = auth.verify_auth_cookie(users_conn)
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
         # This form does not have a CSRF token, because the user is known
         # in the code that serves the form. Not sure how to fix this.
         # An attacker being able to link their last.fm account is not that bad
@@ -622,8 +625,8 @@ def lastfm_connect():
 
 @app.route('/lastfm_now_playing', methods=['POST'])
 def lastfm_now_playing():
-    with db.users() as users_conn:
-        user = auth.verify_auth_cookie(users_conn)
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
         track = Track.by_relpath(request.json['track'])
         lastfm.update_now_playing(user, track.metadata())
@@ -632,8 +635,8 @@ def lastfm_now_playing():
 
 @app.route('/lastfm_scrobble', methods=['POST'])
 def lastfm_scrobble():
-    with db.users() as users_conn:
-        user = auth.verify_auth_cookie(users_conn)
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
         track = Track.by_relpath(request.json['track'])
         start_timestamp = request.json['start_timestamp']
