@@ -16,7 +16,7 @@ log = logging.getLogger('app.radio')
 
 
 def is_configured() -> bool:
-    return settings.lastfm_api_key and settings.lastfm_api_secret
+    return bool(settings.lastfm_api_key) and bool(settings.lastfm_api_secret)
 
 
 def _make_request(method: str, api_method: str, **extra_params):
@@ -49,7 +49,7 @@ def _make_request(method: str, api_method: str, **extra_params):
     return r.json()
 
 
-def _get_key(user: User) -> Optional[str]:
+def get_user_key(user: User) -> Optional[str]:
     result = user.conn.execute('SELECT key FROM user_lastfm WHERE user=?',
                                (user.user_id,)).fetchone()
     return result[0] if result else None
@@ -71,7 +71,7 @@ def obtain_session_key(user: User, auth_token: str) -> str:
     return name
 
 
-def update_now_playing(user: User, metadata: Metadata):
+def update_now_playing(user_key: str, metadata: Metadata):
     if not is_configured():
         log.info('Skipped scrobble, last.fm not configured')
         return
@@ -80,18 +80,13 @@ def update_now_playing(user: User, metadata: Metadata):
         log.info('Skipped update_now_playing, missing metadata')
         return
 
-    key = _get_key(user)
-    if not key:
-        log.info('Skipped update_now_playing, account is not linked')
-        return
-
     _make_request('post', 'track.updateNowPlaying',
                   artist=metadata.artists[0],
                   track=metadata.title,
-                  sk=key)
+                  sk=user_key)
 
 
-def scrobble(user: User, metadata: Metadata, start_timestamp: int):
+def scrobble(user_key: str, metadata: Metadata, start_timestamp: int):
     if not is_configured():
         log.info('Skipped scrobble, last.fm not configured')
         return
@@ -100,14 +95,9 @@ def scrobble(user: User, metadata: Metadata, start_timestamp: int):
         log.info('Skipped scrobble, missing metadata')
         return
 
-    key = _get_key(user)
-    if not key:
-        log.info('Skipped scrobble, account is not linked')
-        return
-
     _make_request('post', 'track.scrobble',
                   artist=metadata.artists[0],
                   track=metadata.title,
                   chosenByUser='0',
                   timestamp=str(start_timestamp),
-                  sk=key)
+                  sk=user_key)

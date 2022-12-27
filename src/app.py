@@ -631,8 +631,14 @@ def lastfm_now_playing():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
+        user_key = lastfm.get_user_key(user)
+        if user_key:
+            log.info('Skip last.fm now playing, account is not linked')
+            return
         track = Track.by_relpath(request.json['track'])
-        lastfm.update_now_playing(user, track.metadata(conn))
+        meta = track.metadata(conn)
+    # Scrobble request takes a while, so close database connection first
+    lastfm.update_now_playing(user_key, meta)
     return Response('ok', 200)
 
 
@@ -641,9 +647,15 @@ def lastfm_scrobble():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
+        user_key = lastfm.get_user_key(user)
+        if user_key:
+            log.info('Skip last.fm now playing, account is not linked')
+            return
         track = Track.by_relpath(request.json['track'])
         start_timestamp = request.json['start_timestamp']
-        lastfm.scrobble(user, track.metadata(conn), start_timestamp)
+        meta = track.metadata(conn)
+    # Scrobble request takes a while, so close database connection first
+    lastfm.scrobble(user_key, meta, start_timestamp)
     return Response('ok', 200)
 
 
