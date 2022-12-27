@@ -35,7 +35,7 @@ def image_search(bing_query: str) -> Optional[bytes]:
     try:
         headers = {'User-Agent': settings.webscraping_user_agent}
         r = requests.get('https://www.bing.com/images/search',
-                         timeout=10
+                         timeout=10,
                          headers=headers,
                          params={'q': bing_query,
                                  'form': 'HDRSC2',
