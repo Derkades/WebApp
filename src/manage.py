@@ -1,9 +1,9 @@
 from argparse import ArgumentParser
 import logging
 
-import logconfig
-import db
 import bcrypt
+
+import db
 
 
 log = logging.getLogger('app.manage')
@@ -25,7 +25,8 @@ def handle_useradd(args):
 
 def handle_userdel(args):
     with db.connect() as conn:
-        deleted = conn.execute('DELETE FROM user WHERE username=?', (args.username,)).rowcount
+        deleted = conn.execute('DELETE FROM user WHERE username=?',
+                               (args.username,)).rowcount
         if deleted == 0:
             log.warning('No user deleted, does the user exist?')
         else:
@@ -50,7 +51,8 @@ def handle_userlist(args):
 
 def handle_passwd(args):
     with db.connect() as conn:
-        result = conn.execute('SELECT id FROM user WHERE username=?', (args.username,)).fetchone()
+        result = conn.execute('SELECT id FROM user WHERE username=?',
+                              (args.username,)).fetchone()
         if result is None:
             print('No user exists with the provided username')
             return
@@ -65,7 +67,29 @@ def handle_passwd(args):
         print('Password updated successfully.')
 
 
+def handle_playlist(args):
+    with db.connect() as conn:
+        result = conn.execute('SELECT id FROM user WHERE username=?',
+                              (args.username,)).fetchone()
+        if result is None:
+            print('No user exists with the provided username')
+            return
+
+        user_id = result[0]
+
+        result = conn.execute('SELECT path FROM playlist WHERE path=?',
+                              (args.playlist_path,)).fetchone()
+
+        if result is None:
+            print('Playlist does not exist. If you just added it, please re-scan first.')
+            return
+
+        conn.execute('INSERT OR REPLACE INTO user_playlist (user, playlist, write) VALUES (?, ?, 1)',
+                     (user_id, result[0]))
+
+
 if __name__ == '__main__':
+    import logconfig
     logconfig.apply()
 
     parser = ArgumentParser()
@@ -86,6 +110,11 @@ if __name__ == '__main__':
     passwd = subparsers.add_parser('passwd', help='change password')
     passwd.add_argument('username')
     passwd.set_defaults(func=handle_passwd)
+
+    playlist = subparsers.add_parser('playlist', help='give write access to playlist')
+    playlist.add_argument('username')
+    playlist.add_argument('playlist_path')
+    playlist.set_defaults(func=handle_playlist)
 
     args = parser.parse_args()
     args.func(args)
