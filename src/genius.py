@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional
 import json
 import html
 import logging
@@ -19,7 +19,7 @@ log = logging.getLogger('app.genius')
 @dataclass
 class Lyrics:
     source_url: Optional[str]
-    lyrics: List[str]
+    lyrics: list[str]
 
     def lyrics_html(self):
         return '<br>\n'.join(self.lyrics)
@@ -44,7 +44,7 @@ def _search(title: str) -> Optional[str]:
     return None
 
 
-def _extract_lyrics(genius_url: str) -> List[str]:
+def _extract_lyrics(genius_url: str) -> list[str]:
     """
     Extract lyrics from the supplied Genius lyrics page
     Parameters:

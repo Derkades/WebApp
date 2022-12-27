@@ -1,7 +1,7 @@
 from pathlib import Path
 import subprocess
 import re
-from typing import Optional, List, Iterator
+from typing import Optional, Iterator
 import logging
 import json
 from dataclasses import dataclass
@@ -104,13 +104,13 @@ class Metadata:
 
     relpath: str
     duration: int
-    artists: Optional[List[str]]
+    artists: Optional[list[str]]
     album: Optional[str]
     title: Optional[str]
     year: Optional[int]
     album_artist: Optional[str]
     album_index: Optional[int]
-    tags: List[str]
+    tags: list[str]
 
     def _meta_title(self) -> Optional[str]:
         """

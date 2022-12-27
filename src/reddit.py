@@ -64,7 +64,7 @@ def search(query: str) -> Optional[str]:
         query: Search query
     Returns: Image URL string, or None if no image was found
     """
-    subreddits = random.choices(MEME_SUBREDDITS, k=SUBREDDIT_ATTEMPTS)
+    subreddits: list[Optional[str]] = random.choices(MEME_SUBREDDITS, k=SUBREDDIT_ATTEMPTS)
     subreddits.append(None) # If nothing was found, search all of reddit
     for subreddit in subreddits:
         url = _search(subreddit, query)

@@ -1,4 +1,4 @@
-from typing import Union, Callable, Optional
+from typing import Callable, Optional
 from io import BytesIO
 from pathlib import Path
 import logging
@@ -36,7 +36,7 @@ RESOLUTION_TABLE =  {
 }
 
 
-def thumbnail(input_img: Union[Path, bytes, Callable], cache_id: str, thumb_format: str, thumb_resolution: Optional[int], thumb_quality, square) -> bytes:
+def thumbnail(input_img: Path | bytes | Callable, cache_id: str, thumb_format: str, thumb_resolution: Optional[int], thumb_quality, square) -> bytes:
     """
     Generate thumbnail, making use of cache.
     Parameters:

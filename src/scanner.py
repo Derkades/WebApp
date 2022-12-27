@@ -1,6 +1,7 @@
 from pathlib import Path
 import logging
 from sqlite3 import Connection
+from typing import Any
 
 import db
 import metadata
@@ -36,7 +37,7 @@ def scan_playlists(conn: Connection) -> set[str]:
     return paths_disk
 
 
-def query_params(relpath: str, path: Path) -> dict[str, str]:
+def query_params(relpath: str, path: Path) -> tuple[dict[str, object], list[dict[str, str]], list[dict[str, str]]]:
     """
     Create dictionary of track metadata, to be used as SQL query parameters
     """

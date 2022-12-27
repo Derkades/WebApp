@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Iterator, Optional, Dict
+from typing import Iterator, Literal, Optional
 from datetime import datetime
 import subprocess
 from subprocess import CompletedProcess
@@ -10,7 +10,6 @@ from dataclasses import dataclass
 from sqlite3 import Connection
 
 import cache
-import db
 import metadata
 import settings
 
@@ -191,7 +190,7 @@ class Track:
 
         return cached_data
 
-    def write_metadata(self, conn: Connection, **meta_dict: Dict[str, str]):
+    def write_metadata(self, conn: Connection, **meta_dict: str):
         """
         Write metadata to file
         """
@@ -253,7 +252,7 @@ class Playlist:
     name: str
     track_count: int
 
-    def choose_track(self, conn: Connection, tag_mode, tags: List[str]) -> Track:
+    def choose_track(self, conn: Connection, tag_mode: Optional[Literal['allow', 'deny']], tags: Optional[list[str]]) -> Track:
         """
         Randomly choose a track from this playlist directory
         Args:
@@ -268,9 +267,11 @@ class Playlist:
                 """
         params = [self.relpath]
         if tag_mode == 'allow':
+            assert tags is not None
             query += ' AND (' + ' OR '.join(len(tags) * ['? IN (SELECT tag FROM track_tag WHERE track = track.path)']) + ')'
             params.extend(tags)
         elif tag_mode == 'deny':
+            assert tags is not None
             query += ' AND (' + ' AND '.join(len(tags) * ['? NOT IN (SELECT tag FROM track_tag WHERE track = track.path)']) + ')'
             params.extend(tags)
 
@@ -293,7 +294,7 @@ class Playlist:
 
         return Track.by_relpath(track)
 
-    def tracks(self, conn: Connection) -> List[Track]:
+    def tracks(self, conn: Connection) -> list[Track]:
         """
         Get all tracks in this playlist as a list of Track objects
         """
@@ -339,7 +340,7 @@ def playlist(conn: Connection, dir_name: str) -> Playlist:
                                 (dir_name,)).fetchone()[0]
     return Playlist(dir_name, path, name, track_count)
 
-def playlists(conn: Connection) -> List[Playlist]:
+def playlists(conn: Connection) -> list[Playlist]:
     """
     List playlists
     Returns: List of Playlist objects
