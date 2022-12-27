@@ -216,23 +216,25 @@ def get_album_cover() -> Response:
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.args['csrf'])
-
         track = Track.by_relpath(request.args['path'])
-        meme = 'meme' in request.args and bool(int(request.args['meme']))
+        meta = track.metadata(conn)
 
-        def get_img():
-            meta = track.metadata(conn)
-            img = get_cover_bytes(meta, meme)
-            return img
+    # Don't keep database connection active while downloading images
 
-        img_format = get_img_format()
+    meme = 'meme' in request.args and bool(int(request.args['meme']))
 
-        cache_id = track.relpath
-        if meme:
-            cache_id += 'meme2'
+    def get_img():
+        img = get_cover_bytes(meta, meme)
+        return img
 
-        comp_bytes = image.thumbnail(get_img, cache_id, img_format[6:], None,
-                                    request.args['quality'], not meme)
+    img_format = get_img_format()
+
+    cache_id = track.relpath
+    if meme:
+        cache_id += 'meme2'
+
+    comp_bytes = image.thumbnail(get_img, cache_id, img_format[6:], None,
+                                request.args['quality'], not meme)
 
     return Response(comp_bytes, mimetype=img_format)
 
