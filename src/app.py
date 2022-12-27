@@ -91,7 +91,7 @@ def login():
             username = request.form['username']
             password = request.form['password']
 
-            token = auth.log_in(username, password)
+            token = auth.log_in(conn, username, password)
 
             if token is None:
                 return render_template('login.jinja2', invalid_password=True)
