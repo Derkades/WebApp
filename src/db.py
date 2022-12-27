@@ -85,7 +85,18 @@ def create_tables() -> None:
                          id INTEGER NOT NULL UNIQUE PRIMARY KEY AUTOINCREMENT,
                          username TEXT NOT NULL UNIQUE,
                          password TEXT NOT NULL,
-                         admin INT NOT NULL DEFAULT 0
+                         admin INTEGER NOT NULL DEFAULT 0
+                     )
+                     """)
+
+        conn.execute("""
+                     CREATE TABLE IF NOT EXISTS user_playlist (
+                         user INTEGER NOT NULL,
+                         playlist TEXT NOT NULL,
+                         write INTEGER DEFAULT 0,
+                         UNIQUE (user, playlist),
+                         FOREIGN KEY (user) REFERENCES user(id),
+                         FOREIGN KEY (playlist) REFERENCES playlist(path)
                      )
                      """)
 

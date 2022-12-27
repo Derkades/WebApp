@@ -659,6 +659,50 @@ def lastfm_scrobble():
     return Response('ok', 200)
 
 
+@app.route('/playlists')
+def playlists():
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
+        csrf_token = user.get_csrf()
+
+        all_playlists = music.playlists(conn)
+
+        user_playlists = conn.execute('SELECT playlist, write FROM user_playlist WHERE user=?',
+                            (user.user_id,)).fetchall()
+
+        user_playlists_paths = {p[0] for p in user_playlists}
+        other_playlists = [p for p in all_playlists if p.relpath not in user_playlists_paths]
+
+    return render_template('playlists.jinja2',
+                           other_playlists=other_playlists,
+                           user_playlists=user_playlists,
+                           csrf_token=csrf_token)
+
+
+@app.route('/playlists_add', methods=['POST'])
+def playlists_add():
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
+        user.verify_csrf(request.form['csrf'])
+        playlist = request.form['playlist']
+        conn.execute('INSERT INTO user_playlist (user, playlist) VALUES (?, ?)',
+                     (user.user_id, playlist))
+
+    return redirect('/playlists')
+
+
+@app.route('/playlists_remove', methods=['POST'])
+def playlists_remove():
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
+        user.verify_csrf(request.form['csrf'])
+        playlist = request.form['playlist']
+        conn.execute('DELETE FROM user_playlist WHERE user=? AND playlist=?',
+                     (user.user_id, playlist))
+
+    return redirect('/playlists')
+
+
 def get_language() -> str:
     """
     Returns two letter language code, matching a language code in

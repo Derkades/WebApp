@@ -4,7 +4,7 @@ services:
 
   music:
     ports:
-      - 127.0.0.1:8080:8080
+      - 8080:8080
     build: .
     volumes:
       - type: bind
@@ -19,3 +19,7 @@ services:
     user: "1000"
     environment:
       TZ: Europe/Amsterdam
+      MUSIC_RADIO_PLAYLISTS: 'CB;DK;JK;Guest-Robin'
+      MUSIC_RADIO_ANNOUNCEMENTS_PLAYLIST: 'RR'
+      MUSIC_LASTFM_API_KEY: b6eefad5832d7a4f73324b1614411137
+      MUSIC_LASTFM_API_SECRET: 03037dc0291a39ab6cc80ca486c5c64a

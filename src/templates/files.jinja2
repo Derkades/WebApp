@@ -6,6 +6,8 @@
 
 {% block content %}
     <main>
+        <a href="/">{% trans %}Back to home{% endtrans %}</a>
+        <h1>{% trans %}File manager{% endtrans %}</h1>
         <h3>
             {% if base_path == '.' %}
                 {% trans %}Browsing root directory{% endtrans %}
@@ -17,13 +19,12 @@
         {% if parent_path_uri == '.' %}
             {# Not necessary, but looks better #}
             <a href="/files">Parent directory</a>
+            <br>
         {% elif parent_path_uri %}
             <a href="/files?path={{ parent_path_uri }}">Parent directory</a>
-        {% else %}
-            <a href="/">{% trans %}Back to home{% endtrans %}</a>
+            <br>
         {% endif %}
 
-        <br>
         <hr>
         <br>
 
