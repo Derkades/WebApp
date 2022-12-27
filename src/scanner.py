@@ -1,7 +1,6 @@
 from pathlib import Path
 import logging
 from sqlite3 import Connection
-from typing import Any
 
 import db
 import metadata
@@ -18,7 +17,7 @@ def scan_playlists(conn: Connection) -> set[str]:
     where necessary.
     """
     paths_db = {row[0] for row in conn.execute('SELECT path FROM playlist').fetchall()}
-    paths_disk = {p.name for p in Path(settings.music_dir).iterdir() if p.is_dir()}
+    paths_disk = {p.name for p in Path(settings.music_dir).iterdir() if p.is_dir() and not p.name.startswith('.trash.')}
 
     add_to_db = []
 
