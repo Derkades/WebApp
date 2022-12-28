@@ -432,19 +432,10 @@ def files():
             if path.name.startswith('.trash.'):
                 continue
 
-            # Deletion is only allowed for files and empty directories
-            # TODO Not necessary, since restoring is easily possible anyway?
-            can_delete = True
             if path.is_dir():
                 pathtype = 'dir'
-                try:
-                    next(path.iterdir())
-                    can_delete = False
-                except StopIteration:
-                    pass
             elif music.has_music_extension(path):
                 pathtype = 'music'
-                can_delete = True
             else:
                 pathtype = 'file'
 
@@ -459,7 +450,6 @@ def files():
                 'name': path.name,
                 'type': pathtype,
                 'write_permission': write_permission,
-                'can_delete': can_delete,
             })
 
     children = sorted(children, key=lambda x: x['name'])

@@ -62,14 +62,12 @@
                         {{ icon_button('rename-box') }}
                     </form>
 
-                    {% if file['can_delete'] %}
-                        <form method="POST" action="/files_rename" class="inline-block">
-                            <input type="hidden" name="csrf" value="{{ csrf_token }}">
-                            <input type="hidden" name="new-name" value=".trash.{{ file['name'] }}">
-                            <input type="hidden" name="path" value="{{ file['path'] }}">
-                            {{ icon_button('delete') }}
-                        </form>
-                    {% endif %}
+                    <form method="POST" action="/files_rename" class="inline-block">
+                        <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                        <input type="hidden" name="new-name" value=".trash.{{ file['name'] }}">
+                        <input type="hidden" name="path" value="{{ file['path'] }}">
+                        {{ icon_button('delete') }}
+                    </form>
                 {% endif %}
 
                 {% if file['type'] != 'dir' %}
