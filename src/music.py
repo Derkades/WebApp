@@ -252,12 +252,13 @@ class Track:
 @dataclass
 class Playlist:
 
+    conn: Connection
     relpath: str
     path: Path
     name: str
     track_count: int
 
-    def choose_track(self, conn: Connection, tag_mode: Optional[Literal['allow', 'deny']], tags: Optional[list[str]]) -> Track:
+    def choose_track(self, tag_mode: Optional[Literal['allow', 'deny']], tags: Optional[list[str]]) -> Track:
         """
         Randomly choose a track from this playlist directory
         Args:
@@ -286,7 +287,7 @@ class Playlist:
         # From randomly ordered tracks, choose one that was last played longest ago
         query = 'SELECT * FROM (' + query + ') ORDER BY last_played ASC LIMIT 1'
 
-        track, last_played = conn.execute(query, params).fetchone()
+        track, last_played = self.conn.execute(query, params).fetchone()
 
         current_timestamp = int(datetime.now().timestamp())
         if last_played == 0:
@@ -295,7 +296,7 @@ class Playlist:
             hours_ago = (current_timestamp - last_played) / 3600
             log.info('Chosen track: %s (last played %.2f hours ago)', track, hours_ago)
 
-        conn.execute('UPDATE track SET last_played = ? WHERE path=?', (current_timestamp, track))
+        self.conn.execute('UPDATE track SET last_played = ? WHERE path=?', (current_timestamp, track))
 
         return Track.by_relpath(track)
 
@@ -337,7 +338,7 @@ class Playlist:
         if user.admin:
             return True
 
-        row = user.conn.execute('SELECT write FROM user_playlist WHERE playlist=? AND user=?',
+        row = self.conn.execute('SELECT write FROM user_playlist WHERE playlist=? AND user=?',
                                 (self.relpath, user.user_id)).fetchone()
 
         if row is None:
@@ -363,7 +364,7 @@ class Playlist:
                              (dir_name,)).fetchone()
         track_count = conn.execute('SELECT COUNT(*) FROM track WHERE playlist=?',
                                 (dir_name,)).fetchone()[0]
-        return Playlist(dir_name, from_relpath(dir_name), name, track_count)
+        return Playlist(conn, dir_name, from_relpath(dir_name), name, track_count)
 
 
 def playlist(conn: Connection, dir_name: str) -> Playlist:
@@ -381,7 +382,7 @@ def playlist(conn: Connection, dir_name: str) -> Playlist:
     name, = row
     track_count = conn.execute('SELECT COUNT(*) FROM track WHERE playlist=?',
                                 (dir_name,)).fetchone()[0]
-    return Playlist(dir_name, path, name, track_count)
+    return Playlist(conn, dir_name, path, name, track_count)
 
 def playlists(conn: Connection) -> list[Playlist]:
     """

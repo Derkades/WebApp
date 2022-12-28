@@ -34,7 +34,7 @@ def _choose_track(conn: Connection, previous_playlist = None) -> Track:
         playlist_name = random.choice(playlist_candidates)
 
     playlist = music.playlist(conn, playlist_name)
-    track = playlist.choose_track(conn, None, None)
+    track = playlist.choose_track(None, None)
     return track
 
 
