@@ -285,6 +285,10 @@ def ytdl():
 
     result = playlist.download(url)
 
+    with db.connect() as conn:
+        playlist = music.playlist(conn, directory)
+        scanner.scan_tracks(conn, playlist)
+
     return {
         'code': result.returncode,
         'stdout': result.stdout,
