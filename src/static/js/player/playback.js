@@ -180,6 +180,8 @@ function updateTrackHtml() {
     } else {
         document.getElementById('previous-track').textContent = '-';
     }
+
+    updateWritablePlaylistButtons();
 }
 
 function replaceAlbumImages(imageUrl) {
@@ -222,4 +224,22 @@ function switchAlbumCover() {
     document.getElementById('button-lyrics').classList.remove('hidden');
     document.getElementById('sidebar-lyrics').classList.add('hidden');
     document.getElementById('sidebar-album-covers').classList.remove('hidden');
+}
+
+function updateWritablePlaylistButtons() {
+    // Only show metadata edit and track delete buttons if playlist is writable
+
+    const playlist = queue.currentTrack.playlist();
+    if (playlist === undefined) {
+        console.warn('Track playlist path not in state.playlists', queue.currentTrack.playlistPath);
+        return;
+    }
+
+    if (playlist.write) {
+        document.getElementById('button-edit').classList.remove('hidden');
+        document.getElementById('button-delete-track').classList.remove('hidden');
+    } else {
+        document.getElementById('button-edit').classList.add('hidden');
+        document.getElementById('button-delete-track').classList.add('hidden');
+    }
 }

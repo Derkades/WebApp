@@ -31,6 +31,10 @@ class Track {
         this.year = trackData.year;
     };
 
+    playlist() {
+        return state.playlists[this.playlistPath];
+    };
+
     displayHtml(showPlaylist = false) {
         const html = document.createElement('span');
         html.classList.add('track-display-html');
