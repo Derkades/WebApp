@@ -14,7 +14,8 @@ async function update() {
 
     if (state.currentTrack === null || state.currentTrack.path != currentJson.path) {
         state.currentTrack = currentJson;
-        console.info('replace audio elem')
+        document.getElementById('status').textContent = 'loading...';
+        console.info('replace audio elem');
         replaceAudioElem();
         return;
     }
@@ -23,6 +24,7 @@ async function update() {
 
     if (audioElem === null) {
         console.debug('audio elem null');
+        document.getElementById('status').textContent = 'audio null';
         return;
     }
 
@@ -30,16 +32,21 @@ async function update() {
     const timezoneOffset = new Date().getTimezoneOffset() * 60 * 1000;
     const currentPos = (Date.now() - currentJson.start_time) + timezoneOffset;
     const offset = audioElem.currentTime*1000 - currentPos;
-    document.getElementById('current-pos').innerText = currentPos;
 
     if (Math.abs(offset) > 1000) {
         console.debug('large offset', offset, 'skip from', audioElem.currentTime, 'to', currentPos / 1000);
         audioElem.currentTime = currentPos / 1000;
         audioElem.playbackRate = 1;
+        document.getElementById('status').textContent = 'very out of sync';
     } else {
         const rate = 1 - offset / (10*updateInterval);
         console.debug('small offset', offset, 'rate', rate);
         audioElem.playbackRate = rate;
+        if (Math.abs(offset) < 50) {
+            document.getElementById('status').textContent = 'in sync: ' + Math.floor(offset) + 'ms';
+        } else {
+            document.getElementById('status').textContent = 'out of sync: ' + Math.floor(offset) + 'ms';
+        }
     }
 };
 
@@ -47,7 +54,6 @@ async function updateNext() {
     const nextResponse = await fetch('/radio_next');
     const nextJson = await nextResponse.json();
     document.getElementById('next').textContent = nextJson.path;
-    document.getElementById('next-start').textContent = nextJson.start_time;
 };
 
 async function replaceAudioElem() {
