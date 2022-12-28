@@ -18,7 +18,7 @@ import image
 import lastfm
 from metadata import Metadata
 import music
-from music import Track
+from music import Playlist, Track
 import musicbrainz
 import radio
 from radio import RadioTrack
@@ -113,7 +113,7 @@ def player():
         csrf_token = user.get_csrf()
 
     return render_template('player.jinja2',
-                           user_is_admin=user.admin,
+                           user_is_admin=user.admin,  # TODO remove when more specific permission checks are implemented
                            mobile=is_mobile(),
                            csrf_token=csrf_token,
                            languages=LANGUAGES,
@@ -269,13 +269,16 @@ def ytdl():
     Use yt-dlp to download the provided URL to a playlist directory
     """
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, require_admin=True)
+        user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
 
         directory = request.json['directory']
         url = request.json['url']
 
         playlist = music.playlist(conn, directory)
+        if not playlist.has_write_permission(user):
+            return Response('No write permission for this playlist', 403)
+
         log.info('ytdl %s %s', directory, url)
 
     result = playlist.download(url)
@@ -346,7 +349,7 @@ def scan_music():
     Scans all playlists for new music
     """
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, require_admin=True)
+        user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
 
         if 'playlist' in request.json:
@@ -367,10 +370,15 @@ def update_metadata():
     """
     payload = request.json
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, require_admin=True)
+        user = auth.verify_auth_cookie(conn)
         user.verify_csrf(payload['csrf'])
 
         track = Track.by_relpath(payload['path'])
+
+        playlist = music.playlist(conn, track.playlist)
+        if not playlist.has_write_permission(user):
+            return Response('No write permission for this playlist', 403)
+
         track.write_metadata(conn,
                             title=payload['metadata']['title'],
                             album=payload['metadata']['album'],
@@ -464,10 +472,15 @@ def files_upload():
     Form target to upload file
     """
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, require_admin=True)
+        user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.form['csrf'])
 
-    upload_dir = music.from_relpath(request.form['dir'])
+        upload_dir = music.from_relpath(request.form['dir'])
+
+        playlist = Playlist.from_path(conn, upload_dir)
+        if not playlist.has_write_permission(user):
+            return Response(None, 403)
+
     for uploaded_file in request.files.getlist('upload'):
         check_filename(uploaded_file.filename)
         uploaded_file.save(Path(upload_dir, uploaded_file.filename))
@@ -480,7 +493,7 @@ def files_rename():
     Page and form target to rename file
     """
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, require_admin=True)
+        user = auth.verify_auth_cookie(conn)
 
         if request.method == 'POST':
             if request.is_json:
@@ -496,6 +509,11 @@ def files_rename():
 
             path = music.from_relpath(relpath)
             check_filename(new_name)
+
+            playlist = Playlist.from_path(conn, path)
+            if not playlist.has_write_permission(user):
+                return Response(None, 403)
+
             path.rename(Path(path.parent, new_name))
 
             if request.is_json:
@@ -516,10 +534,15 @@ def files_mkdir():
     Create directory, then enter it
     """
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, require_admin=True)
+        user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.form['csrf'])
 
     path = music.from_relpath(request.form['path'])
+
+    playlist = Playlist.from_path(conn, upload_dir)
+    if not playlist.has_write_permission(user):
+        return Response(None, 403)
+
     dirname = request.form['dirname']
     check_filename(dirname)
     Path(path, dirname).mkdir()

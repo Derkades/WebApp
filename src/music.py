@@ -9,6 +9,7 @@ import shutil
 from dataclasses import dataclass
 from sqlite3 import Connection
 
+from auth import User
 import cache
 import metadata
 import settings
@@ -90,6 +91,10 @@ def has_music_extension(path: Path) -> bool:
 class Track:
     relpath: str
     path: Path
+
+    @property
+    def playlist(self) -> str:
+        return self.relpath[:self.relpath.index('/')]
 
     def metadata(self, conn: Connection):
         """
@@ -321,6 +326,41 @@ class Playlist:
                               cwd=self.path,
                               capture_output=True,
                               text=True)
+
+    def has_write_permission(self, user: User) -> bool:
+        """
+        Check if user is allowed to modify files in a playlist.
+        Args:
+            user
+        Returns: boolean
+        """
+        if user.admin:
+            return True
+
+        row = user.conn.execute('SELECT write FROM user_playlist WHERE playlist=? AND user=?',
+                                (self.relpath, user.user_id)).fetchone()
+
+        if row is None:
+            return False
+
+        return row[0]
+
+    @staticmethod
+    def from_path(conn: Connection, path: Path) -> 'Playlist':
+        """
+        Get parent playlist for a path
+        Args:
+            conn: Database connection
+            path: Any (nested) path
+        Returns: Playlist object
+        """
+        relpath = to_relpath(path)
+        dir_name = relpath[:relpath.index('/')]
+        name, = conn.execute('SELECT name FROM playlist WHERE path=?',
+                             (dir_name,)).fetchone()
+        track_count = conn.execute('SELECT COUNT(*) FROM track WHERE playlist=?',
+                                (dir_name,)).fetchone()[0]
+        return Playlist(dir_name, from_relpath(dir_name), name, track_count)
 
 
 def playlist(conn: Connection, dir_name: str) -> Playlist:

@@ -12,8 +12,6 @@ import bcrypt
 from flask import request
 from flask_babel import _
 
-import db
-
 
 log = logging.getLogger('app.auth')
 
