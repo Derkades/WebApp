@@ -134,41 +134,50 @@ class Track {
         const encodedPath = encodeURIComponent(this.path);
         const encodedCsrf = encodeURIComponent(getCsrfToken());
 
-        // Get track audio
-        console.info('queue | download audio');
-        const trackResponse = await fetch('/get_track?path=' + encodedPath + '&quality=' + encodedQuality + '&csrf=' + encodedCsrf);
-        checkResponseCode(trackResponse);
-        const audioBlob = await trackResponse.blob();
-        const audioBlobUrl = URL.createObjectURL(audioBlob);
+        const audioBlobUrlGetter = async function() {
+            // Get track audio
+            console.info('queue | download audio');
+            const trackResponse = await fetch('/get_track?path=' + encodedPath + '&quality=' + encodedQuality + '&csrf=' + encodedCsrf);
+            checkResponseCode(trackResponse);
+            const audioBlob = await trackResponse.blob();
+            return URL.createObjectURL(audioBlob);
+        };
 
-        let imageBlobUrl;
+        const imageBlobUrlGetter = async function() {
+            // Get cover image
+            if (encodedQuality === 'verylow') {
+                console.info('queue | using raphson image to save data');
+                return '/raphson';
+            } else {
+                console.info('queue | download album cover image');
+                const meme = document.getElementById('settings-meme-mode').checked ? '1' : '0';
+                const imageUrl = '/get_album_cover?path=' + encodedPath + '&quality=' + encodedQuality + '&meme=' + meme + '&csrf=' + encodedCsrf;
+                const coverResponse = await fetch(imageUrl);
+                checkResponseCode(coverResponse);
+                const imageBlob = await coverResponse.blob();
+                return URL.createObjectURL(imageBlob);
+            }
+        };
 
-        // Get cover image
-        if (encodedQuality === 'verylow') {
-            console.info('queue | using raphson image to save data');
-            imageBlobUrl = '/raphson';
-        } else {
-            console.info('queue | download album cover image');
-            const meme = document.getElementById('settings-meme-mode').checked ? '1' : '0';
-            const imageUrl = '/get_album_cover?path=' + encodedPath + '&quality=' + encodedQuality + '&meme=' + meme + '&csrf=' + encodedCsrf;
-            const coverResponse = await fetch(imageUrl);
-            checkResponseCode(coverResponse);
-            const imageBlob = await coverResponse.blob();
-            imageBlobUrl = URL.createObjectURL(imageBlob);
-        }
+        const lyricsGetter = async function() {
+            // Get lyrics
+            if (encodedQuality === 'verylow') {
+                return new Lyrics(true, null, '<i>Lyrics were not downloaded to save data</i>');
+            } else {
+                console.info('queue | download lyrics');
+                const lyricsResponse = await fetch('/get_lyrics?path=' + encodedPath + '&csrf=' + encodedCsrf);
+                checkResponseCode(lyricsResponse);
+                const lyricsJson = await lyricsResponse.json();
+                return new Lyrics(lyricsJson.found, lyricsJson.source, lyricsJson.html);
+            }
+        };
 
-        let lyrics;
+        // Resolve all, download in parallel
+        const resolved = await Promise.all([audioBlobUrlGetter(), imageBlobUrlGetter(), lyricsGetter()]);
 
-        // Get lyrics
-        if (encodedQuality === 'verylow') {
-            lyrics = new Lyrics(true, null, '<i>Lyrics were not downloaded to save data</i>');
-        } else {
-            console.info('queue | download lyrics');
-            const lyricsResponse = await fetch('/get_lyrics?path=' + encodedPath + '&csrf=' + encodedCsrf);
-            checkResponseCode(lyricsResponse);
-            const lyricsJson = await lyricsResponse.json();
-            lyrics = new Lyrics(lyricsJson.found, lyricsJson.source, lyricsJson.html);
-        }
+        const audioBlobUrl = resolved[0];
+        const imageBlobUrl = resolved[1];
+        const lyrics = resolved[2];
 
         const queuedTrack = new QueuedTrack(this.trackData, audioBlobUrl, imageBlobUrl, lyrics);
 
