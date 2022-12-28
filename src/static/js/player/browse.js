@@ -52,7 +52,7 @@ class Browse {
     browseAlbum(albumName, albumArtistName) {
         const albumText = document.getElementById('trans-album').textContent;
         const title = albumArtistName === null ? albumName : albumArtistName + ' - ' + albumName;
-        this.browse(albumText + title, track => track.album === albumName);
+        this.browse(albumText + title, track => track.album === albumName && track.albumArtist === albumArtistName);
     };
 
     browseTag(tagName) {
