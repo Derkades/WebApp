@@ -12,9 +12,7 @@
         Next: <span id="next"></span></span>
     </main>
 
-    {% assets "js/radio.js", filters="jsmin", output="gen/radio-packed.js" %}
-        <script src="{{ ASSET_URL }}"></script>
-    {% endassets %}
+    <script src="/static/js/radio.js"></script>
 
     <span id="csrf" class="hidden">{{ csrf }}</span>
 {% endblock content %}

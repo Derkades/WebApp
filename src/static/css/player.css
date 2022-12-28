@@ -1,5 +1,3 @@
-@import "./base.scss";
-
 .sidebar-left h3 {
     margin: .5rem 0;
 }
@@ -44,7 +42,9 @@ kbd {
 }
 
 .bg-image-blurred {
-    @include background-cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
     filter: blur(3rem);
 }
 
@@ -55,7 +55,8 @@ kbd {
 }
 
 #album-covers > div {
-    @include background-cover;
+    background-position: center;
+    background-repeat: no-repeat;
     background-size: contain;
     height: 100%;
     width: 100%;
@@ -150,7 +151,7 @@ audio {
 }
 
 .box-rounded {
-    border-radius: $border-radius-amount;
+    border-radius: var(--border-radius-amount);
     box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
 }
 
@@ -241,7 +242,9 @@ body.light .progress-time {
 
 /* album image column */
 #queue-table td:first-child {
-    @include background-cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
     width: 4rem;
     cursor: pointer;
 }
@@ -285,7 +288,9 @@ body.light .progress-time {
 }
 
 .spinner {
-    @include background-cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
     animation: rotate 1.25s linear infinite;
     display: inline-block;
     margin-left: 1rem;
@@ -324,7 +329,7 @@ h4 > .icon {
     justify-content: center;
     align-items: center;
     backdrop-filter: blur(2rem);
-    pointer-events: none; // Allow closing dialogs behind top dialog
+    pointer-events: none; /* Allow closing dialogs behind top dialog */
 }
 
 .full-page-overlay .box-solid {
@@ -334,12 +339,12 @@ h4 > .icon {
     min-width: 60vw;
     max-width: calc(100vw - 1rem);
     min-height: 60vh;
-    max-height: calc(100vh - 3rem); // no idea why 3rem is needed here
+    max-height: calc(100vh - 3rem); /* no idea why 3rem is needed here */
     margin: .5rem;
-    // prevent children from overflowing parent
+    /* prevent children from overflowing parent */
     display: flex;
     flex-direction: column;
-    pointer-events: initial; // Re-enable click events for the actual box
+    pointer-events: initial; /* Re-enable click events for the actual box */
 }
 
 body.light .full-page-overlay .box-solid {
@@ -371,7 +376,7 @@ body.light .full-page-overlay .box-solid {
     max-height: 15rem;
     overflow: auto;
     border: 1px solid gray;
-    border-radius: $border-radius-amount;
+    border-radius: var(--border-radius-amount);
     padding: .5rem;
     margin-top: .5rem;
 }

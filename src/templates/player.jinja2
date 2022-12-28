@@ -27,9 +27,7 @@
 {% endblock title %}
 
 {% block styles %}
-    {% assets "css/player.scss", filters="pyscss", output="gen/player.css" %}
-        <link rel="stylesheet" href="{{ ASSET_URL }}">
-    {% endassets %}
+    <link rel="stylesheet" href="/static/css/player.css">
 {% endblock styles %}
 
 {% block content %}
@@ -335,9 +333,7 @@
 
     <div class="vignette"></div>
 
-    {% assets "js/player/*.js", filters="jsmin", output="gen/player-packed.js" %}
-        <script src="{{ ASSET_URL }}"></script>
-    {% endassets %}
+    <script src="/static/js/player/packed.js"></script>
 
     <div class="hidden" id="csrf-token">{{ csrf_token }}</div>
     <div class="hidden" id="trans-artist">{% trans %}Artist: {% endtrans %}</div>

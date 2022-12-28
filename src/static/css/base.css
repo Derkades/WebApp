@@ -1,16 +1,12 @@
-$border-radius-amount: .5rem;
+:root {
+    --border-radius-amount: .5rem;
+}
 
 @font-face {
     font-family: 'Quicksand';
     font-style: normal;
     font-weight: 400;
     src: url('/static/quicksand-v30-latin-regular.woff2') format('woff2');
-}
-
-@mixin background-cover {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
 }
 
 body {
@@ -84,14 +80,14 @@ input[type=range] {
     padding: .3rem;
     background-color: rgba(50, 50, 50, 0.7);
     border: 1px solid black;
-    border-radius: $border-radius-amount;
+    border-radius: var(--border-radius-amount);
     color: white;
     margin-right: .3rem;
     margin-bottom: .3rem;
 }
 
 input[type=checkbox] {
-    appearance: none; // No native checkbox design
+    appearance: none; /* No native checkbox design */
     height: 1rem;
     width: 1.25rem;
     margin-bottom: 0;
@@ -119,21 +115,20 @@ input[type=range]::-moz-range-thumb {
     border: none;
 }
 
-body.light {
-    & select,
-    & button,
-    & input[type=text],
-    & input[type=number],
-    & input[type=submit],
-    & input[type=password],
-    & input[type=checkbox] {
-        background-color: rgba(200, 200, 200, 0.7);
-        border: 1px solid #505050;
-        color: black;
-    }
-    & input[type=checkbox]:checked {
-        background-color: rgba(0, 0, 0, 0.7);
-    }
+body.light select,
+body.light button,
+body.light input[type=text],
+body.light input[type=number],
+body.light input[type=submit],
+body.light input[type=password],
+body.light input[type=checkbox] {
+    background-color: rgba(200, 200, 200, 0.7);
+    border: 1px solid #505050;
+    color: black;
+}
+
+body.light input[type=checkbox]:checked {
+    background-color: rgba(0, 0, 0, 0.7);
 }
 
 .inline-block {
@@ -144,7 +139,7 @@ main {
     background-color: #474747;
     margin: 1rem;
     padding: 1rem;
-    border-radius: $border-radius-amount;
+    border-radius: var(--border-radius-amount);
 }
 
 .icon {

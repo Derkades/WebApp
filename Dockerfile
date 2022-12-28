@@ -14,8 +14,7 @@ COPY ./src .
 COPY ./docker/entrypoint.sh .
 COPY ./docker/manage /usr/local/bin
 
-# TODO Find a better way to make '/app/static/.webassets-cache' etc others writable
-RUN chmod -R 777 /app/static
+RUN cat ./static/js/player/*.js > ./static/js/player/packed.js
 
 RUN pybabel compile -d translations
 

@@ -5,7 +5,6 @@ from urllib.parse import quote as urlencode
 import random
 
 from flask import Flask, request, render_template, Response, redirect, send_file
-import flask_assets
 from flask_babel import Babel
 from flask_babel import _
 
@@ -28,7 +27,6 @@ import scanner
 
 app = Flask(__name__, template_folder='templates')
 babel = Babel(app)
-flask_assets.Environment(app)
 log = logging.getLogger('app')
 assets_dir = Path('static')
 raphson_png_path = Path(assets_dir, 'raphson.png')
