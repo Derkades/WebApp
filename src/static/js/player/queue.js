@@ -82,7 +82,7 @@ class Queue {
         }
 
         await track.downloadAndAddToQueue();
-    }
+    };
 
     updateHtml() {
         document.getElementsByTagName("body")[0].style.cursor = this.#fillBusy ? 'progress' : '';
@@ -239,8 +239,11 @@ class Queue {
         if (this.currentTrack !== null) {
             this.previousTracks.push(this.currentTrack);
             // If history exceeded maximum length, remove first (oldest) element
-            if (this.previousTracks.length > 20) {
-                this.previousTracks.shift();
+            if (this.previousTracks.length > 5) {
+                const removedTrack = this.previousTracks.shift();
+                console.info('Revoke objects', removedTrack.path)
+                URL.revokeObjectURL(removedTrack.audioBlobUrl);
+                URL.revokeObjectURL(removedTrack.imageBlobUrl);
             }
         }
 
@@ -291,4 +294,4 @@ function hideLoadingOverlay() {
     setTimeout(() => {
         overlay.classList.add('hidden');
     }, 500);
-}
+};
