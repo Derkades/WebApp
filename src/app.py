@@ -411,47 +411,70 @@ def files():
         user = auth.verify_auth_cookie(conn, redirect_to_login=True)
         csrf_token = user.get_csrf()
 
-    if 'path' in request.args:
-        base_path = music.from_relpath(request.args['path'])
-        if base_path.as_posix() == '/music':
+        if 'path' in request.args:
+            base_path = music.from_relpath(request.args['path'])
+            if base_path.as_posix() == '/music':
+                parent_path_uri = None
+            else:
+                parent_path_uri = urlencode(music.to_relpath(base_path.parent))
+
+            # If the base directory is writable, all paths inside it will be, too.
+            playlist = Playlist.from_path(conn, base_path)
+            global_write_permission = playlist.has_write_permission(user)
+        else:
+            base_path = music.from_relpath('.')
             parent_path_uri = None
-        else:
-            parent_path_uri = urlencode(music.to_relpath(base_path.parent))
-    else:
-        base_path = music.from_relpath('.')
-        parent_path_uri = None
+            global_write_permission = None  # Needs to be considered for every directory individually
 
-    children = []
+        children = []
 
-    for path in base_path.iterdir():
-        if path.name.startswith('.trash.'):
-            continue
+        for path in base_path.iterdir():
+            if path.name.startswith('.trash.'):
+                continue
 
-        can_delete = True
-        if path.is_dir():
-            pathtype = 'dir'
-            try:
-                next(path.iterdir())
-                can_delete = False
-            except StopIteration:
-                pass
-        elif music.has_music_extension(path):
-            pathtype = 'music'
+            # Deletion is only allowed for files and empty directories
+            # TODO Not necessary, since restoring is easily possible anyway?
             can_delete = True
-        else:
-            pathtype = 'file'
-        children.append({
-            'path': music.to_relpath(path),
-            'name': path.name,
-            'type': pathtype,
-            'can_delete': can_delete,
-        })
+            if path.is_dir():
+                pathtype = 'dir'
+                try:
+                    next(path.iterdir())
+                    can_delete = False
+                except StopIteration:
+                    pass
+            elif music.has_music_extension(path):
+                pathtype = 'music'
+                can_delete = True
+            else:
+                pathtype = 'file'
+
+            if global_write_permission is None:
+                playlist = Playlist.from_path(conn, path)
+                write_permission = playlist.has_write_permission(user)
+            else:
+                write_permission = global_write_permission
+
+            children.append({
+                'path': music.to_relpath(path),
+                'name': path.name,
+                'type': pathtype,
+                'write_permission': write_permission,
+                'can_delete': can_delete,
+            })
 
     children = sorted(children, key=lambda x: x['name'])
+
+    if global_write_permission is None:
+        # Don't allow creating new playlists in base directory
+        # TODO Allow, and automatically give user write permission for that playlist
+        base_write_permission = False
+    else:
+        base_write_permission = global_write_permission
 
     return render_template('files.jinja2',
                            base_path=music.to_relpath(base_path),
                            base_path_uri=urlencode(music.to_relpath(base_path)),
+                           base_write_permission=base_write_permission,
                            parent_path_uri=parent_path_uri,
                            files=children,
                            music_extensions=','.join(music.MUSIC_EXTENSIONS),

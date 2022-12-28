@@ -355,7 +355,10 @@ class Playlist:
         Returns: Playlist object
         """
         relpath = to_relpath(path)
-        dir_name = relpath[:relpath.index('/')]
+        try:
+            dir_name = relpath[:relpath.index('/')]
+        except ValueError:  # No slash found
+            dir_name = relpath
         name, = conn.execute('SELECT name FROM playlist WHERE path=?',
                              (dir_name,)).fetchone()
         track_count = conn.execute('SELECT COUNT(*) FROM track WHERE playlist=?',
