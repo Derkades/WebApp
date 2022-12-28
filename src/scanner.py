@@ -5,6 +5,7 @@ from sqlite3 import Connection
 import db
 import metadata
 import music
+from music import Playlist
 import settings
 
 
@@ -60,15 +61,21 @@ def query_params(relpath: str, path: Path) -> tuple[dict[str, object], list[dict
     return main_data, artist_data, tag_data
 
 
-def scan_tracks(conn: Connection, playlist: str) -> None:
+def scan_tracks(conn: Connection, playlist: Playlist | str) -> None:
     """
     Scan for added, removed or changed tracks in a playlist.
     """
-    log.info('Scanning playlist: %s', playlist)
+    if isinstance(playlist, Playlist):
+        playlist_path = playlist.relpath
+    else:
+        playlist_path = playlist
+
+    log.info('Scanning playlist: %s', playlist_path)
 
     paths_db: set[str] = set()
 
-    for relpath, db_mtime in conn.execute('SELECT path, mtime FROM track WHERE playlist=?', (playlist,)).fetchall():
+    for relpath, db_mtime in conn.execute('SELECT path, mtime FROM track WHERE playlist=?',
+                                          (playlist_path,)).fetchall():
         path = music.from_relpath(relpath)
         if not path.exists():
             log.info('deleting: %s', relpath)
@@ -99,7 +106,7 @@ def scan_tracks(conn: Connection, playlist: str) -> None:
             conn.execute('DELETE FROM track_tag WHERE track=?', (relpath,))
             conn.executemany('INSERT INTO track_tag (track, tag) VALUES (:track, :tag)', tag_data)
 
-    for path in music.scan_playlist(playlist):
+    for path in music.scan_playlist(playlist_path):
         relpath = music.to_relpath(path)
         if relpath not in paths_db:
             mtime = int(path.stat().st_mtime)
@@ -110,7 +117,7 @@ def scan_tracks(conn: Connection, playlist: str) -> None:
                          VALUES (:path, :playlist, :duration, :title, :album, :album_artist, :album_index, :year, :mtime)
                          ''',
                          {**main_data,
-                          'playlist': playlist,
+                          'playlist': playlist_path,
                           'mtime': mtime})
             conn.executemany('INSERT INTO track_artist (track, artist) VALUES (:track, :artist)', artist_data)
             conn.executemany('INSERT INTO track_tag (track, tag) VALUES (:track, :tag)', tag_data)

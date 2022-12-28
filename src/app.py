@@ -281,6 +281,8 @@ def ytdl():
 
         log.info('ytdl %s %s', directory, url)
 
+    # Release database connection during download
+
     result = playlist.download(url)
 
     return {
@@ -496,6 +498,10 @@ def files_upload():
     for uploaded_file in request.files.getlist('upload'):
         check_filename(uploaded_file.filename)
         uploaded_file.save(Path(upload_dir, uploaded_file.filename))
+
+    with db.connect() as conn:
+        scanner.scan_tracks(conn, playlist)
+
     return redirect('/files?path=' + urlencode(music.to_relpath(upload_dir)))
 
 
@@ -528,6 +534,8 @@ def files_rename():
 
             path.rename(Path(path.parent, new_name))
 
+            scanner.scan_tracks(conn, playlist)
+
             if request.is_json:
                 return Response(None, 200)
             else:
@@ -551,7 +559,7 @@ def files_mkdir():
 
     path = music.from_relpath(request.form['path'])
 
-    playlist = Playlist.from_path(conn, upload_dir)
+    playlist = Playlist.from_path(conn, path)
     if not playlist.has_write_permission(user):
         return Response(None, 403)
 
