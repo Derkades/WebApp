@@ -137,31 +137,22 @@ function getTransformedVolume() {
     return document.getElementById('settings-volume').value ** e / 100 ** e;
 }
 
-function createAudioElement(sourceUrl) {
-    const audioElem = document.createElement('audio');
-    audioElem.volume = getTransformedVolume();
-    audioElem.setAttribute('autoplay', '');
-    audioElem.onended = () => queue.next();
-    const sourceElem = document.createElement('source');
-    sourceElem.src = sourceUrl;
-    audioElem.appendChild(sourceElem);
-    return audioElem;
+function setAudioSource(sourceUrl) {
+    document.getElementById('audio').src = sourceUrl;
 }
 
 function getAudioElement() {
-    const audioDiv = document.getElementById('audio');
-    if (audioDiv.children.length === 1) {
-        return audioDiv.children[0];
-    }
-    return null;
+    return document.getElementById('audio');
 }
 
 // Replace audio player, album cover, and lyrics according to current track info
 function updateTrackHtml() {
     const track = queue.currentTrack;
-    const audioElem = createAudioElement(track.audioBlobUrl);
-    replaceAudioElement(audioElem);
 
+    // Replace audio element source
+    setAudioSource(track.audioBlobUrl);
+
+    // Replace album cover images
     replaceAlbumImages(track.imageBlobUrl);
 
     const notFoundElem = document.getElementById('lyrics-not-found');
@@ -189,11 +180,6 @@ function updateTrackHtml() {
     } else {
         document.getElementById('previous-track').textContent = '-';
     }
-}
-
-function replaceAudioElement(newElement) {
-    const audioDiv = document.getElementById('audio');
-    audioDiv.replaceChildren(newElement);
 }
 
 function replaceAlbumImages(imageUrl) {
