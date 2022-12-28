@@ -297,6 +297,12 @@ def track_list():
         user.verify_csrf(request.args['csrf'])
 
         playlists = music.playlists(conn)
+        rows = conn.execute('SELECT playlist FROM user_playlist WHERE user=?',
+                            (user.user_id,))
+        user_playlists = {row[0] for row in rows}
+        rows = conn.execute('SELECT playlist FROM user_playlist WHERE user=? AND write=1',
+                            (user.user_id,))
+        write_playlists = {row[0] for row in rows}
 
         response = {
             'playlists': {},
@@ -308,7 +314,8 @@ def track_list():
                 'dir_name': playlist.relpath,
                 'display_name': playlist.name,
                 'track_count': playlist.track_count,
-                'guest': False,  # TODO remove when guest logic has been removed from frontend
+                'favorite': playlist.relpath in user_playlists,
+                'write': playlist.relpath in write_playlists,
             }
 
         for playlist in playlists:

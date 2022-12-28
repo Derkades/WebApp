@@ -5,7 +5,7 @@ const state = {
     playlistOverrides: [],
     playlists: null,
     mainPlaylists: [],
-    guestPlaylists: [],
+    otherPlaylists: [],
     tracks: null,
     loadingOverlayHidden: false,
 };

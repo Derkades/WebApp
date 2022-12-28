@@ -95,13 +95,13 @@ class Track {
 
         state.playlists = json.playlists;
         state.mainPlaylists = [];
-        state.guestPlaylists = [];
+        state.otherPlaylists = [];
         for (const dir_name in state.playlists) {
             const playlist = state.playlists[dir_name];
-            if (playlist.guest) {
-                state.guestPlaylists.push(playlist);
-            } else {
+            if (playlist.favorite) {
                 state.mainPlaylists.push(playlist);
+            } else {
+                state.otherPlaylists.push(playlist);
             }
         }
         state.tracks = json.tracks.map(trackData => new Track(trackData));

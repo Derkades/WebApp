@@ -48,8 +48,8 @@ function createPlaylistCheckbox(playlist, index) {
     // Attempt to restore state from cookie
     const savedState = getSavedCheckboxState();
     if (savedState === null) {
-        // If no saved state, check if not guest
-        input.checked = !playlist.guest
+        // No save state, enable if it's a favorited playlist
+        input.checked = playlist.favorite
     } else {
         input.checked = savedState.indexOf(playlist.dir_name) !== -1;
     }
@@ -80,13 +80,13 @@ function updatePlaylistCheckboxHtml() {
     for (const playlist of state.mainPlaylists) {
         mainDiv.appendChild(createPlaylistCheckbox(playlist, index++));
     }
-    const guestDiv = document.createElement('div');
-    guestDiv.classList.add('guest-checkboxes');
-    for (const playlist of state.guestPlaylists) {
-        guestDiv.appendChild(createPlaylistCheckbox(playlist, 10));
+    const otherDiv = document.createElement('div');
+    otherDiv.classList.add('other-checkboxes');
+    for (const playlist of state.otherPlaylists) {
+        otherDiv.appendChild(createPlaylistCheckbox(playlist, 10));
     }
     const parent = document.getElementById('playlist-checkboxes');
-    parent.replaceChildren(mainDiv, guestDiv);
+    parent.replaceChildren(mainDiv, otherDiv);
 }
 
 function saveCheckboxState() {
