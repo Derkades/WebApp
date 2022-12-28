@@ -159,10 +159,10 @@ def get_track() -> Response:
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.args['csrf'])
+        track = Track.by_relpath(conn, request.args['path'])
 
     quality = request.args['quality'] if 'quality' in request.args else 'high'
 
-    track = Track.by_relpath(request.args['path'])
     fruit = is_fruit()
     audio = track.transcoded_audio(quality, fruit)
     mime = 'audio/mp4' if fruit else 'audio/webm'
@@ -216,8 +216,8 @@ def get_album_cover() -> Response:
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.args['csrf'])
-        track = Track.by_relpath(request.args['path'])
-        meta = track.metadata(conn)
+        track = Track.by_relpath(conn, request.args['path'])
+        meta = track.metadata()
 
     # Don't keep database connection active while downloading images
 
@@ -248,8 +248,8 @@ def get_lyrics():
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.args['csrf'])
 
-        track = Track.by_relpath(request.args['path'])
-        meta = track.metadata(conn)
+        track = Track.by_relpath(conn, request.args['path'])
+        meta = track.metadata()
 
     for search_query in meta.lyrics_search_queries():
         lyrics = genius.get_lyrics(search_query)
@@ -322,8 +322,8 @@ def track_list():
             }
 
         for playlist in playlists:
-            for track in playlist.tracks(conn):
-                meta = track.metadata(conn)
+            for track in playlist.tracks():
+                meta = track.metadata()
                 response['tracks'].append({
                     'path': track.relpath,
                     'display': meta.display_title(),
@@ -373,19 +373,18 @@ def update_metadata():
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(payload['csrf'])
 
-        track = Track.by_relpath(payload['path'])
+        track = Track.by_relpath(conn, payload['path'])
 
         playlist = music.playlist(conn, track.playlist)
         if not playlist.has_write_permission(user):
             return Response('No write permission for this playlist', 403)
 
-        track.write_metadata(conn,
-                            title=payload['metadata']['title'],
-                            album=payload['metadata']['album'],
-                            artist='; '.join(payload['metadata']['artists']),
-                            album_artist=payload['metadata']['album_artist'],
-                            genre='; '.join(payload['metadata']['tags']),
-                            date=payload['metadata']['year'])
+        track.write_metadata(title=payload['metadata']['title'],
+                             album=payload['metadata']['album'],
+                             artist='; '.join(payload['metadata']['artists']),
+                             album_artist=payload['metadata']['album_artist'],
+                             genre='; '.join(payload['metadata']['tags']),
+                             date=payload['metadata']['year'])
 
     return Response(None, 200)
 
@@ -678,8 +677,8 @@ def lastfm_now_playing():
         if user_key:
             log.info('Skip last.fm now playing, account is not linked')
             return
-        track = Track.by_relpath(request.json['track'])
-        meta = track.metadata(conn)
+        track = Track.by_relpath(conn, request.json['track'])
+        meta = track.metadata()
     # Scrobble request takes a while, so close database connection first
     lastfm.update_now_playing(user_key, meta)
     return Response('ok', 200)
@@ -694,9 +693,9 @@ def lastfm_scrobble():
         if user_key:
             log.info('Skip last.fm now playing, account is not linked')
             return
-        track = Track.by_relpath(request.json['track'])
+        track = Track.by_relpath(conn, request.json['track'])
         start_timestamp = request.json['start_timestamp']
-        meta = track.metadata(conn)
+        meta = track.metadata()
     # Scrobble request takes a while, so close database connection first
     lastfm.scrobble(user_key, meta, start_timestamp)
     return Response('ok', 200)

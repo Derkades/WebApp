@@ -59,7 +59,7 @@ def get_current_track(conn: Connection) -> RadioTrack:
         log.info('No current song, choose track starting at random time')
         current_time = int(datetime.utcnow().timestamp() * 1000)
         track = _choose_track(conn)
-        meta = track.metadata(conn)
+        meta = track.metadata()
         start_time = current_time - int((meta.duration * 1000) * random.random())
         conn.execute('INSERT INTO radio_track (track, start_time) VALUES (?, ?)',
                         (track.relpath, start_time))
@@ -70,8 +70,8 @@ def get_current_track(conn: Connection) -> RadioTrack:
     log.info('Return current track')
 
     # Return current song from database
-    track = Track.by_relpath(track_path)
-    meta = track.metadata(conn)
+    track = Track.by_relpath(conn, track_path)
+    meta = track.metadata()
     return RadioTrack(track, meta, start_time, duration)
 
 
@@ -106,12 +106,12 @@ def get_next_track(conn: Connection) -> RadioTrack:
 
         # Choose next track starting right after current track
         track = _choose_track(conn, previous_playlist=current_track_playlist)
-        meta = track.metadata(conn)
+        meta = track.metadata()
         conn.execute('INSERT INTO radio_track (track, start_time) VALUES (?, ?)',
                         (track.relpath, current_track_end_time))
         return RadioTrack(track, meta, current_track_end_time, meta.duration)
 
     log.info('Returning already chosen next track')
     (track_path, start_time, duration) = next_track_info
-    track = Track.by_relpath(track_path)
-    return RadioTrack(track, track.metadata(conn), start_time, duration)
+    track = Track.by_relpath(conn, track_path)
+    return RadioTrack(track, track.metadata(), start_time, duration)
