@@ -60,7 +60,7 @@ def get_current_track(conn: Connection) -> RadioTrack:
         current_time = int(datetime.utcnow().timestamp() * 1000)
         track = _choose_track(conn)
         meta = track.metadata(conn)
-        start_time = int(current_time - (meta.duration - meta.duration / 4) * random.random())
+        start_time = current_time - int((meta.duration * 1000) * random.random())
         conn.execute('INSERT INTO radio_track (track, start_time) VALUES (?, ?)',
                         (track.relpath, start_time))
         return RadioTrack(track, meta, start_time, meta.duration)
