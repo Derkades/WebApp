@@ -322,7 +322,7 @@ def track_list():
                 'display_name': playlist.name,
                 'track_count': playlist.track_count,
                 'favorite': playlist.relpath in user_playlists,
-                'write': playlist.relpath in write_playlists,
+                'write': user.admin or playlist.relpath in write_playlists,
             }
 
         for playlist in playlists:
