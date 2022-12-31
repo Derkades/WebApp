@@ -183,3 +183,7 @@ body.light .icon {
     bottom: .4em;
     }
 }
+
+a.large {
+    font-size: 1.5em;
+}
