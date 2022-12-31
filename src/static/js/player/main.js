@@ -67,19 +67,14 @@ document.addEventListener("DOMContentLoaded", () => {
         console.warn('Downloader submit button missing from page, this is normal if you are not an admin user');
     }
     document.getElementById('scan-button').addEventListener('click', () => (async function() {
-        const selectedPlaylist = document.getElementById('scan-playlist').value;
         const spinner = document.getElementById('scan-spinner');
         const button = document.getElementById('scan-button');
         spinner.classList.remove('hidden');
-        button.disabled = true;
-        if (selectedPlaylist !== "") {
-            await Track.scanPlaylist(selectedPlaylist);
-        } else {
-            await Track.scanPlaylist();
-        }
+        button.classList.add('hidden');
+        await jsonPost('/scan_music', {});
         await Track.updateLocalTrackList();
         spinner.classList.add('hidden');
-        button.disabled = false;
+        button.classList.remove('hidden');
     })());
     document.getElementById('settings-queue-size').addEventListener('input', () => queue.fill());
     document.getElementById('settings-theme').addEventListener('input', applyTheme);
@@ -130,7 +125,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const newName = '.trash.' + oldName;
             (async function() {
                 await jsonPost('/files_rename', {path: path, new_name: newName});
-                await Track.scanPlaylist(queue.currentTrack.playlistPath);
                 await Track.updateLocalTrackList();
                 queue.next();
                 deleteSpinner.classList.add('hidden');

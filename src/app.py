@@ -356,13 +356,9 @@ def scan_music():
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
 
-        if 'playlist' in request.json:
-            playlist = music.playlist(conn, request.json['playlist'])
-            scanner.scan_tracks(conn, playlist.relpath)
-        else:
-            playlists = scanner.scan_playlists(conn)
-            for playlist in playlists:
-                scanner.scan_tracks(conn, playlist)
+        playlists_list = scanner.scan_playlists(conn)
+        for playlist in playlists_list:
+            scanner.scan_tracks(conn, playlist)
 
     return Response(None, 200)
 
