@@ -123,17 +123,17 @@ def scan_tracks(conn: Connection, playlist: Playlist | str) -> None:
             conn.executemany('INSERT INTO track_tag (track, tag) VALUES (:track, :tag)', tag_data)
 
 
-def scan() -> None:
+def scan(conn: Connection) -> None:
     """
     Main function for scanning music directory structure
     """
-    with db.connect() as conn:
-        playlists = scan_playlists(conn)
-        for playlist in playlists:
-            scan_tracks(conn, playlist)
+    playlists = scan_playlists(conn)
+    for playlist in playlists:
+        scan_tracks(conn, playlist)
 
 
 if __name__ == '__main__':
     import logconfig
     logconfig.apply()
-    scan()
+    with db.connect() as conn:
+        scan(conn)

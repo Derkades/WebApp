@@ -12,9 +12,9 @@
         <table>
             <thead>
                 <tr>
-                    <th>Path</th>
-                    <th>Write access</th>
-                    <th>Actions</th>
+                    <th>{% trans %}Path{% endtrans %}</th>
+                    <th>{% trans %}Write access{% endtrans %}</th>
+                    <th>{% trans %}Actions{% endtrans %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -29,8 +29,8 @@
                         </td>
                         <td>
                             <form action="/playlists_remove" method="POST">
-                                <input type="hidden" name="playlist" value="{{ playlist }}">
                                 <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                                <input type="hidden" name="playlist" value="{{ playlist }}">
                                 <input type="submit" value="{% trans %}Remove{% endtrans %}">
                             </form>
                         </td>
@@ -39,13 +39,12 @@
             </tbody>
         </table>
         <h2>{% trans %}Other playlists{% endtrans %}</h2>
-        <p>{% trans %}To create a new playlist, use the <a href="/files">file manager</a>{% endtrans %}.</p>
         <table>
             <thead>
                 <tr>
-                    <th>Path</th>
-                    <th>Track count</th>
-                    <th>Actions</th>
+                    <th>{% trans %}Path{% endtrans %}</th>
+                    <th>{% trans %}Track count{% endtrans %}</th>
+                    <th>{% trans %}Actions{% endtrans %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -55,8 +54,8 @@
                         <td>{{ playlist.track_count }}</td>
                         <td>
                             <form action="/playlists_add" method="POST">
-                                <input type="hidden" name="playlist" value="{{ playlist.relpath }}">
                                 <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                                <input type="hidden" name="playlist" value="{{ playlist.relpath }}">
                                 <input type="submit" value="{% trans %}Add to my playlists{% endtrans %}">
                             </form>
                         </td>
@@ -64,5 +63,13 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        <h2>Create new playlist</h2>
+        <form action="/playlists_create" method="POST">
+            <input type="hidden" name="csrf" value="{{ csrf_token }}">
+            Directory name<br>
+            <input type="text" name="path"><br>
+            <input type="submit" value="{% trans %}Create{% endtrans %}">
+        </form>
     </main>
 {% endblock content %}

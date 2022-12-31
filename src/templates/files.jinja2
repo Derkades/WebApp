@@ -37,26 +37,26 @@
                     <div class="icon" style="background-image: url('static/icon/folder.svg')"></div>
                 </td>
                 <td>
-                    <a href="?path={{ file['path'] }}" {% if not file['write_permission'] %}class="secondary"{% endif%}>{{ file.name }}/</a>
+                    <a href="?path={{ file['path'] }}" {% if not write_permission %}class="secondary"{% endif%}>{{ file.name }}/</a>
                 </td>
             {% elif file['type'] == 'music' %}
                 <td>
                     <div class="icon" style="background-image: url('static/icon/music.svg')"></div>
                 </td>
                 <td>
-                    <span {% if not file['write_permission'] %}class="secondary"{% endif%}>{{ file.name }}</span>
+                    <span {% if not write_permission %}class="secondary"{% endif%}>{{ file.name }}</span>
                 </td>
             {% else %}
                 <td>
                     <div class="icon" style="background-image: url('static/icon/file-question.svg')"></div>
                 </td>
                 <td>
-                    <span {% if not file['write_permission'] %}class="secondary"{% endif%}>{{ file.name }}</span>
+                    <span {% if not write_permission %}class="secondary"{% endif%}>{{ file.name }}</span>
                 </td>
             {% endif %}
 
             <td>
-                {% if file['write_permission'] %}
+                {% if write_permission %}
                     <form method="GET" action="/files_rename" class="inline-block">
                         <input type="hidden" name="path" value="{{ file['path'] }}">
                         {{ icon_button('rename-box') }}
@@ -82,7 +82,7 @@
 
         <hr>
 
-        {% if base_write_permission %}
+        {% if write_permission %}
             <h3>Upload files</h3>
             <form method="POST" action="/files_upload" enctype="multipart/form-data">
                 <input type="hidden" name="csrf" value="{{ csrf_token }}">

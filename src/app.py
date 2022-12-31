@@ -23,6 +23,7 @@ import radio
 from radio import RadioTrack
 import reddit
 import scanner
+import settings
 
 
 app = Flask(__name__, template_folder='templates')
@@ -356,9 +357,7 @@ def scan_music():
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
 
-        playlists_list = scanner.scan_playlists(conn)
-        for playlist in playlists_list:
-            scanner.scan_tracks(conn, playlist)
+        scanner.scan(conn)
 
     return Response(None, 200)
 
@@ -411,23 +410,22 @@ def files():
         csrf_token = user.get_csrf()
 
         if 'path' in request.args:
-            base_path = music.from_relpath(request.args['path'])
-            if base_path.as_posix() == '/music':
-                parent_path_uri = None
-            else:
-                parent_path_uri = urlencode(music.to_relpath(base_path.parent))
-
-            # If the base directory is writable, all paths inside it will be, too.
-            playlist = Playlist.from_path(conn, base_path)
-            global_write_permission = playlist.has_write_permission(user)
+            browse_path = music.from_relpath(request.args['path'])
         else:
-            base_path = music.from_relpath('.')
+            browse_path = music.from_relpath('.')
+
+        if browse_path.resolve() == Path(settings.music_dir).resolve():
             parent_path_uri = None
-            global_write_permission = None  # Needs to be considered for every directory individually
+            write_permission = user.admin
+        else:
+            parent_path_uri = urlencode(music.to_relpath(browse_path.parent))
+            # If the base directory is writable, all paths inside it will be, too.
+            playlist = Playlist.from_path(conn, browse_path)
+            write_permission = playlist.has_write_permission(user)
 
         children = []
 
-        for path in base_path.iterdir():
+        for path in browse_path.iterdir():
             if path.name.startswith('.trash.'):
                 continue
 
@@ -438,32 +436,18 @@ def files():
             else:
                 pathtype = 'file'
 
-            if global_write_permission is None:
-                playlist = Playlist.from_path(conn, path)
-                write_permission = playlist.has_write_permission(user)
-            else:
-                write_permission = global_write_permission
-
             children.append({
                 'path': music.to_relpath(path),
                 'name': path.name,
                 'type': pathtype,
-                'write_permission': write_permission,
             })
 
     children = sorted(children, key=lambda x: x['name'])
 
-    if global_write_permission is None:
-        # Don't allow creating new playlists in base directory
-        # TODO Allow, and automatically give user write permission for that playlist
-        base_write_permission = False
-    else:
-        base_write_permission = global_write_permission
-
     return render_template('files.jinja2',
-                           base_path=music.to_relpath(base_path),
-                           base_path_uri=urlencode(music.to_relpath(base_path)),
-                           base_write_permission=base_write_permission,
+                           base_path=music.to_relpath(browse_path),
+                           base_path_uri=urlencode(music.to_relpath(browse_path)),
+                           write_permission=write_permission,
                            parent_path_uri=parent_path_uri,
                            files=children,
                            music_extensions=','.join(music.MUSIC_EXTENSIONS),
@@ -476,6 +460,31 @@ def check_filename(name: str) -> None:
     """
     if '/' in name or name == '.' or name == '..':
         raise ValueError('illegal name')
+
+
+@app.route('/playlists_create', methods=['POST'])
+def playlists_create():
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
+        user.verify_csrf(request.form['csrf'])
+
+        dir_name = request.form['path']
+
+        check_filename(dir_name)
+
+        path = Path(settings.music_dir, dir_name)
+
+        if path.exists():
+            return Response('Playlist path already exists', 400)
+
+        path.mkdir()
+
+        scanner.scan(conn)
+
+        conn.execute('INSERT OR REPLACE INTO user_playlist (user, playlist, write) VALUES (?, ?, 1)',
+                     (user.user_id, dir_name))
+
+        return redirect('/playlists')
 
 
 @app.route('/files_upload', methods=['POST'])
