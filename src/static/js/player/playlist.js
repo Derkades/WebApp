@@ -103,7 +103,7 @@ function getSavedCheckboxState() {
 }
 
 function createPlaylistDropdowns() {
-    for (const select of document.getElementsByClassName("playlist-select")) {
+    for (const select of document.getElementsByClassName('playlist-select')) {
         // Remove all children except the ones that should be kept
         const keptChildren = []
         for (const child of select.children) {
@@ -114,11 +114,14 @@ function createPlaylistDropdowns() {
         }
         select.replaceChildren(...keptChildren);
 
+        const onlyWritable = select.classList.contains('playlist-select-writable');
+
         for (const dir_name in state.playlists) {
             const playlist = state.playlists[dir_name];
             const option = document.createElement('option');
             option.value = playlist.dir_name;
             option.textContent = playlist.display_name;
+            option.disabled = onlyWritable && playlist.write;
             select.appendChild(option);
         }
     }
