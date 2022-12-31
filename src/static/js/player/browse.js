@@ -104,9 +104,11 @@ class Browse {
             colAddBottom.replaceChildren(addButton);
 
             const colEdit = document.createElement('td');
-            const editButton = createIconButton('pencil.svg');
-            editButton.onclick = () => editor.open(track);
-            colEdit.replaceChildren(editButton);
+            if (track.playlist().write) {
+                const editButton = createIconButton('pencil.svg');
+                editButton.onclick = () => editor.open(track);
+                colEdit.replaceChildren(editButton);
+            }
 
             const dataRow = document.createElement('tr');
             dataRow.replaceChildren(colPlaylist, colDuration, colTitle, colAddTop, colAddBottom, colEdit);
