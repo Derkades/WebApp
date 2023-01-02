@@ -95,6 +95,9 @@ class Track:
 
     @property
     def playlist(self) -> str:
+        """
+        Returns: Part of track path before first slash
+        """
         return self.relpath[:self.relpath.index('/')]
 
     def metadata(self):
@@ -275,13 +278,15 @@ class Playlist:
                 WHERE track.playlist=?
                 """
         params = [self.relpath]
+
+        track_tags_query = 'SELECT tag FROM track_tag WHERE track = track.path'
         if tag_mode == 'allow':
             assert tags is not None
-            query += ' AND (' + ' OR '.join(len(tags) * ['? IN (SELECT tag FROM track_tag WHERE track = track.path)']) + ')'
+            query += ' AND (' + ' OR '.join(len(tags) * [f'? IN ({track_tags_query})']) + ')'
             params.extend(tags)
         elif tag_mode == 'deny':
             assert tags is not None
-            query += ' AND (' + ' AND '.join(len(tags) * ['? NOT IN (SELECT tag FROM track_tag WHERE track = track.path)']) + ')'
+            query += ' AND (' + ' AND '.join(len(tags) * [f'? NOT IN ({track_tags_query})']) + ')'
             params.extend(tags)
 
         query += ' ORDER BY RANDOM()'

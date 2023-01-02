@@ -464,6 +464,9 @@ def check_filename(name: str) -> None:
 
 @app.route('/playlists_create', methods=['POST'])
 def playlists_create():
+    """
+    Form target to create playlist, called from /playlists page
+    """
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.form['csrf'])
@@ -490,7 +493,7 @@ def playlists_create():
 @app.route('/files_upload', methods=['POST'])
 def files_upload():
     """
-    Form target to upload file
+    Form target to upload file, called from file manager
     """
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
@@ -609,6 +612,9 @@ def account():
 
 @app.route('/change_password_form', methods=['POST'])
 def change_password_form():
+    """
+    Form target to change password, called from /account page
+    """
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.form['csrf_token'])
@@ -632,6 +638,9 @@ def radio_track_response(track: RadioTrack):
 
 @app.route('/radio_current')
 def radio_current():
+    """
+    Endpoint that returns information about the current radio track
+    """
     with db.connect() as conn:
         auth.verify_auth_cookie(conn)
         track = radio.get_current_track(conn)
@@ -640,6 +649,9 @@ def radio_current():
 
 @app.route('/radio_next')
 def radio_next():
+    """
+    Endpoint that returns information about the next radio track
+    """
     with db.connect() as conn:
         auth.verify_auth_cookie(conn)
         track = radio.get_next_track(conn)
@@ -799,6 +811,9 @@ def get_img_format():
 
 
 def is_mobile() -> bool:
+    """
+    Checks whether User-Agent looks like a mobile device (Android or iOS)
+    """
     if 'User-Agent' in request.headers:
         user_agent = request.headers['User-Agent']
         if 'Android' in user_agent or 'iOS' in user_agent:
@@ -807,6 +822,9 @@ def is_mobile() -> bool:
 
 
 def is_fruit() -> bool:
+    """
+    Check whether User-Agent looks like an Apple device
+    """
     if 'User-Agent' in request.headers:
         user_agent = request.headers['User-Agent']
         if 'Macintosh' in user_agent or \

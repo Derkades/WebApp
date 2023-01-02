@@ -10,6 +10,9 @@ log = logging.getLogger('app.manage')
 
 
 def handle_useradd(args):
+    """
+    Handle command to add user
+    """
     username = args.username
     is_admin = int(args.admin)
     password = input('Enter password:')
@@ -24,6 +27,9 @@ def handle_useradd(args):
 
 
 def handle_userdel(args):
+    """
+    Handle command to delete user
+    """
     with db.connect() as conn:
         deleted = conn.execute('DELETE FROM user WHERE username=?',
                                (args.username,)).rowcount
@@ -34,6 +40,9 @@ def handle_userdel(args):
 
 
 def handle_userlist(args):
+    """
+    Handle command to list users
+    """
     with db.connect() as conn:
         result = conn.execute('SELECT username, admin FROM user')
         if result.rowcount == 0:
@@ -50,6 +59,9 @@ def handle_userlist(args):
 
 
 def handle_passwd(args):
+    """
+    Handle command to change a user's password
+    """
     with db.connect() as conn:
         result = conn.execute('SELECT id FROM user WHERE username=?',
                               (args.username,)).fetchone()
@@ -68,6 +80,9 @@ def handle_passwd(args):
 
 
 def handle_playlist(args):
+    """
+    Handle command to give a user write access to a playlist
+    """
     with db.connect() as conn:
         result = conn.execute('SELECT id FROM user WHERE username=?',
                               (args.username,)).fetchone()
