@@ -1,6 +1,7 @@
 from pathlib import Path
 import logging
 from sqlite3 import Connection
+from dataclasses import dataclass
 
 import db
 import metadata
@@ -37,7 +38,14 @@ def scan_playlists(conn: Connection) -> set[str]:
     return paths_disk
 
 
-def query_params(relpath: str, path: Path) -> tuple[dict[str, object], list[dict[str, str]], list[dict[str, str]]]:
+@dataclass
+class QueryParams:
+    main_data: dict[str, object]
+    artist_data: list[dict[str, str]]
+    tag_data: list[dict[str, str]]
+
+
+def query_params(relpath: str, path: Path) -> QueryParams:
     """
     Create dictionary of track metadata, to be used as SQL query parameters
     """
@@ -58,7 +66,7 @@ def query_params(relpath: str, path: Path) -> tuple[dict[str, object], list[dict
     tag_data = [{'track': relpath,
                  'tag': tag} for tag in meta.tags]
 
-    return main_data, artist_data, tag_data
+    return QueryParams(main_data, artist_data, tag_data)
 
 
 def scan_tracks(conn: Connection, playlist: Playlist | str) -> None:
@@ -87,7 +95,7 @@ def scan_tracks(conn: Connection, playlist: Playlist | str) -> None:
         file_mtime = int(path.stat().st_mtime)
         if file_mtime != db_mtime:
             log.info('changed, update: %s (%s, %s)', relpath, file_mtime, db_mtime)
-            main_data, artist_data, tag_data = query_params(relpath, path)
+            params = query_params(relpath, path)
             conn.execute('''
                          UPDATE track
                          SET duration=:duration,
@@ -99,28 +107,28 @@ def scan_tracks(conn: Connection, playlist: Playlist | str) -> None:
                              mtime=:mtime
                          WHERE path=:path
                         ''',
-                        {**main_data,
+                        {**params.main_data,
                          'mtime': file_mtime})
             conn.execute('DELETE FROM track_artist WHERE track=?', (relpath,))
-            conn.executemany('INSERT INTO track_artist (track, artist) VALUES (:track, :artist)', artist_data)
+            conn.executemany('INSERT INTO track_artist (track, artist) VALUES (:track, :artist)', params.artist_data)
             conn.execute('DELETE FROM track_tag WHERE track=?', (relpath,))
-            conn.executemany('INSERT INTO track_tag (track, tag) VALUES (:track, :tag)', tag_data)
+            conn.executemany('INSERT INTO track_tag (track, tag) VALUES (:track, :tag)', params.tag_data)
 
     for path in music.scan_playlist(playlist_path):
         relpath = music.to_relpath(path)
         if relpath not in paths_db:
             mtime = int(path.stat().st_mtime)
             log.info('new track, insert: %s', relpath)
-            main_data, artist_data, tag_data = query_params(relpath, path)
+            params = query_params(relpath, path)
             conn.execute('''
                          INSERT INTO track (path, playlist, duration, title, album, album_artist, album_index, year, mtime)
                          VALUES (:path, :playlist, :duration, :title, :album, :album_artist, :album_index, :year, :mtime)
                          ''',
-                         {**main_data,
+                         {**params.main_data,
                           'playlist': playlist_path,
                           'mtime': mtime})
-            conn.executemany('INSERT INTO track_artist (track, artist) VALUES (:track, :artist)', artist_data)
-            conn.executemany('INSERT INTO track_tag (track, tag) VALUES (:track, :tag)', tag_data)
+            conn.executemany('INSERT INTO track_artist (track, artist) VALUES (:track, :artist)', params.artist_data)
+            conn.executemany('INSERT INTO track_tag (track, tag) VALUES (:track, :tag)', params.tag_data)
 
 
 def scan(conn: Connection) -> None:
@@ -135,5 +143,5 @@ def scan(conn: Connection) -> None:
 if __name__ == '__main__':
     import logconfig
     logconfig.apply()
-    with db.connect() as conn:
-        scan(conn)
+    with db.connect() as connection:
+        scan(connection)
