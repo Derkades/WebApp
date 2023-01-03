@@ -18,16 +18,6 @@ Music player for communities (hacker spaces, maker spaces).
 - Audio is RMS-normalized and silence is trimmed from the start and end
 - File browser to download, upload, rename and delete files
 
-## Security notice
-
-This is alpha-level software. While a reasonable attempt was made at good security, the program should not be exposed to the internet without authentication.
-
-Some examples of missing security features:
-- ~~No protection against cross-site request forgery.~~ Fixed!
-- ~~Password is stored in cookie instead of a long, randomized, short-lived access token.~~ Fixed!
-- Directory traversal should be prevented but some endpoints may still be implemented incorrectly.
-- Writing to files should not be possible for non-admin users, but some endpoints may still be unprotected.
-
 ## Usage
 
 Prebuilt container image: `ghcr.io/danielkoomen/webapp`. Take the `docker-compose.yaml` file in this repository as an example, replacing `build` with an `image`.
@@ -62,9 +52,11 @@ music
 
 Don't worry about removing strings like "(Official Audio)" from song titles, these are automatically removed. If possible, do add the following metadata to each file: artist, album artist, album title, song title, album cover image.
 
+The first startup wil be slow, since all files need to be scanned. Later, unmodified files can be skipped (based on the file modification time).
+
 ### `MUSIC_CACHE_DIR` (default `/cache`)
 
-This directory is used to store the result of time-consuming operations, like transcoding audio or web scraping for album art. It may be emptied at any time as long as the application is not running.
+This directory is used to store the result of time-consuming operations, like transcoding audio or web scraping for album art. It may be emptied at any time as long as the application is not running. Emptying the cache will significantly impact however, so strongly consider never deleting it.
 
 ### User management
 
@@ -76,6 +68,11 @@ docker compose exec music manage --help
 Add an example admin user (prompts for password):
 ```
 docker compose exec music manage useradd --admin example
+```
+
+Give user write access to a playlist
+```
+docker compose exec music manage playlist <username> <playlist>
 ```
 
 ## Development
@@ -115,10 +112,6 @@ This project is using many open source software and libraries, such as:
 - [Python Gunicorn](https://gunicorn.org)
 - [Python Flask](https://flask.palletsprojects.com)
 - [Python Flask-Babel](https://python-babel.github.io/flask-babel/)
-- [Python Flask-Assets](https://flask-assets.readthedocs.io/en/latest/)
-- [Python jsmin](https://pypi.org/project/jsmin/)
-- [Python pyScss](https://github.com/Kronuz/pyScss)
-- [Python cssutils](https://github.com/jaraco/cssutils)
 - [Python requests](https://pypi.org/project/requests)
 - [Python BeautifulSoup](https://pypi.org/project/beautifulsoup4)
 - [Python lxml](https://pypi.org/project/beautifulsoup4)
