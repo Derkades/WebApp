@@ -95,8 +95,8 @@ def create_tables() -> None:
                          playlist TEXT NOT NULL,
                          write INTEGER DEFAULT 0,
                          UNIQUE (user, playlist),
-                         FOREIGN KEY (user) REFERENCES user(id),
-                         FOREIGN KEY (playlist) REFERENCES playlist(path)
+                         FOREIGN KEY (user) REFERENCES user(id) ON DELETE CASCADE,
+                         FOREIGN KEY (playlist) REFERENCES playlist(path) ON DELETE CASCADE
                      )
                      """)
 
