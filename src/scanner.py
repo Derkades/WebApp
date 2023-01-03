@@ -2,6 +2,7 @@ from pathlib import Path
 import logging
 from sqlite3 import Connection
 from dataclasses import dataclass
+import time
 
 import db
 import metadata
@@ -135,9 +136,12 @@ def scan(conn: Connection) -> None:
     """
     Main function for scanning music directory structure
     """
+    start_time_ns = time.time_ns()
     playlists = scan_playlists(conn)
     for playlist in playlists:
         scan_tracks(conn, playlist)
+    duration_ms = (time.time_ns() - start_time_ns) // 1000000
+    log.info('Done scanning all playlists, took %sms', duration_ms)
 
 
 if __name__ == '__main__':
