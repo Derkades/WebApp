@@ -121,7 +121,7 @@ function createPlaylistDropdowns() {
             const option = document.createElement('option');
             option.value = playlist.dir_name;
             option.textContent = playlist.display_name;
-            option.disabled = onlyWritable && playlist.write;
+            option.disabled = onlyWritable && !playlist.write;
             select.appendChild(option);
         }
     }
