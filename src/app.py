@@ -701,9 +701,9 @@ def lastfm_now_playing():
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
         user_key = lastfm.get_user_key(user)
-        if user_key:
+        if not user_key:
             log.info('Skip last.fm now playing, account is not linked')
-            return
+            return Response('ok', 200)
         track = Track.by_relpath(conn, request.json['track'])
         meta = track.metadata()
     # Scrobble request takes a while, so close database connection first
@@ -717,9 +717,9 @@ def lastfm_scrobble():
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
         user_key = lastfm.get_user_key(user)
-        if user_key:
+        if not user_key:
             log.info('Skip last.fm now playing, account is not linked')
-            return
+            return Response('ok', 200)
         track = Track.by_relpath(conn, request.json['track'])
         start_timestamp = request.json['start_timestamp']
         meta = track.metadata()
