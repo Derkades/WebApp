@@ -286,7 +286,7 @@ def ytdl():
 
     with db.connect() as conn:
         playlist = music.playlist(conn, directory)
-        scanner.scan_tracks(conn, playlist)
+        scanner.scan_tracks(conn, playlist.path)
 
     return {
         'code': result.returncode,
@@ -510,7 +510,7 @@ def files_upload():
         uploaded_file.save(Path(upload_dir, uploaded_file.filename))
 
     with db.connect() as conn:
-        scanner.scan_tracks(conn, playlist)
+        scanner.scan_tracks(conn, playlist.path)
 
     return redirect('/files?path=' + urlencode(music.to_relpath(upload_dir)))
 
@@ -544,7 +544,7 @@ def files_rename():
 
             path.rename(Path(path.parent, new_name))
 
-            scanner.scan_tracks(conn, playlist)
+            scanner.scan_tracks(conn, playlist.path)
 
             if request.is_json:
                 return Response(None, 200)

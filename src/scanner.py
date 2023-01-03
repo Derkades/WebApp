@@ -7,7 +7,6 @@ import time
 import db
 import metadata
 import music
-from music import Playlist
 import settings
 
 
@@ -70,15 +69,10 @@ def query_params(relpath: str, path: Path) -> QueryParams:
     return QueryParams(main_data, artist_data, tag_data)
 
 
-def scan_tracks(conn: Connection, playlist: Playlist | str) -> None:
+def scan_tracks(conn: Connection, playlist_path: str) -> None:
     """
     Scan for added, removed or changed tracks in a playlist.
     """
-    if isinstance(playlist, Playlist):
-        playlist_path = playlist.relpath
-    else:
-        playlist_path = playlist
-
     log.info('Scanning playlist: %s', playlist_path)
 
     paths_db: set[str] = set()

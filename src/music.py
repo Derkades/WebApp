@@ -13,6 +13,7 @@ from auth import User
 import cache
 import metadata
 import settings
+import scanner
 
 
 log = logging.getLogger('app.music')
@@ -224,28 +225,8 @@ class Track:
             subprocess.run(command, shell=False, check=True, capture_output=False)
             shutil.copy(temp_file.name, self.path)
 
-            self.update_database()
+            scanner.scan_tracks(self.conn, self.playlist)
 
-    def update_database(self):
-        """
-        Update metadata in database for this track only
-        """
-        meta = metadata.probe(self.path)
-
-        self.conn.execute('UPDATE track SET title=?, album=?, album_artist=?, year=? WHERE path=?',
-                          (meta.title, meta.album, meta.album_artist, meta.year, self.relpath))
-
-        self.conn.execute('DELETE FROM track_artist WHERE track=?', (self.relpath,))
-        self.conn.execute('DELETE FROM track_tag WHERE track=?', (self.relpath,))
-
-        if meta.artists is not None:
-            artist_insert = [(self.relpath, artist) for artist in meta.artists]
-            self.conn.executemany(('INSERT INTO track_artist (track, artist) VALUES (?, ?)'),
-                                  artist_insert)
-
-        tag_insert = [(self.relpath, tag) for tag in meta.tags]
-        self.conn.executemany(('INSERT INTO track_tag (track, tag) VALUES (?, ?)'),
-                              tag_insert)
 
     @staticmethod
     def by_relpath(conn: Connection, relpath: str) -> 'Track':
