@@ -138,7 +138,10 @@ function getTransformedVolume() {
 }
 
 function setAudioSource(sourceUrl) {
-    document.getElementById('audio').src = sourceUrl;
+    const audio = getAudioElement();
+    // Ensure audio volume matches slider
+    audio.volume = getTransformedVolume();
+    audio.src = sourceUrl;
 }
 
 function getAudioElement() {
