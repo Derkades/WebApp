@@ -226,6 +226,7 @@ class Queue {
         this.currentTrack = this.previousTracks.pop();
 
         onTrackChange();
+        this.updateHtml();
     };
 
     next() {
