@@ -1,8 +1,6 @@
 from argparse import ArgumentParser
 import logging
 
-import bcrypt
-
 import db
 
 
@@ -62,6 +60,8 @@ def handle_passwd(args):
     """
     Handle command to change a user's password
     """
+    import bcrypt
+
     with db.connect() as conn:
         result = conn.execute('SELECT id FROM user WHERE username=?',
                               (args.username,)).fetchone()
@@ -103,6 +103,16 @@ def handle_playlist(args):
                      (user_id, result[0]))
 
 
+def handle_scan(args):
+    """
+    Handle command to scan playlists
+    """
+    import scanner
+
+    with db.connect() as conn:
+        scanner.scan(conn)
+
+
 if __name__ == '__main__':
     import logconfig
     logconfig.apply()
@@ -130,6 +140,9 @@ if __name__ == '__main__':
     playlist.add_argument('username')
     playlist.add_argument('playlist_path')
     playlist.set_defaults(func=handle_playlist)
+
+    scan = subparsers.add_parser('scan', help='scan playlists for changes')
+    scan.set_defaults(func=handle_scan)
 
     args = parser.parse_args()
     args.func(args)
