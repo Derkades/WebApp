@@ -67,6 +67,7 @@
                 {{ icon_button('skip-next', 'button-next') }}
                 {{ icon_button('microphone', 'button-lyrics') }}
                 {{ icon_button('album', 'button-album') }}
+                {{ icon_button('chart-line-variant', 'open-dialog-playlist-stats') }}
                 {{ icon_button('gear', 'open-dialog-settings') }}
 
                 {{ icon_button('pencil', 'button-edit') }}
@@ -310,6 +311,15 @@
         </div>
     </div>
 
+    <div id="dialog-playlist-stats" class="full-page-overlay hidden dialog-overlay">
+        <div class="box-rounded box-solid">
+            {{ dialog_header('dialog-playlist-stats', gettext('Playlist statistics')) }}
+            <div class="scroll">
+                <div id="playlist-stats"></div>
+            </div>
+        </div>
+    </div>
+
     <div id="loading-overlay" class="full-page-overlay">
         <div>
             <div class="flex-content-center">
@@ -350,6 +360,31 @@
                 <div class="icon" style="background-image: url('/static/icon/delete.svg')"></div>
             </div>
         </td>
+    </template>
+    <template id="template-playlist-stats">
+        <div>
+            <h3 class="insert-value" data-value="name"></h3>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>Track count</td>
+                        <td><span class="insert-value" data-value="track_count"></span></td>
+                    </tr>
+                    <tr>
+                        <td>Total duration</td>
+                        <td><span class="insert-value" data-value="total_duration" data-format-time></span></td>
+                    </tr>
+                    <tr>
+                        <td>Mean duration</td>
+                        <td><span class="insert-value" data-value="mean_duration" data-format-time></span></td>
+                    </tr>
+                    <tr>
+                        <td>Artist count</td>
+                        <td><span class="insert-value" data-value="artist_count"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </template>
 
 {% endblock content %}

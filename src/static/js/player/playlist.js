@@ -64,8 +64,7 @@ function createPlaylistCheckbox(playlist, index) {
     }
     label.replaceChildren(
         playlist.display_name,
-        sup,
-        ' (' + playlist.track_count + ')'
+        sup
     );
 
     span.appendChild(input);
@@ -125,4 +124,32 @@ function createPlaylistDropdowns() {
             select.appendChild(option);
         }
     }
+}
+
+function updatePlaylistStatsHtml() {
+    const children = [];
+
+    for (const relpath in state.playlists) {
+        const playlist = state.playlists[relpath];
+
+        const child = document.getElementById('template-playlist-stats').content.cloneNode(true).firstElementChild;
+
+        for (const elem of child.getElementsByClassName('insert-value')) {
+            const valueName = elem.dataset.value;
+            let value;
+            if (valueName === 'name') {
+                value = playlist.display_name;
+            } else {
+                value = playlist.stats[valueName];
+            }
+            if (elem.dataset.formatTime === "") {
+                value = secondsToString(value);
+            }
+            elem.textContent = value;
+        }
+
+        children.push(child);
+    }
+
+    document.getElementById('playlist-stats').replaceChildren(...children);
 }

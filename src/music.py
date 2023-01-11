@@ -7,7 +7,7 @@ import logging
 import tempfile
 import shutil
 from dataclasses import dataclass
-from sqlite3 import Connection
+from sqlite3 import Connection, Row
 
 from auth import User
 import cache
@@ -237,6 +237,30 @@ class Track:
 
 
 @dataclass
+class PlaylistStats:
+    track_count: int
+    total_duration: int
+    mean_duration: int
+    artist_count: int
+
+    def __init__(self, conn: Connection, relpath: str):
+        row = conn.execute('SELECT COUNT(*), SUM(duration), AVG(duration) FROM track WHERE playlist=?',
+                           (relpath,)).fetchone()
+        self.track_count, self.total_duration, self.mean_duration = row
+
+        row = conn.execute('SELECT COUNT(DISTINCT artist) FROM track_artist JOIN track ON track.path=track WHERE playlist=?',
+                           (relpath,)).fetchone()
+        self.artist_count, = row
+
+    def as_dict(self) -> dict[str, str | int]:
+        return {
+            'total_duration': self.total_duration,
+            'track_count': self.track_count,
+            'mean_duration': self.mean_duration,
+            'artist_count': self.artist_count,
+        }
+
+@dataclass
 class Playlist:
 
     conn: Connection
@@ -336,6 +360,9 @@ class Playlist:
             return False
 
         return row[0]
+
+    def stats(self) -> PlaylistStats:
+        return PlaylistStats(self.conn, self.relpath)
 
     @staticmethod
     def from_path(conn: Connection, path: Path) -> 'Playlist':

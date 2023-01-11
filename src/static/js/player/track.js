@@ -114,6 +114,7 @@ class Track {
 
         // Update HTML depending on state.playlists and state.tracks
         updatePlaylistCheckboxHtml();
+        updatePlaylistStatsHtml();
         browse.updateCurrentView();
         createPlaylistDropdowns();
         updateTagCheckboxes();
