@@ -367,20 +367,56 @@
             <table>
                 <tbody>
                     <tr>
-                        <td>Track count</td>
+                        <td>{% trans %}Number of tracks{% endtrans %}</td>
                         <td><span class="insert-value" data-value="track_count"></span></td>
                     </tr>
-                    <tr>
-                        <td>Total duration</td>
-                        <td><span class="insert-value" data-value="total_duration" data-format-time></span></td>
-                    </tr>
-                    <tr>
-                        <td>Mean duration</td>
-                        <td><span class="insert-value" data-value="mean_duration" data-format-time></span></td>
-                    </tr>
-                    <tr>
-                        <td>Artist count</td>
+                         <tr>
+                        <td>{% trans %}Number of artists{% endtrans %}</td>
                         <td><span class="insert-value" data-value="artist_count"></span></td>
+                    </tr>
+                    <tr>
+                        <td>{% trans %}Total duration{% endtrans %}</td>
+                        <td><span class="insert-value" data-value="total_duration" data-format-duration></span></td>
+                    </tr>
+                    <tr>
+                        <td>{% trans %}Mean duration{% endtrans %}</td>
+                        <td><span class="insert-value" data-value="mean_duration" data-format-duration></span></td>
+                    </tr>
+                    <tr>
+                        <td>{% trans %}Tracks with title metadata{% endtrans %}</td>
+                        <td><span class="insert-value" data-value="has_title_count"></span></td>
+                    </tr>
+                    <tr>
+                        <td>{% trans %}Tracks with album metadata{% endtrans %}</td>
+                        <td><span class="insert-value" data-value="has_album_count"></span></td>
+                    </tr>
+                    <tr>
+                        <td>{% trans %}Tracks with album artist metadata{% endtrans %}</td>
+                        <td><span class="insert-value" data-value="has_album_artist_count"></span></td>
+                    </tr>
+                    <tr>
+                        <td>{% trans %}Tracks with year metadata{% endtrans %}</td>
+                        <td><span class="insert-value" data-value="has_year_count"></span></td>
+                    </tr>
+                    <tr>
+                        <td>{% trans %}Tracks with artist metadata{% endtrans %}</td>
+                        <td><span class="insert-value" data-value="has_artist_count"></span></td>
+                    </tr>
+                    <tr>
+                        <td>{% trans %}Tracks with tag metadata{% endtrans %}</td>
+                        <td><span class="insert-value" data-value="has_tag_count"></span></td>
+                    </tr>
+                    <tr>
+                        <td>{% trans %}Most recent play{% endtrans %}</td>
+                        <td><span class="insert-value" data-value="most_recent_play" data-format-timestamp></span></td>
+                    </tr>
+                    <tr>
+                        <td>{% trans %}Least recent play{% endtrans %}</td>
+                        <td><span class="insert-value" data-value="least_recent_play" data-format-timestamp></span></td>
+                    </tr>
+                    <tr>
+                        <td>{% trans %}Most recent track modification{% endtrans %}</td>
+                        <td><span class="insert-value" data-value="most_recent_mtime" data-format-timestamp></span></td>
                     </tr>
                 </tbody>
             </table>

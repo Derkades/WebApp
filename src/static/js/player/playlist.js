@@ -142,8 +142,10 @@ function updatePlaylistStatsHtml() {
             } else {
                 value = playlist.stats[valueName];
             }
-            if (elem.dataset.formatTime === "") {
+            if (elem.dataset.formatDuration === "") {
                 value = secondsToString(value);
+            } else if (elem.dataset.formatTimestamp === "") {
+                value = secondsTimestampToString(value);
             }
             elem.textContent = value;
         }

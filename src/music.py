@@ -242,15 +242,43 @@ class PlaylistStats:
     total_duration: int
     mean_duration: int
     artist_count: int
+    has_title_count: int
+    has_album_count: int
+    has_album_artist_count: int
+    has_year_count: int
+    has_artist_count: int
+    has_tag_count: int
+    most_recent_play: int
+    least_recent_play: int
+    most_recent_mtime: int
 
     def __init__(self, conn: Connection, relpath: str):
         row = conn.execute('SELECT COUNT(*), SUM(duration), AVG(duration) FROM track WHERE playlist=?',
                            (relpath,)).fetchone()
         self.track_count, self.total_duration, self.mean_duration = row
 
-        row = conn.execute('SELECT COUNT(DISTINCT artist) FROM track_artist JOIN track ON track.path=track WHERE playlist=?',
+        row = conn.execute('''
+                           SELECT COUNT(DISTINCT artist),
+                                  SUM(title IS NOT NULL),
+                                  SUM(album IS NOT NULL),
+                                  SUM(album_artist IS NOT NULL),
+                                  SUM(year IS NOT NULL),
+                                  MAX(last_played),
+                                  MIN(last_played),
+                                  MAX(mtime)
+                           FROM track_artist JOIN track ON track.path=track WHERE playlist=?
+                           ''',
                            (relpath,)).fetchone()
-        self.artist_count, = row
+        self.artist_count, self.has_title_count, self.has_album_count, self.has_album_artist_count, \
+            self.has_year_count, self.most_recent_play, self.least_recent_play, self.most_recent_mtime = row
+
+        row = conn.execute('SELECT COUNT(DISTINCT track) FROM track_artist JOIN track on track.path = track WHERE playlist=?',
+                           (relpath,)).fetchone()
+        self.has_artist_count, = row
+
+        row = conn.execute('SELECT COUNT(DISTINCT track) FROM track_tag JOIN track on track.path = track WHERE playlist=?',
+                           (relpath,)).fetchone()
+        self.has_tag_count, = row
 
     def as_dict(self) -> dict[str, str | int]:
         return {
@@ -258,6 +286,15 @@ class PlaylistStats:
             'track_count': self.track_count,
             'mean_duration': self.mean_duration,
             'artist_count': self.artist_count,
+            'has_title_count': self.has_title_count,
+            'has_album_count': self.has_album_count,
+            'has_album_artist_count': self.has_album_artist_count,
+            'has_year_count': self.has_year_count,
+            'has_artist_count': self.has_artist_count,
+            'has_tag_count': self.has_tag_count,
+            'most_recent_play': self.most_recent_play,
+            'least_recent_play': self.least_recent_play,
+            'most_recent_mtime': self.most_recent_mtime,
         }
 
 @dataclass

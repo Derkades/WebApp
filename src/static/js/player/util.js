@@ -30,6 +30,11 @@ function secondsToString(seconds) {
     }
 }
 
+function secondsTimestampToString(seconds) {
+    const utcString = new Date(1000 * seconds).toISOString();
+    return utcString.substring(0, 10) + ' ' + utcString.substring(11, 16)
+}
+
 // https://www.w3schools.com/js/js_cookies.asp
 function setCookie(cname, cvalue) {
     const d = new Date();

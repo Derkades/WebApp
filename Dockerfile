@@ -14,9 +14,8 @@ COPY ./src .
 COPY ./docker/entrypoint.sh .
 COPY ./docker/manage /usr/local/bin
 
-RUN cat ./static/js/player/*.js > ./static/js/player/packed.js
-
-RUN pybabel compile -d translations
+RUN cat ./static/js/player/*.js > ./static/js/player/packed.js && \
+    pybabel compile -d translations
 
 ENV PYTHONUNBUFFERED=1
 
