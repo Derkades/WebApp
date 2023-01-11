@@ -83,15 +83,6 @@ class Track {
         return html;
     };
 
-    static findTrackByPath(path) {
-        for (const track of state.tracks) {
-            if (track.path === path) {
-                return track;
-            }
-        }
-        return null;
-    };
-
     static async updateLocalTrackList() {
         console.info('Requesting track list');
         const response = await fetch('/track_list?csrf=' + encodeURIComponent(getCsrfToken()));
@@ -108,7 +99,11 @@ class Track {
                 state.otherPlaylists.push(playlist);
             }
         }
-        state.tracks = json.tracks.map(trackData => new Track(trackData));
+
+        state.tracks = {};
+        for (const trackData of json.tracks) {
+            state.tracks[trackData.path] = new Track(trackData);
+        }
 
         hideLoadingOverlay();
 

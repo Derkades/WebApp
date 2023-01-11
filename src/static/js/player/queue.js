@@ -75,9 +75,9 @@ class Queue {
         const path = (await chooseResponse.json()).path;
 
         // Find track info for this file
-        const track = Track.findTrackByPath(path);
+        const track = state.tracks[path];
 
-        if (track === null) {
+        if (track === undefined) {
             throw Error('Track does not exist in local list: ' + path);
         }
 

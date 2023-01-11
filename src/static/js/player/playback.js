@@ -233,10 +233,6 @@ function updateWritablePlaylistButtons() {
     // Only show metadata edit and track delete buttons if playlist is writable
 
     const playlist = queue.currentTrack.playlist();
-    if (playlist === undefined) {
-        console.warn('Track playlist path not in state.playlists', queue.currentTrack.playlistPath);
-        return;
-    }
 
     if (playlist.write) {
         document.getElementById('button-edit').classList.remove('hidden');
