@@ -6,3 +6,5 @@ __pycache__/
 messages.pot
 *.mo
 *.db
+*.db-shm
+*.db-wal
