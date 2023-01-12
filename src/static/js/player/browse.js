@@ -32,7 +32,7 @@ class Browse {
         }
         const current = this.#history[this.#history.length - 1];
         this.setHeader(current.title);
-        const tracks = this.filterTracks(state.tracks, current.filter);
+        const tracks = this.filterTracks(Object.values(state.tracks), current.filter);
         this.setContent(this.generateTrackList(tracks));
     };
 
