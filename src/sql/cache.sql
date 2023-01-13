@@ -1,0 +1,10 @@
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS cache (
+    key TEXT NOT NULL UNIQUE PRIMARY KEY,
+    data BLOB NOT NULL,
+    update_time INTEGER NOT NULL,
+    access_time INTEGER DEFAULT 0
+);
+
+COMMIT;
