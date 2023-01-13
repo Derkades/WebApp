@@ -8,11 +8,8 @@ services:
     build: .
     volumes:
       - type: bind
-        source: ./music # in nextcloud /zwembad/nextcloud/data/files/...
+        source: ./music
         target: /music
-      - type: bind
-        source: ./cache
-        target: /cache
       - type: bind
         source: ./data
         target: /data

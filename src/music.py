@@ -7,7 +7,7 @@ import logging
 import tempfile
 import shutil
 from dataclasses import dataclass
-from sqlite3 import Connection, Row
+from sqlite3 import Connection
 
 from auth import User
 import cache
@@ -107,7 +107,9 @@ class Track:
         """
         return metadata.cached(self.conn, self.relpath)
 
-    def transcoded_audio(self, quality, fruit) -> bytes:
+    def transcoded_audio(self,
+                         quality: Literal['verylow'] | Literal['low'] | Literal['high'],
+                         fruit: bool) -> bytes:
         """
         Normalize and compress audio using ffmpeg
         Returns: Compressed audio bytes
@@ -145,8 +147,9 @@ class Track:
 
         in_path_abs = self.path.absolute().as_posix()
 
-        cache_object = cache.get('audio2', container_format + in_path_abs + bit_rate)
-        cached_data = cache_object.retrieve()
+        cache_key = 'audio' + container_format + in_path_abs + bit_rate
+
+        cached_data = cache.retrieve(cache_key)
         if cached_data is not None:
             log.info('Returning cached audio')
             return cached_data
@@ -179,26 +182,28 @@ class Track:
         # Remove whitespace and newlines
         filters = ''.join(filters.split())
 
-        command = ['ffmpeg',
-                '-y',  # overwrite existing file
-                '-hide_banner',
-                '-loglevel', settings.ffmpeg_loglevel,
-                '-i', in_path_abs,
-                '-map_metadata', '-1',  # browser doesn't need metadata
-                '-vn',  # remove video track (also used by album covers, as mjpeg stream)
-                '-filter:a', filters,
-                '-c:a', audio_codec,
-                '-b:a', bit_rate,
-                '-f', container_format,
-                '-vbr', 'on',
-                '-frame_duration', '60',
-                '-ac', str(channels),
-                cache_object.data_path.absolute().as_posix()]
-        subprocess.run(command, shell=False, check=True, capture_output=False)
+        with tempfile.NamedTemporaryFile() as temp_file:
+            command = ['ffmpeg',
+                    '-y',  # overwrite existing file
+                    '-hide_banner',
+                    '-loglevel', settings.ffmpeg_loglevel,
+                    '-i', in_path_abs,
+                    '-map_metadata', '-1',  # browser doesn't need metadata
+                    '-vn',  # remove video track (also used by album covers, as mjpeg stream)
+                    '-filter:a', filters,
+                    '-c:a', audio_codec,
+                    '-b:a', bit_rate,
+                    '-f', container_format,
+                    '-vbr', 'on',
+                    '-frame_duration', '60',
+                    '-ac', str(channels),
+                    temp_file.name]
+            subprocess.run(command, shell=False, check=True, capture_output=False)
 
-        cached_data = cache_object.retrieve_overwrite_checksum()
-
-        return cached_data
+            temp_file.seek(0)
+            data = temp_file.read()
+            cache.store(cache_key, data)
+            return data
 
     def write_metadata(self, **meta_dict: str):
         """

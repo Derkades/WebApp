@@ -22,8 +22,9 @@ def image_search(bing_query: str) -> Optional[bytes]:
     Returns: Image data bytes
     """
 
-    cache_obj = cache.get('bing', bing_query)
-    cache_data = cache_obj.retrieve()
+    cache_key = 'bing' + bing_query
+
+    cache_data = cache.retrieve(cache_key)
     if cache_data:
         if cache_data == b'magic_no_results':
             log.info('Returning no result, from cache: %s', bing_query)
@@ -82,10 +83,10 @@ def image_search(bing_query: str) -> Optional[bytes]:
                 log.info('Exception while downloading image, skipping. %s', ex)
 
         if best_image is None:
-            cache_obj.store(b'magic_no_results')
+            cache.store(cache_key, b'magic_no_results')
             log.info('No image found')
         else:
-            cache_obj.store(best_image)
+            cache.store(cache_key, best_image)
             log.info('Found image, %.2fMiB', len(best_image)/1024/1024)
 
         return best_image

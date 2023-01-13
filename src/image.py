@@ -36,9 +36,15 @@ RESOLUTION_TABLE =  {
 }
 
 
-def thumbnail(input_img: Path | bytes | Callable, cache_id: str, thumb_format: str, thumb_resolution: Optional[int], thumb_quality, square) -> bytes:
+def thumbnail(input_img: Path | bytes | Callable,
+              cache_key: str,
+              thumb_format: str,
+              thumb_resolution: Optional[int],
+              thumb_quality,
+              square) -> bytes:
     """
     Generate thumbnail, making use of cache.
+    WARNING: Database must NOT be open when this is function is called.
     Parameters:
         input_img: Input image, either a path, image bytes, or a function that returns image bytes.
         cache_id: A cache identifier string to uniquely identify this image. If a cache object exists
@@ -54,14 +60,15 @@ def thumbnail(input_img: Path | bytes | Callable, cache_id: str, thumb_format: s
     if thumb_resolution is None:
         thumb_resolution = RESOLUTION_TABLE[thumb_quality]
     thumb_quality_percent = QUALITY_TABLE[thumb_quality][thumb_format]
-    cache_id += thumb_format + str(thumb_quality_percent) + str(thumb_resolution)
-    cache_obj = cache.get('thumbnail5', cache_id)
-    cache_data = cache_obj.retrieve()
+    cache_key += 'thumbnail5' + thumb_format + str(thumb_quality_percent) + str(thumb_resolution)
+
+    cache_data = cache.retrieve(cache_key)
+
     if cache_data is not None:
-        log.info('Returning thumbnail from cache: %s', cache_id)
+        log.info('Returning thumbnail from cache: %s', cache_key)
         return cache_data
 
-    log.info('Generating thumbnail: %s', cache_id)
+    log.info('Generating thumbnail: %s', cache_key)
 
     input_bytes: Optional[bytes]
 
@@ -73,7 +80,7 @@ def thumbnail(input_img: Path | bytes | Callable, cache_id: str, thumb_format: s
     elif isinstance(input_img, bytes):
         input_bytes = input_img
     elif input_img is None:
-        log.warning('input_img is None, using fallback for id: %s', cache_id)
+        log.warning('input_img is None, using fallback for id: %s', cache_key)
         input_bytes = None
     else:
         raise ValueError('invalid image type: ' + type(input_img))
@@ -98,7 +105,7 @@ def thumbnail(input_img: Path | bytes | Callable, cache_id: str, thumb_format: s
             img_out.seek(0)
             comp_bytes = img_out.read()
 
-            cache_obj.store(comp_bytes)
+            cache.store(cache_key, comp_bytes)
             return comp_bytes
         except Exception as ex:
             log.warning('Error during thumbnail generation: %s', ex)

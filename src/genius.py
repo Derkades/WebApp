@@ -101,8 +101,8 @@ def get_lyrics(query: str) -> Optional[Lyrics]:
         query: Search query
     Returns: Lyrics object, or None if no lyrics were found
     """
-    cache_object = cache.get('genius', query)
-    cached_data = cache_object.retrieve_json()
+    cache_key = 'genius' + query
+    cached_data = cache.retrieve_json(cache_key)
 
     if cached_data is not None:
         if not cached_data['found']:
@@ -123,7 +123,7 @@ def get_lyrics(query: str) -> Optional[Lyrics]:
 
     if genius_url is None:
         log.info('No lyrics found')
-        cache_object.store_json({'found': False})
+        cache.store_json(cache_key, {'found': False})
         return None
 
     log.info('Found URL: %s', genius_url)
@@ -136,10 +136,9 @@ def get_lyrics(query: str) -> Optional[Lyrics]:
         # Don't cache so we try again in the future when the bug is fixed
         return Lyrics(genius_url, ['Error retrieving lyrics, please report this issue. Make sure to include the source URL in your report. Please look at the logs for a more detailed message, if you are able to.'])
 
-    cache_object.store_json({
-        'found': True,
-        'source_url': genius_url,
-        'lyrics': lyrics,
-    })
+    cache.store_json(cache_key,
+                     {'found': True,
+                      'source_url': genius_url,
+                      'lyrics': lyrics})
 
     return Lyrics(genius_url, lyrics)

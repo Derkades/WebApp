@@ -22,7 +22,6 @@ def getenv(key: str, default: Optional[str]) -> str:
 
 user_agent = 'Super fancy music player (https://github.com/DanielKoomen/WebApp/)'
 ffmpeg_loglevel = getenv('MUSIC_FFMPEG_LOGLEVEL', 'info')
-cache_dir = getenv('MUSIC_CACHE_DIR', '/cache')
 music_dir = getenv('MUSIC_MUSIC_DIR', '/music')
 log_level = getenv('MUSIC_LOG_LEVEL', 'INFO')
 webscraping_user_agent = getenv('MUSIC_WEBSCRAPING_USER_AGENT', 'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0')

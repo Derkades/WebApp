@@ -22,7 +22,7 @@ Music player for communities (hacker spaces, maker spaces).
 
 Prebuilt container image: `ghcr.io/danielkoomen/webapp`. Take the `docker-compose.yaml` file in this repository as an example, replacing `build` with an `image`.
 
-### `MUSIC_MUSIC_DIR` (default `/music`)
+### `MUSIC_MUSIC_DIR` (default: `/music`)
 
 This directory should contain one subdirectory for each playlist. Place audio files in these playlist directories. Creating directories inside playlist directories is not supported at this time.
 
@@ -54,9 +54,11 @@ Don't worry about removing strings like "(Official Audio)" from song titles, the
 
 The first startup wil be slow, since all files need to be scanned. Later, unmodified files can be skipped (based on the file modification time).
 
-### `MUSIC_CACHE_DIR` (default `/cache`)
+### `MUSIC_DATA_PATH` (default: `/data`)
 
-This directory is used to store the result of time-consuming operations, like transcoding audio or web scraping for album art. It may be emptied at any time as long as the application is not running. Emptying the cache will significantly impact however, so strongly consider never deleting it.
+This directory is used to store the database files.
+- `music.db`: Stores accounts and sessions. Also stores an index of playlist, tracks, and metadata.
+- `cache.db`: Stores cached data for slow operations. For example, it stores transcoded audio, downloaded album covers, and scraped lyrics. This database may be deleted, but deleting it will severely impact application performance until it is populated again.
 
 ### User management
 

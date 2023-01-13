@@ -47,28 +47,28 @@ def get_cover(title: str) -> Optional[bytes]:
     Get album cover for the given song title
     Returns: Image bytes, or None of no album cover was found.
     """
-    cache_obj = cache.get('musicbrainz cover', title)
-    cache_data = cache_obj.retrieve()
+    cache_key = 'musicbrainz cover' + title
+    cached_data = cache.retrieve(cache_key)
 
-    if cache_data is not None:
-        if cache_data == b'magic_no_cover':
+    if cached_data is not None:
+        if cached_data == b'magic_no_cover':
             log.info('Returning no cover, from cache')
             return None
         log.info('Returning cover from cache')
-        return cache_data
+        return cached_data
 
     try:
         release = _search_release(title)
         if release is None:
             log.info('No release found')
-            cache_obj.store(b'magic_no_cover')
+            cache.store(cache_key, b'magic_no_cover')
             return None
 
         image_url = _get_image_url(release)
 
         if image_url is None:
             log.info('Release has no cover image attached')
-            cache_obj.store(b'magic_no_cover')
+            cache.store(cache_key, b'magic_no_cover')
             return None
 
         r = requests.get(image_url,
@@ -79,7 +79,7 @@ def get_cover(title: str) -> Optional[bytes]:
             log.warning('Returned image seems to be corrupt')
             return None
 
-        cache_obj.store(image_bytes)
+        cache.store(cache_key, image_bytes)
         log.info('Found suitable cover art')
         return image_bytes
     except Exception as ex:

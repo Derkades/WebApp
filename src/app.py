@@ -1,3 +1,4 @@
+from sqlite3 import Connection
 from typing import Optional
 import logging
 from pathlib import Path
@@ -218,8 +219,6 @@ def get_album_cover() -> Response:
         track = Track.by_relpath(conn, request.args['path'])
         meta = track.metadata()
 
-    # Don't keep database connection active while downloading images
-
     meme = 'meme' in request.args and bool(int(request.args['meme']))
 
     def get_img():
@@ -233,7 +232,7 @@ def get_album_cover() -> Response:
         cache_id += 'meme2'
 
     comp_bytes = image.thumbnail(get_img, cache_id, img_format[6:], None,
-                                request.args['quality'], not meme)
+                                 request.args['quality'], not meme)
 
     return Response(comp_bytes, mimetype=img_format)
 

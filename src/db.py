@@ -24,6 +24,13 @@ def connect() -> Connection:
     return _connect('music')
 
 
+def cache() -> Connection:
+    """
+    Create new SQLite database connection to cache database
+    """
+    return _connect('cache')
+
+
 def create_tables() -> None:
     """
     Initialise SQLite database with tables
@@ -128,6 +135,16 @@ def create_tables() -> None:
                          creation_date INTEGER NOT NULL,
                          UNIQUE(user, token),
                          FOREIGN KEY (user) REFERENCES user(id) ON DELETE CASCADE
+                     )
+                     """)
+
+    with cache() as conn:
+        conn.execute("""
+                     CREATE TABLE IF NOT EXISTS cache (
+                         key TEXT NOT NULL UNIQUE PRIMARY KEY,
+                         data BLOB NOT NULL,
+                         update_time INTEGER NOT NULL,
+                         access_time INTEGER DEFAULT 0
                      )
                      """)
 
