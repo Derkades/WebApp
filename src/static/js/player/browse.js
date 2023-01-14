@@ -118,32 +118,41 @@ class Browse {
     };
 
     getSearchScore(track, query) {
-        const matchProperties = [track.path, track.display, ...track.tags];
+        if (query === '') {
+            // No query, same score for all tracks
+            return 1;
+        }
+
+        const matchProperties = [track.display];
         if (track.album !== null) {
             matchProperties.push(track.album);
         }
         if (track.artists !== null) {
-            matchProperties.push(track.artists.join(' & '));
-        }
-        if (track.albumArtist !== null) {
-            matchProperties.push(track.albumArtist);
+            for (const artist of track.artists) {
+                matchProperties.push(artist);
+            }
         }
 
-        if (query !== '') {
-            let score = 0;
-            for (const matchProperty of matchProperties) {
-                let partialScore = matchProperty.length - levenshtein(matchProperty.toLowerCase(), query);
-                // Boost exact matches
-                if (matchProperty.toLowerCase().includes(query)) {
-                    partialScore *= 2;
-                }
-                score += partialScore;
+        let score = 0;
+
+        for (const matchProperty of matchProperties) {
+            if (matchProperty.toLowerCase().includes(query)) {
+                score += 1;
             }
-            return score;
-        } else {
-            // No query, same score for all tracks
-            return 1;
         }
+
+        const parts = query.split(' ');
+        for (const part of parts) {
+            for (const matchProperty of matchProperties) {
+                if (matchProperty.toLowerCase().includes(part)) {
+                    score += 2 / parts.length;
+                } else {
+                    score += 1 / (levenshtein(matchProperty.toLowerCase(), query) * parts.length);
+                }
+            }
+        }
+
+        return score;
     };
 
     filterTracks(tracks, customFilter) {
