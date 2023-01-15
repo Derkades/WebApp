@@ -1,13 +1,12 @@
-from typing import Optional
 import json
 import html
 import logging
 import traceback
 from dataclasses import dataclass
+import sys
 
 import requests
-from bs4 import BeautifulSoup
-from bs4.element import Tag
+from bs4 import BeautifulSoup, NavigableString, PageElement, Tag
 
 import cache
 import settings
@@ -18,14 +17,11 @@ log = logging.getLogger('app.genius')
 
 @dataclass
 class Lyrics:
-    source_url: Optional[str]
-    lyrics: list[str]
-
-    def lyrics_html(self):
-        return '<br>\n'.join(self.lyrics)
+    source_url: str | None
+    lyrics_html: str
 
 
-def _search(title: str) -> Optional[str]:
+def _search(title: str) -> str | None:
     """
     Returns: URL of genius lyrics page, or None if no page was found.
     """
@@ -44,56 +40,63 @@ def _search(title: str) -> Optional[str]:
     return None
 
 
-def _extract_lyrics(genius_url: str) -> list[str]:
+def _html_tree_to_lyrics(elements: list[PageElement], level=0) -> str:
+    lyrics = ''
+    for element in elements:
+        if isinstance(element, NavigableString):
+            # print(level, '\tstr\t', str(element))
+            lyrics += html.escape(str(element))
+        elif isinstance(element, Tag):
+            # print(level, '\ttag\t', element.name, '\t', str(element))
+            if element.name == 'br':
+                lyrics += '<br>'
+            else:
+                # Probably an element like <a>, <p>, <i> with important text inside it.
+                lyrics += _html_tree_to_lyrics(element.contents, level + 1)
+        else:
+            log.warning('Encountered unexpected element type: %s', type(element))
+    return lyrics
+
+
+def _extract_lyrics(genius_url: str) -> str:
     """
     Extract lyrics from the supplied Genius lyrics page
     Parameters:
         genius_url: Lyrics page URL
     Returns: A list where each element is one lyrics line.
     """
-    # 1. In de HTML response, zoek voor een stukje JavaScript (een string)
-    # 2. Parse deze string als JSON
-    # 3. Trek een bepaalde property uit deze JSON, en parse deze met BeautifulSoup weer als HTML
-    # 4. Soms staat lyrics in een link of in italics, de for loop maakt dat goed
+    # Firstly, a request is made to download the standard Genius lyrics page. Inside this HTML is
+    # a bit of inline javascript.
     r = requests.get(genius_url,
                      timeout=10,
                      headers={'User-Agent': settings.webscraping_user_agent})
     text = r.text
+    # Find the important bit of javascript using these known parts of the code
     start = text.index('window.__PRELOADED_STATE__ = JSON.parse(') + 41
     end = text.index("}');") + 1
+    # Inside the javascript bit that has now been extracted, is a string. This string contains
+    # JSON data. Because it is in a string, some characters are escaped. These need to be
+    # un-escaped first.
     info_json_string = text[start:end].replace('\\"', "\"").replace("\\'", "'").replace('\\\\', '\\').replace('\\$', '$').replace('\\`', '`')
     try:
+        # Now, the JSON object is ready to be parsed.
         info_json = json.loads(info_json_string)
     except json.decoder.JSONDecodeError as ex:
         log.info('Error retrieving lyrics: json decode error at %s', ex.pos)
         log.info('Neighbouring text: "%s"', info_json_string[ex.pos-20:ex.pos+20])
         raise ex
+    # For some reason, the JSON object happens to contain lyrics HTML. This HTML is parsed
+    # using BeautifulSoup. The _html_tree_to_lyrics() function is responsible for extracting
+    # text from this HTML tree.
     lyric_html = info_json['songPage']['lyricsData']['body']['html']
     soup = BeautifulSoup(lyric_html, 'lxml')
     p = soup.find('p')
     assert isinstance(p, Tag)
-    lyrics = ''
-    for content in p.contents:
-        if not isinstance(content, Tag):
-            lyrics += html.escape(str(content).strip())
-            continue
 
-        if content.name == 'a':
-            for s in content.contents:
-                lyrics += html.escape(str(s).strip())
-        elif content.name == 'i':
-            for s in content.contents:
-                if str(s).strip() == '<br/>':
-                    lyrics += html.escape(str(s).strip())
-                else:
-                    lyrics += '<i>' + html.escape(str(s).strip()) + '</i>'
-        else:
-            lyrics += html.escape(str(content).strip())
-
-    return lyrics.split('&lt;br/&gt;')
+    return _html_tree_to_lyrics(p.contents)
 
 
-def get_lyrics(query: str) -> Optional[Lyrics]:
+def get_lyrics(query: str) -> Lyrics | None:
     """
     Search for the given query, then extract lyrics from that page (if found). This function
     will return lyrics from cache if it has been cached before.
@@ -101,7 +104,7 @@ def get_lyrics(query: str) -> Optional[Lyrics]:
         query: Search query
     Returns: Lyrics object, or None if no lyrics were found
     """
-    cache_key = 'genius' + query
+    cache_key = 'genius3' + query
     cached_data = cache.retrieve_json(cache_key)
 
     if cached_data is not None:
@@ -129,7 +132,7 @@ def get_lyrics(query: str) -> Optional[Lyrics]:
     log.info('Found URL: %s', genius_url)
 
     try:
-        lyrics = _extract_lyrics(genius_url)
+        lyrics_html = _extract_lyrics(genius_url)
     except Exception:
         log.info('Error retrieving lyrics')
         traceback.print_exc()
@@ -139,6 +142,21 @@ def get_lyrics(query: str) -> Optional[Lyrics]:
     cache.store_json(cache_key,
                      {'found': True,
                       'source_url': genius_url,
-                      'lyrics': lyrics})
+                      'lyrics': lyrics_html})
 
-    return Lyrics(genius_url, lyrics)
+    return Lyrics(genius_url, lyrics_html)
+
+
+if __name__ == '__main__':
+    if len(sys.argv) == 3:
+        if sys.argv[1] == 'search':
+            print(_search(sys.argv[2]))
+            sys.exit(0)
+        elif sys.argv[1] == 'extract':
+            for line in _extract_lyrics(sys.argv[2]).split('<br>'):
+                print(line)
+            sys.exit(0)
+
+    print('Usage:')
+    print(f' - {sys.argv[0]} search [search query]')
+    print(f' - {sys.argv[0]} extract [genius url]')

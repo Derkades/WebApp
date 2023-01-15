@@ -255,7 +255,7 @@ def get_lyrics():
             return {
                 'found': True,
                 'source': lyrics.source_url,
-                'html': lyrics.lyrics_html(),
+                'html': lyrics.lyrics_html,
             }
 
     return {'found': False}
