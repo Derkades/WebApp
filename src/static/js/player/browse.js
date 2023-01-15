@@ -137,7 +137,7 @@ class Browse {
 
         for (const matchProperty of matchProperties) {
             if (matchProperty.toLowerCase().includes(query)) {
-                score += 1;
+                score += 2;
             }
         }
 
