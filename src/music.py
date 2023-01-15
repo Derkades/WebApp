@@ -263,26 +263,37 @@ class PlaylistStats:
         self.track_count, self.total_duration, self.mean_duration = row
 
         row = conn.execute('''
-                           SELECT COUNT(DISTINCT artist),
-                                  SUM(title IS NOT NULL),
+                           SELECT COUNT(DISTINCT artist)
+                           FROM track_artist JOIN track ON track.path=track
+                           WHERE playlist=?
+                           ''', (relpath,)).fetchone()
+        self.artist_count, = row
+
+        row = conn.execute('''
+                           SELECT SUM(title IS NOT NULL),
                                   SUM(album IS NOT NULL),
                                   SUM(album_artist IS NOT NULL),
                                   SUM(year IS NOT NULL),
                                   MAX(last_played),
                                   MIN(last_played),
                                   MAX(mtime)
-                           FROM track_artist JOIN track ON track.path=track WHERE playlist=?
-                           ''',
-                           (relpath,)).fetchone()
-        self.artist_count, self.has_title_count, self.has_album_count, self.has_album_artist_count, \
+                           FROM track WHERE playlist=?
+                           ''', (relpath,)).fetchone()
+        self.has_title_count, self.has_album_count, self.has_album_artist_count, \
             self.has_year_count, self.most_recent_play, self.least_recent_play, self.most_recent_mtime = row
 
-        row = conn.execute('SELECT COUNT(DISTINCT track) FROM track_artist JOIN track on track.path = track WHERE playlist=?',
-                           (relpath,)).fetchone()
+        row = conn.execute('''
+                           SELECT COUNT(DISTINCT track)
+                           FROM track_artist JOIN track ON track.path = track
+                           WHERE playlist=?
+                           ''', (relpath,)).fetchone()
         self.has_artist_count, = row
 
-        row = conn.execute('SELECT COUNT(DISTINCT track) FROM track_tag JOIN track on track.path = track WHERE playlist=?',
-                           (relpath,)).fetchone()
+        row = conn.execute('''
+                           SELECT COUNT(DISTINCT track)
+                           FROM track_tag JOIN track ON track.path = track
+                           WHERE playlist=?
+                           ''', (relpath,)).fetchone()
         self.has_tag_count, = row
 
     def as_dict(self) -> dict[str, str | int]:
