@@ -216,9 +216,10 @@ def _verify_token(conn: sqlite3.Connection, token: str, user_agent = None, remot
 
     session_rowid, session_creation_date, session_user_agent, session_address, user_id, username, admin, lastfm_name, lastfm_key = result
 
-    if user_agent and remote_addr:
-        conn.execute('UPDATE session SET last_user_agent=?, last_address=? WHERE rowid=?',
-                        (user_agent, remote_addr, session_rowid))
+    # Disabled so database can be read-only. TODO Need to find a better solution.
+    # if user_agent and remote_addr:
+    #     conn.execute('UPDATE session SET last_user_agent=?, last_address=? WHERE rowid=?',
+    #                     (user_agent, remote_addr, session_rowid))
 
     session = Session(session_rowid, token, session_creation_date, session_user_agent, session_address)
     return User(conn, user_id, username, admin, session, lastfm_name, lastfm_key)

@@ -65,7 +65,7 @@ def home():
     """
     Home page, with links to file manager and music player
     """
-    with db.connect() as conn:
+    with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn, redirect_to_login=True)
     return render_template('home.jinja2')
 
@@ -156,7 +156,7 @@ def get_track() -> Response:
     """
     Get transcoded audio for the given track path.
     """
-    with db.connect() as conn:
+    with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.args['csrf'])
         track = Track.by_relpath(conn, request.args['path'])
@@ -213,7 +213,7 @@ def get_album_cover() -> Response:
     """
     Get album cover image for the provided track path.
     """
-    with db.connect() as conn:
+    with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.args['csrf'])
         track = Track.by_relpath(conn, request.args['path'])
@@ -242,7 +242,7 @@ def get_lyrics():
     """
     Get lyrics for the provided track path.
     """
-    with db.connect() as conn:
+    with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.args['csrf'])
 
@@ -266,7 +266,7 @@ def ytdl():
     """
     Use yt-dlp to download the provided URL to a playlist directory
     """
-    with db.connect() as conn:
+    with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
 
@@ -299,7 +299,7 @@ def track_list():
     """
     Return list of playlists and tracks.
     """
-    with db.connect() as conn:
+    with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.args['csrf'])
 
@@ -584,7 +584,7 @@ def files_download():
     """
     Download track
     """
-    with db.connect() as conn:
+    with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
     path = music.from_relpath(request.args['path'])
     return send_file(path, as_attachment=True)
@@ -696,7 +696,7 @@ def lastfm_connect():
 
 
 @app.route('/lastfm_now_playing', methods=['POST'])
-def lastfm_now_playing():
+def lastfm_now_playing(read_only=True):
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
@@ -713,7 +713,7 @@ def lastfm_now_playing():
 
 @app.route('/lastfm_scrobble', methods=['POST'])
 def lastfm_scrobble():
-    with db.connect() as conn:
+    with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
         user_key = lastfm.get_user_key(user)
