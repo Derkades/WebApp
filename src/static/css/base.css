@@ -187,3 +187,27 @@ body.light .icon {
 a.large {
     font-size: 1.5em;
 }
+
+.table {
+    width: 100%;
+    border-spacing: 0;
+    background: #313131;
+    border-radius: var(--border-radius-amount); /* TODO why does border radius not apply to top? */
+}
+
+.table thead tr {
+    background: #414141;
+}
+
+.table tr td,
+.table tr th {
+    padding: .5rem;
+}
+
+.table .icon-col {
+    width: 2rem;
+}
+
+.table .button-col {
+    width: 2.75rem;
+}

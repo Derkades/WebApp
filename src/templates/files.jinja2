@@ -28,62 +28,78 @@
         <hr>
         <br>
 
-        <table>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>{% trans %}Type{% endtrans %}</th>
+                    <th>{% trans %}File name{% endtrans %}</th>
+                    <th>{% trans %}Artists{% endtrans %}</th>
+                    <th>{% trans %}Title{% endtrans %}</th>
+                    <th {% if write_permission %}colspan="3"{% endif %}>{% trans %}Actions {% endtrans %}</th>
+                </tr>
+            </thead>
 
-        {% for file in files %}
-            <tr>
-            {% if file['type'] == 'dir' %}
-                <td>
-                    <div class="icon" style="background-image: url('static/icon/folder.svg')"></div>
-                </td>
-                <td>
-                    <a href="?path={{ file['path'] }}" {% if not write_permission %}class="secondary"{% endif%}>{{ file.name }}/</a>
-                </td>
-                <td></td>
-                <td></td>
-            {% elif file['type'] == 'music' %}
-                <td>
-                    <div class="icon" style="background-image: url('static/icon/music.svg')"></div>
-                </td>
-                <td>
-                    <span {% if not write_permission %}class="secondary"{% endif%}>{{ file.name }}</span>
-                </td>
-                <td>{{ file['artist'] }}</td>
-                <td>{{ file['title'] }}</td>
-            {% else %}
-                <td>
-                    <div class="icon" style="background-image: url('static/icon/file-question.svg')"></div>
-                </td>
-                <td>
-                    <span {% if not write_permission %}class="secondary"{% endif%}>{{ file.name }}</span>
-                </td>
-                <td></td>
-                <td></td>
-            {% endif %}
+            <tbody>
+                {% for file in files %}
+                <tr>
+                    {% if file['type'] == 'dir' %}
+                    <td class="icon-col">
+                        <div class="icon" style="background-image: url('static/icon/folder.svg')"></div>
+                    </td>
+                    <td>
+                        <a href="?path={{ file['path'] }}" {% if not write_permission %}class="secondary"{% endif%}>{{ file.name }}/</a>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    {% elif file['type'] == 'music' %}
+                    <td class="icon-col">
+                        <div class="icon" style="background-image: url('static/icon/music.svg')"></div>
+                    </td>
+                    <td>
+                        <span {% if not write_permission %}class="secondary"{% endif%}>{{ file.name }}</span>
+                    </td>
+                    <td>{{ file['artist'] }}</td>
+                    <td>{{ file['title'] }}</td>
+                    {% else %}
+                    <td class="icon-col">
+                        <div class="icon" style="background-image: url('static/icon/file-question.svg')"></div>
+                    </td>
+                    <td>
+                        <span {% if not write_permission %}class="secondary"{% endif%}>{{ file.name }}</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    {% endif %}
 
-            <td>
-                {% if write_permission %}
-                    <form method="GET" action="/files_rename" class="inline-block">
-                        <input type="hidden" name="path" value="{{ file['path'] }}">
-                        {{ icon_button('rename-box') }}
-                    </form>
+                    {% if write_permission %}
+                    <td class="button-col">
+                        <form method="GET" action="/files_rename" class="inline-block">
+                            <input type="hidden" name="path" value="{{ file['path'] }}">
+                            {{ icon_button('rename-box') }}
+                        </form>
+                    </td>
 
-                    <form method="POST" action="/files_rename" class="inline-block">
-                        <input type="hidden" name="csrf" value="{{ csrf_token }}">
-                        <input type="hidden" name="new-name" value=".trash.{{ file['name'] }}">
-                        <input type="hidden" name="path" value="{{ file['path'] }}">
-                        {{ icon_button('delete') }}
-                    </form>
-                {% endif %}
+                    <td class="button-col">
+                        <form method="POST" action="/files_rename" class="inline-block">
+                            <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                            <input type="hidden" name="new-name" value=".trash.{{ file['name'] }}">
+                            <input type="hidden" name="path" value="{{ file['path'] }}">
+                            {{ icon_button('delete') }}
+                        </form>
+                    </td>
+                    {% endif %}
 
-                {% if file['type'] != 'dir' %}
-                    <form method="GET" action="/files_download" class="inline-block">
-                        <input type="hidden" name="path" value="{{ file['path'] }}">
-                        {{ icon_button('download') }}
-                    </form>
-                {% endif %}
-            </td>
-        {% endfor %}
+                    <td class="button-col">
+                        {% if file['type'] != 'dir' %}
+                            <form method="GET" action="/files_download" class="inline-block">
+                                <input type="hidden" name="path" value="{{ file['path'] }}">
+                                {{ icon_button('download') }}
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
 
         <hr>

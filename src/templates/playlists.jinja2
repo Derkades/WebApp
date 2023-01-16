@@ -9,37 +9,43 @@
         <a href="/">{% trans %}Back to home{% endtrans %}</a>
         <h1>{% trans %}Playlist manager{% endtrans %}</h1>
         <h2>{% trans %}Your playlists{% endtrans %}</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>{% trans %}Path{% endtrans %}</th>
-                    <th>{% trans %}Write access{% endtrans %}</th>
-                    <th>{% trans %}Actions{% endtrans %}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for playlist, write in user_playlists %}
+        <p>{% trans %}These playlists are shown in the top row in the music player. They are enabled by default, and can be toggled using number keys.{% endtrans %}</p>
+        {% if user_playlists %}
+            <table class="table">
+                <thead>
                     <tr>
-                        <td>{{ playlist }}</td>
-                        <td>{% if write %}
-                                {% trans %}Yes{% endtrans %}
-                            {% else %}
-                                {% trans%}No{% endtrans %}
-                            {% endif %}
-                        </td>
-                        <td>
-                            <form action="/playlists_remove" method="POST">
-                                <input type="hidden" name="csrf" value="{{ csrf_token }}">
-                                <input type="hidden" name="playlist" value="{{ playlist }}">
-                                <input type="submit" value="{% trans %}Remove{% endtrans %}">
-                            </form>
-                        </td>
+                        <th>{% trans %}Path{% endtrans %}</th>
+                        <th>{% trans %}Write access{% endtrans %}</th>
+                        <th>{% trans %}Actions{% endtrans %}</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for playlist, write in user_playlists %}
+                        <tr>
+                            <td>{{ playlist }}</td>
+                            <td>{% if write %}
+                                    {% trans %}Yes{% endtrans %}
+                                {% else %}
+                                    {% trans%}No{% endtrans %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form action="/playlists_remove" method="POST">
+                                    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                                    <input type="hidden" name="playlist" value="{{ playlist }}">
+                                    <input type="submit" value="{% trans %}Remove{% endtrans %}">
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <br>
+            <p>{% trans %}You have no playlists.{% endtrans %}</p>
+        {% endif %}
         <h2>{% trans %}Other playlists{% endtrans %}</h2>
-        <table>
+        <table class="table">
             <thead>
                 <tr>
                     <th>{% trans %}Path{% endtrans %}</th>
