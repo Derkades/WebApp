@@ -429,18 +429,22 @@ def files():
             if path.name.startswith('.trash.'):
                 continue
 
-            if path.is_dir():
-                pathtype = 'dir'
-            elif music.has_music_extension(path):
-                pathtype = 'music'
-            else:
-                pathtype = 'file'
-
-            children.append({
+            file_info = {
                 'path': music.to_relpath(path),
                 'name': path.name,
-                'type': pathtype,
-            })
+            }
+            children.append(file_info)
+
+            if path.is_dir():
+                file_info['type'] = 'dir'
+            elif music.has_music_extension(path):
+                file_info['type'] = 'music'
+                track = Track.by_relpath(conn, music.to_relpath(path))
+                meta = track.metadata()
+                file_info['artist'] = ' & '.join(meta.artists) if meta.artists else ''
+                file_info['title'] = meta.title if meta.title else ''
+            else:
+                file_info['type'] = 'file'
 
     children = sorted(children, key=lambda x: x['name'])
 
