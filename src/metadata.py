@@ -68,6 +68,14 @@ COLLECTION_KEYWORDS = [
 ]
 
 
+def contains_collection_keyword(text: str) -> bool:
+    text = text.lower()
+    for keyword in COLLECTION_KEYWORDS:
+        if keyword in text:
+            return True
+    return False
+
+
 def strip_keywords(inp: str) -> str:
     """
     Remove undesirable keywords from title, as a result of being downloaded from the internet.
@@ -164,17 +172,6 @@ class Metadata:
         else:
             return self.filename_title() + ' ~'
 
-    def _is_collection_album(self) -> bool:
-        """
-        Check whether album is a collection based on known keywords
-        """
-        if self.album is None:
-            raise ValueError('album name not known')
-        for keyword in COLLECTION_KEYWORDS:
-            if keyword in self.album.lower():
-                return True
-        return False
-
     def album_release_query(self) -> str:
         """
         Get album search query for a music search engine like MusicBrainz
@@ -186,7 +183,7 @@ class Metadata:
         else:
             artist = None
 
-        if self.album and not self._is_collection_album():
+        if self.album and not contains_collection_keyword(self.album):
             album = self.album
         elif self.title:
             album = self.title
@@ -202,14 +199,14 @@ class Metadata:
         """
         Generate possible search queries to find album art using a general search engine
         """
-        if self.album_artist:
+        if self.album_artist and not contains_collection_keyword(self.album_artist):
             artist = self.album_artist
         elif self.artists is not None and len(self.artists) > 0:
             artist = ' '.join(self.artists)
         else:
             artist = None
 
-        if artist and self.album and not self._is_collection_album():
+        if artist and self.album and not contains_collection_keyword(self.album):
             yield artist + ' - ' + self.album + ' cover'
             yield artist + ' - ' + self.album
 
