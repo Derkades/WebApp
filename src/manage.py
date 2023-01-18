@@ -11,6 +11,7 @@ def handle_useradd(args):
     """
     Handle command to add user
     """
+    import bcrypt
     username = args.username
     is_admin = int(args.admin)
     password = input('Enter password:')
