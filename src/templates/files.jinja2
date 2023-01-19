@@ -9,14 +9,6 @@
         <a href="/">{% trans %}Back to home{% endtrans %}</a>
         <h1>{% trans %}File manager{% endtrans %}</h1>
 
-        {% if parent_path_uri == '.' %}
-            {# Not necessary, but looks better #}
-            <a href="/files">Parent directory</a>
-        {% elif parent_path_uri %}
-            <a href="/files?path={{ parent_path_uri }}">Parent directory</a>
-        {% endif %}
-        </p>
-
         {% if write_permission %}
             <h2>Upload files</h2>
             <form method="POST" action="/files_upload" enctype="multipart/form-data">
@@ -42,6 +34,15 @@
         {% else %}
             <h2>{% trans dir=base_path + '/' %}Files in {{ dir }}{% endtrans %}</h2>
         {% endif %}  
+
+        <p>
+        {% if parent_path_uri == '.' %}
+            {# Not necessary, but looks better #}
+            <a href="/files">Parent directory</a>
+        {% elif parent_path_uri %}
+            <a href="/files?path={{ parent_path_uri }}">Parent directory</a>
+        {% endif %}
+        </p>
 
         <table class="table">
             <thead>

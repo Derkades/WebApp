@@ -201,13 +201,15 @@ a.large {
 
 .table tr td,
 .table tr th {
-    padding: .5rem;
+    padding: .3rem;
 }
 
 .table .icon-col {
     width: 2rem;
+    height: 2rem;
 }
 
 .table .button-col {
     width: 2.75rem;
+    height: 2.75rem;
 }
