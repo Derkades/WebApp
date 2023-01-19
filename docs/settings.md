@@ -34,11 +34,7 @@ Maximum track length. If a track is longer than this value, it is cut.
 
 ## `MUSIC_RADIO_PLAYLISTS`
 
-Playlists to choose from, for radio
-
-## `MUSIC_RADIO_ANNOUNCEMENTS_PLAYLIST`
-
-Playlist with radio announcements
+Playlists to choose from, for radio. Semicolon separated.
 
 ## `MUSIC_LASTFM_API_KEY`
 
