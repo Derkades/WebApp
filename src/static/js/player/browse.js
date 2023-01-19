@@ -63,7 +63,7 @@ class Browse {
                     .filter(combinedFilter)
                     .map(track => { return {track: track, score: this.getSearchScore(track, query)}})
                     .sort((a, b) => b.score - a.score)
-                    .slice(0, state.maxTrackListSizeSearch)
+                    .slice(0, query === '' ? state.maxTrackListSize : state.maxTrackListSizeSearch)
                     .map(sortedTrack => sortedTrack.track);
 
         const table = this.generateTrackList(tracks);
