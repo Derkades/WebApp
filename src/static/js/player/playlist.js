@@ -62,9 +62,15 @@ function createPlaylistCheckbox(playlist, index) {
     if (index < 10) { // Assume number keys higher than 9 don't exist
         sup.textContent = index;
     }
+    
+    const trackCount = document.createElement('span');
+    trackCount.classList.add('secondary');
+    trackCount.textContent = ' (' + playlist.track_count + ')';
+
     label.replaceChildren(
         playlist.display_name,
-        sup
+        sup,
+        trackCount,
     );
 
     span.appendChild(input);
