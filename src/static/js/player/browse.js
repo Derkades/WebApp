@@ -8,8 +8,14 @@ class Browse {
         document.getElementById('dialog-browse').getElementsByTagName('h3')[0].textContent = textContent;
     };
 
-    setContent(child) {
-        document.getElementById('browse-content').replaceChildren(child);
+    setContent(table) {
+        if (table === null) {
+            document.getElementById('browse-no-content').classList.remove('hidden');
+            document.getElementById('browse-content').replaceChildren();
+        } else {
+            document.getElementById('browse-no-content').classList.add('hidden');
+            document.getElementById('browse-content').replaceChildren(table);
+        }
     };
 
     open() {
@@ -30,10 +36,39 @@ class Browse {
         if (this.#history.length === 0) {
             return;
         }
+
         const current = this.#history[this.#history.length - 1];
         this.setHeader(current.title);
-        const tracks = this.filterTracks(Object.values(state.tracks), current.filter);
-        this.setContent(this.generateTrackList(tracks));
+
+        // Playlist filter (or 'all')
+        const playlist = document.getElementById('browse-filter-playlist').value;
+        // Search query text field
+        const query = document.getElementById('browse-filter-query').value.trim().toLowerCase();
+
+        if (query === '' && playlist === 'all') {
+            // No playlist filter or search query. For performance reasons, don't display entire track list.
+            this.setContent(null);
+            return;
+        }
+
+        let combinedFilter;
+        if (playlist === 'all') {
+            combinedFilter = current.filter;
+        } else {
+            combinedFilter = track => current.filter(track) && track.playlistPath == playlist;
+        }
+
+        // Assign score to all tracks, then sort tracks by score. Finally, get original track object back.
+        const tracks = Object.values(state.tracks)
+                    .filter(combinedFilter)
+                    .map(track => { return {track: track, score: this.getSearchScore(track, query)}})
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, state.maxTrackListSizeSearch)
+                    .map(sortedTrack => sortedTrack.track);
+
+        const table = this.generateTrackList(tracks);
+
+        this.setContent(table);
     };
 
     back() {
@@ -154,33 +189,6 @@ class Browse {
 
         return score;
     };
-
-    filterTracks(tracks, customFilter) {
-        // Playlist filter (or 'all')
-        const playlist = document.getElementById('browse-filter-playlist').value;
-        // Search query text field
-        const query = document.getElementById('browse-filter-query').value.trim().toLowerCase();
-
-        let combinedFilter;
-        if (playlist === 'all') {
-            combinedFilter = customFilter;
-        } else {
-            combinedFilter = track => customFilter(track) && track.playlistPath == playlist;
-        }
-
-        if (query === '') {
-            return tracks.filter(combinedFilter).slice(0, state.maxTrackListSize);
-        } else {
-            // Assign score to all tracks, then sort tracks by score. Finally, get original track object back.
-            return tracks
-                    .filter(combinedFilter)
-                    .map(track => { return {track: track, score: this.getSearchScore(track, query)}})
-                    .sort((a, b) => b.score - a.score)
-                    .slice(0, state.maxTrackListSizeSearch)
-                    .map(sortedTrack => sortedTrack.track);
-        }
-    };
-
 };
 
 const browse = new Browse();
