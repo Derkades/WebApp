@@ -13,6 +13,7 @@ Music is important. However, when you're with a group, who is in charge? Everyon
 - No metadata hassle!
     - Album covers are automatically fetched from MusicBrainz or using a bing web scraper
     - Lyrics are automatically fetched using a web scraper
+    - Metadata editor to easily correct metadata during music playback
 - Easy file management!
     - Built-in web file browser to download, upload, rename and delete files
     - Built-in music downloader using `yt-dlp`
