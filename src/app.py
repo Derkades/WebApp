@@ -1,4 +1,3 @@
-from sqlite3 import Connection
 from typing import Optional
 import logging
 from pathlib import Path

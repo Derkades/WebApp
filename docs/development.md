@@ -1,5 +1,7 @@
 # Development 
 
+## Development using Docker
+
 With docker and docker-compose-plugin installed, run the following command to start a local testing server:
 ```
 docker compose up --build
@@ -7,27 +9,37 @@ docker compose up --build
 
 Before doing so, you will need to create a music and cache directory. You may need to change `user` in the docker compose file if your user is not using the default id of 1000.
 
+## Installing dependencies locally
+
+Installing python and dependencies locally may be useful, for example to get linting and suggestions in your IDE.
+
+Packages for Fedora:
+```
+sudo dnf install python3 pylint python3-mypy python3-flask python3-flask-babel python3-requests python3-beautifulsoup4 python3-musicbrainzngs python3-pillow python3-bcrypt
+```
+
 ## Preparing for offline development
 
 ### Docker images
 
-Download the python:3 base image locally: `docker pull python:3`. If you don't do this, buildx will attempt to pull the image very frequently while rebuilding, which won't work offline.
+Download the base image locally: `docker pull python:3.11`. If you don't do this, buildx will attempt to pull the image very frequently while rebuilding, which won't work offline.
 
 Then, build and start the container: `docker compose up --build`. Following builds will be cached, unless you change one of the `RUN` instructions in the `Dockerfile`.
 
 ### Music
 
-Add some music to `./music`. Adding only a small amount is recommended. While online, start the web interface, enable all playlists and increase the queue size. This will ensure album art and lyrics are downloaded to the cache for all tracks.
+Add some music to `./music`. Adding only a small amount is recommended. While online, start the web interface, enable all playlists and skip through all tracks. This will ensure album art and lyrics are downloaded to the cache for all tracks.
 
 ## Using babel for translations
 
 In templates:
-```
+```jinja
 {% trans %}Something in English{% endtrans %}
+{{ gettext('Something in English') }}
 ```
 
 In Python:
-```
+```py
 from flask_babel import gettext as _
 
 translated_string = _('Something in English')
