@@ -307,12 +307,16 @@ def probe(path: Path) -> Metadata:
     return Metadata(music.to_relpath(path), duration, artists, album, title, year, album_artist, album_index, tags)
 
 
-def cached(conn: Connection, relpath: str) -> Metadata:
+def cached(conn: Connection, relpath: str) -> Metadata | None:
     """
     Create Metadata object from database contents
+    Returns: Metadata, or None if the track is not known
     """
     query = 'SELECT duration, title, album, album_artist, album_index, year FROM track WHERE path=?'
-    duration, title, album, album_artist, album_index, year = conn.execute(query, (relpath,)).fetchone()
+    row = conn.execute(query, (relpath,)).fetchone()
+    if row is None:
+        return None
+    duration, title, album, album_artist, album_index, year = row
 
     rows = conn.execute('SELECT artist FROM track_artist WHERE track=?', (relpath,)).fetchall()
     if len(rows) == 0:

@@ -710,6 +710,10 @@ def lastfm_now_playing(read_only=True):
             return Response('ok', 200)
         track = Track.by_relpath(conn, request.json['track'])
         meta = track.metadata()
+        meta = track.metadata()
+        if meta is None:
+            log.warning('Track is missing from database. Probably deleted by a rescan after the track was queued.')
+            return Response('ok', 200)
     # Scrobble request takes a while, so close database connection first
     lastfm.update_now_playing(user_key, meta)
     return Response('ok', 200)
@@ -727,6 +731,9 @@ def lastfm_scrobble():
         track = Track.by_relpath(conn, request.json['track'])
         start_timestamp = request.json['start_timestamp']
         meta = track.metadata()
+        if meta is None:
+            log.warning('Track is missing from database. Probably deleted by a rescan after the track was queued.')
+            return Response('ok', 200)
     # Scrobble request takes a while, so close database connection first
     lastfm.scrobble(user_key, meta, start_timestamp)
     return Response('ok', 200)
