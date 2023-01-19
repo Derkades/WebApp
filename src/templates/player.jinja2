@@ -61,17 +61,18 @@
                     </div>
                 </div>
 
-                {{ icon_button('skip-previous', 'button-prev') }}
-                {{ icon_button('play', 'button-play') }}
-                {{ icon_button('pause', 'button-pause') }}
-                {{ icon_button('skip-next', 'button-next') }}
-                {{ icon_button('microphone', 'button-lyrics') }}
-                {{ icon_button('album', 'button-album') }}
-                {{ icon_button('chart-line-variant', 'open-dialog-playlist-stats') }}
-                {{ icon_button('gear', 'open-dialog-settings') }}
+                {{ icon_button('skip-previous', 'button-prev', title=gettext('Go to beginning of current track, or previous track')) }}
+                {{ icon_button('play', 'button-play', title=gettext('Play')) }}
+                {{ icon_button('pause', 'button-pause', title=gettext('Pause')) }}
+                {{ icon_button('skip-next', 'button-next', title=gettext('Skip to next track')) }}
+                {{ icon_button('microphone', 'button-lyrics', title=gettext('Show lyrics instead of album cover')) }}
+                {{ icon_button('album', 'button-album', title=gettext('Show album cover instead of lyrics')) }}
+                {{ icon_button('chart-line-variant', 'open-dialog-playlist-stats', title=gettext('Open playlist statistics')) }}
+                {{ icon_button('gear', 'open-dialog-settings', title=gettext('Open settings')) }}
+                {{ icon_button('folder', 'open-file-manager', title=gettext('Open file manager in a new tab')) }}
 
-                {{ icon_button('pencil', 'button-edit') }}
-                {{ icon_button('delete', 'button-delete-track') }}
+                {{ icon_button('pencil', 'button-edit', title=gettext('Open metadata editor')) }}
+                {{ icon_button('delete', 'button-delete-track', title=gettext('Delete track from playlist')) }}
                 <div id="delete-spinner" class="spinner hidden"></div>
 
                 {% if mobile %}
@@ -86,8 +87,8 @@
                 <div class="flex-space-between">
                     <h3>{% trans %}Queue{% endtrans %} (<span id="current-queue-size">0</span>)</h3>
                     <div>
-                        {{ icon_button('tag-multiple', 'open-dialog-tags') }}
-                        {{ icon_button('playlist-plus', 'browse-all') }}
+                        {{ icon_button('tag-multiple', 'open-dialog-tags', title=gettext('Open tag selection')) }}
+                        {{ icon_button('playlist-plus', 'browse-all', title=gettext('Browse all tags')) }}
                     </div>
                 </div>
                 <div class="scroll" id="queue-scroll">

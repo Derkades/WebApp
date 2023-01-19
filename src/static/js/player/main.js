@@ -79,6 +79,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('settings-queue-size').addEventListener('input', () => queue.fill());
     document.getElementById('settings-theme').addEventListener('input', applyTheme);
 
+    // File manager button
+    document.getElementById('open-file-manager').addEventListener('click', () => window.open('/files', '_blank'));
+
     // Queue overlay
     document.getElementById('browse-filter-playlist').addEventListener('input', () => browse.updateCurrentView());
     document.getElementById('browse-filter-query').addEventListener('input', () => browse.updateCurrentView());
