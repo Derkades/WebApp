@@ -6,7 +6,7 @@
 
 {% block content %}
     <main>
-        <h1>{% trans %}Share playlist{% endtrans %}</h1>
+        {{ page_heading(gettext('Share playlist'), back_url='/playlists') }}
 
         <p>{% trans %}Give someone else write access to the playlist: '{{ playlist }}'{% endtrans %}</p>
         <br>

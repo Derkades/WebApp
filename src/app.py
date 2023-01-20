@@ -27,7 +27,6 @@ import settings
 
 
 app = Flask(__name__, template_folder='templates')
-app.config['DEBUG'] = True
 babel = Babel(app)
 log = logging.getLogger('app')
 assets_dir = Path('static')

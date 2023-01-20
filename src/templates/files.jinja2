@@ -6,36 +6,73 @@
 
 {% block content %}
     <main>
-        <a href="/">{% trans %}Back to home{% endtrans %}</a>
-        <h1>{% trans %}File manager{% endtrans %}</h1>
+        {% if base_path == '.' %}
+            {{ page_heading(gettext('File manager')) }}
+        {% else %}
+            {% if parent_path_uri == '.' %}
+                {# Not necessary, but looks better #}
+                {% set back_url = '/files' %}
+            {% elif parent_path_uri %}
+                {% set back_url = '/files?path=' + parent_path_uri %}
+            {% endif %}
+            {{ page_heading(gettext('Files in: %(dir)s', dir=base_path), back_url=back_url) }}
+        {% endif %}
 
         {% if base_path == '.' %}
             <p>{% trans %}To create a new playlist, use the <a href="/playlists">playlist manager</a>.{% endtrans %}</p>
         {% else %}
             {% if write_permission %}
-                <form method="POST" action="/files_upload" enctype="multipart/form-data">
-                    <input type="hidden" name="csrf" value="{{ csrf_token }}">
-                    <input type="hidden" name="dir" value="{{ base_path }}">
-                    <input type="file" name="upload" accept="{{ music_extensions }}" multiple>
-                    <input type="submit" value="{% trans %}Upload{% endtrans %}">
-                </form>
+            <table>
+                <tbody>
+                    <form method="POST" action="/files_upload" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                        <input type="hidden" name="dir" value="{{ base_path }}">
+                        <tr>
+                            <td>
+                                {% trans %}Upload files{% endtrans %}
+                            </td>
+                            <td>
+                                <input type="file" name="upload" accept="{{ music_extensions }}" multiple>
+                            </td>
+                            <td>
+                                <input type="submit" value="{% trans %}Upload{% endtrans %}">
+                            </td>
+                        </tr>
+                    </form>
+                    <form method="POST" action="/files_mkdir">
+                        <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                        <input type="hidden" name="path" value="{{ base_path }}">
+                        <tr>
+                            <td>
+                                {% trans %}Create directory{% endtrans %}
+                            </td>
+                            <td>
+                                <input type="text" name="dirname" placeholder="{% trans %}Directory name{% endtrans %}">
+                            </td>
+                            <td>
+                                <input type="submit" value="{% trans %}Create{% endtrans %}">
+                            
+                            </td>
+                        </tr>
+                    </form>
+                </tbody>
+            
+            </table>
 
-                <form method="POST" action="/files_mkdir">
-                    <input type="hidden" name="csrf" value="{{ csrf_token }}">
-                    <input type="hidden" name="path" value="{{ base_path }}">
-                    <input type="text" name="dirname" placeholder="{% trans %}Directory name{% endtrans %}">
-                    <input type="submit" value="{% trans %}Create directory{% endtrans %}">
-                </form>
+
+
             {% else %}
                 <p>{% trans %}You don't have permission to upload files or create directories here.{% endtrans %}</p>
             {% endif %}
         {% endif %}
 
-        {% if base_path != '.' %}
+        <br>
+
+        {# {% if base_path != '.' %}
             <h2>{% trans dir=base_path + '/' %}Files in {{ dir }}{% endtrans %}</h2>
         {% else %}
             <br>
-        {% endif %}
+        {% endif %} #}
 
         <table class="table">
             <thead>
@@ -49,24 +86,19 @@
             </thead>
 
             <tbody>
-                {% if parent_path_uri %}
+                {# {% if parent_path_uri %}
                     <tr>
                         <td class="icon-col">
                             <div class="icon" style="background-image: url('static/icon/folder-arrow-left.svg')"></div>
                         </td>
                         <td>
-                            {% if parent_path_uri == '.' %}
-                                {# Not necessary, but looks better #}
-                                <a href="/files">Parent directory</a>
-                            {% elif parent_path_uri %}
-                                <a href="/files?path={{ parent_path_uri }}">Parent directory</a>
-                            {% endif %}
+     
                         </td>
                         <td></td>
                         <td></td>
                         <td></td>
                     </tr>
-                {% endif %}
+                {% endif %} #}
 
                 {% for file in files %}
                 <tr>

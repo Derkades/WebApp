@@ -236,3 +236,11 @@ a.large {
 form {
     display: inline-block;
 }
+
+.page-heading > * {
+    display: inline-block;
+}
+
+.page-heading > *:first-child {
+    margin-right: .5rem;
+}

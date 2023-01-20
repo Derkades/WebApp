@@ -6,8 +6,8 @@
 
 {% block content %}
     <main>
-        <a href="/">{% trans %}Back to home{% endtrans %}</a>
-        <h1>{% trans %}Playlist manager{% endtrans %}</h1>
+        {{ page_heading(gettext('Playlist manager')) }}
+        
 
         {% if user_is_admin %}
             <p>{% trans %}As an administrator, you can modify tracks in all playlists even without write access.{% endtrans %}</p>

@@ -3,9 +3,8 @@
 {% block content %}
 
     <main>
-        <a href="/">{% trans %}Back to home{% endtrans %}</a>
+        {{ page_heading(gettext('Account settings')) }}
 
-        <h1>Account settings</h1>
         <p>{% trans name=user.username %}Logged in as: {{ name }}{% endtrans %}</p>
 
 

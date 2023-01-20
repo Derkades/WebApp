@@ -2,8 +2,7 @@
 
 {% block content %}
     <main>
-        <a href="/">{% trans %}Back to home{% endtrans %}</a>
-        <h1>{% trans %}Radio{% endtrans %}</h1>
+        {{ page_heading(gettext('Radio')) }}
 
         <div id="audio"></div><br>
 
