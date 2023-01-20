@@ -27,13 +27,13 @@
             </form>
         {% else %}
             <p>{% trans %}You don't have permission to upload files or create directories here.{% endtrans %}</p>
-        {% endif %}    
+        {% endif %}
 
         {% if base_path == '.' %}
             <h2>{% trans %}Files in base directory{% endtrans %}</h2>
         {% else %}
             <h2>{% trans dir=base_path + '/' %}Files in {{ dir }}{% endtrans %}</h2>
-        {% endif %}  
+        {% endif %}
 
         <p>
         {% if parent_path_uri == '.' %}
@@ -91,7 +91,7 @@
                     <td class="button-col">
                         <form method="GET" action="/files_rename" class="inline-block">
                             <input type="hidden" name="path" value="{{ file['path'] }}">
-                            {{ icon_button('rename-box') }}
+                            {{ icon_button('rename-box', title=gettext('Rename file')) }}
                         </form>
                     </td>
 
@@ -100,7 +100,7 @@
                             <input type="hidden" name="csrf" value="{{ csrf_token }}">
                             <input type="hidden" name="new-name" value=".trash.{{ file['name'] }}">
                             <input type="hidden" name="path" value="{{ file['path'] }}">
-                            {{ icon_button('delete') }}
+                            {{ icon_button('delete', title=gettext('Move file to trash')) }}
                         </form>
                     </td>
                     {% endif %}
@@ -109,7 +109,7 @@
                         {% if file['type'] != 'dir' %}
                             <form method="GET" action="/files_download" class="inline-block">
                                 <input type="hidden" name="path" value="{{ file['path'] }}">
-                                {{ icon_button('download') }}
+                                {{ icon_button('download', title=gettext('Download original file')) }}
                             </form>
                         {% endif %}
                     </td>
