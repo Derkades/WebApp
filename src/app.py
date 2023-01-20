@@ -752,6 +752,7 @@ def playlists():
         other_playlists = [p for p in all_playlists if p.relpath not in user_playlists_paths]
 
     return render_template('playlists.jinja2',
+                           user_is_admin=user.admin,
                            other_playlists=other_playlists,
                            user_playlists=user_playlists,
                            csrf_token=csrf_token)

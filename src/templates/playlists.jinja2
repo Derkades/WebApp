@@ -10,6 +10,11 @@
         <h1>{% trans %}Playlist manager{% endtrans %}</h1>
         <h2>{% trans %}Your playlists{% endtrans %}</h2>
         <p>{% trans %}These playlists are shown in the top row in the music player. They are enabled by default, and can be toggled using number keys.{% endtrans %}</p>
+        <br>
+        {% if user_is_admin %}
+            <p>{% trans %}You are an administrator, meaning you can always edit all playlists even if you do not have write access.{% endtrans %}</p>
+            <br>
+        {% endif %}
         {% if user_playlists %}
             <table class="table">
                 <thead>
