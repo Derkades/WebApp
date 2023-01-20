@@ -461,15 +461,29 @@ def playlist(conn: Connection, relpath: str, user_id: int = None) -> Playlist:
         name, track_count = row
         return Playlist(conn, relpath, from_relpath(relpath), name, track_count)
     else:
-        row = conn.execute('''
-                           SELECT name, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path), write, favorite
-                           FROM playlist
-                               LEFT JOIN user_playlist ON playlist.path = user_playlist.playlist
-                           WHERE (user = ? OR user IS NULL) and path = ?
-                           ORDER BY favorite DESC, write DESC, name ASC
-                           ''', (user_id, relpath)).fetchone()
-        name, track_count, write, favorite = row
-        return UserPlaylist(conn, relpath, from_relpath(relpath), name, track_count, write == 1, favorite == 1)
+        # TODO merge to single query when bookworm is released, with a version of sqlite3 supporting outer join
+        
+        row1 = conn.execute('''
+                            SELECT name, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path)
+                            FROM playlist
+                            WHERE path=?
+                            ''', (relpath,)).fetchone()
+        row2 = conn.execute('''
+                            SELECT write, favorite
+                            FROM user_playlist
+                            WHERE user=? and playlist=?
+                            ''', (user_id, relpath)).fetchone()
+        
+        name, track_count = row1
+        
+        if row2 is not None:
+            write = row2[0] == 1
+            favorite = row2[1] == 1
+        else:
+            write = False
+            favorite = False
+        
+        return UserPlaylist(conn, relpath, from_relpath(relpath), name, track_count, write, favorite)
 
 
 def playlists(conn: Connection, user_id: int = None) -> list[Playlist]:
@@ -478,6 +492,7 @@ def playlists(conn: Connection, user_id: int = None) -> list[Playlist]:
     Returns: List of Playlist objects
     """
     playlist_list = []
+
     if user_id is None:
         rows = conn.execute('''
                             SELECT path, name, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path)
@@ -487,14 +502,29 @@ def playlists(conn: Connection, user_id: int = None) -> list[Playlist]:
         for relpath, name, track_count in rows:
             playlist_list.append(Playlist(conn, relpath, from_relpath(relpath), name, track_count))
     else:
-        rows = conn.execute('''
-                            SELECT path, name, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path), write, favorite
-                            FROM playlist
-                                LEFT JOIN user_playlist ON playlist.path = user_playlist.playlist
-                                WHERE user = ? OR user IS NULL
-                            ORDER BY favorite DESC, write DESC, name ASC
-                            ''', (user_id,))
-        for relpath, name, track_count, write, favorite in rows:
-            playlist_list.append(UserPlaylist(conn, relpath, from_relpath(relpath), name, track_count, write == 1, favorite == 1))
+        # TODO merge to single query when bookworm is released, with a version of sqlite3 supporting outer join
+        
+        rows1 = conn.execute('''
+                             SELECT playlist, write, favorite FROM user_playlist WHERE user=?
+                             ORDER BY favorite DESC, write DESC, playlist ASC
+                             ''', (user_id,)).fetchall()
+        rows2 = conn.execute('''
+                             SELECT path, name, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path)
+                             FROM playlist
+                             ORDER BY name ASC
+                             ''').fetchall()
+        
+        relpaths: set[str] = set()
+        for relpath, write, favorite in rows1:
+            for relpath2, name, track_count in rows2:
+                if relpath == relpath2:
+                    relpaths.add(relpath)
+                    playlist_list.append(UserPlaylist(conn, relpath, from_relpath(relpath), name, track_count, write == 1, favorite == 1))
+                    break
+        
+        for relpath, name, track_count in rows2:
+            if relpath in relpaths:
+                continue
+            playlist_list.append(UserPlaylist(conn, relpath, from_relpath(relpath), name, track_count, False, False))
 
     return playlist_list
