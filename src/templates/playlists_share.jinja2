@@ -13,13 +13,35 @@
 
         <form method="POST">
             <input type="hidden" name="csrf" value="{{ csrf }}">
-            <input type="text" name="playlist" value="{{ playlist }}" readonly>
-            <select name="username">
-                {% for username in usernames %}
-                    <option value="{{ username }}">{{ username }}</option>
-                {% endfor %}
-            </select>
-            <input type="submit" value="{% trans %}Share{% endtrans %}">
+            <table>
+                <tbody>
+                    <tr>
+                        <td>
+                            {% trans%}Playlist{% endtrans %}
+                        </td>
+                        <td>
+                            <input type="text" name="playlist" value="{{ playlist }}" readonly>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            {% trans %}User{% endtrans %}
+                        </td>
+                        <td>
+                            <select name="username">
+                                {% for username in usernames %}
+                                    <option value="{{ username }}">{{ username }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <input type="submit" value="{% trans %}Share{% endtrans %}">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </form>
     </main>
 {% endblock content %}
