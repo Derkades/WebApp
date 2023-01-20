@@ -335,7 +335,7 @@ def track_list():
                 'display_name': playlist.name,
                 'track_count': playlist.track_count,
                 'favorite': playlist.favorite,
-                'write': playlist.write,
+                'write': playlist.write or user.admin,
                 'stats': playlist.stats(),
             }
 
