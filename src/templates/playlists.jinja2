@@ -59,6 +59,16 @@
                                     <input type="submit" value="{% trans %}Make favorite{% endtrans %}">
                                 </form>
                             {% endif %}
+
+                            {% if user_is_admin or playlist.write %}
+                                <form action="/playlists_share" method="GET">
+                                    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                                    <input type="hidden" name="playlist" value="{{ playlist.relpath }}">
+                                    <input type="submit" value="{% trans %}Share{% endtrans %}">
+                                </form>
+                            {% endif %}
+
+
                         </td>
                     </tr>
                 {% endfor %}

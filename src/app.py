@@ -27,6 +27,7 @@ import settings
 
 
 app = Flask(__name__, template_folder='templates')
+app.config['DEBUG'] = True
 babel = Babel(app)
 log = logging.getLogger('app')
 assets_dir = Path('static')
@@ -485,6 +486,44 @@ def playlists_create():
 
         return redirect('/playlists')
 
+
+@app.route('/playlists_share', methods=['GET', 'POST'])
+def playlists_share():
+    if request.method == 'GET':
+        with db.connect(read_only=True) as conn:
+            auth.verify_auth_cookie(conn)
+            usernames = [row[0] for row in conn.execute('SELECT username FROM user')]
+        csrf = request.args['csrf']
+        playlist = request.args['playlist']
+        return render_template('playlists_share.jinja2',
+                               csrf=csrf,
+                               playlist=playlist,
+                               usernames=usernames)
+    else:
+        with db.connect() as conn:
+            user = auth.verify_auth_cookie(conn)
+            user.verify_csrf(request.form['csrf'])
+            playlist_relpath = request.form['playlist']
+            username = request.form['username']
+            
+            target_user_id, = conn.execute('SELECT id FROM user WHERE username=?',
+                                           (username,)).fetchone()
+            
+            # Verify playlist exists and user has write access
+            playlist: UserPlaylist = music.playlist(conn, playlist_relpath, user_id=user.user_id)
+            
+            if not playlist.write and not user.admin:
+                return Response('Cannot share playlist if you do not have write permission', 403)
+            
+            conn.execute('''
+                         INSERT INTO user_playlist (user, playlist, write)
+                         VALUES (?, ?, 1)
+                         ON CONFLICT (user, playlist) DO UPDATE
+                            SET write = 1
+                         ''', (target_user_id, playlist_relpath))
+            
+            return redirect('/playlists')
+        
 
 @app.route('/files_upload', methods=['POST'])
 def files_upload():

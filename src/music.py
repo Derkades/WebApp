@@ -461,11 +461,11 @@ def playlist(conn: Connection, relpath: str, user_id: int = None) -> Playlist:
         return Playlist(conn, relpath, from_relpath(relpath), name, track_count)
     else:
         row = conn.execute('''
-                           SELECT path, name, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path), write, favorite
+                           SELECT name, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path), write, favorite
                            FROM playlist
                                LEFT JOIN user_playlist ON playlist.path = user_playlist.playlist
-                            WHERE (user = ? OR user IS NULL) and path = ?
-                           ''', (user_id, relpath))
+                           WHERE (user = ? OR user IS NULL) and path = ?
+                           ''', (user_id, relpath)).fetchone()
         name, track_count, write, favorite = row
         return UserPlaylist(conn, relpath, from_relpath(relpath), name, track_count, write == 1, favorite == 1)
 
