@@ -126,6 +126,9 @@ def player():
                            language=get_language())
 
 
+PLAYER_JS = pack_js(Path('static', 'js', 'player'))
+
+
 @app.route('/player.js')
 def player_js():
     if settings.dev:
