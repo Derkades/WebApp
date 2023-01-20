@@ -112,7 +112,6 @@ def player():
         csrf_token = user.get_csrf()
 
     return render_template('player.jinja2',
-                           user_is_admin=user.admin,  # TODO remove when more specific permission checks are implemented
                            mobile=is_mobile(),
                            csrf_token=csrf_token,
                            languages=LANGUAGES,
