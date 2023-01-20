@@ -16,3 +16,4 @@ services:
     user: "1000"
     environment:
       TZ: Europe/Amsterdam
+      MUSIC_ENV: dev

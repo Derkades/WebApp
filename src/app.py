@@ -504,25 +504,25 @@ def playlists_share():
             user.verify_csrf(request.form['csrf'])
             playlist_relpath = request.form['playlist']
             username = request.form['username']
-            
+
             target_user_id, = conn.execute('SELECT id FROM user WHERE username=?',
                                            (username,)).fetchone()
-            
+
             # Verify playlist exists and user has write access
             playlist: UserPlaylist = music.playlist(conn, playlist_relpath, user_id=user.user_id)
-            
+
             if not playlist.write and not user.admin:
                 return Response('Cannot share playlist if you do not have write permission', 403)
-            
+
             conn.execute('''
                          INSERT INTO user_playlist (user, playlist, write)
                          VALUES (?, ?, 1)
                          ON CONFLICT (user, playlist) DO UPDATE
                             SET write = 1
                          ''', (target_user_id, playlist_relpath))
-            
+
             return redirect('/playlists')
-        
+
 
 @app.route('/files_upload', methods=['POST'])
 def files_upload():
