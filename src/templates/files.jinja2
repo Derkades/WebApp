@@ -51,15 +51,13 @@
                             </td>
                             <td>
                                 <input type="submit" value="{% trans %}Create{% endtrans %}">
-                            
+
                             </td>
                         </tr>
                     </form>
                 </tbody>
-            
+
             </table>
-
-
 
             {% else %}
                 <p>{% trans %}You don't have permission to upload files or create directories here.{% endtrans %}</p>
@@ -67,12 +65,6 @@
         {% endif %}
 
         <br>
-
-        {# {% if base_path != '.' %}
-            <h2>{% trans dir=base_path + '/' %}Files in {{ dir }}{% endtrans %}</h2>
-        {% else %}
-            <br>
-        {% endif %} #}
 
         <table class="table">
             <thead>
@@ -86,20 +78,6 @@
             </thead>
 
             <tbody>
-                {# {% if parent_path_uri %}
-                    <tr>
-                        <td class="icon-col">
-                            <div class="icon" style="background-image: url('static/icon/folder-arrow-left.svg')"></div>
-                        </td>
-                        <td>
-     
-                        </td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                {% endif %} #}
-
                 {% for file in files %}
                 <tr>
                     {% if file['type'] == 'dir' %}
