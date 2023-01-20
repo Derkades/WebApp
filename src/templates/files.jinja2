@@ -10,7 +10,7 @@
         <h1>{% trans %}File manager{% endtrans %}</h1>
 
         {% if base_path == '.' %}
-            <p>{% trans %}It is not possible to create files or directories here. To create a new playlist, use the playlist manager.{% endtrans %}</p>
+            <p>{% trans %}To create a new playlist, use the playlist manager.{% endtrans %}</p>
         {% else %}
             {% if write_permission %}
                 <form method="POST" action="/files_upload" enctype="multipart/form-data">
