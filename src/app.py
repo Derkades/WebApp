@@ -39,6 +39,14 @@ LANGUAGES = (
 )
 
 
+def pack_js(base_dir: Path):
+    packed_js = b''
+    for js_path in sorted(base_dir.iterdir()):
+        with open(js_path, 'rb') as js_file:
+            packed_js += js_file.read()
+    return packed_js
+
+
 @app.errorhandler(AuthError)
 def handle_auth_error(err: AuthError):
     """
@@ -116,6 +124,16 @@ def player():
                            csrf_token=csrf_token,
                            languages=LANGUAGES,
                            language=get_language())
+
+
+@app.route('/player.js')
+def player_js():
+    if settings.dev:
+        # If debug is enabled, regenerate JS every request
+        global PLAYER_JS
+        PLAYER_JS = pack_js(Path('static', 'js', 'player'))
+
+    return Response(PLAYER_JS, content_type='application/javascript')
 
 
 @app.route('/get_csrf')

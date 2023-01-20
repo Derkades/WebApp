@@ -7,16 +7,14 @@ RUN apt-get update && \
 COPY requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt
 
-RUN mkdir /app
+COPY ./docker/entrypoint.sh /entrypoint.sh
+COPY ./docker/manage /usr/local/bin
+COPY ./src /app
+
 WORKDIR /app
 
-COPY ./src .
-COPY ./docker/entrypoint.sh .
-COPY ./docker/manage /usr/local/bin
-
-RUN cat ./static/js/player/*.js > ./static/js/player/packed.js && \
-    pybabel compile -d translations
+RUN pybabel compile -d translations
 
 ENV PYTHONUNBUFFERED=1
 
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]

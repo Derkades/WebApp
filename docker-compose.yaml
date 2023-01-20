@@ -13,6 +13,10 @@ services:
       - type: bind
         source: ./data
         target: /data
+      # To get new files without re-building, during development
+      - type: bind
+        source: ./src
+        target: /app
     user: "1000"
     environment:
       TZ: Europe/Amsterdam
