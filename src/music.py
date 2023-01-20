@@ -438,28 +438,59 @@ class Playlist:
         return Playlist(conn, dir_name, from_relpath(dir_name), name, track_count)
 
 
-def playlist(conn: Connection, dir_name: str) -> Playlist:
+@dataclass
+class UserPlaylist(Playlist):
+    write: bool
+    favorite: bool
+
+
+def playlist(conn: Connection, relpath: str, user_id: int = None) -> Playlist:
     """
     Get playlist object from the name of a music directory, using information from the database.
     Args:
-        dir_name: Name of directory
+        relpath: Name of directory
     Returns: Playlist instance
     """
-    path = from_relpath(dir_name)
-    row = conn.execute('SELECT name FROM playlist WHERE path=?',
-                        (dir_name,)).fetchone()
-    if row is None:
-        raise ValueError('Playlist does not exist: ' + dir_name)
-    name, = row
-    track_count = conn.execute('SELECT COUNT(*) FROM track WHERE playlist=?',
-                                (dir_name,)).fetchone()[0]
-    return Playlist(conn, dir_name, path, name, track_count)
+    if user_id is None:
+        row = conn.execute('''
+                           SELECT name, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path)
+                           FROM playlist
+                           WHERE path=?
+                           ''', (relpath,)).fetchone()
+        name, track_count = row
+        return Playlist(conn, relpath, from_relpath(relpath), name, track_count)
+    else:
+        row = conn.execute('''
+                           SELECT path, name, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path), write, favorite
+                           FROM playlist
+                               LEFT JOIN user_playlist ON playlist.path = user_playlist.playlist
+                            WHERE (user = ? OR user IS NULL) and path = ?
+                           ''', (user_id, relpath))
+        name, track_count, write, favorite = row
+        return UserPlaylist(conn, relpath, from_relpath(relpath), name, track_count, write == 1, favorite == 1)
 
-def playlists(conn: Connection) -> list[Playlist]:
+
+def playlists(conn: Connection, user_id: int = None) -> list[Playlist]:
     """
     List playlists
     Returns: List of Playlist objects
     """
+    playlist_list = []
+    if user_id is None:
+        rows = conn.execute('''
+                            SELECT path, name, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path)
+                            FROM playlist
+                            ''')
+        for relpath, name, track_count in rows:
+            playlist_list.append(Playlist(conn, relpath, from_relpath(relpath), name, track_count))
+    else:
+        rows = conn.execute('''
+                            SELECT path, name, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path), write, favorite
+                            FROM playlist
+                                LEFT JOIN user_playlist ON playlist.path = user_playlist.playlist
+                                WHERE user = ? OR user IS NULL
+                            ''', (user_id,))
+        for relpath, name, track_count, write, favorite in rows:
+            playlist_list.append(UserPlaylist(conn, relpath, from_relpath(relpath), name, track_count, write == 1, favorite == 1))
 
-    rows = conn.execute('SELECT path FROM playlist').fetchall()
-    return [playlist(conn, row[0]) for row in rows]
+    return playlist_list

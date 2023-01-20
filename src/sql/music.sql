@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS user (
 CREATE TABLE IF NOT EXISTS user_playlist (
     user INTEGER NOT NULL,
     playlist TEXT NOT NULL,
+    favorite INTEGER DEFAULT 0,
     write INTEGER DEFAULT 0,
     UNIQUE (user, playlist),
     FOREIGN KEY (user) REFERENCES user(id) ON DELETE CASCADE,

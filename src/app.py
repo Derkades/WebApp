@@ -17,7 +17,7 @@ import image
 import lastfm
 from metadata import Metadata
 import music
-from music import Playlist, Track
+from music import Playlist, Track, UserPlaylist
 import musicbrainz
 import radio
 from radio import RadioTrack
@@ -301,13 +301,7 @@ def track_list():
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.args['csrf'])
 
-        playlists = music.playlists(conn)
-        rows = conn.execute('SELECT playlist FROM user_playlist WHERE user=?',
-                            (user.user_id,))
-        user_playlists = {row[0] for row in rows}
-        rows = conn.execute('SELECT playlist FROM user_playlist WHERE user=? AND write=1',
-                            (user.user_id,))
-        write_playlists = {row[0] for row in rows}
+        playlists: list[UserPlaylist] = music.playlists(conn, user_id=user.user_id)
 
         response = {
             'playlists': {},
@@ -319,8 +313,8 @@ def track_list():
                 'dir_name': playlist.relpath,
                 'display_name': playlist.name,
                 'track_count': playlist.track_count,
-                'favorite': playlist.relpath in user_playlists,
-                'write': user.admin or playlist.relpath in write_playlists,
+                'favorite': playlist.favorite,
+                'write': playlist.write,
                 'stats': playlist.stats(),
             }
 
@@ -742,42 +736,28 @@ def playlists():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         csrf_token = user.get_csrf()
-
-        all_playlists = music.playlists(conn)
-
-        user_playlists = conn.execute('SELECT playlist, write FROM user_playlist WHERE user=?',
-                            (user.user_id,)).fetchall()
-
-        user_playlists_paths = {p[0] for p in user_playlists}
-        other_playlists = [p for p in all_playlists if p.relpath not in user_playlists_paths]
+        user_playlists = music.playlists(conn, user_id=user.user_id)
 
     return render_template('playlists.jinja2',
                            user_is_admin=user.admin,
-                           other_playlists=other_playlists,
-                           user_playlists=user_playlists,
+                           playlists=user_playlists,
                            csrf_token=csrf_token)
 
 
-@app.route('/playlists_add', methods=['POST'])
-def playlists_add():
+@app.route('/playlists_favorite', methods=['POST'])
+def playlists_favorite():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.form['csrf'])
         playlist = request.form['playlist']
-        conn.execute('INSERT INTO user_playlist (user, playlist) VALUES (?, ?)',
-                     (user.user_id, playlist))
-
-    return redirect('/playlists')
-
-
-@app.route('/playlists_remove', methods=['POST'])
-def playlists_remove():
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
-        playlist = request.form['playlist']
-        conn.execute('DELETE FROM user_playlist WHERE user=? AND playlist=?',
-                     (user.user_id, playlist))
+        is_favorite = request.form['favorite']
+        assert is_favorite in {'0', '1'}
+        conn.execute('''
+                     INSERT INTO user_playlist (user, playlist, favorite)
+                     VALUES (?, ?, ?)
+                     ON CONFLICT (user, playlist) DO UPDATE
+                        SET favorite = ?
+                     ''', (user.user_id, playlist, int(is_favorite), int(is_favorite)))
 
     return redirect('/playlists')
 
