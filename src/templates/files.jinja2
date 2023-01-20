@@ -9,40 +9,33 @@
         <a href="/">{% trans %}Back to home{% endtrans %}</a>
         <h1>{% trans %}File manager{% endtrans %}</h1>
 
-        {% if write_permission %}
-            <h2>Upload files</h2>
-            <form method="POST" action="/files_upload" enctype="multipart/form-data">
-                <input type="hidden" name="csrf" value="{{ csrf_token }}">
-                <input type="hidden" name="dir" value="{{ base_path }}">
-                <input type="file" name="upload" accept="{{ music_extensions }}" multiple>
-                <input type="submit" value="{% trans %}Upload{% endtrans %}">
-            </form>
-
-            <h2>Create directory</h2>
-            <form method="POST" action="/files_mkdir">
-                <input type="hidden" name="csrf" value="{{ csrf_token }}">
-                <input type="hidden" name="path" value="{{ base_path }}">
-                <input type="text" name="dirname">
-                <input type="submit" value="{% trans %}Create directory{% endtrans %}">
-            </form>
-        {% else %}
-            <p>{% trans %}You don't have permission to upload files or create directories here.{% endtrans %}</p>
-        {% endif %}
-
         {% if base_path == '.' %}
-            <h2>{% trans %}Files in base directory{% endtrans %}</h2>
+            <p>{% trans %}It is not possible to create files or directories here. To create a new playlist, use the playlist manager.{% endtrans %}</p>
         {% else %}
-            <h2>{% trans dir=base_path + '/' %}Files in {{ dir }}{% endtrans %}</h2>
+            {% if write_permission %}
+                <form method="POST" action="/files_upload" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                    <input type="hidden" name="dir" value="{{ base_path }}">
+                    <input type="file" name="upload" accept="{{ music_extensions }}" multiple>
+                    <input type="submit" value="{% trans %}Upload{% endtrans %}">
+                </form>
+
+                <form method="POST" action="/files_mkdir">
+                    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                    <input type="hidden" name="path" value="{{ base_path }}">
+                    <input type="text" name="dirname" placeholder="{% trans %}Directory name{% endtrans %}">
+                    <input type="submit" value="{% trans %}Create directory{% endtrans %}">
+                </form>
+            {% else %}
+                <p>{% trans %}You don't have permission to upload files or create directories here.{% endtrans %}</p>
+            {% endif %}
         {% endif %}
 
-        <p>
-        {% if parent_path_uri == '.' %}
-            {# Not necessary, but looks better #}
-            <a href="/files">Parent directory</a>
-        {% elif parent_path_uri %}
-            <a href="/files?path={{ parent_path_uri }}">Parent directory</a>
+        {% if base_path != '.' %}
+            <h2>{% trans dir=base_path + '/' %}Files in {{ dir }}{% endtrans %}</h2>
+        {% else %}
+            <br>
         {% endif %}
-        </p>
 
         <table class="table">
             <thead>
@@ -56,6 +49,25 @@
             </thead>
 
             <tbody>
+                {% if parent_path_uri %}
+                    <tr>
+                        <td class="icon-col">
+                            <div class="icon" style="background-image: url('static/icon/folder-arrow-left.svg')"></div>
+                        </td>
+                        <td>
+                            {% if parent_path_uri == '.' %}
+                                {# Not necessary, but looks better #}
+                                <a href="/files">Parent directory</a>
+                            {% elif parent_path_uri %}
+                                <a href="/files?path={{ parent_path_uri }}">Parent directory</a>
+                            {% endif %}
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                {% endif %}
+
                 {% for file in files %}
                 <tr>
                     {% if file['type'] == 'dir' %}

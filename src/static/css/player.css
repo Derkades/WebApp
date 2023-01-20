@@ -198,25 +198,6 @@ body.light #progress-bar {
     background-color: #202020;
 }
 
-.flex-content-center {
-    display: flex;
-    justify-content: center;
-}
-
-.flex-space-between {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-}
-
-.flex-space-between > * {
-    display: inline;
-}
-
-.flex-space-between > span > h3 {
-    margin: .75rem 0;
-}
-
 .progress-time {
     margin: 0 .25rem;
     font-size: 1.1rem;
