@@ -14,8 +14,6 @@ function handleKey(key) {
         if (checkboxes.length >= keyInt) {
             // Toggle checkbox
             checkboxes[keyInt-1].checked ^= 1;
-            // Save to cookies
-            saveCheckboxState();
         }
     } else if (key === 'p' || key === ' ') {
         playPause();

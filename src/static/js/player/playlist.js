@@ -45,15 +45,7 @@ function createPlaylistCheckbox(playlist, index) {
     input.type = 'checkbox';
     input.classList.add('playlist-checkbox');
     input.id = 'checkbox-' + playlist.dir_name;
-    // Attempt to restore state from cookie
-    const savedState = getSavedCheckboxState();
-    if (savedState === null) {
-        // No save state, enable if it's a favorited playlist
-        input.checked = playlist.favorite
-    } else {
-        input.checked = savedState.indexOf(playlist.dir_name) !== -1;
-    }
-    input.onclick = saveCheckboxState;
+    input.checked = playlist.favorite;
 
     const label = document.createElement("label");
     label.htmlFor = "checkbox-" + playlist.dir_name;
@@ -92,19 +84,6 @@ function updatePlaylistCheckboxHtml() {
     }
     const parent = document.getElementById('playlist-checkboxes');
     parent.replaceChildren(mainDiv, otherDiv);
-}
-
-function saveCheckboxState() {
-    setCookie('enabled-playlists', getActivePlaylists().join('~'));
-}
-
-function getSavedCheckboxState() {
-    const cookie = getCookie('enabled-playlists');
-    if (cookie === null) {
-        return null;
-    } else {
-        return cookie.split('~');
-    }
 }
 
 function createPlaylistDropdowns() {
