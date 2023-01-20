@@ -456,6 +456,7 @@ def playlist(conn: Connection, relpath: str, user_id: int = None) -> Playlist:
                            SELECT name, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path)
                            FROM playlist
                            WHERE path=?
+                           ORDER BY name ASC
                            ''', (relpath,)).fetchone()
         name, track_count = row
         return Playlist(conn, relpath, from_relpath(relpath), name, track_count)
@@ -465,6 +466,7 @@ def playlist(conn: Connection, relpath: str, user_id: int = None) -> Playlist:
                            FROM playlist
                                LEFT JOIN user_playlist ON playlist.path = user_playlist.playlist
                            WHERE (user = ? OR user IS NULL) and path = ?
+                           ORDER BY favorite DESC, write DESC, name ASC
                            ''', (user_id, relpath)).fetchone()
         name, track_count, write, favorite = row
         return UserPlaylist(conn, relpath, from_relpath(relpath), name, track_count, write == 1, favorite == 1)
@@ -480,6 +482,7 @@ def playlists(conn: Connection, user_id: int = None) -> list[Playlist]:
         rows = conn.execute('''
                             SELECT path, name, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path)
                             FROM playlist
+                            ORDER BY name ASC
                             ''')
         for relpath, name, track_count in rows:
             playlist_list.append(Playlist(conn, relpath, from_relpath(relpath), name, track_count))
@@ -489,6 +492,7 @@ def playlists(conn: Connection, user_id: int = None) -> list[Playlist]:
                             FROM playlist
                                 LEFT JOIN user_playlist ON playlist.path = user_playlist.playlist
                                 WHERE user = ? OR user IS NULL
+                            ORDER BY favorite DESC, write DESC, name ASC
                             ''', (user_id,))
         for relpath, name, track_count, write, favorite in rows:
             playlist_list.append(UserPlaylist(conn, relpath, from_relpath(relpath), name, track_count, write == 1, favorite == 1))
