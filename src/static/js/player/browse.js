@@ -45,22 +45,34 @@ class Browse {
         // Search query text field
         const query = document.getElementById('browse-filter-query').value.trim().toLowerCase();
 
-        if (query === '' && playlist === 'all') {
-            // No playlist filter or search query. For performance reasons, don't display entire track list.
+        if (query === '' && playlist === 'all' && current.filter === null) {
+            // No search query, selected playlist, or filter. For performance reasons, don't display entire track list.
             this.setContent(null);
             return;
         }
 
-        let combinedFilter;
+        let filter;
         if (playlist === 'all') {
-            combinedFilter = current.filter;
+            if (current.filter === null) {
+                // Show all tracks
+                filter = () => true;
+            } else {
+                // Apply filter to tracks in all playlist
+                filter = current.filter;
+            }
         } else {
-            combinedFilter = track => current.filter(track) && track.playlistPath == playlist;
+            if (current.filter === null) {
+                // Show tracks in specific playlist
+                filter = track => track.playlistPath === playlist;
+            } else {
+                // Apply filter to tracks in specific playlists
+                filter = track => current.filter(track) && track.playlistPath === playlist;
+            }
         }
 
         // Assign score to all tracks, then sort tracks by score. Finally, get original track object back.
         const tracks = Object.values(state.tracks)
-                    .filter(combinedFilter)
+                    .filter(filter)
                     .map(track => { return {track: track, score: this.getSearchScore(track, query)}})
                     .sort((a, b) => b.score - a.score)
                     .slice(0, query === '' ? state.maxTrackListSize : state.maxTrackListSizeSearch)
@@ -102,7 +114,7 @@ class Browse {
 
     browseAll() {
         const allText = document.getElementById('trans-all-tracks').textContent;
-        this.browse(allText, () => true);
+        this.browse(allText, null);
     };
 
     generateTrackList(tracks) {
