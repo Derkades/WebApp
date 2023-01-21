@@ -43,8 +43,8 @@ function secondsToString(seconds) {
  * @returns {string} formatted time
  */
 function secondsTimestampToString(seconds) {
-    const utcString = new Date(1000 * seconds).toISOString();
-    return utcString.substring(0, 10) + ' ' + utcString.substring(11, 16)
+    const isoString = new Date(1000 * seconds).toISOString();
+    return isoString.substring(0, 10) + ' ' + isoString.substring(11, 16);
 }
 
 // https://www.w3schools.com/js/js_cookies.asp
