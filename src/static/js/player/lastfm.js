@@ -54,7 +54,7 @@ class LastFM {
 
         this.playingCounter++;
 
-        console.debug('lastfm | playing, counter:', this.playingCounter);
+        console.debug('lastfm | playing, counter:', this.playingCounter, '/', this.requiredPlayingCounter);
 
         // Send 'Now playing' after 10 seconds, then every 3 minutes
         if (this.playingCounter % (3*60) === 10) {
