@@ -70,7 +70,7 @@ class LastFM {
     }
 
     async updateNowPlaying() {
-        await jsonPost('/lastfm_now_playing', {track: this.currentlyPlayingTrackPath});
+        await jsonPost('/lastfm_now_playing', {track: this.currentlyPlayingTrack.path});
     }
 
     async scrobble() {
