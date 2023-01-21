@@ -106,3 +106,5 @@ def scrobble(user_key: str, metadata: Metadata, start_timestamp: int):
                   chosenByUser='0',
                   timestamp=str(start_timestamp),
                   sk=user_key)
+
+    log.info('Scrobbled to last.fm: %s - %s', artist, metadata.title)

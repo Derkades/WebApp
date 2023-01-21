@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS user_lastfm (
 CREATE TABLE IF NOT EXISTS session (
     user INTEGER NOT NULL,
     token TEXT NOT NULL UNIQUE,
-    creation_date INTEGER NOT NULL,
+    creation_date INTEGER NOT NULL, -- Seconds since UNIX epoch
     last_user_agent TEXT NULL,
     last_address TEXT NULL,
     FOREIGN KEY (user) REFERENCES user(id) ON DELETE CASCADE
@@ -75,9 +75,17 @@ CREATE TABLE IF NOT EXISTS session (
 CREATE TABLE IF NOT EXISTS csrf (
     user INTEGER NOT NULL,
     token TEXT NOT NULL UNIQUE,
-    creation_date INTEGER NOT NULL,
+    creation_date INTEGER NOT NULL, -- Seconds since UNIX epoch
     UNIQUE(user, token),
     FOREIGN KEY (user) REFERENCES user(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS history (
+    id INTEGER NOT NULL UNIQUE PRIMARY KEY AUTOINCREMENT,
+    timestamp INTEGER NOT NULL,
+    user INTEGER NOT NULL, -- Intentionally not a foreign key, so history remains when user is deleted
+    track TEXT NOT NULL, -- Intentionally not a foreign key, so history remains when user is deleted
+    playlist TEXT -- Could be obtained from track info, but included anyway for convenience
 );
 
 COMMIT;

@@ -3,6 +3,7 @@ import logging
 from pathlib import Path
 from urllib.parse import quote as urlencode
 import random
+import time
 
 from flask import Flask, request, render_template, Response, redirect, send_file
 from flask_babel import Babel
@@ -770,23 +771,43 @@ def lastfm_now_playing(read_only=True):
     return Response('ok', 200)
 
 
-@app.route('/lastfm_scrobble', methods=['POST'])
-def lastfm_scrobble():
-    with db.connect(read_only=True) as conn:
+@app.route('/history_played', methods=['POST'])
+def history_played():
+    with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
-        user_key = lastfm.get_user_key(user)
-        if not user_key:
-            log.info('Skip last.fm now playing, account is not linked')
+
+        track = request.json['track']
+        playlist = request.json['playlist']
+
+        timestamp = int(time.time())
+        conn.execute('''
+                     INSERT INTO history (timestamp, user, track, playlist)
+                     VALUES (?, ?, ?, ?)
+                     ''',
+                     (timestamp, user.user_id, track, playlist))
+
+        if not request.json['lastfmEligible']:
+            # No need to scrobble, nothing more to do
             return Response('ok', 200)
+
+        lastfm_key = lastfm.get_user_key(user)
+
+        if not lastfm_key:
+            # User has not linked their account, no need to scrobble
+            return Response('ok', 200)
+
         track = Track.by_relpath(conn, request.json['track'])
-        start_timestamp = request.json['start_timestamp']
         meta = track.metadata()
         if meta is None:
             log.warning('Track is missing from database. Probably deleted by a rescan after the track was queued.')
             return Response('ok', 200)
+
     # Scrobble request takes a while, so close database connection first
-    lastfm.scrobble(user_key, meta, start_timestamp)
+
+    start_timestamp = request.json['startTimestamp']
+    lastfm.scrobble(lastfm_key, meta, start_timestamp)
+
     return Response('ok', 200)
 
 
