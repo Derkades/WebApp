@@ -58,7 +58,7 @@ def _html_tree_to_lyrics(elements: list[PageElement], level=0) -> str:
     return lyrics
 
 
-def _extract_lyrics(genius_url: str) -> str:
+def _extract_lyrics(genius_url: str) -> str | None:
     """
     Extract lyrics from the supplied Genius lyrics page
     Parameters:
@@ -91,7 +91,10 @@ def _extract_lyrics(genius_url: str) -> str:
     lyric_html = info_json['songPage']['lyricsData']['body']['html']
     soup = BeautifulSoup(lyric_html, 'lxml')
     p = soup.find('p')
-    assert isinstance(p, Tag)
+    if not isinstance(p, Tag):
+        log.warning('Cannot extract lyrics from URL: %s', genius_url)
+        log.warning('It is probably marked as unreleased')
+        return None
 
     return _html_tree_to_lyrics(p.contents)
 
@@ -133,6 +136,10 @@ def get_lyrics(query: str) -> Lyrics | None:
 
     try:
         lyrics_html = _extract_lyrics(genius_url)
+
+        if lyrics_html is None:
+            cache.store_json(cache_key, {'found': False})
+            return None
     except Exception:
         log.info('Error retrieving lyrics')
         traceback.print_exc()
