@@ -177,8 +177,7 @@ def get_track() -> Response:
     Get transcoded audio for the given track path.
     """
     with db.connect(read_only=True) as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.args['csrf'])
+        auth.verify_auth_cookie(conn)
         track = Track.by_relpath(conn, request.args['path'])
 
     quality = request.args['quality'] if 'quality' in request.args else 'high'
@@ -235,7 +234,6 @@ def get_album_cover() -> Response:
     """
     with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.args['csrf'])
         track = Track.by_relpath(conn, request.args['path'])
         meta = track.metadata()
 
@@ -264,7 +262,6 @@ def get_lyrics():
     """
     with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.args['csrf'])
 
         track = Track.by_relpath(conn, request.args['path'])
         meta = track.metadata()
@@ -321,7 +318,6 @@ def track_list():
     """
     with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.args['csrf'])
 
         playlists: list[UserPlaylist] = music.playlists(conn, user_id=user.user_id)
 
@@ -346,7 +342,6 @@ def track_list():
                 response['tracks'].append({
                     'path': track.relpath,
                     'display': meta.display_title(),
-                    'display_file': meta.filename_title(),
                     'playlist': playlist.relpath,
                     'playlist_display': playlist.name,
                     'duration': meta.duration,
@@ -898,6 +893,16 @@ def playlists_favorite():
                      ''', (user.user_id, playlist, int(is_favorite), int(is_favorite)))
 
     return redirect('/playlists')
+
+
+@app.route('/download')
+def download():
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn)
+        playlists = music.playlists(conn)
+
+    return render_template('download.jinja2',
+                           playlists=playlists)
 
 
 def get_language() -> str:

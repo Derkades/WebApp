@@ -59,9 +59,8 @@ async function updateNext() {
 async function replaceAudioElem() {
     const audioElem = document.createElement('audio');
     console.log('replace children');
-    const csrf = document.getElementById('csrf').textContent;
     const sourceElem = document.createElement('source');
-    sourceElem.src = '/get_track?path=' + encodeURIComponent(state.currentTrack.path) + '&csrf=' + csrf;
+    sourceElem.src = '/get_track?path=' + encodeURIComponent(state.currentTrack.path);
     audioElem.appendChild(sourceElem);
     audioElem.controls = true;
     audioElem.play();

@@ -32,7 +32,6 @@ class Track {
         this.trackData = trackData;
         this.path = trackData.path;
         this.display = trackData.display;
-        this.displayFile = trackData.display_file;
         this.playlistPath = trackData.playlist;
         this.playlistDisplay = trackData.playlist_display;
         this.duration = trackData.duration;
@@ -100,14 +99,14 @@ class Track {
             }
         } else {
             // Use half-decent display name generated from file name by python backend
-            html.append(this.displayFile + ' ~');
+            html.append(this.display + ' ~');
         }
         return html;
     };
 
     static async updateLocalTrackList() {
         console.info('Requesting track list');
-        const response = await fetch('/track_list?csrf=' + encodeURIComponent(getCsrfToken()));
+        const response = await fetch('/track_list');
         const json = await response.json();
 
         state.playlists = json.playlists;
@@ -140,12 +139,11 @@ class Track {
     async downloadAndAddToQueue(top = false) {
         const encodedQuality = encodeURIComponent(document.getElementById('settings-audio-quality').value);
         const encodedPath = encodeURIComponent(this.path);
-        const encodedCsrf = encodeURIComponent(getCsrfToken());
 
         const audioBlobUrlGetter = async function() {
             // Get track audio
             console.info('queue | download audio');
-            const trackResponse = await fetch('/get_track?path=' + encodedPath + '&quality=' + encodedQuality + '&csrf=' + encodedCsrf);
+            const trackResponse = await fetch('/get_track?path=' + encodedPath + '&quality=' + encodedQuality);
             checkResponseCode(trackResponse);
             const audioBlob = await trackResponse.blob();
             return URL.createObjectURL(audioBlob);
@@ -159,7 +157,7 @@ class Track {
             } else {
                 console.info('queue | download album cover image');
                 const meme = document.getElementById('settings-meme-mode').checked ? '1' : '0';
-                const imageUrl = '/get_album_cover?path=' + encodedPath + '&quality=' + encodedQuality + '&meme=' + meme + '&csrf=' + encodedCsrf;
+                const imageUrl = '/get_album_cover?path=' + encodedPath + '&quality=' + encodedQuality + '&meme=' + meme;
                 const coverResponse = await fetch(imageUrl);
                 checkResponseCode(coverResponse);
                 const imageBlob = await coverResponse.blob();
@@ -173,7 +171,7 @@ class Track {
                 return new Lyrics(true, null, '<i>Lyrics were not downloaded to save data</i>');
             } else {
                 console.info('queue | download lyrics');
-                const lyricsResponse = await fetch('/get_lyrics?path=' + encodedPath + '&csrf=' + encodedCsrf);
+                const lyricsResponse = await fetch('/get_lyrics?path=' + encodedPath);
                 checkResponseCode(lyricsResponse);
                 const lyricsJson = await lyricsResponse.json();
                 return new Lyrics(lyricsJson.found, lyricsJson.source, lyricsJson.html);
