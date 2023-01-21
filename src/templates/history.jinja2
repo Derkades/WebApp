@@ -44,8 +44,7 @@
         // Replace timestamp by formatted time string
         document.addEventListener('DOMContentLoaded', () => {
             for (const elem of document.getElementsByClassName('timestamp')) {
-                const isoString = new Date(1000 * elem.textContent).toISOString();
-                elem.textContent = isoString.substring(0, 10) + ' ' + isoString.substring(11, 16);
+                elem.textContent = new Date(1000 * elem.textContent).toLocaleString();
             }
         });
     </script>

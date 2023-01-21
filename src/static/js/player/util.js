@@ -38,15 +38,6 @@ function secondsToString(seconds) {
     }
 }
 
-/**
- * @param {number} seconds
- * @returns {string} formatted time
- */
-function secondsTimestampToString(seconds) {
-    const isoString = new Date(1000 * seconds).toISOString();
-    return isoString.substring(0, 10) + ' ' + isoString.substring(11, 16);
-}
-
 // https://www.w3schools.com/js/js_cookies.asp
 function setCookie(cname, cvalue) {
     const d = new Date();
