@@ -327,14 +327,15 @@ def track_list():
         }
 
         for playlist in playlists:
-            response['playlists'][playlist.relpath] = {
-                'dir_name': playlist.relpath,
-                'display_name': playlist.name,
-                'track_count': playlist.track_count,
-                'favorite': playlist.favorite,
-                'write': playlist.write or user.admin,
-                'stats': playlist.stats(),
-            }
+            if playlist.track_count:
+                response['playlists'][playlist.relpath] = {
+                    'dir_name': playlist.relpath,
+                    'display_name': playlist.name,
+                    'track_count': playlist.track_count,
+                    'favorite': playlist.favorite,
+                    'write': playlist.write or user.admin,
+                    'stats': playlist.stats(),
+                }
 
         for playlist in playlists:
             for track in playlist.tracks():
