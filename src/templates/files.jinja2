@@ -80,9 +80,13 @@
             <tbody>
                 {% for file in files %}
                 <tr>
-                    {% if file['type'] == 'dir' %}
+                    {% if file['type'] == 'dir' or file['type'] == 'empty_dir' %}
                     <td class="icon-col">
-                        <div class="icon" style="background-image: url('static/icon/folder.svg')"></div>
+                        {% if file['type'] == 'empty_dir' %}
+                            {{ icon('folder-alert') }}
+                        {% else %}
+                            {{ icon('folder') }}
+                        {% endif %}
                     </td>
                     <td>
                         <a href="?path={{ file['path'] }}">{{ file.name }}/</a>
