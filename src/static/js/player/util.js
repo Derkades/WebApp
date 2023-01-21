@@ -15,12 +15,20 @@ function choice(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
 }
 
+/**
+ * Throw error if response status code is an error code
+ * @param {Response} response
+ */
 function checkResponseCode(response) {
     if (response.status != 200) {
         throw 'response code ' + response.status;
     }
 }
 
+/**
+ * @param {seconds} seconds
+ * @returns {string} formatted duration
+ */
 function secondsToString(seconds) {
     const hhmmss =  new Date(1000 * seconds).toISOString().substring(11, 19);
     if (hhmmss.startsWith('00:')) {
@@ -30,6 +38,10 @@ function secondsToString(seconds) {
     }
 }
 
+/**
+ * @param {number} seconds
+ * @returns {string} formatted time
+ */
 function secondsTimestampToString(seconds) {
     const utcString = new Date(1000 * seconds).toISOString();
     return utcString.substring(0, 10) + ' ' + utcString.substring(11, 16)
@@ -43,6 +55,10 @@ function setCookie(cname, cvalue) {
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/;SameSite=Strict";
 }
 
+/**
+ * @param {string} cname cookie name
+ * @returns {string} cookie value
+ */
 function getCookie(cname) {
     const name = cname + "=";
     const decodedCookie = decodeURIComponent(document.cookie);
@@ -82,6 +98,9 @@ function levenshtein(str1, str2) {
     return track[str2.length][str1.length];
 };
 
+/**
+ * @returns {string} CSRF token
+ */
 function getCsrfToken() {
     return document.getElementById('csrf-token').textContent;
 }
@@ -94,6 +113,11 @@ async function refreshCsrfToken() {
     document.getElementById('csrf-token').textContent = token;
 }
 
+/**
+ * @param {string} url
+ * @param {object} postDataObject
+ * @returns {Response}
+ */
 async function jsonPost(url, postDataObject) {
     postDataObject.csrf = getCsrfToken();
     const options = {

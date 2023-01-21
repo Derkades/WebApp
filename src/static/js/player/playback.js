@@ -106,7 +106,10 @@ function seek(delta) {
     updateMediaSession();
 }
 
-// Seek to position in song, float 0 to 1
+/**
+ * Seek to position in song, number 0 to 1
+ * @param {number} position
+ */
 function seekToFloat(position) {
     const audioElem = getAudioElement();
     if (audioElem == null) {
@@ -118,7 +121,11 @@ function seekToFloat(position) {
     updateMediaSession();
 }
 
-// Seek to position in song, current time in seconds
+//
+/**
+ * Seek to position in song, current time in seconds
+ * @param {number} position
+ */
 function seekToSeconds(position) {
     const audioElem = getAudioElement();
     if (audioElem == null) {
@@ -130,6 +137,9 @@ function seekToSeconds(position) {
     updateMediaSession();
 }
 
+/**
+ * @returns {number}
+ */
 function getTransformedVolume() {
     // https://www.dr-lex.be/info-stuff/volumecontrols.html
     // According to this article, x^4 seems to be a pretty good approximation of the perceived loudness curve
@@ -137,6 +147,9 @@ function getTransformedVolume() {
     return document.getElementById('settings-volume').value ** e / 100 ** e;
 }
 
+/**
+ * @param {string} sourceUrl
+ */
 function setAudioSource(sourceUrl) {
     const audio = getAudioElement();
     // Ensure audio volume matches slider
@@ -144,11 +157,16 @@ function setAudioSource(sourceUrl) {
     audio.src = sourceUrl;
 }
 
+/**
+ * @returns {HTMLAudioElement}
+ */
 function getAudioElement() {
     return document.getElementById('audio');
 }
 
-// Replace audio player, album cover, and lyrics according to current track info
+/**
+ * Replace audio player, album cover, and lyrics according to current track info
+ */
 function updateTrackHtml() {
     const track = queue.currentTrack;
 
@@ -213,7 +231,9 @@ function replaceAlbumImages(imageUrl) {
     }, 200);
 }
 
-// Display lyrics, instead of album art
+/**
+ * Display lyrics, hide album art
+ */
 function switchLyrics() {
     document.getElementById('button-album').classList.remove('hidden');
     document.getElementById('button-lyrics').classList.add('hidden');
@@ -221,7 +241,9 @@ function switchLyrics() {
     document.getElementById('sidebar-album-covers').classList.add('hidden');
 }
 
-// Display album art, instead of lyrics
+/**
+ * Display album art, hide lyrics
+ */
 function switchAlbumCover() {
     document.getElementById('button-album').classList.add('hidden');
     document.getElementById('button-lyrics').classList.remove('hidden');
@@ -229,9 +251,10 @@ function switchAlbumCover() {
     document.getElementById('sidebar-album-covers').classList.remove('hidden');
 }
 
+/**
+ * Only show metadata edit and track delete buttons if playlist is writable
+ */
 function updateWritablePlaylistButtons() {
-    // Only show metadata edit and track delete buttons if playlist is writable
-
     const playlist = queue.currentTrack.playlist();
 
     if (playlist.write) {

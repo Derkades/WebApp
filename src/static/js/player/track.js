@@ -1,17 +1,31 @@
 class Track {
+    /** @type {object} */
     trackData;
+    /** @type {string} */
     path;
+    /** @type {string} */
     display;
+    /** @type {string} */
     displayFile;
+    /** @type {string} */
     playlistPath;
+    /** @type {string} */
     playlistDisplay;
+    /** @type {number} */
     duration;
+    /** @type {Array<string>} */
     tags;
+    /** @type {string | null} */
     title;
+    /** @type {Array<string> | null} */
     artists;
+    /** @type {string | null} */
     album;
+    /** @type {string | null} */
     albumArist;
+    /** @type {number | null} */
     albumIndex;
+    /** @type {number | null} */
     year;
 
     constructor(trackData) {
@@ -31,10 +45,18 @@ class Track {
         this.year = trackData.year;
     };
 
+    /**
+     * @returns {Playlist}
+     */
     playlist() {
         return state.playlists[this.playlistPath];
     };
 
+    /**
+     * Get display HTML for this track
+     * @param {boolean} showPlaylist
+     * @returns {HTMLSpanElement}
+     */
     displayHtml(showPlaylist = false) {
         const html = document.createElement('span');
         html.classList.add('track-display-html');
