@@ -164,18 +164,17 @@ body.light .box-solid {
     background-color: rgba(200, 200, 200, 0.4);
 }
 
-#outer-progress-bar,
-#progress-bar {
-    height: 1.5rem;
-}
-
 #outer-progress-bar {
+    border-radius: var(--border-radius-amount);
+    height: 1.5rem;
     border: 1px solid #ccc;
     width: 100%;
     margin: .5rem 0;
     position: relative; /* required for positioning of child */
     background-color: rgba(0, 0, 0, 0.4);
     cursor: col-resize;
+    /* Hide part of inner progress bar (corners) that goes outside of outer element) */
+    overflow: hidden;
 }
 
 body.light #outer-progress-bar {
@@ -192,6 +191,9 @@ body.light #outer-progress-bar {
 #progress-bar {
     background-color: #ccc;
     width: 0;
+    /* Inner progress bar needs to overlap border of outer bar to have matching corner radius */
+    height: calc(1.5rem + 2px);
+    margin: -1px;
 }
 
 body.light #progress-bar {
