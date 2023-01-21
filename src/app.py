@@ -881,3 +881,9 @@ def is_fruit() -> bool:
                 'iPad' in user_agent:
             return True
     return False
+
+
+if __name__ == '__main__':
+    import logconfig
+    logconfig.apply()
+    app.run(host='0.0.0.0', port='8080', debug=True)
