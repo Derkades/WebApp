@@ -85,7 +85,7 @@
                         <div class="icon" style="background-image: url('static/icon/folder.svg')"></div>
                     </td>
                     <td>
-                        <a href="?path={{ file['path'] }}" {% if not write_permission %}class="secondary"{% endif%}>{{ file.name }}/</a>
+                        <a href="?path={{ file['path'] }}">{{ file.name }}/</a>
                     </td>
                     <td></td>
                     <td></td>
@@ -94,7 +94,7 @@
                         <div class="icon" style="background-image: url('static/icon/music.svg')"></div>
                     </td>
                     <td>
-                        <span {% if not write_permission %}class="secondary"{% endif%}>{{ file.name }}</span>
+                        {{ file.name }}
                     </td>
                     <td>{{ file['artist'] }}</td>
                     <td>{{ file['title'] }}</td>
@@ -103,7 +103,7 @@
                         <div class="icon" style="background-image: url('static/icon/file-question.svg')"></div>
                     </td>
                     <td>
-                        <span {% if not write_permission %}class="secondary"{% endif%}>{{ file.name }}</span>
+                        {{ file.name }}
                     </td>
                     <td></td>
                     <td></td>
