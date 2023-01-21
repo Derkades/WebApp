@@ -811,6 +811,37 @@ def history_played():
     return Response('ok', 200)
 
 
+@app.route('/history')
+def history():
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn)
+
+        result = conn.execute('''
+                              SELECT timestamp, username, playlist, track
+                              FROM history LEFT JOIN user ON user = user.id
+                              ORDER BY history.id DESC
+                              LIMIT 25
+                              ''')
+        history_items = []
+        for timestamp, username, playlist, relpath in result:
+            track = Track.by_relpath(conn, relpath)
+            meta = track.metadata()
+            if meta is None:
+                title = relpath
+            else:
+                title = meta.display_title()
+
+            history_items.append({
+                'time': timestamp,
+                'username': username,
+                'playlist': playlist,
+                'title': title,
+            })
+
+    return render_template('history.jinja2',
+                           history=history_items)
+
+
 @app.route('/playlists')
 def playlists():
     with db.connect() as conn:

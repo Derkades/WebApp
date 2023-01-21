@@ -1,0 +1,42 @@
+{% extends "base.jinja2" %}
+
+{% block title %}
+    {% trans %}Playback history{% endtrans %}
+{% endblock title %}
+
+{% block content %}
+    <main>
+        {{ page_heading(gettext('Playback history')) }}
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        {% trans %}Time{% endtrans %}
+                    </th>
+                    <th>
+                        {% trans %}User{% endtrans %}
+                    </th>
+                    <th>
+                        {% trans %}Playlist{% endtrans %}
+                    </th>
+                    <th>
+                        {% trans %}Track{% endtrans %}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for track in history %}
+                    <tr>
+                        <td>{{ track['time'] }}</td>
+                        <td>{{ track['username'] }}</td>
+                        <td>{{ track['playlist'] }}</td>
+                        <td>{{ track['title'] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+
+    </main>
+{% endblock content %}

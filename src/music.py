@@ -1,5 +1,6 @@
+from __future__ import annotations
 from pathlib import Path
-from typing import Iterator, Literal, Optional
+from typing import Iterator, Literal, Optional, TYPE_CHECKING
 from datetime import datetime
 import subprocess
 from subprocess import CompletedProcess
@@ -14,6 +15,9 @@ import cache
 import metadata
 import settings
 import scanner
+
+if TYPE_CHECKING:
+    from metadata import Metadata
 
 
 log = logging.getLogger('app.music')
@@ -101,7 +105,7 @@ class Track:
         """
         return self.relpath[:self.relpath.index('/')]
 
-    def metadata(self):
+    def metadata(self) -> Metadata | None:
         """
         Returns: Cached metadata for this track, as a Metadata object
         """
