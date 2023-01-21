@@ -88,4 +88,11 @@ CREATE TABLE IF NOT EXISTS history (
     playlist TEXT -- Could be obtained from track info, but included anyway for convenience
 );
 
+CREATE TABLE IF NOT EXISTS now_playing (
+    user INTEGER NOT NULL UNIQUE PRIMARY KEY,
+    timestamp INTEGER NOT NULL,
+    track TEXT NOT NULL,
+    FOREIGN KEY (track) REFERENCES track(path) ON DELETE CASCADE
+);
+
 COMMIT;

@@ -57,6 +57,7 @@ class LastFM {
         console.debug('lastfm | playing, counter:', this.playingCounter, '/', this.requiredPlayingCounter);
 
         // Send 'Now playing' after 10 seconds, then every 3 minutes
+        // If you modify this, also modify history() in app.py
         if (this.playingCounter % (3*60) === 10) {
             console.info('lastfm | update now playing');
             await this.updateNowPlaying();
@@ -70,7 +71,7 @@ class LastFM {
     }
 
     async updateNowPlaying() {
-        await jsonPost('/lastfm_now_playing', {track: this.currentlyPlayingTrack.path});
+        await jsonPost('/now_playing', {track: this.currentlyPlayingTrack.path});
     }
 
     async scrobble() {

@@ -751,21 +751,32 @@ def lastfm_connect():
                            name=name)
 
 
-@app.route('/lastfm_now_playing', methods=['POST'])
-def lastfm_now_playing(read_only=True):
+@app.route('/now_playing', methods=['POST'])
+def now_playing(read_only=True):
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
+
+        relpath = request.json['track']
+
+        conn.execute('''
+                     INSERT INTO now_playing (user, timestamp, track)
+                     VALUES (:user_id, :timestamp, :relpath)
+                     ON CONFLICT(user) DO UPDATE
+                         SET timestamp=:timestamp, track=:relpath
+                     ''',
+                     {'user_id': user.user_id,
+                      'timestamp': int(time.time()),
+                      'relpath': relpath})
+
         user_key = lastfm.get_user_key(user)
         if not user_key:
             log.info('Skip last.fm now playing, account is not linked')
             return Response('ok', 200)
-        track = Track.by_relpath(conn, request.json['track'])
+
+        track = Track.by_relpath(conn, relpath)
         meta = track.metadata()
-        meta = track.metadata()
-        if meta is None:
-            log.warning('Track is missing from database. Probably deleted by a rescan after the track was queued.')
-            return Response('ok', 200)
+
     # Scrobble request takes a while, so close database connection first
     lastfm.update_now_playing(user_key, meta)
     return Response('ok', 200)
@@ -820,7 +831,7 @@ def history():
                               SELECT timestamp, username, playlist, track
                               FROM history LEFT JOIN user ON user = user.id
                               ORDER BY history.id DESC
-                              LIMIT 25
+                              LIMIT 50
                               ''')
         history_items = []
         for timestamp, username, playlist, relpath in result:
@@ -831,15 +842,31 @@ def history():
             else:
                 title = meta.display_title()
 
-            history_items.append({
-                'time': timestamp,
-                'username': username,
-                'playlist': playlist,
-                'title': title,
-            })
+            history_items.append({'time': timestamp,
+                                  'username': username,
+                                  'playlist': playlist,
+                                  'title': title})
+
+        result = conn.execute('''
+                              SELECT username, playlist.name, track
+                              FROM now_playing
+                                JOIN user ON now_playing.user = user.id
+                                JOIN track ON now_playing.track = track.path
+                                JOIN playlist ON track.playlist = playlist.path
+                              WHERE now_playing.timestamp > ?
+                              ''',
+                              (int(time.time()) - 185,))  # JS updates now playing every 3 minutes
+        now_playing_items = []
+        for username, playlist_name, relpath in result:
+            track = Track.by_relpath(conn, relpath)
+            meta = track.metadata()
+            now_playing_items.append({'username': username,
+                                      'playlist': playlist_name,
+                                      'title': meta.display_title()})
 
     return render_template('history.jinja2',
-                           history=history_items)
+                           history=history_items,
+                           now_playing=now_playing_items)
 
 
 @app.route('/playlists')

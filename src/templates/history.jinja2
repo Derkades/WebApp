@@ -8,6 +8,39 @@
     <main>
         {{ page_heading(gettext('Playback history')) }}
 
+        <h2>{% trans %}Now playing{% endtrans %}</h2>
+
+        {% if now_playing %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            {% trans %}User{% endtrans %}
+                        </th>
+                        <th>
+                            {% trans %}Playlist{% endtrans %}
+                        </th>
+                        <th>
+                            {% trans %}Track{% endtrans %}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for track in now_playing %}
+                        <tr>
+                            <td>{{ track['username'] }}</td>
+                            <td>{{ track['playlist'] }}</td>
+                            <td>{{ track['title'] }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            {% trans %}<p>No one is playing music.</p>{% endtrans %}
+        {% endif %}
+
+        <h2>{% trans %}History{% endtrans %}</h2>
+
         <table class="table">
             <thead>
                 <tr>
@@ -36,7 +69,6 @@
                 {% endfor %}
             </tbody>
         </table>
-
 
     </main>
 
