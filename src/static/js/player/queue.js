@@ -286,13 +286,5 @@ class Queue {
 const queue = new Queue();
 
 function hideLoadingOverlay() {
-    if (state.loadingOverlayHidden) {
-        return;
-    }
-    state.loadingOverlayHidden = true;
-    const overlay = document.getElementById('loading-overlay');
-    overlay.style.opacity = 0;
-    setTimeout(() => {
-        overlay.classList.add('hidden');
-    }, 500);
+    document.getElementById('loading-overlay').classList.add('overlay-hidden');
 };

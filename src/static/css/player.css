@@ -339,7 +339,12 @@ body.light .full-page-overlay .box-solid {
 
 #loading-overlay {
     background-color: #171717;
-    transition: opacity .5s;
+    transition: opacity .5s, visibility .5s;
+}
+
+.overlay-hidden {
+    opacity: 0;
+    visibility: hidden;
 }
 
 .loading-text {
