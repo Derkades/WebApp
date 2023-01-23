@@ -38,14 +38,22 @@ function getNextPlaylist(currentPlaylist) {
 }
 
 function createPlaylistCheckbox(playlist, index) {
+    const id = 'checkbox-' + playlist.dir_name;
+
+    // Re-use state from previous checkbox if it exists
+    // Otherwise, playlist should be enabled if favorite
+    const previousCheckbox = document.getElementById(id);
+    console.log(previousCheckbox);
+    const checked = previousCheckbox !== null ? previousCheckbox.checked : playlist.favorite;
+
     const span = document.createElement("span");
     span.classList.add("checkbox-with-label");
 
     const input = document.createElement("input");
     input.type = 'checkbox';
     input.classList.add('playlist-checkbox');
-    input.id = 'checkbox-' + playlist.dir_name;
-    input.checked = playlist.favorite;
+    input.id = id;
+    input.checked = checked;
 
     const label = document.createElement("label");
     label.htmlFor = "checkbox-" + playlist.dir_name;
