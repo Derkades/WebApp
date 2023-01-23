@@ -72,7 +72,7 @@
                 {{ icon_button('folder-multiple', 'open-file-manager', title=gettext('Open file manager in a new tab')) }}
 
                 {{ icon_button('pencil', 'button-edit', title=gettext('Open metadata editor')) }}
-                {{ icon_button('delete', 'button-delete-track', title=gettext('Delete track from playlist')) }}
+                {{ icon_button('delete', 'button-delete-track', title=gettext('Delete currently playing track from playlist')) }}
                 <div id="delete-spinner" class="spinner hidden"></div>
 
                 {% if mobile %}
@@ -127,7 +127,7 @@
         </div>
     </div>
 
-    <div id="dialog-settings" class="full-page-overlay hidden dialog-overlay">
+    <div id="dialog-settings" class="full-page-overlay overlay-hidden dialog-overlay">
         <div class="box-rounded box-solid">
             {{ dialog_header('dialog-settings', gettext('Settings')) }}
             <div class="scroll">
@@ -242,7 +242,7 @@
         </div>
     </div>
 
-    <div id="dialog-tags" class="full-page-overlay hidden dialog-overlay">
+    <div id="dialog-tags" class="full-page-overlay overlay-hidden dialog-overlay">
         <div class="box-rounded box-solid">
             {{ dialog_header('dialog-tags', gettext('Tags')) }}
 
@@ -256,7 +256,7 @@
         </div>
     </div>
 
-    <div id="dialog-browse" class="full-page-overlay hidden dialog-overlay">
+    <div id="dialog-browse" class="full-page-overlay overlay-hidden dialog-overlay">
         <div class="box-rounded box-solid">
             {{ dialog_header('dialog-browse', 'placeholder', back_id='browse-back') }}
             <div class="scroll">
@@ -273,7 +273,7 @@
         </div>
     </div>
 
-    <div id="dialog-editor" class="full-page-overlay hidden dialog-overlay">
+    <div id="dialog-editor" class="full-page-overlay overlay-hidden dialog-overlay">
         <div class="box-rounded box-solid">
             {{ dialog_header('dialog-editor', gettext('Metadata editor')) }}
             <div id="editor-content" class="scroll">
@@ -314,7 +314,7 @@
         </div>
     </div>
 
-    <div id="dialog-playlist-stats" class="full-page-overlay hidden dialog-overlay">
+    <div id="dialog-playlist-stats" class="full-page-overlay overlay-hidden dialog-overlay">
         <div class="box-rounded box-solid">
             {{ dialog_header('dialog-playlist-stats', gettext('Playlist statistics')) }}
             <div class="scroll">

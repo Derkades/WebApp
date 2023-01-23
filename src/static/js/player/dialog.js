@@ -47,12 +47,12 @@ const dialog = {
             // Add dialog to top (end of array), set z-index and make visible
             dialog.openDialogs.push(idToOpen);
             dialogToOpen.style.zIndex = dialog.baseIndex + dialog.openDialogs.length;
-            dialogToOpen.classList.remove('hidden');
+            dialogToOpen.classList.remove('overlay-hidden');
         }
     },
     close: (idToClose) => {
         // Hide closed dialog
-        document.getElementById(idToClose).classList.add('hidden');
+        document.getElementById(idToClose).classList.add('overlay-hidden');
 
         // Remove closed dialog from array
         dialog.openDialogs = dialog.openDialogs.filter(id => id !== idToClose);

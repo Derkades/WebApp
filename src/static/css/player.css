@@ -312,11 +312,12 @@ h4 > .icon {
     align-items: center;
     backdrop-filter: blur(2rem);
     pointer-events: none; /* Allow closing dialogs behind top dialog */
+    transition: opacity .2s, visibility .2s;
 }
 
 .full-page-overlay .box-solid {
     /* blur backdrop filter doesn't work on firefox <=102, make the box darker or text won't be readable */
-    /* the current ESR is 102, when the next ESR is released this can be removed */
+    /* the current ESR is 102, when the next ESR is released (summer 2023) this can be removed */
     background-color: rgba(20, 20, 20, 0.6);
     min-width: 60vw;
     max-width: calc(100vw - 1rem);
@@ -327,10 +328,20 @@ h4 > .icon {
     display: flex;
     flex-direction: column;
     pointer-events: initial; /* Re-enable click events for the actual box */
+    transition: scale .2s;
 }
 
 body.light .full-page-overlay .box-solid {
     background-color: rgba(255, 255, 255, 0.9);
+}
+
+.full-page-overlay.overlay-hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.full-page-overlay.overlay-hidden .box-solid {
+    scale: .9;
 }
 
 .scroll {
@@ -340,11 +351,6 @@ body.light .full-page-overlay .box-solid {
 #loading-overlay {
     background-color: #171717;
     transition: opacity .5s, visibility .5s;
-}
-
-.overlay-hidden {
-    opacity: 0;
-    visibility: hidden;
 }
 
 .loading-text {
