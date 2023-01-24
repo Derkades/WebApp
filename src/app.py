@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 import logging
 from pathlib import Path
 from urllib.parse import quote as urlencode
@@ -162,6 +162,7 @@ def choose_track():
 
         dir_name = request.args['playlist_dir']
         tag_mode = request.args['tag_mode']
+        assert tag_mode in {'allow', 'deny'}
         tags = request.args['tags'].split(';')
         playlist = music.playlist(conn, dir_name)
         chosen_track = playlist.choose_track(tag_mode=tag_mode, tags=tags)
@@ -319,16 +320,14 @@ def track_list():
     with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn)
 
-        playlists: list[UserPlaylist] = music.playlists(conn, user_id=user.user_id)
+        user_playlists = music.user_playlists(conn, user.user_id)
 
-        response = {
-            'playlists': {},
-            'tracks': [],
-        }
+        playlist_response: dict[str, dict[str, Any]] = {}
+        track_response: list[dict[str, Any]] = []
 
-        for playlist in playlists:
+        for playlist in user_playlists:
             if playlist.track_count:
-                response['playlists'][playlist.relpath] = {
+                playlist_response[playlist.relpath] = {
                     'dir_name': playlist.relpath,
                     'display_name': playlist.name,
                     'track_count': playlist.track_count,
@@ -337,10 +336,11 @@ def track_list():
                     'stats': playlist.stats(),
                 }
 
-        for playlist in playlists:
+        # TODO move track list to playlist dictionary
+        for playlist in user_playlists:
             for track in playlist.tracks():
                 meta = track.metadata()
-                response['tracks'].append({
+                track_response.append({
                     'path': track.relpath,
                     'display': meta.display_title(),
                     'playlist': playlist.relpath,
@@ -355,7 +355,8 @@ def track_list():
                     'year': meta.year,
                 })
 
-    return response
+    return {'playlists': playlist_response,
+            'tracks': track_response}
 
 
 @app.route('/scan_music', methods=['POST'])
@@ -518,10 +519,10 @@ def playlists_share():
             auth.verify_auth_cookie(conn)
             usernames = [row[0] for row in conn.execute('SELECT username FROM user')]
         csrf = request.args['csrf']
-        playlist = request.args['playlist']
+        playlist_relpath = request.args['playlist']
         return render_template('playlists_share.jinja2',
                                csrf=csrf,
-                               playlist=playlist,
+                               playlist=playlist_relpath,
                                usernames=usernames)
     else:
         with db.connect() as conn:
@@ -534,7 +535,7 @@ def playlists_share():
                                            (username,)).fetchone()
 
             # Verify playlist exists and user has write access
-            playlist: UserPlaylist = music.playlist(conn, playlist_relpath, user_id=user.user_id)
+            playlist = music.user_playlist(conn, playlist_relpath, user.user_id)
 
             if not playlist.write and not user.admin:
                 return Response('Cannot share playlist if you do not have write permission', 403)
@@ -565,6 +566,7 @@ def files_upload():
             return Response(None, 403)
 
     for uploaded_file in request.files.getlist('upload'):
+        assert uploaded_file.filename is not None
         check_filename(uploaded_file.filename)
         uploaded_file.save(Path(upload_dir, uploaded_file.filename))
 
@@ -879,7 +881,7 @@ def playlists():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         csrf_token = user.get_csrf()
-        user_playlists = music.playlists(conn, user_id=user.user_id)
+        user_playlists = music.playlists(conn, user.user_id)
 
     return render_template('playlists.jinja2',
                            user_is_admin=user.admin,
@@ -980,4 +982,4 @@ def is_fruit() -> bool:
 if __name__ == '__main__':
     import logconfig
     logconfig.apply()
-    app.run(host='0.0.0.0', port='8080', debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=True)

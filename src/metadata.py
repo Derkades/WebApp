@@ -307,7 +307,7 @@ def probe(path: Path) -> Metadata:
     return Metadata(music.to_relpath(path), duration, artists, album, title, year, album_artist, album_index, tags)
 
 
-def cached(conn: Connection, relpath: str) -> Metadata | None:
+def cached(conn: Connection, relpath: str) -> Metadata:
     """
     Create Metadata object from database contents
     Returns: Metadata, or None if the track is not known
@@ -315,7 +315,7 @@ def cached(conn: Connection, relpath: str) -> Metadata | None:
     query = 'SELECT duration, title, album, album_artist, album_index, year FROM track WHERE path=?'
     row = conn.execute(query, (relpath,)).fetchone()
     if row is None:
-        return None
+        raise ValueError('missing track from database')
     duration, title, album, album_artist, album_index, year = row
 
     rows = conn.execute('SELECT artist FROM track_artist WHERE track=?', (relpath,)).fetchall()

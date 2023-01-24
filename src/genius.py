@@ -125,7 +125,7 @@ def get_lyrics(query: str) -> Lyrics | None:
         log.info('Search error')
         traceback.print_exc()
         # Return not found now, but don't cache so we try again in the future when the bug is fixed
-        return Lyrics(None, ['Error during lyrics search, please report this issue if it persists.'])
+        return Lyrics(None, 'Error during lyrics search, please report this issue if it persists.')
 
     if genius_url is None:
         log.info('No lyrics found')
@@ -144,7 +144,7 @@ def get_lyrics(query: str) -> Lyrics | None:
         log.info('Error retrieving lyrics')
         traceback.print_exc()
         # Don't cache so we try again in the future when the bug is fixed
-        return Lyrics(genius_url, ['Error retrieving lyrics, please report this issue. Make sure to include the source URL in your report. Please look at the logs for a more detailed message, if you are able to.'])
+        return Lyrics(genius_url, 'Error retrieving lyrics, please report this issue. Make sure to include the source URL in your report. Please look at the logs for a more detailed message, if you are able to.')
 
     cache.store_json(cache_key,
                      {'found': True,
@@ -160,8 +160,12 @@ if __name__ == '__main__':
             print(_search(sys.argv[2]))
             sys.exit(0)
         elif sys.argv[1] == 'extract':
-            for line in _extract_lyrics(sys.argv[2]).split('<br>'):
-                print(line)
+            lyrics = _extract_lyrics(sys.argv[2])
+            if lyrics is None:
+                print('no lyrics found')
+            else:
+                for line in lyrics.split('<br>'):
+                    print(line)
             sys.exit(0)
 
     print('Usage:')

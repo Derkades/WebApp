@@ -40,7 +40,7 @@ def scan_playlists(conn: Connection) -> set[str]:
 
 @dataclass
 class QueryParams:
-    main_data: dict[str, object]
+    main_data: dict[str, str|int|None]
     artist_data: list[dict[str, str]]
     tag_data: list[dict[str, str]]
 
@@ -51,13 +51,13 @@ def query_params(relpath: str, path: Path) -> QueryParams:
     """
     meta = metadata.probe(path)
 
-    main_data = {'path': relpath,
-                 'duration': meta.duration,
-                 'title': meta.title,
-                 'album': meta.album,
-                 'album_artist': meta.album_artist,
-                 'album_index': meta.album_index,
-                 'year': meta.year}
+    main_data: dict[str, str|int|None] = {'path': relpath,
+                                          'duration': meta.duration,
+                                          'title': meta.title,
+                                          'album': meta.album,
+                                          'album_artist': meta.album_artist,
+                                          'album_index': meta.album_index,
+                                          'year': meta.year}
     if meta.artists is None:
         artist_data = []
     else:
