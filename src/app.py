@@ -233,7 +233,7 @@ def get_album_cover() -> Response:
     Get album cover image for the provided track path.
     """
     with db.connect(read_only=True) as conn:
-        user = auth.verify_auth_cookie(conn)
+        auth.verify_auth_cookie(conn)
         track = Track.by_relpath(conn, request.args['path'])
         meta = track.metadata()
 
@@ -611,10 +611,12 @@ def files_rename():
                 return redirect('/files?path=' + urlencode(music.to_relpath(path.parent)))
         else:
             path = music.from_relpath(request.args['path'])
+            back_url = request.args['back_url']
             return render_template('files_rename.jinja2',
                                 csrf_token=user.get_csrf(),
                                 path=music.to_relpath(path),
-                                name=path.name)
+                                name=path.name,
+                                back_url=back_url)
 
 
 @app.route('/files_mkdir', methods=['POST'])

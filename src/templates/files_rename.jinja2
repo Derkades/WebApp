@@ -6,8 +6,7 @@
 
 {% block content %}
     <main>
-        {# TODO dynamic back url depending on browse path #}
-        {{ page_heading(gettext('Rename file', back_url='/files')) }}
+        {{ page_heading(gettext('Rename file'), back_url=back_url) }}
 
         <form method="POST">
             <input type="hidden" name="csrf" value="{{ csrf_token }}">

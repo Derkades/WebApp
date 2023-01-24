@@ -117,6 +117,11 @@
                     <td class="button-col">
                         <form method="GET" action="/files_rename" class="inline-block">
                             <input type="hidden" name="path" value="{{ file['path'] }}">
+                            {% if base_path == '.' %}
+                                <input type="hidden" name="back_url" value="/files">
+                            {% else %}
+                                <input type="hidden" name="back_url" value="/files?path={{ base_path }}">
+                            {% endif %}
                             {{ icon_button('rename-box', title=gettext('Rename file')) }}
                         </form>
                     </td>
