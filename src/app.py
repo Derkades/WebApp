@@ -447,14 +447,7 @@ def files():
             children.append(file_info)
 
             if path.is_dir():
-                try:
-                    one_file = next(path.iterdir())
-                    if one_file.name.startswith('.trash.'):
-                        raise StopIteration()
-                    file_info['type'] = 'dir'
-                except StopIteration:
-                    print('empty')
-                    file_info['type'] = 'empty_dir'
+                file_info['type'] = 'dir'
             elif music.has_music_extension(path):
                 file_info['type'] = 'music'
                 track = Track.by_relpath(conn, music.to_relpath(path))
