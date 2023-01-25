@@ -300,22 +300,6 @@ class PlaylistStats:
                            ''', (relpath,)).fetchone()
         self.has_tag_count, = row
 
-    def as_dict(self) -> dict[str, str | int]:
-        return {
-            'total_duration': self.total_duration,
-            'track_count': self.track_count,
-            'mean_duration': self.mean_duration,
-            'artist_count': self.artist_count,
-            'has_title_count': self.has_title_count,
-            'has_album_count': self.has_album_count,
-            'has_album_artist_count': self.has_album_artist_count,
-            'has_year_count': self.has_year_count,
-            'has_artist_count': self.has_artist_count,
-            'has_tag_count': self.has_tag_count,
-            'most_recent_play': self.most_recent_play,
-            'least_recent_play': self.least_recent_play,
-            'most_recent_mtime': self.most_recent_mtime,
-        }
 
 @dataclass
 class Playlist:

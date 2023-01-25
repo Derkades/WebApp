@@ -117,12 +117,5 @@
 
     </main>
 
-    <script>
-        // Replace timestamp by formatted time string
-        document.addEventListener('DOMContentLoaded', () => {
-            for (const elem of document.getElementsByClassName('timestamp')) {
-                elem.textContent = new Date(1000 * elem.textContent).toLocaleString();
-            }
-        });
-    </script>
+    <script src="/static/js/replace-timestamp.js"></script>
 {% endblock content %}

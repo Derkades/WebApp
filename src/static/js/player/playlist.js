@@ -118,33 +118,3 @@ function createPlaylistDropdowns() {
         }
     }
 }
-
-function updatePlaylistStatsHtml() {
-    const children = [];
-
-    for (const relpath in state.playlists) {
-        const playlist = state.playlists[relpath];
-
-        const child = document.getElementById('template-playlist-stats').content.cloneNode(true).firstElementChild;
-
-        for (const elem of child.getElementsByClassName('insert-value')) {
-            const valueName = elem.dataset.value;
-            let value;
-            if (valueName === 'name') {
-                value = playlist.display_name;
-            } else {
-                value = playlist.stats[valueName];
-            }
-            if (elem.dataset.formatDuration === "") {
-                value = secondsToString(value);
-            } else if (elem.dataset.formatTimestamp === "") {
-                value = new Date(value * 1000).toLocaleString();
-            }
-            elem.textContent = value;
-        }
-
-        children.push(child);
-    }
-
-    document.getElementById('playlist-stats').replaceChildren(...children);
-}

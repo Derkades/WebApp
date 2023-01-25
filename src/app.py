@@ -18,7 +18,7 @@ import image
 import lastfm
 from metadata import Metadata
 import music
-from music import Playlist, Track, UserPlaylist
+from music import Playlist, Track
 import musicbrainz
 import radio
 from radio import RadioTrack
@@ -333,7 +333,7 @@ def track_list():
                     'track_count': playlist.track_count,
                     'favorite': playlist.favorite,
                     'write': playlist.write or user.admin,
-                    'stats': playlist.stats(),
+                    'stats': playlist.stats(),  # TODO can be removed, should be left for a few days for backwards compatibility
                 }
 
         # TODO move track list to playlist dictionary
@@ -912,12 +912,25 @@ def history():
                            summary_users=summary_users)
 
 
+@app.route('/playlist_stats')
+def playlist_stats():
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn)
+        playlists = music.playlists(conn)
+        playlists_stats = [{'name': playlist.name,
+                            'stats': playlist.stats()}
+                           for playlist in playlists]
+
+    return render_template('playlist_stats.jinja2',
+                           playlists=playlists_stats)
+
+
 @app.route('/playlists')
 def playlists():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         csrf_token = user.get_csrf()
-        user_playlists = music.playlists(conn, user.user_id)
+        user_playlists = music.user_playlists(conn, user.user_id)
 
     return render_template('playlists.jinja2',
                            user_is_admin=user.admin,

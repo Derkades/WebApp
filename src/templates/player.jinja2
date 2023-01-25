@@ -67,7 +67,6 @@
                 {{ icon_button('skip-next', 'button-next', title=gettext('Skip to next track')) }}
                 {{ icon_button('microphone', 'button-lyrics', title=gettext('Show lyrics instead of album cover')) }}
                 {{ icon_button('album', 'button-album', title=gettext('Show album cover instead of lyrics')) }}
-                {{ icon_button('chart-line-variant', 'open-dialog-playlist-stats', title=gettext('Open playlist statistics')) }}
                 {{ icon_button('gear', 'open-dialog-settings', title=gettext('Open settings')) }}
                 {{ icon_button('folder-multiple', 'open-file-manager', title=gettext('Open file manager in a new tab')) }}
 
@@ -314,15 +313,6 @@
         </div>
     </div>
 
-    <div id="dialog-playlist-stats" class="full-page-overlay overlay-hidden dialog-overlay">
-        <div class="box-rounded box-solid">
-            {{ dialog_header('dialog-playlist-stats', gettext('Playlist statistics')) }}
-            <div class="scroll">
-                <div id="playlist-stats"></div>
-            </div>
-        </div>
-    </div>
-
     <div id="loading-overlay" class="full-page-overlay">
         <div>
             <div class="flex-content-center">
@@ -350,6 +340,7 @@
     <div class="hidden" id="trans-album">{% trans %}Album: {% endtrans %}</div>
     <div class="hidden" id="trans-tag">{% trans %}Tag: {% endtrans %}</div>
     <div class="hidden" id="trans-all-tracks">{% trans %}All tracks{% endtrans %}</div>
+
     <template id="template-queue-spinner">
         <tr>
             <td colspan="3" class="secondary downloading">
@@ -357,73 +348,13 @@
             </td>
         </tr>
     </template>
+
     <template id="template-td-cover">
         <td class="box-rounded">
             <div class="delete-overlay">
                 <div class="icon" style="background-image: url('/static/icon/delete.svg')"></div>
             </div>
         </td>
-    </template>
-    <template id="template-playlist-stats">
-        <div>
-            <h3 class="insert-value" data-value="name"></h3>
-            <table>
-                <tbody>
-                    <tr>
-                        <td>{% trans %}Number of tracks{% endtrans %}</td>
-                        <td><span class="insert-value" data-value="track_count"></span></td>
-                    </tr>
-                         <tr>
-                        <td>{% trans %}Number of artists{% endtrans %}</td>
-                        <td><span class="insert-value" data-value="artist_count"></span></td>
-                    </tr>
-                    <tr>
-                        <td>{% trans %}Total duration{% endtrans %}</td>
-                        <td><span class="insert-value" data-value="total_duration" data-format-duration></span></td>
-                    </tr>
-                    <tr>
-                        <td>{% trans %}Mean duration{% endtrans %}</td>
-                        <td><span class="insert-value" data-value="mean_duration" data-format-duration></span></td>
-                    </tr>
-                    <tr>
-                        <td>{% trans %}Tracks with title metadata{% endtrans %}</td>
-                        <td><span class="insert-value" data-value="has_title_count"></span></td>
-                    </tr>
-                    <tr>
-                        <td>{% trans %}Tracks with album metadata{% endtrans %}</td>
-                        <td><span class="insert-value" data-value="has_album_count"></span></td>
-                    </tr>
-                    <tr>
-                        <td>{% trans %}Tracks with album artist metadata{% endtrans %}</td>
-                        <td><span class="insert-value" data-value="has_album_artist_count"></span></td>
-                    </tr>
-                    <tr>
-                        <td>{% trans %}Tracks with year metadata{% endtrans %}</td>
-                        <td><span class="insert-value" data-value="has_year_count"></span></td>
-                    </tr>
-                    <tr>
-                        <td>{% trans %}Tracks with artist metadata{% endtrans %}</td>
-                        <td><span class="insert-value" data-value="has_artist_count"></span></td>
-                    </tr>
-                    <tr>
-                        <td>{% trans %}Tracks with tag metadata{% endtrans %}</td>
-                        <td><span class="insert-value" data-value="has_tag_count"></span></td>
-                    </tr>
-                    <tr>
-                        <td>{% trans %}Most recent play{% endtrans %}</td>
-                        <td><span class="insert-value" data-value="most_recent_play" data-format-timestamp></span></td>
-                    </tr>
-                    <tr>
-                        <td>{% trans %}Least recent play{% endtrans %}</td>
-                        <td><span class="insert-value" data-value="least_recent_play" data-format-timestamp></span></td>
-                    </tr>
-                    <tr>
-                        <td>{% trans %}Most recent track modification{% endtrans %}</td>
-                        <td><span class="insert-value" data-value="most_recent_mtime" data-format-timestamp></span></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
     </template>
 
 {% endblock content %}

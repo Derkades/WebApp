@@ -6,22 +6,25 @@
 
 {% block content %}
     <main>
-        <div class="icon" style="background-image: url('/static/icon/music.svg')"></div>
+        {{ icon('music') }}
         <a href="/player" class="large">{% trans %}Music player{% endtrans %}</a><br>
 
-        <div class="icon" style="background-image: url('/static/icon/folder.svg')"></div>
+        {{ icon('folder') }}
         <a href="/files" class="large">{% trans %}File manager{% endtrans %}</a><br>
 
-        <div class="icon" style="background-image: url('/static/icon/playlist-music.svg')"></div>
+        {{ icon('playlist-music') }}
         <a href="/playlists" class="large">{% trans %}Playlist manager{% endtrans %}</a><br>
 
-        <div class="icon" style="background-image: url('/static/icon/account-cog.svg')"></div>
+        {{ icon('account-cog') }}
         <a href="/account" class="large">{% trans %}Account{% endtrans %}</a><br>
 
-        <div class="icon" style="background-image: url('/static/icon/history.svg')"></div>
+        {{ icon('history') }}
         <a href="/history" class="large">{% trans %}Playback history{% endtrans %}</a><br>
 
-        <div class="icon" style="background-image: url('/static/icon/radio.svg')"></div>
+        {{ icon('chart-line-variant') }}
+        <a href="/playlist_stats" class="large">{% trans %}Playlist statistics{% endtrans %}</a><br>
+
+        {{ icon('radio') }}
         <a href="/radio" class="large">{% trans %}Radio (Alpha){% endtrans %}</a><br>
     </main>
 {% endblock content %}
