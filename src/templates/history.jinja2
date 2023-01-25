@@ -106,7 +106,7 @@
             <tbody>
                 {% for track in history %}
                     <tr>
-                        <td class="timestamp">{{ track['time'] }}</td>
+                        <td class="format-timestamp">{{ track['time'] }}</td>
                         <td>{{ track['username'] }}</td>
                         <td>{{ track['playlist'] }}</td>
                         <td>{{ track['title'] }}</td>
@@ -117,5 +117,5 @@
 
     </main>
 
-    <script src="/static/js/replace-timestamp.js"></script>
+    <script src="/static/js/format.js"></script>
 {% endblock content %}

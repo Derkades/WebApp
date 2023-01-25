@@ -49,17 +49,17 @@
                             <td>{{ playlist['name'] }}</td>
                             <td>{{ playlist['stats'].track_count }}</td>
                             <td>{{ playlist['stats'].artist_count }}</td>
-                            <td>{{ playlist['stats'].total_duration }}</td>
-                            <td>{{ playlist['stats'].mean_duration }}</td>
+                            <td class="format-duration">{{ playlist['stats'].total_duration }}</td>
+                            <td class="format-duration">{{ playlist['stats'].mean_duration }}</td>
                             <td>{{ playlist['stats'].has_title_count }}</td>
                             <td>{{ playlist['stats'].has_album_count }}</td>
                             <td>{{ playlist['stats'].has_album_artist_count }}</td>
                             <td>{{ playlist['stats'].has_year_count }}</td>
                             <td>{{ playlist['stats'].has_artist_count }}</td>
                             <td>{{ playlist['stats'].has_tag_count }}</td>
-                            <td class="timestamp">{{ playlist['stats'].most_recent_play }}</td>
-                            <td class="timestamp">{{ playlist['stats'].least_recent_play }}</td>
-                            <td class="timestamp">{{ playlist['stats'].most_recent_mtime }}</td>
+                            <td class="format-timestamp">{{ playlist['stats'].most_recent_play }}</td>
+                            <td class="format-timestamp">{{ playlist['stats'].least_recent_play }}</td>
+                            <td class="format-timestamp">{{ playlist['stats'].most_recent_mtime }}</td>
                         </tr>
                     {% endif %}
                 {% endfor %}
@@ -67,5 +67,5 @@
         </table>
     </main>
 
-    <script src="/static/js/replace-timestamp.js"></script>
+    <script src="/static/js/format.js"></script>
 {% endblock content %}
