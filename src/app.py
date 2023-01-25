@@ -834,6 +834,8 @@ def history():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
 
+        # History
+
         result = conn.execute('''
                               SELECT timestamp, username, playlist, track
                               FROM history LEFT JOIN user ON user = user.id
@@ -854,6 +856,8 @@ def history():
                                   'playlist': playlist,
                                   'title': title})
 
+        # Now playing
+
         result = conn.execute('''
                               SELECT username, playlist.name, track
                               FROM now_playing
@@ -871,9 +875,41 @@ def history():
                                       'playlist': playlist_name,
                                       'title': meta.display_title()})
 
+        # Summary
+
+        summary_from = int(time.time()) - 60*60*24*7
+
+        result = conn.execute('''
+                              SELECT (SELECT name FROM playlist WHERE playlist.path = history.playlist), COUNT(*)
+                              FROM history
+                              WHERE timestamp > ?
+                              GROUP BY playlist
+                              ORDER BY COUNT(*) DESC
+                              ''',
+                              (summary_from,))
+
+        summary_playlists = [{'name': playlist,
+                              'count': count}
+                             for playlist, count in result]
+
+        result = conn.execute('''
+                              SELECT (SELECT username FROM user WHERE user.id = history.user), COUNT(*)
+                              FROM history
+                              WHERE timestamp > ?
+                              GROUP BY history.user
+                              ORDER BY COUNT(*) DESC
+                              ''',
+                              (summary_from,))
+
+        summary_users = [{'name': username,
+                          'count': count}
+                          for username, count in result]
+
     return render_template('history.jinja2',
                            history=history_items,
-                           now_playing=now_playing_items)
+                           now_playing=now_playing_items,
+                           summary_playlists=summary_playlists,
+                           summary_users=summary_users)
 
 
 @app.route('/playlists')
