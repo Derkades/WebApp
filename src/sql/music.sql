@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS csrf (
 
 CREATE TABLE IF NOT EXISTS history (
     id INTEGER NOT NULL UNIQUE PRIMARY KEY AUTOINCREMENT,
-    timestamp INTEGER NOT NULL,
+    timestamp INTEGER NOT NULL, -- Seconds since UNIX epoch
     user INTEGER NOT NULL, -- Intentionally not a foreign key, so history remains when user is deleted
     track TEXT NOT NULL, -- Intentionally not a foreign key, so history remains when user is deleted
     playlist TEXT -- Could be obtained from track info, but included anyway for convenience
@@ -93,6 +93,13 @@ CREATE TABLE IF NOT EXISTS now_playing (
     timestamp INTEGER NOT NULL,
     track TEXT NOT NULL,
     FOREIGN KEY (track) REFERENCES track(path) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS scanner_log (
+    timestamp INTEGER NOT NULL, -- Seconds since UNIX epoch
+    action TEXT NOT NULL, -- Literal string 'insert', 'delete', or 'update'
+    playlist TEXT NOT NULL, -- Intentionally not a foreign key, log should be kept for deleted playlists
+    track TEXT NOT NULL  -- Intentionally not a foreign key, log contains deleted tracks
 );
 
 COMMIT;

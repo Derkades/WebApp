@@ -83,6 +83,10 @@ def scan_tracks(conn: Connection, playlist_path: str) -> None:
         if not path.exists():
             log.info('deleting: %s', relpath)
             conn.execute('DELETE FROM track WHERE path=?', (relpath,))
+            conn.execute('''
+                         INSERT INTO scanner_log (timestamp, action, playlist, track)
+                         VALUES (?, 'delete', ?, ?)
+                         ''', (int(time.time()), playlist_path, relpath))
             continue
 
         paths_db.add(relpath)
@@ -109,6 +113,11 @@ def scan_tracks(conn: Connection, playlist_path: str) -> None:
             conn.execute('DELETE FROM track_tag WHERE track=?', (relpath,))
             conn.executemany('INSERT INTO track_tag (track, tag) VALUES (:track, :tag)', params.tag_data)
 
+            conn.execute('''
+                         INSERT INTO scanner_log (timestamp, action, playlist, track)
+                         VALUES (?, 'update', ?, ?)
+                         ''', (int(time.time()), playlist_path, relpath))
+
     for path in music.scan_playlist(playlist_path):
         relpath = music.to_relpath(path)
         if relpath not in paths_db:
@@ -124,6 +133,11 @@ def scan_tracks(conn: Connection, playlist_path: str) -> None:
                           'mtime': mtime})
             conn.executemany('INSERT INTO track_artist (track, artist) VALUES (:track, :artist)', params.artist_data)
             conn.executemany('INSERT INTO track_tag (track, tag) VALUES (:track, :tag)', params.tag_data)
+
+            conn.execute('''
+                         INSERT INTO scanner_log (timestamp, action, playlist, track)
+                         VALUES (?, 'insert', ?, ?)
+                         ''', (int(time.time()), playlist_path, relpath))
 
 
 def scan(conn: Connection) -> None:
