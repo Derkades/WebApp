@@ -390,7 +390,6 @@ class Playlist:
                                '--no-progress',
                                '-f', 'bestaudio',
                                '--remux-video', 'webm>ogg/mp3>mp3/mka',
-                               '--add-metadata',
                                '--no-playlist',
                                '--paths', 'temp:/tmp',
                                url],
