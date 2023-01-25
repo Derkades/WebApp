@@ -96,6 +96,7 @@ CREATE TABLE IF NOT EXISTS now_playing (
 );
 
 CREATE TABLE IF NOT EXISTS scanner_log (
+    id INTEGER NOT NULL UNIQUE PRIMARY KEY AUTOINCREMENT,
     timestamp INTEGER NOT NULL, -- Seconds since UNIX epoch
     action TEXT NOT NULL, -- Literal string 'insert', 'delete', or 'update'
     playlist TEXT NOT NULL, -- Intentionally not a foreign key, log should be kept for deleted playlists

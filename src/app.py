@@ -966,6 +966,28 @@ def download():
                            playlists=playlists)
 
 
+@app.route('/recent_changes')
+def recent_changes():
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn)
+
+        result = conn.execute('''
+                              SELECT timestamp, action, playlist, track
+                              FROM scanner_log
+                              ORDER BY id DESC
+                              LIMIT 50
+                              ''')
+
+        changes = [{'timestamp': timestamp,
+                    'action': action,
+                    'playlist': playlist,
+                    'track': track}
+                   for timestamp, action, playlist, track in result]
+
+    return render_template('recent_changes.jinja2',
+                           changes=changes)
+
+
 def get_language() -> str:
     """
     Returns two letter language code, matching a language code in
