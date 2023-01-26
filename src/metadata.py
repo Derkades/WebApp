@@ -315,7 +315,7 @@ def cached(conn: Connection, relpath: str) -> Metadata:
     query = 'SELECT duration, title, album, album_artist, album_index, year FROM track WHERE path=?'
     row = conn.execute(query, (relpath,)).fetchone()
     if row is None:
-        raise ValueError('missing track from database')
+        raise ValueError('Missing track from database: ' + relpath)
     duration, title, album, album_artist, album_index, year = row
 
     rows = conn.execute('SELECT artist FROM track_artist WHERE track=?', (relpath,)).fetchall()

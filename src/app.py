@@ -830,19 +830,21 @@ def history():
         # History
 
         result = conn.execute('''
-                              SELECT timestamp, username, playlist, track
-                              FROM history LEFT JOIN user ON user = user.id
+                              SELECT history.timestamp, user.username, history.playlist, history.track, track.path IS NOT NULL
+                              FROM history
+                                  LEFT JOIN user ON history.user = user.id
+                                  LEFT JOIN track ON history.track = track.path
                               ORDER BY history.id DESC
                               LIMIT 50
                               ''')
         history_items = []
-        for timestamp, username, playlist, relpath in result:
-            track = Track.by_relpath(conn, relpath)
-            meta = track.metadata()
-            if meta is None:
-                title = relpath
-            else:
+        for timestamp, username, playlist, relpath, track_exists in result:
+            if track_exists:
+                track = Track.by_relpath(conn, relpath)
+                meta = track.metadata()
                 title = meta.display_title()
+            else:
+                title = relpath
 
             history_items.append({'time': timestamp,
                                   'username': username,
