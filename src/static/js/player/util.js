@@ -30,11 +30,15 @@ function checkResponseCode(response) {
  * @returns {string} formatted duration
  */
 function secondsToString(seconds) {
-    const hhmmss =  new Date(1000 * seconds).toISOString().substring(11, 19);
-    if (hhmmss.startsWith('00:')) {
-        return hhmmss.substring(3);
+    // If you modify this function, also copy it to format.js!
+    const isoString = new Date(1000 * seconds).toISOString();
+    const days = Math.floor(seconds / (24*60*60));
+    const hours = parseInt(isoString.substring(11, 13)) + (days * 24);
+    const mmss = isoString.substring(14, 19);
+    if (hours == 0) {
+        return mmss;
     } else {
-        return hhmmss;
+        return hours + ':' + mmss;
     }
 }
 
