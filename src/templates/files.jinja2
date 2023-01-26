@@ -71,8 +71,8 @@
                 <tr>
                     <th>{% trans %}Type{% endtrans %}</th>
                     <th>{% trans %}File name{% endtrans %}</th>
-                    <th>{% trans %}Artists{% endtrans %}</th>
-                    <th>{% trans %}Title{% endtrans %}</th>
+                    <th class="collapse-col">{% trans %}Artists{% endtrans %}</th>
+                    <th class="collapse-col">{% trans %}Title{% endtrans %}</th>
                     <th {% if write_permission %}colspan="3"{% endif %}>{% trans %}Actions{% endtrans %}</th>
                 </tr>
             </thead>
@@ -87,8 +87,8 @@
                     <td>
                         <a href="?path={{ file['path'] }}">{{ file.name }}/</a>
                     </td>
-                    <td></td>
-                    <td></td>
+                    <td class="collapse-col"></td>
+                    <td class="collapse-col"></td>
                     {% elif file['type'] == 'music' %}
                     <td class="icon-col">
                         <div class="icon" style="background-image: url('static/icon/music.svg')"></div>
@@ -96,8 +96,8 @@
                     <td>
                         {{ file.name }}
                     </td>
-                    <td>{{ file['artist'] }}</td>
-                    <td>{{ file['title'] }}</td>
+                    <td class="collapse-col">{{ file['artist'] }}</td>
+                    <td class="collapse-col">{{ file['title'] }}</td>
                     {% else %}
                     <td class="icon-col">
                         <div class="icon" style="background-image: url('static/icon/file-question.svg')"></div>
@@ -105,8 +105,8 @@
                     <td>
                         {{ file.name }}
                     </td>
-                    <td></td>
-                    <td></td>
+                    <td class="collapse-col"></td>
+                    <td class="collapse-col"></td>
                     {% endif %}
 
                     {% if write_permission %}

@@ -244,3 +244,9 @@ form {
 .page-heading > *:first-child {
     margin-right: .5rem;
 }
+
+@media screen and (max-width: 800px) {
+    .collapse-col {
+        display: none;
+    }
+}
