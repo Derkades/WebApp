@@ -70,7 +70,14 @@ function updateMediaSession() {
 
 // Called on track change
 function updateMediaTrackInfo() {
-    const track = queue.currentTrack;
+    if (queue.currentTrack === null) {
+        return;
+    }
+    const track = queue.currentTrack.track();
+    if (track === null) {
+        console.warn('Not updating mediaSession, track info is null');
+        return;
+    }
     navigator.mediaSession.metadata = new MediaMetadata({
         title: track.title !== null ? track.title : track.display,
         album: track.album !== null ? track.album : 'Unknown Album',
@@ -78,7 +85,7 @@ function updateMediaTrackInfo() {
         // For some unknown reason this does not work everywhere. For example, it works on Chromium
         // mobile and desktop, but not the KDE media player widget with Firefox or Chromium.
         // Firefox mobile doesn't seem to support the MediaSession API at all.
-        artwork: [{src: track.imageBlobUrl}],
+        artwork: [{src: queue.currentTrack.imageBlobUrl}],
     });
 }
 
@@ -168,24 +175,24 @@ function getAudioElement() {
  * Replace audio player, album cover, and lyrics according to current track info
  */
 function updateTrackHtml() {
-    const track = queue.currentTrack;
+    const queuedTrack = queue.currentTrack;
 
     // Replace audio element source
-    setAudioSource(track.audioBlobUrl);
+    setAudioSource(queuedTrack.audioBlobUrl);
 
     // Replace album cover images
-    replaceAlbumImages(track.imageBlobUrl);
+    replaceAlbumImages(queuedTrack.imageBlobUrl);
 
     const notFoundElem = document.getElementById('lyrics-not-found');
     const textElem = document.getElementById('lyrics-text');
     const sourceElem = document.getElementById('lyrics-source');
-    if (track.lyrics.found) {
+    if (queuedTrack.lyrics.found) {
         notFoundElem.classList.add('hidden');
         textElem.classList.remove('hidden');
         sourceElem.classList.remove('hidden');
 
-        sourceElem.href = track.lyrics.source;
-        textElem.innerHTML = track.lyrics.html;
+        sourceElem.href = queuedTrack.lyrics.source;
+        textElem.innerHTML = queuedTrack.lyrics.html;
     } else {
         notFoundElem.classList.remove('hidden');
         textElem.classList.add('hidden');
@@ -193,11 +200,21 @@ function updateTrackHtml() {
     }
     document.getElementById('lyrics-scroll').scrollTo({top: 0, behavior: 'smooth'});
 
-    document.getElementById('current-track').replaceChildren(track.displayHtml(true));
+    const track = queuedTrack.track();
+    if (track !== null) {
+        document.getElementById('current-track').replaceChildren(track.displayHtml(true));
+    } else {
+        document.getElementById('current-track').replaceChildren('[track info unavailable]');
+    }
 
     const previous = queue.getPreviousTrack();
     if (previous !== null) {
-        document.getElementById('previous-track').replaceChildren(previous.displayHtml(true));
+        const previousTrack = previous.track();
+        if (previousTrack !== null) {
+            document.getElementById('previous-track').replaceChildren(previousTrack.displayHtml(true));
+        } else {
+            document.getElementById('previous-track').replaceChildren('[track info unavailable]');
+        }
     } else {
         document.getElementById('previous-track').textContent = '-';
     }
@@ -255,9 +272,9 @@ function switchAlbumCover() {
  * Only show metadata edit and track delete buttons if playlist is writable
  */
 function updateWritablePlaylistButtons() {
-    const playlist = queue.currentTrack.playlist();
+    const track = queue.currentTrack.track();
 
-    if (playlist.write) {
+    if (track !== null && track.playlist().write) {
         document.getElementById('button-edit').classList.remove('hidden');
         document.getElementById('button-delete-track').classList.remove('hidden');
     } else {

@@ -1,12 +1,18 @@
 const state = {
+    /** @type {int} */
     maxTrackListSize: 500,
+    /** @type {int} */
     maxTrackListSizeSearch: 25,
+    /** @type {string} */
     lastChosenPlaylist: null,
+    /** @type {Array<string>} */
     playlistOverrides: [],
     playlists: null,
     mainPlaylists: [],
     otherPlaylists: [],
+    /** @type {Object.<string, Track> | null} */
     tracks: null,
+    /** @type {boolean} */
     loadingOverlayHidden: false,
 };
 
@@ -92,9 +98,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const editorButton = document.getElementById('button-edit');
     if (editorButton !== null) {
         editorButton.addEventListener('click', () => {
-            if (queue.currentTrack !== null) {
-                editor.open(queue.currentTrack);
+            if (queue.currentTrack === null) {
+                alert('No current track in queue');
+                return;
             }
+            const track = queue.currentTrack.track();
+            if (track === null) {
+                alert('Missing track info, has the track been deleted?');
+                return;
+            }
+            editor.open(track);
         });
         document.getElementById('editor-save').addEventListener('click', () => editor.save());
     } else {
@@ -123,7 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             const deleteSpinner = document.getElementById('delete-spinner');
             deleteSpinner.classList.remove('hidden');
-            const path = queue.currentTrack.path;
+            const path = queue.currentTrack.trackPath;
             const oldName = path.split('/').pop();
             const newName = '.trash.' + oldName;
             (async function() {

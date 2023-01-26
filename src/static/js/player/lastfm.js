@@ -19,13 +19,12 @@ class LastFM {
     };
 
     signalNewTrack() {
-        const track = queue.currentTrack;
-
-        if (this.currentlyPlayingTrack !== null && track.path == this.currentlyPlayingTrack.path) {
-            console.debug('lastfm | still same track');
+        const track = queue.currentTrack.track();
+        if (track === null) {
+            console.warn('lastfm | missing track info');
+            this.currentlyPlayingTrack = false;
             return;
         }
-
         console.info('lastfm | track changed');
         this.currentlyPlayingTrack = track;
         this.hasScrobbled = false;

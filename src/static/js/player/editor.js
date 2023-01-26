@@ -5,6 +5,9 @@ class Editor {
         this.#currentlyEditingPath = null;
     };
 
+    /**
+     * @param {Track} track
+     */
     open(track) {
         if (track == null) {
             throw new Error('Track is null');
@@ -70,6 +73,8 @@ class Editor {
 
         // Need to update local track list now, so metadata editor reflects changes
         await Track.updateLocalTrackList();
+
+        updateTrackHtml();
 
         // Close dialog, and restore save button
         dialog.close('dialog-editor');

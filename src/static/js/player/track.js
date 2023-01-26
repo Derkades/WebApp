@@ -184,7 +184,7 @@ class Track {
         const imageBlobUrl = resolved[1];
         const lyrics = resolved[2];
 
-        const queuedTrack = new QueuedTrack(this.trackData, audioBlobUrl, imageBlobUrl, lyrics);
+        const queuedTrack = new QueuedTrack(this, audioBlobUrl, imageBlobUrl, lyrics);
 
         // Add track to queue and update HTML
         queue.add(queuedTrack, top);
@@ -192,21 +192,12 @@ class Track {
     };
 };
 
-class QueuedTrack extends Track {
-    audioBlobUrl;
-    imageBlobUrl;
-    lyrics;
-    constructor(trackData, audioBlobUrl, imageBlobUrl, lyrics) {
-        super(trackData);
-        this.audioBlobUrl = audioBlobUrl;
-        this.imageBlobUrl = imageBlobUrl;
-        this.lyrics = lyrics;
-    };
-};
-
 class Lyrics {
+    /** @type {boolean} */
     found;
+    /** @type {string | null} */
     source;
+    /** @type {string | null} */
     html;
     constructor(found, source = null, html = null) {
         this.found = found;

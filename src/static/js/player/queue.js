@@ -1,7 +1,11 @@
 class Queue {
+    /** @type {boolean} */
     #fillBusy;
+    /** @type {QueuedTrack | null} */
     currentTrack;
+    /** @type {Array<QueuedTrack>} */
     previousTracks;
+    /** @type {Array<QueuedTrack>} */
     queuedTracks;
 
     constructor() {
@@ -11,6 +15,9 @@ class Queue {
         this.queuedTracks = [];
     };
 
+    /**
+     * @returns {QueuedTrack | null}
+     */
     getPreviousTrack() {
         if (this.previousTracks.length > 0) {
             return this.previousTracks[this.previousTracks.length - 1];
@@ -68,6 +75,9 @@ class Queue {
         });
     };
 
+    /**
+     * @param {string} playlist Playlist directory name
+     */
     static async downloadRandomAndAddToQueue(playlist) {
         console.info('queue | choose track');
         const chooseResponse = await fetch('/choose_track?playlist_dir=' + encodeURIComponent(playlist) + '&' + getTagFilter() + '&csrf=' + encodeURIComponent(getCsrfToken()));
@@ -87,16 +97,16 @@ class Queue {
     updateHtml() {
         document.getElementsByTagName("body")[0].style.cursor = this.#fillBusy ? 'progress' : '';
 
-        let totalQueueDuration = 0;
-        for (const queuedTrack of this.queuedTracks) {
-            totalQueueDuration += queuedTrack.duration;
-        }
-
-        document.getElementById('current-queue-size').textContent = this.queuedTracks.length + ' - ' + secondsToString(totalQueueDuration);
-
         const rows = [];
         let i = 0;
+        let totalQueueDuration = 0;
         for (const queuedTrack of this.queuedTracks) {
+            const track = queuedTrack.track();
+
+            if (track !== null) {
+                totalQueueDuration += track.duration;
+            }
+
             // Trash can that appears when hovering - click to remove track
             const tdCover = document.getElementById('template-td-cover').content.cloneNode(true).firstElementChild;
             tdCover.style.backgroundImage = 'url("' + queuedTrack.imageBlobUrl + '")';
@@ -105,14 +115,22 @@ class Queue {
 
             // Playlist link that opens browse view
             const aPlaylist = document.createElement('a');
-            aPlaylist.textContent = queuedTrack.playlistDisplay;
-            aPlaylist.onclick = () => browse.browsePlaylist(queuedTrack.playlistPath);
+            if (track !== null) {
+                aPlaylist.textContent = track.playlistDisplay;
+                aPlaylist.onclick = () => browse.browsePlaylist(track.playlistPath);
+            } else {
+                aPlaylist.textContent = '?';
+            }
             const tdPlaylist = document.createElement('td');
             tdPlaylist.append(aPlaylist);
 
             // Track title HTML
             const tdTrack = document.createElement('td');
-            tdTrack.appendChild(queuedTrack.displayHtml());
+            if (track !== null) {
+                tdTrack.appendChild(track.displayHtml());
+            } else {
+                tdTrack.textContent = '[track info unavailable]';
+            }
 
             // Add columns to <tr> row and add the row to the table
             const row = document.createElement('tr');
@@ -124,6 +142,8 @@ class Queue {
             rows.push(row);
             i++;
         }
+
+        document.getElementById('current-queue-size').textContent = this.queuedTracks.length + ' - ' + secondsToString(totalQueueDuration);
 
         // If the queue is still loading (size smaller than target size), add a loading spinner
         const minQueueSize = parseInt(document.getElementById('settings-queue-size').value);
@@ -242,7 +262,7 @@ class Queue {
             // If history exceeded maximum length, remove first (oldest) element
             if (this.previousTracks.length > 5) {
                 const removedTrack = this.previousTracks.shift();
-                console.info('Revoke objects', removedTrack.path)
+                console.info('Revoke objects', removedTrack.trackPath)
                 URL.revokeObjectURL(removedTrack.audioBlobUrl);
                 URL.revokeObjectURL(removedTrack.imageBlobUrl);
             }
@@ -255,6 +275,11 @@ class Queue {
         this.fill();
     };
 
+    /**
+     * Add track to queue
+     * @param {QueuedTrack} queuedTrack
+     * @param {boolean} top True to add track to the top of the queue, false to add to the bottom
+     */
     add(queuedTrack, top) {
         if (top) {
             this.queuedTracks.unshift(queuedTrack);
@@ -281,6 +306,41 @@ class Queue {
         });
     };
 
+};
+
+class QueuedTrack {
+    /** @type {string} */
+    trackPath;
+    /** @type {string} */
+    audioBlobUrl;
+    /** @type {string} */
+    imageBlobUrl;
+    /** @type {string} */
+    lyrics;
+
+    /**
+     * @param {Track} track
+     * @param {string} audioBlobUrl
+     * @param {string} imageBlobUrl
+     * @param {string} lyrics
+     */
+    constructor(track, audioBlobUrl, imageBlobUrl, lyrics) {
+        this.trackPath = track.path;
+        this.audioBlobUrl = audioBlobUrl;
+        this.imageBlobUrl = imageBlobUrl;
+        this.lyrics = lyrics;
+    };
+
+    /**
+     * @returns {Track | null} Track info, or null if the track has since been deleted
+     */
+    track() {
+        if (this.trackPath in state.tracks) {
+            return state.tracks[this.trackPath];
+        } else {
+            return null;
+        }
+    }
 };
 
 const queue = new Queue();
