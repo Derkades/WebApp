@@ -26,11 +26,11 @@ class Track {
     /** @type {number | null} */
     year;
 
-    constructor(trackData) {
+    constructor(playlistName, trackData) {
         this.trackData = trackData;
         this.path = trackData.path;
         this.display = trackData.display;
-        this.playlistPath = trackData.playlist;
+        this.playlistPath = playlistName;
         this.duration = trackData.duration;
         this.tags = trackData.tags;
         this.title = trackData.title;
@@ -107,14 +107,12 @@ class Track {
         const json = await response.json();
 
         state.playlists = {};
-        for (const playlistObj of json.playlists) {
-            const playlist = new Playlist(playlistObj);
-            state.playlists[playlist.name] = playlist;
-        }
-
         state.tracks = {};
-        for (const trackData of json.tracks) {
-            state.tracks[trackData.path] = new Track(trackData);
+        for (const playlistObj of json.playlists) {
+            state.playlists[playlistObj.name] = new Playlist(playlistObj);;
+            for (const trackObj of playlistObj.tracks) {
+                state.tracks[trackObj.path] = new Track(playlistObj.name, trackObj);
+            }
         }
 
         hideLoadingOverlay();

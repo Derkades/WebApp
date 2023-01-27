@@ -331,25 +331,20 @@ def track_list():
         user_playlists = music.user_playlists(conn, user.user_id)
 
         playlist_response: list[dict[str, Any]] = []
-        track_response: list[dict[str, Any]] = []
 
         for playlist in user_playlists:
-            if playlist.track_count:
-                playlist_response.append({
-                    'name': playlist.name,
-                    'track_count': playlist.track_count,
-                    'favorite': playlist.favorite,
-                    'write': playlist.write or user.admin,
-                })
-
-        # TODO move track list to playlist dictionary
-        for playlist in user_playlists:
+            playlist_json = {
+                'name': playlist.name,
+                'track_count': playlist.track_count,
+                'favorite': playlist.favorite,
+                'write': playlist.write or user.admin,
+                'tracks': [],
+            }
             for track in playlist.tracks():
                 meta = track.metadata()
-                track_response.append({
+                playlist_json['tracks'].append({
                     'path': track.relpath,
                     'display': meta.display_title(),
-                    'playlist': playlist.name,
                     'duration': meta.duration,
                     'tags': meta.tags,
                     'title': meta.title,
@@ -359,9 +354,10 @@ def track_list():
                     'album_index': meta.album_index,
                     'year': meta.year,
                 })
+            playlist_response.append(playlist_json)
 
-    return {'playlists': playlist_response,
-            'tracks': track_response}
+
+    return {'playlists': playlist_response}
 
 
 @app.route('/scan_music', methods=['POST'])
