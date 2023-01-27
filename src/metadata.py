@@ -96,7 +96,11 @@ def is_alpha(c):
            '0' <= c <= '9'
 
 
-def split_meta_list(meta_list):
+def join_meta_list(entries: list[str]) -> str:
+    return '; '.join(entries)
+
+
+def split_meta_list(meta_list: str) -> list[str]:
     """
     Split list (stored as string in metadata) by semicolon
     """

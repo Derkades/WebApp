@@ -18,7 +18,7 @@ import image
 import lastfm
 from metadata import Metadata
 import music
-from music import Playlist, Track
+from music import AudioType, Playlist, Track
 import musicbrainz
 import radio
 from radio import RadioTrack
@@ -189,14 +189,27 @@ def get_track() -> Response:
         auth.verify_auth_cookie(conn)
         track = Track.by_relpath(conn, request.args['path'])
 
-    quality = request.args['quality'] if 'quality' in request.args else 'high'
+    type_str = request.args['type']
+    if type_str == 'webm_opus_high':
+        audio_type = AudioType.WEBM_OPUS_HIGH
+        media_type = 'audio/webm'
+    elif type_str == 'webm_opus_low':
+        audio_type = AudioType.WEBM_OPUS_LOW
+        media_type = 'audio_webm'
+    elif type_str == 'mp4_aac':
+        audio_type = AudioType.MP4_AAC
+        media_type = 'audio/mp4'
+    elif type_str == 'mp3_with_metadata':
+        audio_type = AudioType.MP3_WITH_METADATA
+        media_type = 'audio/mp3'
 
-    fruit = is_fruit()
-    audio = track.transcoded_audio(quality, fruit)
-    mime = 'audio/mp4' if fruit else 'audio/webm'
-    response = Response(audio, mimetype=mime)
+    audio = track.transcoded_audio(audio_type)
+    response = Response(audio, mimetype=media_type)
     response.accept_ranges = 'bytes'  # Workaround for Chromium bug https://stackoverflow.com/a/65804889
     return response
+
+
+# TODO cover bytes en thumbnail methodes verplaatsen naar Track class
 
 
 def get_cover_bytes(meta: Metadata, meme: bool) -> Optional[bytes]:

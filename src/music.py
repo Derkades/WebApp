@@ -9,12 +9,17 @@ import tempfile
 import shutil
 from dataclasses import dataclass
 from sqlite3 import Connection
+from enum import Enum
+import random
 
 from auth import User
 import cache
 import metadata
 import settings
 import scanner
+import bing
+import musicbrainz
+import reddit
 
 if TYPE_CHECKING:
     from metadata import Metadata
@@ -92,6 +97,36 @@ def has_music_extension(path: Path) -> bool:
     return False
 
 
+
+class AudioType(Enum):
+    """
+    Opus audio in WebM container, for music player streaming.
+    """
+    WEBM_OPUS_HIGH = 0
+
+    """
+    Opus audio in WebM container, for music player streaming with lower data
+    usage.
+    """
+    WEBM_OPUS_LOW = 1
+
+    """
+    Special AAC audio in MP4 container for Safari. Apple press releases
+    say Opus in WebM are supported, but that does not seem to be the case.
+    caniuse.com claims Opus in CAF container is supported, but doesn't seem
+    to work either (tested using Safari 16.0 in macOS Monterey VM).
+    We have to use the less-efficient AAC codec at a higher bit rate.
+    """
+    MP4_AAC = 2
+
+    """
+    MP3 files with metadata (including cover art), for use with external
+    music player applications and devices Uses the MP3 format for broadest
+    compatibility.
+    """
+    MP3_WITH_METADATA = 3
+
+
 @dataclass
 class Track:
     conn: Connection
@@ -111,80 +146,103 @@ class Track:
         """
         return metadata.cached(self.conn, self.relpath)
 
+    def get_cover(meta: Metadata, meme: bool) -> Optional[bytes]:
+        """
+        Find album cover using MusicBrainz or Bing.
+        Parameters:
+            meta: Track metadata
+        Returns: Album cover image bytes, or None if MusicBrainz nor bing found an image.
+        """
+        log.info('Finding cover for: %s', meta.relpath)
+
+        if meme:
+            if random.random() > 0.4:
+                query = next(meta.lyrics_search_queries())
+                image_bytes = reddit.get_image(query)
+                if image_bytes:
+                    return image_bytes
+
+            query = next(meta.lyrics_search_queries()) + ' meme'
+            if '-' in query:
+                query = query[query.index('-')+1:]
+            image_bytes = bing.image_search(query)
+            if image_bytes:
+                return image_bytes
+
+        # Try MusicBrainz first
+        mb_query = meta.album_release_query()
+        if image_bytes := musicbrainz.get_cover(mb_query):
+            return image_bytes
+
+        # Otherwise try bing
+        for query in meta.album_search_queries():
+            if image_bytes := bing.image_search(query):
+                return image_bytes
+
+        log.info('No suitable cover found')
+        return None
+
+    def get_cover_thumbnail():
+            def get_img():
+        img = get_cover_bytes(meta, meme)
+        return img
+
+    img_format = get_img_format()
+
+    cache_id = track.relpath
+    if meme:
+        cache_id += 'meme2'
+
+    comp_bytes = image.thumbnail(get_img, cache_id, img_format[6:], None,
+                                 request.args['quality'], not meme)
+
     def transcoded_audio(self,
-                         quality: Literal['verylow'] | Literal['low'] | Literal['high'],
-                         fruit: bool) -> bytes:
+                         audio_type: AudioType) -> bytes:
         """
         Normalize and compress audio using ffmpeg
         Returns: Compressed audio bytes
         """
 
-        channels_table = {
-            'verylow': 1,
-            'low': 2,
-            'high': 2,
-        }
+        if audio_type in {AudioType.WEBM_OPUS_HIGH, AudioType.WEBM_OPUS_LOW}:
+            input_options = ['-map_metadata', '-1']
+            bit_rate = '128k' if audio_type == AudioType.WEBM_OPUS_HIGH else '64k'
+            audio_options = ['-f', 'webm',
+                             '-c:a', 'libopus',
+                             '-b:a', bit_rate,
+                             '-vbr', 'on',
+                             '-frame_duration', '60']
+        elif audio_type == AudioType.MP4_AAC:
+            input_options = ['-map_metadata', '-1']
+            audio_options = ['-f', 'mp4',
+                             'c:a', 'aac',
+                             '-b:a', '192k']
+        elif audio_type == AudioType.MP3_WITH_METADATA:
+            meta = self.metadata()
+            input_options = ['-map_metadata', '-1']
+            if meta.title is not None:
+                input_options.extend(('-metadata', 'title=' + meta.title))
+            if meta.artists is not None:
+                input_options.extend(('-metadata', 'artist=' + metadata.join_meta_list(meta.artists)))
+            if meta.album_artist is not None:
+                input_options.extend(('-metadata', 'album_artist=' + meta.album_artist))
+            # TODO all metadata, including cover
+            # https://stackoverflow.com/questions/18710992/how-to-add-album-art-with-ffmpeg
 
-        if fruit:
-            # Special AAC audio in MP4 container for Safari. caniuse.com claims opus in CAF
-            # container is supported, but doesn't seem to work on Safari 16.0 macOS Monterey,
-            # so we'll have to use the less-efficient AAC codec at a higher bit rate.
-            container_format = 'mp4'
-            audio_codec = 'aac'
-            bit_rate_table = {
-                'verylow': '64k',
-                'low': '128k',
-                'high': '256k',
-            }
-        else:
-            # Opus in webm container for all other browsers
-            container_format = 'webm'
-            audio_codec = 'libopus'
-            bit_rate_table = {
-                'verylow': '32k',
-                'low': '64k',
-                'high': '128k',
-            }
 
-        channels = channels_table[quality]
-        bit_rate = bit_rate_table[quality]
+            audio_options = ['-f', 'mp3',
+                             '-c:a', 'libmp3lame',
+                             '-q:a', '1']  # VBR 190-250kb/s
 
         in_path_abs = self.path.absolute().as_posix()
 
-        cache_key = 'audio' + container_format + in_path_abs + bit_rate
+        cache_key = 'audio' + str(audio_type) + in_path_abs
 
-        cached_data = cache.retrieve(cache_key)
-        if cached_data is not None:
-            log.info('Returning cached audio')
-            return cached_data
-
-        # 1. Stilte aan het begin weghalen met silenceremove: https://ffmpeg.org/ffmpeg-filters.html#silenceremove
-        # 2. Audio omkeren
-        # 3. Stilte aan het eind (nu begin) weghalen
-        # 4. Audio omkeren
-        # 5. Audio normaliseren met dynaudnorm: https://ffmpeg.org/ffmpeg-filters.html#dynaudnorm
-        # 6. Audio fade-in met afade: https://ffmpeg.org/ffmpeg-filters.html#afade-1
-
-        # Nu zou je zeggen dat we ook stop_periods kunnen gebruiken om stilte aan het eind weg te halen, maar
-        # dat werkt niet. Van sommige nummers (bijv. irrenhaus) werd alles eraf geknipt behalve de eerste paar
-        # seconden. Ik heb geen idee waarom, de documentatie is vaag. Oplossing: keer het nummer om, en haal
-        # nog eens stilte aan "het begin" weg.
-
-        # filters = f'''
-        # atrim=0:{settings.track_limit_seconds},
-        # silenceremove=start_periods=1:start_threshold=-70dB,
-        # areverse,
-        # silenceremove=start_periods=1:start_threshold=-70dB,
-        # areverse,
-        # dynaudnorm=targetrms=0.3:gausssize=101,
-        # afade
-        # '''
-
+        # cached_data = cache.retrieve(cache_key)
+        # if cached_data is not None:
+        #     log.info('Returning cached audio')
+        #     return cached_data
 
         filters = 'dynaudnorm=targetrms=0.3:gausssize=101'
-
-        # Remove whitespace and newlines
-        filters = ''.join(filters.split())
 
         with tempfile.NamedTemporaryFile() as temp_file:
             command = ['ffmpeg',
@@ -192,15 +250,11 @@ class Track:
                     '-hide_banner',
                     '-loglevel', settings.ffmpeg_loglevel,
                     '-i', in_path_abs,
-                    '-map_metadata', '-1',  # browser doesn't need metadata
+                    *input_options,
                     '-vn',  # remove video track (also used by album covers, as mjpeg stream)
                     '-filter:a', filters,
-                    '-c:a', audio_codec,
-                    '-b:a', bit_rate,
-                    '-f', container_format,
-                    '-vbr', 'on',
-                    '-frame_duration', '60',
-                    '-ac', str(channels),
+                    *audio_options,
+                    '-ac', '2',
                     temp_file.name]
             subprocess.run(command, shell=False, check=True, capture_output=False)
 

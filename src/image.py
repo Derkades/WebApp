@@ -2,6 +2,8 @@ from typing import Callable, Optional
 from io import BytesIO
 from pathlib import Path
 import logging
+from enum import Enum
+from dataclasses import dataclass
 
 from PIL import Image
 import pillow_avif  # register AVIF plugin - pylint: disable=unused-import
@@ -11,21 +13,31 @@ import cache
 
 log = logging.getLogger('app.image')
 
-QUALITY_TABLE = {
-    'high': {
-        'avif': 100,
-        'webp': 100,
-        'jpeg': 100,
+
+class ImageFormat(Enum):
+    JPEG = 'jpeg'
+    WEBP = 'webp'
+
+
+class ImageQuality(Enum):
+    HIGH = 'high'
+    LOW = 'low'
+
+
+@dataclass
+class ThumbnailParameters:
+    quality: int
+    resolution: int
+
+
+PARAMS_TABLE: dict[ImageFormat, dict[ImageQuality, int]] = {
+    ImageFormat.JPEG: {
+        ImageQuality.HIGH: 100,
+        ImageQuality.LOW: 50,
     },
-    'low': {
-        'avif': 60,
-        'webp': 70,
-        'jpeg': 70,
-    },
-    'verylow': {
-        'avif': 50,
-        'webp': 50,
-        'jpeg': 50,
+    ImageFormat.JPEG: {
+        ImageQuality.HIGH: 100,
+        ImageQuality.LOW: 50,
     }
 }
 
@@ -34,6 +46,9 @@ RESOLUTION_TABLE =  {
     'low': 512,
     'verylow': 128,
 }
+
+
+
 
 
 def thumbnail(input_img: Path | bytes | Callable,
