@@ -65,7 +65,6 @@ This project is using many open source software and libraries, such as:
 - [Python lxml](https://pypi.org/project/beautifulsoup4)
 - [MusicBrainz](https://musicbrainz.org) and Python musicbrainzngs
 - [Python Pillow](https://pillow.readthedocs.io)
-- [Python Pillow AVIF plugin](https://pypi.org/project/pillow-avif-plugin/)
 - [Python bcrypt](https://pypi.org/project/bcrypt/)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 - [Material Design Icons](https://materialdesignicons.com)
