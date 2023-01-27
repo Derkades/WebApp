@@ -125,13 +125,14 @@ class Track {
     };
 
     async downloadAndAddToQueue(top = false) {
-        const encodedQuality = encodeURIComponent(document.getElementById('settings-audio-quality').value);
+        const encodedAudioType = encodeURIComponent(document.getElementById('settings-audio-type').value);
+        const imageQuality = document.getElementById('settings-audio-type').value == 'webm_opus_low' ? 'low' : 'high';
         const encodedPath = encodeURIComponent(this.path);
 
         const audioBlobUrlGetter = async function() {
             // Get track audio
             console.info('queue | download audio');
-            const trackResponse = await fetch('/get_track?path=' + encodedPath + '&quality=' + encodedQuality);
+            const trackResponse = await fetch('/get_track?path=' + encodedPath + '&type=' + encodedAudioType);
             checkResponseCode(trackResponse);
             const audioBlob = await trackResponse.blob();
             return URL.createObjectURL(audioBlob);
@@ -139,31 +140,22 @@ class Track {
 
         const imageBlobUrlGetter = async function() {
             // Get cover image
-            if (encodedQuality === 'verylow') {
-                console.info('queue | using raphson image to save data');
-                return '/raphson';
-            } else {
-                console.info('queue | download album cover image');
-                const meme = document.getElementById('settings-meme-mode').checked ? '1' : '0';
-                const imageUrl = '/get_album_cover?path=' + encodedPath + '&quality=' + encodedQuality + '&meme=' + meme;
-                const coverResponse = await fetch(imageUrl);
-                checkResponseCode(coverResponse);
-                const imageBlob = await coverResponse.blob();
-                return URL.createObjectURL(imageBlob);
-            }
+            console.info('queue | download album cover image');
+            const meme = document.getElementById('settings-meme-mode').checked ? '1' : '0';
+            const imageUrl = '/get_album_cover?path=' + encodedPath + '&quality=' + imageQuality + '&meme=' + meme;
+            const coverResponse = await fetch(imageUrl);
+            checkResponseCode(coverResponse);
+            const imageBlob = await coverResponse.blob();
+            return URL.createObjectURL(imageBlob);
         };
 
         const lyricsGetter = async function() {
             // Get lyrics
-            if (encodedQuality === 'verylow') {
-                return new Lyrics(true, null, '<i>Lyrics were not downloaded to save data</i>');
-            } else {
-                console.info('queue | download lyrics');
-                const lyricsResponse = await fetch('/get_lyrics?path=' + encodedPath);
-                checkResponseCode(lyricsResponse);
-                const lyricsJson = await lyricsResponse.json();
-                return new Lyrics(lyricsJson.found, lyricsJson.source, lyricsJson.html);
-            }
+            console.info('queue | download lyrics');
+            const lyricsResponse = await fetch('/get_lyrics?path=' + encodedPath);
+            checkResponseCode(lyricsResponse);
+            const lyricsJson = await lyricsResponse.json();
+            return new Lyrics(lyricsJson.found, lyricsJson.source, lyricsJson.html);
         };
 
         // Resolve all, download in parallel

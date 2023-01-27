@@ -170,12 +170,12 @@
                     <label for="settings-queue-size">{% trans %}Minimum queue length{% endtrans %}</label>
                 </div>
                 <div>
-                    <select id="settings-audio-quality">
-                        <option value="verylow">{% trans %}Potato (~15MB per hour, Safari ~30MB){% endtrans %}</option>
-                        <option value="low">{% trans %}Low (~35MB per hour, Safari ~65MB){% endtrans %}</option>
-                        <option value="high" selected>{% trans %}High (~70MB per hour, Safari ~120MB){% endtrans %}</option>
+                    <select id="settings-audio-type">
+                        <option value="webm_opus_high" selected>{% trans %}High quality Opus audio (~60MB per hour){% endtrans %}</option>
+                        <option value="webm_opus_low">{% trans %}Low quality Opus audio (~30MB per hour){% endtrans %}</option>
+                        <option value="mp4_aac">{% trans %}High quality AAC audio, for Apple devices (~90MB per hour){% endtrans %}</option>
                     </select>
-                    <label for="settings-audio-quality">{% trans %}Audio quality{% endtrans %}</label>
+                    <label for="settings-audio-type">{% trans %}Audio quality{% endtrans %}</label>
                 </div>
                 <div>
                     <select id="settings-queue-removal-behaviour">

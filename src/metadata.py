@@ -121,7 +121,7 @@ class Metadata:
     title: Optional[str]
     year: Optional[int]
     album_artist: Optional[str]
-    album_index: Optional[int]
+    album_index: Optional[int] # TODO rename to track_number
     tags: list[str]
 
     def _meta_title(self) -> Optional[str]:

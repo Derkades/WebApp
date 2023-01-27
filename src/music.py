@@ -20,6 +20,8 @@ import scanner
 import bing
 import musicbrainz
 import reddit
+import image
+from image import ImageFormat, ImageQuality
 
 if TYPE_CHECKING:
     from metadata import Metadata
@@ -146,13 +148,15 @@ class Track:
         """
         return metadata.cached(self.conn, self.relpath)
 
-    def get_cover(meta: Metadata, meme: bool) -> Optional[bytes]:
+    def get_cover(self, meme: bool) -> Optional[bytes]:
         """
         Find album cover using MusicBrainz or Bing.
         Parameters:
             meta: Track metadata
         Returns: Album cover image bytes, or None if MusicBrainz nor bing found an image.
         """
+        meta = self.metadata()
+
         log.info('Finding cover for: %s', meta.relpath)
 
         if meme:
@@ -182,19 +186,34 @@ class Track:
         log.info('No suitable cover found')
         return None
 
-    def get_cover_thumbnail():
-            def get_img():
-        img = get_cover_bytes(meta, meme)
-        return img
+    def get_cover_thumbnail(self, meme: bool, img_format: ImageFormat, img_quality: ImageQuality) -> bytes:
+        cache_key = self.relpath
+        if meme:
+            cache_key += 'meme'
+        square = not meme
 
-    img_format = get_img_format()
+        def get_img_function():
+            return self.get_cover(meme)
 
-    cache_id = track.relpath
-    if meme:
-        cache_id += 'meme2'
+        return image.thumbnail(get_img_function, cache_key, img_format, img_quality, square)
 
-    comp_bytes = image.thumbnail(get_img, cache_id, img_format[6:], None,
-                                 request.args['quality'], not meme)
+    def _get_ffmpeg_metadata_options(self):
+        meta = self.metadata()
+        metadata_options = []
+        if meta.album is not None:
+            metadata_options.extend(('-metadata', 'album=' + meta.album))
+        if meta.artists is not None:
+            metadata_options.extend(('-metadata', 'artist=' + metadata.join_meta_list(meta.artists)))
+        if meta.title is not None:
+            metadata_options.extend(('-metadata', 'title=' + meta.title))
+        if meta.year is not None:
+            metadata_options.extend(('-metadata', 'date=' + str(meta.year)))
+        if meta.album_artist is not None:
+            metadata_options.extend(('-metadata', 'album_artist=' + meta.album_artist))
+        if meta.album_index is not None:
+            metadata_options.extend(('-metadata', 'track=' + str(meta.album_index)))
+        metadata_options.extend(('-metadata', 'genre=' + metadata.join_meta_list(meta.tags)))
+        return metadata_options
 
     def transcoded_audio(self,
                          audio_type: AudioType) -> bytes:
@@ -203,6 +222,18 @@ class Track:
         Returns: Compressed audio bytes
         """
 
+        cache_key = 'audio' + str(audio_type) + self.relpath
+
+        if audio_type == AudioType.MP3_WITH_METADATA:
+            metadata_options = self._get_ffmpeg_metadata_options()
+            # Cache should be invalidated when metadata is changed
+            cache_key += str(metadata_options)
+
+        cached_data = cache.retrieve(cache_key)
+        if cached_data is not None:
+            log.info('Returning cached audio')
+            return cached_data
+
         if audio_type in {AudioType.WEBM_OPUS_HIGH, AudioType.WEBM_OPUS_LOW}:
             input_options = ['-map_metadata', '-1']
             bit_rate = '128k' if audio_type == AudioType.WEBM_OPUS_HIGH else '64k'
@@ -210,37 +241,34 @@ class Track:
                              '-c:a', 'libopus',
                              '-b:a', bit_rate,
                              '-vbr', 'on',
-                             '-frame_duration', '60']
+                             '-frame_duration', '60',
+                             '-vn']  # remove video track (and album covers)
         elif audio_type == AudioType.MP4_AAC:
             input_options = ['-map_metadata', '-1']
             audio_options = ['-f', 'mp4',
-                             'c:a', 'aac',
-                             '-b:a', '192k']
+                             '-c:a', 'aac',
+                             '-b:a', '192k',
+                             '-vn']  # remove video track (and album covers)
         elif audio_type == AudioType.MP3_WITH_METADATA:
-            meta = self.metadata()
-            input_options = ['-map_metadata', '-1']
-            if meta.title is not None:
-                input_options.extend(('-metadata', 'title=' + meta.title))
-            if meta.artists is not None:
-                input_options.extend(('-metadata', 'artist=' + metadata.join_meta_list(meta.artists)))
-            if meta.album_artist is not None:
-                input_options.extend(('-metadata', 'album_artist=' + meta.album_artist))
-            # TODO all metadata, including cover
-            # https://stackoverflow.com/questions/18710992/how-to-add-album-art-with-ffmpeg
+            cover = self.get_cover_thumbnail(False, ImageFormat.JPEG, ImageQuality.HIGH)
+            # Write cover to temp file so ffmpeg can read it
+            cover_temp_file = tempfile.NamedTemporaryFile('wb')
+            cover_temp_file.write(cover)
 
+            input_options = ['-i', cover_temp_file.name,  # Add album cover
+                             '-map', '0:0',
+                             '-map', '1:0',  # map album image to audio stream
+                             '-id3v2_version', '3',
+                             '-metadata:s:v', 'title=Album cover',
+                             '-metadata:s:v', 'comment=Cover (front)']
+
+            input_options.extend(['-map_metadata', '-1'])  # Discard original metadata
+            input_options.extend(metadata_options)  # Set new metadata
 
             audio_options = ['-f', 'mp3',
                              '-c:a', 'libmp3lame',
+                             '-c:v', 'copy',  # Leave cover as JPEG, don't re-encode as PNG
                              '-q:a', '1']  # VBR 190-250kb/s
-
-        in_path_abs = self.path.absolute().as_posix()
-
-        cache_key = 'audio' + str(audio_type) + in_path_abs
-
-        # cached_data = cache.retrieve(cache_key)
-        # if cached_data is not None:
-        #     log.info('Returning cached audio')
-        #     return cached_data
 
         filters = 'dynaudnorm=targetrms=0.3:gausssize=101'
 
@@ -249,9 +277,8 @@ class Track:
                     '-y',  # overwrite existing file
                     '-hide_banner',
                     '-loglevel', settings.ffmpeg_loglevel,
-                    '-i', in_path_abs,
+                    '-i', self.path.absolute().as_posix(),
                     *input_options,
-                    '-vn',  # remove video track (also used by album covers, as mjpeg stream)
                     '-filter:a', filters,
                     *audio_options,
                     '-ac', '2',
@@ -260,8 +287,12 @@ class Track:
 
             temp_file.seek(0)
             data = temp_file.read()
-            cache.store(cache_key, data)
-            return data
+
+        if audio_type == AudioType.MP3_WITH_METADATA:
+            cover_temp_file.close()
+
+        cache.store(cache_key, data)
+        return data
 
     def write_metadata(self, **meta_dict: str):
         """

@@ -15,6 +15,7 @@ import bing
 import db
 import genius
 import image
+from image import ImageFormat, ImageQuality
 import lastfm
 from metadata import Metadata
 import music
@@ -202,6 +203,8 @@ def get_track() -> Response:
     elif type_str == 'mp3_with_metadata':
         audio_type = AudioType.MP3_WITH_METADATA
         media_type = 'audio/mp3'
+    else:
+        raise ValueError(type_str)
 
     audio = track.transcoded_audio(audio_type)
     response = Response(audio, mimetype=media_type)
@@ -209,72 +212,24 @@ def get_track() -> Response:
     return response
 
 
-# TODO cover bytes en thumbnail methodes verplaatsen naar Track class
-
-
-def get_cover_bytes(meta: Metadata, meme: bool) -> Optional[bytes]:
-    """
-    Find album cover using MusicBrainz or Bing.
-    Parameters:
-        meta: Track metadata
-    Returns: Album cover image bytes, or None if MusicBrainz nor bing found an image.
-    """
-    log.info('Finding cover for: %s', meta.relpath)
-
-    if meme:
-        if random.random() > 0.4:
-            query = next(meta.lyrics_search_queries())
-            image_bytes = reddit.get_image(query)
-            if image_bytes:
-                return image_bytes
-
-        query = next(meta.lyrics_search_queries()) + ' meme'
-        if '-' in query:
-            query = query[query.index('-')+1:]
-        image_bytes = bing.image_search(query)
-        if image_bytes:
-            return image_bytes
-
-    # Try MusicBrainz first
-    mb_query = meta.album_release_query()
-    if image_bytes := musicbrainz.get_cover(mb_query):
-        return image_bytes
-
-    # Otherwise try bing
-    for query in meta.album_search_queries():
-        if image_bytes := bing.image_search(query):
-            return image_bytes
-
-    log.info('No suitable cover found')
-    return None
-
-
 @app.route('/get_album_cover')
 def get_album_cover() -> Response:
     """
     Get album cover image for the provided track path.
     """
+    meme = 'meme' in request.args and bool(int(request.args['meme']))
+
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
         track = Track.by_relpath(conn, request.args['path'])
-        meta = track.metadata()
+        quality_str = request.args['quality']
+        if quality_str == 'high':
+            quality = ImageQuality.HIGH
+        elif quality_str == 'low':
+            quality = ImageQuality.LOW
+        image_bytes = track.get_cover_thumbnail(meme, ImageFormat.WEBP, quality)
 
-    meme = 'meme' in request.args and bool(int(request.args['meme']))
-
-    def get_img():
-        img = get_cover_bytes(meta, meme)
-        return img
-
-    img_format = get_img_format()
-
-    cache_id = track.relpath
-    if meme:
-        cache_id += 'meme2'
-
-    comp_bytes = image.thumbnail(get_img, cache_id, img_format[6:], None,
-                                 request.args['quality'], not meme)
-
-    return Response(comp_bytes, mimetype=img_format)
+    return Response(image_bytes, mimetype='image/webp')
 
 
 @app.route('/get_lyrics')
@@ -418,9 +373,8 @@ def raphson() -> Response:
     """
     Serve raphson logo image
     """
-    img_format = get_img_format()
-    thumb = image.thumbnail(raphson_png_path, 'raphson', img_format[6:], 512, 'low', True)
-    response = Response(thumb, mimetype=img_format)
+    thumb = image.thumbnail(raphson_png_path, 'raphson', ImageFormat.WEBP, ImageQuality.LOW, True)
+    response = Response(thumb, mimetype='image/webp')
     response.cache_control.max_age = 24*3600
     return response
 

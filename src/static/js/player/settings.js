@@ -29,7 +29,7 @@ function syncCookieWithInput(elemId) {
 function syncCookiesWithInputs() {
     [
         'settings-queue-size',
-        'settings-audio-quality',
+        'settings-audio-type',
         'settings-volume',
         'settings-queue-removal-behaviour',
         'settings-theme',

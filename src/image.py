@@ -6,7 +6,6 @@ from enum import Enum
 from dataclasses import dataclass
 
 from PIL import Image
-import pillow_avif  # register AVIF plugin - pylint: disable=unused-import
 
 import cache
 
@@ -30,36 +29,26 @@ class ThumbnailParameters:
     resolution: int
 
 
-PARAMS_TABLE: dict[ImageFormat, dict[ImageQuality, int]] = {
+PARAMS_TABLE: dict[ImageFormat, dict[ImageQuality, ThumbnailParameters]] = {
     ImageFormat.JPEG: {
-        ImageQuality.HIGH: 100,
-        ImageQuality.LOW: 50,
+        ImageQuality.HIGH: ThumbnailParameters(100, 2048),
+        ImageQuality.LOW: ThumbnailParameters(50, 512),
     },
-    ImageFormat.JPEG: {
-        ImageQuality.HIGH: 100,
-        ImageQuality.LOW: 50,
+    ImageFormat.WEBP: {
+        ImageQuality.HIGH: ThumbnailParameters(100, 2048),
+        ImageQuality.LOW: ThumbnailParameters(50, 512),
     }
 }
-
-RESOLUTION_TABLE =  {
-    'high': 2048,
-    'low': 512,
-    'verylow': 128,
-}
-
-
-
 
 
 def thumbnail(input_img: Path | bytes | Callable,
               cache_key: str,
-              thumb_format: str,
-              thumb_resolution: Optional[int],
-              thumb_quality,
-              square) -> bytes:
+              img_format: ImageFormat,
+              img_quality: ImageQuality,
+              square: bool) -> bytes:
+    # TODO update doc
     """
     Generate thumbnail, making use of cache.
-    WARNING: Database must NOT be open when this is function is called.
     Parameters:
         input_img: Input image, either a path, image bytes, or a function that returns image bytes.
         cache_id: A cache identifier string to uniquely identify this image. If a cache object exists
@@ -72,11 +61,7 @@ def thumbnail(input_img: Path | bytes | Callable,
         square: Whether the thumbnail should be cropped to 1:1 aspect ratio
     Returns: Compressed thumbnail image bytes.
     """
-    if thumb_resolution is None:
-        thumb_resolution = RESOLUTION_TABLE[thumb_quality]
-    thumb_quality_percent = QUALITY_TABLE[thumb_quality][thumb_format]
-    cache_key += 'thumbnail5' + thumb_format + str(thumb_quality_percent) + str(thumb_resolution)
-
+    cache_key += 'thumbnail5' + img_format.value + img_quality.value
     cache_data = cache.retrieve(cache_key)
 
     if cache_data is not None:
@@ -102,8 +87,9 @@ def thumbnail(input_img: Path | bytes | Callable,
 
     if input_bytes is not None:
         try:
+            params = PARAMS_TABLE[img_format][img_quality]
             img = Image.open(BytesIO(input_bytes))
-            img.thumbnail((thumb_resolution, thumb_resolution), Image.ANTIALIAS)
+            img.thumbnail((params.resolution, params.resolution), Image.ANTIALIAS)
 
             if square:
                 new_dim = min(img.height, img.width)
@@ -116,7 +102,7 @@ def thumbnail(input_img: Path | bytes | Callable,
                 img = img.crop((left, top, right, bottom))
 
             img_out = BytesIO()
-            img.save(img_out, format=thumb_format, quality=thumb_quality_percent)
+            img.save(img_out, format=img_format.value, quality=params.quality)
             img_out.seek(0)
             comp_bytes = img_out.read()
 
@@ -126,7 +112,10 @@ def thumbnail(input_img: Path | bytes | Callable,
             log.warning('Error during thumbnail generation: %s', ex)
 
     # Return fallback thumbnail if input_bytes was None or an Exception was raised
-    return thumbnail(Path('static', 'raphson.png'), 'raphson', thumb_format, thumb_resolution, thumb_quality, square)
+    fallback_path = Path('static', 'raphson.png')
+    if input_img == fallback_path:  # or was this already the fallback cover?
+        raise Exception('Error during fallback cover generation')
+    return thumbnail(fallback_path, 'raphson', img_format, img_quality, square)
 
 
 def check_valid(input_img: bytes) -> bool:
