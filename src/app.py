@@ -336,8 +336,9 @@ def track_list():
         for playlist in user_playlists:
             if playlist.track_count:
                 playlist_response[playlist.relpath] = {
-                    'dir_name': playlist.relpath,
-                    'display_name': playlist.name,
+                    'name': playlist.relpath,
+                    'dir_name': playlist.relpath, # Deprecated
+                    'display_name': playlist.name, # Deprecated
                     'track_count': playlist.track_count,
                     'favorite': playlist.favorite,
                     'write': playlist.write or user.admin,

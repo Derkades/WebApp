@@ -222,7 +222,7 @@ def _verify_token(conn: sqlite3.Connection, token: str, user_agent = None, remot
     #                     (user_agent, remote_addr, session_rowid))
 
     session = Session(session_rowid, token, session_creation_date, session_user_agent, session_address)
-    return User(conn, user_id, username, admin, session, lastfm_name, lastfm_key)
+    return User(conn, user_id, username, admin == 1, session, lastfm_name, lastfm_key)
 
 
 def verify_auth_cookie(conn: sqlite3.Connection, require_admin = False, redirect_to_login = False) -> User:

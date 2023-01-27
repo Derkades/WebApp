@@ -7,9 +7,8 @@ const state = {
     lastChosenPlaylist: null,
     /** @type {Array<string>} */
     playlistOverrides: [],
+    /** @type {Object.<string, Playlist>} */
     playlists: null,
-    mainPlaylists: [],
-    otherPlaylists: [],
     /** @type {Object.<string, Track> | null} */
     tracks: null,
     /** @type {boolean} */

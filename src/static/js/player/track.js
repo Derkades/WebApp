@@ -109,16 +109,10 @@ class Track {
         const response = await fetch('/track_list');
         const json = await response.json();
 
-        state.playlists = json.playlists;
-        state.mainPlaylists = [];
-        state.otherPlaylists = [];
-        for (const dir_name in state.playlists) {
-            const playlist = state.playlists[dir_name];
-            if (playlist.favorite) {
-                state.mainPlaylists.push(playlist);
-            } else {
-                state.otherPlaylists.push(playlist);
-            }
+        state.playlists = {};
+        for (const playlistObj of Object.values(json.playlists)) {
+            const playlist = new Playlist(playlistObj);
+            state.playlists[playlist.name] = playlist;
         }
 
         state.tracks = {};

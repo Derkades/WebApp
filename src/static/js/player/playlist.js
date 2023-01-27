@@ -1,3 +1,24 @@
+class Playlist {
+    /** @type {string} */
+    name;
+    /** @type {number} */
+    trackCount;
+    /** @type {boolean} */
+    favorite;
+    /** @type {boolean} */
+    write;
+
+    /**
+     * @param {Object.<string, string|boolean|number} objectFromApi
+     */
+    constructor(objectFromApi) {
+        this.name = objectFromApi.name;
+        this.trackCount = objectFromApi.track_count;
+        this.favorite = objectFromApi.favorite;
+        this.write = objectFromApi.write;
+    }
+}
+
 function getActivePlaylists() {
     const active = [];
 
@@ -37,8 +58,14 @@ function getNextPlaylist(currentPlaylist) {
     return playlist;
 }
 
+/**
+ *
+ * @param {Playlist} playlist
+ * @param {number} index
+ * @returns {HTMLSpanElement}
+ */
 function createPlaylistCheckbox(playlist, index) {
-    const id = 'checkbox-' + playlist.dir_name;
+    const id = 'checkbox-' + playlist.name;
 
     // Re-use state from previous checkbox if it exists
     // Otherwise, playlist should be enabled if favorite
@@ -56,8 +83,8 @@ function createPlaylistCheckbox(playlist, index) {
     input.checked = checked;
 
     const label = document.createElement("label");
-    label.htmlFor = "checkbox-" + playlist.dir_name;
-    label.textContent = playlist.display_name;
+    label.htmlFor = "checkbox-" + playlist.name;
+    label.textContent = playlist.name;
     const sup = document.createElement('sup');
     if (index < 10) { // Assume number keys higher than 9 don't exist
         sup.textContent = index;
@@ -65,10 +92,10 @@ function createPlaylistCheckbox(playlist, index) {
 
     const trackCount = document.createElement('span');
     trackCount.classList.add('secondary');
-    trackCount.textContent = ' (' + playlist.track_count + ')';
+    trackCount.textContent = ' (' + playlist.trackCount + ')';
 
     label.replaceChildren(
-        playlist.display_name,
+        playlist.name,
         sup,
         trackCount,
     );
@@ -82,14 +109,17 @@ function createPlaylistCheckbox(playlist, index) {
 function updatePlaylistCheckboxHtml() {
     let index = 1;
     const mainDiv = document.createElement('div');
-    for (const playlist of state.mainPlaylists) {
-        mainDiv.appendChild(createPlaylistCheckbox(playlist, index++));
-    }
     const otherDiv = document.createElement('div');
     otherDiv.classList.add('other-checkboxes');
-    for (const playlist of state.otherPlaylists) {
-        otherDiv.appendChild(createPlaylistCheckbox(playlist, 10));
+
+    for (const playlist of Object.values(state.playlists)) {
+        if (playlist.favorite) {
+            mainDiv.appendChild(createPlaylistCheckbox(playlist, index++));
+        } else {
+            otherDiv.appendChild(createPlaylistCheckbox(playlist, 10));
+        }
     }
+
     const parent = document.getElementById('playlist-checkboxes');
     parent.replaceChildren(mainDiv, otherDiv);
 }
@@ -108,11 +138,10 @@ function createPlaylistDropdowns() {
 
         const onlyWritable = select.classList.contains('playlist-select-writable');
 
-        for (const dir_name in state.playlists) {
-            const playlist = state.playlists[dir_name];
+        for (const playlist of Object.values(state.playlists)) {
             const option = document.createElement('option');
-            option.value = playlist.dir_name;
-            option.textContent = playlist.display_name;
+            option.value = playlist.name;
+            option.textContent = playlist.name;
             option.disabled = onlyWritable && !playlist.write;
             select.appendChild(option);
         }
