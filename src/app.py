@@ -312,6 +312,7 @@ def track_list():
                 meta = track.metadata()
                 playlist_json['tracks'].append({
                     'path': track.relpath,
+                    'mtime': track.mtime,
                     'display': meta.display_title(),
                     'duration': meta.duration,
                     'tags': meta.tags,

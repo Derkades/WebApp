@@ -134,6 +134,7 @@ class Track:
     conn: Connection
     relpath: str
     path: Path
+    mtime: int
 
     @property
     def playlist(self) -> str:
@@ -327,7 +328,9 @@ class Track:
         """
         Find track by relative path
         """
-        return Track(conn, relpath, from_relpath(relpath))
+        mtime, = conn.execute('SELECT mtime FROM track WHERE path=?',
+                              (relpath,)).fetchone()
+        return Track(conn, relpath, from_relpath(relpath), mtime)
 
 
 @dataclass

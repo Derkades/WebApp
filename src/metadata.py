@@ -110,6 +110,7 @@ def split_meta_list(meta_list: str) -> list[str]:
             entries.append(entry.strip())
     return entries
 
+# TODO Move to Track class
 
 @dataclass
 class Metadata:
