@@ -101,6 +101,10 @@ def thumbnail(input_img: Path | bytes | Callable,
 
                 img = img.crop((left, top, right, bottom))
 
+            if img_format == ImageFormat.JPEG and img.mode in {'RGBA', 'P'}:
+                # JPEG does not support transparency, remove alpha channel
+                img = img.convert('RGB')
+
             img_out = BytesIO()
             img.save(img_out, format=img_format.value, quality=params.quality)
             img_out.seek(0)
