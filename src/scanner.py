@@ -56,7 +56,7 @@ def query_params(relpath: str, path: Path) -> QueryParams:
                                           'title': meta.title,
                                           'album': meta.album,
                                           'album_artist': meta.album_artist,
-                                          'album_index': meta.album_index,
+                                          'track_number': meta.track_number,
                                           'year': meta.year}
     if meta.artists is None:
         artist_data = []
@@ -101,7 +101,7 @@ def scan_tracks(conn: Connection, playlist_name: str) -> None:
                              title=:title,
                              album=:album,
                              album_artist=:album_artist,
-                             album_index=:album_index,
+                             track_number=:track_number,
                              year=:year,
                              mtime=:mtime
                          WHERE path=:path
@@ -125,8 +125,8 @@ def scan_tracks(conn: Connection, playlist_name: str) -> None:
             log.info('new track, insert: %s', relpath)
             params = query_params(relpath, track_path)
             conn.execute('''
-                         INSERT INTO track (path, playlist, duration, title, album, album_artist, album_index, year, mtime)
-                         VALUES (:path, :playlist, :duration, :title, :album, :album_artist, :album_index, :year, :mtime)
+                         INSERT INTO track (path, playlist, duration, title, album, album_artist, track_number, year, mtime)
+                         VALUES (:path, :playlist, :duration, :title, :album, :album_artist, :track_number, :year, :mtime)
                          ''',
                          {**params.main_data,
                           'playlist': playlist_name,

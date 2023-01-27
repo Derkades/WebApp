@@ -210,8 +210,8 @@ class Track:
             metadata_options.extend(('-metadata', 'date=' + str(meta.year)))
         if meta.album_artist is not None:
             metadata_options.extend(('-metadata', 'album_artist=' + meta.album_artist))
-        if meta.album_index is not None:
-            metadata_options.extend(('-metadata', 'track=' + str(meta.album_index)))
+        if meta.track_number is not None:
+            metadata_options.extend(('-metadata', 'track=' + str(meta.track_number)))
         metadata_options.extend(('-metadata', 'genre=' + metadata.join_meta_list(meta.tags)))
         return metadata_options
 

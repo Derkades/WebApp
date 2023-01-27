@@ -22,7 +22,7 @@ class Track {
     /** @type {string | null} */
     albumArist;
     /** @type {number | null} */
-    albumIndex;
+    trackNumber;
     /** @type {number | null} */
     year;
 
@@ -37,7 +37,7 @@ class Track {
         this.artists = trackData.artists;
         this.album = trackData.album;
         this.albumArtist = trackData.album_artist;
-        this.albumIndex = trackData.album_index;
+        this.trackNumber = trackData.track_number;
         this.year = trackData.year;
     };
 

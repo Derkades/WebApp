@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS track (
     title TEXT NULL,
     album TEXT NULL,
     album_artist TEXT NULL,
-    album_index INTEGER NULL,
+    track_number INTEGER NULL,
     year INTEGER NULL,
     mtime INTEGER NOT NULL,
     last_played INTEGER NOT NULL DEFAULT 0,
