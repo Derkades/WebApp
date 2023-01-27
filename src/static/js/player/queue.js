@@ -116,7 +116,7 @@ class Queue {
             // Playlist link that opens browse view
             const aPlaylist = document.createElement('a');
             if (track !== null) {
-                aPlaylist.textContent = track.playlistDisplay;
+                aPlaylist.textContent = track.playlistPath;
                 aPlaylist.onclick = () => browse.browsePlaylist(track.playlistPath);
             } else {
                 aPlaylist.textContent = '?';

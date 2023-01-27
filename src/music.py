@@ -305,9 +305,8 @@ class PlaylistStats:
 class Playlist:
 
     conn: Connection
-    relpath: str
-    path: Path
     name: str
+    path: Path
     track_count: int
 
     def choose_track(self, tag_mode: Optional[Literal['allow', 'deny']], tags: Optional[list[str]]) -> Track:
@@ -325,7 +324,7 @@ class Playlist:
                 FROM track
                 WHERE track.playlist=?
                 """
-        params = [self.relpath]
+        params = [self.name]
 
         track_tags_query = 'SELECT tag FROM track_tag WHERE track = track.path'
         if tag_mode == 'allow':
@@ -360,7 +359,8 @@ class Playlist:
         """
         Get all tracks in this playlist as a list of Track objects
         """
-        rows = self.conn.execute('SELECT path FROM track WHERE playlist=?', (self.relpath,)).fetchall()
+        rows = self.conn.execute('SELECT path FROM track WHERE playlist=?',
+                                 (self.name,)).fetchall()
         return [Track.by_relpath(self.conn, row[0]) for row in rows]
 
     def download(self, url: str) -> CompletedProcess:
@@ -394,7 +394,7 @@ class Playlist:
             return True
 
         row = self.conn.execute('SELECT write FROM user_playlist WHERE playlist=? AND user=?',
-                                (self.relpath, user.user_id)).fetchone()
+                                (self.name, user.user_id)).fetchone()
 
         if row is None:
             return False
@@ -402,7 +402,7 @@ class Playlist:
         return row[0]
 
     def stats(self) -> PlaylistStats:
-        return PlaylistStats(self.conn, self.relpath)
+        return PlaylistStats(self.conn, self.name)
 
     @staticmethod
     def from_path(conn: Connection, path: Path) -> 'Playlist':
@@ -415,14 +415,12 @@ class Playlist:
         """
         relpath = to_relpath(path)
         try:
-            dir_name = relpath[:relpath.index('/')]
+            name = relpath[:relpath.index('/')]
         except ValueError:  # No slash found
-            dir_name = relpath
-        name, = conn.execute('SELECT name FROM playlist WHERE path=?',
-                             (dir_name,)).fetchone()
+            name = relpath
         track_count = conn.execute('SELECT COUNT(*) FROM track WHERE playlist=?',
-                                (dir_name,)).fetchone()[0]
-        return Playlist(conn, dir_name, from_relpath(dir_name), name, track_count)
+                                (name,)).fetchone()[0]
+        return Playlist(conn, name, from_relpath(name), track_count)
 
 
 @dataclass
@@ -431,38 +429,38 @@ class UserPlaylist(Playlist):
     favorite: bool
 
 
-def playlist(conn: Connection, relpath: str) -> Playlist:
+def playlist(conn: Connection, name: str) -> Playlist:
     """
     Get playlist object from the name of a music directory, using information from the database.
     Args:
-        relpath: Name of directory
+        name: Name of directory
     Returns: Playlist instance
     """
     row = conn.execute('''
-                        SELECT name, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path)
+                        SELECT (SELECT COUNT(*) FROM track WHERE playlist=playlist.path)
                         FROM playlist
                         WHERE path=?
-                        ORDER BY name ASC
-                        ''', (relpath,)).fetchone()
-    name, track_count = row
-    return Playlist(conn, relpath, from_relpath(relpath), name, track_count)
+                        ORDER BY path ASC
+                        ''', (name,)).fetchone()
+    track_count, = row
+    return Playlist(conn, name, from_relpath(name), track_count)
 
 
-def user_playlist(conn: Connection, relpath: str, user_id: int) -> UserPlaylist:
+def user_playlist(conn: Connection, name: str, user_id: int) -> UserPlaylist:
     # TODO merge to single query when bookworm is released, with a version of sqlite3 supporting outer join
 
     row1 = conn.execute('''
-                        SELECT name, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path)
+                        SELECT (SELECT COUNT(*) FROM track WHERE playlist=playlist.path)
                         FROM playlist
                         WHERE path=?
-                        ''', (relpath,)).fetchone()
+                        ''', (name,)).fetchone()
     row2 = conn.execute('''
                         SELECT write, favorite
                         FROM user_playlist
                         WHERE user=? and playlist=?
-                        ''', (user_id, relpath)).fetchone()
+                        ''', (user_id, name)).fetchone()
 
-    name, track_count = row1
+    track_count, = row1
 
     if row2 is not None:
         write = row2[0] == 1
@@ -471,7 +469,7 @@ def user_playlist(conn: Connection, relpath: str, user_id: int) -> UserPlaylist:
         write = False
         favorite = False
 
-    return UserPlaylist(conn, relpath, from_relpath(relpath), name, track_count, write, favorite)
+    return UserPlaylist(conn, name, from_relpath(name), track_count, write, favorite)
 
 
 def playlists(conn: Connection) -> list[Playlist]:
@@ -480,12 +478,12 @@ def playlists(conn: Connection) -> list[Playlist]:
     Returns: List of Playlist objects
     """
     rows = conn.execute('''
-                        SELECT path, name, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path)
+                        SELECT path, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path)
                         FROM playlist
-                        ORDER BY name ASC
+                        ORDER BY path ASC
                         ''')
-    return [Playlist(conn, relpath, from_relpath(relpath), name, track_count)
-            for relpath, name, track_count in rows]
+    return [Playlist(conn, name, from_relpath(name), track_count)
+            for name, track_count in rows]
 
 
 def user_playlists(conn: Connection, user_id: int) -> list[UserPlaylist]:
@@ -493,26 +491,26 @@ def user_playlists(conn: Connection, user_id: int) -> list[UserPlaylist]:
     # TODO merge to single query when bookworm is released, with a version of sqlite3 supporting outer join
 
     rows1 = conn.execute('''
-                            SELECT playlist, write, favorite FROM user_playlist WHERE user=?
-                            ORDER BY favorite DESC, write DESC, playlist ASC
-                            ''', (user_id,)).fetchall()
+                         SELECT playlist, write, favorite FROM user_playlist WHERE user=?
+                         ORDER BY favorite DESC, write DESC, playlist ASC
+                         ''', (user_id,)).fetchall()
     rows2 = conn.execute('''
-                            SELECT path, name, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path)
-                            FROM playlist
-                            ORDER BY name ASC
-                            ''').fetchall()
+                         SELECT path, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path)
+                         FROM playlist
+                         ORDER BY path ASC
+                         ''').fetchall()
 
-    relpaths: set[str] = set()
-    for relpath, write, favorite in rows1:
-        for relpath2, name, track_count in rows2:
-            if relpath == relpath2:
-                relpaths.add(relpath)
-                playlist_list.append(UserPlaylist(conn, relpath, from_relpath(relpath), name, track_count, write == 1, favorite == 1))
+    names: set[str] = set()
+    for name, write, favorite in rows1:
+        for name2, track_count in rows2:
+            if name == name2:
+                names.add(name)
+                playlist_list.append(UserPlaylist(conn, name, from_relpath(name), track_count, write == 1, favorite == 1))
                 break
 
-    for relpath, name, track_count in rows2:
-        if relpath in relpaths:
+    for name, track_count in rows2:
+        if name in names:
             continue
-        playlist_list.append(UserPlaylist(conn, relpath, from_relpath(relpath), name, track_count, False, False))
+        playlist_list.append(UserPlaylist(conn, name, from_relpath(name), track_count, False, False))
 
     return playlist_list

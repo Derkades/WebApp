@@ -7,7 +7,7 @@
 {% block content %}
     <main>
         {{ page_heading(gettext('Playlist manager')) }}
-        
+
 
         {% if user_is_admin %}
             <p>{% trans %}As an administrator, you can modify tracks in all playlists even without write access.{% endtrans %}</p>
@@ -18,7 +18,7 @@
             <thead>
                 <tr>
                     <th class="icon-col">{% trans %}Favorite{% endtrans %}</th>
-                    <th>{% trans %}Path{% endtrans %}</th>
+                    <th>{% trans %}Name{% endtrans %}</th>
                     <th>{% trans %}Write access{% endtrans %}</th>
                     <th>{% trans %}Actions{% endtrans %}</th>
                 </tr>
@@ -34,7 +34,7 @@
                             {% endif %}
                         </td>
                         <td>
-                            {{ playlist.relpath }}
+                            {{ playlist.name }}
                         </td>
                         <td>
                             {% if playlist.write  %}

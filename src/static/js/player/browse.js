@@ -107,8 +107,11 @@ class Browse {
         this.browse(tagText + tagName, track => track.tags.indexOf(tagName) !== -1)
     };
 
-    browsePlaylist(playlist) {
-        document.getElementById('browse-filter-playlist').value = playlist;
+    /**
+     * @param {string} playlistName
+     */
+    browsePlaylist(playlistName) {
+        document.getElementById('browse-filter-playlist').value = playlistName;
         this.browseAll();
     };
 
@@ -117,6 +120,9 @@ class Browse {
         this.browse(allText, null);
     };
 
+    /**
+     * @param {Array<Track>} tracks
+     */
     generateTrackList(tracks) {
         const table = document.createElement('table');
         table.classList.add('track-list-table');
@@ -132,7 +138,7 @@ class Browse {
 
         for (const track of tracks) {
             const colPlaylist = document.createElement('td');
-            colPlaylist.textContent = track.playlistDisplay;
+            colPlaylist.textContent = track.playlistPath;
 
             const colDuration = document.createElement('td');
             colDuration.append(secondsToString(track.duration));

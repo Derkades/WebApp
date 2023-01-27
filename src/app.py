@@ -311,7 +311,7 @@ def ytdl():
 
     with db.connect() as conn:
         playlist = music.playlist(conn, directory)
-        scanner.scan_tracks(conn, playlist.relpath)
+        scanner.scan_tracks(conn, playlist.name)
 
     return {
         'code': result.returncode,
@@ -330,20 +330,17 @@ def track_list():
 
         user_playlists = music.user_playlists(conn, user.user_id)
 
-        playlist_response: dict[str, dict[str, Any]] = {}
+        playlist_response: list[dict[str, Any]] = []
         track_response: list[dict[str, Any]] = []
 
         for playlist in user_playlists:
             if playlist.track_count:
-                playlist_response[playlist.relpath] = {
-                    'name': playlist.relpath,
-                    'dir_name': playlist.relpath, # Deprecated
-                    'display_name': playlist.name, # Deprecated
+                playlist_response.append({
+                    'name': playlist.name,
                     'track_count': playlist.track_count,
                     'favorite': playlist.favorite,
                     'write': playlist.write or user.admin,
-                    'stats': playlist.stats(),  # TODO can be removed, should be left for a few days for backwards compatibility
-                }
+                })
 
         # TODO move track list to playlist dictionary
         for playlist in user_playlists:
@@ -352,8 +349,7 @@ def track_list():
                 track_response.append({
                     'path': track.relpath,
                     'display': meta.display_title(),
-                    'playlist': playlist.relpath,
-                    'playlist_display': playlist.name,
+                    'playlist': playlist.name,
                     'duration': meta.duration,
                     'tags': meta.tags,
                     'title': meta.title,
@@ -506,7 +502,7 @@ def playlists_create():
 
         path.mkdir()
 
-        scanner.scan(conn)
+        scanner.scan(conn)  # This creates a row for the playlist in the playlist table
 
         conn.execute('INSERT OR REPLACE INTO user_playlist (user, playlist, write) VALUES (?, ?, 1)',
                      (user.user_id, dir_name))
@@ -573,7 +569,7 @@ def files_upload():
         uploaded_file.save(Path(upload_dir, uploaded_file.filename))
 
     with db.connect() as conn:
-        scanner.scan_tracks(conn, playlist.relpath)
+        scanner.scan_tracks(conn, playlist.name)
 
     return redirect('/files?path=' + urlencode(music.to_relpath(upload_dir)))
 
@@ -607,7 +603,7 @@ def files_rename():
 
             path.rename(Path(path.parent, new_name))
 
-            scanner.scan_tracks(conn, playlist.relpath)
+            scanner.scan_tracks(conn, playlist.name)
 
             if request.is_json:
                 return Response(None, 200)
@@ -863,11 +859,10 @@ def history():
         # Now playing
 
         result = conn.execute('''
-                              SELECT username, playlist.name, track
+                              SELECT user.username, track.playlist, track
                               FROM now_playing
                                 JOIN user ON now_playing.user = user.id
                                 JOIN track ON now_playing.track = track.path
-                                JOIN playlist ON track.playlist = playlist.path
                               WHERE now_playing.timestamp > ?
                               ''',
                               (int(time.time()) - 185,))  # JS updates now playing every 3 minutes
@@ -884,7 +879,7 @@ def history():
         summary_from = int(time.time()) - 60*60*24*7
 
         result = conn.execute('''
-                              SELECT (SELECT name FROM playlist WHERE playlist.path = history.playlist), COUNT(*)
+                              SELECT playlist, COUNT(*)
                               FROM history
                               WHERE timestamp > ?
                               GROUP BY playlist

@@ -70,7 +70,6 @@ function createPlaylistCheckbox(playlist, index) {
     // Re-use state from previous checkbox if it exists
     // Otherwise, playlist should be enabled if favorite
     const previousCheckbox = document.getElementById(id);
-    console.log(previousCheckbox);
     const checked = previousCheckbox !== null ? previousCheckbox.checked : playlist.favorite;
 
     const span = document.createElement("span");

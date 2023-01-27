@@ -8,9 +8,7 @@ class Track {
     /** @type {string} */
     displayFile;
     /** @type {string} */
-    playlistPath;
-    /** @type {string} */
-    playlistDisplay;
+    playlistPath; // TODO rename to playlistName
     /** @type {number} */
     duration;
     /** @type {Array<string>} */
@@ -33,7 +31,6 @@ class Track {
         this.path = trackData.path;
         this.display = trackData.display;
         this.playlistPath = trackData.playlist;
-        this.playlistDisplay = trackData.playlist_display;
         this.duration = trackData.duration;
         this.tags = trackData.tags;
         this.title = trackData.title;
@@ -63,7 +60,7 @@ class Track {
         if (showPlaylist) {
             const playlistHtml = document.createElement('a');
             playlistHtml.onclick = () => browse.browsePlaylist(this.playlistPath);
-            playlistHtml.textContent = this.playlistDisplay;
+            playlistHtml.textContent = this.playlistPath;
             html.append(playlistHtml, ': ');
         }
 
@@ -110,7 +107,7 @@ class Track {
         const json = await response.json();
 
         state.playlists = {};
-        for (const playlistObj of Object.values(json.playlists)) {
+        for (const playlistObj of json.playlists) {
             const playlist = new Playlist(playlistObj);
             state.playlists[playlist.name] = playlist;
         }
