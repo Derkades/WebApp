@@ -223,12 +223,7 @@ class Track:
         Returns: Compressed audio bytes
         """
 
-        cache_key = 'audio' + str(audio_type) + self.relpath
-
-        if audio_type == AudioType.MP3_WITH_METADATA:
-            metadata_options = self._get_ffmpeg_metadata_options()
-            # Cache should be invalidated when metadata is changed
-            cache_key += str(metadata_options)
+        cache_key = 'audio' + str(audio_type) + self.relpath + str(self.mtime)
 
         cached_data = cache.retrieve(cache_key)
         if cached_data is not None:
@@ -264,6 +259,7 @@ class Track:
                              '-metadata:s:v', 'comment=Cover (front)']
 
             input_options.extend(['-map_metadata', '-1'])  # Discard original metadata
+            metadata_options = self._get_ffmpeg_metadata_options()
             input_options.extend(metadata_options)  # Set new metadata
 
             audio_options = ['-f', 'mp3',
