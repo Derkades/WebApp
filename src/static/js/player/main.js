@@ -25,12 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('button-play').addEventListener('click', play);
     document.getElementById('button-pause').addEventListener('click', pause);
     document.getElementById('button-next').addEventListener('click', () => queue.next());
-    document.getElementById('settings-volume').addEventListener('input', () => {
-        const audioElem = getAudioElement();
-        if (audioElem !== null) {
-            audioElem.volume = getTransformedVolume();
-        }
-    });
+    document.getElementById('settings-volume').addEventListener('input', () => onVolumeChange());
 
     // Progress bar seeking
     const onMove = event => {

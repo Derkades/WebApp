@@ -411,6 +411,21 @@ body.light #loading-overlay {
     pointer-events: none;
 }
 
+input[type=range].input-volume-high::-webkit-slider-thumb,
+input[type=range].input-volume-high::-moz-range-thumb {
+    background: url('/static/icon/volume-high.svg') no-repeat center, rgba(255, 255, 255, 0.8);
+}
+
+input[type=range].input-volume-medium::-webkit-slider-thumb,
+input[type=range].input-volume-medium::-moz-range-thumb {
+    background: url('/static/icon/volume-medium.svg') no-repeat center, rgba(255, 255, 255, 0.8);
+}
+
+input[type=range].input-volume-low::-webkit-slider-thumb,
+input[type=range].input-volume-low::-moz-range-thumb {
+    background: url('/static/icon/volume-low.svg') no-repeat center, rgba(255, 255, 255, 0.8);
+}
+
 /* Firefox scrollbars look good by default, style Chromium scrollbars so they look similar */
 
 ::-webkit-scrollbar {

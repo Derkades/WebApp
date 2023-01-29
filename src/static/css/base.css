@@ -116,17 +116,6 @@ input[type=range]::-moz-range-thumb {
     border: none;
 }
 
-/* body.light select,
-body.light button,
-body.light input[type=text],
-body.light input[type=number],
-body.light input[type=submit],
-body.light input[type=password] {
-    background-color: rgba(200, 200, 200, 0.7);
-    border: 1px solid #505050;
-    color: black;
-} */
-
 body.light input {
     filter: invert();
 }

@@ -146,14 +146,30 @@ function seekToSeconds(position) {
     updateMediaSession();
 }
 
-/**
- * @returns {number}
- */
-function getTransformedVolume() {
+function getTransformedVolume(volumeZeroToHundred) {
     // https://www.dr-lex.be/info-stuff/volumecontrols.html
     // According to this article, x^4 seems to be a pretty good approximation of the perceived loudness curve
     const e = 4;
-    return document.getElementById('settings-volume').value ** e / 100 ** e;
+    return volumeZeroToHundred ** e / 100 ** e;
+}
+
+function onVolumeChange() {
+    const slider = document.getElementById('settings-volume');
+    const volume = slider.value;
+
+    slider.classList.remove('input-volume-high', 'input-volume-medium', 'input-volume-low');
+    if (volume > 60) {
+        slider.classList.add('input-volume-high');
+    } else if (volume > 20) {
+        slider.classList.add('input-volume-medium');
+    } else {
+        slider.classList.add('input-volume-low');
+    }
+
+    const audioElem = getAudioElement();
+    if (audioElem !== null) {
+        audioElem.volume = getTransformedVolume(volume);
+    }
 }
 
 /**
@@ -178,9 +194,9 @@ function updateTrackHtml() {
 function replaceAudioSource() {
     const sourceUrl = queue.currentTrack.audioBlobUrl;
     const audio = getAudioElement();
-    // Ensure audio volume matches slider
-    audio.volume = getTransformedVolume();
     audio.src = sourceUrl;
+    // Ensure audio volume matches slider
+    onVolumeChange();
 }
 
 function replaceAlbumImages() {

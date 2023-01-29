@@ -36,6 +36,8 @@ function syncCookiesWithInputs() {
         'settings-meme-mode',
         'settings-language',
     ].forEach(syncCookieWithInput);
+
+    onVolumeChange();
 }
 
 function youTubeDownload(event) {
