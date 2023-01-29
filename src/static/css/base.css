@@ -243,3 +243,34 @@ form {
         display: none;
     }
 }
+
+
+/* Firefox scrollbars look good by default, style Chromium scrollbars so they look similar */
+
+::-webkit-scrollbar {
+    height: .5rem;
+    width: .5rem;
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: .5rem;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: white;
+    border-radius: 1rem;
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+body.light ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+body.light ::-webkit-scrollbar-thumb:hover {
+    background: black;
+}

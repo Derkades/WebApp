@@ -425,20 +425,3 @@ input[type=range].input-volume-low::-webkit-slider-thumb,
 input[type=range].input-volume-low::-moz-range-thumb {
     background: url('/static/icon/volume-low.svg') no-repeat center, rgba(255, 255, 255, 0.8);
 }
-
-/* Firefox scrollbars look good by default, style Chromium scrollbars so they look similar */
-
-::-webkit-scrollbar {
-    height: .5rem;
-    width: .5rem;
-    background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #666;
-    border-radius: .5rem;
-}
-
-::-webkit-scrollbar-corner {
-    background: transparent;
-}
