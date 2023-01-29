@@ -161,7 +161,7 @@ audio {
 }
 
 body.light .box-solid {
-    background-color: rgba(200, 200, 200, 0.4);
+    background-color: rgba(200, 200, 200, 0.7);
 }
 
 #outer-progress-bar {
@@ -331,10 +331,6 @@ h4 > .icon {
     transition: scale .2s;
 }
 
-body.light .full-page-overlay .box-solid {
-    background-color: rgba(255, 255, 255, 0.9);
-}
-
 .full-page-overlay.overlay-hidden {
     opacity: 0;
     visibility: hidden;
@@ -349,8 +345,12 @@ body.light .full-page-overlay .box-solid {
 }
 
 #loading-overlay {
-    background-color: #171717;
+    background: rgba(0, 0, 0, 0.5);
     transition: opacity .5s, visibility .5s;
+}
+
+body.light #loading-overlay {
+    background: rgba(255, 255, 255, 0.5);
 }
 
 .loading-text {
