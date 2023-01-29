@@ -344,7 +344,3 @@ class QueuedTrack {
 };
 
 const queue = new Queue();
-
-function hideLoadingOverlay() {
-    document.getElementById('loading-overlay').classList.add('overlay-hidden');
-};

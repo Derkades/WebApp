@@ -74,8 +74,6 @@ class Editor {
         // Need to update local track list now, so metadata editor reflects changes
         await Track.updateLocalTrackList();
 
-        updateTrackHtml();
-
         // Close dialog, and restore save button
         dialog.close('dialog-editor');
         document.getElementById('editor-reloading').classList.add('hidden');

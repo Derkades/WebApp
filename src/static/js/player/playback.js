@@ -71,8 +71,10 @@ function updateMediaSession() {
 // Called on track change
 function updateMediaTrackInfo() {
     if (queue.currentTrack === null) {
+        console.warn('Ignoring call to updateMediaTrackInfo(), queue.currentTrack is null');
         return;
     }
+
     const track = queue.currentTrack.track();
     if (track === null) {
         console.warn('Not updating mediaSession, track info is null');
@@ -155,16 +157,6 @@ function getTransformedVolume() {
 }
 
 /**
- * @param {string} sourceUrl
- */
-function setAudioSource(sourceUrl) {
-    const audio = getAudioElement();
-    // Ensure audio volume matches slider
-    audio.volume = getTransformedVolume();
-    audio.src = sourceUrl;
-}
-
-/**
  * @returns {HTMLAudioElement}
  */
 function getAudioElement() {
@@ -175,54 +167,25 @@ function getAudioElement() {
  * Replace audio player, album cover, and lyrics according to current track info
  */
 function updateTrackHtml() {
-    const queuedTrack = queue.currentTrack;
-
-    // Replace audio element source
-    setAudioSource(queuedTrack.audioBlobUrl);
-
-    // Replace album cover images
-    replaceAlbumImages(queuedTrack.imageBlobUrl);
-
-    const notFoundElem = document.getElementById('lyrics-not-found');
-    const textElem = document.getElementById('lyrics-text');
-    const sourceElem = document.getElementById('lyrics-source');
-    if (queuedTrack.lyrics.found) {
-        notFoundElem.classList.add('hidden');
-        textElem.classList.remove('hidden');
-        sourceElem.classList.remove('hidden');
-
-        sourceElem.href = queuedTrack.lyrics.source;
-        textElem.innerHTML = queuedTrack.lyrics.html;
-    } else {
-        notFoundElem.classList.remove('hidden');
-        textElem.classList.add('hidden');
-        sourceElem.classList.add('hidden');
-    }
-    document.getElementById('lyrics-scroll').scrollTo({top: 0, behavior: 'smooth'});
-
-    const track = queuedTrack.track();
-    if (track !== null) {
-        document.getElementById('current-track').replaceChildren(track.displayHtml(true));
-    } else {
-        document.getElementById('current-track').replaceChildren('[track info unavailable]');
-    }
-
-    const previous = queue.getPreviousTrack();
-    if (previous !== null) {
-        const previousTrack = previous.track();
-        if (previousTrack !== null) {
-            document.getElementById('previous-track').replaceChildren(previousTrack.displayHtml(true));
-        } else {
-            document.getElementById('previous-track').replaceChildren('[track info unavailable]');
-        }
-    } else {
-        document.getElementById('previous-track').textContent = '-';
-    }
-
+    replaceAudioSource();
+    replaceAlbumImages();
+    replaceLyrics();
+    replaceTrackDisplayTitle();
     updateWritablePlaylistButtons();
 }
 
-function replaceAlbumImages(imageUrl) {
+
+function replaceAudioSource() {
+    const sourceUrl = queue.currentTrack.audioBlobUrl;
+    const audio = getAudioElement();
+    // Ensure audio volume matches slider
+    audio.volume = getTransformedVolume();
+    audio.src = sourceUrl;
+}
+
+function replaceAlbumImages() {
+    const imageUrl = queue.currentTrack.imageBlobUrl;
+
     const cssUrl = 'url("' + imageUrl + '")';
 
     const bgBottom = document.getElementById('bg-image-1');
@@ -246,6 +209,52 @@ function replaceAlbumImages(imageUrl) {
         bgTop.style.opacity = 1;
         fgTop.style.opacity = 1;
     }, 200);
+}
+
+function replaceLyrics() {
+    const queuedTrack = queue.currentTrack;
+    const notFoundElem = document.getElementById('lyrics-not-found');
+    const textElem = document.getElementById('lyrics-text');
+    const sourceElem = document.getElementById('lyrics-source');
+    if (queuedTrack.lyrics.found) {
+        notFoundElem.classList.add('hidden');
+        textElem.classList.remove('hidden');
+        sourceElem.classList.remove('hidden');
+
+        sourceElem.href = queuedTrack.lyrics.source;
+        textElem.innerHTML = queuedTrack.lyrics.html;
+    } else {
+        notFoundElem.classList.remove('hidden');
+        textElem.classList.add('hidden');
+        sourceElem.classList.add('hidden');
+    }
+    document.getElementById('lyrics-scroll').scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function replaceTrackDisplayTitle() {
+    if (queue.currentTrack !== null) {
+        const track = queue.currentTrack.track();
+        if (track !== null) {
+            document.getElementById('current-track').replaceChildren(track.displayHtml(true));
+        } else {
+            document.getElementById('current-track').replaceChildren('[track info unavailable]');
+        }
+    } else {
+        // Nothing playing
+        document.getElementById('current-track').textContent = '-';
+    }
+
+    const previous = queue.getPreviousTrack();
+    if (previous !== null) {
+        const previousTrack = previous.track();
+        if (previousTrack !== null) {
+            document.getElementById('previous-track').replaceChildren(previousTrack.displayHtml(true));
+        } else {
+            document.getElementById('previous-track').replaceChildren('[track info unavailable]');
+        }
+    } else {
+        document.getElementById('previous-track').textContent = '-';
+    }
 }
 
 /**

@@ -115,13 +115,16 @@ class Track {
             }
         }
 
-        hideLoadingOverlay();
+        // Hide loading overlay
+        document.getElementById('loading-overlay').classList.add('overlay-hidden');
 
         // Update HTML depending on state.playlists and state.tracks
         updatePlaylistCheckboxHtml();
         browse.updateCurrentView();
         createPlaylistDropdowns();
         updateTagCheckboxes();
+        replaceTrackDisplayTitle();
+        queue.updateHtml();
     };
 
     async downloadAndAddToQueue(top = false) {
