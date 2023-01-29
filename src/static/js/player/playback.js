@@ -238,7 +238,7 @@ function replaceLyrics() {
         sourceElem.classList.remove('hidden');
 
         sourceElem.href = queuedTrack.lyrics.source;
-        textElem.innerHTML = queuedTrack.lyrics.html;
+        textElem.innerHTML = queuedTrack.lyrics.html + '<br>';
     } else {
         notFoundElem.classList.remove('hidden');
         textElem.classList.add('hidden');
