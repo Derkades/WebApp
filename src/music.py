@@ -309,7 +309,14 @@ class Track:
                 meta_flag = '-metadata' # Set container metadata
             for key, value in meta_dict.items():
                 command.extend((meta_flag, key + '=' + ('' if value is None else value)))
-            command.extend(('-f', self.path.name.split('.')[-1]))
+
+            extension = self.path.name.split('.')[-1]
+            if extension == 'm4a':
+                ffmpeg_format = 'ipod'
+            else:
+                ffmpeg_format = extension
+            command.extend(('-f', ffmpeg_format))
+
             command.append(temp_file.name)
 
             log.info('Writing metadata: %s', str(command))
