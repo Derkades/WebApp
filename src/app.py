@@ -726,7 +726,7 @@ def lastfm_connect():
 
 
 @app.route('/now_playing', methods=['POST'])
-def now_playing(read_only=True):
+def now_playing():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
