@@ -528,7 +528,9 @@ def files_upload():
             return Response(None, 403)
 
     for uploaded_file in request.files.getlist('upload'):
-        assert uploaded_file.filename is not None
+        if uploaded_file.filename is None or uploaded_file.filename == '':
+            return Response('Blank file name. Did you select a file?', 402)
+
         check_filename(uploaded_file.filename)
         uploaded_file.save(Path(upload_dir, uploaded_file.filename))
 
