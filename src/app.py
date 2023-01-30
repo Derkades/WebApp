@@ -177,7 +177,7 @@ def choose_track():
         assert tag_mode in {'allow', 'deny'}
         tags = request.args['tags'].split(';')
         playlist = music.playlist(conn, dir_name)
-        chosen_track = playlist.choose_track(tag_mode=tag_mode, tags=tags)
+        chosen_track = playlist.choose_track(user, tag_mode=tag_mode, tags=tags)
 
     return {
         'path': chosen_track.relpath,
@@ -970,6 +970,17 @@ def recent_changes():
 
     return render_template('recent_changes.jinja2',
                            changes=changes)
+
+
+@app.route('/add_never_play', methods=['POST'])
+def add_never_play():
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
+        user.verify_csrf(request.json['csrf'])
+        track = request.json['track']
+        conn.execute('INSERT OR IGNORE INTO never_play (user, track) VALUES (?, ?)',
+                     (user.user_id, track))
+    return Response(None, 200)
 
 
 def get_language() -> str:

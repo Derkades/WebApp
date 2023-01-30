@@ -4,11 +4,11 @@ from datetime import datetime
 from sqlite3 import Connection
 import random
 
-import db
 from music import Track
 import music
 from metadata import Metadata
 import settings
+from auth import User
 
 
 log = logging.getLogger('app.radio')
@@ -27,7 +27,7 @@ def _choose_track(conn: Connection, previous_playlist = None) -> Track:
     playlist_name = random.choice(playlist_candidates)
 
     playlist = music.playlist(conn, playlist_name)
-    track = playlist.choose_track(None, None)
+    track = playlist.choose_track(None, None, None)
     return track
 
 

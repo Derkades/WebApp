@@ -80,13 +80,20 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('settings-theme').addEventListener('input', applyTheme);
 
     // File manager button
-    document.getElementById('open-file-manager').addEventListener('click', () => window.open('/files', '_blank'));
+    // document.getElementById('open-file-manager').addEventListener('click', () => window.open('/files', '_blank'));
 
     // Queue overlay
     document.getElementById('browse-filter-playlist').addEventListener('input', () => browse.updateCurrentView());
     document.getElementById('browse-filter-query').addEventListener('input', () => browse.updateCurrentView());
     document.getElementById('browse-all').addEventListener('click', () => browse.browseAll());
     document.getElementById('browse-back').addEventListener('click', () => browse.back());
+
+    // Never play button
+    document.getElementById('button-never-play').addEventListener('click', () => {
+        const data = {track: queue.currentTrack.trackPath};
+        jsonPost('/add_never_play', data);
+        queue.next();
+    });
 
     // Editor
     const editorButton = document.getElementById('button-edit');

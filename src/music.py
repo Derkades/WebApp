@@ -393,7 +393,7 @@ class Playlist:
     path: Path
     track_count: int
 
-    def choose_track(self, tag_mode: Optional[Literal['allow', 'deny']], tags: Optional[list[str]]) -> Track:
+    def choose_track(self, user: Optional[User], tag_mode: Optional[Literal['allow', 'deny']], tags: Optional[list[str]]) -> Track:
         """
         Randomly choose a track from this playlist directory
         Args:
@@ -409,6 +409,10 @@ class Playlist:
                 WHERE track.playlist=?
                 """
         params = [self.name]
+
+        if user is not None:
+            query += ' AND path NOT IN (SELECT track FROM never_play WHERE user = ?)'
+            params.append(user.user_id)
 
         track_tags_query = 'SELECT tag FROM track_tag WHERE track = track.path'
         if tag_mode == 'allow':

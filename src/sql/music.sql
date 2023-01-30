@@ -104,4 +104,10 @@ CREATE TABLE IF NOT EXISTS scanner_log (
     track TEXT NOT NULL  -- Intentionally not a foreign key, log contains deleted tracks
 );
 
+CREATE TABLE IF NOT EXISTS never_play (
+    user INTEGER NOT NULL REFERENCES user(id),
+    track TEXT NOT NULL REFERENCES track(path),
+    UNIQUE(user, track)
+);
+
 COMMIT;
