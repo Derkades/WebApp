@@ -105,8 +105,8 @@ CREATE TABLE IF NOT EXISTS scanner_log (
 );
 
 CREATE TABLE IF NOT EXISTS never_play (
-    user INTEGER NOT NULL REFERENCES user(id),
-    track TEXT NOT NULL REFERENCES track(path),
+    user INTEGER NOT NULL REFERENCES user(id) ON DELETE CASCADE,
+    track TEXT NOT NULL REFERENCES track(path) ON DELETE CASCADE,
     UNIQUE(user, track)
 );
 
