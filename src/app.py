@@ -896,11 +896,14 @@ def playlists():
         user = auth.verify_auth_cookie(conn)
         csrf_token = user.get_csrf()
         user_playlists = music.user_playlists(conn, user.user_id)
+        primary_playlist, = conn.execute('SELECT primary_playlist FROM user WHERE id=?',
+                                         (user.user_id,)).fetchone()
 
     return render_template('playlists.jinja2',
                            user_is_admin=user.admin,
                            playlists=user_playlists,
-                           csrf_token=csrf_token)
+                           csrf_token=csrf_token,
+                           primary_playlist=primary_playlist)
 
 
 @app.route('/playlists_favorite', methods=['POST'])
@@ -917,6 +920,19 @@ def playlists_favorite():
                      ON CONFLICT (user, playlist) DO UPDATE
                         SET favorite = ?
                      ''', (user.user_id, playlist, int(is_favorite), int(is_favorite)))
+
+    return redirect('/playlists')
+
+
+@app.route('/playlists_set_primary', methods=['POST'])
+def playlists_set_primary():
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
+        user.verify_csrf(request.form['csrf'])
+        playlist = request.form['primary-playlist']
+
+        conn.execute('UPDATE user SET primary_playlist=? WHERE id=?',
+                     (playlist, user.user_id))
 
     return redirect('/playlists')
 
