@@ -135,6 +135,7 @@ function createPlaylistDropdowns() {
         }
         select.replaceChildren(...keptChildren);
 
+        const primaryPlaylist = document.getElementById('primary-playlist').textContent;
         const onlyWritable = select.classList.contains('playlist-select-writable');
 
         for (const playlist of Object.values(state.playlists)) {
@@ -142,6 +143,7 @@ function createPlaylistDropdowns() {
             option.value = playlist.name;
             option.textContent = playlist.name;
             option.disabled = onlyWritable && !playlist.write;
+            option.selected = keptChildren.length == 0 && playlist.name == primaryPlaylist;
             select.appendChild(option);
         }
     }

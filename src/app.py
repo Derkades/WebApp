@@ -128,12 +128,15 @@ def player():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn, redirect_to_login=True)
         csrf_token = user.get_csrf()
+        primary_playlist, = conn.execute('SELECT primary_playlist FROM user WHERE id=?',
+                                        (user.user_id,)).fetchone()
 
     return render_template('player.jinja2',
                            mobile=is_mobile(),
                            csrf_token=csrf_token,
                            languages=LANGUAGES,
-                           language=get_language())
+                           language=get_language(),
+                           primary_playlist=primary_playlist)
 
 
 PLAYER_JS = pack_js(Path('static', 'js', 'player'))
