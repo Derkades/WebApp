@@ -54,10 +54,18 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('queue-up').addEventListener('click', () => queue.scroll('up'));
     document.getElementById('queue-down').addEventListener('click', () => queue.scroll('down'));
 
-    // Lyrics
+    // Lyrics / album cover switch
     document.getElementById('button-lyrics').addEventListener('click', switchLyrics);
     document.getElementById('button-album').addEventListener('click', switchAlbumCover);
     document.getElementById('button-album').classList.add('hidden');
+    document.getElementById('album-covers').addEventListener('click', event => {
+        event.preventDefault();
+        switchLyrics();
+    });
+    document.getElementById('lyrics-box').addEventListener('click', event => {
+        event.preventDefault();
+        switchAlbumCover();
+    });
 
     // Settings overlay
     const downloadSubmit = document.getElementById('youtube-dl-submit');
