@@ -4,33 +4,25 @@
     {% trans %}Home{% endtrans%}
 {% endblock title %}
 
+{% macro nav(link, icon_name, title) %}
+    <a href="{{ link }}" class="homepage-select">
+        <div>
+            {{ icon(icon_name) }}
+            <span>{{ title }}</span>
+        </div>
+    </a>
+{% endmacro %}
+
 {% block content %}
     <main>
-        {{ icon('music') }}
-        <a href="/player" class="large">{% trans %}Music player{% endtrans %}</a><br>
-
-        {{ icon('folder') }}
-        <a href="/files" class="large">{% trans %}File manager{% endtrans %}</a><br>
-
-        {{ icon('playlist-music') }}
-        <a href="/playlists" class="large">{% trans %}Playlist manager{% endtrans %}</a><br>
-
-        {{ icon('account-cog') }}
-        <a href="/account" class="large">{% trans %}Account{% endtrans %}</a><br>
-
-        {{ icon('history') }}
-        <a href="/history" class="large">{% trans %}Playback history{% endtrans %}</a><br>
-
-        {{ icon('chart-line-variant') }}
-        <a href="/playlist_stats" class="large">{% trans %}Playlist statistics{% endtrans %}</a><br>
-
-        {{ icon('file-edit') }}
-        <a href="/recent_changes" class="large">{% trans %}Recent file changes{% endtrans %}</a><br>
-
-        {{ icon('cancel') }}
-        <a href="/never_play" class="large">{% trans %}Manage track blocklist{% endtrans %}</a><br>
-
-        {{ icon('radio') }}
-        <a href="/radio" class="large">{% trans %}Radio (Alpha){% endtrans %}</a><br>
+        {{ nav('/player', 'music', _('Music player')) }}
+        {{ nav('/files', 'folder', _('File manager')) }}
+        {{ nav('/playlists', 'playlist-music', _('Playlist manager')) }}
+        {{ nav('/account', 'account-cog', _('Account')) }}
+        {{ nav('/history', 'history', _('Playback history')) }}
+        {{ nav('/playlist_stats', 'chart-line-variant', _('Playback statistics')) }}
+        {{ nav('/recent_changes', 'file-edit', _('Recent file changes')) }}
+        {{ nav('/never_play', 'cancel', _('Manage track blocklist')) }}
+        {{ nav('/radio', 'radio', _('Radio')) }}
     </main>
 {% endblock content %}

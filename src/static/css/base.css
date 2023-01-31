@@ -188,8 +188,35 @@ body.light .icon {
     }
 }
 
-a.large {
-    font-size: 1.5em;
+.homepage-select {
+    text-decoration: none;
+    color: white;
+}
+
+.homepage-select:hover {
+    text-decoration: none;
+    color: white;
+}
+
+.homepage-select > div {
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    display: flex;
+    width: 18.5rem;
+    padding: .5rem;
+    margin: .5rem;
+    border-radius: var(--border-radius-amount);
+    box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
+    transition: transform .1s;
+}
+
+.homepage-select > div:hover {
+    transform: translate(.5rem, 0);
+}
+
+.homepage-select > div > span {
+    margin-left: .5rem;
+    font-size: 1.5rem;
+
 }
 
 .table {
