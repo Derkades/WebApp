@@ -30,16 +30,13 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>{% trans %}ID{% endtrans %}</th>
-                    <th>{% trans %}Creation date{% endtrans %}</th>
-                    <th>{% trans %}Last device{% endtrans %}</th>
-                    <th>{% trans %}Last address{% endtrans %}</th>
+                    <th>{% trans %}Date of login{% endtrans %}</th>
+                    <th>{% trans %}Device{% endtrans %}</th>
                 </tr>
             </thead>
             <tbody>
                 {% for session in sessions %}
                     <tr>
-                        <td>{{ session.rowid }}</td>
                         <td>{{ session.creation_date }}</td>
                         <td>
                             {% if session == user.session %}
@@ -48,7 +45,6 @@
                                 {{ session.last_device }}
                             {% endif %}
                         </td>
-                        <td>{{ session.last_address }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

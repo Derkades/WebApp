@@ -21,8 +21,8 @@ class Session:
     rowid: int
     token: str
     creation_timestamp: int
-    last_user_agent: Optional[str]
-    last_address: Optional[str]
+    user_agent: Optional[str]
+    remote_address: Optional[str]
 
     @property
     def creation_date(self) -> str:
@@ -42,25 +42,25 @@ class Session:
         """
         Last device string, based on user agent string
         """
-        if self.last_user_agent is None:
-            return None
+        if self.user_agent is None:
+            return _('Unknown')
 
         browsers = ['Firefox', 'Chromium', 'Chrome', 'Vivaldi', 'Opera', 'Safari']
         systems = ['Windows', 'macOS', 'Android', 'iOS', 'Linux']
 
         for maybe_browser in browsers:
-            if maybe_browser in self.last_user_agent:
+            if maybe_browser in self.user_agent:
                 browser = maybe_browser
                 break
         else:
-            browser = 'Unknown'
+            browser = _('Unknown')
 
         for maybe_system in systems:
-            if maybe_system in self.last_user_agent:
+            if maybe_system in self.user_agent:
                 system = maybe_system
                 break
         else:
-            system = 'Unknown'
+            system = _('Unknown')
 
         return f'{browser}, {system}'
 
@@ -80,7 +80,7 @@ class User:
         Get all sessions for users
         """
         results = self.conn.execute("""
-                                    SELECT rowid, token, creation_date, last_user_agent, last_address
+                                    SELECT rowid, token, creation_date, user_agent, remote_address
                                     FROM session WHERE user=?
                                     """, (self.user_id,)).fetchall()
         return [Session(*row) for row in results]
@@ -161,12 +161,15 @@ def _generate_token() -> str:
     return base64.b64encode(os.urandom(16)).decode()
 
 
-def log_in(conn: Connection, username: str, password: str) -> Optional[str]:
+def log_in(conn: Connection, username: str, password: str, user_agent: str, remote_addr: str) -> Optional[str]:
     """
     Log in using username and password.
     Args:
+        conn: Read-write database connection
         username
         password
+        user_agent
+        remote_addr
     Returns: Session token, or None if the username+password combination is not valid
     """
     result = conn.execute('SELECT id, password FROM user WHERE username=?', (username,)).fetchone()
@@ -184,27 +187,25 @@ def log_in(conn: Connection, username: str, password: str) -> Optional[str]:
     token = _generate_token()
     creation_date = int(time.time())
 
-    conn.execute('INSERT INTO session (user, token, creation_date) VALUES (?, ?, ?)',
-                    (user_id, token, creation_date))
+    conn.execute('INSERT INTO session (user, token, creation_date, user_agent, remote_address) VALUES (?, ?, ?, ?, ?)',
+                    (user_id, token, creation_date, user_agent, remote_addr))
 
     log.info('Successful login for user %s', username)
 
     return token
 
 
-def _verify_token(conn: sqlite3.Connection, token: str, user_agent = None, remote_addr = None) -> Optional[User]:
+def _verify_token(conn: sqlite3.Connection, token: str) -> Optional[User]:
     """
     Verify session token, and return corresponding user
     Args:
-        conn: Database connection to users database
+        conn: Read-only database connection
         token: Session token to verify
-        user_agent: Browser user agent
-        remote_addr: Browser IP address
     Returns: User object if session token is valid, or None if invalid
     """
     # TODO does this introduce the possibility of a timing attack?
     result = conn.execute("""
-                          SELECT session.rowid, session.creation_date, session.last_user_agent, session.last_address, user.id, user.username, user.admin, user_lastfm.name, user_lastfm.key
+                          SELECT session.rowid, session.creation_date, session.user_agent, session.remote_address, user.id, user.username, user.admin, user_lastfm.name, user_lastfm.key
                           FROM user
                           INNER JOIN session ON user.id = session.user
                           LEFT JOIN user_lastfm ON user.id = user_lastfm.user
@@ -215,11 +216,6 @@ def _verify_token(conn: sqlite3.Connection, token: str, user_agent = None, remot
         return None
 
     session_rowid, session_creation_date, session_user_agent, session_address, user_id, username, admin, lastfm_name, lastfm_key = result
-
-    # Disabled so database can be read-only. TODO Need to find a better solution.
-    # if user_agent and remote_addr:
-    #     conn.execute('UPDATE session SET last_user_agent=?, last_address=? WHERE rowid=?',
-    #                     (user_agent, remote_addr, session_rowid))
 
     session = Session(session_rowid, token, session_creation_date, session_user_agent, session_address)
     return User(conn, user_id, username, admin == 1, session, lastfm_name, lastfm_key)
@@ -234,8 +230,7 @@ def verify_auth_cookie(conn: sqlite3.Connection, require_admin = False, redirect
         raise AuthError(AuthErrorReason.NO_TOKEN, redirect_to_login)
 
     token = request.cookies['token']
-    user_agent = request.headers['User-Agent'] if 'User-Agent' in request.headers else None
-    user = _verify_token(conn, token, user_agent, request.remote_addr)
+    user = _verify_token(conn, token)
     if user is None:
         raise AuthError(AuthErrorReason.INVALID_TOKEN, redirect_to_login)
 

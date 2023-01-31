@@ -93,31 +93,33 @@ def login():
         except AuthError:
             pass
 
-        if request.method == 'POST':
-            if request.is_json:
-                username = request.json['username']
-                password = request.json['password']
-
-                token = auth.log_in(conn, username, password)
-
-                if token is None:
-                    return Response(None, 403)
-
-                return {'token': token}
-            else:
-                username = request.form['username']
-                password = request.form['password']
-
-                token = auth.log_in(conn, username, password)
-
-                if token is None:
-                    return render_template('login.jinja2', invalid_password=True)
-
-                response = redirect('/')
-                response.set_cookie('token', token, max_age=3600*24*30, samesite='Strict')
-                return response
-        else:
+        if request.method == 'GET':
             return render_template('login.jinja2', invalid_password=False)
+
+        if request.is_json:
+            username = request.json['username']
+            password = request.json['password']
+        else:
+            username = request.form['username']
+            password = request.form['password']
+
+        remote_addr = request.remote_addr
+        user_agent = request.headers['User-Agent'] if 'User-Agent' in request.headers else None
+
+        token = auth.log_in(conn, username, password, user_agent, remote_addr)
+
+        if token is None:
+            if request.is_json:
+                return Response(None, 403)
+            else:
+                return render_template('login.jinja2', invalid_password=True)
+
+        if request.is_json:
+            return {'token': token}
+        else:
+            response = redirect('/')
+            response.set_cookie('token', token, max_age=3600*24*30, samesite='Strict')
+            return response
 
 
 @app.route('/player')

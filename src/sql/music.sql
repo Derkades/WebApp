@@ -68,8 +68,8 @@ CREATE TABLE IF NOT EXISTS session (
     user INTEGER NOT NULL REFERENCES user(id) ON DELETE CASCADE,
     token TEXT NOT NULL UNIQUE,
     creation_date INTEGER NOT NULL, -- Seconds since UNIX epoch
-    last_user_agent TEXT NULL,
-    last_address TEXT NULL
+    user_agent TEXT NULL,
+    remote_address TEXT NULL
 );
 
 CREATE TABLE IF NOT EXISTS csrf (
