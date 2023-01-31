@@ -96,7 +96,7 @@ class Track {
             }
         } else {
             // Use half-decent display name generated from file name by python backend
-            html.append(this.display + ' ~');
+            html.append(this.display);
         }
         return html;
     };
