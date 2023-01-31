@@ -134,9 +134,16 @@ body.light button > .icon {
 }
 
 main {
-    background-color: #171717;
+    background-color: #1A1A1A;
     padding: 1rem;
-    height: calc(100vh - 2rem);
+    min-height: calc(100vh - 2rem);
+    width: 100vw;
+}
+
+@media screen and (min-width: 100rem) {
+    main {
+        width: calc(100rem - 2rem);
+    }
 }
 
 .icon {
