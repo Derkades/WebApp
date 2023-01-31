@@ -47,14 +47,14 @@
                             {% if playlist.favorite %}
                                 <form action="/playlists_favorite" method="POST">
                                     <input type="hidden" name="csrf" value="{{ csrf_token }}">
-                                    <input type="hidden" name="playlist" value="{{ playlist.relpath }}">
+                                    <input type="hidden" name="playlist" value="{{ playlist.name }}">
                                     <input type="hidden" name="favorite" value="0">
                                     <input type="submit" value="{% trans %}Remove favorite{% endtrans %}">
                                 </form>
                             {% else %}
                                 <form action="/playlists_favorite" method="POST">
                                     <input type="hidden" name="csrf" value="{{ csrf_token }}">
-                                    <input type="hidden" name="playlist" value="{{ playlist.relpath }}">
+                                    <input type="hidden" name="playlist" value="{{ playlist.name }}">
                                     <input type="hidden" name="favorite" value="1">
                                     <input type="submit" value="{% trans %}Make favorite{% endtrans %}">
                                 </form>
