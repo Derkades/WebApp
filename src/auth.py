@@ -10,6 +10,7 @@ from sqlite3 import Connection
 
 import bcrypt
 from flask import request
+import flask_babel
 from flask_babel import _
 
 
@@ -26,25 +27,8 @@ class Session:
 
     @property
     def creation_date(self) -> str:
-        minutes_ago = (int(time.time()) - self.creation_timestamp) // 60
-        if minutes_ago == 0:
-            return _('Just now')
-        if minutes_ago == 1:
-            return _('1 minute ago')
-        if minutes_ago < 120:
-            return _('%(minutes)d minutes ago', minutes=minutes_ago)
-
-        hours_ago = minutes_ago // 60
-        if hours_ago == 1:
-            return _('1 hour ago')
-        if hours_ago < 48:
-            return _('%(hours)d hours ago', hours=hours_ago)
-
-        days_ago = hours_ago // 24
-        if days_ago == 1:
-            return _('1 day ago')
-
-        return _('%(days)d days ago', days=days_ago)
+        seconds_ago = -(int(time.time()) - self.creation_timestamp)
+        return flask_babel.format_timedelta(seconds_ago, add_direction=True)
 
     @property
     def last_device(self) -> Optional[str]:
