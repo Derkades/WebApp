@@ -994,6 +994,32 @@ def add_never_play():
     return Response(None, 200)
 
 
+@app.route('/never_play')
+def never_play():
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
+        csrf_token = user.get_csrf()
+        result = conn.execute('SELECT track FROM never_play WHERE user=?',
+                              (user.user_id,)).fetchall()
+        tracks = [track for track, in result]
+
+    return render_template('never_play.jinja2',
+                           csrf_token=csrf_token,
+                           tracks=tracks)
+
+
+@app.route('/remove_never_play', methods=['POST'])
+def remove_never_play():
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
+        user.verify_csrf(request.form['csrf'])
+        track = request.form['track']
+        conn.execute('DELETE FROM never_play WHERE user=? AND track=?',
+                     (user.user_id, track))
+
+    return redirect('/never_play')
+
+
 def get_language() -> str:
     """
     Returns two letter language code, matching a language code in
