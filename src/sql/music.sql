@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS playlist (
 
 CREATE TABLE IF NOT EXISTS track (
     path TEXT NOT NULL UNIQUE PRIMARY KEY,
-    playlist TEXT NOT NULL,
+    playlist TEXT NOT NULL REFERENCES playlist(path) ON DELETE CASCADE,
     duration INTEGER NOT NULL,
     title TEXT NULL,
     album TEXT NULL,
@@ -14,34 +14,30 @@ CREATE TABLE IF NOT EXISTS track (
     track_number INTEGER NULL,
     year INTEGER NULL,
     mtime INTEGER NOT NULL,
-    last_played INTEGER NOT NULL DEFAULT 0,
-    FOREIGN KEY (playlist) REFERENCES playlist(path) ON DELETE CASCADE
+    last_played INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS idx_track_playlist ON track(playlist);
 
 CREATE TABLE IF NOT EXISTS track_artist (
-    track TEXT NOT NULL,
+    track TEXT NOT NULL REFERENCES track(path) ON DELETE CASCADE,
     artist TEXT NOT NULL,
-    FOREIGN KEY (track) REFERENCES track(path) ON DELETE CASCADE,
     UNIQUE (track, artist)
 );
 
 CREATE INDEX IF NOT EXISTS idx_track_artist_track ON track_artist(track);
 
 CREATE TABLE IF NOT EXISTS track_tag (
-    track TEXT NOT NULL,
+    track TEXT NOT NULL REFERENCES track(path) ON DELETE CASCADE,
     tag TEXT NOT NULL,
-    FOREIGN KEY (track) REFERENCES track(path) ON DELETE CASCADE,
     UNIQUE (track, tag)
 );
 
 CREATE INDEX IF NOT EXISTS idx_track_tag_track ON track_tag(track);
 
 CREATE TABLE IF NOT EXISTS radio_track (
-    track TEXT NOT NULL,
-    start_time INTEGER NOT NULL,
-    FOREIGN KEY (track) REFERENCES track(path) ON DELETE CASCADE
+    track TEXT NOT NULL REFERENCES track(path) ON DELETE CASCADE,
+    start_time INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS user (
@@ -53,39 +49,34 @@ CREATE TABLE IF NOT EXISTS user (
 );
 
 CREATE TABLE IF NOT EXISTS user_playlist (
-    user INTEGER NOT NULL,
-    playlist TEXT NOT NULL,
+    user INTEGER NOT NULL REFERENCES user(id) ON DELETE CASCADE,
+    playlist TEXT NOT NULL REFERENCES playlist(path) ON DELETE CASCADE,
     favorite INTEGER DEFAULT 0,
     write INTEGER DEFAULT 0,
-    UNIQUE (user, playlist),
-    FOREIGN KEY (user) REFERENCES user(id) ON DELETE CASCADE,
-    FOREIGN KEY (playlist) REFERENCES playlist(path) ON DELETE CASCADE
+    UNIQUE (user, playlist)
 );
 
 CREATE INDEX IF NOT EXISTS idx_user_playlist_user ON user_playlist(user);
 
 CREATE TABLE IF NOT EXISTS user_lastfm (
-    user INTEGER NOT NULL UNIQUE PRIMARY KEY,
+    user INTEGER NOT NULL UNIQUE PRIMARY KEY REFERENCES user(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
-    key TEXT NOT NULL,
-    FOREIGN KEY (user) REFERENCES user(id) ON DELETE CASCADE
+    key TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS session (
-    user INTEGER NOT NULL,
+    user INTEGER NOT NULL REFERENCES user(id) ON DELETE CASCADE,
     token TEXT NOT NULL UNIQUE,
     creation_date INTEGER NOT NULL, -- Seconds since UNIX epoch
     last_user_agent TEXT NULL,
-    last_address TEXT NULL,
-    FOREIGN KEY (user) REFERENCES user(id) ON DELETE CASCADE
+    last_address TEXT NULL
 );
 
 CREATE TABLE IF NOT EXISTS csrf (
-    user INTEGER NOT NULL,
+    user INTEGER NOT NULL REFERENCES user(id) ON DELETE CASCADE,
     token TEXT NOT NULL UNIQUE,
     creation_date INTEGER NOT NULL, -- Seconds since UNIX epoch
-    UNIQUE(user, token),
-    FOREIGN KEY (user) REFERENCES user(id) ON DELETE CASCADE
+    UNIQUE(user, token)
 );
 
 CREATE TABLE IF NOT EXISTS history (
@@ -99,8 +90,7 @@ CREATE TABLE IF NOT EXISTS history (
 CREATE TABLE IF NOT EXISTS now_playing (
     user INTEGER NOT NULL UNIQUE PRIMARY KEY,
     timestamp INTEGER NOT NULL,
-    track TEXT NOT NULL,
-    FOREIGN KEY (track) REFERENCES track(path) ON DELETE CASCADE
+    track TEXT NOT NULL REFERENCES track(path) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS scanner_log (
