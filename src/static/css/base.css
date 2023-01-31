@@ -129,10 +129,9 @@ body.light button > .icon {
 }
 
 main {
-    background-color: #474747;
-    margin: 1rem;
+    background-color: #171717;
     padding: 1rem;
-    border-radius: var(--border-radius-amount);
+    height: calc(100vh - 2rem);
 }
 
 .icon {
