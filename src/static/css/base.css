@@ -62,6 +62,22 @@ p.secondary {
     font-size: .8em;
 }
 
+button:hover,
+input[type=submit]:hover {
+    transition: transform .05s, background-color .1s;
+}
+
+button:hover,
+input[type=submit]:hover {
+    border: 1px solid white;
+    background-color: rgba(150, 150, 150, 0.7);
+}
+
+button:active,
+input[type=submit]:active {
+    transform: translate(1px, 1px);
+}
+
 select,
 button,
 input[type=submit],
@@ -191,6 +207,8 @@ body.light .icon {
 .homepage-select {
     text-decoration: none;
     color: white;
+    display: block;
+    width: 100%;
 }
 
 .homepage-select:hover {
@@ -199,24 +217,35 @@ body.light .icon {
 }
 
 .homepage-select > div {
+    background-color: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.7);
     display: flex;
-    width: 18.5rem;
     padding: .5rem;
     margin: .5rem;
     border-radius: var(--border-radius-amount);
     box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
-    transition: transform .1s;
+    transition: transform .1s, background-color .1s;
+}
+
+@media screen and (min-width: 30rem) {
+    .homepage-select {
+        width: 20.5rem;
+    }
 }
 
 .homepage-select > div:hover {
-    transform: translate(.5rem, 0);
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: translate(-1px, -1px);
+}
+
+.homepage-select > div:active {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: translate(1px, 1px);
 }
 
 .homepage-select > div > span {
     margin-left: .5rem;
     font-size: 1.5rem;
-
 }
 
 .table {
