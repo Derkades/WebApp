@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS track (
     FOREIGN KEY (playlist) REFERENCES playlist(path) ON DELETE CASCADE
 );
 
+CREATE INDEX IF NOT EXISTS idx_track_playlist ON track(playlist);
+
 CREATE TABLE IF NOT EXISTS track_artist (
     track TEXT NOT NULL,
     artist TEXT NOT NULL,
@@ -25,12 +27,16 @@ CREATE TABLE IF NOT EXISTS track_artist (
     UNIQUE (track, artist)
 );
 
+CREATE INDEX IF NOT EXISTS idx_track_artist_track ON track_artist(track);
+
 CREATE TABLE IF NOT EXISTS track_tag (
     track TEXT NOT NULL,
     tag TEXT NOT NULL,
     FOREIGN KEY (track) REFERENCES track(path) ON DELETE CASCADE,
     UNIQUE (track, tag)
 );
+
+CREATE INDEX IF NOT EXISTS idx_track_tag_track ON track_tag(track);
 
 CREATE TABLE IF NOT EXISTS radio_track (
     track TEXT NOT NULL,
@@ -55,6 +61,8 @@ CREATE TABLE IF NOT EXISTS user_playlist (
     FOREIGN KEY (user) REFERENCES user(id) ON DELETE CASCADE,
     FOREIGN KEY (playlist) REFERENCES playlist(path) ON DELETE CASCADE
 );
+
+CREATE INDEX IF NOT EXISTS idx_user_playlist_user ON user_playlist(user);
 
 CREATE TABLE IF NOT EXISTS user_lastfm (
     user INTEGER NOT NULL UNIQUE PRIMARY KEY,
