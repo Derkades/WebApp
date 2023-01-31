@@ -364,14 +364,8 @@ body.light #loading-overlay {
 }
 
 #youtube-dl-output {
-    white-space: pre-wrap; /* Render \n as <br> */
     min-height: 5rem;
     max-height: 15rem;
-    overflow: auto;
-    border: 1px solid gray;
-    border-radius: var(--border-radius-amount);
-    padding: .5rem;
-    margin-top: .5rem;
 }
 
 .checkbox-with-label {

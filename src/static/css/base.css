@@ -76,16 +76,21 @@ input[type=number],
 input[type=submit],
 input[type=password],
 input[type=checkbox],
-input[type=range] {
+input[type=range],
+.logbox {
     padding: .3rem;
     background-color: rgba(50, 50, 50, 0.7);
-    border: 1px solid black;
+    border: 1px solid rgba(255, 255, 255, 0.6);
     border-radius: var(--border-radius-amount);
     color: white;
     margin-right: .3rem;
     margin-bottom: .3rem;
 }
 
+.logbox {
+    white-space: pre-wrap; /* Render \n as <br> */
+    overflow: auto;
+}
 
 input[type=checkbox] {
     appearance: none; /* No native checkbox design */
