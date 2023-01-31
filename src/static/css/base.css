@@ -196,7 +196,8 @@ a.large {
     width: 100%;
     border-spacing: 0;
     background: #313131;
-    border-radius: var(--border-radius-amount); /* TODO why does border radius not apply to top? */
+    border-radius: var(--border-radius-amount);
+    overflow: hidden; /* prevent top row from overlapping rounded corners */
 }
 
 .table thead tr {
