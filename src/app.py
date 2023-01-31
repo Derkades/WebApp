@@ -1,8 +1,7 @@
-from typing import Any, Optional
+from typing import Any
 import logging
 from pathlib import Path
 from urllib.parse import quote as urlencode
-import random
 import time
 
 from flask import Flask, request, render_template, Response, redirect, send_file
@@ -11,19 +10,15 @@ from flask_babel import _
 
 import auth
 from auth import AuthError, RequestTokenError
-import bing
 import db
 import genius
 import image
 from image import ImageFormat, ImageQuality
 import lastfm
-from metadata import Metadata
 import music
 from music import AudioType, Playlist, Track
-import musicbrainz
 import radio
 from radio import RadioTrack
-import reddit
 import scanner
 import settings
 
@@ -735,6 +730,15 @@ def now_playing():
 
         relpath = request.json['track']
 
+        user_key = lastfm.get_user_key(user)
+
+        if user_key:
+            result = conn.execute('''
+                                  SELECT timestamp FROM now_playing
+                                  WHERE user = ? AND track = ?
+                                  ''', (user.user_id, relpath)).fetchone()
+            previous_update = None if result is None else result[0]
+
         conn.execute('''
                      INSERT INTO now_playing (user, timestamp, track)
                      VALUES (:user_id, :timestamp, :relpath)
@@ -745,17 +749,22 @@ def now_playing():
                       'timestamp': int(time.time()),
                       'relpath': relpath})
 
-        user_key = lastfm.get_user_key(user)
         if not user_key:
             log.info('Skip last.fm now playing, account is not linked')
-            return Response('ok', 200)
+            return Response(None, 200)
+
+        # If now playing has already been sent for this track, only send an update to
+        # last.fm if it was more than 5 minutes ago.
+        if previous_update is not None and int(time.time()) - previous_update < 5*60:
+            log.info('Skip last.fm now playing, already sent recently')
+            return Response(None, 200)
 
         track = Track.by_relpath(conn, relpath)
         meta = track.metadata()
 
     # Scrobble request takes a while, so close database connection first
     lastfm.update_now_playing(user_key, meta)
-    return Response('ok', 200)
+    return Response(None, 200)
 
 
 @app.route('/history_played', methods=['POST'])
@@ -836,7 +845,7 @@ def history():
                                 JOIN track ON now_playing.track = track.path
                               WHERE now_playing.timestamp > ?
                               ''',
-                              (int(time.time()) - 185,))  # JS updates now playing every 3 minutes
+                              (int(time.time()) - 65,))  # JS updates now playing every minute
         now_playing_items = []
         for username, playlist_name, relpath in result:
             track = Track.by_relpath(conn, relpath)

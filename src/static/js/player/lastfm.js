@@ -55,9 +55,9 @@ class LastFM {
 
         console.debug('lastfm | playing, counter:', this.playingCounter, '/', this.requiredPlayingCounter);
 
-        // Send 'Now playing' after 10 seconds, then every 3 minutes
+        // Send 'Now playing' after 5 seconds, then every minute
         // If you modify this, also modify history() in app.py
-        if (this.playingCounter % (3*60) === 10) {
+        if (this.playingCounter % (60) === 5) {
             console.info('lastfm | update now playing');
             await this.updateNowPlaying();
         }

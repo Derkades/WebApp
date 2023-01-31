@@ -1,7 +1,6 @@
 import os
 import base64
 import logging
-import sqlite3
 import time
 from typing import Optional
 from dataclasses import dataclass
@@ -60,7 +59,7 @@ class Session:
 
 @dataclass
 class User:
-    conn: sqlite3.Connection
+    conn: Connection
     user_id: int
     username: str
     admin: bool
@@ -188,7 +187,7 @@ def log_in(conn: Connection, username: str, password: str, user_agent: str, remo
     return token
 
 
-def _verify_token(conn: sqlite3.Connection, token: str) -> Optional[User]:
+def _verify_token(conn: Connection, token: str) -> Optional[User]:
     """
     Verify session token, and return corresponding user
     Args:
@@ -196,7 +195,6 @@ def _verify_token(conn: sqlite3.Connection, token: str) -> Optional[User]:
         token: Session token to verify
     Returns: User object if session token is valid, or None if invalid
     """
-    # TODO does this introduce the possibility of a timing attack?
     result = conn.execute("""
                           SELECT session.rowid, session.creation_date, session.user_agent, session.remote_address, user.id, user.username, user.admin, user_lastfm.name, user_lastfm.key
                           FROM user
@@ -214,9 +212,13 @@ def _verify_token(conn: sqlite3.Connection, token: str) -> Optional[User]:
     return User(conn, user_id, username, admin == 1, session, lastfm_name, lastfm_key)
 
 
-def verify_auth_cookie(conn: sqlite3.Connection, require_admin = False, redirect_to_login = False) -> User:
+def verify_auth_cookie(conn: Connection, require_admin = False, redirect_to_login = False) -> User:
     """
-    Verify auth token sent as cookie, raising AuthError if missing or not valid
+    Verify auth token sent as cookie, raising AuthError if missing or not valid.
+    Args:
+        conn: Read-only database connection
+        require_admin: Whether logging in as a non-admin account should be treated as an authentication failure
+        redirect_to_login: Whether the user should sent a redirect if authentication failed, instead of showing a 403 page
     """
     if 'token' not in request.cookies:
         log.warning('No auth token')

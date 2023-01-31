@@ -46,18 +46,14 @@ def thumbnail(input_img: Path | bytes | Callable,
               img_format: ImageFormat,
               img_quality: ImageQuality,
               square: bool) -> bytes:
-    # TODO update doc
     """
     Generate thumbnail, making use of cache.
     Parameters:
         input_img: Input image, either a path, image bytes, or a function that returns image bytes.
-        cache_id: A cache identifier string to uniquely identify this image. If a cache object exists
-                  with this cache id (and the same thumbnail settings), a thumbnail is returned from cache.
-        thumb_format: Image format, 'avif' or 'webp'
-        thumb_resolution: Thumbnail height and width. Note that the resulting thumbnail may not necessarily be
-                          square, it will still have the same aspect ratio as the original image unless square=True is set.
-                          Set to None to choose a suitable resolution based on quality
-        thumb_quality: Quality level, 'high', 'low' or 'verylow'
+        cache_key: A cache identifier string to uniquely identify this image. If a cache object exists
+                   with this cache id (and the same thumbnail settings), a thumbnail is returned from cache.
+        img_format: Image format, a value from the ImageFormat enum
+        img_quality: Image quality, a value from the ImageQuality enum
         square: Whether the thumbnail should be cropped to 1:1 aspect ratio
     Returns: Compressed thumbnail image bytes.
     """

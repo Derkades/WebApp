@@ -41,21 +41,21 @@ def _search(title: str) -> str | None:
 
 
 def _html_tree_to_lyrics(elements: list[PageElement], level=0) -> str:
-    lyrics = ''
+    lyrics_str = ''
     for element in elements:
         if isinstance(element, NavigableString):
             # print(level, '\tstr\t', str(element))
-            lyrics += html.escape(str(element))
+            lyrics_str += html.escape(str(element))
         elif isinstance(element, Tag):
             # print(level, '\ttag\t', element.name, '\t', str(element))
             if element.name == 'br':
-                lyrics += '<br>'
+                lyrics_str += '<br>'
             else:
                 # Probably an element like <a>, <p>, <i> with important text inside it.
-                lyrics += _html_tree_to_lyrics(element.contents, level + 1)
+                lyrics_str += _html_tree_to_lyrics(element.contents, level + 1)
         else:
             log.warning('Encountered unexpected element type: %s', type(element))
-    return lyrics
+    return lyrics_str
 
 
 def _extract_lyrics(genius_url: str) -> str | None:
