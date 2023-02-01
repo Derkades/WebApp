@@ -188,14 +188,12 @@ class Track:
         return None
 
     def get_cover_thumbnail(self, meme: bool, img_format: ImageFormat, img_quality: ImageQuality) -> bytes:
-        cache_key = self.relpath
-        if meme:
-            cache_key += 'meme'
-        square = not meme
+        cache_key = self.relpath + str(self.mtime) + str(meme)
 
         def get_img_function():
             return self.get_cover(meme)
 
+        square = not meme
         return image.thumbnail(get_img_function, cache_key, img_format, img_quality, square)
 
     def _get_ffmpeg_metadata_options(self):
