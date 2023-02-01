@@ -235,3 +235,15 @@ def verify_auth_cookie(conn: Connection, require_admin = False, redirect_to_logi
         raise AuthError(AuthErrorReason.ADMIN_REQUIRED, redirect_to_login)
 
     return user
+
+
+def prune_old_csrf_tokens(conn: Connection) -> int:
+    """
+    Prune old CSRF tokens
+    Args:
+        conn: Read-write database connection
+    Returns: Number of deleted tokens
+    """
+    delete_before = int(time.time()) - settings.csrf_validity_seconds
+    return conn.execute('DELETE FROM csrf WHERE creation_date < ?',
+                        (delete_before,)).rowcount

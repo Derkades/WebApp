@@ -1,7 +1,9 @@
 #!/bin/bash
 set -e
 python db.py
-python scanner.py
+manage scan
+manage prune-csrf
+
 if [ "$MUSIC_ENV" = "dev" ]
 then
     # During development, a volume is mounted into /app. This means that the

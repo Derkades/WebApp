@@ -150,10 +150,3 @@ def scan(conn: Connection) -> None:
         scan_tracks(conn, playlist)
     duration_ms = (time.time_ns() - start_time_ns) // 1000000
     log.info('Done scanning all playlists, took %sms', duration_ms)
-
-
-if __name__ == '__main__':
-    import logconfig
-    logconfig.apply()
-    with db.connect() as connection:
-        scan(connection)

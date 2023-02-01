@@ -114,6 +114,13 @@ def handle_scan(args):
         scanner.scan(conn)
 
 
+def handle_prune_csrf(args):
+    import auth
+    with db.connect() as conn:
+        count = auth.prune_old_csrf_tokens(conn)
+        log.info('Deleted %s old CSRF tokens', count)
+
+
 if __name__ == '__main__':
     import logconfig
     logconfig.apply()
@@ -144,6 +151,9 @@ if __name__ == '__main__':
 
     scan = subparsers.add_parser('scan', help='scan playlists for changes')
     scan.set_defaults(func=handle_scan)
+
+    prune_csrf = subparsers.add_parser('prune-csrf', help='delete old csrf tokens')
+    prune_csrf.set_defaults(func=handle_prune_csrf)
 
     args = parser.parse_args()
     args.func(args)
