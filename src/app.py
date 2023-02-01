@@ -3,6 +3,7 @@ import logging
 from pathlib import Path
 from urllib.parse import quote as urlencode
 import time
+import bcrypt
 
 from flask import Flask, request, render_template, Response, redirect, send_file
 from flask_babel import Babel
@@ -1018,6 +1019,57 @@ def remove_never_play():
                      (user.user_id, track))
 
     return redirect('/never_play')
+
+
+@app.route('/users')
+def users():
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn, require_admin=True)
+
+        result = conn.execute('SELECT username, admin, primary_playlist FROM user')
+        users = [{'username': username,
+                  'admin': admin,
+                  'primary_playlist': primary_playlist}
+                 for username, admin, primary_playlist in result]
+
+    return render_template('users.jinja2',
+                           users=users)
+
+
+@app.route('/users_edit', methods=['GET', 'POST'])
+def users_edit():
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn, require_admin=True)
+
+        if request.method == 'GET':
+            csrf_token = user.get_csrf()
+            username = request.args['username']
+
+            return render_template('users_edit.jinja2',
+                                   csrf_token=csrf_token,
+                                   username=username)
+        else:
+            user.verify_csrf(request.form['csrf'])
+            username = request.form['username']
+            new_username = request.form['new_username']
+            new_password = request.form['new_password']
+
+            if new_password != '':
+                hashed_password = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt())
+                conn.execute('UPDATE user SET password=? WHERE username=?',
+                             (hashed_password, username))
+                # TODO Join does not work in DELETE FROM query?
+                conn.execute('''
+                             DELETE FROM session
+                                 JOIN user ON session.user = user.id
+                             WHERE user.username = ?
+                             ''', (username,))
+
+            if new_username != username:
+                conn.execute('UPDATE user SET username=? WHERE username=?',
+                             (new_username, username))
+
+            return redirect('/users')
 
 
 def get_language() -> str:

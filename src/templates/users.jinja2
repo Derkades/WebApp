@@ -1,0 +1,47 @@
+{% extends "base.jinja2" %}
+
+{% block title %}
+    {% trans %}User management{% endtrans %}
+{% endblock title %}
+
+{% block content %}
+    <main>
+        {{ page_heading(gettext('User management')) }}
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="icon-col">{% trans %}Username{% endtrans %}</th>
+                    <th>{% trans %}Admin{% endtrans %}</th>
+                    <th>{% trans %}Primary playlist{% endtrans %}</th>
+                    <th>{% trans %}Edit{% endtrans %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>
+                            {{ user.username }}
+                        </td>
+                        <td>
+                            {% if user.admin  %}
+                                {% trans %}Yes{% endtrans %}
+                            {% else %}
+                                {% trans%}No{% endtrans %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ user.primary_playlist }}
+                        </td>
+                        <td>
+                            <form action="/users_edit">
+                                <input type="hidden" name="username" value="{{ user.username }}">
+                                <input type="submit" value="{% trans %}Edit{% endtrans %}">
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+{% endblock content %}
