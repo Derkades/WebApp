@@ -12,6 +12,8 @@ from flask import request
 import flask_babel
 from flask_babel import _
 
+import settings
+
 
 log = logging.getLogger('app.auth')
 
@@ -91,9 +93,9 @@ class User:
         """
         Verify request token, raising RequestTokenException if not valid
         """
-        week_ago = int(time.time()) - 3600
-        result = self.conn.execute('SELECT token FROM session WHERE user=? AND token=? AND creation_date > ?',
-                                   (self.user_id, token, week_ago))
+        min_timestamp = int(time.time()) - settings.csrf_validity_seconds
+        result = self.conn.execute('SELECT token FROM csrf WHERE user=? AND token=? AND creation_date > ?',
+                                   (self.user_id, token, min_timestamp)).fetchone()
         if result is None:
             raise RequestTokenError()
 

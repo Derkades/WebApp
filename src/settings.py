@@ -20,6 +20,8 @@ def getenv(key: str, default: Optional[str]) -> str:
         raise ValueError('Required environment variable ' + key + ' not configured.')
 
 
+csrf_validity_seconds = 3600
+
 user_agent = 'Super fancy music player (https://github.com/DanielKoomen/WebApp/)'
 ffmpeg_loglevel = getenv('MUSIC_FFMPEG_LOGLEVEL', 'info')
 music_dir = getenv('MUSIC_MUSIC_DIR', '/music')
