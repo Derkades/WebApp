@@ -66,7 +66,7 @@ def handle_token_error(_err: RequestTokenError):
 
 
 @app.route('/')
-def home():
+def route_home():
     """
     Home page, with links to file manager and music player
     """
@@ -76,7 +76,7 @@ def home():
 
 
 @app.route('/login', methods=['GET', 'POST'])
-def login():
+def route_login():
     """
     Login route. Serve login page for GET requests, and accepts password input for POST requests.
     If the provided password is invalid, the login template is rendered with invalid_password=True
@@ -119,7 +119,7 @@ def login():
 
 
 @app.route('/player')
-def player():
+def route_player():
     """
     Main player page. Serves player.jinja2 template file.
     """
@@ -141,7 +141,7 @@ PLAYER_JS = pack_js(Path('static', 'js', 'player'))
 
 
 @app.route('/player.js')
-def player_js():
+def route_player_js():
     if settings.dev:
         # If debug is enabled, regenerate JS every request
         global PLAYER_JS
@@ -151,7 +151,7 @@ def player_js():
 
 
 @app.route('/get_csrf')
-def get_csrf():
+def route_get_csrf():
     """
     Get CSRF token
     """
@@ -162,7 +162,7 @@ def get_csrf():
 
 
 @app.route('/choose_track', methods=['GET'])
-def choose_track():
+def route_choose_track():
     """
     Choose random track from the provided playlist directory.
     """
@@ -183,7 +183,7 @@ def choose_track():
 
 
 @app.route('/get_track')
-def get_track() -> Response:
+def route_get_track() -> Response:
     """
     Get transcoded audio for the given track path.
     """
@@ -214,7 +214,7 @@ def get_track() -> Response:
 
 
 @app.route('/get_album_cover')
-def get_album_cover() -> Response:
+def route_get_album_cover() -> Response:
     """
     Get album cover image for the provided track path.
     """
@@ -234,12 +234,12 @@ def get_album_cover() -> Response:
 
 
 @app.route('/get_lyrics')
-def get_lyrics():
+def route_get_lyrics():
     """
     Get lyrics for the provided track path.
     """
     with db.connect(read_only=True) as conn:
-        user = auth.verify_auth_cookie(conn)
+        auth.verify_auth_cookie(conn)
 
         track = Track.by_relpath(conn, request.args['path'])
         meta = track.metadata()
@@ -257,7 +257,7 @@ def get_lyrics():
 
 
 @app.route('/ytdl', methods=['POST'])
-def ytdl():
+def route_ytdl():
     """
     Use yt-dlp to download the provided URL to a playlist directory
     """
@@ -290,7 +290,7 @@ def ytdl():
 
 
 @app.route('/track_list')
-def track_list():
+def route_track_list():
     """
     Return list of playlists and tracks.
     """
@@ -331,7 +331,7 @@ def track_list():
 
 
 @app.route('/scan_music', methods=['POST'])
-def scan_music():
+def route_scan_music():
     """
     Scans all playlists for new music
     """
@@ -345,7 +345,7 @@ def scan_music():
 
 
 @app.route('/update_metadata', methods=['POST'])
-def update_metadata():
+def route_update_metadata():
     """
     Endpoint to update track metadata
     """
@@ -371,7 +371,7 @@ def update_metadata():
 
 
 @app.route('/raphson')
-def raphson() -> Response:
+def route_raphson() -> Response:
     """
     Serve raphson logo image
     """
@@ -382,7 +382,7 @@ def raphson() -> Response:
 
 
 @app.route('/files')
-def files():
+def route_files():
     """
     File manager
     """
@@ -448,7 +448,7 @@ def check_filename(name: str) -> None:
 
 
 @app.route('/playlists_create', methods=['POST'])
-def playlists_create():
+def route_playlists_create():
     """
     Form target to create playlist, called from /playlists page
     """
@@ -476,7 +476,7 @@ def playlists_create():
 
 
 @app.route('/playlists_share', methods=['GET', 'POST'])
-def playlists_share():
+def route_playlists_share():
     if request.method == 'GET':
         with db.connect(read_only=True) as conn:
             auth.verify_auth_cookie(conn)
@@ -514,7 +514,7 @@ def playlists_share():
 
 
 @app.route('/files_upload', methods=['POST'])
-def files_upload():
+def route_files_upload():
     """
     Form target to upload file, called from file manager
     """
@@ -542,7 +542,7 @@ def files_upload():
 
 
 @app.route('/files_rename', methods=['GET', 'POST'])
-def files_rename():
+def route_files_rename():
     """
     Page and form target to rename file
     """
@@ -587,7 +587,7 @@ def files_rename():
 
 
 @app.route('/files_mkdir', methods=['POST'])
-def files_mkdir():
+def route_files_mkdir():
     """
     Create directory, then enter it
     """
@@ -608,7 +608,7 @@ def files_mkdir():
 
 
 @app.route('/files_download')
-def files_download():
+def route_files_download():
     """
     Download track
     """
@@ -619,7 +619,7 @@ def files_download():
 
 
 @app.route('/account')
-def account():
+def route_account():
     """
     Account information page
     """
@@ -639,7 +639,7 @@ def account():
 
 
 @app.route('/change_password_form', methods=['POST'])
-def change_password_form():
+def route_change_password_form():
     """
     Form target to change password, called from /account page
     """
@@ -665,7 +665,7 @@ def radio_track_response(track: RadioTrack):
 
 
 @app.route('/radio_current')
-def radio_current():
+def route_radio_current():
     """
     Endpoint that returns information about the current radio track
     """
@@ -676,7 +676,7 @@ def radio_current():
 
 
 @app.route('/radio_next')
-def radio_next():
+def route_radio_next():
     """
     Endpoint that returns information about the next radio track
     """
@@ -687,7 +687,7 @@ def radio_next():
 
 
 @app.route('/radio')
-def radio_home():
+def route_radio_home():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         csrf_token=user.get_csrf()
@@ -696,7 +696,7 @@ def radio_home():
 
 
 @app.route('/lastfm_callback')
-def lastfm_callback():
+def route_lastfm_callback():
     # After allowing access, last.fm sends the user to this page with an
     # authentication token. The authentication token can only be used once,
     # to obtain a session key. Session keys are stored in the database.
@@ -710,7 +710,7 @@ def lastfm_callback():
 
 
 @app.route('/lastfm_connect', methods=['POST'])
-def lastfm_connect():
+def route_lastfm_connect():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         # This form does not have a CSRF token, because the user is known
@@ -724,7 +724,7 @@ def lastfm_connect():
 
 
 @app.route('/now_playing', methods=['POST'])
-def now_playing():
+def route_now_playing():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
@@ -769,7 +769,7 @@ def now_playing():
 
 
 @app.route('/history_played', methods=['POST'])
-def history_played():
+def route_history_played():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
@@ -809,7 +809,7 @@ def history_played():
 
 
 @app.route('/history')
-def history():
+def route_history():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
 
@@ -893,7 +893,7 @@ def history():
 
 
 @app.route('/playlist_stats')
-def playlist_stats():
+def route_playlist_stats():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
         playlists = music.playlists(conn)
@@ -906,7 +906,7 @@ def playlist_stats():
 
 
 @app.route('/playlists')
-def playlists():
+def route_playlists():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         csrf_token = user.get_csrf()
@@ -922,7 +922,7 @@ def playlists():
 
 
 @app.route('/playlists_favorite', methods=['POST'])
-def playlists_favorite():
+def route_playlists_favorite():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.form['csrf'])
@@ -940,7 +940,7 @@ def playlists_favorite():
 
 
 @app.route('/playlists_set_primary', methods=['POST'])
-def playlists_set_primary():
+def route_playlists_set_primary():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.form['csrf'])
@@ -953,7 +953,7 @@ def playlists_set_primary():
 
 
 @app.route('/download')
-def download():
+def route_download():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
         playlists = music.playlists(conn)
@@ -963,7 +963,7 @@ def download():
 
 
 @app.route('/recent_changes')
-def recent_changes():
+def route_recent_changes():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
 
@@ -985,7 +985,7 @@ def recent_changes():
 
 
 @app.route('/add_never_play', methods=['POST'])
-def add_never_play():
+def route_add_never_play():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
@@ -996,7 +996,7 @@ def add_never_play():
 
 
 @app.route('/never_play')
-def never_play():
+def route_never_play():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         csrf_token = user.get_csrf()
@@ -1010,7 +1010,7 @@ def never_play():
 
 
 @app.route('/remove_never_play', methods=['POST'])
-def remove_never_play():
+def route_remove_never_play():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.form['csrf'])
@@ -1022,7 +1022,7 @@ def remove_never_play():
 
 
 @app.route('/users')
-def users():
+def route_users():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn, require_admin=True)
 
@@ -1037,7 +1037,7 @@ def users():
 
 
 @app.route('/users_edit', methods=['GET', 'POST'])
-def users_edit():
+def route_users_edit():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn, require_admin=True)
 
