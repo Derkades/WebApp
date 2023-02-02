@@ -61,13 +61,13 @@
                     </div>
                 </div>
 
+                {{ icon_button('home', 'button-home', title=gettext('Open home page in a new tab')) }}
                 {{ icon_button('skip-previous', 'button-prev', title=gettext('Go to beginning of current track, or previous track')) }}
                 {{ icon_button('play', 'button-play', title=gettext('Play')) }}
                 {{ icon_button('pause', 'button-pause', title=gettext('Pause')) }}
                 {{ icon_button('skip-next', 'button-next', title=gettext('Skip to next track')) }}
                 {{ icon_button('microphone', 'button-lyrics', title=gettext('Show lyrics instead of album cover')) }}
                 {{ icon_button('album', 'button-album', title=gettext('Show album cover instead of lyrics')) }}
-                {# {{ icon_button('folder-multiple', 'open-file-manager', title=gettext('Open file manager in a new tab')) }} #}
                 {{ icon_button('cancel', 'button-never-play', title=gettext('Never play again')) }}
                 {{ icon_button('pencil', 'button-edit', title=gettext('Open metadata editor')) }}
                 {{ icon_button('delete', 'button-delete-track', title=gettext('Delete currently playing track from playlist')) }}

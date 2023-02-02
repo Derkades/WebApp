@@ -20,6 +20,8 @@ document.addEventListener("DOMContentLoaded", () => {
     applyTheme();
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
 
+    document.getElementById('button-home').addEventListener('click', () => window.open('/', '_blank'));
+
     // Playback controls
     document.getElementById('button-prev').addEventListener('click', () => queue.previous());
     document.getElementById('button-play').addEventListener('click', play);
@@ -86,9 +88,6 @@ document.addEventListener("DOMContentLoaded", () => {
     })());
     document.getElementById('settings-queue-size').addEventListener('input', () => queue.fill());
     document.getElementById('settings-theme').addEventListener('input', applyTheme);
-
-    // File manager button
-    // document.getElementById('open-file-manager').addEventListener('click', () => window.open('/files', '_blank'));
 
     // Queue overlay
     document.getElementById('browse-filter-playlist').addEventListener('input', () => browse.updateCurrentView());
