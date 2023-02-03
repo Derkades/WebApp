@@ -95,7 +95,7 @@ function onTrackChange() {
     updateTrackHtml();
     updateMediaSession();
     updateMediaTrackInfo();
-    lastfm.signalNewTrack();
+    history.signalNewTrack();
 }
 
 function seek(delta) {

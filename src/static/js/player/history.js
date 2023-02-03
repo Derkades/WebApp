@@ -1,4 +1,4 @@
-class LastFM {
+class History {
     /** @type {Track} */
     currentlyPlayingTrack;
     /** @type {boolean} */
@@ -14,18 +14,14 @@ class LastFM {
         this.currentlyPlayingTrack = null;
     }
 
-    init() {
-        setInterval(() => this.update(), 1_000);
-    };
-
     signalNewTrack() {
         const track = queue.currentTrack.track();
         if (track === null) {
-            console.warn('lastfm | missing track info');
+            console.warn('history | missing track info');
             this.currentlyPlayingTrack = false;
             return;
         }
-        console.info('lastfm | track changed');
+        console.info('history | track changed');
         this.currentlyPlayingTrack = track;
         this.hasScrobbled = false;
         this.playingCounter = 0;
@@ -36,34 +32,34 @@ class LastFM {
 
     async update() {
         if (this.currentlyPlayingTrack === null) {
-            console.debug('lastfm | no current track');
+            console.debug('history | no current track');
             return;
         }
 
         const audioElem = getAudioElement();
         if (audioElem === null) {
-            console.warn('lastfm | no audio element');
+            console.warn('history | no audio element');
             return;
         }
 
         if (audioElem.paused) {
-            console.debug('lastfm | audio element paused');
+            console.debug('history | audio element paused');
             return;
         }
 
         this.playingCounter++;
 
-        console.debug('lastfm | playing, counter:', this.playingCounter, '/', this.requiredPlayingCounter);
+        console.debug('history | playing, counter:', this.playingCounter, '/', this.requiredPlayingCounter);
 
         // Send 'Now playing' after 5 seconds, then every minute
         // If you modify this, also modify history() in app.py
         if (this.playingCounter % (60) === 5) {
-            console.info('lastfm | update now playing');
+            console.info('history | update now playing');
             await this.updateNowPlaying();
         }
 
         if (!this.hasScrobbled && this.playingCounter > this.requiredPlayingCounter) {
-            console.info('lastfm | scrobble');
+            console.info('history | played');
             this.hasScrobbled = true;
             await this.scrobble();
         }
@@ -84,4 +80,8 @@ class LastFM {
     }
 }
 
-const lastfm = new LastFM();
+const history = new History();
+
+document.addEventListener('DOMContentLoaded', () => {
+    setInterval(() => history.update(), 1_000);
+});

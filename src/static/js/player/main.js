@@ -169,7 +169,6 @@ document.addEventListener("DOMContentLoaded", () => {
         jsonPost('/player_copy_track', {track: queue.currentTrack.trackPath}, onError)
     });
 
-    lastfm.init();
     queue.next();
     setInterval(updateMediaSession, 1000);
     initTrackList();
