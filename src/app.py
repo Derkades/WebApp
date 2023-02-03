@@ -23,27 +23,21 @@ import radio
 from radio import RadioTrack
 import scanner
 import settings
+from packer import PackedAsset
 
 
 app = Flask(__name__, template_folder='templates')
 babel = Babel(app)
 log = logging.getLogger('app')
-assets_dir = Path('static')
-raphson_png_path = Path(assets_dir, 'raphson.png')
+static_dir = Path('static')
+raphson_png_path = Path(static_dir, 'raphson.png')
+player_js = PackedAsset(Path(static_dir, 'js', 'player'))
 
 
 LANGUAGES = (
     ('en', 'English'),
     ('nl', 'Nederlands'),
 )
-
-
-def pack_js(base_dir: Path):
-    packed_js = b''
-    for js_path in sorted(base_dir.iterdir()):
-        with open(js_path, 'rb') as js_file:
-            packed_js += js_file.read()
-    return packed_js
 
 
 @app.errorhandler(AuthError)
@@ -138,17 +132,9 @@ def route_player():
                            primary_playlist=primary_playlist)
 
 
-PLAYER_JS = pack_js(Path('static', 'js', 'player'))
-
-
 @app.route('/player.js')
 def route_player_js():
-    if settings.dev:
-        # If debug is enabled, regenerate JS every request
-        global PLAYER_JS
-        PLAYER_JS = pack_js(Path('static', 'js', 'player'))
-
-    return Response(PLAYER_JS, content_type='application/javascript')
+    return Response(player_js.get_bytes(), content_type='application/javascript')
 
 
 @app.route('/get_csrf')
