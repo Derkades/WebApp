@@ -15,41 +15,14 @@ const state = {
     loadingOverlayHidden: false,
 };
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener('DOMContentLoaded', () => {
     syncCookiesWithInputs();
     applyTheme();
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
 
     document.getElementById('button-home').addEventListener('click', () => window.open('/', '_blank'));
 
-    // Playback controls
-    document.getElementById('button-prev').addEventListener('click', () => queue.previous());
-    document.getElementById('button-play').addEventListener('click', play);
-    document.getElementById('button-pause').addEventListener('click', pause);
-    document.getElementById('button-next').addEventListener('click', () => queue.next());
     document.getElementById('settings-volume').addEventListener('input', () => onVolumeChange());
-
-    // Progress bar seeking
-    const onMove = event => {
-        seekToFloat((event.clientX - progressBar.offsetLeft) / progressBar.offsetWidth);
-        event.preventDefault(); // Prevent accidental text selection
-    };
-    const onUp = () => {
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
-    };
-    const progressBar = document.getElementById('outer-progress-bar');
-    progressBar.addEventListener('mousedown', event => {
-        seekToFloat((event.clientX - progressBar.offsetLeft) / progressBar.offsetWidth);
-
-        // Keep updating while mouse is moving
-        document.addEventListener('mousemove', onMove);
-
-        // Unregister events on mouseup event
-        document.addEventListener('mouseup', onUp);
-
-        event.preventDefault(); // Prevent accidental text selection
-    });
 
     // Queue
     queue.fill();
@@ -122,16 +95,6 @@ document.addEventListener("DOMContentLoaded", () => {
         console.warn('Editor button missing from page, this is normal if you are not an admin user');
     }
 
-    // Hotkeys
-    document.addEventListener('keydown', event => handleKey(event.key));
-
-    // Media session events
-    navigator.mediaSession.setActionHandler('play', play);
-    navigator.mediaSession.setActionHandler('pause', pause);
-    navigator.mediaSession.setActionHandler('seekto', callback => seekToSeconds(callback.seekTime));
-    navigator.mediaSession.setActionHandler('previoustrack', () => queue.previous());
-    navigator.mediaSession.setActionHandler('nexttrack', () => queue.next());
-
     // Delete track button
     const deleteButton = document.getElementById('button-delete-track');
     if (deleteButton !== null) {
@@ -167,9 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     queue.next();
-    setInterval(updateMediaSession, 1000);
     initTrackList();
-
     setInterval(refreshCsrfToken, 15*60*1000);
 });
 

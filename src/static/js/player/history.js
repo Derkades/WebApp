@@ -37,10 +37,6 @@ class History {
         }
 
         const audioElem = getAudioElement();
-        if (audioElem === null) {
-            console.warn('history | no audio element');
-            return;
-        }
 
         if (audioElem.paused) {
             console.debug('history | audio element paused');

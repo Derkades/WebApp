@@ -1,108 +1,60 @@
-function play() {
-    const audioElem = getAudioElement();
-    if (audioElem == null) {
-        return;
-    }
-    audioElem.play().then(updateMediaSession);
+/**
+ * Called when player has skipped to a different track. Also calls onPlaybackStateChange().
+ */
+function onPlaybackTrackChange() {
+    replaceAudioSource();
+    replaceAlbumImages();
+    replaceLyrics();
+    replaceTrackDisplayTitle();
+    updateWritablePlaylistButtons();
+
+    history.signalNewTrack();
+
+    // Update mediaSession
+    updateMediaSessionTrack();
+
+    onPlaybackStateChange();
 }
 
-function pause() {
+/**
+ * Called periodically and in other cases where the playback state has
+ * changed, like seeking and pausing.
+ */
+function onPlaybackStateChange() {
     const audioElem = getAudioElement();
-    if (audioElem == null) {
-        return;
-    }
-    audioElem.pause()
-    updateMediaSession()
-}
 
-function playPause() {
-    const audioElem = getAudioElement();
-    if (audioElem == null) {
-        return;
-    }
     if (audioElem.paused) {
-        play();
+        document.getElementById('button-pause').classList.add('hidden');
+        document.getElementById('button-play').classList.remove('hidden');
     } else {
-        pause();
-    }
-}
-
-// Called periodically (frequently). Also called manually on some events like play/pause/seek.
-function updateMediaSession() {
-    const audioElem = getAudioElement();
-
-    const oldState = navigator.mediaSession.playbackState;
-    const newState = audioElem == null ? 'none' : (audioElem.paused ? 'paused' : 'playing');
-
-    if (newState != oldState) {
-        navigator.mediaSession.playbackState = newState;
-        if (newState == 'playing') {
-            document.getElementById('button-play').style.display = 'none';
-            document.getElementById('button-pause').style.display = '';
-        } else {
-            document.getElementById('button-pause').style.display = 'none';
-            document.getElementById('button-play').style.display = '';
-        }
+        document.getElementById('button-pause').classList.remove('hidden');
+        document.getElementById('button-play').classList.add('hidden');
     }
 
-    if (audioElem != null && isFinite(audioElem.duration) && isFinite(audioElem.currentTime) && isFinite(audioElem.playbackRate)) {
-        navigator.mediaSession.setPositionState({
-            duration: audioElem.duration,
-            playbackRate: audioElem.playbackRate,
-            position: audioElem.currentTime,
-        });
+    console.log(audioElem.currentTime, audioElem.duration);
 
-        const current = secondsToString(Math.floor(audioElem.currentTime));
-        const max = secondsToString(Math.floor(audioElem.duration));
+    // Update seek bar
+    if (isFinite(audioElem.currentTime) && isFinite(audioElem.duration)) {
+        const current = secondsToString(Math.round(audioElem.currentTime));
+        const max = secondsToString(Math.round(audioElem.duration));
         const percentage = (audioElem.currentTime / audioElem.duration) * 100;
 
         document.getElementById('progress-bar').style.width = percentage + '%';
         document.getElementById('progress-time-current').innerText = current;
-        if (newState != oldState && newState == 'playing') {
-            // TODO move to updateMediaTrackInfo()
-            document.getElementById('progress-time-duration').innerText = max;
-        }
-    } else {
-        navigator.mediaSession.setPositionState({});
-        document.getElementById('progress-bar').style.width = '0';
-    }
-}
-
-// Called on track change
-function updateMediaTrackInfo() {
-    if (queue.currentTrack === null) {
-        console.warn('Ignoring call to updateMediaTrackInfo(), queue.currentTrack is null');
-        return;
+        document.getElementById('progress-time-duration').innerText = max;
     }
 
-    const track = queue.currentTrack.track();
-    if (track === null) {
-        console.warn('Not updating mediaSession, track info is null');
-        return;
-    }
-    navigator.mediaSession.metadata = new MediaMetadata({
-        title: track.title !== null ? track.title : track.display,
-        album: track.album !== null ? track.album : 'Unknown Album',
-        artist: track.artists !== null ? track.artists.join(' & ') : 'Unknown Artist',
-        // For some unknown reason this does not work everywhere. For example, it works on Chromium
-        // mobile and desktop, but not the KDE media player widget with Firefox or Chromium.
-        // Firefox mobile doesn't seem to support the MediaSession API at all.
-        artwork: [{src: queue.currentTrack.imageBlobUrl}],
-    });
+    // Update mediaSession
+    updateMediaSessionState();
 }
 
-function onTrackChange() {
-    updateTrackHtml();
-    updateMediaSession();
-    updateMediaTrackInfo();
-    history.signalNewTrack();
-}
+document.addEventListener('DOMContentLoaded', () => {
+    setInterval(onPlaybackStateChange, 1000);
+});
 
 function seek(delta) {
     const audioElem = getAudioElement();
-    if (audioElem == null) {
-        return;
-    }
+
     const newTime = audioElem.currentTime + delta;
     if (newTime < 0) {
         audioElem.currentTime = 0;
@@ -112,38 +64,7 @@ function seek(delta) {
         audioElem.currentTime = newTime;
     }
 
-    updateMediaSession();
-}
-
-/**
- * Seek to position in song, number 0 to 1
- * @param {number} position
- */
-function seekToFloat(position) {
-    const audioElem = getAudioElement();
-    if (audioElem == null) {
-        return;
-    }
-
-    audioElem.currentTime = position * audioElem.duration;
-
-    updateMediaSession();
-}
-
-//
-/**
- * Seek to position in song, current time in seconds
- * @param {number} position
- */
-function seekToSeconds(position) {
-    const audioElem = getAudioElement();
-    if (audioElem == null) {
-        return;
-    }
-
-    audioElem.currentTime = position;
-
-    updateMediaSession();
+    onPlaybackStateChange();
 }
 
 function getTransformedVolume(volumeZeroToHundred) {
@@ -167,9 +88,7 @@ function onVolumeChange() {
     }
 
     const audioElem = getAudioElement();
-    if (audioElem !== null) {
-        audioElem.volume = getTransformedVolume(volume);
-    }
+    audioElem.volume = getTransformedVolume(volume);
 }
 
 /**
@@ -177,17 +96,6 @@ function onVolumeChange() {
  */
 function getAudioElement() {
     return document.getElementById('audio');
-}
-
-/**
- * Replace audio player, album cover, and lyrics according to current track info
- */
-function updateTrackHtml() {
-    replaceAudioSource();
-    replaceAlbumImages();
-    replaceLyrics();
-    replaceTrackDisplayTitle();
-    updateWritablePlaylistButtons();
 }
 
 

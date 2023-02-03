@@ -16,7 +16,13 @@ function handleKey(key) {
             checkboxes[keyInt-1].checked ^= 1;
         }
     } else if (key === 'p' || key === ' ') {
-        playPause();
+        const audioElem = getAudioElement();
+        if (audioElem.paused) {
+            audioElem.play().then(onPlaybackStateChange);
+        } else {
+            audioElem.pause();
+            onPlaybackStateChange();
+        }
     } else if (key === 'ArrowLeft') {
         queue.previous();
     } else if (key === 'ArrowRight') {
@@ -35,3 +41,7 @@ function handleKey(key) {
         console.log('Unhandled keypress', key);
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('keydown', event => handleKey(event.key));
+});

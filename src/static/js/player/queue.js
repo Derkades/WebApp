@@ -228,14 +228,6 @@ class Queue {
     };
 
     previous() {
-        const audioElem = getAudioElement();
-
-        // Skip to beginning of current track first
-        if (audioElem !== null && (audioElem.currentTime > 15 || this.previousTracks.length == 0)) {
-            audioElem.currentTime = 0;
-            return;
-        }
-
         if (this.previousTracks.length == 0) {
             return;
         }
@@ -245,7 +237,7 @@ class Queue {
         // Replace current track with last track in history
         this.currentTrack = this.previousTracks.pop();
 
-        onTrackChange();
+        onPlaybackTrackChange();
         this.updateHtml();
     };
 
@@ -271,7 +263,7 @@ class Queue {
         // Replace current track with first item from queue
         this.currentTrack = this.queuedTracks.shift();
 
-        onTrackChange();
+        onPlaybackTrackChange();
         this.fill();
     };
 
