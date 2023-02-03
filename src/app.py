@@ -1089,6 +1089,10 @@ def route_player_copy_track():
             return Response(_('No write permission for playlist: %(playlist)s', playlist=playlist.name), 200)
 
         track = Track.by_relpath(conn, request.json['track'])
+
+        if track.playlist == playlist.name:
+            return Response(_('Track is already in this playlist'))
+
         shutil.copy(track.path, playlist.path)
 
         scanner.scan_tracks(conn, playlist.name)
