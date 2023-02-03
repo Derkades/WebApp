@@ -122,9 +122,6 @@ document.addEventListener("DOMContentLoaded", () => {
         console.warn('Editor button missing from page, this is normal if you are not an admin user');
     }
 
-    // Dialogs
-    dialog.registerEvents();
-
     // Hotkeys
     document.addEventListener('keydown', event => handleKey(event.key));
 

@@ -19,7 +19,7 @@ class Browse {
     };
 
     open() {
-        dialog.open('dialog-browse');
+        dialogs.open('dialog-browse');
     };
 
     browse(title, filter) {

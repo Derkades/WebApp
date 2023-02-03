@@ -26,7 +26,7 @@ function handleKey(key) {
     } else if (key === ',') {
         seek(-3);
     } else if (key === 'Escape') {
-        dialog.closeTop();
+        dialogs.closeTop();
     } else if (key === 'l') {
         switchLyrics();
     } else if (key === 'a') {

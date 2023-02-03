@@ -21,7 +21,7 @@ class Editor {
         document.getElementById('editor-tags').value = track.tags.join('; ');
         document.getElementById('editor-year').value = track.year;
 
-        dialog.open('dialog-editor');
+        dialogs.open('dialog-editor');
     };
 
     getValue(id, list = false) {
@@ -75,7 +75,7 @@ class Editor {
         await Track.updateLocalTrackList();
 
         // Close dialog, and restore save button
-        dialog.close('dialog-editor');
+        dialogs.close('dialog-editor');
         document.getElementById('editor-reloading').classList.add('hidden');
         document.getElementById('editor-save').classList.remove('hidden');
         this.#currentlyEditingPath = null;
