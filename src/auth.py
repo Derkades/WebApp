@@ -68,6 +68,7 @@ class User:
     session: Session
     lastfm_name: Optional[str]
     lastfm_key: Optional[str]
+    primary_playlist: Optional[str]
 
     def sessions(self):
         """
@@ -198,7 +199,7 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
     Returns: User object if session token is valid, or None if invalid
     """
     result = conn.execute("""
-                          SELECT session.rowid, session.creation_date, session.user_agent, session.remote_address, user.id, user.username, user.admin, user_lastfm.name, user_lastfm.key
+                          SELECT session.rowid, session.creation_date, session.user_agent, session.remote_address, user.id, user.username, user.admin, user_lastfm.name, user_lastfm.key, user.primary_playlist
                           FROM user
                           INNER JOIN session ON user.id = session.user
                           LEFT JOIN user_lastfm ON user.id = user_lastfm.user
@@ -208,10 +209,10 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
         log.warning('Invalid auth token: %s', token)
         return None
 
-    session_rowid, session_creation_date, session_user_agent, session_address, user_id, username, admin, lastfm_name, lastfm_key = result
+    session_rowid, session_creation_date, session_user_agent, session_address, user_id, username, admin, lastfm_name, lastfm_key, primary_playlist = result
 
     session = Session(session_rowid, token, session_creation_date, session_user_agent, session_address)
-    return User(conn, user_id, username, admin == 1, session, lastfm_name, lastfm_key)
+    return User(conn, user_id, username, admin == 1, session, lastfm_name, lastfm_key, primary_playlist)
 
 
 def verify_auth_cookie(conn: Connection, require_admin = False, redirect_to_login = False) -> User:

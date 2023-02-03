@@ -158,6 +158,17 @@ document.addEventListener("DOMContentLoaded", () => {
         console.warn('Editor button missing from page, this is normal if you are not an admin user');
     }
 
+    document.getElementById('button-copy').addEventListener('click', () => {
+        const onError = response => {
+            if (response.status == 200) {
+                response.text().then(text => alert(text));
+            } else {
+                alert('error');
+            }
+        }
+        jsonPost('/player_copy_track', {track: queue.currentTrack.trackPath}, onError)
+    });
+
     lastfm.init();
     queue.next();
     setInterval(updateMediaSession, 1000);

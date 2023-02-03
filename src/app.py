@@ -4,6 +4,7 @@ from pathlib import Path
 from urllib.parse import quote as urlencode
 import time
 import bcrypt
+import shutil
 
 from flask import Flask, request, render_template, Response, redirect, send_file
 from flask_babel import Babel
@@ -1070,6 +1071,29 @@ def route_users_edit():
                              (new_username, username))
 
             return redirect('/users')
+
+
+@app.route('/player_copy_track', methods=['POST'])
+def route_player_copy_track():
+    """
+    Endpoint used by music player to copy a track to the user's primary playlist
+    """
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
+        user.verify_csrf(request.json['csrf'])
+        if user.primary_playlist is None:
+            return Response(_('No playlist configured. Please configure a primay playlist in playlist manager.'), 200)
+
+        playlist = music.user_playlist(conn, user.primary_playlist, user.user_id)
+        if not playlist.write and not user.admin:
+            return Response(_('No write permission for playlist: %(playlist)s', playlist=playlist.name), 200)
+
+        track = Track.by_relpath(conn, request.json['track'])
+        shutil.copy(track.path, playlist.path)
+
+        scanner.scan_tracks(conn, playlist.name)
+
+        return Response(_('File has been successfully copied to your playlist: %(playlist)s', playlist=playlist.name), 200)
 
 
 def get_language() -> str:

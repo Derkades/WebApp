@@ -113,7 +113,7 @@ async function refreshCsrfToken() {
  * @param {object} postDataObject
  * @returns {Response}
  */
-async function jsonPost(url, postDataObject) {
+async function jsonPost(url, postDataObject, onErrorStatus) {
     postDataObject.csrf = getCsrfToken();
     const options = {
         method: 'POST',
@@ -123,6 +123,10 @@ async function jsonPost(url, postDataObject) {
         }),
     };
     const response = await fetch(new Request(url, options));
-    checkResponseCode(response);
+    if (onErrorStatus === undefined) {
+        checkResponseCode(response);
+    } else {
+        onErrorStatus(response);
+    }
     return response;
 }
