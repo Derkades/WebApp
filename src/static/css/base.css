@@ -120,21 +120,39 @@ input[type=checkbox]:checked {
 }
 
 input[type=range] {
-    -webkit-appearance: none;
     appearance: none;
+    height: 1.25rem;
+    padding: 0;
+    overflow: hidden;
+}
+
+input[type=range]::-moz-range-thumb {
+    background: rgba(255, 255, 255, 0.8);
+    height: calc(1.25rem + 2px);
+    width: calc(1.5rem + 2px);
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    background: rgba(255, 255, 255, 0.8);
+    height: calc(1.25rem + 2px);
+    width: calc(1.5rem + 2px);
+    margin: 0;
+    margin-top: -1px;
+    padding: 0;
+    border-radius: var(--border-radius-amount);
+}
+
+input[type=range]::-webkit-slider-runnable-track {
     height: 1.25rem;
     padding: 0;
 }
 
-input[type=range]::-webkit-slider-thumb,
-input[type=range]::-moz-range-thumb {
-    -webkit-appearance: none;
-    background: rgba(255, 255, 255, 0.8);
-    height: 1.25rem;
-    width: 1.5rem;
-    margin: 0;
-    padding: 0;
-    border: none;
+input[type=range]:focus {
+    outline: none;
 }
 
 body.light input {
@@ -197,10 +215,10 @@ body.light .icon {
 
 @keyframes sleutelframes {
     0%, 100% {
-    bottom: -.4em;
+        bottom: -.4em;
     }
     50% {
-    bottom: .4em;
+        bottom: .4em;
     }
 }
 
@@ -311,7 +329,6 @@ form {
         display: none;
     }
 }
-
 
 /* Firefox scrollbars look good by default, style Chromium scrollbars so they look similar */
 
