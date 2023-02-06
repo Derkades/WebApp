@@ -210,3 +210,17 @@ class Browse {
 };
 
 const browse = new Browse();
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Playlist dropdown
+    document.getElementById('browse-filter-playlist').addEventListener('input', () => browse.updateCurrentView());
+
+    // Search query input
+    document.getElementById('browse-filter-query').addEventListener('input', () => browse.updateCurrentView());
+
+    // Button to open browse dialog ("add to queue" button)
+    document.getElementById('browse-all').addEventListener('click', () => browse.browseAll());
+
+    // Back button in top left corner of browse window
+    document.getElementById('browse-back').addEventListener('click', () => browse.back());
+});

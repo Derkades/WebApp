@@ -17,8 +17,6 @@ const state = {
 
 document.addEventListener('DOMContentLoaded', () => {
     syncCookiesWithInputs();
-    applyTheme();
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
 
     document.getElementById('button-home').addEventListener('click', () => window.open('/', '_blank'));
 
@@ -62,38 +60,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('settings-queue-size').addEventListener('input', () => queue.fill());
     document.getElementById('settings-theme').addEventListener('input', applyTheme);
 
-    // Queue overlay
-    document.getElementById('browse-filter-playlist').addEventListener('input', () => browse.updateCurrentView());
-    document.getElementById('browse-filter-query').addEventListener('input', () => browse.updateCurrentView());
-    document.getElementById('browse-all').addEventListener('click', () => browse.browseAll());
-    document.getElementById('browse-back').addEventListener('click', () => browse.back());
-
     // Never play button
     document.getElementById('button-never-play').addEventListener('click', () => {
         const data = {track: queue.currentTrack.trackPath};
         jsonPost('/add_never_play', data);
         queue.next();
     });
-
-    // Editor
-    const editorButton = document.getElementById('button-edit');
-    if (editorButton !== null) {
-        editorButton.addEventListener('click', () => {
-            if (queue.currentTrack === null) {
-                alert('No current track in queue');
-                return;
-            }
-            const track = queue.currentTrack.track();
-            if (track === null) {
-                alert('Missing track info, has the track been deleted?');
-                return;
-            }
-            editor.open(track);
-        });
-        document.getElementById('editor-save').addEventListener('click', () => editor.save());
-    } else {
-        console.warn('Editor button missing from page, this is normal if you are not an admin user');
-    }
 
     // Delete track button
     const deleteButton = document.getElementById('button-delete-track');
@@ -131,7 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     queue.next();
     initTrackList();
-    setInterval(refreshCsrfToken, 15*60*1000);
 });
 
 function initTrackList() {

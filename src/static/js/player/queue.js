@@ -80,7 +80,8 @@ class Queue {
      */
     static async downloadRandomAndAddToQueue(playlist) {
         console.info('queue | choose track');
-        const chooseResponse = await fetch('/choose_track?playlist_dir=' + encodeURIComponent(playlist) + '&' + getTagFilter() + '&csrf=' + encodeURIComponent(getCsrfToken()));
+        const token = encodeURIComponent(csrf.getToken());
+        const chooseResponse = await fetch('/choose_track?playlist_dir=' + encodeURIComponent(playlist) + '&' + getTagFilter() + '&csrf=' + token);
         checkResponseCode(chooseResponse);
         const path = (await chooseResponse.json()).path;
 

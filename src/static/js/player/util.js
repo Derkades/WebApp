@@ -94,27 +94,12 @@ function levenshtein(str1, str2) {
 };
 
 /**
- * @returns {string} CSRF token
- */
-function getCsrfToken() {
-    return document.getElementById('csrf-token').textContent;
-}
-
-async function refreshCsrfToken() {
-    const response = await fetch('/get_csrf');
-    checkResponseCode(response);
-    const json = await response.json();
-    const token = json.token;
-    document.getElementById('csrf-token').textContent = token;
-}
-
-/**
  * @param {string} url
  * @param {object} postDataObject
  * @returns {Response}
  */
 async function jsonPost(url, postDataObject, onErrorStatus) {
-    postDataObject.csrf = getCsrfToken();
+    postDataObject.csrf = csrf.getToken();
     const options = {
         method: 'POST',
         body: JSON.stringify(postDataObject),
