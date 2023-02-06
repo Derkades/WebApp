@@ -1,57 +1,3 @@
-/**
- * Called when player has skipped to a different track. Also calls onPlaybackStateChange().
- */
-function onPlaybackTrackChange() {
-    replaceAudioSource();
-    replaceAlbumImages();
-    replaceLyrics();
-    replaceTrackDisplayTitle();
-    updateWritablePlaylistButtons();
-
-    history.signalNewTrack();
-
-    // Update mediaSession
-    updateMediaSessionTrack();
-
-    onPlaybackStateChange();
-}
-
-/**
- * Called periodically and in other cases where the playback state has
- * changed, like seeking and pausing.
- */
-function onPlaybackStateChange() {
-    const audioElem = getAudioElement();
-
-    if (audioElem.paused) {
-        document.getElementById('button-pause').classList.add('hidden');
-        document.getElementById('button-play').classList.remove('hidden');
-    } else {
-        document.getElementById('button-pause').classList.remove('hidden');
-        document.getElementById('button-play').classList.add('hidden');
-    }
-
-    console.log(audioElem.currentTime, audioElem.duration);
-
-    // Update seek bar
-    if (isFinite(audioElem.currentTime) && isFinite(audioElem.duration)) {
-        const current = secondsToString(Math.round(audioElem.currentTime));
-        const max = secondsToString(Math.round(audioElem.duration));
-        const percentage = (audioElem.currentTime / audioElem.duration) * 100;
-
-        document.getElementById('progress-bar').style.width = percentage + '%';
-        document.getElementById('progress-time-current').innerText = current;
-        document.getElementById('progress-time-duration').innerText = max;
-    }
-
-    // Update mediaSession
-    updateMediaSessionState();
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    setInterval(onPlaybackStateChange, 1000);
-});
-
 function seek(delta) {
     const audioElem = getAudioElement();
 
@@ -64,7 +10,7 @@ function seek(delta) {
         audioElem.currentTime = newTime;
     }
 
-    onPlaybackStateChange();
+    eventBus.publish(MusicEvent.PLAYBACK_CHANGE);
 }
 
 function getTransformedVolume(volumeZeroToHundred) {
@@ -97,7 +43,6 @@ function onVolumeChange() {
 function getAudioElement() {
     return document.getElementById('audio');
 }
-
 
 function replaceAudioSource() {
     const sourceUrl = queue.currentTrack.audioBlobUrl;
@@ -181,6 +126,18 @@ function replaceTrackDisplayTitle() {
     }
 }
 
+function replaceAllTrackHtml() {
+    replaceAudioSource();
+    replaceAlbumImages();
+    replaceLyrics();
+    replaceTrackDisplayTitle();
+}
+
+eventBus.subscribe(MusicEvent.TRACK_CHANGE, replaceAllTrackHtml);
+
+// Update track title, metadata may have changed
+eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, replaceTrackDisplayTitle);
+
 /**
  * Display lyrics, hide album art
  */
@@ -199,19 +156,4 @@ function switchAlbumCover() {
     document.getElementById('button-lyrics').classList.remove('hidden');
     document.getElementById('sidebar-lyrics').classList.add('hidden');
     document.getElementById('sidebar-album-covers').classList.remove('hidden');
-}
-
-/**
- * Only show metadata edit and track delete buttons if playlist is writable
- */
-function updateWritablePlaylistButtons() {
-    const track = queue.currentTrack.track();
-
-    if (track !== null && track.playlist().write) {
-        document.getElementById('button-edit').classList.remove('hidden');
-        document.getElementById('button-delete-track').classList.remove('hidden');
-    } else {
-        document.getElementById('button-edit').classList.add('hidden');
-        document.getElementById('button-delete-track').classList.add('hidden');
-    }
 }

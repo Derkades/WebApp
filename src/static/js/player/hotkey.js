@@ -18,10 +18,10 @@ function handleKey(key) {
     } else if (key === 'p' || key === ' ') {
         const audioElem = getAudioElement();
         if (audioElem.paused) {
-            audioElem.play().then(onPlaybackStateChange);
+            audioElem.play().then(() => eventBus.publish(MusicEvent.PLAYBACK_CHANGE));
         } else {
             audioElem.pause();
-            onPlaybackStateChange();
+            eventBus.publish(MusicEvent.PLAYBACK_CHANGE);
         }
     } else if (key === 'ArrowLeft') {
         queue.previous();

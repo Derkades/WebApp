@@ -3,7 +3,9 @@ class CSRF {
 
     constructor() {
         // Initial CSRF token is supplied using hidden page element
-        this.csrfToken = document.getElementById('csrf-token').textContent;
+        document.addEventListener('DOMContentLoaded', () => {
+            this.csrfToken = document.getElementById('csrf-token').textContent;
+        });
     }
 
     /**

@@ -13,6 +13,10 @@ class Queue {
         this.currentTrack = null;
         this.previousTracks = [];
         this.queuedTracks = [];
+
+        eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, () => {
+            this.updateHtml();
+        });
     };
 
     /**
@@ -238,7 +242,7 @@ class Queue {
         // Replace current track with last track in history
         this.currentTrack = this.previousTracks.pop();
 
-        onPlaybackTrackChange();
+        eventBus.publish(MusicEvent.TRACK_CHANGE);
         this.updateHtml();
     };
 
@@ -264,7 +268,7 @@ class Queue {
         // Replace current track with first item from queue
         this.currentTrack = this.queuedTracks.shift();
 
-        onPlaybackTrackChange();
+        eventBus.publish(MusicEvent.TRACK_CHANGE);
         this.fill();
     };
 

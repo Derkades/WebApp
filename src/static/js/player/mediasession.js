@@ -1,4 +1,4 @@
-function updateMediaSessionState() {
+eventBus.subscribe(MusicEvent.PLAYBACK_CHANGE, () => {
     const audioElem = getAudioElement();
 
     navigator.mediaSession.playbackState = audioElem.paused ? 'paused' : 'playing';
@@ -10,9 +10,9 @@ function updateMediaSessionState() {
             position: audioElem.currentTime,
         });
     }
-}
+});
 
-function updateMediaSessionTrack() {
+eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {
     const track = queue.currentTrack.track();
     if (track === null) {
         console.warn('Not updating mediaSession, track info is null');
@@ -28,22 +28,22 @@ function updateMediaSessionTrack() {
         // Firefox mobile doesn't seem to support the MediaSession API at all.
         artwork: [{src: queue.currentTrack.imageBlobUrl}],
     });
-}
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     const audioElem = getAudioElement();
 
     // Media session events
     navigator.mediaSession.setActionHandler('play', () => {
-        audioElem.play().then(onPlaybackStateChange);
+        audioElem.play().then(() => eventBus.publish(MusicEvent.PLAYBACK_CHANGE));
     });
     navigator.mediaSession.setActionHandler('pause', () => {
         audioElem.pause();
-        onPlaybackStateChange();
+        eventBus.publish(MusicEvent.PLAYBACK_CHANGE)
     });
     navigator.mediaSession.setActionHandler('seekto', callback => {
         audioElem.currentTime = callback.seekTime;
-        onPlaybackStateChange();
+        eventBus.publish(MusicEvent.PLAYBACK_CHANGE)
     });
     navigator.mediaSession.setActionHandler('previoustrack', () => queue.previous());
     navigator.mediaSession.setActionHandler('nexttrack', () => queue.next());

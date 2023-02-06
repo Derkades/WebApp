@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Try to skip to beginning of current track first
         if (audioElem.currentTime > 15 || this.previousTracks.length == 0) {
             audioElem.currentTime = 0;
-            onPlaybackStateChange();
+            eventBus.publish(MusicEvent.PLAYBACK_CHANGE)
             return;
         }
 
@@ -18,11 +18,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Play pause
     document.getElementById('button-play').addEventListener('click', () => {
-        audioElem.play().then(onPlaybackStateChange());
+        audioElem.play().then(() => eventBus.publish(MusicEvent.PLAYBACK_CHANGE));
     });
     document.getElementById('button-pause').addEventListener('click', () => {
         audioElem.pause();
-        onPlaybackStateChange();
+        eventBus.publish(MusicEvent.PLAYBACK_CHANGE)
     });
 
     // Seek bar
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const onMove = event => {
         audioElem.currentTime = ((event.clientX - seekBar.offsetLeft) / seekBar.offsetWidth) * audioElem.duration;
-        onPlaybackStateChange();
+        eventBus.publish(MusicEvent.PLAYBACK_CHANGE)
         event.preventDefault(); // Prevent accidental text selection
     };
 
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     seekBar.addEventListener('mousedown', event => {
         audioElem.currentTime = ((event.clientX - seekBar.offsetLeft) / seekBar.offsetWidth) * audioElem.duration;
-        onPlaybackStateChange();
+        eventBus.publish(MusicEvent.PLAYBACK_CHANGE)
 
         // Keep updating while mouse is moving
         document.addEventListener('mousemove', onMove);
@@ -51,4 +51,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
         event.preventDefault(); // Prevent accidental text selection
     });
+});
+
+// Update seek bar
+eventBus.subscribe(MusicEvent.PLAYBACK_CHANGE, () => {
+    const audioElem = getAudioElement();
+
+    if (isFinite(audioElem.currentTime) && isFinite(audioElem.duration)) {
+        const current = secondsToString(Math.round(audioElem.currentTime));
+        const max = secondsToString(Math.round(audioElem.duration));
+        const percentage = (audioElem.currentTime / audioElem.duration) * 100;
+
+        document.getElementById('progress-bar').style.width = percentage + '%';
+        document.getElementById('progress-time-current').innerText = current;
+        document.getElementById('progress-time-duration').innerText = max;
+    }
+});
+
+// Update play/pause buttons
+eventBus.subscribe(MusicEvent.PLAYBACK_CHANGE, () => {
+    if (getAudioElement().paused) {
+        document.getElementById('button-pause').classList.add('hidden');
+        document.getElementById('button-play').classList.remove('hidden');
+    } else {
+        document.getElementById('button-pause').classList.remove('hidden');
+        document.getElementById('button-play').classList.add('hidden');
+    }
+});
+
+// Only show metadata edit and track delete buttons if playlist is writable
+eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {
+    const track = queue.currentTrack.track();
+
+    if (track !== null && track.playlist().write) {
+        document.getElementById('button-edit').classList.remove('hidden');
+        document.getElementById('button-delete-track').classList.remove('hidden');
+    } else {
+        document.getElementById('button-edit').classList.add('hidden');
+        document.getElementById('button-delete-track').classList.add('hidden');
+    }
 });

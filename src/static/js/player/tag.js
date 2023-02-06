@@ -35,6 +35,8 @@ function updateTagCheckboxes() {
     document.getElementById('tag-checkboxes').replaceChildren(...newChildren);
 }
 
+eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, updateTagCheckboxes);
+
 function getTagFilter() {
     const mode = document.getElementById('tag-mode').value;
     const tags = [];

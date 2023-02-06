@@ -2,6 +2,10 @@ class Browse {
     #history;
     constructor() {
         this.#history = [];
+
+        eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, () => {
+            this.updateCurrentView();
+        });
     };
 
     setHeader(textContent) {
@@ -32,6 +36,9 @@ class Browse {
         this.updateCurrentView();
     };
 
+    /**
+     * Called before window is opened and when track list state changed
+     */
     updateCurrentView() {
         if (this.#history.length === 0) {
             return;

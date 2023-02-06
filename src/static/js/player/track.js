@@ -115,16 +115,7 @@ class Track {
             }
         }
 
-        // Hide loading overlay
-        document.getElementById('loading-overlay').classList.add('overlay-hidden');
-
-        // Update HTML depending on state.playlists and state.tracks
-        updatePlaylistCheckboxHtml();
-        browse.updateCurrentView();
-        createPlaylistDropdowns();
-        updateTagCheckboxes();
-        replaceTrackDisplayTitle();
-        queue.updateHtml();
+        eventBus.publish(MusicEvent.TRACK_LIST_CHANGE);
     };
 
     async downloadAndAddToQueue(top = false) {

@@ -112,3 +112,8 @@ function initTrackList() {
         setTimeout(initTrackList, 1000);
     });
 }
+
+// Hide loading overlay when track list has finished loading
+eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, () => {
+    document.getElementById('loading-overlay').classList.add('overlay-hidden');
+});

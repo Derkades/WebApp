@@ -122,6 +122,7 @@ function updatePlaylistCheckboxHtml() {
     const parent = document.getElementById('playlist-checkboxes');
     parent.replaceChildren(mainDiv, otherDiv);
 }
+eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, updatePlaylistCheckboxHtml);
 
 function createPlaylistDropdowns() {
     for (const select of document.getElementsByClassName('playlist-select')) {
@@ -148,3 +149,4 @@ function createPlaylistDropdowns() {
         }
     }
 }
+eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, createPlaylistDropdowns);

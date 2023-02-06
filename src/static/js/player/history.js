@@ -12,6 +12,8 @@ class History {
 
     constructor() {
         this.currentlyPlayingTrack = null;
+
+        eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => this.signalNewTrack());
     }
 
     signalNewTrack() {
