@@ -1,4 +1,4 @@
-{% extends "base.jinja2" %}
+{% extends "base_static.jinja2" %}
 
 {% block title %}
     {% trans %}Home{% endtrans%}
@@ -14,15 +14,15 @@
 {% endmacro %}
 
 {% block content %}
-    <main>
-        {{ nav('/player', 'music', _('Music player')) }}
-        {{ nav('/files', 'folder', _('File manager')) }}
-        {{ nav('/playlists', 'playlist-music', _('Playlist manager')) }}
-        {{ nav('/account', 'account-cog', _('Account')) }}
-        {{ nav('/history', 'history', _('Playback history')) }}
-        {{ nav('/playlist_stats', 'chart-line-variant', _('Playback statistics')) }}
-        {{ nav('/recent_changes', 'file-edit', _('Recent file changes')) }}
-        {{ nav('/never_play', 'cancel', _('Manage track blocklist')) }}
-        {{ nav('/radio', 'radio', _('Radio')) }}
-    </main>
+
+{{ nav('/player', 'music', _('Music player')) }}
+{{ nav('/files', 'folder', _('File manager')) }}
+{{ nav('/playlists', 'playlist-music', _('Playlist manager')) }}
+{{ nav('/account', 'account-cog', _('Account')) }}
+{{ nav('/history', 'history', _('Playback history')) }}
+{{ nav('/playlist_stats', 'chart-line-variant', _('Playback statistics')) }}
+{{ nav('/recent_changes', 'file-edit', _('Recent file changes')) }}
+{{ nav('/never_play', 'cancel', _('Manage track blocklist')) }}
+{{ nav('/radio', 'radio', _('Radio')) }}
+
 {% endblock content %}

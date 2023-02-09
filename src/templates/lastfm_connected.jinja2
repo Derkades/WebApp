@@ -1,13 +1,11 @@
-{% extends "base.jinja2" %}
+{% extends "base_static.jinja2" %}
 
 {% block content %}
 
-    <main>
-        <h1>{% trans %}Last.fm connection{% endtrans %}</h1>
+<h1>{% trans %}Last.fm connection{% endtrans %}</h1>
 
-        <p>{% trans %}Logged in as {{ name }}{% endtrans %}</p>
+<p>{% trans %}Logged in as {{ name }}{% endtrans %}</p>
 
-        <p><a href="/account">{% trans %}Back to account page{% endtrans %}</a></p>
-    </main>
+<p><a href="/account">{% trans %}Back to account page{% endtrans %}</a></p>
 
 {% endblock content %}

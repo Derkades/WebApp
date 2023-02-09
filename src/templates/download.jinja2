@@ -1,51 +1,49 @@
-{% extends "base.jinja2" %}
+{% extends "base_static.jinja2" %}
 
 {% block title %}
     {% trans %}Download{% endtrans %}
 {% endblock title %}
 
 {% block content %}
-    <main>
-        {{ page_heading(gettext('Download')) }}
 
-        <select id="select-playlist">
-            <option id="dummy-value" name="dummy">{% trans %}Select a playlist{% endtrans %}</option>
-            {% for playlist in playlists %}
-                <option name="{{ playlist.relpath }}">{{ playlist.name }}</option>
-            {% endfor %}
-        </select>
+{{ page_heading(gettext('Download')) }}
 
-        {{ icon_button('download', id='download-button') }}
+<select id="select-playlist">
+    <option id="dummy-value" name="dummy">{% trans %}Select a playlist{% endtrans %}</option>
+    {% for playlist in playlists %}
+        <option name="{{ playlist.relpath }}">{{ playlist.name }}</option>
+    {% endfor %}
+</select>
 
-        <h2>{% trans %}To be downloaded{% endtrans %}</h2>
+{{ icon_button('download', id='download-button') }}
 
-        <table class="table">
-            <thead>
-                <tr>
-                    <th class="icon-col">{% trans %}Progress{% endtrans %}</th>
-                    <th>{% trans %}Title{% endtrans %}</th>
-                </tr>
-            </thead>
-            <tbody id="table-body">
-            </tbody>
-        </table>
+<h2>{% trans %}To be downloaded{% endtrans %}</h2>
 
-        <h2>{% trans %}Already downloaded{% endtrans %}</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th class="icon-col">{% trans %}Progress{% endtrans %}</th>
+            <th>{% trans %}Title{% endtrans %}</th>
+        </tr>
+    </thead>
+    <tbody id="table-body">
+    </tbody>
+</table>
 
-        <p>{% trans %}Total size: {% endtrans%}<span id="total-size-mib"></span>MiB</p>
+<h2>{% trans %}Already downloaded{% endtrans %}</h2>
 
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>{% trans %}Size{% endtrans %}</th>
-                    <th>{% trans %}Title{% endtrans %}</th>
-                </tr>
-            </thead>
-            <tbody id="table-body-downloaded">
-            </tbody>
-        </table>
+<p>{% trans %}Total size: {% endtrans%}<span id="total-size-mib"></span>MiB</p>
 
-    </main>
+<table class="table">
+    <thead>
+        <tr>
+            <th>{% trans %}Size{% endtrans %}</th>
+            <th>{% trans %}Title{% endtrans %}</th>
+        </tr>
+    </thead>
+    <tbody id="table-body-downloaded">
+    </tbody>
+</table>
 
-    <script src="/static/js/download.js"></script>
+<script src="/static/js/download.js"></script>
 {% endblock content %}

@@ -1,16 +1,14 @@
-{% extends "base.jinja2" %}
+{% extends "base_static.jinja2" %}
 
 {% block content %}
 
-    <main>
-        <h1>{% trans %}Last.fm connection{% endtrans %}</h1>
+<h1>{% trans %}Last.fm connection{% endtrans %}</h1>
 
-        <p>{% trans %}Click the button below to link your Last.fm account.{% endtrans %}</p>
+<p>{% trans %}Click the button below to link your Last.fm account.{% endtrans %}</p>
 
-        <form method="POST" action="/lastfm_connect">
-            <input type="hidden" name="auth_token" value="{{ auth_token }}">
-            <input type="submit" value="{% trans %}Link{% endtrans %}">
-        </form>
-    </main>
+<form method="POST" action="/lastfm_connect">
+    <input type="hidden" name="auth_token" value="{{ auth_token }}">
+    <input type="submit" value="{% trans %}Link{% endtrans %}">
+</form>
 
 {% endblock content %}

@@ -1,19 +1,18 @@
-{% extends "base.jinja2" %}
+{% extends "base_static.jinja2" %}
 
 {% block content %}
-    <main>
-        {{ page_heading(gettext('Radio')) }}
 
-        WARNING: Experimental<br>
+{{ page_heading(gettext('Radio')) }}
 
-        <div id="audio"></div><br>
+WARNING: Experimental<br>
 
-        Status: <span id="status"></span><br>
-        Current: <span id="current"></span><br>
-        Next: <span id="next"></span></span>
-    </main>
+<div id="audio"></div><br>
 
-    <script src="/static/js/radio.js"></script>
+Status: <span id="status"></span><br>
+Current: <span id="current"></span><br>
+Next: <span id="next"></span></span>
 
-    <span id="csrf" class="hidden">{{ csrf }}</span>
+<script src="/static/js/radio.js"></script>
+
+<span id="csrf" class="hidden">{{ csrf }}</span>
 {% endblock content %}

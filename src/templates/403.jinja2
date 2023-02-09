@@ -1,13 +1,13 @@
-{% extends "base.jinja2" %}
+{% extends "base_static.jinja2" %}
 
 {% block title %}
     {% trans %}Permission denied{% endtrans %}
 {% endblock title %}
 
 {% block content %}
-    <main>
-        <h1>{% trans %}Permission denied{% endtrans %}</h1>
-        <p>{{ reason }}</p><br>
-        <a href="/login">{% trans %}Log in{% endtrans %}</a>
-    </main>
+
+<h1>{% trans %}Permission denied{% endtrans %}</h1>
+<p>{{ reason }}</p><br>
+<a href="/login">{% trans %}Log in{% endtrans %}</a>
+
 {% endblock content %}

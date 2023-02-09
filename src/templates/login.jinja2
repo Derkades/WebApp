@@ -1,32 +1,32 @@
-{% extends "base.jinja2" %}
+{% extends "base_static.jinja2" %}
 
 {% block title %}
     {% trans %}Log in{% endtrans %}
 {% endblock title %}
 
 {% block content %}
-    <main>
-        <p>
-            {% trans %}Please log in to get access to{% endtrans %}
-        </p>
 
-        <span class="fancy">Super fancy music player 2.0</span>
+<p>
+    {% trans %}Please log in to get access to{% endtrans %}
+</p>
 
-        <br>
-        <br>
+<span class="fancy">Super fancy music player 2.0</span>
 
-        {% if invalid_password %}
-            <p>{% trans %}Invalid username or password{% endtrans %}</p>
-        {% endif %}
+<br>
+<br>
 
-        <br>
+{% if invalid_password %}
+    <p>{% trans %}Invalid username or password{% endtrans %}</p>
+{% endif %}
 
-        <form method="POST">
-            <label for="username">{% trans %}Username{% endtrans %}</label><br>
-            <input type="text" name="username" id="username" autofocus><br>
-            <label for="password">{% trans %}Password{% endtrans %}</label><br>
-            <input type="password" name="password" id="password"><br>
-            <input type="submit" value="{% trans %}Log in{% endtrans %}">
-        </form>
-    </main>
+<br>
+
+<form method="POST">
+    <label for="username">{% trans %}Username{% endtrans %}</label><br>
+    <input type="text" name="username" id="username" autofocus><br>
+    <label for="password">{% trans %}Password{% endtrans %}</label><br>
+    <input type="password" name="password" id="password"><br>
+    <input type="submit" value="{% trans %}Log in{% endtrans %}">
+</form>
+
 {% endblock content %}

@@ -1,46 +1,45 @@
-{% extends "base.jinja2" %}
+{% extends "base_static.jinja2" %}
 
 {% block content %}
-    <main>
-        {{ page_heading(gettext('Recent file changes')) }}
 
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>
-                        {% trans %}Time{% endtrans %}
-                    </th>
-                    <th>
-                        {% trans %}Action{% endtrans %}
-                    </th>
-                    <th>
-                        {% trans %}Playlist{% endtrans %}
-                    </th>
-                    <th>
-                        {% trans %}Track{% endtrans %}
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for change in changes %}
-                    <tr>
-                        <td class="format-timestamp">{{ change['timestamp'] }}</td>
-                        <td>
-                            {% if change['action'] == 'insert' %}
-                                {% trans %}Added{% endtrans %}
-                            {% elif change['action'] == 'delete' %}
-                                {% trans %}Deleted{% endtrans %}
-                            {% elif change['action'] == 'update' %}
-                                {% trans %}Changed{% endtrans %}
-                            {% endif %}
-                        </td>
-                        <td>{{ change['playlist'] }}</td>
-                        <td>{{ change['track'] }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </main>
+{{ page_heading(gettext('Recent file changes')) }}
 
-    <script src="/static/js/format.js"></script>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                {% trans %}Time{% endtrans %}
+            </th>
+            <th>
+                {% trans %}Action{% endtrans %}
+            </th>
+            <th>
+                {% trans %}Playlist{% endtrans %}
+            </th>
+            <th>
+                {% trans %}Track{% endtrans %}
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for change in changes %}
+            <tr>
+                <td class="format-timestamp">{{ change['timestamp'] }}</td>
+                <td>
+                    {% if change['action'] == 'insert' %}
+                        {% trans %}Added{% endtrans %}
+                    {% elif change['action'] == 'delete' %}
+                        {% trans %}Deleted{% endtrans %}
+                    {% elif change['action'] == 'update' %}
+                        {% trans %}Changed{% endtrans %}
+                    {% endif %}
+                </td>
+                <td>{{ change['playlist'] }}</td>
+                <td>{{ change['track'] }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script src="/static/js/format.js"></script>
 {% endblock content %}

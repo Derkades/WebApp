@@ -1,148 +1,148 @@
-{% extends "base.jinja2" %}
+{% extends "base_static.jinja2" %}
 
 {% block title %}
     {% trans %}File manager{% endtrans %}
 {% endblock title %}
 
 {% block content %}
-    <main>
-        {% if base_path == '.' %}
-            {{ page_heading(gettext('File manager')) }}
-        {% else %}
-            {% if parent_path_uri == '.' %}
-                {# Not necessary, but looks better #}
-                {% set back_url = '/files' %}
-            {% elif parent_path_uri %}
-                {% set back_url = '/files?path=' + parent_path_uri %}
-            {% endif %}
-            {{ page_heading(gettext('Files in: %(dir)s', dir=base_path), back_url=back_url) }}
-        {% endif %}
 
-        {% if base_path == '.' %}
-            <p>{% trans %}To create a new playlist, use the <a href="/playlists">playlist manager</a>.{% endtrans %}</p>
-        {% else %}
-            {% if write_permission %}
-            <table>
-                <tbody>
-                    <form method="POST" action="/files_upload" enctype="multipart/form-data">
-                        <input type="hidden" name="csrf" value="{{ csrf_token }}">
-                        <input type="hidden" name="dir" value="{{ base_path }}">
-                        <tr>
-                            <td>
-                                {% trans %}Upload files{% endtrans %}
-                            </td>
-                            <td>
-                                <input type="file" name="upload" accept="{{ music_extensions }}" multiple>
-                            </td>
-                            <td>
-                                <input type="submit" value="{% trans %}Upload{% endtrans %}">
-                            </td>
-                        </tr>
-                    </form>
-                    <form method="POST" action="/files_mkdir">
-                        <input type="hidden" name="csrf" value="{{ csrf_token }}">
-                        <input type="hidden" name="path" value="{{ base_path }}">
-                        <tr>
-                            <td>
-                                {% trans %}Create directory{% endtrans %}
-                            </td>
-                            <td>
-                                <input type="text" name="dirname" placeholder="{% trans %}Directory name{% endtrans %}">
-                            </td>
-                            <td>
-                                <input type="submit" value="{% trans %}Create{% endtrans %}">
+{% if base_path == '.' %}
+    {{ page_heading(gettext('File manager')) }}
+{% else %}
+    {% if parent_path_uri == '.' %}
+        {# Not necessary, but looks better #}
+        {% set back_url = '/files' %}
+    {% elif parent_path_uri %}
+        {% set back_url = '/files?path=' + parent_path_uri %}
+    {% endif %}
+    {{ page_heading(gettext('Files in: %(dir)s', dir=base_path), back_url=back_url) }}
+{% endif %}
 
-                            </td>
-                        </tr>
-                    </form>
-                </tbody>
+{% if base_path == '.' %}
+    <p>{% trans %}To create a new playlist, use the <a href="/playlists">playlist manager</a>.{% endtrans %}</p>
+{% else %}
+    {% if write_permission %}
+    <table>
+        <tbody>
+            <form method="POST" action="/files_upload" enctype="multipart/form-data">
+                <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                <input type="hidden" name="dir" value="{{ base_path }}">
+                <tr>
+                    <td>
+                        {% trans %}Upload files{% endtrans %}
+                    </td>
+                    <td>
+                        <input type="file" name="upload" accept="{{ music_extensions }}" multiple>
+                    </td>
+                    <td>
+                        <input type="submit" value="{% trans %}Upload{% endtrans %}">
+                    </td>
+                </tr>
+            </form>
+            <form method="POST" action="/files_mkdir">
+                <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                <input type="hidden" name="path" value="{{ base_path }}">
+                <tr>
+                    <td>
+                        {% trans %}Create directory{% endtrans %}
+                    </td>
+                    <td>
+                        <input type="text" name="dirname" placeholder="{% trans %}Directory name{% endtrans %}">
+                    </td>
+                    <td>
+                        <input type="submit" value="{% trans %}Create{% endtrans %}">
 
-            </table>
+                    </td>
+                </tr>
+            </form>
+        </tbody>
 
+    </table>
+
+    {% else %}
+        <p>{% trans %}You don't have permission to upload files or create directories here.{% endtrans %}</p>
+    {% endif %}
+{% endif %}
+
+<br>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>{% trans %}Type{% endtrans %}</th>
+            <th>{% trans %}File name{% endtrans %}</th>
+            <th class="collapse-col">{% trans %}Artists{% endtrans %}</th>
+            <th class="collapse-col">{% trans %}Title{% endtrans %}</th>
+            <th {% if write_permission %}colspan="3"{% endif %}>{% trans %}Actions{% endtrans %}</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for file in files %}
+        <tr>
+            {% if file['type'] == 'dir' %}
+            <td class="icon-col">
+                {{ icon('folder') }}
+            </td>
+            <td>
+                <a href="?path={{ file['path'] }}">{{ file.name }}/</a>
+            </td>
+            <td class="collapse-col"></td>
+            <td class="collapse-col"></td>
+            {% elif file['type'] == 'music' %}
+            <td class="icon-col">
+                <div class="icon" style="background-image: url('static/icon/music.svg')"></div>
+            </td>
+            <td>
+                {{ file.name }}
+            </td>
+            <td class="collapse-col">{{ file['artist'] }}</td>
+            <td class="collapse-col">{{ file['title'] }}</td>
             {% else %}
-                <p>{% trans %}You don't have permission to upload files or create directories here.{% endtrans %}</p>
+            <td class="icon-col">
+                <div class="icon" style="background-image: url('static/icon/file-question.svg')"></div>
+            </td>
+            <td>
+                {{ file.name }}
+            </td>
+            <td class="collapse-col"></td>
+            <td class="collapse-col"></td>
             {% endif %}
-        {% endif %}
 
-        <br>
-
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>{% trans %}Type{% endtrans %}</th>
-                    <th>{% trans %}File name{% endtrans %}</th>
-                    <th class="collapse-col">{% trans %}Artists{% endtrans %}</th>
-                    <th class="collapse-col">{% trans %}Title{% endtrans %}</th>
-                    <th {% if write_permission %}colspan="3"{% endif %}>{% trans %}Actions{% endtrans %}</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for file in files %}
-                <tr>
-                    {% if file['type'] == 'dir' %}
-                    <td class="icon-col">
-                        {{ icon('folder') }}
-                    </td>
-                    <td>
-                        <a href="?path={{ file['path'] }}">{{ file.name }}/</a>
-                    </td>
-                    <td class="collapse-col"></td>
-                    <td class="collapse-col"></td>
-                    {% elif file['type'] == 'music' %}
-                    <td class="icon-col">
-                        <div class="icon" style="background-image: url('static/icon/music.svg')"></div>
-                    </td>
-                    <td>
-                        {{ file.name }}
-                    </td>
-                    <td class="collapse-col">{{ file['artist'] }}</td>
-                    <td class="collapse-col">{{ file['title'] }}</td>
+            {% if write_permission %}
+            <td class="button-col">
+                <form method="GET" action="/files_rename" class="inline-block">
+                    <input type="hidden" name="path" value="{{ file['path'] }}">
+                    {% if base_path == '.' %}
+                        <input type="hidden" name="back_url" value="/files">
                     {% else %}
-                    <td class="icon-col">
-                        <div class="icon" style="background-image: url('static/icon/file-question.svg')"></div>
-                    </td>
-                    <td>
-                        {{ file.name }}
-                    </td>
-                    <td class="collapse-col"></td>
-                    <td class="collapse-col"></td>
+                        <input type="hidden" name="back_url" value="/files?path={{ base_path }}">
                     {% endif %}
+                    {{ icon_button('rename-box', title=gettext('Rename file')) }}
+                </form>
+            </td>
 
-                    {% if write_permission %}
-                    <td class="button-col">
-                        <form method="GET" action="/files_rename" class="inline-block">
-                            <input type="hidden" name="path" value="{{ file['path'] }}">
-                            {% if base_path == '.' %}
-                                <input type="hidden" name="back_url" value="/files">
-                            {% else %}
-                                <input type="hidden" name="back_url" value="/files?path={{ base_path }}">
-                            {% endif %}
-                            {{ icon_button('rename-box', title=gettext('Rename file')) }}
-                        </form>
-                    </td>
+            <td class="button-col">
+                <form method="POST" action="/files_rename" class="inline-block">
+                    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                    <input type="hidden" name="new-name" value=".trash.{{ file['name'] }}">
+                    <input type="hidden" name="path" value="{{ file['path'] }}">
+                    {{ icon_button('delete', title=gettext('Move file to trash')) }}
+                </form>
+            </td>
+            {% endif %}
 
-                    <td class="button-col">
-                        <form method="POST" action="/files_rename" class="inline-block">
-                            <input type="hidden" name="csrf" value="{{ csrf_token }}">
-                            <input type="hidden" name="new-name" value=".trash.{{ file['name'] }}">
-                            <input type="hidden" name="path" value="{{ file['path'] }}">
-                            {{ icon_button('delete', title=gettext('Move file to trash')) }}
-                        </form>
-                    </td>
-                    {% endif %}
+            <td class="button-col">
+                {% if file['type'] != 'dir' %}
+                    <form method="GET" action="/files_download" class="inline-block">
+                        <input type="hidden" name="path" value="{{ file['path'] }}">
+                        {{ icon_button('download', title=gettext('Download original file')) }}
+                    </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
-                    <td class="button-col">
-                        {% if file['type'] != 'dir' %}
-                            <form method="GET" action="/files_download" class="inline-block">
-                                <input type="hidden" name="path" value="{{ file['path'] }}">
-                                {{ icon_button('download', title=gettext('Download original file')) }}
-                            </form>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </main>
 {% endblock content %}

@@ -1,4 +1,4 @@
-{% extends "base.jinja2" %}
+{% extends "base_static.jinja2" %}
 
 {% block title %}
     {% trans %}Account settings{% endtrans %}
@@ -7,60 +7,58 @@
 
 {% block content %}
 
-    <main>
-        {{ page_heading(gettext('Account settings')) }}
+{{ page_heading(gettext('Account settings')) }}
 
-        <p>{% trans name=user.username %}Logged in as: {{ name }}{% endtrans %}</p>
+<p>{% trans name=user.username %}Logged in as: {{ name }}{% endtrans %}</p>
 
 
-        <h2>{% trans %}Last.fm scrobbling{% endtrans%}</h2>
-        <p>
-            {% if lastfm_enabled %}
-                {% if lastfm_name %}
-                    {% trans name=lastfm_name %}Connected to last.fm account: {{ name }}{% endtrans%}
-                {% else %}
-                    <a href="{{ lastfm_connect_url }}">{% trans %}Connect your last.fm account{% endtrans %}</a>
-                {% endif %}
-            {% else %}
-                {% trans %}Last.fm integration is not available, because no API key is configured{% endtrans %}
-            {% endif %}
-        </p>
+<h2>{% trans %}Last.fm scrobbling{% endtrans%}</h2>
+<p>
+    {% if lastfm_enabled %}
+        {% if lastfm_name %}
+            {% trans name=lastfm_name %}Connected to last.fm account: {{ name }}{% endtrans%}
+        {% else %}
+            <a href="{{ lastfm_connect_url }}">{% trans %}Connect your last.fm account{% endtrans %}</a>
+        {% endif %}
+    {% else %}
+        {% trans %}Last.fm integration is not available, because no API key is configured{% endtrans %}
+    {% endif %}
+</p>
 
-        <h2>{% trans %}Sessions{% endtrans%}</h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>{% trans %}Login date{% endtrans %}</th>
-                    <th>{% trans %}Device{% endtrans %}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for session in sessions %}
-                    <tr>
-                        <td>{{ session.creation_date }}</td>
-                        <td>
-                            {% if session == user.session %}
-                                {% trans device=session.last_device %}{{ device }} (current session){%endtrans%}
-                            {% else %}
-                                {{ session.last_device }}
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<h2>{% trans %}Sessions{% endtrans%}</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>{% trans %}Login date{% endtrans %}</th>
+            <th>{% trans %}Device{% endtrans %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for session in sessions %}
+            <tr>
+                <td>{{ session.creation_date }}</td>
+                <td>
+                    {% if session == user.session %}
+                        {% trans device=session.last_device %}{{ device }} (current session){%endtrans%}
+                    {% else %}
+                        {{ session.last_device }}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
-        <h2>{% trans %}Change password{% endtrans %}</h2>
-        <form method="POST" action="/change_password_form">
-            <input type="hidden" value="{{ csrf_token }}" name="csrf_token">
-            {% trans %}Current password{% endtrans %}<br>
-            <input type="password" value="" name="current_password"><br>
-            {% trans %}New password{% endtrans %}<br>
-            <input type="password" value="" name="new_password"><br>
-            {% trans %}Repeat new password{% endtrans %}<br>
-            <input type="password" value="" name="repeat_new_password"><br>
-            <input type="submit" value="{% trans %}Change password{% endtrans %}">
-        </form>
-    </main>
+<h2>{% trans %}Change password{% endtrans %}</h2>
+<form method="POST" action="/change_password_form">
+    <input type="hidden" value="{{ csrf_token }}" name="csrf_token">
+    {% trans %}Current password{% endtrans %}<br>
+    <input type="password" value="" name="current_password"><br>
+    {% trans %}New password{% endtrans %}<br>
+    <input type="password" value="" name="new_password"><br>
+    {% trans %}Repeat new password{% endtrans %}<br>
+    <input type="password" value="" name="repeat_new_password"><br>
+    <input type="submit" value="{% trans %}Change password{% endtrans %}">
+</form>
 
 {% endblock content %}

@@ -1,18 +1,18 @@
-{% extends "base.jinja2" %}
+{% extends "base_static.jinja2" %}
 
 {% block title %}
     {% trans %}Rename file{% endtrans %}
 {% endblock title %}
 
 {% block content %}
-    <main>
-        {{ page_heading(gettext('Rename file'), back_url=back_url) }}
 
-        <form method="POST">
-            <input type="hidden" name="csrf" value="{{ csrf_token }}">
-            <input type="hidden" name="path" value="{{ path }}">
-            <input type="text" name="new-name" value="{{ name }}" size="70">
-            <input type="submit" value="{% trans %}Rename{% endtrans %}">
-        </form>
-    </main>
+{{ page_heading(gettext('Rename file'), back_url=back_url) }}
+
+<form method="POST">
+    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+    <input type="hidden" name="path" value="{{ path }}">
+    <input type="text" name="new-name" value="{{ name }}" size="70">
+    <input type="submit" value="{% trans %}Rename{% endtrans %}">
+</form>
+
 {% endblock content %}
