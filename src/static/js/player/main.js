@@ -36,6 +36,10 @@ document.addEventListener('DOMContentLoaded', () => {
         switchLyrics();
     });
     document.getElementById('lyrics-box').addEventListener('click', event => {
+        if (event.target.nodeName === 'A') {
+            // Allow clicking 'source' link
+            return;
+        }
         event.preventDefault();
         switchAlbumCover();
     });
