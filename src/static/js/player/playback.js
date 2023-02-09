@@ -108,6 +108,7 @@ function replaceTrackDisplayTitle() {
         } else {
             document.getElementById('current-track').replaceChildren('[track info unavailable]');
         }
+        document.title = track.display;
     } else {
         // Nothing playing
         document.getElementById('current-track').textContent = '-';
