@@ -123,7 +123,7 @@ kbd {
 }
 
 .other-checkboxes {
-    max-height: 11rem;
+    max-height: 10vh;
     overflow-y: auto;
 }
 
