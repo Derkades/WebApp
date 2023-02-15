@@ -6,9 +6,9 @@ import time
 import bcrypt
 import shutil
 
-from flask import Flask, request, render_template, Response, redirect, send_file
-from flask_babel import Babel
-from flask_babel import _
+from quart import Quart, request, render_template, Response, redirect, send_file
+from quart_babel import Babel
+from quart_babel import gettext as _
 
 import auth
 from auth import AuthError, RequestTokenError
@@ -26,7 +26,7 @@ import settings
 from packer import PackedAsset
 
 
-app = Flask(__name__, template_folder='templates')
+app = Quart(__name__, template_folder='templates')
 babel = Babel(app)
 log = logging.getLogger('app')
 static_dir = Path('static')
@@ -41,18 +41,18 @@ LANGUAGES = (
 
 
 @app.errorhandler(AuthError)
-def handle_auth_error(err: AuthError):
+async def handle_auth_error(err: AuthError):
     """
     Display permission denied error page with reason, or redirect to login page
     """
     if err.redirect:
         return redirect('/login')
 
-    return Response(render_template('403.jinja2', reason=err.reason.message), 403)
+    return Response(await render_template('403.jinja2', reason=err.reason.message), 403)
 
 
 @app.errorhandler(RequestTokenError)
-def handle_token_error(_err: RequestTokenError):
+async def handle_token_error(_err: RequestTokenError):
     """
     Return bad request
     """
@@ -61,17 +61,17 @@ def handle_token_error(_err: RequestTokenError):
 
 
 @app.route('/')
-def route_home():
+async def route_home():
     """
     Home page, with links to file manager and music player
     """
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn, redirect_to_login=True)
-    return render_template('home.jinja2')
+    return await render_template('home.jinja2')
 
 
 @app.route('/login', methods=['GET', 'POST'])
-def route_login():
+async def route_login():
     """
     Login route. Serve login page for GET requests, and accepts password input for POST requests.
     If the provided password is invalid, the login template is rendered with invalid_password=True
@@ -85,14 +85,15 @@ def route_login():
             pass
 
         if request.method == 'GET':
-            return render_template('login.jinja2', invalid_password=False)
+            return await render_template('login.jinja2', invalid_password=False)
 
         if request.is_json:
-            username = request.json['username']
-            password = request.json['password']
+            input_dict = await request.json
         else:
-            username = request.form['username']
-            password = request.form['password']
+            input_dict = await request.form
+
+        username = input_dict['username']
+        password = input_dict['password']
 
         remote_addr = request.remote_addr
         user_agent = request.headers['User-Agent'] if 'User-Agent' in request.headers else None
@@ -103,7 +104,7 @@ def route_login():
             if request.is_json:
                 return Response(None, 403)
             else:
-                return render_template('login.jinja2', invalid_password=True)
+                return await render_template('login.jinja2', invalid_password=True)
 
         if request.is_json:
             return {'token': token}
@@ -114,7 +115,7 @@ def route_login():
 
 
 @app.route('/player')
-def route_player():
+async def route_player():
     """
     Main player page. Serves player.jinja2 template file.
     """
@@ -124,21 +125,21 @@ def route_player():
         primary_playlist, = conn.execute('SELECT primary_playlist FROM user WHERE id=?',
                                         (user.user_id,)).fetchone()
 
-    return render_template('player.jinja2',
-                           mobile=is_mobile(),
-                           csrf_token=csrf_token,
-                           languages=LANGUAGES,
-                           language=get_language(),
-                           primary_playlist=primary_playlist)
+    return await render_template('player.jinja2',
+                                  mobile=is_mobile(),
+                                  csrf_token=csrf_token,
+                                  languages=LANGUAGES,
+                                  language=get_language(),
+                                  primary_playlist=primary_playlist)
 
 
 @app.route('/player.js')
-def route_player_js():
+async def route_player_js():
     return Response(player_js.get_bytes(), content_type='application/javascript')
 
 
 @app.route('/get_csrf')
-def route_get_csrf():
+async def route_get_csrf():
     """
     Get CSRF token
     """
@@ -149,7 +150,7 @@ def route_get_csrf():
 
 
 @app.route('/choose_track', methods=['GET'])
-def route_choose_track():
+async def route_choose_track():
     """
     Choose random track from the provided playlist directory.
     """
@@ -170,7 +171,7 @@ def route_choose_track():
 
 
 @app.route('/get_track')
-def route_get_track() -> Response:
+async def route_get_track() -> Response:
     """
     Get transcoded audio for the given track path.
     """
@@ -194,14 +195,14 @@ def route_get_track() -> Response:
     else:
         raise ValueError(type_str)
 
-    audio = track.transcoded_audio(audio_type)
+    audio = await track.transcoded_audio(audio_type)
     response = Response(audio, mimetype=media_type)
     response.accept_ranges = 'bytes'  # Workaround for Chromium bug https://stackoverflow.com/a/65804889
     return response
 
 
 @app.route('/get_album_cover')
-def route_get_album_cover() -> Response:
+async def route_get_album_cover() -> Response:
     """
     Get album cover image for the provided track path.
     """
@@ -215,13 +216,13 @@ def route_get_album_cover() -> Response:
             quality = ImageQuality.HIGH
         elif quality_str == 'low':
             quality = ImageQuality.LOW
-        image_bytes = track.get_cover_thumbnail(meme, ImageFormat.WEBP, quality)
+        image_bytes = await track.get_cover_thumbnail(meme, ImageFormat.WEBP, quality)
 
     return Response(image_bytes, mimetype='image/webp')
 
 
 @app.route('/get_lyrics')
-def route_get_lyrics():
+async def route_get_lyrics():
     """
     Get lyrics for the provided track path.
     """
@@ -244,16 +245,18 @@ def route_get_lyrics():
 
 
 @app.route('/ytdl', methods=['POST'])
-def route_ytdl():
+async def route_ytdl():
     """
     Use yt-dlp to download the provided URL to a playlist directory
     """
+    json = await request.json
+
     with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
+        user.verify_csrf(json['csrf'])
 
-        directory = request.json['directory']
-        url = request.json['url']
+        directory = json['directory']
+        url = json['url']
 
         playlist = music.playlist(conn, directory)
         if not playlist.has_write_permission(user):
@@ -277,7 +280,7 @@ def route_ytdl():
 
 
 @app.route('/track_list')
-def route_track_list():
+async def route_track_list():
     """
     Return list of playlists and tracks.
     """
@@ -318,13 +321,15 @@ def route_track_list():
 
 
 @app.route('/scan_music', methods=['POST'])
-def route_scan_music():
+async def route_scan_music():
     """
     Scans all playlists for new music
     """
+    json = await request.json
+
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
+        user.verify_csrf(json['csrf'])
 
         scanner.scan(conn)
 
@@ -332,11 +337,12 @@ def route_scan_music():
 
 
 @app.route('/update_metadata', methods=['POST'])
-def route_update_metadata():
+async def route_update_metadata():
     """
     Endpoint to update track metadata
     """
-    payload = request.json
+    payload = await request.json
+
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(payload['csrf'])
@@ -358,18 +364,18 @@ def route_update_metadata():
 
 
 @app.route('/raphson')
-def route_raphson() -> Response:
+async def route_raphson() -> Response:
     """
     Serve raphson logo image
     """
-    thumb = image.thumbnail(raphson_png_path, 'raphson', ImageFormat.WEBP, ImageQuality.LOW, True)
+    thumb = await image.thumbnail(raphson_png_path, 'raphson', ImageFormat.WEBP, ImageQuality.LOW, True)
     response = Response(thumb, mimetype='image/webp')
     response.cache_control.max_age = 24*3600
     return response
 
 
 @app.route('/files')
-def route_files():
+async def route_files():
     """
     File manager
     """
@@ -416,14 +422,14 @@ def route_files():
 
     children = sorted(children, key=lambda x: x['name'])
 
-    return render_template('files.jinja2',
-                           base_path=music.to_relpath(browse_path),
-                           base_path_uri=urlencode(music.to_relpath(browse_path)),
-                           write_permission=write_permission,
-                           parent_path_uri=parent_path_uri,
-                           files=children,
-                           music_extensions=','.join(music.MUSIC_EXTENSIONS),
-                           csrf_token=csrf_token)
+    return await render_template('files.jinja2',
+                                 base_path=music.to_relpath(browse_path),
+                                 base_path_uri=urlencode(music.to_relpath(browse_path)),
+                                 write_permission=write_permission,
+                                 parent_path_uri=parent_path_uri,
+                                 files=children,
+                                 music_extensions=','.join(music.MUSIC_EXTENSIONS),
+                                 csrf_token=csrf_token)
 
 
 def check_filename(name: str) -> None:
@@ -435,15 +441,17 @@ def check_filename(name: str) -> None:
 
 
 @app.route('/playlists_create', methods=['POST'])
-def route_playlists_create():
+async def route_playlists_create():
     """
     Form target to create playlist, called from /playlists page
     """
+    form = await request.form
+
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
+        user.verify_csrf(form['csrf'])
 
-        dir_name = request.form['path']
+        dir_name = form['path']
 
         check_filename(dir_name)
 
@@ -463,23 +471,25 @@ def route_playlists_create():
 
 
 @app.route('/playlists_share', methods=['GET', 'POST'])
-def route_playlists_share():
+async def route_playlists_share():
     if request.method == 'GET':
         with db.connect(read_only=True) as conn:
             auth.verify_auth_cookie(conn)
             usernames = [row[0] for row in conn.execute('SELECT username FROM user')]
         csrf = request.args['csrf']
         playlist_relpath = request.args['playlist']
-        return render_template('playlists_share.jinja2',
-                               csrf=csrf,
-                               playlist=playlist_relpath,
-                               usernames=usernames)
+        return await render_template('playlists_share.jinja2',
+                                     csrf=csrf,
+                                     playlist=playlist_relpath,
+                                     usernames=usernames)
     else:
+        form = await request.form
+
         with db.connect() as conn:
             user = auth.verify_auth_cookie(conn)
-            user.verify_csrf(request.form['csrf'])
-            playlist_relpath = request.form['playlist']
-            username = request.form['username']
+            user.verify_csrf(form['csrf'])
+            playlist_relpath = form['playlist']
+            username = form['username']
 
             target_user_id, = conn.execute('SELECT id FROM user WHERE username=?',
                                            (username,)).fetchone()
@@ -497,25 +507,29 @@ def route_playlists_share():
                             SET write = 1
                          ''', (target_user_id, playlist_relpath))
 
-            return redirect('/playlists')
+            return await redirect('/playlists')
 
 
 @app.route('/files_upload', methods=['POST'])
-def route_files_upload():
+async def route_files_upload():
     """
     Form target to upload file, called from file manager
     """
+    form = await request.form
+
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
+        user.verify_csrf(form['csrf'])
 
-        upload_dir = music.from_relpath(request.form['dir'])
+        upload_dir = music.from_relpath(form['dir'])
 
         playlist = Playlist.from_path(conn, upload_dir)
         if not playlist.has_write_permission(user):
             return Response(None, 403)
 
-    for uploaded_file in request.files.getlist('upload'):
+    files = await request.files
+
+    for uploaded_file in files.getlist('upload'):
         if uploaded_file.filename is None or uploaded_file.filename == '':
             return Response('Blank file name. Did you select a file?', 402)
 
@@ -529,7 +543,7 @@ def route_files_upload():
 
 
 @app.route('/files_rename', methods=['GET', 'POST'])
-def route_files_rename():
+async def route_files_rename():
     """
     Page and form target to rename file
     """
@@ -538,13 +552,15 @@ def route_files_rename():
 
         if request.method == 'POST':
             if request.is_json:
-                csrf = request.json['csrf']
-                relpath = request.json['path']
-                new_name = request.json['new_name']
+                json = await request.json
+                csrf = json['csrf']
+                relpath = json['path']
+                new_name = json['new_name']
             else:
-                csrf = request.form['csrf']
-                relpath = request.form['path']
-                new_name = request.form['new-name']
+                form = await request.form
+                csrf = form['csrf']
+                relpath = form['path']
+                new_name = form['new-name']
 
             user.verify_csrf(csrf)
 
@@ -566,47 +582,49 @@ def route_files_rename():
         else:
             path = music.from_relpath(request.args['path'])
             back_url = request.args['back_url']
-            return render_template('files_rename.jinja2',
-                                csrf_token=user.get_csrf(),
-                                path=music.to_relpath(path),
-                                name=path.name,
-                                back_url=back_url)
+            return await render_template('files_rename.jinja2',
+                                          csrf_token=user.get_csrf(),
+                                          path=music.to_relpath(path),
+                                          name=path.name,
+                                          back_url=back_url)
 
 
 @app.route('/files_mkdir', methods=['POST'])
-def route_files_mkdir():
+async def route_files_mkdir():
     """
     Create directory, then enter it
     """
+    form = await request.form
+
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
+        user.verify_csrf(form['csrf'])
 
-    path = music.from_relpath(request.form['path'])
+    path = music.from_relpath(form['path'])
 
     playlist = Playlist.from_path(conn, path)
     if not playlist.has_write_permission(user):
         return Response(None, 403)
 
-    dirname = request.form['dirname']
+    dirname = form['dirname']
     check_filename(dirname)
     Path(path, dirname).mkdir()
     return redirect('/files?path=' + urlencode(music.to_relpath(path)))
 
 
 @app.route('/files_download')
-def route_files_download():
+async def route_files_download():
     """
     Download track
     """
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
     path = music.from_relpath(request.args['path'])
-    return send_file(path, as_attachment=True)
+    return await send_file(path, as_attachment=True)
 
 
 @app.route('/account')
-def route_account():
+async def route_account():
     """
     Account information page
     """
@@ -615,31 +633,33 @@ def route_account():
         csrf_token = user.get_csrf()
         sessions = user.sessions()
 
-        return render_template('account.jinja2',
-                               user=user,
-                               csrf_token=csrf_token,
-                               sessions=sessions,
-                               lastfm_enabled=lastfm.is_configured(),
-                               lastfm_name=user.lastfm_name,
-                               lastfm_key=user.lastfm_key,
-                               lastfm_connect_url=lastfm.CONNECT_URL)
+    return await render_template('account.jinja2',
+                                 user=user,
+                                 csrf_token=csrf_token,
+                                 sessions=sessions,
+                                 lastfm_enabled=lastfm.is_configured(),
+                                 lastfm_name=user.lastfm_name,
+                                 lastfm_key=user.lastfm_key,
+                                 lastfm_connect_url=lastfm.CONNECT_URL)
 
 
 @app.route('/change_password_form', methods=['POST'])
-def route_change_password_form():
+async def route_change_password_form():
     """
     Form target to change password, called from /account page
     """
+    form = await request.form
+
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf_token'])
-        if not user.verify_password(request.form['current_password']):
+        user.verify_csrf(form['csrf_token'])
+        if not user.verify_password(form['current_password']):
             return _('Incorrect password.')
 
-        if request.form['new_password'] != request.form['repeat_new_password']:
+        if form['new_password'] != form['repeat_new_password']:
             return _('Repeated new passwords do not match.')
 
-        user.update_password(request.form['new_password'])
+        user.update_password(form['new_password'])
         return _('Password updated. All sessions have been invalidated. You will need to log in again.')
 
 
@@ -652,7 +672,7 @@ def radio_track_response(track: RadioTrack):
 
 
 @app.route('/radio_current')
-def route_radio_current():
+async def route_radio_current():
     """
     Endpoint that returns information about the current radio track
     """
@@ -663,7 +683,7 @@ def route_radio_current():
 
 
 @app.route('/radio_next')
-def route_radio_next():
+async def route_radio_next():
     """
     Endpoint that returns information about the next radio track
     """
@@ -674,16 +694,16 @@ def route_radio_next():
 
 
 @app.route('/radio')
-def route_radio_home():
+async def route_radio_home():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         csrf_token=user.get_csrf()
-    return render_template('radio.jinja2',
-                           csrf=csrf_token)
+    return await render_template('radio.jinja2',
+                                 csrf=csrf_token)
 
 
 @app.route('/lastfm_callback')
-def route_lastfm_callback():
+async def route_lastfm_callback():
     # After allowing access, last.fm sends the user to this page with an
     # authentication token. The authentication token can only be used once,
     # to obtain a session key. Session keys are stored in the database.
@@ -692,31 +712,35 @@ def route_lastfm_callback():
     # can't save the token just yet. Add another redirect step.
 
     auth_token = request.args['token']
-    return render_template('lastfm_callback.jinja2',
-                           auth_token=auth_token)
+    return await render_template('lastfm_callback.jinja2',
+                                 auth_token=auth_token)
 
 
 @app.route('/lastfm_connect', methods=['POST'])
-def route_lastfm_connect():
+async def route_lastfm_connect():
+    form = await request.form
+
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         # This form does not have a CSRF token, because the user is known
         # in the code that serves the form. Not sure how to fix this.
         # An attacker being able to link their last.fm account is not that bad
         # of an issue, so we'll deal with it later.
-        auth_token = request.form['auth_token']
+        auth_token = form['auth_token']
         name = lastfm.obtain_session_key(user, auth_token)
-    return render_template('lastfm_connected.jinja2',
-                           name=name)
+    return await render_template('lastfm_connected.jinja2',
+                                 name=name)
 
 
 @app.route('/now_playing', methods=['POST'])
-def route_now_playing():
+async def route_now_playing():
+    json = await request.json
+
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
+        user.verify_csrf(json['csrf'])
 
-        relpath = request.json['track']
+        relpath = json['track']
 
         user_key = lastfm.get_user_key(user)
 
@@ -756,13 +780,15 @@ def route_now_playing():
 
 
 @app.route('/history_played', methods=['POST'])
-def route_history_played():
+async def route_history_played():
+    json = await request.json
+
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
+        user.verify_csrf(json['csrf'])
 
-        track = request.json['track']
-        playlist = request.json['playlist']
+        track = json['track']
+        playlist = json['playlist']
 
         timestamp = int(time.time())
         conn.execute('''
@@ -771,7 +797,7 @@ def route_history_played():
                      ''',
                      (timestamp, user.user_id, track, playlist))
 
-        if not request.json['lastfmEligible']:
+        if not json['lastfmEligible']:
             # No need to scrobble, nothing more to do
             return Response('ok', 200)
 
@@ -781,7 +807,7 @@ def route_history_played():
             # User has not linked their account, no need to scrobble
             return Response('ok', 200)
 
-        track = Track.by_relpath(conn, request.json['track'])
+        track = Track.by_relpath(conn, json['track'])
         meta = track.metadata()
         if meta is None:
             log.warning('Track is missing from database. Probably deleted by a rescan after the track was queued.')
@@ -789,14 +815,14 @@ def route_history_played():
 
     # Scrobble request takes a while, so close database connection first
 
-    start_timestamp = request.json['startTimestamp']
+    start_timestamp = json['startTimestamp']
     lastfm.scrobble(lastfm_key, meta, start_timestamp)
 
     return Response('ok', 200)
 
 
 @app.route('/history')
-def route_history():
+async def route_history():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
 
@@ -872,15 +898,15 @@ def route_history():
                           'count': count}
                           for username, count in result]
 
-    return render_template('history.jinja2',
-                           history=history_items,
-                           now_playing=now_playing_items,
-                           summary_playlists=summary_playlists,
-                           summary_users=summary_users)
+    return await render_template('history.jinja2',
+                                 history=history_items,
+                                 now_playing=now_playing_items,
+                                 summary_playlists=summary_playlists,
+                                 summary_users=summary_users)
 
 
 @app.route('/playlist_stats')
-def route_playlist_stats():
+async def route_playlist_stats():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
         playlists = music.playlists(conn)
@@ -888,12 +914,12 @@ def route_playlist_stats():
                             'stats': playlist.stats()}
                            for playlist in playlists]
 
-    return render_template('playlist_stats.jinja2',
-                           playlists=playlists_stats)
+    return await render_template('playlist_stats.jinja2',
+                                 playlists=playlists_stats)
 
 
 @app.route('/playlists')
-def route_playlists():
+async def route_playlists():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         csrf_token = user.get_csrf()
@@ -901,20 +927,22 @@ def route_playlists():
         primary_playlist, = conn.execute('SELECT primary_playlist FROM user WHERE id=?',
                                          (user.user_id,)).fetchone()
 
-    return render_template('playlists.jinja2',
-                           user_is_admin=user.admin,
-                           playlists=user_playlists,
-                           csrf_token=csrf_token,
-                           primary_playlist=primary_playlist)
+    return await render_template('playlists.jinja2',
+                                 user_is_admin=user.admin,
+                                 playlists=user_playlists,
+                                 csrf_token=csrf_token,
+                                 primary_playlist=primary_playlist)
 
 
 @app.route('/playlists_favorite', methods=['POST'])
-def route_playlists_favorite():
+async def route_playlists_favorite():
+    form = await request.form
+
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
-        playlist = request.form['playlist']
-        is_favorite = request.form['favorite']
+        user.verify_csrf(form['csrf'])
+        playlist = form['playlist']
+        is_favorite = form['favorite']
         assert is_favorite in {'0', '1'}
         conn.execute('''
                      INSERT INTO user_playlist (user, playlist, favorite)
@@ -927,11 +955,12 @@ def route_playlists_favorite():
 
 
 @app.route('/playlists_set_primary', methods=['POST'])
-def route_playlists_set_primary():
+async def route_playlists_set_primary():
+    form = await request.form
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
-        playlist = request.form['primary-playlist']
+        user.verify_csrf(form['csrf'])
+        playlist = form['primary-playlist']
 
         conn.execute('UPDATE user SET primary_playlist=? WHERE id=?',
                      (playlist, user.user_id))
@@ -940,17 +969,17 @@ def route_playlists_set_primary():
 
 
 @app.route('/download')
-def route_download():
+async def route_download():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
         playlists = music.playlists(conn)
 
-    return render_template('download.jinja2',
-                           playlists=playlists)
+    return await render_template('download.jinja2',
+                                 playlists=playlists)
 
 
 @app.route('/recent_changes')
-def route_recent_changes():
+async def route_recent_changes():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
 
@@ -967,23 +996,25 @@ def route_recent_changes():
                     'track': track}
                    for timestamp, action, playlist, track in result]
 
-    return render_template('recent_changes.jinja2',
-                           changes=changes)
+    return await render_template('recent_changes.jinja2',
+                                 changes=changes)
 
 
 @app.route('/add_never_play', methods=['POST'])
-def route_add_never_play():
+async def route_add_never_play():
+    json = await request.json
+
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
-        track = request.json['track']
+        user.verify_csrf(json['csrf'])
+        track = json['track']
         conn.execute('INSERT OR IGNORE INTO never_play (user, track) VALUES (?, ?)',
                      (user.user_id, track))
     return Response(None, 200)
 
 
 @app.route('/never_play')
-def route_never_play():
+async def route_never_play():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         csrf_token = user.get_csrf()
@@ -991,17 +1022,18 @@ def route_never_play():
                               (user.user_id,)).fetchall()
         tracks = [track for track, in result]
 
-    return render_template('never_play.jinja2',
-                           csrf_token=csrf_token,
-                           tracks=tracks)
+    return await render_template('never_play.jinja2',
+                                 csrf_token=csrf_token,
+                                 tracks=tracks)
 
 
 @app.route('/remove_never_play', methods=['POST'])
-def route_remove_never_play():
+async def route_remove_never_play():
+    form = await request.form
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
-        track = request.form['track']
+        user.verify_csrf(form['csrf'])
+        track = form['track']
         conn.execute('DELETE FROM never_play WHERE user=? AND track=?',
                      (user.user_id, track))
 
@@ -1009,7 +1041,7 @@ def route_remove_never_play():
 
 
 @app.route('/users')
-def route_users():
+async def route_users():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn, require_admin=True)
 
@@ -1019,27 +1051,21 @@ def route_users():
                   'primary_playlist': primary_playlist}
                  for username, admin, primary_playlist in result]
 
-    return render_template('users.jinja2',
-                           users=users)
+    return await render_template('users.jinja2',
+                                 users=users)
 
 
 @app.route('/users_edit', methods=['GET', 'POST'])
-def route_users_edit():
+async def route_users_edit():
+    form = await request.form
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn, require_admin=True)
 
-        if request.method == 'GET':
-            csrf_token = user.get_csrf()
-            username = request.args['username']
-
-            return render_template('users_edit.jinja2',
-                                   csrf_token=csrf_token,
-                                   username=username)
-        else:
-            user.verify_csrf(request.form['csrf'])
-            username = request.form['username']
-            new_username = request.form['new_username']
-            new_password = request.form['new_password']
+        if request.method == 'POST':
+            user.verify_csrf(form['csrf'])
+            username = form['username']
+            new_username = form['new_username']
+            new_password = form['new_password']
 
             if new_password != '':
                 hashed_password = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt())
@@ -1057,16 +1083,25 @@ def route_users_edit():
                              (new_username, username))
 
             return redirect('/users')
+        else:
+            csrf_token = user.get_csrf()
+            username = request.args['username']
+
+    return await render_template('users_edit.jinja2',
+                                 csrf_token=csrf_token,
+                                 username=username)
 
 
 @app.route('/player_copy_track', methods=['POST'])
-def route_player_copy_track():
+async def route_player_copy_track():
     """
     Endpoint used by music player to copy a track to the user's primary playlist
     """
+    json = await request.json
+
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
+        user.verify_csrf(json['csrf'])
         if user.primary_playlist is None:
             return Response(_('No playlist configured. Please configure a primay playlist in playlist manager.'), 200)
 
@@ -1074,7 +1109,7 @@ def route_player_copy_track():
         if not playlist.write and not user.admin:
             return Response(_('No write permission for playlist: %(playlist)s', playlist=playlist.name), 200)
 
-        track = Track.by_relpath(conn, request.json['track'])
+        track = Track.by_relpath(conn, json['track'])
 
         if track.playlist == playlist.name:
             return Response(_('Track is already in this playlist'))
@@ -1100,13 +1135,7 @@ def get_language() -> str:
     header_lang = best_match[:2] if best_match else 'en'
     return header_lang
 
-
-@babel.localeselector
-def get_locale():
-    """
-    Get locale preference from HTTP headers
-    """
-    return get_language()
+babel.locale_selector = get_language
 
 
 def get_img_format():
@@ -1149,6 +1178,9 @@ def is_fruit() -> bool:
 
 
 if __name__ == '__main__':
+    if not settings.dev:
+        print('Refusing to start in development mode without MUSIC_ENV set to "dev"')
+
     import logconfig
     logconfig.apply()
     app.run(host='0.0.0.0', port=8080, debug=True)

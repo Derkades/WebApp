@@ -41,11 +41,11 @@ PARAMS_TABLE: dict[ImageFormat, dict[ImageQuality, ThumbnailParameters]] = {
 }
 
 
-def thumbnail(input_img: Path | bytes | Callable,
-              cache_key: str,
-              img_format: ImageFormat,
-              img_quality: ImageQuality,
-              square: bool) -> bytes:
+async def thumbnail(input_img: Path | bytes | Callable,
+                    cache_key: str,
+                    img_format: ImageFormat,
+                    img_quality: ImageQuality,
+                    square: bool) -> bytes:
     """
     Generate thumbnail, making use of cache.
     Parameters:
@@ -72,7 +72,7 @@ def thumbnail(input_img: Path | bytes | Callable,
         with open(input_img, 'rb') as inp_img_f:
             input_bytes = inp_img_f.read()
     elif callable(input_img):
-        input_bytes = input_img()
+        input_bytes = await input_img()
     elif isinstance(input_img, bytes):
         input_bytes = input_img
     elif input_img is None:

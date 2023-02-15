@@ -8,9 +8,9 @@ from enum import Enum, unique
 from sqlite3 import Connection
 
 import bcrypt
-from flask import request
-import flask_babel
-from flask_babel import _
+from quart import request
+import quart_babel
+from quart_babel import gettext as _
 
 import settings
 
@@ -29,7 +29,7 @@ class Session:
     @property
     def creation_date(self) -> str:
         seconds_ago = -(int(time.time()) - self.creation_timestamp)
-        return flask_babel.format_timedelta(seconds_ago, add_direction=True)
+        return quart_babel.format_timedelta(seconds_ago, add_direction=True)
 
     @property
     def last_device(self) -> Optional[str]:

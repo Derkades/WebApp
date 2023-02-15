@@ -150,7 +150,7 @@ class Track:
         """
         return metadata.cached(self.conn, self.relpath)
 
-    def get_cover(self, meme: bool) -> Optional[bytes]:
+    async def get_cover(self, meme: bool) -> Optional[bytes]:
         """
         Find album cover using MusicBrainz or Bing.
         Parameters:
@@ -188,14 +188,14 @@ class Track:
         log.info('No suitable cover found')
         return None
 
-    def get_cover_thumbnail(self, meme: bool, img_format: ImageFormat, img_quality: ImageQuality) -> bytes:
+    async def get_cover_thumbnail(self, meme: bool, img_format: ImageFormat, img_quality: ImageQuality) -> bytes:
         cache_key = self.relpath + str(self.mtime) + str(meme)
 
-        def get_img_function():
-            return self.get_cover(meme)
+        async def get_img_function():
+            return await self.get_cover(meme)
 
         square = not meme
-        return image.thumbnail(get_img_function, cache_key, img_format, img_quality, square)
+        return await image.thumbnail(get_img_function, cache_key, img_format, img_quality, square)
 
     def _get_ffmpeg_metadata_options(self):
         meta = self.metadata()
@@ -215,8 +215,8 @@ class Track:
         metadata_options.extend(('-metadata', 'genre=' + metadata.join_meta_list(meta.tags)))
         return metadata_options
 
-    def transcoded_audio(self,
-                         audio_type: AudioType) -> bytes:
+    async def transcoded_audio(self,
+                               audio_type: AudioType) -> bytes:
         """
         Normalize and compress audio using ffmpeg
         Returns: Compressed audio bytes
@@ -245,7 +245,7 @@ class Track:
                              '-b:a', '192k',
                              '-vn']  # remove video track (and album covers)
         elif audio_type == AudioType.MP3_WITH_METADATA:
-            cover = self.get_cover_thumbnail(False, ImageFormat.JPEG, ImageQuality.HIGH)
+            cover = await self.get_cover_thumbnail(False, ImageFormat.JPEG, ImageQuality.HIGH)
             # Write cover to temp file so ffmpeg can read it
             cover_temp_file = tempfile.NamedTemporaryFile('wb')
             cover_temp_file.write(cover)
