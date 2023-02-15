@@ -21,6 +21,7 @@ def getenv(key: str, default: Optional[str]) -> str:
 
 
 csrf_validity_seconds = 3600
+bing_image_download_count = 5
 
 user_agent = 'Super fancy music player (https://github.com/DanielKoomen/WebApp/)'
 ffmpeg_loglevel = getenv('MUSIC_FFMPEG_LOGLEVEL', 'info')
