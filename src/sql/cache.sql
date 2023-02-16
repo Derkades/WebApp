@@ -7,4 +7,6 @@ CREATE TABLE IF NOT EXISTS cache (
     access_time INTEGER DEFAULT 0
 );
 
+CREATE INDEX IF NOT EXISTS idx_cache_access_time ON cache(access_time);
+
 COMMIT;
