@@ -105,10 +105,11 @@ function replaceTrackDisplayTitle() {
         const track = queue.currentTrack.track();
         if (track !== null) {
             document.getElementById('current-track').replaceChildren(track.displayHtml(true));
+            document.title = track.display;
         } else {
             document.getElementById('current-track').replaceChildren('[track info unavailable]');
+            document.title = '';
         }
-        document.title = track.display;
     } else {
         // Nothing playing
         document.getElementById('current-track').textContent = '-';
