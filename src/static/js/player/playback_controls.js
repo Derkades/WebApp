@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Skip to previous
     document.getElementById('button-prev').addEventListener('click', () => {
         // Try to skip to beginning of current track first
-        if (audioElem.currentTime > 15 || this.previousTracks.length == 0) {
+        if (audioElem.currentTime > 15 || queue.previousTracks.length == 0) {
             audioElem.currentTime = 0;
             eventBus.publish(MusicEvent.PLAYBACK_CHANGE)
             return;
