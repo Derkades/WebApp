@@ -1,0 +1,24 @@
+{% extends "base_static.jinja2" %}
+
+{% block title %}
+    {% trans %}Give playlist write access{% endtrans %}
+{% endblock title %}
+
+{% block content %}
+
+{{ page_heading(gettext('Give playlist write access user'), back_url='/users') }}
+
+{% trans username=username %}Select playlist to add to {{ username }}:{% endtrans %}<br>
+
+<form action="/users_add_playlist" method="POST">
+    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+    <input type="hidden" name="username" value="{{ username }}">
+    <select name="playlist">
+        {% for playlist in playlists %}
+            <option value="{{ playlist }}">{{ playlist }}</option>
+        {% endfor %}
+    </select><br>
+    <input type="submit" value="{% trans %}Add{% endtrans %}">
+</form>
+
+{% endblock content %}

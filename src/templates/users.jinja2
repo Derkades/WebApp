@@ -54,6 +54,10 @@
                         <input type="hidden" name="username" value="{{ user.username }}">
                         <input type="submit" value="{% trans %}Edit{% endtrans %}">
                     </form>
+                    <form action="/users_add_playlist">
+                        <input type="hidden" name="username" value="{{ user.username }}">
+                        <input type="submit" value="{% trans %}Add playlist{% endtrans %}">
+                    </form>
                 </td>
             </tr>
         {% endfor %}
