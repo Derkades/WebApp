@@ -457,7 +457,7 @@ def route_playlists_create():
 
         scanner.scan(conn)  # This creates a row for the playlist in the playlist table
 
-        conn.execute('INSERT OR REPLACE INTO user_playlist (user, playlist, write) VALUES (?, ?, 1)',
+        conn.execute('INSERT INTO user_playlist (user, playlist, write) VALUES (?, ?, 1)',
                      (user.user_id, dir_name))
 
         return redirect('/playlists')
