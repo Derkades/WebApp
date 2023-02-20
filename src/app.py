@@ -959,7 +959,7 @@ def route_recent_changes():
                               SELECT timestamp, action, playlist, track
                               FROM scanner_log
                               ORDER BY id DESC
-                              LIMIT 100
+                              LIMIT 500
                               ''')
 
         changes = [{'timestamp': timestamp,
