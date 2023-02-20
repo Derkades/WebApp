@@ -1,12 +1,12 @@
 {% extends "base_static.jinja2" %}
 
 {% block title %}
-    {% trans %}Give playlist write access{% endtrans %}
+    {% trans %}Give user write access to playlist{% endtrans %}
 {% endblock title %}
 
 {% block content %}
 
-{{ page_heading(gettext('Give playlist write access user'), back_url='/users') }}
+{{ page_heading(gettext('Give user write access to playlist'), back_url='/users') }}
 
 {% trans username=username %}Select playlist to add to {{ username }}:{% endtrans %}<br>
 
