@@ -167,6 +167,19 @@ class Track {
     };
 };
 
+function initTrackList() {
+    Track.updateLocalTrackList().catch(err => {
+        console.warn('track list | error');
+        console.warn(err);
+        setTimeout(initTrackList, 1000);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initTrackList();
+    setInterval(initTrackList, 15*60*1000);
+});
+
 class Lyrics {
     /** @type {boolean} */
     found;

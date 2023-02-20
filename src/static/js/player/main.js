@@ -106,16 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     queue.next();
-    initTrackList();
 });
-
-function initTrackList() {
-    Track.updateLocalTrackList().catch(err => {
-        console.warn('track list | error');
-        console.warn(err);
-        setTimeout(initTrackList, 1000);
-    });
-}
 
 // Hide loading overlay when track list has finished loading
 eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, () => {
