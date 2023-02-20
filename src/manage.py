@@ -100,8 +100,13 @@ def handle_playlist(args):
             print('Playlist does not exist. If you just added it, please re-scan first.')
             return
 
-        conn.execute('INSERT OR REPLACE INTO user_playlist (user, playlist, write) VALUES (?, ?, 1)',
+        conn.execute('''
+                     INSERT INTO user_playlist (user, playlist, write) VALUES (?, ?, 1)
+                     ON CONFLICT (user, playlist) DO UPDATE SET write=1
+                     ''',
                      (user_id, result[0]))
+
+        log.info('Given user %s access to playlist %s', args.username, args.playlist_path)
 
 
 def handle_scan(args):
