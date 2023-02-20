@@ -14,6 +14,7 @@
             <th class="icon-col">{% trans %}Username{% endtrans %}</th>
             <th>{% trans %}Admin{% endtrans %}</th>
             <th>{% trans %}Primary playlist{% endtrans %}</th>
+            <th>{% trans %}Writable playlists{% endtrans %}</th>
             <th>{% trans %}Edit{% endtrans %}</th>
         </tr>
     </thead>
@@ -32,6 +33,9 @@
                 </td>
                 <td>
                     {{ user.primary_playlist }}
+                </td>
+                <td>
+                    {{ user.writable_playlists_str }}
                 </td>
                 <td>
                     <form action="/users_edit">

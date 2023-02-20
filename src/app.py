@@ -1014,11 +1014,18 @@ def route_users():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn, require_admin=True)
 
-        result = conn.execute('SELECT username, admin, primary_playlist FROM user')
-        users = [{'username': username,
+        result = conn.execute('SELECT id, username, admin, primary_playlist FROM user')
+        users = [{'id': user_id,
+                  'username': username,
                   'admin': admin,
                   'primary_playlist': primary_playlist}
-                 for username, admin, primary_playlist in result]
+                 for user_id, username, admin, primary_playlist in result]
+
+        for user in users:
+            result = conn.execute('SELECT playlist FROM user_playlist WHERE user=? AND write=1',
+                                  (user['id'],))
+            user['writable_playlists'] = [playlist for playlist, in result]
+            user['writable_playlists_str'] = ', '.join(user['writable_playlists'])
 
     return render_template('users.jinja2',
                            users=users)
