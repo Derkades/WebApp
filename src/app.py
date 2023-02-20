@@ -1011,8 +1011,9 @@ def route_remove_never_play():
 
 @app.route('/users')
 def route_users():
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn, require_admin=True)
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn, require_admin=True)
+        new_csrf_token = user.get_csrf()
 
         result = conn.execute('SELECT id, username, admin, primary_playlist FROM user')
         users = [{'id': user_id,
@@ -1028,6 +1029,7 @@ def route_users():
             user['writable_playlists_str'] = ', '.join(user['writable_playlists'])
 
     return render_template('users.jinja2',
+                           csrf_token=new_csrf_token,
                            users=users)
 
 
@@ -1065,6 +1067,25 @@ def route_users_edit():
                              (new_username, username))
 
             return redirect('/users')
+
+
+@app.route('/users_new', methods=['POST'])
+def route_users_new():
+    form = request.form
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn, require_admin=True)
+        user.verify_csrf(form['csrf'])
+
+    # Close connection, bcrypt hash takes a while
+    username = form['username']
+    password = form['password']
+    hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+
+    with db.connect() as conn:
+        conn.execute('INSERT INTO user (username, password) VALUES (?, ?)',
+                     (username, hashed_password))
+
+    return redirect('/users')
 
 
 @app.route('/player_copy_track', methods=['POST'])

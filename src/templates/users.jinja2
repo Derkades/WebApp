@@ -9,6 +9,18 @@
 {{ page_heading(gettext('User management')) }}
 
 <table class="table">
+    {% trans %}To create admin users or to delete users, please use the CLI interface.{% endtrans %}
+    <h2>{% trans %}Create new user{% endtrans %}</h2>
+    <form method="POST" action="/users_new">
+        <input type="hidden" name="csrf" value="{{ csrf_token }}">
+        {% trans %}Username{% endtrans %}<br>
+        <input type="text" name="username"><br>
+        {% trans %}Password{% endtrans %}<br>
+        <input type="password" name="password"><br>
+        <input type="submit" value="{% trans %}Create{% endtrans %}">
+    </form>
+
+    <h2>{% trans %}Users{% endtrans %}</h2>
     <thead>
         <tr>
             <th class="icon-col">{% trans %}Username{% endtrans %}</th>
