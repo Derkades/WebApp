@@ -66,8 +66,9 @@ def route_home():
     Home page, with links to file manager and music player
     """
     with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn, redirect_to_login=True)
-    return render_template('home.jinja2')
+        user = auth.verify_auth_cookie(conn, redirect_to_login=True)
+    return render_template('home.jinja2',
+                           user_is_admin=user.admin)
 
 
 @app.route('/login', methods=['GET', 'POST'])

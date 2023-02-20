@@ -15,14 +15,28 @@
 
 {% block content %}
 
+<h2>{% trans %}Music{% endtrans %}</h2>
 {{ nav('/player', 'music', _('Music player')) }}
+
+<h2>{% trans %}Files{%endtrans %}</h2>
 {{ nav('/files', 'folder', _('File manager')) }}
 {{ nav('/playlists', 'playlist-music', _('Playlist manager')) }}
-{{ nav('/account', 'account-cog', _('Account')) }}
+
+<h2>{% trans %}Statistics{%endtrans %}</h2>
 {{ nav('/history', 'history', _('Playback history')) }}
 {{ nav('/playlist_stats', 'chart-line-variant', _('Playback statistics')) }}
 {{ nav('/recent_changes', 'file-edit', _('Recent file changes')) }}
+
+<h2>{% trans %}Settings{%endtrans %}</h2>
+{{ nav('/account', 'account-cog', _('Account')) }}
 {{ nav('/never_play', 'cancel', _('Manage track blocklist')) }}
+
+<h2>{% trans %}Experimental{% endtrans %}</h2>
 {{ nav('/radio', 'radio', _('Radio')) }}
+
+{% if user_is_admin %}
+    <h2>{% trans %}Administrative{% endtrans %}</h2>
+    {{ nav('/users', 'account-multiple', _('User management')) }}
+{% endif %}
 
 {% endblock content %}
