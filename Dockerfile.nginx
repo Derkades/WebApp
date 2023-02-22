@@ -1,0 +1,15 @@
+FROM nginxinc/nginx-unprivileged
+
+USER root
+RUN rm /usr/share/nginx/html/* && \
+    chown nginx: /usr/share/nginx/html
+USER nginx
+
+COPY src/static /usr/share/nginx/html/static
+
+COPY docker/default.conf /etc/nginx/conf.d/
+COPY docker/proxy.conf.template /etc/nginx/templates/
+
+RUN cat /usr/share/nginx/html/static/js/player/*.js > /usr/share/nginx/html/player.js
+
+ENV NGINX_ENVSUBST_OUTPUT_DIR=/tmp

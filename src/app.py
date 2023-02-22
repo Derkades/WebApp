@@ -23,7 +23,7 @@ import radio
 from radio import RadioTrack
 import scanner
 import settings
-from packer import PackedAsset
+import packer
 
 
 app = Flask(__name__, template_folder='templates')
@@ -31,7 +31,6 @@ babel = Babel(app)
 log = logging.getLogger('app')
 static_dir = Path('static')
 raphson_png_path = Path(static_dir, 'raphson.png')
-player_js = PackedAsset(Path(static_dir, 'js', 'player'))
 
 
 LANGUAGES = (
@@ -135,7 +134,8 @@ def route_player():
 
 @app.route('/player.js')
 def route_player_js():
-    return Response(player_js.get_bytes(), content_type='application/javascript')
+    return Response(packer.pack(Path(static_dir, 'js', 'player')),
+                    content_type='application/javascript')
 
 
 @app.route('/get_csrf')

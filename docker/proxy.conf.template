@@ -1,0 +1,2 @@
+set $upstream "$BACKEND_ADDRESS";
+proxy_pass $upstream;
