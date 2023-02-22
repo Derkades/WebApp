@@ -1,7 +1,9 @@
 function handleKey(key) {
     // Don't perform hotkey actions when user is typing in a text field
-    if (document.activeElement.tagName === 'INPUT') {
-        console.log('Ignoring keypress', key);
+    // But do still allow escape key
+    if (document.activeElement.tagName === 'INPUT' &&
+            key !== 'Escape') {
+        console.debug('Ignoring keypress', key);
         return;
     }
 
@@ -38,7 +40,7 @@ function handleKey(key) {
     } else if (key === 'a') {
         switchAlbumCover();
     } else {
-        console.log('Unhandled keypress', key);
+        console.debug('Unhandled keypress', key);
     }
 }
 
