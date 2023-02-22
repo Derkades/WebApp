@@ -7,8 +7,8 @@ USER nginx
 
 COPY src/static /usr/share/nginx/html/static
 
-COPY docker/default.conf /etc/nginx/conf.d/
-COPY docker/proxy.conf.template /etc/nginx/templates/
+COPY docker/nginx/default.conf /etc/nginx/conf.d/
+COPY docker/nginx/proxy.conf.template /etc/nginx/templates/
 
 RUN cat /usr/share/nginx/html/static/js/player/*.js > /usr/share/nginx/html/player.js
 
