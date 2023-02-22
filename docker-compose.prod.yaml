@@ -15,6 +15,7 @@ services:
     user: "1000"
     environment:
       TZ: Europe/Amsterdam
+      MUSIC_PROXIES_X_FORWARDED_FOR: 1
 
   music-nginx:
     # image: ghcr.io/danielkoomen/webapp:nginx

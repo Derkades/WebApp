@@ -33,3 +33,4 @@ radio_playlists = split_by_semicolon(getenv('MUSIC_RADIO_PLAYLISTS', ''))
 lastfm_api_key = getenv('MUSIC_LASTFM_API_KEY', '')
 lastfm_api_secret = getenv('MUSIC_LASTFM_API_SECRET', '')
 dev: bool = getenv('MUSIC_ENV', '') == 'dev'
+proxies_x_forwarded_for: int = int(getenv('MUSIC_PROXIES_X_FORWARDED_FOR', '0'))

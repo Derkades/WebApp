@@ -9,6 +9,7 @@ import shutil
 from flask import Flask, request, render_template, Response, redirect, send_file
 from flask_babel import Babel
 from flask_babel import _
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 import auth
 from auth import AuthError, RequestTokenError
@@ -27,6 +28,7 @@ import packer
 
 
 app = Flask(__name__, template_folder='templates')
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=settings.proxies_x_forwarded_for)
 babel = Babel(app)
 log = logging.getLogger('app')
 static_dir = Path('static')
