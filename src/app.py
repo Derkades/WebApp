@@ -1164,12 +1164,14 @@ def get_language() -> str:
     return header_lang
 
 
-@babel.localeselector
 def get_locale():
     """
     Get locale preference from HTTP headers
     """
     return get_language()
+
+
+babel.locale_selector = get_locale
 
 
 def get_img_format():
