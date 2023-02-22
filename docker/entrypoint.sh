@@ -2,6 +2,7 @@
 set -e
 python db.py
 manage scan
+manage cache-clean
 manage prune-csrf
 
 if [ "$MUSIC_ENV" = "dev" ]
