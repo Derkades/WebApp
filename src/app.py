@@ -811,7 +811,7 @@ def route_history():
                                   LEFT JOIN user ON history.user = user.id
                                   LEFT JOIN track ON history.track = track.path
                               ORDER BY history.id DESC
-                              LIMIT 50
+                              LIMIT 250
                               ''')
         history_items = []
         for timestamp, username, playlist, relpath, track_exists in result:
