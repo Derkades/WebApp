@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-02-20 22:50+0100\n"
-"PO-Revision-Date: 2023-02-20 22:50+0100\n"
+"POT-Creation-Date: 2023-02-25 23:15+0100\n"
+"PO-Revision-Date: 2023-02-25 23:14+0100\n"
 "Last-Translator: \n"
 "Language: nl\n"
 "Language-Team: nl <LL@li.org>\n"
@@ -18,15 +18,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.11.0\n"
 
-#: app.py:638
+#: app.py:640
 msgid "Incorrect password."
 msgstr "Onjuist wachtwoord."
 
-#: app.py:641
+#: app.py:643
 msgid "Repeated new passwords do not match."
 msgstr "Herhaalde wachtwoorden komen niet overeen."
 
-#: app.py:644
+#: app.py:646
 msgid ""
 "Password updated. All sessions have been invalidated. You will need to "
 "log in again."
@@ -34,7 +34,7 @@ msgstr ""
 "Wachtwoord veranderd. Alle sessies zijn ongeldig gemaakt. Je zal opnieuw "
 "moeten inloggen."
 
-#: app.py:1134
+#: app.py:1136
 msgid ""
 "No playlist configured. Please configure a primay playlist in playlist "
 "manager."
@@ -42,16 +42,16 @@ msgstr ""
 "Geen afspeellijst ingesteld. Je kan een playlist instellen in "
 "playlistbeheer."
 
-#: app.py:1138
+#: app.py:1140
 #, python-format
 msgid "No write permission for playlist: %(playlist)s"
 msgstr "Geen schrijftoegang tot de afspeellijst: '%(playlist)s'"
 
-#: app.py:1143
+#: app.py:1145
 msgid "Track is already in this playlist"
 msgstr "Nummer zit al in deze afspeellijst"
 
-#: app.py:1149
+#: app.py:1151
 #, python-format
 msgid "File has been successfully copied to your playlist: %(playlist)s"
 msgstr "Bestand is gekopieerd naar jouw playlist: '%(playlist)s'"
@@ -899,18 +899,14 @@ msgstr "Bewerken"
 msgid "Add playlist"
 msgstr "Afspeellijst toevoegen"
 
-#: templates/users_add_playlist.jinja2:4
-msgid "Give playlist write access"
-msgstr ""
-
-#: templates/users_add_playlist.jinja2:9
-msgid "Give playlist write access user"
-msgstr ""
+#: templates/users_add_playlist.jinja2:4 templates/users_add_playlist.jinja2:9
+msgid "Give user write access to playlist"
+msgstr "Geef iemand toegang tot playlist"
 
 #: templates/users_add_playlist.jinja2:11
 #, python-format
 msgid "Select playlist to add to %(username)s:"
-msgstr ""
+msgstr "Selecteer afspeellijst om %(username)s toegang te geven:"
 
 #: templates/users_add_playlist.jinja2:21
 msgid "Add"
