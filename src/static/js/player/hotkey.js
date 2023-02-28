@@ -1,3 +1,5 @@
+const VOLUME_HOTKEY_CHANGE = 5;
+
 function handleKey(key) {
     // Don't perform hotkey actions when user is typing in a text field
     // But do still allow escape key
@@ -29,6 +31,22 @@ function handleKey(key) {
         queue.previous();
     } else if (key === 'ArrowRight') {
         queue.next();
+    } else if (key == 'ArrowUp') {
+        const slider = document.getElementById('settings-volume');
+        if (slider.value < 100 - VOLUME_HOTKEY_CHANGE) {
+            slider.value += VOLUME_HOTKEY_CHANGE;
+        } else {
+            slider.value = 100;
+        }
+        onVolumeChange();
+    } else if (key == 'ArrowDown') {
+        const slider = document.getElementById('settings-volume');
+        if (slider.value > VOLUME_HOTKEY_CHANGE) {
+            slider.value -= VOLUME_HOTKEY_CHANGE;
+        } else {
+            slider.value = 0;
+        }
+        onVolumeChange();
     } else if (key === '.') {
         seek(3);
     } else if (key === ',') {
