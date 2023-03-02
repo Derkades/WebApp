@@ -40,10 +40,10 @@ class Session:
             return _('Unknown')
 
         if 'Music-Player-Android' in self.user_agent:
-            return 'MusicPlayer for Android'
+            return 'MusicPlayer, Android'
 
         browsers = ['Firefox', 'Chromium', 'Chrome', 'Vivaldi', 'Opera', 'Safari']
-        systems = ['Windows', 'macOS', 'Android', 'iOS', 'Linux']
+        systems = ['Windows', 'macOS', 'Android', 'iOS', 'Ubuntu', 'Debian', 'Fedora', 'Linux']
 
         for maybe_browser in browsers:
             if maybe_browser in self.user_agent:
