@@ -31,6 +31,7 @@
         <tr>
             <th>{% trans %}Login date{% endtrans %}</th>
             <th>{% trans %}Device{% endtrans %}</th>
+            <th>{% trans %}IP address{% endtrans %}</th>
         </tr>
     </thead>
     <tbody>
@@ -43,6 +44,9 @@
                     {% else %}
                         {{ session.last_device }}
                     {% endif %}
+                </td>
+                <td>
+                    {{ session.remote_address }}
                 </td>
             </tr>
         {% endfor %}
