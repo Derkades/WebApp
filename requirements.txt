@@ -7,4 +7,4 @@ lxml~=4.0
 musicbrainzngs~=0.7.0
 pillow~=9.0
 bcrypt~=4.0
-yt-dlp
+https://github.com/yt-dlp/yt-dlp/archive/master.tar.gz
