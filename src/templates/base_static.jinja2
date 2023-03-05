@@ -1,9 +1,12 @@
 {% extends "base.jinja2" %}
 
 {% block body %}
-<div class="flex-content-center">
-    <main>
-        {% block content %}{% endblock content %}
-    </main>
-</div>
+<body class="colorful">
+    <div class="dither"></div>
+    <div class="flex-content-center">
+        <main>
+            {% block content %}{% endblock content %}
+        </main>
+    </div>
+</body>
 {% endblock body %}
