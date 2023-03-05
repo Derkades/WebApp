@@ -1,10 +1,18 @@
 class Browse {
     #history;
+    /** @type {Fuse} */
+    #fuse;
+    /** @type {Array.<Track>} */
+    #filteredTracks;
+    /** @type {boolean} */
+    #hasFilter;
     constructor() {
         this.#history = [];
 
         eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, () => {
-            this.updateCurrentView();
+            if (dialogs.isOpen('dialog-browse')) {
+                this.updateFilter();
+            }
         });
     };
 
@@ -33,14 +41,20 @@ class Browse {
             title: title,
             filter: filter,
         });
-        this.updateCurrentView();
+        this.updateFilter();
     };
 
-    /**
-     * Called before window is opened and when track list state changed
-     */
-    updateCurrentView() {
+    back() {
+        if (this.#history.length < 2) {
+            return;
+        }
+        this.#history.pop();
+        this.updateFilter();
+    };
+
+    updateFilter() {
         if (this.#history.length === 0) {
+            console.warn('Requested browse list update, but there are no entries in history');
             return;
         }
 
@@ -49,20 +63,14 @@ class Browse {
 
         // Playlist filter (or 'all')
         const playlist = document.getElementById('browse-filter-playlist').value;
-        // Search query text field
-        const query = document.getElementById('browse-filter-query').value.trim().toLowerCase();
 
-        if (query === '' && playlist === 'all' && current.filter === null) {
-            // No search query, selected playlist, or filter. For performance reasons, don't display entire track list.
-            this.setContent(null);
-            return;
-        }
-
+        this.#hasFilter = true;
         let filter;
         if (playlist === 'all') {
             if (current.filter === null) {
                 // Show all tracks
                 filter = () => true;
+                this.#hasFilter = false;
             } else {
                 // Apply filter to tracks in all playlist
                 filter = current.filter;
@@ -77,26 +85,44 @@ class Browse {
             }
         }
 
-        // Assign score to all tracks, then sort tracks by score. Finally, get original track object back.
-        const tracks = Object.values(state.tracks)
-                    .filter(filter)
-                    .map(track => { return {track: track, score: this.getSearchScore(track, query)}})
-                    .sort((a, b) => b.score - a.score)
-                    .slice(0, query === '' ? state.maxTrackListSize : state.maxTrackListSizeSearch)
-                    .map(sortedTrack => sortedTrack.track);
+        // https://fusejs.io/api/options.html
+        const options = {
+            keys: [
+                "path",
+                "display",
+                "artists",
+                "title",
+                "album",
+                "albumArtist",
+                "year",
+            ],
+        };
+        this.#filteredTracks = Object.values(state.tracks).filter(filter)
+        this.#fuse = new Fuse(this.#filteredTracks, options);
+
+        this.search();
+    }
+
+    search() {
+        const query = document.getElementById('browse-filter-query').value.trim().toLowerCase();
+
+        let tracks;
+        if (query === ''){
+            if (!this.#hasFilter) {
+                // No search query, selected playlist, or filter. For performance reasons, don't display entire track list.
+                this.setContent(null);
+                return;
+            }
+
+            // No search query, display all tracks
+            tracks = this.#filteredTracks;
+        } else {
+            tracks = this.#fuse.search(query, {limit: state.maxTrackListSizeSearch}).map(e => e.item);
+        }
 
         const table = this.generateTrackList(tracks);
-
         this.setContent(table);
-    };
-
-    back() {
-        if (this.#history.length < 2) {
-            return;
-        }
-        this.#history.pop();
-        this.updateCurrentView();
-    };
+    }
 
     browseArtist(artistName) {
         const artistText = document.getElementById('trans-artist').textContent;
@@ -176,54 +202,16 @@ class Browse {
         }
         return table;
     };
-
-    getSearchScore(track, query) {
-        if (query === '') {
-            // No query, same score for all tracks
-            return 1;
-        }
-
-        const matchProperties = [track.display];
-        if (track.album !== null) {
-            matchProperties.push(track.album);
-        }
-        if (track.artists !== null) {
-            for (const artist of track.artists) {
-                matchProperties.push(artist);
-            }
-        }
-
-        let score = 0;
-
-        for (const matchProperty of matchProperties) {
-            if (matchProperty.toLowerCase().includes(query)) {
-                score += 2;
-            }
-        }
-
-        const parts = query.split(' ');
-        for (const part of parts) {
-            for (const matchProperty of matchProperties) {
-                if (matchProperty.toLowerCase().includes(part)) {
-                    score += 2 / parts.length;
-                } else {
-                    score += 1 / (levenshtein(matchProperty.toLowerCase(), query) * parts.length);
-                }
-            }
-        }
-
-        return score;
-    };
 };
 
 const browse = new Browse();
 
 document.addEventListener('DOMContentLoaded', () => {
     // Playlist dropdown
-    document.getElementById('browse-filter-playlist').addEventListener('input', () => browse.updateCurrentView());
+    document.getElementById('browse-filter-playlist').addEventListener('input', () => browse.updateFilter());
 
     // Search query input
-    document.getElementById('browse-filter-query').addEventListener('input', () => browse.updateCurrentView());
+    document.getElementById('browse-filter-query').addEventListener('input', () => browse.search());
 
     // Button to open browse dialog ("add to queue" button)
     document.getElementById('browse-all').addEventListener('click', () => browse.browseAll());

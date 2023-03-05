@@ -66,6 +66,10 @@ class Dialogs {
         }
     }
 
+    isOpen(id) {
+        return !document.getElementById(id).classList.contains('overlay-hidden');
+    }
+
 }
 
 const dialogs = new Dialogs();
