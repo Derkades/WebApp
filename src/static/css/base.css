@@ -185,10 +185,18 @@ main {
     /* background-color: #1A1A1A; */
     background-color: rgba(0, 0, 0, 0.5);
     padding: 1rem;
-    margin: 1rem;
-    min-height: calc(100vh - 4rem);
-    width: calc(100vw - 4rem);
-    border-radius: var(--border-radius-amount);
+    min-height: calc(100vh - 2rem);
+    width: calc(100vw - 2rem);
+
+}
+
+@media screen and (min-width: 50rem) {
+    main {
+        width: calc(100vw - 4rem);
+        min-height: calc(100vh - 4rem);
+        margin: 1rem;
+        border-radius: var(--border-radius-amount);
+    }
 }
 
 @media screen and (min-width: 100rem) {
