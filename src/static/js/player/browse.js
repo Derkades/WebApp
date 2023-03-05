@@ -35,6 +35,7 @@ class Browse {
     };
 
     browse(title, filter) {
+        document.getElementById('browse-filter-query').value = ''; // Clear previous search query
         this.open();
         this.setHeader(title);
         this.#history.push({
