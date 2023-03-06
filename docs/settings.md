@@ -39,3 +39,11 @@ Playlists to choose from, for radio. Semicolon separated.
 ## `MUSIC_LASTFM_API_KEY`
 
 ## `MUSIC_LASTFM_API_SECRET`
+
+## `MUSIC_ENV`
+
+Set to `dev` to enable developmnent mode. Default is `prod`.
+
+## `MUSIC_PROXIES_X_FORWARDED_FOR`
+
+Number of proxies in front of backend app that append to the X-Forwarded-For header. Defaults to 0. Setting it to less than the actual amount means the app sees the IP address of one of your proxies for all users. Setting it to a value greater than the actual amount of proxies means users can forge their remote address to be any arbitrary string.
