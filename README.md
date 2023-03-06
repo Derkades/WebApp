@@ -67,8 +67,9 @@ This project is using many open source software and libraries, such as:
 - [Python Pillow](https://pillow.readthedocs.io)
 - [Python bcrypt](https://pypi.org/project/bcrypt/)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
-- [Material Design Icons](https://materialdesignicons.com)
+- [Material Design Icons](https://pictogrammers.com/library/mdi)
 - [sqlite3](https://docs.python.org/3/library/sqlite3.html)
 - [Docker, docker compose](https://docs.docker.com/get-docker)
+- [Nginx](https://nginx.com)
 
 It also relies on some other parties for web scraping, who shall not be named.
