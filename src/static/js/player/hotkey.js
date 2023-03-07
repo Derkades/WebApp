@@ -33,16 +33,16 @@ function handleKey(key) {
         queue.next();
     } else if (key == 'ArrowUp') {
         const slider = document.getElementById('settings-volume');
-        if (slider.value < 100 - VOLUME_HOTKEY_CHANGE) {
-            slider.value += VOLUME_HOTKEY_CHANGE;
+        if (parseInt(slider.value) < 100 - VOLUME_HOTKEY_CHANGE) {
+            slider.value = parseInt(slider.value) + VOLUME_HOTKEY_CHANGE;
         } else {
             slider.value = 100;
         }
         onVolumeChange();
     } else if (key == 'ArrowDown') {
         const slider = document.getElementById('settings-volume');
-        if (slider.value > VOLUME_HOTKEY_CHANGE) {
-            slider.value -= VOLUME_HOTKEY_CHANGE;
+        if (parseInt(slider.value) > VOLUME_HOTKEY_CHANGE) {
+            slider.value = parseInt(slider.value) - VOLUME_HOTKEY_CHANGE;
         } else {
             slider.value = 0;
         }
