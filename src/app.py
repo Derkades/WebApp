@@ -27,18 +27,35 @@ import settings
 import packer
 
 
-app = Flask(__name__, template_folder='templates')
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=settings.proxies_x_forwarded_for)
-babel = Babel(app)
-log = logging.getLogger('app')
-static_dir = Path('static')
-raphson_png_path = Path(static_dir, 'raphson.png')
-
-
 LANGUAGES = (
     ('en', 'English'),
     ('nl', 'Nederlands'),
 )
+
+
+def get_locale() -> str:
+    """
+    Returns two letter language code, matching a language code in
+    the LANGUAGES constant
+    """
+    if 'settings-language' in request.cookies:
+        for language in LANGUAGES:
+            if language[0] == request.cookies['settings-language']:
+                print('cookie', language[0])
+                return request.cookies['settings-language']
+
+    best_match = request.accept_languages.best_match(['nl', 'nl-NL', 'nl-BE', 'en'])
+    header_lang = best_match[:2] if best_match else 'en'
+    print('header', header_lang)
+    return header_lang
+
+
+app = Flask(__name__, template_folder='templates')
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=settings.proxies_x_forwarded_for)
+babel = Babel(app, locale_selector=get_locale)
+log = logging.getLogger('app')
+static_dir = Path('static')
+raphson_png_path = Path(static_dir, 'raphson.png')
 
 
 @app.errorhandler(AuthError)
@@ -130,7 +147,7 @@ def route_player():
                            mobile=is_mobile(),
                            csrf_token=csrf_token,
                            languages=LANGUAGES,
-                           language=get_language(),
+                           language=get_locale(),
                            primary_playlist=primary_playlist)
 
 
@@ -1149,31 +1166,6 @@ def route_player_copy_track():
         scanner.scan_tracks(conn, playlist.name)
 
         return Response(_('File has been successfully copied to your playlist: %(playlist)s', playlist=playlist.name), 200)
-
-
-def get_language() -> str:
-    """
-    Returns two letter language code, matching a language code in
-    the LANGUAGES constant
-    """
-    if 'settings-language' in request.cookies:
-        for language in LANGUAGES:
-            if language[0] == request.cookies['settings-language']:
-                return request.cookies['settings-language']
-
-    best_match = request.accept_languages.best_match(['nl', 'nl-NL', 'nl-BE', 'en'])
-    header_lang = best_match[:2] if best_match else 'en'
-    return header_lang
-
-
-def get_locale():
-    """
-    Get locale preference from HTTP headers
-    """
-    return get_language()
-
-
-babel.locale_selector = get_locale
 
 
 def get_img_format():
