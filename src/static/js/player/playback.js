@@ -140,6 +140,14 @@ eventBus.subscribe(MusicEvent.TRACK_CHANGE, replaceAllTrackHtml);
 // Update track title, metadata may have changed
 eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, replaceTrackDisplayTitle);
 
+function toggleLyrics() {
+    if (document.getElementById('sidebar-lyrics').classList.contains('hidden')) {
+        switchLyrics();
+    } else {
+        switchAlbumCover();
+    }
+}
+
 /**
  * Display lyrics, hide album art
  */

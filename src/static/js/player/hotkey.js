@@ -54,9 +54,7 @@ function handleKey(key) {
     } else if (key === 'Escape') {
         dialogs.closeTop();
     } else if (key === 'l') {
-        switchLyrics();
-    } else if (key === 'a') {
-        switchAlbumCover();
+        toggleLyrics();
     } else {
         console.debug('Unhandled keypress', key);
     }
