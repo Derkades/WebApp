@@ -6,14 +6,24 @@ class Browse {
     #filteredTracks;
     /** @type {boolean} */
     #hasFilter;
+    /** @type {boolean} */
+    searchQueryChanged
     constructor() {
         this.#history = [];
+        this.searchQueryChanged = false;
 
         eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, () => {
             if (dialogs.isOpen('dialog-browse')) {
                 this.updateFilter();
             }
         });
+
+        setInterval(() => {
+            if (this.searchQueryChanged) {
+                this.searchQueryChanged = false;
+                this.search();
+            }
+        }, 250);
     };
 
     setHeader(textContent) {
@@ -118,10 +128,16 @@ class Browse {
             // No search query, display all tracks
             tracks = this.#filteredTracks;
         } else {
+            const start = performance.now();
             tracks = this.#fuse.search(query, {limit: state.maxTrackListSizeSearch}).map(e => e.item);
+            const end = performance.now();
+            console.debug(`Search took ${end - start} ms`);
         }
 
+        const start = performance.now();
         const table = this.generateTrackList(tracks);
+        const end = performance.now();
+        console.debug(`Generating table took ${end - start} ms`);
         this.setContent(table);
     }
 
@@ -212,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('browse-filter-playlist').addEventListener('input', () => browse.updateFilter());
 
     // Search query input
-    document.getElementById('browse-filter-query').addEventListener('input', () => browse.search());
+    document.getElementById('browse-filter-query').addEventListener('input', () => browse.searchQueryChanged = true);
 
     // Button to open browse dialog ("add to queue" button)
     document.getElementById('browse-all').addEventListener('click', () => browse.browseAll());
