@@ -834,7 +834,7 @@ msgstr ""
 #: templates/playlists.jinja2:80
 #, python-format
 msgid "Your current primary playlist is '%(primary_playlist)s'."
-msgstr "Je huidige primary afspeellijst is '%(primary_playlist)s'."
+msgstr "Je huidige primaire afspeellijst is '%(primary_playlist)s'."
 
 #: templates/playlists.jinja2:82
 msgid "You do not have a primary playlist configured."
