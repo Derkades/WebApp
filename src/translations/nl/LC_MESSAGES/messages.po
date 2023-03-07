@@ -496,7 +496,7 @@ msgstr "Er zijn geen afspeellijsten geselecteerd"
 
 #: templates/player.jinja2:121
 msgid "No lyrics found"
-msgstr "Laat songtekst zien"
+msgstr "Geen songtekst gevonden"
 
 #: templates/player.jinja2:124
 msgid "Source"
