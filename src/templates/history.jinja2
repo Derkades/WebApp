@@ -84,6 +84,24 @@
     </tbody>
 </table>
 
+<h3>{% trans %}Time of day{% endtrans %}</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>{% trans %}Time of day{% endtrans %}</th>
+            <th>{% trans %}Number of plays{% endtrans %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for hour in summary_hours %}
+            <tr>
+                <td>{{ hour['hour'] }}</td>
+                <td>{{ hour['count'] }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 <h2>{% trans %}History{% endtrans %}</h2>
 
 <table class="table">

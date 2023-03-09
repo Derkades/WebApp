@@ -892,11 +892,28 @@ def route_history():
                           'count': count}
                           for username, count in result]
 
+        result = conn.execute('''
+                              SELECT hour, COUNT(*)
+                              FROM (
+                                  SELECT STRFTIME('%H', DATETIME(timestamp, 'unixepoch')) AS hour
+                                  FROM history
+                                  WHERE timestamp > ?
+                              )
+                              GROUP BY hour
+                              ORDER BY hour ASC
+                              ''', (summary_from,))
+
+        # TODO Convert from UTC hours to local timezone hours (in javascript?)
+        summary_hours = [{'hour': hour + ':00',
+                          'count': count}
+                         for hour, count in result]
+
     return render_template('history.jinja2',
                            history=history_items,
                            now_playing=now_playing_items,
                            summary_playlists=summary_playlists,
-                           summary_users=summary_users)
+                           summary_users=summary_users,
+                           summary_hours=summary_hours)
 
 
 @app.route('/playlist_stats')
