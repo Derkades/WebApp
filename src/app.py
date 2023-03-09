@@ -5,11 +5,15 @@ from urllib.parse import quote as urlencode
 import time
 import bcrypt
 import shutil
+from io import BytesIO
+from base64 import b64encode
 
 from flask import Flask, request, render_template, Response, redirect, send_file
 from flask_babel import Babel
 from flask_babel import _
 from werkzeug.middleware.proxy_fix import ProxyFix
+from matplotlib import pyplot as plt
+import numpy as np
 
 import auth
 from auth import AuthError, RequestTokenError
@@ -813,6 +817,18 @@ def route_history_played():
     return Response('ok', 200)
 
 
+def fig_start():
+    plt.style.use('dark_background')
+    fig, ax = plt.subplots()
+    return fig, ax
+
+def fig_end(fig) -> str:
+    out = BytesIO()
+    fig.savefig(out, format='svg', transparent=True, bbox_inches="tight", pad_inches=0)
+    out.seek(0)
+    return 'data:image/svg+xml;base64,' + b64encode(out.read()).decode()
+
+
 @app.route('/history')
 def route_history():
     with db.connect(read_only=True) as conn:
@@ -873,9 +889,16 @@ def route_history():
                               ''',
                               (summary_from,))
 
-        summary_playlists = [{'name': playlist,
-                              'count': count}
-                             for playlist, count in result]
+        fig, ax = fig_start()
+        x = []
+        y = []
+        for playlist, count in result:
+            x.append(playlist)
+            y.append(count)
+        bars = ax.bar(x, y)
+        ax.bar_label(bars)
+        plt.xticks(rotation=45)
+        summary_playlists = fig_end(fig)
 
         result = conn.execute('''
                               SELECT (SELECT username FROM user WHERE user.id = history.user), COUNT(*)
@@ -886,32 +909,36 @@ def route_history():
                               ''',
                               (summary_from,))
 
-        summary_users = [{'name': username,
-                          'count': count}
-                          for username, count in result]
+        fig, ax = fig_start()
+        x = []
+        y = []
+        for username, count in result:
+            x.append(username)
+            y.append(count)
+        bars = ax.bar(x, y)
+        ax.bar_label(bars)
+        plt.xticks(rotation=45)
+        summary_users = fig_end(fig)
 
         result = conn.execute('''
-                              SELECT hour, COUNT(*)
-                              FROM (
-                                  SELECT STRFTIME('%H', DATETIME(timestamp, 'unixepoch')) AS hour
-                                  FROM history
-                                  WHERE timestamp > ?
-                              )
-                              GROUP BY hour
-                              ORDER BY hour ASC
+                              SELECT (STRFTIME('%H', DATETIME(timestamp, 'unixepoch'))*60+STRFTIME('%H', DATETIME(timestamp, 'unixepoch'))) AS minute_of_day
+                              FROM history
+                              WHERE timestamp > ?
                               ''', (summary_from,))
 
-        # TODO Convert from UTC hours to local timezone hours (in javascript?)
-        summary_hours = [{'hour': hour + ':00',
-                          'count': count}
-                         for hour, count in result]
+        # TODO Convert from UTC hours to local timezone hours
+        fig, ax = fig_start()
+        x = [m for m, in result]
+        ax.hist(x, bins=24, range=(0, 24*60))
+        plt.xticks([n*60 for n in range(0, 24)], [f'{n:02}:00' for n in range(0, 24)], rotation=45)
+        summary_time_of_day = fig_end(fig)
 
     return render_template('history.jinja2',
                            history=history_items,
                            now_playing=now_playing_items,
                            summary_playlists=summary_playlists,
                            summary_users=summary_users,
-                           summary_hours=summary_hours)
+                           summary_time_of_day=summary_time_of_day)
 
 
 @app.route('/playlist_stats')

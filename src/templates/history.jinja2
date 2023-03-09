@@ -41,66 +41,13 @@
 
 <h2>{% trans %}Summary (last 7 days){% endtrans %}</h2>
 <h3>{% trans %}Playlists{% endtrans %}</h3>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                {% trans %}Playlist{% endtrans %}
-            </th>
-            <th>
-                {% trans %}Number of plays{% endtrans %}
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for playlist in summary_playlists %}
-            <tr>
-                <td>{{ playlist['name'] }}</td>
-                <td>{{ playlist['count'] }}</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<img src="{{ summary_playlists }}">
 
 <h3>{% trans %}Users{% endtrans %}</h3>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                {% trans %}Username{% endtrans %}
-            </th>
-            <th>
-                {% trans %}Number of plays{% endtrans %}
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for user in summary_users %}
-            <tr>
-                <td>{{ user['name'] }}</td>
-                <td>{{ user['count'] }}</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<img src="{{ summary_users }}">
 
 <h3>{% trans %}Time of day{% endtrans %}</h3>
-<table class="table">
-    <thead>
-        <tr>
-            <th>{% trans %}Time of day{% endtrans %}</th>
-            <th>{% trans %}Number of plays{% endtrans %}</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for hour in summary_hours %}
-            <tr>
-                <td>{{ hour['hour'] }}</td>
-                <td>{{ hour['count'] }}</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<img src="{{ summary_time_of_day }}">
 
 <h2>{% trans %}History{% endtrans %}</h2>
 
