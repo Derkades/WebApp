@@ -41,12 +41,10 @@ def get_locale() -> str:
     if 'settings-language' in request.cookies:
         for language in LANGUAGES:
             if language[0] == request.cookies['settings-language']:
-                print('cookie', language[0])
                 return request.cookies['settings-language']
 
     best_match = request.accept_languages.best_match(['nl', 'nl-NL', 'nl-BE', 'en'])
     header_lang = best_match[:2] if best_match else 'en'
-    print('header', header_lang)
     return header_lang
 
 
