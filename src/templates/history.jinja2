@@ -39,7 +39,7 @@
     {% trans %}<p>No one is playing music.</p>{% endtrans %}
 {% endif %}
 
-<h2>{% trans %}Summary (last 7 days){% endtrans %}</h2>
+<h2>{% trans %}Summary (last 30 days){% endtrans %}</h2>
 <h3>{% trans %}Playlists{% endtrans %}</h3>
 <img src="{{ summary_playlists }}">
 
@@ -48,6 +48,9 @@
 
 <h3>{% trans %}Time of day{% endtrans %}</h3>
 <img src="{{ summary_time_of_day }}">
+
+<h3>{% trans %}Top 10 tracks {% endtrans %}</h3>
+<img src="{{ summary_top_10 }}">
 
 <h2>{% trans %}History{% endtrans %}</h2>
 

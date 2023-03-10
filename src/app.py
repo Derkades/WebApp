@@ -878,7 +878,7 @@ def route_history():
 
         # Summary
 
-        summary_from = int(time.time()) - 60*60*24*7
+        summary_from = int(time.time()) - 60*60*24*30
 
         result = conn.execute('''
                               SELECT playlist, COUNT(*)
@@ -895,9 +895,9 @@ def route_history():
         for playlist, count in result:
             x.append(playlist)
             y.append(count)
-        bars = ax.bar(x, y)
+        bars = ax.barh(x, y)
         ax.bar_label(bars)
-        plt.xticks(rotation=45)
+        ax.set_xlabel(_('Times played'))
         summary_playlists = fig_end(fig)
 
         result = conn.execute('''
@@ -915,9 +915,9 @@ def route_history():
         for username, count in result:
             x.append(username)
             y.append(count)
-        bars = ax.bar(x, y)
+        bars = ax.barh(x, y)
         ax.bar_label(bars)
-        plt.xticks(rotation=45)
+        ax.set_xlabel(_('Times played'))
         summary_users = fig_end(fig)
 
         result = conn.execute('''
@@ -930,15 +930,43 @@ def route_history():
         fig, ax = fig_start()
         x = [m for m, in result]
         ax.hist(x, bins=24, range=(0, 24*60))
-        plt.xticks([n*60 for n in range(0, 24)], [f'{n:02}:00' for n in range(0, 24)], rotation=45)
+        ax.set_xlabel(_('Time of day'))
+        ax.set_ylabel(_('Tracks played'))
+        plt.xticks([n*60 for n in range(0, 24)], [f'{n:02}:00' for n in range(0, 24)], rotation=60)
         summary_time_of_day = fig_end(fig)
+
+        result = conn.execute('''
+                              SELECT track, COUNT(*), track.path IS NOT NULL AS track_exists
+                              FROM history
+                              LEFT JOIN track ON history.track = track.path
+                              WHERE timestamp > ?
+                              GROUP BY track
+                              ORDER BY COUNT(*) DESC
+                              LIMIT 10
+                              ''', (summary_from,))
+
+        fig, ax = fig_start()
+        x = []
+        y = []
+        for relpath, count, track_exists in result:
+            if track_exists:
+                x.append(Track.by_relpath(conn, relpath).metadata().display_title())
+            else:
+                x.append(relpath)
+            y.append(count)
+        bars = ax.barh(x, y)
+        ax.bar_label(bars)
+        ax.set_xlabel(_('Times played'))
+        summary_top_10 = fig_end(fig)
+
 
     return render_template('history.jinja2',
                            history=history_items,
                            now_playing=now_playing_items,
                            summary_playlists=summary_playlists,
                            summary_users=summary_users,
-                           summary_time_of_day=summary_time_of_day)
+                           summary_time_of_day=summary_time_of_day,
+                           summary_top_10=summary_top_10)
 
 
 @app.route('/playlist_stats')
