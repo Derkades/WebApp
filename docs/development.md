@@ -1,4 +1,4 @@
-# Development 
+# Development
 
 ## Development using Docker
 
@@ -16,7 +16,7 @@ Installing python and dependencies locally may be useful, for example to get lin
 ### Fedora
 Main packages:
 ```
-sudo dnf install python3 pylint python3-mypy python3-flask python3-flask-babel python3-requests python3-beautifulsoup4 python3-musicbrainzngs python3-pillow python3-bcrypt
+sudo dnf install python3 pylint python3-mypy python3-flask python3-flask-babel python3-requests python3-beautifulsoup4 python3-musicbrainzngs python3-pillow python3-bcrypt python3-matplotlib
 ```
 Translations:
 ```
