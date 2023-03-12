@@ -99,13 +99,19 @@ class Browse {
         // https://fusejs.io/api/options.html
         const options = {
             keys: [
-                "path",
-                "display",
-                "artists",
-                "title",
-                "album",
-                "albumArtist",
-                "year",
+                {
+                    name: 'title',
+                    weight: 2,
+                },
+                {
+                    name: 'display',
+                },
+                {
+                    name: 'artists'
+                },
+                {
+                    name: 'albumArtist',
+                },
             ],
         };
         this.#filteredTracks = Object.values(state.tracks).filter(filter)
