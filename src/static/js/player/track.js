@@ -22,8 +22,6 @@ class Track {
     /** @type {string | null} */
     albumArist;
     /** @type {number | null} */
-    trackNumber;
-    /** @type {number | null} */
     year;
 
     constructor(playlistName, trackData) {
@@ -37,7 +35,6 @@ class Track {
         this.artists = trackData.artists;
         this.album = trackData.album;
         this.albumArtist = trackData.album_artist;
-        this.trackNumber = trackData.track_number;
         this.year = trackData.year;
     };
 

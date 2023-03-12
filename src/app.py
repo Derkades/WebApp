@@ -331,7 +331,7 @@ def route_track_list():
                     'artists': meta.artists,
                     'album': meta.album,
                     'album_artist': meta.album_artist,
-                    'track_number': meta.track_number,
+                    # 'track_number': meta.track_number,
                     'year': meta.year,
                 })
             playlist_response.append(playlist_json)
