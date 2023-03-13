@@ -942,7 +942,7 @@ def route_history():
         fig, ax = fig_start()
         ax.hist(day_of_week, bins=7, range=(-0.5, 6.5), orientation='horizontal')
         ax.set_xlabel(_('Tracks played'))
-        ax.set_ylabel(_('Time of day'))
+        ax.set_ylabel(_('Day of week'))
         plt.yticks((0, 1, 2, 3, 4, 5, 6), (_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday'), _('Saturday'), _('Sunday')))
         summary_day_of_week = fig_end(fig)
 
