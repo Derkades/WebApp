@@ -5,7 +5,7 @@ import time
 from typing import Optional
 from dataclasses import dataclass
 from enum import Enum, unique
-from sqlite3 import Connection
+from sqlite3 import Connection, OperationalError
 
 import bcrypt
 from flask import request
@@ -25,10 +25,16 @@ class Session:
     creation_timestamp: int
     user_agent: Optional[str]
     remote_address: Optional[str]
+    last_use: int
 
     @property
     def creation_date(self) -> str:
         seconds_ago = -(int(time.time()) - self.creation_timestamp)
+        return flask_babel.format_timedelta(seconds_ago, add_direction=True)
+
+    @property
+    def last_use_ago(self) -> str:
+        seconds_ago = -(int(time.time()) - self.last_use)
         return flask_babel.format_timedelta(seconds_ago, add_direction=True)
 
     @property
@@ -78,7 +84,7 @@ class User:
         Get all sessions for users
         """
         results = self.conn.execute("""
-                                    SELECT rowid, token, creation_date, user_agent, remote_address
+                                    SELECT rowid, token, creation_date, user_agent, remote_address, last_use
                                     FROM session WHERE user=?
                                     """, (self.user_id,)).fetchall()
         return [Session(*row) for row in results]
@@ -159,7 +165,7 @@ def _generate_token() -> str:
     return base64.b64encode(os.urandom(16)).decode()
 
 
-def log_in(conn: Connection, username: str, password: str, user_agent: str, remote_addr: str) -> Optional[str]:
+def log_in(conn: Connection, username: str, password: str) -> Optional[str]:
     """
     Log in using username and password.
     Args:
@@ -183,10 +189,15 @@ def log_in(conn: Connection, username: str, password: str, user_agent: str, remo
         return None
 
     token = _generate_token()
-    creation_date = int(time.time())
+    remote_addr = request.remote_addr
+    user_agent = request.headers['User-Agent'] if 'User-Agent' in request.headers else None
 
-    conn.execute('INSERT INTO session (user, token, creation_date, user_agent, remote_address) VALUES (?, ?, ?, ?, ?)',
-                    (user_id, token, creation_date, user_agent, remote_addr))
+    # TODO use unixepoch() after update to debian bookworm
+    conn.execute("""
+                 INSERT INTO session (user, token, creation_date, user_agent, remote_address, last_use)
+                 VALUES (?, ?, strftime('%s', 'now'), ?, ?, strftime('%s', 'now'))
+                 """,
+                 (user_id, token, user_agent, remote_addr))
 
     log.info('Successful login for user %s', username)
 
@@ -202,7 +213,8 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
     Returns: User object if session token is valid, or None if invalid
     """
     result = conn.execute("""
-                          SELECT session.rowid, session.creation_date, session.user_agent, session.remote_address, user.id, user.username, user.admin, user_lastfm.name, user_lastfm.key, user.primary_playlist
+                          SELECT session.rowid, session.creation_date, session.user_agent, session.remote_address, session.last_use,
+                                 user.id, user.username, user.admin, user_lastfm.name, user_lastfm.key, user.primary_playlist
                           FROM user
                           INNER JOIN session ON user.id = session.user
                           LEFT JOIN user_lastfm ON user.id = user_lastfm.user
@@ -212,9 +224,24 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
         log.warning('Invalid auth token: %s', token)
         return None
 
-    session_rowid, session_creation_date, session_user_agent, session_address, user_id, username, admin, lastfm_name, lastfm_key, primary_playlist = result
+    session_rowid, session_creation_date, session_user_agent, session_address, session_last_use, user_id, username, admin, lastfm_name, lastfm_key, primary_playlist = result
 
-    session = Session(session_rowid, token, session_creation_date, session_user_agent, session_address)
+    try:
+        remote_addr = request.remote_addr
+        user_agent = request.headers['User-Agent'] if 'User-Agent' in request.headers else None
+        # TODO use unixepoch() after update to debian bookworm
+        conn.execute("""
+                     UPDATE session
+                     SET user_agent=?, remote_address=?, last_use=strftime('%s', 'now')
+                     WHERE rowid=?
+                     """,
+                     (user_agent, remote_addr, session_rowid))
+    except OperationalError as ex:
+        # Ignore error if database is read-only
+        if ex.sqlite_errorname != 'SQLITE_READONLY':
+            raise ex
+
+    session = Session(session_rowid, token, session_creation_date, session_user_agent, session_address, session_last_use)
     return User(conn, user_id, username, admin == 1, session, lastfm_name, lastfm_key, primary_playlist)
 
 

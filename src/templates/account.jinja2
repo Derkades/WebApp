@@ -30,6 +30,7 @@
     <thead>
         <tr>
             <th>{% trans %}Login date{% endtrans %}</th>
+            <th>{% trans %}Last used{% endtrans %}</th>
             <th>{% trans %}Device{% endtrans %}</th>
             <th>{% trans %}IP address{% endtrans %}</th>
         </tr>
@@ -38,6 +39,7 @@
         {% for session in sessions %}
             <tr>
                 <td>{{ session.creation_date }}</td>
+                <td>{{ session.last_use_ago }}</td>
                 <td>
                     {% if session == user.session %}
                         {% trans device=session.last_device %}{{ device }} (current session){%endtrans%}

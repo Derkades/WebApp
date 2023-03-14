@@ -69,7 +69,8 @@ CREATE TABLE IF NOT EXISTS session (
     token TEXT NOT NULL UNIQUE,
     creation_date INTEGER NOT NULL, -- Seconds since UNIX epoch
     user_agent TEXT NULL,
-    remote_address TEXT NULL
+    remote_address TEXT NULL,
+    last_use INTEGER NOT NULL -- Seconds since UNIX epoch
 );
 
 CREATE TABLE IF NOT EXISTS csrf (

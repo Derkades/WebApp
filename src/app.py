@@ -116,10 +116,7 @@ def route_login():
             username = request.form['username']
             password = request.form['password']
 
-        remote_addr = request.remote_addr
-        user_agent = request.headers['User-Agent'] if 'User-Agent' in request.headers else None
-
-        token = auth.log_in(conn, username, password, user_agent, remote_addr)
+        token = auth.log_in(conn, username, password)
 
         if token is None:
             if request.is_json:
