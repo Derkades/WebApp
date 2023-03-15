@@ -56,3 +56,8 @@ def retrieve_json(cache_key: str) -> Any | None:
         return None
 
     return json.loads(data.decode())
+
+def cleanup() -> int:
+    with db.cache() as conn:
+        one_month_ago = int(time.time()) - 60*60*24*30
+        return conn.execute('DELETE FROM cache WHERE access_time < ?', (one_month_ago,)).rowcount

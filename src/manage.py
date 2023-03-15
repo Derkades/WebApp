@@ -120,26 +120,10 @@ def handle_scan(args):
         scanner.scan(conn)
 
 
-def handle_prune_csrf(args):
-    """
-    Handle command to delete expired CSRF tokens
-    """
-    import auth
+def handle_cleanup(args):
+    import cleanup
 
-    with db.connect() as conn:
-        count = auth.prune_old_csrf_tokens(conn)
-        log.info('Deleted %s old CSRF tokens', count)
-
-
-def handle_cache_clean(args):
-    """
-    Handle command to remove old entries from cache
-    """
-
-    with db.cache() as conn:
-        one_month_ago = int(time.time()) - 60*60*24*30
-        rowcount = conn.execute('DELETE FROM cache WHERE access_time < ?', (one_month_ago, )).rowcount
-        log.info('Deleted %s entries from cache', rowcount)
+    cleanup.cleanup()
 
 
 if __name__ == '__main__':
@@ -173,11 +157,8 @@ if __name__ == '__main__':
     scan = subparsers.add_parser('scan', help='scan playlists for changes')
     scan.set_defaults(func=handle_scan)
 
-    prune_csrf = subparsers.add_parser('prune-csrf', help='delete old csrf tokens')
-    prune_csrf.set_defaults(func=handle_prune_csrf)
-
-    cache_clean = subparsers.add_parser('cache-clean', help='delete old entries from cache')
-    cache_clean.set_defaults(func=handle_cache_clean)
+    cleanup = subparsers.add_parser('cleanup', help='clean old or unused data from the database')
+    cleanup.set_defaults(func=handle_cleanup)
 
     args = parser.parse_args()
     args.func(args)

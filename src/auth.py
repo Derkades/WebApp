@@ -278,3 +278,7 @@ def prune_old_csrf_tokens(conn: Connection) -> int:
     delete_before = int(time.time()) - settings.csrf_validity_seconds
     return conn.execute('DELETE FROM csrf WHERE creation_date < ?',
                         (delete_before,)).rowcount
+
+def prune_old_session_tokens(conn: Connection) -> int:
+    one_month_ago = int(time.time()) - 60*60*24*30
+    return conn.execute('DELETE FROM session WHERE last_use < ?', (one_month_ago,)).rowcount
