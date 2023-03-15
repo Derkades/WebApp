@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-03-10 12:09+0100\n"
-"PO-Revision-Date: 2023-03-10 12:09+0100\n"
+"POT-Creation-Date: 2023-03-15 08:00+0100\n"
+"PO-Revision-Date: 2023-03-15 08:00+0100\n"
 "Last-Translator: \n"
 "Language: nl\n"
 "Language-Team: nl <LL@li.org>\n"
@@ -18,15 +18,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.10.3\n"
 
-#: app.py:659
+#: app.py:657
 msgid "Incorrect password."
 msgstr "Onjuist wachtwoord."
 
-#: app.py:662
+#: app.py:660
 msgid "Repeated new passwords do not match."
 msgstr "Herhaalde wachtwoorden komen niet overeen."
 
-#: app.py:665
+#: app.py:663
 msgid ""
 "Password updated. All sessions have been invalidated. You will need to "
 "log in again."
@@ -34,7 +34,7 @@ msgstr ""
 "Wachtwoord veranderd. Alle sessies zijn ongeldig gemaakt. Je zal opnieuw "
 "moeten inloggen."
 
-#: app.py:900 app.py:920 app.py:959
+#: app.py:922 app.py:928 app.py:949 app.py:955
 msgid "Times played"
 msgstr "Aantal keer afgespeeld"
 
@@ -42,11 +42,43 @@ msgstr "Aantal keer afgespeeld"
 msgid "Time of day"
 msgstr "Moment van de dag"
 
-#: app.py:934
+#: app.py:934 app.py:941
 msgid "Tracks played"
 msgstr "Nummers afgespeeld"
 
-#: app.py:1223
+#: app.py:942 templates/history.jinja2:52
+msgid "Day of week"
+msgstr "Dag van de week"
+
+#: app.py:943
+msgid "Monday"
+msgstr "Maandag"
+
+#: app.py:943
+msgid "Tuesday"
+msgstr "Dinsdag"
+
+#: app.py:943
+msgid "Wednesday"
+msgstr "Woensdag"
+
+#: app.py:943
+msgid "Thursday"
+msgstr "Donderdag"
+
+#: app.py:943
+msgid "Friday"
+msgstr "Vrijdag"
+
+#: app.py:943
+msgid "Saturday"
+msgstr "Zaterdag"
+
+#: app.py:943
+msgid "Sunday"
+msgstr "Zondag"
+
+#: app.py:1221
 msgid ""
 "No playlist configured. Please configure a primay playlist in playlist "
 "manager."
@@ -54,33 +86,33 @@ msgstr ""
 "Geen afspeellijst ingesteld. Je kan een playlist instellen in "
 "playlistbeheer."
 
-#: app.py:1227
+#: app.py:1225
 #, python-format
 msgid "No write permission for playlist: %(playlist)s"
 msgstr "Geen schrijftoegang tot de afspeellijst: '%(playlist)s'"
 
-#: app.py:1232
+#: app.py:1230
 msgid "Track is already in this playlist"
 msgstr "Nummer zit al in deze afspeellijst"
 
-#: app.py:1238
+#: app.py:1236
 #, python-format
 msgid "File has been successfully copied to your playlist: %(playlist)s"
 msgstr "Bestand is gekopieerd naar jouw playlist: '%(playlist)s'"
 
-#: auth.py:40 auth.py:53 auth.py:60
+#: auth.py:46 auth.py:59 auth.py:66
 msgid "Unknown"
 msgstr "Onbekend"
 
-#: auth.py:139
+#: auth.py:145
 msgid "You are not logged in, please log in."
 msgstr "Je bent niet ingelogd, gelieve in te loggen."
 
-#: auth.py:141
+#: auth.py:147
 msgid "Your current session is invalid, please log in again."
 msgstr "Je huidige sessie is ongeldig, gelieve opnieuw in te loggen."
 
-#: auth.py:143
+#: auth.py:149
 msgid ""
 "Your are not an administrator, but this page requires administrative "
 "privileges"
@@ -133,31 +165,35 @@ msgid "Login date"
 msgstr "Inlogdatum"
 
 #: templates/account.jinja2:33
+msgid "Last used"
+msgstr "Laatst gebruikt"
+
+#: templates/account.jinja2:34
 msgid "Device"
 msgstr "Apparaat"
 
-#: templates/account.jinja2:34
+#: templates/account.jinja2:35
 msgid "IP address"
 msgstr "IP-adres"
 
-#: templates/account.jinja2:43
+#: templates/account.jinja2:45
 #, python-format
 msgid "%(device)s (current session)"
 msgstr "%(device)s (huidige sessie)"
 
-#: templates/account.jinja2:56 templates/account.jinja2:65
+#: templates/account.jinja2:58 templates/account.jinja2:67
 msgid "Change password"
 msgstr "Wachtwoord"
 
-#: templates/account.jinja2:59
+#: templates/account.jinja2:61
 msgid "Current password"
 msgstr "Huidig wachtwoord"
 
-#: templates/account.jinja2:61
+#: templates/account.jinja2:63
 msgid "New password"
 msgstr "Nieuw wachtwoord"
 
-#: templates/account.jinja2:63
+#: templates/account.jinja2:65
 msgid "Repeat new password"
 msgstr "Herhaal nieuw wachtwoord"
 
@@ -283,16 +319,16 @@ msgstr "Afspeelgeschiedenis"
 msgid "Now playing"
 msgstr "Nu aan het afspelen"
 
-#: templates/history.jinja2:18 templates/history.jinja2:64
+#: templates/history.jinja2:18 templates/history.jinja2:70
 msgid "User"
 msgstr "Gebruiker"
 
-#: templates/history.jinja2:21 templates/history.jinja2:67
+#: templates/history.jinja2:21 templates/history.jinja2:73
 #: templates/recent_changes.jinja2:17
 msgid "Playlist"
 msgstr "Afspeellijst"
 
-#: templates/history.jinja2:24 templates/history.jinja2:70
+#: templates/history.jinja2:24 templates/history.jinja2:76
 #: templates/never_play.jinja2:14 templates/recent_changes.jinja2:20
 msgid "Track"
 msgstr "Nummer"
@@ -313,15 +349,19 @@ msgstr "Afspeellijsten"
 msgid "Users"
 msgstr "Gebruikers"
 
-#: templates/history.jinja2:52
-msgid "Top 10 tracks "
-msgstr "Top 10 nummers"
-
 #: templates/history.jinja2:55
+msgid "Top tracks "
+msgstr "Meest afgespeelde nummers"
+
+#: templates/history.jinja2:58
+msgid "Top artists "
+msgstr "Meest afgespeelde artiesten"
+
+#: templates/history.jinja2:61
 msgid "History"
 msgstr "Geschiedenis"
 
-#: templates/history.jinja2:61 templates/recent_changes.jinja2:11
+#: templates/history.jinja2:67 templates/recent_changes.jinja2:11
 msgid "Time"
 msgstr "Tijd"
 
