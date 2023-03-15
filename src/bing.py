@@ -3,6 +3,7 @@ import sys
 import logging
 import traceback
 from typing import Optional
+from multiprocessing.pool import ThreadPool
 
 import requests
 from bs4 import BeautifulSoup
@@ -12,6 +13,29 @@ import image
 import settings
 
 log = logging.getLogger("app.bing")
+
+
+def _download(image_url: str) -> bytes:
+    resp = requests.get(image_url,
+                        timeout=10,
+                        headers={'User-Agent': settings.webscraping_user_agent})
+    if resp.status_code != 200:
+        log.warning('Could not download %s, status code %s', image_url, resp.status_code)
+        return None
+
+    img_bytes = resp.content
+
+    if not image.check_valid(img_bytes):
+        log.warning('Could not download %s, image is corrupt', image_url)
+        return None
+
+    log.info('Downloaded image: %s', image_url)
+
+    return img_bytes
+
+
+def _sort_key_len(download: bytes) -> int:
+    return len(download)
 
 
 def image_search(bing_query: str) -> Optional[bytes]:
@@ -34,10 +58,9 @@ def image_search(bing_query: str) -> Optional[bytes]:
 
     log.info('Searching bing: %s', bing_query)
     try:
-        headers = {'User-Agent': settings.webscraping_user_agent}
         r = requests.get('https://www.bing.com/images/search',
                          timeout=10,
-                         headers=headers,
+                         headers={'User-Agent': settings.webscraping_user_agent},
                          params={'q': bing_query,
                                  'form': 'HDRSC2',
                                  'first': '1',
@@ -46,55 +69,39 @@ def image_search(bing_query: str) -> Optional[bytes]:
         soup = BeautifulSoup(r.text, 'lxml')
         results = soup.find_all('a', {'class': 'iusc'})
 
-        # Try all results, looking for the image of the largest size (which is probably the highest quality image)
-        # Some images have no 'm' attribute for some reason, skip those.
+        # Download multiple images, looking for the image of the largest
+        # size (which is probably the highest quality image)
 
-        max_consider_images = 5
-        best_image = None
+        image_urls = []
         for result in results:
             try:
+                # Some images have no 'm' attribute for some reason, skip those.
                 m_attr = result['m']
             except KeyError:
                 log.info('Skipping result without "m" attribute: %s', result)
 
-            image_url = json.loads(m_attr)['murl']
+            image_urls.append(json.loads(m_attr)['murl'])
 
-            log.info('Downloading image (%s left): %s', max_consider_images, image_url)
+            if len(image_urls) >= 5:
+                break
 
-            try:
-                resp = requests.get(image_url,
-                                    timeout=10,
-                                    headers=headers)
-                if resp.status_code != 200:
-                    log.info('Status code %s, skipping', resp.status_code)
-                    continue
-                img_bytes = resp.content
+        with ThreadPool(5) as pool:
+            downloads = pool.map(_download, image_urls)
 
-                if not image.check_valid(img_bytes):
-                    continue
-
-                if best_image is None or len(img_bytes) > len(best_image):
-                    best_image = img_bytes
-
-                max_consider_images -= 1
-                if max_consider_images == 0:
-                    break
-            except Exception as ex:
-                log.info('Exception while downloading image, skipping. %s', ex)
-
-        if best_image is None:
+        if len(downloads) == 0:
             cache.store(cache_key, b'magic_no_results')
             log.info('No image found')
-        else:
-            cache.store(cache_key, best_image)
-            log.info('Found image, %.2fMiB', len(best_image)/1024/1024)
+            return None
 
+        best_image = sorted(downloads, key=_sort_key_len)[-1]
+        cache.store(cache_key, best_image)
+        log.info('Found image, %.2fMiB', len(best_image)/1024/1024)
         return best_image
+
     except Exception:
         log.info('Error during bing search. This is probably a bug.')
         traceback.print_exc()
         return None
-
 
 
 if __name__ == '__main__':
@@ -104,6 +111,6 @@ if __name__ == '__main__':
         print('no result found')
         sys.exit(1)
 
-    with open('test_bing_result.webp', 'wb') as test_file:
+    with open('test_bing_result', 'wb') as test_file:
         test_file.truncate(0)
         test_file.write(result_bytes)
