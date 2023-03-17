@@ -65,6 +65,8 @@ COLLECTION_KEYWORDS = [
     'the best of',
     'het beste uit',
     'hitzone',
+    'greatest hits',
+    'hits collection',
 ]
 
 
