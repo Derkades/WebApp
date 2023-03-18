@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-03-15 08:00+0100\n"
-"PO-Revision-Date: 2023-03-15 08:00+0100\n"
+"POT-Creation-Date: 2023-03-18 18:10+0100\n"
+"PO-Revision-Date: 2023-03-18 18:10+0100\n"
 "Last-Translator: \n"
 "Language: nl\n"
 "Language-Team: nl <LL@li.org>\n"
@@ -16,17 +16,17 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.10.3\n"
+"Generated-By: Babel 2.11.0\n"
 
-#: app.py:657
+#: app.py:655
 msgid "Incorrect password."
 msgstr "Onjuist wachtwoord."
 
-#: app.py:660
+#: app.py:658
 msgid "Repeated new passwords do not match."
 msgstr "Herhaalde wachtwoorden komen niet overeen."
 
-#: app.py:663
+#: app.py:661
 msgid ""
 "Password updated. All sessions have been invalidated. You will need to "
 "log in again."
@@ -34,51 +34,7 @@ msgstr ""
 "Wachtwoord veranderd. Alle sessies zijn ongeldig gemaakt. Je zal opnieuw "
 "moeten inloggen."
 
-#: app.py:922 app.py:928 app.py:949 app.py:955
-msgid "Times played"
-msgstr "Aantal keer afgespeeld"
-
-#: app.py:933 templates/history.jinja2:49
-msgid "Time of day"
-msgstr "Moment van de dag"
-
-#: app.py:934 app.py:941
-msgid "Tracks played"
-msgstr "Nummers afgespeeld"
-
-#: app.py:942 templates/history.jinja2:52
-msgid "Day of week"
-msgstr "Dag van de week"
-
-#: app.py:943
-msgid "Monday"
-msgstr "Maandag"
-
-#: app.py:943
-msgid "Tuesday"
-msgstr "Dinsdag"
-
-#: app.py:943
-msgid "Wednesday"
-msgstr "Woensdag"
-
-#: app.py:943
-msgid "Thursday"
-msgstr "Donderdag"
-
-#: app.py:943
-msgid "Friday"
-msgstr "Vrijdag"
-
-#: app.py:943
-msgid "Saturday"
-msgstr "Zaterdag"
-
-#: app.py:943
-msgid "Sunday"
-msgstr "Zondag"
-
-#: app.py:1221
+#: app.py:1125
 msgid ""
 "No playlist configured. Please configure a primay playlist in playlist "
 "manager."
@@ -86,16 +42,16 @@ msgstr ""
 "Geen afspeellijst ingesteld. Je kan een playlist instellen in "
 "playlistbeheer."
 
-#: app.py:1225
+#: app.py:1129
 #, python-format
 msgid "No write permission for playlist: %(playlist)s"
 msgstr "Geen schrijftoegang tot de afspeellijst: '%(playlist)s'"
 
-#: app.py:1230
+#: app.py:1134
 msgid "Track is already in this playlist"
 msgstr "Nummer zit al in deze afspeellijst"
 
-#: app.py:1236
+#: app.py:1140
 #, python-format
 msgid "File has been successfully copied to your playlist: %(playlist)s"
 msgstr "Bestand is gekopieerd naar jouw playlist: '%(playlist)s'"
@@ -119,6 +75,50 @@ msgid ""
 msgstr ""
 "Je bent geen administrator, maar deze pagina vereist administratieve "
 "rechten"
+
+#: stats_plots.py:40 stats_plots.py:48 stats_plots.py:75 stats_plots.py:83
+msgid "Times played"
+msgstr "Aantal keer afgespeeld"
+
+#: stats_plots.py:55 templates/history.jinja2:49
+msgid "Time of day"
+msgstr "Moment van de dag"
+
+#: stats_plots.py:56 stats_plots.py:65
+msgid "Tracks played"
+msgstr "Nummers afgespeeld"
+
+#: stats_plots.py:66 templates/history.jinja2:52
+msgid "Day of week"
+msgstr "Dag van de week"
+
+#: stats_plots.py:67
+msgid "Monday"
+msgstr "Maandag"
+
+#: stats_plots.py:67
+msgid "Tuesday"
+msgstr "Dinsdag"
+
+#: stats_plots.py:67
+msgid "Wednesday"
+msgstr "Woensdag"
+
+#: stats_plots.py:67
+msgid "Thursday"
+msgstr "Donderdag"
+
+#: stats_plots.py:67
+msgid "Friday"
+msgstr "Vrijdag"
+
+#: stats_plots.py:67
+msgid "Saturday"
+msgstr "Zaterdag"
+
+#: stats_plots.py:67
+msgid "Sunday"
+msgstr "Zondag"
 
 #: templates/403.jinja2:4 templates/403.jinja2:9
 msgid "Permission denied"
@@ -599,8 +599,8 @@ msgid "Low quality Opus audio (~30MB per hour)"
 msgstr "Lage kwaliteit Opus audio (~30MB per uur)"
 
 #: templates/player.jinja2:173
-msgid "High quality AAC audio, for Apple devices (~90MB per hour)"
-msgstr "Hoge kwaliteit AAC audio, voor Apple apparaten (~90MB per uur)"
+msgid "High quality AAC audio, for old Safari or old iOS (~90MB per hour)"
+msgstr "Hoge kwaliteit AAC audio, voor oude Safari en iOS versies (~90MB per uur)"
 
 #: templates/player.jinja2:175
 msgid "Audio quality"
@@ -984,61 +984,3 @@ msgstr "Nieuw wachtwoord (laat leeg om niet te veranderen)"
 #: templates/users_edit.jinja2:18
 msgid "Submit"
 msgstr "Versturen"
-
-#~ msgid "ID"
-#~ msgstr "ID"
-
-#~ msgid "Creation date"
-#~ msgstr "Aanmaakdatum"
-
-#~ msgid "Last address"
-#~ msgstr "Laatste adres"
-
-#~ msgid "Open file manager in a new tab"
-#~ msgstr "Open bestandsbeheer in nieuw tabblad"
-
-#~ msgid "Potato (~15MB per hour, Safari ~30MB)"
-#~ msgstr "Prut (~15MB per uur, Safari ~30MB)"
-
-#~ msgid "Low (~35MB per hour, Safari ~65MB)"
-#~ msgstr "Laag (~35MB per uur, Safari ~65MB)"
-
-#~ msgid "High (~70MB per hour, Safari ~120MB)"
-#~ msgstr "Hoog (~70MB per uur, Safari ~120MB)"
-
-#~ msgid "Path"
-#~ msgstr "Pad"
-
-#~ msgid "Date of login"
-#~ msgstr "Inlogdatum"
-
-#~ msgid "Just now"
-#~ msgstr "Zojuist"
-
-#~ msgid "1 minute ago"
-#~ msgstr "1 minuut geleden"
-
-#~ msgid "%(minutes)d minutes ago"
-#~ msgstr "%(minutes)d minuten geleden"
-
-#~ msgid "1 hour ago"
-#~ msgstr "1 uur geleden"
-
-#~ msgid "%(hours)d hours ago"
-#~ msgstr "%(hours)d uur geleden"
-
-#~ msgid "1 day ago"
-#~ msgstr "1 dag geleden"
-
-#~ msgid "%(days)d days ago"
-#~ msgstr "%(days)d dagen geleden"
-
-#~ msgid "Radio (Alpha)"
-#~ msgstr "Radio (Alpha)"
-
-#~ msgid "Playback statistics"
-#~ msgstr "Afspeellijststatistieken"
-
-#~ msgid "Show album cover"
-#~ msgstr "Laat albumhoes zien"
-
