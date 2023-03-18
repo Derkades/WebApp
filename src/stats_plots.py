@@ -11,9 +11,9 @@ from matplotlib import pyplot as plt
 
 from music import Track
 
+plt.style.use(('dark_background', 'fast'))
 
 def fig_start():
-    plt.style.use('dark_background')
     fig, ax = plt.subplots()
     return fig, ax
 
