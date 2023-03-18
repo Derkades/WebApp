@@ -30,6 +30,7 @@ if TYPE_CHECKING:
 log = logging.getLogger('app.music')
 
 
+# .wma is intentionally missing, ffmpeg support seems to be flaky
 MUSIC_EXTENSIONS = [
     '.mp3',
     '.flac',
@@ -37,7 +38,6 @@ MUSIC_EXTENSIONS = [
     '.webm',
     '.mkv',
     '.mka',
-    '.wma',
     '.m4a',
     '.wav',
     '.opus',
