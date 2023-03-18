@@ -5,8 +5,6 @@ from urllib.parse import quote as urlencode
 import time
 import bcrypt
 import shutil
-from io import BytesIO
-from base64 import b64encode
 from collections import Counter
 from datetime import datetime
 
@@ -14,7 +12,6 @@ from flask import Flask, request, render_template, Response, redirect, send_file
 from flask_babel import Babel
 from flask_babel import _
 from werkzeug.middleware.proxy_fix import ProxyFix
-from matplotlib import pyplot as plt
 
 import auth
 from auth import AuthError, RequestTokenError
@@ -30,6 +27,7 @@ from radio import RadioTrack
 import scanner
 import settings
 import packer
+import stats_plots
 
 
 LANGUAGES = (
@@ -815,27 +813,6 @@ def route_history_played():
     return Response('ok', 200)
 
 
-def fig_start():
-    plt.style.use('dark_background')
-    fig, ax = plt.subplots()
-    return fig, ax
-
-def fig_end(fig) -> str:
-    out = BytesIO()
-    fig.savefig(out, format='svg', transparent=True, bbox_inches="tight", pad_inches=0)
-    out.seek(0)
-    return 'data:image/svg+xml;base64,' + b64encode(out.read()).decode()
-
-
-def counter_to_xy(counter: Counter):
-    xs = []
-    ys = []
-    for x, y in counter.most_common(10):
-        xs.append(x)
-        ys.append(y)
-    return xs, ys
-
-
 @app.route('/history')
 def route_history():
     with db.connect(read_only=True) as conn:
@@ -883,88 +860,15 @@ def route_history():
                                       'playlist': playlist_name,
                                       'title': meta.display_title()})
 
-        # Summary
+        stats_data = stats_plots.get_data(conn)
 
-        result = conn.execute('''
-                              SELECT timestamp, user.username, history.track, history.playlist, track.path IS NOT NULL AS track_exists
-                              FROM history
-                                JOIN user ON history.user = user.id
-                                LEFT JOIN track ON history.track = track.path
-                              WHERE timestamp > ?
-                              ''', (int(time.time()) - 60*60*24*30,))
-
-        playlist_counter = Counter()
-        user_counter = Counter()
-        time_of_day = []
-        day_of_week = []
-        artist_counter = Counter()
-        track_counter = Counter()
-
-        for timestamp, username, relpath, playlist, track_exists in result:
-            playlist_counter.update((playlist,))
-            user_counter.update((username,))
-
-            dt = datetime.fromtimestamp(timestamp)
-            time_of_day.append(dt.hour)
-            day_of_week.append(dt.weekday())
-
-            if track_exists:
-                meta = Track.by_relpath(conn, relpath).metadata()
-                if meta.artists:
-                    artist_counter.update(meta.artists)
-                track_counter.update((meta.display_title(),))
-            else:
-                track_counter.update((relpath,))
-
-        fig, ax = fig_start()
-        bars = ax.barh(*counter_to_xy(playlist_counter))
-        ax.bar_label(bars)
-        ax.set_xlabel(_('Times played'))
-        summary_playlists = fig_end(fig)
-
-        fig, ax = fig_start()
-        bars = ax.barh(*counter_to_xy(user_counter))
-        ax.bar_label(bars)
-        ax.set_xlabel(_('Times played'))
-        summary_users = fig_end(fig)
-
-        fig, ax = fig_start()
-        ax.hist(time_of_day, bins=24, range=(-0.5, 23.5))
-        ax.set_xlabel(_('Time of day'))
-        ax.set_ylabel(_('Tracks played'))
-        # plt.xticks([n for n in range(0, 24)], [f'{n:02}:00' for n in range(0, 24)])
-        plt.xticks([0, 6, 12, 18, 24], ['00:00', '06:00', '12:00', '18:00', '00:00'])
-        summary_time_of_day = fig_end(fig)
-
-        fig, ax = fig_start()
-        ax.hist(day_of_week, bins=7, range=(-0.5, 6.5), orientation='horizontal')
-        ax.set_xlabel(_('Tracks played'))
-        ax.set_ylabel(_('Day of week'))
-        plt.yticks((0, 1, 2, 3, 4, 5, 6), (_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday'), _('Saturday'), _('Sunday')))
-        summary_day_of_week = fig_end(fig)
-
-        fig, ax = fig_start()
-        bars = ax.barh(*counter_to_xy(track_counter))
-        ax.bar_label(bars)
-        ax.set_xlabel(_('Times played'))
-        summary_top_tracks = fig_end(fig)
-
-        fig, ax = fig_start()
-        bars = ax.barh(*counter_to_xy(artist_counter))
-        ax.bar_label(bars)
-        ax.set_xlabel(_('Times played'))
-        summary_top_artists = fig_end(fig)
-
+    # This takes a long time, so the database connection is closed
+    plots_dict = stats_plots.get_plots(stats_data)
 
     return render_template('history.jinja2',
                            history=history_items,
                            now_playing=now_playing_items,
-                           summary_playlists=summary_playlists,
-                           summary_users=summary_users,
-                           summary_time_of_day=summary_time_of_day,
-                           summary_day_of_week=summary_day_of_week,
-                           summary_top_tracks=summary_top_tracks,
-                           summary_top_artists=summary_top_artists)
+                           **plots_dict)
 
 
 @app.route('/playlist_stats')
