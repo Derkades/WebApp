@@ -263,7 +263,7 @@ class Track:
             audio_options = ['-f', 'mp3',
                              '-c:a', 'libmp3lame',
                              '-c:v', 'copy',  # Leave cover as JPEG, don't re-encode as PNG
-                             '-q:a', '1']  # VBR 190-250kb/s
+                             '-q:a', '5']  # VBR ~130kbps (usually 120-150kbps), close to transparent
 
         filters = 'dynaudnorm=targetrms=0.3:gausssize=101'
 
