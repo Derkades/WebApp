@@ -206,12 +206,6 @@
                     <label for="settings-meme-mode">{% trans %}Album cover meme mode{% endtrans %}</label>
                 </div>
 
-                <h4>{% trans %}Scan music{% endtrans %}</h4>
-                <div>
-                    <button id="scan-button">{% trans %}Scan playlists and update local track list{% endtrans %}</button>
-                    <div id="scan-spinner" class="spinner hidden"></div>
-                </div>
-
                 <h4>{% trans %}YouTube download{% endtrans %}</h4>
                 <p>
                     {% trans %}Select a playlist and paste a link from YouTube, Soundcloud, Bandcamp, etc. Finally, press <kbd>Download</kbd>.{% endtrans %}
@@ -225,11 +219,18 @@
                     <div id="youtube-dl-output" class="logbox">{% trans %}yt-dlp output will appear here{% endtrans %}</div>
                 </form>
 
+                <h4>{% trans %}Update track list{% endtrans %}</h4>
+                <div>
+                    <p>{% trans %}The local music cache is updated every 15 minutes. If you've added, removed, or otherwise modified files externally, you may want to force an update.{% endtrans %}</p>
+                    <button id="scan-button">{% trans %}Force update track list cache{% endtrans %}</button>
+                    <div id="scan-spinner" class="spinner hidden"></div>
+                </div>
+
                 <h4>{% trans %}Credits{% endtrans %}</h4>
                 <p>
                     {% trans trimmed gh="https://github.com/DanielKoomen/WebApp", robin_gh="https://github.com/Derkades", insp_gh="https://github.com/DanielKoomen/MusicPlayer", daniel_gh="https://github.com/DanielKoomen" %}
                     <a href="{{gh}}">Super fancy music player 2.0</a> is a project largely made by
-                    <a href="{{robin_gh}}">Robin Slot</a>, inspired by the awesome
+                    <a href="{{robin_gh}}">Robin Slot</a>, inspired by
                     <a href="{{insp_gh}}" target="_blank">Super fancy music player</a> by
                     <a href="{{daniel_gh}}" target="_blank">Daniël Koomen</a>. Enjoy!
                     {% endtrans %}
