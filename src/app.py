@@ -1096,7 +1096,7 @@ def route_users_new():
     # Close connection, bcrypt hash takes a while
     username = form['username']
     password = form['password']
-    hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+    hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
     with db.connect() as conn:
         conn.execute('INSERT INTO user (username, password) VALUES (?, ?)',
