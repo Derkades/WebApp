@@ -88,6 +88,9 @@ def image_search(bing_query: str) -> Optional[bytes]:
         with ThreadPool(5) as pool:
             downloads = pool.map(_download, image_urls)
 
+        # Remove failed downloads
+        downloads = [d for d in downloads if d is not None]
+
         if len(downloads) == 0:
             cache.store(cache_key, b'magic_no_results')
             log.info('No image found')
