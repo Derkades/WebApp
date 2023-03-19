@@ -117,6 +117,31 @@ def f_last_played(data: list):
     return fig_end(fig)
 
 
+def f_playlist_count(playlist_names, playlist_counts):
+    fig, ax = fig_start()
+    bars = ax.barh(playlist_names, playlist_counts)
+    ax.set_title(_('Number of tracks in playlists'))
+    ax.bar_label(bars)
+    ax.set_xlabel(_('Number of tracks'))
+    return fig_end(fig)
+
+
+def f_playlist_total_duration(playlist_names, playlist_total_durations):
+    fig, ax = fig_start()
+    ax.barh(playlist_names, playlist_total_durations)
+    ax.set_title(_('Total duration of tracks in playlists'))
+    ax.set_xlabel('Total duration in minutes')
+    return fig_end(fig)
+
+
+def f_playlist_mean_duration(playlist_names, playlist_mean_durations):
+    fig, ax = fig_start()
+    ax.barh(playlist_names, playlist_mean_durations)
+    ax.set_title(_('Mean duration of tracks in playlist'))
+    ax.set_xlabel('Mean duration in minutes')
+    return fig_end(fig)
+
+
 def get_data(conn: Connection, after_timestamp: int):
     result = conn.execute('''
                           SELECT timestamp, user.username, history.track, history.playlist, track.path IS NOT NULL AS track_exists
@@ -150,14 +175,24 @@ def get_data(conn: Connection, after_timestamp: int):
             track_counter.update((relpath,))
 
     result = conn.execute('SELECT last_played FROM track')
-
     last_played_timestamps = [row[0] for row in result]
 
-    return playlist_counter, user_counter, time_of_day, day_of_week, artist_counter, track_counter, last_played_timestamps
+    result = conn.execute('SELECT playlist, COUNT(*), SUM(duration), AVG(duration) FROM track GROUP BY playlist')
+    playlist_name = []
+    playlist_count = []
+    playlist_total_duration = []
+    playlist_mean_duration = []
+    for name, count, total_duration, mean_duration in result:
+        playlist_name.append(name)
+        playlist_count.append(count)
+        playlist_total_duration.append(total_duration)
+        playlist_mean_duration.append(mean_duration)
+
+    return playlist_counter, user_counter, time_of_day, day_of_week, artist_counter, track_counter, last_played_timestamps, playlist_name, playlist_count, playlist_total_duration, playlist_mean_duration
 
 
 def get_plots(data):
-    playlist_counter, user_counter, time_of_day, day_of_week, artist_counter, track_counter, last_played_timestamps = data
+    playlist_counter, user_counter, time_of_day, day_of_week, artist_counter, track_counter, last_played_timestamps, playlist_name, playlist_count, playlist_total_duration, playlist_mean_duration = data
 
     with Pool(4) as p:
         r_playlists = p.apply_async(f_playlists, (playlist_counter,))
@@ -167,6 +202,9 @@ def get_plots(data):
         r_tracks = p.apply_async(f_tracks, (track_counter,))
         r_artists = p.apply_async(f_artists, (artist_counter,))
         r_last_played = p.apply_async(f_last_played, (last_played_timestamps,))
+        r_playlist_count = p.apply_async(f_playlist_count, (playlist_name, playlist_count))
+        r_playlist_total_durations = p.apply_async(f_playlist_total_duration, (playlist_name, playlist_total_duration))
+        r_playlist_mean_durations = p.apply_async(f_playlist_mean_duration, (playlist_name, playlist_mean_duration))
 
         return [r_playlists.get(),
                 r_users.get(),
@@ -174,4 +212,7 @@ def get_plots(data):
                 r_dow.get(),
                 r_tracks.get(),
                 r_artists.get(),
-                r_last_played.get()]
+                r_last_played.get(),
+                r_playlist_count.get(),
+                r_playlist_total_durations.get(),
+                r_playlist_mean_durations.get()]
