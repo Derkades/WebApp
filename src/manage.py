@@ -73,7 +73,7 @@ def handle_passwd(args):
 
         user_id = result[0]
 
-        password = password = input('Enter new password:')
+        password = input('Enter new password:')
         hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
         conn.execute('UPDATE user SET password=? WHERE id=?', (hashed_password, user_id))
