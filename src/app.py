@@ -860,14 +860,40 @@ def route_history():
                                       'playlist': playlist_name,
                                       'title': meta.display_title()})
 
-        stats_data = stats_plots.get_data(conn)
+
+    return render_template('history.jinja2',
+                           history=history_items,
+                           now_playing=now_playing_items)
+
+
+@app.route('/stats')
+def route_stats():
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn)
+
+        current = int(time.time())
+        if 'period' in request.args:
+            period = request.args['period']
+            if period == 'day':
+                before = current - 60*60*24
+                period_str = _('last 24 hours')
+            elif period == 'week':
+                before = current - 60*60*24*7
+                period_str = _('last 7 days')
+            elif period == 'month':
+                before = current - 60*60*24*30
+                period_str = _('last 30 days')
+        else:
+            before = current - 60*60*24*7
+            period_str = _('last 7 days')
+
+        stats_data = stats_plots.get_data(conn, before)
 
     # This takes a long time, so the database connection is closed
     plots_dict = stats_plots.get_plots(stats_data)
 
-    return render_template('history.jinja2',
-                           history=history_items,
-                           now_playing=now_playing_items,
+    return render_template('stats.jinja2',
+                           period_str=period_str,
                            **plots_dict)
 
 

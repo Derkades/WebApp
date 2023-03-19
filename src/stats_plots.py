@@ -14,7 +14,10 @@ from music import Track
 plt.style.use(('dark_background', 'fast'))
 
 def fig_start():
-    fig, ax = plt.subplots()
+    fig = plt.figure(figsize=(7, 4),)
+    fig.set_tight_layout(True)
+    ax = fig.gca()
+    # fig, ax = plt.subplots()
     return fig, ax
 
 def fig_end(fig) -> str:
@@ -36,6 +39,7 @@ def counter_to_xy(counter: Counter):
 def f_playlists(data: Counter):
     fig, ax = fig_start()
     bars = ax.barh(*counter_to_xy(data))
+    ax.set_title(_('Top playlists'))
     ax.bar_label(bars)
     ax.set_xlabel(_('Times played'))
     return fig_end(fig)
@@ -44,6 +48,7 @@ def f_playlists(data: Counter):
 def f_users(data: Counter):
     fig, ax = fig_start()
     bars = ax.barh(*counter_to_xy(data))
+    ax.set_title(_('Most active users'))
     ax.bar_label(bars)
     ax.set_xlabel(_('Times played'))
     return fig_end(fig)
@@ -52,6 +57,7 @@ def f_users(data: Counter):
 def f_tod(data: list):
     fig, ax = fig_start()
     ax.hist(data, bins=24, range=(-0.5, 23.5))
+    ax.set_title(_('Time of day'))
     ax.set_xlabel(_('Time of day'))
     ax.set_ylabel(_('Tracks played'))
     # plt.xticks([n for n in range(0, 24)], [f'{n:02}:00' for n in range(0, 24)])
@@ -62,6 +68,7 @@ def f_tod(data: list):
 def f_dow(data: list):
     fig, ax = fig_start()
     ax.hist(data, bins=7, range=(-0.5, 6.5), orientation='horizontal')
+    ax.set_title(_('Day of week'))
     ax.set_xlabel(_('Tracks played'))
     ax.set_ylabel(_('Day of week'))
     plt.yticks((0, 1, 2, 3, 4, 5, 6), (_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday'), _('Saturday'), _('Sunday')))
@@ -71,6 +78,7 @@ def f_dow(data: list):
 def f_tracks(data: Counter):
     fig, ax = fig_start()
     bars = ax.barh(*counter_to_xy(data))
+    ax.set_title(_('Most played tracks'))
     ax.bar_label(bars)
     ax.set_xlabel(_('Times played'))
     return fig_end(fig)
@@ -79,19 +87,20 @@ def f_tracks(data: Counter):
 def f_artists(data: Counter):
     fig, ax = fig_start()
     bars = ax.barh(*counter_to_xy(data))
+    ax.set_title(_('Most played artists'))
     ax.bar_label(bars)
     ax.set_xlabel(_('Times played'))
     return fig_end(fig)
 
 
-def get_data(conn: Connection):
+def get_data(conn: Connection, after_timestamp: int):
     result = conn.execute('''
                           SELECT timestamp, user.username, history.track, history.playlist, track.path IS NOT NULL AS track_exists
                           FROM history
                               JOIN user ON history.user = user.id
                               LEFT JOIN track ON history.track = track.path
                           WHERE timestamp > ?
-                          ''', (int(time.time()) - 60*60*24*30,))
+                          ''', (after_timestamp,))
 
     playlist_counter = Counter()
     user_counter = Counter()

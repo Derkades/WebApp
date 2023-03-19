@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-03-18 18:10+0100\n"
-"PO-Revision-Date: 2023-03-18 18:10+0100\n"
+"POT-Creation-Date: 2023-03-19 10:48+0100\n"
+"PO-Revision-Date: 2023-03-19 10:48+0100\n"
 "Last-Translator: \n"
 "Language: nl\n"
 "Language-Team: nl <LL@li.org>\n"
@@ -34,7 +34,19 @@ msgstr ""
 "Wachtwoord veranderd. Alle sessies zijn ongeldig gemaakt. Je zal opnieuw "
 "moeten inloggen."
 
-#: app.py:1125
+#: app.py:879
+msgid "last 24 hours"
+msgstr "afgelopen 24 uur"
+
+#: app.py:882 app.py:888
+msgid "last 7 days"
+msgstr "afgelopen 7 dagen"
+
+#: app.py:885
+msgid "last 30 days"
+msgstr "afgelopen 30 dagen"
+
+#: app.py:1151
 msgid ""
 "No playlist configured. Please configure a primay playlist in playlist "
 "manager."
@@ -42,16 +54,16 @@ msgstr ""
 "Geen afspeellijst ingesteld. Je kan een playlist instellen in "
 "playlistbeheer."
 
-#: app.py:1129
+#: app.py:1155
 #, python-format
 msgid "No write permission for playlist: %(playlist)s"
 msgstr "Geen schrijftoegang tot de afspeellijst: '%(playlist)s'"
 
-#: app.py:1134
+#: app.py:1160
 msgid "Track is already in this playlist"
 msgstr "Nummer zit al in deze afspeellijst"
 
-#: app.py:1140
+#: app.py:1166
 #, python-format
 msgid "File has been successfully copied to your playlist: %(playlist)s"
 msgstr "Bestand is gekopieerd naar jouw playlist: '%(playlist)s'"
@@ -76,49 +88,65 @@ msgstr ""
 "Je bent geen administrator, maar deze pagina vereist administratieve "
 "rechten"
 
-#: stats_plots.py:40 stats_plots.py:48 stats_plots.py:75 stats_plots.py:83
+#: stats_plots.py:42
+msgid "Top playlists"
+msgstr "Populairste afspeellijsten"
+
+#: stats_plots.py:44 stats_plots.py:53 stats_plots.py:83 stats_plots.py:92
 msgid "Times played"
 msgstr "Aantal keer afgespeeld"
 
-#: stats_plots.py:55 templates/history.jinja2:49
+#: stats_plots.py:51
+msgid "Most active users"
+msgstr "Meest actieve gebruikers"
+
+#: stats_plots.py:60 stats_plots.py:61
 msgid "Time of day"
 msgstr "Moment van de dag"
 
-#: stats_plots.py:56 stats_plots.py:65
+#: stats_plots.py:62 stats_plots.py:72
 msgid "Tracks played"
 msgstr "Nummers afgespeeld"
 
-#: stats_plots.py:66 templates/history.jinja2:52
+#: stats_plots.py:71 stats_plots.py:73
 msgid "Day of week"
 msgstr "Dag van de week"
 
-#: stats_plots.py:67
+#: stats_plots.py:74
 msgid "Monday"
 msgstr "Maandag"
 
-#: stats_plots.py:67
+#: stats_plots.py:74
 msgid "Tuesday"
 msgstr "Dinsdag"
 
-#: stats_plots.py:67
+#: stats_plots.py:74
 msgid "Wednesday"
 msgstr "Woensdag"
 
-#: stats_plots.py:67
+#: stats_plots.py:74
 msgid "Thursday"
 msgstr "Donderdag"
 
-#: stats_plots.py:67
+#: stats_plots.py:74
 msgid "Friday"
 msgstr "Vrijdag"
 
-#: stats_plots.py:67
+#: stats_plots.py:74
 msgid "Saturday"
 msgstr "Zaterdag"
 
-#: stats_plots.py:67
+#: stats_plots.py:74
 msgid "Sunday"
 msgstr "Zondag"
+
+#: stats_plots.py:81
+msgid "Most played tracks"
+msgstr "Meest gespeelde nummers"
+
+#: stats_plots.py:90
+msgid "Most played artists"
+msgstr "Meest gespeelde artiesten"
 
 #: templates/403.jinja2:4 templates/403.jinja2:9
 msgid "Permission denied"
@@ -319,16 +347,16 @@ msgstr "Afspeelgeschiedenis"
 msgid "Now playing"
 msgstr "Nu aan het afspelen"
 
-#: templates/history.jinja2:18 templates/history.jinja2:70
+#: templates/history.jinja2:18 templates/history.jinja2:54
 msgid "User"
 msgstr "Gebruiker"
 
-#: templates/history.jinja2:21 templates/history.jinja2:73
+#: templates/history.jinja2:21 templates/history.jinja2:57
 #: templates/recent_changes.jinja2:17
 msgid "Playlist"
 msgstr "Afspeellijst"
 
-#: templates/history.jinja2:24 templates/history.jinja2:76
+#: templates/history.jinja2:24 templates/history.jinja2:60
 #: templates/never_play.jinja2:14 templates/recent_changes.jinja2:20
 msgid "Track"
 msgstr "Nummer"
@@ -338,30 +366,14 @@ msgid "<p>No one is playing music.</p>"
 msgstr "<p>Niemand speelt muziek.</p>"
 
 #: templates/history.jinja2:42
-msgid "Summary (last 30 days)"
-msgstr "Samenvatting (afgelopen 30 dagen)"
+msgid "Summary"
+msgstr "Samenvatting"
 
-#: templates/history.jinja2:43
-msgid "Playlists"
-msgstr "Afspeellijsten"
-
-#: templates/history.jinja2:46 templates/users.jinja2:23
-msgid "Users"
-msgstr "Gebruikers"
-
-#: templates/history.jinja2:55
-msgid "Top tracks "
-msgstr "Meest afgespeelde nummers"
-
-#: templates/history.jinja2:58
-msgid "Top artists "
-msgstr "Meest afgespeelde artiesten"
-
-#: templates/history.jinja2:61
+#: templates/history.jinja2:45
 msgid "History"
 msgstr "Geschiedenis"
 
-#: templates/history.jinja2:67 templates/recent_changes.jinja2:11
+#: templates/history.jinja2:51 templates/recent_changes.jinja2:11
 msgid "Time"
 msgstr "Tijd"
 
@@ -386,14 +398,9 @@ msgstr "Bestanden"
 msgid "Playlist manager"
 msgstr "Afspeellijstbeheer"
 
-#: templates/home.jinja2:25
+#: templates/home.jinja2:25 templates/home.jinja2:27
 msgid "Statistics"
 msgstr "Statistieken"
-
-#: templates/home.jinja2:27 templates/playlist_stats.jinja2:4
-#: templates/playlist_stats.jinja2:9
-msgid "Playlist statistics"
-msgstr "Afspeellijststatistieken"
 
 #: templates/home.jinja2:28 templates/recent_changes.jinja2:5
 msgid "Recent file changes"
@@ -420,11 +427,16 @@ msgstr "Experimenteel"
 msgid "Radio"
 msgstr "Radio"
 
-#: templates/home.jinja2:38
+#: templates/home.jinja2:36 templates/playlist_stats.jinja2:4
+#: templates/playlist_stats.jinja2:9
+msgid "Playlist statistics"
+msgstr "Afspeellijststatistieken"
+
+#: templates/home.jinja2:39
 msgid "Administrative"
 msgstr "Administratief"
 
-#: templates/home.jinja2:39 templates/users.jinja2:4 templates/users.jinja2:9
+#: templates/home.jinja2:40 templates/users.jinja2:4 templates/users.jinja2:9
 msgid "User management"
 msgstr "Gebruikerbeheer"
 
@@ -925,6 +937,15 @@ msgstr "Verwijderd"
 msgid "Changed"
 msgstr "Gewijzigd"
 
+#: templates/stats.jinja2:4 templates/stats.jinja2:9
+msgid "Playback statistics"
+msgstr "Afspeelstatistieken"
+
+#: templates/stats.jinja2:26
+#, python-format
+msgid "Summary (%(period_str)s)"
+msgstr "Samenvatting van de %(period_str)s"
+
 #: templates/users.jinja2:12
 msgid "To create admin users or to delete users, please use the CLI interface."
 msgstr ""
@@ -934,6 +955,10 @@ msgstr ""
 #: templates/users.jinja2:13
 msgid "Create new user"
 msgstr "Maak nieuwe gebruiker"
+
+#: templates/users.jinja2:23
+msgid "Users"
+msgstr "Gebruikers"
 
 #: templates/users.jinja2:27
 msgid "Admin"
@@ -984,3 +1009,7 @@ msgstr "Nieuw wachtwoord (laat leeg om niet te veranderen)"
 #: templates/users_edit.jinja2:18
 msgid "Submit"
 msgstr "Versturen"
+
+#~ msgid "Playlists"
+#~ msgstr "Afspeellijsten"
+

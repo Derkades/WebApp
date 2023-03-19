@@ -349,6 +349,12 @@ form {
     margin-right: .5rem;
 }
 
+.stats-plot {
+    margin-right: 1rem;
+    margin-bottom: 1rem;
+    max-width: 100%;
+}
+
 @media screen and (max-width: 800px) {
     .collapse-col {
         display: none;

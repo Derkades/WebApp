@@ -1,0 +1,45 @@
+{% extends "base_static.jinja2" %}
+
+{% block title %}
+    {% trans %}Playback statistics{% endtrans %}
+{% endblock title %}
+
+{% block content %}
+
+{{ page_heading(gettext('Playback statistics')) }}
+
+<form method="GET">
+    <input type="hidden" name="period" value="day">
+    <input type="submit" value="Day">
+</form>
+
+<form method="GET">
+    <input type="hidden" name="period" value="week">
+    <input type="submit" value="Week">
+</form>
+
+<form method="GET">
+    <input type="hidden" name="period" value="month">
+    <input type="submit" value="Month">
+</form>
+
+<h2>{% trans %}Summary ({{ period_str }}){% endtrans %}</h2>
+{# <h3>{% trans %}Playlists{% endtrans %}</h3> #}
+<img src="{{ plot_playlists }}" class="stats-plot">
+
+{# <h3>{% trans %}Users{% endtrans %}</h3> #}
+<img src="{{ plot_users }}" class="stats-plot">
+
+{# <h3>{% trans %}Time of day{% endtrans %}</h3> #}
+<img src="{{ plot_tod }}" class="stats-plot">
+
+{# <h3>{% trans %}Day of week{% endtrans %}</h3> #}
+<img src="{{ plot_dow }}" class="stats-plot">
+
+{# <h3>{% trans %}Top tracks {% endtrans %}</h3> #}
+<img src="{{ plot_tracks }}" class="stats-plot">
+
+{# <h3>{% trans %}Top artists {% endtrans %}</h3> #}
+<img src="{{ plot_artists }}" class="stats-plot">
+
+{% endblock content %}
