@@ -890,11 +890,11 @@ def route_stats():
         stats_data = stats_plots.get_data(conn, before)
 
     # This takes a long time, so the database connection is closed
-    plots_dict = stats_plots.get_plots(stats_data)
+    plots = stats_plots.get_plots(stats_data)
 
     return render_template('stats.jinja2',
                            period_str=period_str,
-                           **plots_dict)
+                           plots=plots)
 
 
 @app.route('/playlist_stats')

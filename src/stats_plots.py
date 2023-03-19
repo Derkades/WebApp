@@ -93,6 +93,30 @@ def f_artists(data: Counter):
     return fig_end(fig)
 
 
+def f_last_played(data: list):
+    words = []
+    current = int(time.time())
+    for timestamp in data:
+        if timestamp == 0:
+            words.append(4) # never
+        if timestamp > current - 60*60*24:
+            words.append(0) # today
+        elif timestamp > current - 60*60*24*7:
+            words.append(1) # this week
+        elif timestamp > current - 60*60*24*30:
+            words.append(2) # this month
+        else:
+            words.append(3) # long ago
+
+    fig, ax = fig_start()
+    ax.hist(words, bins=5, orientation='horizontal', range=(-0.5, 4.5))
+    ax.set_title(_('Last played'))
+    ax.set_xlabel(_('Number of tracks'))
+    ax.set_ylabel(_('Last played'))
+    plt.yticks((0, 1, 2, 3, 4), (_('Today'), _('This week'), _('This month'), _('Long ago'), _('Never')))
+    return fig_end(fig)
+
+
 def get_data(conn: Connection, after_timestamp: int):
     result = conn.execute('''
                           SELECT timestamp, user.username, history.track, history.playlist, track.path IS NOT NULL AS track_exists
@@ -125,11 +149,15 @@ def get_data(conn: Connection, after_timestamp: int):
         else:
             track_counter.update((relpath,))
 
-    return playlist_counter, user_counter, time_of_day, day_of_week, artist_counter, track_counter
+    result = conn.execute('SELECT last_played FROM track')
+
+    last_played_timestamps = [row[0] for row in result]
+
+    return playlist_counter, user_counter, time_of_day, day_of_week, artist_counter, track_counter, last_played_timestamps
 
 
 def get_plots(data):
-    playlist_counter, user_counter, time_of_day, day_of_week, artist_counter, track_counter = data
+    playlist_counter, user_counter, time_of_day, day_of_week, artist_counter, track_counter, last_played_timestamps = data
 
     with Pool(4) as p:
         r_playlists = p.apply_async(f_playlists, (playlist_counter,))
@@ -138,12 +166,12 @@ def get_plots(data):
         r_dow = p.apply_async(f_dow, (day_of_week,))
         r_tracks = p.apply_async(f_tracks, (track_counter,))
         r_artists = p.apply_async(f_artists, (artist_counter,))
+        r_last_played = p.apply_async(f_last_played, (last_played_timestamps,))
 
-        return {
-            'plot_playlists': r_playlists.get(),
-            'plot_users': r_users.get(),
-            'plot_tod':  r_tod.get(),
-            'plot_dow': r_dow.get(),
-            'plot_tracks': r_tracks.get(),
-            'plot_artists': r_artists.get(),
-        }
+        return [r_playlists.get(),
+                r_users.get(),
+                r_tod.get(),
+                r_dow.get(),
+                r_tracks.get(),
+                r_artists.get(),
+                r_last_played.get()]
