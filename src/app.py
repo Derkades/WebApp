@@ -851,14 +851,17 @@ def route_history():
                                 JOIN track ON now_playing.track = track.path
                               WHERE now_playing.timestamp > ?
                               ''',
-                              (int(time.time()) - 65,))  # JS updates now playing every minute
+                              (int(time.time()) - 70,))  # JS updates now playing every minute
         now_playing_items = []
         for username, playlist_name, relpath in result:
             track = Track.by_relpath(conn, relpath)
             meta = track.metadata()
-            now_playing_items.append({'username': username,
+            now_playing_items.append({'image': '/get_album_cover?quality=low&path=' + urlencode(relpath),
+                                      'username': username,
                                       'playlist': playlist_name,
-                                      'title': meta.display_title()})
+                                      'title': meta.title,
+                                      'artists': meta.artists,
+                                      'fallback_title': meta.display_title()})
 
 
     return render_template('history.jinja2',

@@ -291,6 +291,33 @@ body.light .icon {
     font-size: 1.5rem;
 }
 
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.card {
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: var(--border-radius-amount);
+    overflow: hidden; /* prevent top row from overlapping rounded corners */
+}
+
+.card .card-header {
+    background: rgba(0, 0, 0, 0.2);
+    padding: .5rem;
+    font-size: 1.3em;
+}
+
+.card .card-body {
+    padding: .5rem;
+}
+
+.card-medium {
+    width: 30rem;
+    /* width: min(30rem, 100%); */
+}
+
 .table {
     width: 100%;
     border-spacing: 0;

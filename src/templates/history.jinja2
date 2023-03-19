@@ -11,30 +11,27 @@
 <h2>{% trans %}Now playing{% endtrans %}</h2>
 
 {% if now_playing %}
-    <table class="table">
-        <thead>
-            <tr>
-                <th>
-                    {% trans %}User{% endtrans %}
-                </th>
-                <th>
-                    {% trans %}Playlist{% endtrans %}
-                </th>
-                <th>
-                    {% trans %}Track{% endtrans %}
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for track in now_playing %}
-                <tr>
-                    <td>{{ track['username'] }}</td>
-                    <td>{{ track['playlist'] }}</td>
-                    <td>{{ track['title'] }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="card-container">
+        {% for track in now_playing %}
+            <div class="card card-medium">
+                <div class="card-header">
+                    {{ track['username'] }}
+                </div>
+                <div class="card-body" style="display: flex">
+                    <img src="{{ track['image'] }} " height="100" width="100" style="border-radius: var(--border-radius-amount)">
+                    <div style="margin-left: .5rem">
+                        {% if track['title'] and track['artists'] %}
+                            <div style="font-size: 1.3em;">{{ track['title'] }}</div>
+                            <div style="font-size: 1.1em;">{{ track['artists']|join(', ') }}</div>
+                        {% else %}
+                            <div style="font-size: 1.1em;">{{ track['fallback_title'] }}</div>
+                        {% endif %}
+                        <div class="secondary" style="margin-top: .5rem;">{{ track['playlist'] }}</div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 {% else %}
     {% trans %}<p>No one is playing music.</p>{% endtrans %}
 {% endif %}
