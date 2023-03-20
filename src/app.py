@@ -890,10 +890,8 @@ def route_stats():
             before = current - 60*60*24*7
             period_str = _('last 7 days')
 
-        stats_data = stats_plots.get_data(conn, before)
-
     # This takes a long time, so the database connection is closed
-    plots = stats_plots.get_plots(stats_data)
+    plots = stats_plots.get_plots(before)
 
     return render_template('stats.jinja2',
                            period_str=period_str,
