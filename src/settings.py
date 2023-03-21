@@ -20,6 +20,10 @@ def getenv(key: str, default: Optional[str]) -> str:
         raise ValueError('Required environment variable ' + key + ' not configured.')
 
 
+def _to_bool(val: str):
+    return val == '1' or bool(val)
+
+
 csrf_validity_seconds = 3600
 
 user_agent = 'Super fancy music player (https://github.com/DanielKoomen/WebApp/)'
@@ -34,3 +38,4 @@ lastfm_api_key = getenv('MUSIC_LASTFM_API_KEY', '')
 lastfm_api_secret = getenv('MUSIC_LASTFM_API_SECRET', '')
 dev: bool = getenv('MUSIC_ENV', 'prod') == 'dev'
 proxies_x_forwarded_for: int = int(getenv('MUSIC_PROXIES_X_FORWARDED_FOR', '0'))
+offline_mode: bool = _to_bool(getenv('MUSIC_OFFLINE_MODE', ''))

@@ -15,29 +15,38 @@
 
 {% block content %}
 
-<h2>{% trans %}Music{% endtrans %}</h2>
+{% if offline_mode %}
+    <h2>{% trans %}Music (offline mode){% endtrans %}</h2>
+{% else %}
+    <h2>{% trans %}Music{% endtrans %}</h2>
+{% endif %}
+
 {{ nav('/player', 'music', _('Music player')) }}
 
-<h2>{% trans %}Files{%endtrans %}</h2>
-{{ nav('/files', 'folder', _('File manager')) }}
-{{ nav('/playlists', 'playlist-music', _('Playlist manager')) }}
+{% if not offline_mode %}
+    <h2>{% trans %}Files{%endtrans %}</h2>
+    {{ nav('/files', 'folder', _('File manager')) }}
+    {{ nav('/playlists', 'playlist-music', _('Playlist manager')) }}
 
-<h2>{% trans %}Statistics{%endtrans %}</h2>
-{{ nav('/history', 'history', _('Playback history')) }}
-{{ nav('/stats', 'chart-line-variant', _('Statistics')) }}
-{{ nav('/recent_changes', 'file-edit', _('Recent file changes')) }}
+    <h2>{% trans %}Statistics{%endtrans %}</h2>
+    {{ nav('/history', 'history', _('Playback history')) }}
+    {{ nav('/stats', 'chart-line-variant', _('Statistics')) }}
+    {{ nav('/recent_changes', 'file-edit', _('Recent file changes')) }}
 
-<h2>{% trans %}Settings{%endtrans %}</h2>
-{{ nav('/account', 'account-cog', _('Account')) }}
-{{ nav('/never_play', 'cancel', _('Manage track blocklist')) }}
+    <h2>{% trans %}Settings{%endtrans %}</h2>
+    {{ nav('/account', 'account-cog', _('Account')) }}
+    {{ nav('/never_play', 'cancel', _('Manage track blocklist')) }}
 
-<h2>{% trans %}Experimental{% endtrans %}</h2>
-{{ nav('/radio', 'radio', _('Radio')) }}
-{{ nav('/playlist_stats', 'chart-line-variant', _('Playlist statistics')) }}
+    <h2>{% trans %}Experimental{% endtrans %}</h2>
+    {{ nav('/radio', 'radio', _('Radio')) }}
+    {{ nav('/playlist_stats', 'chart-line-variant', _('Playlist statistics')) }}
 
-{% if user_is_admin %}
-    <h2>{% trans %}Administrative{% endtrans %}</h2>
-    {{ nav('/users', 'account-multiple', _('User management')) }}
+    {% if user_is_admin %}
+        <h2>{% trans %}Administrative{% endtrans %}</h2>
+        {{ nav('/users', 'account-multiple', _('User management')) }}
+    {% endif %}
 {% endif %}
+
+
 
 {% endblock content %}

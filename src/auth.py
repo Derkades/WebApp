@@ -6,6 +6,7 @@ from typing import Optional
 from dataclasses import dataclass
 from enum import Enum, unique
 from sqlite3 import Connection, OperationalError
+from abc import ABC, abstractmethod
 
 import bcrypt
 from flask import request
@@ -68,21 +69,50 @@ class Session:
         return f'{browser}, {system}'
 
 
+class User(ABC):
+    user_id: int
+    username: str
+    admin: bool
+    primary_playlist: Optional[str]
+
+    @abstractmethod
+    def sessions(self) -> list[Session]:
+        """
+        Get all sessions for users
+        """
+
+    @abstractmethod
+    def get_csrf(self) -> str:
+        """
+        Generate CSRF token and store it for later validation
+        """
+
+    def verify_csrf(self, token: str) -> None:
+        """
+        Verify request token, raising RequestTokenException if not valid
+        """
+
+    def verify_password(self, password: str) -> bool:
+        """
+        Verify password matches user's existing password
+        Returns: True if password matches, False if not.
+        """
+
+    def update_password(self, new_password: str) -> None:
+        """
+        Update user password and delete all existing sessions.
+        """
+
+
 @dataclass
-class User:
+class StandardUser(User):
     conn: Connection
     user_id: int
     username: str
     admin: bool
-    session: Session
-    lastfm_name: Optional[str]
-    lastfm_key: Optional[str]
     primary_playlist: Optional[str]
 
-    def sessions(self):
-        """
-        Get all sessions for users
-        """
+    def sessions(self) -> list[Session]:
         results = self.conn.execute("""
                                     SELECT rowid, token, creation_date, user_agent, remote_address, last_use
                                     FROM session WHERE user=?
@@ -90,9 +120,6 @@ class User:
         return [Session(*row) for row in results]
 
     def get_csrf(self) -> str:
-        """
-        Generate CSRF token and store it for later validation
-        """
         token = _generate_token()
         now = int(time.time())
         self.conn.execute('INSERT INTO csrf (user, token, creation_date) VALUES (?, ?, ?)',
@@ -100,9 +127,6 @@ class User:
         return token
 
     def verify_csrf(self, token: str) -> None:
-        """
-        Verify request token, raising RequestTokenException if not valid
-        """
         min_timestamp = int(time.time()) - settings.csrf_validity_seconds
         result = self.conn.execute('SELECT token FROM csrf WHERE user=? AND token=? AND creation_date > ?',
                                    (self.user_id, token, min_timestamp)).fetchone()
@@ -110,24 +134,43 @@ class User:
             raise RequestTokenError()
 
     def verify_password(self, password: str) -> bool:
-        """
-        Verify password matches user's existing password
-        Returns: True if password matches, False if not.
-        """
         result = self.conn.execute('SELECT password FROM user WHERE id=?',
                                    (self.user_id,)).fetchone()
         hashed_password, = result
         return bcrypt.checkpw(password.encode(), hashed_password.encode())
 
     def update_password(self, new_password: str) -> None:
-        """
-        Update user password and delete all existing sessions.
-        """
         hashed_password = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
         self.conn.execute('UPDATE user SET password=? WHERE id=?',
                           (hashed_password, self.user_id))
         self.conn.execute('DELETE FROM session WHERE user=?',
                           (self.user_id,))
+
+
+class OfflineUser(User):
+    def __init__(self):
+        self.user_id = 0
+        self.username = 'fake offline user'
+        self.admin = False
+        self.primary_playlist = None
+
+    def sessions(self) -> list[Session]:
+        return []
+
+    def get_csrf(self) -> str:
+        return 'fake_csrf_token'
+
+    def verify_csrf(self, token: str) -> bool:
+        return token == 'fake_csrf_token'
+
+    def verify_password(self, _password: str):
+        raise RuntimeError('Password login is not available in offline mode')
+
+    def update_password(self, _new_password: str) -> None:
+        raise RuntimeError('Cannot update password in offline mode')
+
+
+OFFLINE_DUMMY_USER = OfflineUser()
 
 
 @unique
@@ -176,6 +219,9 @@ def log_in(conn: Connection, username: str, password: str) -> Optional[str]:
         remote_addr
     Returns: Session token, or None if the username+password combination is not valid
     """
+    if settings.offline_mode:
+        raise RuntimeError('Login not available in offline mode')
+
     result = conn.execute('SELECT id, password FROM user WHERE username=?', (username,)).fetchone()
 
     if result is None:
@@ -213,18 +259,16 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
     Returns: User object if session token is valid, or None if invalid
     """
     result = conn.execute("""
-                          SELECT session.rowid, session.creation_date, session.user_agent, session.remote_address, session.last_use,
-                                 user.id, user.username, user.admin, user_lastfm.name, user_lastfm.key, user.primary_playlist
+                          SELECT session.rowid, user.id, user.username, user.admin, user.primary_playlist
                           FROM user
-                          INNER JOIN session ON user.id = session.user
-                          LEFT JOIN user_lastfm ON user.id = user_lastfm.user
+                              INNER JOIN session ON user.id = session.user
                           WHERE session.token=?
                           """, (token,)).fetchone()
     if result is None:
         log.warning('Invalid auth token: %s', token)
         return None
 
-    session_rowid, session_creation_date, session_user_agent, session_address, session_last_use, user_id, username, admin, lastfm_name, lastfm_key, primary_playlist = result
+    session_rowid, user_id, username, admin, primary_playlist = result
 
     try:
         remote_addr = request.remote_addr
@@ -241,8 +285,7 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
         if ex.sqlite_errorname != 'SQLITE_READONLY':
             raise ex
 
-    session = Session(session_rowid, token, session_creation_date, session_user_agent, session_address, session_last_use)
-    return User(conn, user_id, username, admin == 1, session, lastfm_name, lastfm_key, primary_playlist)
+    return StandardUser(conn, user_id, username, admin == 1, primary_playlist)
 
 
 def verify_auth_cookie(conn: Connection, require_admin = False, redirect_to_login = False) -> User:
@@ -253,6 +296,9 @@ def verify_auth_cookie(conn: Connection, require_admin = False, redirect_to_logi
         require_admin: Whether logging in as a non-admin account should be treated as an authentication failure
         redirect_to_login: Whether the user should sent a redirect if authentication failed, instead of showing a 403 page
     """
+    if settings.offline_mode:
+        return OFFLINE_DUMMY_USER
+
     if 'token' not in request.cookies:
         log.warning('No auth token')
         raise AuthError(AuthErrorReason.NO_TOKEN, redirect_to_login)
@@ -279,6 +325,13 @@ def prune_old_csrf_tokens(conn: Connection) -> int:
     return conn.execute('DELETE FROM csrf WHERE creation_date < ?',
                         (delete_before,)).rowcount
 
+
 def prune_old_session_tokens(conn: Connection) -> int:
+    """
+    Prune old session tokens
+    Args:
+        conn: Read-write database connection
+    Returns: Number of deleted tokens
+    """
     one_month_ago = int(time.time()) - 60*60*24*30
     return conn.execute('DELETE FROM session WHERE last_use < ?', (one_month_ago,)).rowcount

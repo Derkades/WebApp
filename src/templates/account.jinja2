@@ -40,11 +40,11 @@
                 <td>{{ session.creation_date }}</td>
                 <td>{{ session.last_use_ago }}</td>
                 <td>
-                    {% if session == user.session %}
-                        {% trans device=session.last_device %}{{ device }} (current session){%endtrans%}
-                    {% else %}
+                    {# {% if session == user.session %} #}
+                        {# {% trans device=session.last_device %}{{ device }} (current session){%endtrans%} #}
+                    {# {% else %} #}
                         {{ session.last_device }}
-                    {% endif %}
+                    {# {% endif %} #}
                 </td>
                 <td>
                     {{ session.remote_address }}

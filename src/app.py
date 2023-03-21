@@ -28,7 +28,9 @@ from radio import RadioTrack
 import scanner
 import settings
 import packer
-import stats_plots
+if not settings.offline_mode:
+    # Matplotlib is slow to import, skip if not needed
+    import stats_plots
 
 
 LANGUAGES = (
@@ -88,7 +90,8 @@ def route_home():
     with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn, redirect_to_login=True)
     return render_template('home.jinja2',
-                           user_is_admin=user.admin)
+                           user_is_admin=user.admin,
+                           offline_mode=settings.offline_mode)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -637,14 +640,20 @@ def route_account():
         csrf_token = user.get_csrf()
         sessions = user.sessions()
 
-        return render_template('account.jinja2',
-                               user=user,
-                               csrf_token=csrf_token,
-                               sessions=sessions,
-                               lastfm_enabled=lastfm.is_configured(),
-                               lastfm_name=user.lastfm_name,
-                               lastfm_key=user.lastfm_key,
-                               lastfm_connect_url=lastfm.CONNECT_URL)
+        result = conn.execute('SELECT name FROM user_lastfm WHERE user=?',
+                              (user.user_id)).fetchone()
+        if result:
+            lastfm_name, = result
+        else:
+            lastfm_name = None
+
+    return render_template('account.jinja2',
+                            user=user,
+                            csrf_token=csrf_token,
+                            sessions=sessions,
+                            lastfm_enabled=lastfm.is_configured(),
+                            lastfm_name=lastfm_name,
+                            lastfm_connect_url=lastfm.CONNECT_URL)
 
 
 @app.route('/change_password_form', methods=['POST'])
