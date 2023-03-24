@@ -67,6 +67,8 @@ COLLECTION_KEYWORDS = [
     'hitzone',
     'greatest hits',
     'hits collection',
+    'top40',
+    'hitdossier',
 ]
 
 
