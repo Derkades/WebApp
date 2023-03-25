@@ -2,9 +2,17 @@
 
 ## Music player
 
-![screenshot](https://downloads.rkslot.nl/music-player-screenshots/player.png)
+![screenshot](https://downloads.rkslot.nl/music-player-screenshots/player2.png)
 
-## Lyrics
+## Home
+
+![screenshot](https://downloads.rkslot.nl/music-player-screenshots/home.png)
+
+## Playback history
+
+![screenshot](https://downloads.rkslot.nl/music-player-screenshots/history.png)
+
+## Lyrics (outdated)
 
 ![screenshot](https://downloads.rkslot.nl/music-player-screenshots/lyrics.png)
 
@@ -20,6 +28,6 @@
 
 ![screenshot](https://downloads.rkslot.nl/music-player-screenshots/album-view.png)
 
-## Account settings
+## Account settings (outdated)
 
 ![screenshot](https://downloads.rkslot.nl/music-player-screenshots/account.png)
