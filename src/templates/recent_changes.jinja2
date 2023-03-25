@@ -1,5 +1,9 @@
 {% extends "base_static.jinja2" %}
 
+{% block title %}
+    {% trans %}Recent file changes{% endtrans %}
+{% endblock title %}
+
 {% block content %}
 
 {{ page_heading(gettext('Recent file changes')) }}
