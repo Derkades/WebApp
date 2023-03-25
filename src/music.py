@@ -319,6 +319,8 @@ class Track:
             extension = self.path.name.split('.')[-1]
             if extension == 'm4a':
                 ffmpeg_format = 'ipod'
+            elif extension == 'mka':
+                ffmpeg_format = 'matroska'
             else:
                 ffmpeg_format = extension
             command.extend(('-f', ffmpeg_format))
