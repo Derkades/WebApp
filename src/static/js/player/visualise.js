@@ -1,44 +1,66 @@
-const visualise = {
-    bars: 2048,
-    analyser: null,
-    dataArray: null,
-    start: () => {
-        // https://blog.logrocket.com/audio-visualizer-from-scratch-javascript/
+// https://blog.logrocket.com/audio-visualizer-from-scratch-javascript/
+class Visualiser {
+    #fftSize = 2**14;
+    /** @type {AnalyserNode} */
+    #analyser;
+    /** @type {Uint8Array} */
+    #dataArray;
+    /** @type {HTMLCanvasElement} */
+    #canvas;
+    /** @type {boolean} */
+    #needRedraw;
+
+    start() {
+        this.#canvas = document.getElementById('visualiser');
+        this.#canvas.style.zIndex = 2;
+
         const audioContext = new AudioContext();
         const audioSource = audioContext.createMediaElementSource(getAudioElement());
         const analyser = audioContext.createAnalyser();
+        analyser.fftSize = this.#fftSize;
         audioSource.connect(analyser);
         audioSource.connect(audioContext.destination);
-        visualise.analyser = analyser;
-        visualise.dataArray = new Uint8Array(analyser.frequencyBinCount);
-        visualise.repeat();
-    },
-    repeat: () => {
-        visualise.analyser.fftSize = visualise.bars;
-        const canvas = document.getElementById('visualiser');
-        canvas.style.zIndex = 2;
-        canvas.height = canvas.clientHeight;
-        canvas.width = canvas.clientWidth;
-        const draw = canvas.getContext('2d');
-        const bufferLength = visualise.analyser.frequencyBinCount;
-        // const upperSkip = Math.round(0.35*bufferLength);
-        const skip = Math.round(0.15*bufferLength);
-        const barWidth = canvas.width / (bufferLength - 2.0*skip);
+        this.#analyser = analyser;
+        this.#dataArray = new Uint8Array(analyser.frequencyBinCount);
+        this.#draw();
 
-        let x = 0;
-        draw.clearRect(0, 0, canvas.height, canvas.width);
-        visualise.analyser.getByteFrequencyData(visualise.dataArray);
-        let finalI = 0;
-        for (let i = skip; i < (bufferLength - skip); i++) {
-            const barHeight = visualise.dataArray[i];
+        setInterval(() => this.#update(), 1000/60);
+    }
+
+    #update() {
+        this.#canvas.height = this.#canvas.clientHeight;
+        this.#canvas.width = this.#canvas.clientWidth;
+        this.#analyser.getByteFrequencyData(this.#dataArray);
+        this.#needRedraw = true;
+    }
+
+    #draw() {
+        if (this.#needRedraw) {
+            this.#needRedraw = false;
+
+            const draw = this.#canvas.getContext('2d');
+
+            draw.clearRect(0, 0, this.#canvas.height, this.#canvas.width);
             draw.fillStyle = "white";
-            draw.fillRect(x, canvas.height - barHeight, barWidth + 1, barHeight);
-            x += barWidth;
-            finalI = i;
+
+            const barWidth = 2;
+
+            const minFreq = 50;
+            const maxFreq = 18000;
+            const minBin = minFreq / 48000 * this.#fftSize; // 4
+            const maxBin = maxFreq / 48000 * this.#fftSize; // 1365
+            const multiplyX = (maxBin - minBin) + minBin;
+
+            for (let x = 0; x < this.#canvas.width; x+= barWidth) {
+                const i = Math.floor((x / this.#canvas.width)**1.7 * multiplyX);
+                const barHeight = this.#dataArray[i];
+                draw.fillRect(x, this.#canvas.height - barHeight, barWidth, barHeight);
+            }
         }
 
-        console.info(canvas.width, bufferLength, skip, barWidth, finalI);
-
-        requestAnimationFrame(visualise.repeat);
+        requestAnimationFrame(() => this.#draw());
     }
-};
+
+}
+
+const visualiser = new Visualiser();
