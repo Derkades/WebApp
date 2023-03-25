@@ -1,3 +1,7 @@
+"""
+Functions related to the cache (cache.db)
+"""
+
 from typing import Any
 import logging
 import json
@@ -15,8 +19,10 @@ def store(key: str, data: bytes) -> None:
     """
     with db.cache() as conn:
         timestamp = int(time.time())
-        conn.execute('INSERT OR REPLACE INTO cache (key, data, update_time, access_time) VALUES (?, ?, ?, ?)',
-                            (key, data, timestamp, timestamp))
+        conn.execute("""
+                     INSERT OR REPLACE INTO cache (key, data, update_time, access_time)
+                     VALUES (?, ?, ?, ?)
+                     """, (key, data, timestamp, timestamp))
 
 
 def store_json(key: str, data: Any) -> None:
@@ -58,6 +64,10 @@ def retrieve_json(cache_key: str) -> Any | None:
     return json.loads(data.decode())
 
 def cleanup() -> int:
+    """
+    Remove entries from cache that have not been used for a long time
+    Returns: Number of removed entries
+    """
     with db.cache() as conn:
         one_month_ago = int(time.time()) - 60*60*24*30
         return conn.execute('DELETE FROM cache WHERE access_time < ?', (one_month_ago,)).rowcount

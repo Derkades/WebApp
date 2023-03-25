@@ -1,3 +1,6 @@
+"""
+Image conversion and thumbnailing
+"""
 from typing import Callable, Optional
 from io import BytesIO
 from pathlib import Path
@@ -50,8 +53,9 @@ def thumbnail(input_img: Path | bytes | Callable,
     Generate thumbnail, making use of cache.
     Parameters:
         input_img: Input image, either a path, image bytes, or a function that returns image bytes.
-        cache_key: A cache identifier string to uniquely identify this image. If a cache object exists
-                   with this cache id (and the same thumbnail settings), a thumbnail is returned from cache.
+        cache_key: A cache identifier string to uniquely identify this image. If a cache object
+                   exists with this cache id (and the same thumbnail settings), a thumbnail is
+                   returned from cache.
         img_format: Image format, a value from the ImageFormat enum
         img_quality: Image quality, a value from the ImageQuality enum
         square: Whether the thumbnail should be cropped to 1:1 aspect ratio

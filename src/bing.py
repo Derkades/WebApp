@@ -15,7 +15,13 @@ import settings
 log = logging.getLogger("app.bing")
 
 
-def _download(image_url: str) -> bytes:
+def _download(image_url: str) -> bytes | None:
+    """
+    Download image by URL
+    Args:
+        image_url
+    Returns: Image bytes, or None if the image failed to download
+    """
     resp = requests.get(image_url,
                         timeout=10,
                         headers={'User-Agent': settings.webscraping_user_agent})
@@ -86,20 +92,20 @@ def image_search(bing_query: str) -> Optional[bytes]:
                 break
 
         with ThreadPool(5) as pool:
-            downloads = pool.map(_download, image_urls)
+            maybe_downloads = pool.map(_download, image_urls)
 
         # Remove failed downloads
-        downloads = [d for d in downloads if d is not None]
+        downloads = [d for d in maybe_downloads if d is not None]
 
-        if len(downloads) == 0:
+        if downloads:
+            best_image = sorted(downloads, key=_sort_key_len)[-1]
+            cache.store(cache_key, best_image)
+            log.info('Found image, %.2fMiB', len(best_image)/1024/1024)
+            return best_image
+        else:
             cache.store(cache_key, b'magic_no_results')
             log.info('No image found')
             return None
-
-        best_image = sorted(downloads, key=_sort_key_len)[-1]
-        cache.store(cache_key, best_image)
-        log.info('Found image, %.2fMiB', len(best_image)/1024/1024)
-        return best_image
 
     except Exception:
         log.info('Error during bing search. This is probably a bug.')

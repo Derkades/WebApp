@@ -188,6 +188,14 @@ class Track:
         return None
 
     def get_cover_thumbnail(self, meme: bool, img_format: ImageFormat, img_quality: ImageQuality) -> bytes:
+        """
+        Get thumbnail version of album cover art
+        Args:
+            meme: Whether to retrieve a meme instead of the proper album cover
+            img_format: Image format
+            img_quality: Image quality level
+        Returns: Thumbnail bytes
+        """
         cache_key = self.relpath + str(self.mtime) + str(meme)
 
         def get_img_function():
@@ -362,32 +370,38 @@ class PlaylistStats:
                            ''', (relpath,)).fetchone()
         self.artist_count, = row
 
-        row = conn.execute('''
-                           SELECT SUM(title IS NOT NULL),
-                                  SUM(album IS NOT NULL),
-                                  SUM(album_artist IS NOT NULL),
-                                  SUM(year IS NOT NULL),
-                                  MAX(last_played),
-                                  MIN(last_played),
-                                  MAX(mtime)
-                           FROM track WHERE playlist=?
-                           ''', (relpath,)).fetchone()
-        self.has_title_count, self.has_album_count, self.has_album_artist_count, \
-            self.has_year_count, self.most_recent_play, self.least_recent_play, self.most_recent_mtime = row
+        (self.has_title_count,
+         self.has_album_count,
+         self.has_album_artist_count,
+         self.has_year_count,
+         self.most_recent_play,
+         self.least_recent_play,
+         self.most_recent_mtime
+         ) = conn.execute('''
+                          SELECT SUM(title IS NOT NULL),
+                                 SUM(album IS NOT NULL),
+                                 SUM(album_artist IS NOT NULL),
+                                 SUM(year IS NOT NULL),
+                                 MAX(last_played),
+                                 MIN(last_played),
+                                 MAX(mtime)
+                          FROM track WHERE playlist=?
+                          ''', (relpath,)).fetchone()
 
-        row = conn.execute('''
-                           SELECT COUNT(DISTINCT track)
-                           FROM track_artist JOIN track ON track.path = track
-                           WHERE playlist=?
-                           ''', (relpath,)).fetchone()
-        self.has_artist_count, = row
 
-        row = conn.execute('''
-                           SELECT COUNT(DISTINCT track)
-                           FROM track_tag JOIN track ON track.path = track
-                           WHERE playlist=?
-                           ''', (relpath,)).fetchone()
-        self.has_tag_count, = row
+        (self.has_artist_count,
+         ) = conn.execute('''
+                          SELECT COUNT(DISTINCT track)
+                          FROM track_artist JOIN track ON track.path = track
+                          WHERE playlist=?
+                          ''', (relpath,)).fetchone()
+
+        (self.has_tag_count,
+         ) = conn.execute('''
+                          SELECT COUNT(DISTINCT track)
+                          FROM track_tag JOIN track ON track.path = track
+                          WHERE playlist=?
+                          ''', (relpath,)).fetchone()
 
 
 @dataclass
@@ -495,6 +509,9 @@ class Playlist:
         return row[0]
 
     def stats(self) -> PlaylistStats:
+        """
+        Returns: PlaylistStats
+        """
         return PlaylistStats(self.conn, self.name)
 
     @staticmethod

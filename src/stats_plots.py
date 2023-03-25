@@ -2,7 +2,6 @@ from io import BytesIO
 from base64 import b64encode
 from multiprocessing.pool import Pool
 from collections import Counter
-from sqlite3 import Connection
 from datetime import datetime
 import time
 
@@ -55,12 +54,12 @@ def _plots_history(after_timestamp: int):
                             WHERE timestamp > ?
                             ''', (after_timestamp,))
 
-        playlist_counter = Counter()
-        user_counter = Counter()
-        time_of_day = []
-        day_of_week = []
-        artist_counter = Counter()
-        track_counter = Counter()
+        playlist_counter: Counter[str] = Counter()
+        user_counter: Counter[str] = Counter()
+        time_of_day: list[int] = []
+        day_of_week: list[int] = []
+        artist_counter: Counter[str] = Counter()
+        track_counter: Counter[str] = Counter()
 
         for timestamp, username, relpath, playlist, track_exists in result:
             playlist_counter.update((playlist,))

@@ -1,6 +1,8 @@
+"""
+Management command
+"""
 from argparse import ArgumentParser
 import logging
-import time
 
 import db
 
@@ -39,7 +41,7 @@ def handle_userdel(args):
             log.info('User deleted successfully')
 
 
-def handle_userlist(args):
+def handle_userlist(_args):
     """
     Handle command to list users
     """
@@ -62,7 +64,7 @@ def handle_passwd(args):
     """
     Handle command to change a user's password
     """
-    import bcrypt
+    import bcrypt  # pylint: disable=import-outside-toplevel
 
     with db.connect() as conn:
         result = conn.execute('SELECT id FROM user WHERE username=?',
@@ -110,18 +112,18 @@ def handle_playlist(args):
         log.info('Given user %s access to playlist %s', args.username, args.playlist_path)
 
 
-def handle_scan(args):
+def handle_scan(_args):
     """
     Handle command to scan playlists
     """
-    import scanner
+    import scanner  # pylint: disable=import-outside-toplevel
 
     with db.connect() as conn:
         scanner.scan(conn)
 
 
-def handle_cleanup(args):
-    import cleanup
+def handle_cleanup(_args):
+    import cleanup  # pylint: disable=import-outside-toplevel
 
     cleanup.cleanup()
 
@@ -133,32 +135,32 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     subparsers = parser.add_subparsers(required=True)
 
-    useradd = subparsers.add_parser('useradd', help='create new user')
-    useradd.add_argument('username')
-    useradd.add_argument('--admin', action='store_true', help='created user should have administrative rights')
-    useradd.set_defaults(func=handle_useradd)
+    cmd_useradd = subparsers.add_parser('useradd', help='create new user')
+    cmd_useradd.add_argument('username')
+    cmd_useradd.add_argument('--admin', action='store_true', help='created user should have administrative rights')
+    cmd_useradd.set_defaults(func=handle_useradd)
 
-    userdel = subparsers.add_parser('userdel', help='delete a user')
-    userdel.add_argument('username')
-    userdel.set_defaults(func=handle_userdel)
+    cmd_userdel = subparsers.add_parser('userdel', help='delete a user')
+    cmd_userdel.add_argument('username')
+    cmd_userdel.set_defaults(func=handle_userdel)
 
-    userlist = subparsers.add_parser('userlist', help='list users')
-    userlist.set_defaults(func=handle_userlist)
+    cmd_userlist = subparsers.add_parser('userlist', help='list users')
+    cmd_userlist.set_defaults(func=handle_userlist)
 
-    passwd = subparsers.add_parser('passwd', help='change password')
-    passwd.add_argument('username')
-    passwd.set_defaults(func=handle_passwd)
+    cmd_passwd = subparsers.add_parser('passwd', help='change password')
+    cmd_passwd.add_argument('username')
+    cmd_passwd.set_defaults(func=handle_passwd)
 
-    playlist = subparsers.add_parser('playlist', help='give write access to playlist')
-    playlist.add_argument('username')
-    playlist.add_argument('playlist_path')
-    playlist.set_defaults(func=handle_playlist)
+    cmd_playlist = subparsers.add_parser('playlist', help='give write access to playlist')
+    cmd_playlist.add_argument('username')
+    cmd_playlist.add_argument('playlist_path')
+    cmd_playlist.set_defaults(func=handle_playlist)
 
-    scan = subparsers.add_parser('scan', help='scan playlists for changes')
-    scan.set_defaults(func=handle_scan)
+    cmd_scan = subparsers.add_parser('scan', help='scan playlists for changes')
+    cmd_scan.set_defaults(func=handle_scan)
 
-    cleanup = subparsers.add_parser('cleanup', help='clean old or unused data from the database')
-    cleanup.set_defaults(func=handle_cleanup)
+    cmd_cleanup = subparsers.add_parser('cleanup', help='clean old or unused data from the database')
+    cmd_cleanup.set_defaults(func=handle_cleanup)
 
-    args = parser.parse_args()
-    args.func(args)
+    parsed_args = parser.parse_args()
+    parsed_args.func(parsed_args)

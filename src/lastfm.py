@@ -1,7 +1,6 @@
 import hashlib
 from urllib.parse import quote as urlencode
 import logging
-from typing import Optional
 
 import requests
 
@@ -49,7 +48,11 @@ def _make_request(method: str, api_method: str, **extra_params):
     return r.json()
 
 
-def get_user_key(user: User) -> Optional[str]:
+def get_user_key(user: User) -> str | None:
+    """
+    Get a user's last.fm session key from local database
+    Returns session key, or None if the user has not set up last.fm
+    """
     result = user.conn.execute('SELECT key FROM user_lastfm WHERE user=?',
                                (user.user_id,)).fetchone()
     return result[0] if result else None

@@ -1,13 +1,14 @@
+"""
+Main application file, containing all Flask routes
+"""
 from typing import Any
 import logging
 from pathlib import Path
 from urllib.parse import quote as urlencode
 import time
-import bcrypt
 import shutil
-from collections import Counter
-from datetime import datetime
 
+import bcrypt
 from flask import Flask, request, render_template, Response, redirect, send_file
 from flask_babel import Babel
 from flask_babel import _
@@ -124,10 +125,10 @@ def route_login():
 
         if request.is_json:
             return {'token': token}
-        else:
-            response = redirect('/')
-            response.set_cookie('token', token, max_age=3600*24*30, samesite='Strict')
-            return response
+
+        response = redirect('/')
+        response.set_cookie('token', token, max_age=3600*24*30, samesite='Strict')
+        return response
 
 
 @app.route('/player')
@@ -151,6 +152,9 @@ def route_player():
 
 @app.route('/player.js')
 def route_player_js():
+    """
+    Concatenated javascript file for music player. Only used during development.
+    """
     return Response(packer.pack(Path(static_dir, 'js', 'player')),
                     content_type='application/javascript')
 
@@ -492,30 +496,30 @@ def route_playlists_share():
                                csrf=csrf,
                                playlist=playlist_relpath,
                                usernames=usernames)
-    else:
-        with db.connect() as conn:
-            user = auth.verify_auth_cookie(conn)
-            user.verify_csrf(request.form['csrf'])
-            playlist_relpath = request.form['playlist']
-            username = request.form['username']
 
-            target_user_id, = conn.execute('SELECT id FROM user WHERE username=?',
-                                           (username,)).fetchone()
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
+        user.verify_csrf(request.form['csrf'])
+        playlist_relpath = request.form['playlist']
+        username = request.form['username']
 
-            # Verify playlist exists and user has write access
-            playlist = music.user_playlist(conn, playlist_relpath, user.user_id)
+        target_user_id, = conn.execute('SELECT id FROM user WHERE username=?',
+                                    (username,)).fetchone()
 
-            if not playlist.write and not user.admin:
-                return Response('Cannot share playlist if you do not have write permission', 403)
+        # Verify playlist exists and user has write access
+        playlist = music.user_playlist(conn, playlist_relpath, user.user_id)
 
-            conn.execute('''
-                         INSERT INTO user_playlist (user, playlist, write)
-                         VALUES (?, ?, 1)
-                         ON CONFLICT (user, playlist) DO UPDATE
-                            SET write = 1
-                         ''', (target_user_id, playlist_relpath))
+        if not playlist.write and not user.admin:
+            return Response('Cannot share playlist if you do not have write permission', 403)
 
-            return redirect('/playlists')
+        conn.execute('''
+                     INSERT INTO user_playlist (user, playlist, write)
+                     VALUES (?, ?, 1)
+                     ON CONFLICT (user, playlist) DO UPDATE
+                         SET write = 1
+                     ''', (target_user_id, playlist_relpath))
+
+        return redirect('/playlists')
 
 
 @app.route('/files_upload', methods=['POST'])
@@ -1167,21 +1171,6 @@ def route_player_copy_track():
         return Response(_('File has been successfully copied to your playlist: %(playlist)s', playlist=playlist.name), 200)
 
 
-def get_img_format():
-    """
-    Get preferred image format
-    """
-    if 'Accept' in request.headers:
-        accept = request.headers['Accept']
-        for mime in ['image-avif', 'image/webp']:
-            if mime in accept:
-                return mime
-
-    # Once webp is working in Accept header for all image requests, this can be changed to jpeg
-    # For now assume the browser supports WEBP to avoid always sending JPEG
-    return 'image/webp'
-
-
 def is_mobile() -> bool:
     """
     Checks whether User-Agent looks like a mobile device (Android or iOS)
@@ -1189,19 +1178,6 @@ def is_mobile() -> bool:
     if 'User-Agent' in request.headers:
         user_agent = request.headers['User-Agent']
         if 'Android' in user_agent or 'iOS' in user_agent:
-            return True
-    return False
-
-
-def is_fruit() -> bool:
-    """
-    Check whether User-Agent looks like an Apple device
-    """
-    if 'User-Agent' in request.headers:
-        user_agent = request.headers['User-Agent']
-        if 'Macintosh' in user_agent or \
-                'iPhone' in user_agent or \
-                'iPad' in user_agent:
             return True
     return False
 
