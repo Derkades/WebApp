@@ -51,6 +51,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         event.preventDefault(); // Prevent accidental text selection
     });
+
+    // Scroll to seek
+    seekBar.addEventListener('wheel', event => {
+        seek(event.deltaY < 0 ? 3 : -3);
+    });
 });
 
 // Update seek bar
