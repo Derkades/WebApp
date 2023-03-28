@@ -6,9 +6,7 @@ class Track {
     /** @type {string} */
     display;
     /** @type {string} */
-    displayFile;
-    /** @type {string} */
-    playlistPath; // TODO rename to playlistName
+    playlistName;
     /** @type {number} */
     duration;
     /** @type {Array<string>} */
@@ -28,7 +26,7 @@ class Track {
         this.trackData = trackData;
         this.path = trackData.path;
         this.display = trackData.display;
-        this.playlistPath = playlistName;
+        this.playlistName = playlistName;
         this.duration = trackData.duration;
         this.tags = trackData.tags;
         this.title = trackData.title;
@@ -42,7 +40,7 @@ class Track {
      * @returns {Playlist}
      */
     playlist() {
-        return state.playlists[this.playlistPath];
+        return state.playlists[this.playlistName];
     };
 
     /**
@@ -56,8 +54,8 @@ class Track {
 
         if (showPlaylist) {
             const playlistHtml = document.createElement('a');
-            playlistHtml.onclick = () => browse.browsePlaylist(this.playlistPath);
-            playlistHtml.textContent = this.playlistPath;
+            playlistHtml.onclick = () => browse.browsePlaylist(this.playlistName);
+            playlistHtml.textContent = this.playlistName;
             html.append(playlistHtml, ': ');
         }
 

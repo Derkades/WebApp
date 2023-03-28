@@ -89,10 +89,10 @@ class Browse {
         } else {
             if (current.filter === null) {
                 // Show tracks in specific playlist
-                filter = track => track.playlistPath === playlist;
+                filter = track => track.playlistName === playlist;
             } else {
                 // Apply filter to tracks in specific playlists
-                filter = track => current.filter(track) && track.playlistPath === playlist;
+                filter = track => current.filter(track) && track.playlistName === playlist;
             }
         }
 
@@ -196,7 +196,7 @@ class Browse {
 
         for (const track of tracks) {
             const colPlaylist = document.createElement('td');
-            colPlaylist.textContent = track.playlistPath;
+            colPlaylist.textContent = track.playlistName;
 
             const colDuration = document.createElement('td');
             colDuration.append(secondsToString(track.duration));

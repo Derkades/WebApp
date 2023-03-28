@@ -121,8 +121,8 @@ class Queue {
             // Playlist link that opens browse view
             const aPlaylist = document.createElement('a');
             if (track !== null) {
-                aPlaylist.textContent = track.playlistPath;
-                aPlaylist.onclick = () => browse.browsePlaylist(track.playlistPath);
+                aPlaylist.textContent = track.playlistName;
+                aPlaylist.onclick = () => browse.browsePlaylist(track.playlistName);
             } else {
                 aPlaylist.textContent = '?';
             }
@@ -168,7 +168,7 @@ class Queue {
         if (removalBehaviour === 'same') {
             // Add playlist to override array. Next time a track is picked, when playlistOverrides contains elements,
             // one element is popped and used instead of choosing a random playlist.
-            state.playlistOverrides.push(track.playlistPath);
+            state.playlistOverrides.push(track.playlistName);
         } else if (removalBehaviour !== 'roundrobin') {
             console.warn('unexpected removal behaviour: ' + removalBehaviour);
         }
