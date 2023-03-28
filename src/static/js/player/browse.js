@@ -107,10 +107,12 @@ class Browse {
                     name: 'display',
                 },
                 {
-                    name: 'artists'
+                    name: 'artists',
+                    weight: 0.5,
                 },
                 {
                     name: 'albumArtist',
+                    weight: 0.5,
                 },
             ],
         };
