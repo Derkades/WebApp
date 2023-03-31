@@ -161,16 +161,16 @@ class Track:
         log.info('Finding cover for: %s', meta.relpath)
 
         if meme:
+            title = meta.title if meta.title else meta.display_title()
+            if '-' in title:
+                title = title[title.index('-')+1:]
+
             if random.random() > 0.4:
-                query = next(meta.lyrics_search_queries())
-                image_bytes = reddit.get_image(query)
+                image_bytes = reddit.get_image(title)
                 if image_bytes:
                     return image_bytes
 
-            query = next(meta.lyrics_search_queries()) + ' meme'
-            if '-' in query:
-                query = query[query.index('-')+1:]
-            image_bytes = bing.image_search(query)
+            image_bytes = bing.image_search(title + ' meme')
             if image_bytes:
                 return image_bytes
 
