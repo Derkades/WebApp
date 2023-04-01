@@ -228,9 +228,9 @@ body.light .progress-time {
     text-align: center;
 }
 
-#queue-table tr.active {
+/* #queue-table tr.active {
     background: darkgoldenrod;
-}
+} */
 
 .delete-overlay {
     height: 100%;
