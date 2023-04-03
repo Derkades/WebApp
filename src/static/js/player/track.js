@@ -15,10 +15,16 @@ class Track {
     title;
     /** @type {Array<string> | null} */
     artists;
+    /** @type {Array<string> | null} */
+    artistsUppercase;
     /** @type {string | null} */
     album;
     /** @type {string | null} */
-    albumArist;
+    albumUppercase;
+    /** @type {string | null} */
+    albumArtist;
+    /** @type {string | null} */
+    albumArtistUppercase;
     /** @type {number | null} */
     year;
 
@@ -31,8 +37,11 @@ class Track {
         this.tags = trackData.tags;
         this.title = trackData.title;
         this.artists = trackData.artists;
+        if (this.artists) this.artistsUppercase = this.artists.map(s => s.toUpperCase());
         this.album = trackData.album;
+        if (this.album) this.albumUppercase = this.album.toUpperCase()
         this.albumArtist = trackData.album_artist;
+        if (this.albumArtist) this.albumArtistUppercase = this.albumArtist.toUpperCase();
         this.year = trackData.year;
     };
 
