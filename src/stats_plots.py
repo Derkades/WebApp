@@ -60,6 +60,7 @@ def _plots_history(after_timestamp: int):
         day_of_week: list[int] = []
         artist_counter: Counter[str] = Counter()
         track_counter: Counter[str] = Counter()
+        album_counter: Counter[str] = Counter()
 
         for timestamp, username, relpath, playlist, track_exists in result:
             playlist_counter.update((playlist,))
@@ -73,6 +74,8 @@ def _plots_history(after_timestamp: int):
                 meta = Track.by_relpath(conn, relpath).metadata()
                 if meta.artists:
                     artist_counter.update(meta.artists)
+                if meta.album:
+                    album_counter.update((meta.album,))
                 track_counter.update((meta.display_title(),))
             else:
                 track_counter.update((relpath,))
@@ -122,7 +125,14 @@ def _plots_history(after_timestamp: int):
     ax.set_xlabel(_('Times played'))
     plot_artists = fig_end(fig)
 
-    return plot_playlists, plot_users, plot_tod, plot_dow, plot_tracks, plot_artists
+    fig, ax = fig_start()
+    bars = ax.barh(*counter_to_xy(album_counter))
+    ax.set_title(_('Most played albums'))
+    ax.bar_label(bars)
+    ax.set_xlabel(_('Times played'))
+    plot_albums = fig_end(fig)
+
+    return plot_playlists, plot_users, plot_tod, plot_dow, plot_tracks, plot_artists, plot_albums
 
 
 def _plots_last_played():
