@@ -180,8 +180,12 @@ class Browse {
     browseAlbum(albumName, albumArtistName) {
         const title = document.getElementById('trans-album').textContent + (albumArtistName === null ? '' : albumArtistName + ' - ') + albumName;
         albumName = albumName.toUpperCase();
-        albumArtistName = albumArtistName.toUpperCase();
-        this.browse(title, track => track.albumUppercase === albumName && track.albumArtistUppercase === albumArtistName);
+        if (albumArtistName) {
+            albumArtistName = albumArtistName.toUpperCase();
+            this.browse(title, track => track.albumUppercase === albumName && track.albumArtistUppercase === albumArtistName);
+        } else {
+            this.browse(title, track => track.albumUppercase === albumName);
+        }
     };
 
     /**
