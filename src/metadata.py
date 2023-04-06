@@ -89,15 +89,15 @@ def strip_keywords(inp: str) -> str:
     return inp
 
 
-def is_alpha(c):
+def is_alpha(char):
     """
     Check whether given character is alphanumeric, a dash or a space
     """
-    return c == ' ' or \
-           c == '-' or \
-           'a' <= c <= 'z' or \
-           'A' <= c <= 'Z' or \
-           '0' <= c <= '9'
+    return char == ' ' or \
+           char == '-' or \
+           'a' <= char <= 'z' or \
+           'A' <= char <= 'Z' or \
+           '0' <= char <= '9'
 
 
 def join_meta_list(entries: list[str]) -> str:
@@ -146,7 +146,7 @@ class Metadata:
         Generate title from file name
         Returns: Title string
         """
-        title = self.relpath.split('/')[-1]
+        title = self.relpath.split('/', maxsplit=1)[-1]
         # Remove file extension
         try:
             title = title[:title.rindex('.')]
@@ -177,8 +177,7 @@ class Metadata:
         title = self._meta_title()
         if title:
             return title
-        else:
-            return self.filename_title() + ' ~'
+        return self.filename_title() + ' ~'
 
     def album_release_query(self) -> str:
         """
@@ -312,7 +311,15 @@ def probe(path: Path) -> Metadata:
         if name == 'genre':
             tags = split_meta_list(value)
 
-    return Metadata(music.to_relpath(path), duration, artists, album, title, year, album_artist, track_number, tags)
+    return Metadata(music.to_relpath(path),
+                    duration,
+                    artists,
+                    album,
+                    title,
+                    year,
+                    album_artist,
+                    track_number,
+                    tags)
 
 
 def cached(conn: Connection, relpath: str) -> Metadata:

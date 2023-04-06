@@ -67,6 +67,10 @@ def from_relpath(relpath: str) -> Path:
 
 
 def is_trashed(path: Path) -> bool:
+    """
+    Returns: Whether this file or directory is trashed, by checking for the
+    trash prefix in all path parts.
+    """
     for part in path.parts:
         if part.startswith('.trash.'):
             return True
@@ -74,6 +78,9 @@ def is_trashed(path: Path) -> bool:
 
 
 def is_music_file(path: Path) -> bool:
+    """
+    Returns: Whether the provided path is a music file, by checking its extension
+    """
     for ext in MUSIC_EXTENSIONS:
         if path.name.endswith(ext):
             return True
@@ -426,7 +433,7 @@ class Playlist:
                 FROM track
                 WHERE track.playlist=?
                 """
-        params = [self.name]
+        params: list[str | int] = [self.name]
 
         if user is not None:
             query += ' AND path NOT IN (SELECT track FROM never_play WHERE user = ?)'
@@ -556,6 +563,13 @@ def playlist(conn: Connection, name: str) -> Playlist:
 
 
 def user_playlist(conn: Connection, name: str, user_id: int) -> UserPlaylist:
+    """
+    Get list of favorite playlists
+    Args:
+        conn
+        user_id
+    Returns: List of UserPlaylist objects
+    """
     # TODO merge to single query when bookworm is released, with a version of sqlite3 supporting outer join
 
     row1 = conn.execute('''

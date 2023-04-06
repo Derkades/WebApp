@@ -11,6 +11,9 @@ from matplotlib import pyplot as plt
 import db
 from music import Track
 
+# Number of entries to display in a plot, for counters
+COUNTER_AMOUNT = 10
+
 plt.style.use(('dark_background', 'fast'))
 
 def fig_start():
@@ -29,7 +32,7 @@ def fig_end(fig) -> str:
 def counter_to_xy(counter: Counter):
     xs = []
     ys = []
-    for x, y in counter.most_common(10):
+    for x, y in counter.most_common(COUNTER_AMOUNT):
         xs.append(x)
         ys.append(y)
     return xs, ys
@@ -44,13 +47,12 @@ def rows_to_xy(rows: list[tuple]):
     return xs, ys
 
 
-def _plots_history(after_timestamp: int):
+def _plots_history(after_timestamp: int) -> list[str]:
     with db.connect(read_only=True) as conn:
         result = conn.execute('''
-                            SELECT timestamp, user.username, history.track, history.playlist, track.path IS NOT NULL AS track_exists
+                            SELECT timestamp, user.username, history.track, history.playlist
                             FROM history
                                 JOIN user ON history.user = user.id
-                                LEFT JOIN track ON history.track = track.path
                             WHERE timestamp > ?
                             ''', (after_timestamp,))
 
@@ -62,7 +64,7 @@ def _plots_history(after_timestamp: int):
         track_counter: Counter[str] = Counter()
         album_counter: Counter[str] = Counter()
 
-        for timestamp, username, relpath, playlist, track_exists in result:
+        for timestamp, username, relpath, playlist in result:
             playlist_counter.update((playlist,))
             user_counter.update((username,))
 
@@ -70,8 +72,9 @@ def _plots_history(after_timestamp: int):
             time_of_day.append(dt.hour)
             day_of_week.append(dt.weekday())
 
-            if track_exists:
-                meta = Track.by_relpath(conn, relpath).metadata()
+            track = Track.by_relpath(conn, relpath)
+            if track:
+                meta = track.metadata()
                 if meta.artists:
                     artist_counter.update(meta.artists)
                 if meta.album:
@@ -135,7 +138,7 @@ def _plots_history(after_timestamp: int):
     return plot_playlists, plot_users, plot_tod, plot_dow, plot_tracks, plot_artists, plot_albums
 
 
-def _plots_last_played():
+def _plots_last_played() -> list[str]:
     with db.connect(read_only=True) as conn:
         result = conn.execute('SELECT last_played FROM track')
         words = []
@@ -162,7 +165,7 @@ def _plots_last_played():
     return plot,
 
 
-def _plots_playlists():
+def _plots_playlists() -> list[str]:
     with db.connect(read_only=True) as conn:
         counts = conn.execute('SELECT playlist, COUNT(*) FROM track GROUP BY playlist ORDER BY COUNT(*) DESC').fetchall()
         totals = conn.execute('SELECT playlist, SUM(duration) FROM track GROUP BY playlist ORDER BY SUM(duration) DESC').fetchall()
@@ -190,9 +193,16 @@ def _plots_playlists():
     return plot_counts, plot_totals, plot_means
 
 
-def get_plots(before_timestamp: int):
+def get_plots(after_timestamp: int) -> list[str]:
+    """
+    Get list of plots
+    Args:
+        after_timestamp: Unix timestamp (seconds). Only history data more recent than
+                         this timestamp is considered.
+    Returns: List of plots, as strings containing base64 encoded SVG data
+    """
     with Pool(4) as p:
-        r_history = p.apply_async(_plots_history, (before_timestamp,))
+        r_history = p.apply_async(_plots_history, (after_timestamp,))
         r_last_played = p.apply_async(_plots_last_played)
         r_playlists = p.apply_async(_plots_playlists)
 

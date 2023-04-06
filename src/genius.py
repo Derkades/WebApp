@@ -77,7 +77,12 @@ def _extract_lyrics(genius_url: str) -> str | None:
     # Inside the javascript bit that has now been extracted, is a string. This string contains
     # JSON data. Because it is in a string, some characters are escaped. These need to be
     # un-escaped first.
-    info_json_string = text[start:end].replace('\\"', "\"").replace("\\'", "'").replace('\\\\', '\\').replace('\\$', '$').replace('\\`', '`')
+    info_json_string = text[start:end] \
+        .replace('\\"', "\"") \
+        .replace("\\'", "'") \
+        .replace('\\\\', '\\') \
+        .replace('\\$', '$') \
+        .replace('\\`', '`')
     try:
         # Now, the JSON object is ready to be parsed.
         info_json = json.loads(info_json_string)
