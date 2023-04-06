@@ -4,7 +4,6 @@ from sqlite3 import Connection
 from dataclasses import dataclass
 import time
 
-import db
 import metadata
 import music
 import settings

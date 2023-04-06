@@ -123,6 +123,9 @@ def handle_scan(_args):
 
 
 def handle_cleanup(_args):
+    """
+    Handle command to clean up old entries from databases
+    """
     import cleanup  # pylint: disable=import-outside-toplevel
 
     cleanup.cleanup()
