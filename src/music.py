@@ -66,17 +66,21 @@ def from_relpath(relpath: str) -> Path:
     return path
 
 
-def scan_playlist(playlist_path: str) -> Iterator[Path]:
-    """
-    Scan playlist for tracks, recursively
-    Args:
-        playlist_path: Playlist name
-    Returns: Paths iterator
-    """
-    yield from scan_music(from_relpath(playlist_path))
+def is_trashed(path: Path) -> bool:
+    for part in path.parts:
+        if part.startswith('.trash.'):
+            return True
+    return False
 
 
-def scan_music(path) -> Iterator[Path]:
+def is_music_file(path: Path) -> bool:
+    for ext in MUSIC_EXTENSIONS:
+        if path.name.endswith(ext):
+            return True
+    return False
+
+
+def list_tracks_recursively(path) -> Iterator[Path]:
     """
     Scan directory for tracks, recursively
     Args:
@@ -85,19 +89,8 @@ def scan_music(path) -> Iterator[Path]:
     """
     for ext in MUSIC_EXTENSIONS:
         for track_path in path.glob('**/*' + ext):
-            if not track_path.name.startswith('.trash.'):
+            if not is_trashed(track_path):
                 yield track_path
-
-
-def has_music_extension(path: Path) -> bool:
-    """
-    Check if file is a music file
-    """
-    for ext in MUSIC_EXTENSIONS:
-        if path.name.endswith(ext):
-            return True
-    return False
-
 
 
 class AudioType(Enum):

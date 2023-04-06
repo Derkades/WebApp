@@ -416,7 +416,7 @@ def route_files():
         children = []
 
         for path in browse_path.iterdir():
-            if path.name.startswith('.trash.'):
+            if music.is_trashed(path):
                 continue
 
             file_info = {
@@ -427,7 +427,7 @@ def route_files():
 
             if path.is_dir():
                 file_info['type'] = 'dir'
-            elif music.has_music_extension(path):
+            elif music.is_music_file(path):
                 file_info['type'] = 'music'
                 track = Track.by_relpath(conn, music.to_relpath(path))
                 meta = track.metadata()
