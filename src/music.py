@@ -328,13 +328,17 @@ class Track:
 
 
     @staticmethod
-    def by_relpath(conn: Connection, relpath: str) -> 'Track':
+    def by_relpath(conn: Connection, relpath: str) -> 'Track' | None:
         """
         Find track by relative path
         """
-        mtime, = conn.execute('SELECT mtime FROM track WHERE path=?',
+        row = conn.execute('SELECT mtime FROM track WHERE path=?',
                               (relpath,)).fetchone()
-        return Track(conn, relpath, from_relpath(relpath), mtime)
+        if row:
+            mtime, = row
+            return Track(conn, relpath, from_relpath(relpath), mtime)
+
+        return None
 
 
 @dataclass
