@@ -157,11 +157,8 @@ class Track {
         };
 
         // Resolve all, download in parallel
-        const resolved = await Promise.all([audioBlobUrlGetter(), imageBlobUrlGetter(), lyricsGetter()]);
-
-        const audioBlobUrl = resolved[0];
-        const imageBlobUrl = resolved[1];
-        const lyrics = resolved[2];
+        const promises = Promise.all([audioBlobUrlGetter(), imageBlobUrlGetter(), lyricsGetter()]);
+        const [audioBlobUrl, imageBlobUrl, lyrics] = await promises;
 
         const queuedTrack = new QueuedTrack(this, audioBlobUrl, imageBlobUrl, lyrics);
 
