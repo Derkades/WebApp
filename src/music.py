@@ -175,9 +175,14 @@ class Track:
                 return image_bytes
 
         # Try MusicBrainz first
-        mb_query = meta.album_release_query()
-        if image_bytes := musicbrainz.get_cover(mb_query):
-            return image_bytes
+
+        if (meta.title or meta.album) and (meta.album_artist or meta.artists):
+            album = meta.album if meta.album else meta.title
+            artist = meta.album_artist if meta.album_artist else ' '.join(meta.artists)
+            if image_bytes := musicbrainz.get_cover(artist, album):
+                return image_bytes
+        else:
+            log.info('Skip MusicBrainz search, not enough metadata')
 
         # Otherwise try bing
         for query in meta.album_search_queries():

@@ -1,53 +1,43 @@
-from typing import Optional
 import logging
 import traceback
 import urllib
 
-import requests
 import musicbrainzngs
 
 import cache
 import image
-
 
 musicbrainzngs.set_useragent('Super fancy music player 2.0', 0.1, 'https://github.com/DanielKoomen/WebApp')
 
 log = logging.getLogger('app.musicbrainz')
 
 
-def _search_release(title: str) -> Optional[str]:
+def _search_release_group(artist: str, title: str) -> str:
     """
-    Search for a release id using the provided search query
+    Search for a release group id using the provided search query
     """
-    r = musicbrainzngs.search_releases(title)['release-list']
-    if len(r) > 0:
-        return r[0]['id']
-    else:
-        return None
+    result = musicbrainzngs.search_release_groups(title, artist=artist)
+    groups = result['release-group-list']
+    return groups[0]['id'] if groups else None
 
 
-def _get_image_url(release_id: str) -> Optional[str]:
+def _get_image(release_id: str) -> bytes | None:
     """
-    Get album cover URL from MusicBrainz release id
+    Get album cover URL from MusicBrainz release group id
     """
     try:
-        imgs = musicbrainzngs.get_image_list(release_id)['images']
-
-        for img in imgs:
-            if img['front']:
-                return img['image']
-        return None
+        return musicbrainzngs.get_release_group_image_front(release_id, size="1200")
     except musicbrainzngs.musicbrainz.ResponseError as ex:
         if isinstance(ex.cause, urllib.error.HTTPError) and ex.cause.code == 404:
             return None
         raise ex
 
-def get_cover(title: str) -> Optional[bytes]:
+def get_cover(artist: str, album: str) -> bytes | None:
     """
-    Get album cover for the given song title
+    Get album cover for the given artist and album
     Returns: Image bytes, or None of no album cover was found.
     """
-    cache_key = 'musicbrainz cover' + title
+    cache_key = 'musicbrainz' + artist + album
     cached_data = cache.retrieve(cache_key)
 
     if cached_data is not None:
@@ -58,29 +48,26 @@ def get_cover(title: str) -> Optional[bytes]:
         return cached_data
 
     try:
-        release = _search_release(title)
+        release = _search_release_group(artist, album)
         if release is None:
             log.info('No release found')
             cache.store(cache_key, b'magic_no_cover')
             return None
 
-        image_url = _get_image_url(release)
+        log.info('Found release %s, downloading image...', release)
 
-        if image_url is None:
-            log.info('Release has no cover image attached')
+        image_bytes = _get_image(release)
+
+        if not image_bytes:
+            log.info('Release has no front cover image')
             cache.store(cache_key, b'magic_no_cover')
             return None
-
-        r = requests.get(image_url,
-                         timeout=10)
-        image_bytes = r.content
 
         if not image.check_valid(image_bytes):
             log.warning('Returned image seems to be corrupt')
             return None
 
         cache.store(cache_key, image_bytes)
-        log.info('Found suitable cover art')
         return image_bytes
     except Exception as ex:
         log.info('Error retrieving album art from musicbrainz: %s', ex)

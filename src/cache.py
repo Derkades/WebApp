@@ -54,7 +54,7 @@ def retrieve(key: str) -> bytes | None:
 
         current_time = int(time.time())
 
-        log.info('Cache entry last updated %s days ago', int((current_time - update_time) / (60 * 60 * 24)))
+        # log.info('Cache entry last updated %s days ago', int((current_time - update_time) / (60 * 60 * 24)))
 
         if current_time - update_time > CACHE_OUTDATED_TIME and random.random() < CACHE_OUTDATED_PROB:
             log.info('Cache entry is outdated, pretend it doesn\'t exist')
