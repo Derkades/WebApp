@@ -158,7 +158,7 @@ class Track:
         """
         meta = self.metadata()
 
-        log.info('Finding cover for: %s', meta.relpath)
+        # log.info('Finding cover for: %s', meta.relpath)
 
         if meme:
             title = meta.title if meta.title else meta.display_title()

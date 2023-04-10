@@ -233,11 +233,17 @@ def route_get_album_cover() -> Response:
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
         track = Track.by_relpath(conn, request.args['path'])
+
         quality_str = request.args['quality']
         if quality_str == 'high':
             quality = ImageQuality.HIGH
         elif quality_str == 'low':
             quality = ImageQuality.LOW
+        elif quality_str == 'tiny':
+            quality = ImageQuality.TINY
+        else:
+            raise Exception('invalid quality')
+
         image_bytes = track.get_cover_thumbnail(meme, ImageFormat.WEBP, quality)
 
     return Response(image_bytes, mimetype='image/webp')
@@ -863,7 +869,7 @@ def route_history():
         for username, playlist_name, relpath in result:
             track = Track.by_relpath(conn, relpath)
             meta = track.metadata()
-            now_playing_items.append({'image': '/get_album_cover?quality=low&path=' + urlencode(relpath),
+            now_playing_items.append({'image': '/get_album_cover?quality=tiny&path=' + urlencode(relpath),
                                       'username': username,
                                       'playlist': playlist_name,
                                       'title': meta.title,

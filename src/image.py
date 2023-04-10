@@ -24,6 +24,7 @@ class ImageFormat(Enum):
 class ImageQuality(Enum):
     HIGH = 'high'
     LOW = 'low'
+    TINY = 'tiny'
 
 
 @dataclass
@@ -34,12 +35,14 @@ class ThumbnailParameters:
 
 PARAMS_TABLE: dict[ImageFormat, dict[ImageQuality, ThumbnailParameters]] = {
     ImageFormat.JPEG: {
-        ImageQuality.HIGH: ThumbnailParameters(100, 2048),
+        ImageQuality.HIGH: ThumbnailParameters(100, 1024),
         ImageQuality.LOW: ThumbnailParameters(50, 512),
+        ImageQuality.TINY: ThumbnailParameters(40, 128),
     },
     ImageFormat.WEBP: {
-        ImageQuality.HIGH: ThumbnailParameters(100, 2048),
+        ImageQuality.HIGH: ThumbnailParameters(100, 1024),
         ImageQuality.LOW: ThumbnailParameters(50, 512),
+        ImageQuality.TINY: ThumbnailParameters(40, 128),
     }
 }
 
@@ -61,7 +64,7 @@ def thumbnail(input_img: Path | bytes | Callable,
         square: Whether the thumbnail should be cropped to 1:1 aspect ratio
     Returns: Compressed thumbnail image bytes.
     """
-    cache_key += 'thumbnail5' + img_format.value + img_quality.value
+    cache_key += 'thumbnail' + img_format.value + img_quality.value
     cache_data = cache.retrieve(cache_key)
 
     if cache_data is not None:
