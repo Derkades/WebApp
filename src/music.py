@@ -431,7 +431,7 @@ class Playlist:
             tags: List of tags
         Returns: Track object
         """
-        random_choices = max(5, min(50, self.track_count // 6))
+        random_choices = max(3, min(10, self.track_count // 6))
 
         query = """
                 SELECT track.path, last_played
