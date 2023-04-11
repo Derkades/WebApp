@@ -150,7 +150,8 @@ def route_player():
                            csrf_token=csrf_token,
                            languages=LANGUAGES,
                            language=get_locale(),
-                           primary_playlist=primary_playlist)
+                           primary_playlist=primary_playlist,
+                           offline_mode=settings.offline_mode)
 
 
 @app.route('/player.js')
@@ -189,9 +190,7 @@ def route_choose_track():
         playlist = music.playlist(conn, dir_name)
         chosen_track = playlist.choose_track(user, tag_mode=tag_mode, tags=tags)
 
-    return {
-        'path': chosen_track.relpath,
-    }
+    return {'path': chosen_track.relpath}
 
 
 @app.route('/get_track')
@@ -199,6 +198,13 @@ def route_get_track() -> Response:
     """
     Get transcoded audio for the given track path.
     """
+    if settings.offline_mode:
+        with db.offline(read_only=True) as conn:
+            path = request.args['path']
+            music_data, = conn.execute('SELECT music_data FROM content WHERE path=?',
+                                       (path,))
+            return Response(music_data, content_type='audio/webm')
+
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
         track = Track.by_relpath(conn, request.args['path'])
@@ -230,6 +236,13 @@ def route_get_album_cover() -> Response:
     """
     Get album cover image for the provided track path.
     """
+    if settings.offline_mode:
+        with db.offline(read_only=True) as conn:
+            path = request.args['path']
+            cover_data, = conn.execute('SELECT cover_data FROM content WHERE path=?',
+                                       (path,))
+            return Response(cover_data, content_type='image/webp')
+
     meme = 'meme' in request.args and bool(int(request.args['meme']))
 
     with db.connect(read_only=True) as conn:
@@ -250,6 +263,13 @@ def route_get_lyrics():
     """
     Get lyrics for the provided track path.
     """
+    if settings.offline_mode:
+        with db.offline(read_only=True) as conn:
+            path = request.args['path']
+            lyrics_json, = conn.execute('SELECT lyrics_json FROM content WHERE path=?',
+                                        (path,))
+            return Response(lyrics_json, content_type='application/json')
+
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
 
