@@ -10,3 +10,8 @@ CREATE TABLE IF NOT EXISTS content (
     cover_data BLOB NOT NULL,
     lyrics_json TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS settings (
+    key TEXT NOT NULL,
+    value TEXT NOT NULL
+);
