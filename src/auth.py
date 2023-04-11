@@ -49,6 +49,9 @@ class Session:
         if 'Music-Player-Android' in self.user_agent:
             return 'MusicPlayer, Android'
 
+        if self.user_agent == settings.user_agent:
+            return 'MusicPlayer'
+
         browsers = ['Firefox', 'Chromium', 'Chrome', 'Vivaldi', 'Opera', 'Safari']
         systems = ['Windows', 'macOS', 'Android', 'iOS', 'Ubuntu', 'Debian', 'Fedora', 'Linux']
 

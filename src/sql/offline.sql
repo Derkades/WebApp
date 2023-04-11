@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS history (
 );
 
 CREATE TABLE IF NOT EXISTS content (
-    path TEXT NOT NULL,
+    path TEXT NOT NULL UNIQUE PRIMARY KEY,
     music_data BLOB NOT NULL,
     cover_data BLOB NOT NULL,
     lyrics_json TEXT NOT NULL
