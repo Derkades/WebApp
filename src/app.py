@@ -794,6 +794,19 @@ def route_now_playing():
 
 @app.route('/history_played', methods=['POST'])
 def route_history_played():
+    if settings.offline_mode:
+        with db.offline() as conn:
+            track = request.json['track']
+            playlist = request.json['playlist']
+
+            timestamp = int(time.time())
+            conn.execute('''
+                        INSERT INTO history (timestamp, track, playlist)
+                        VALUES (?, ?, ?)
+                        ''',
+                        (timestamp, track, playlist))
+        return
+
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
