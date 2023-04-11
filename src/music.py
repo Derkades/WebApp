@@ -66,17 +66,28 @@ def from_relpath(relpath: str) -> Path:
     return path
 
 
-def scan_playlist(playlist_path: str) -> Iterator[Path]:
+def is_trashed(path: Path) -> bool:
     """
-    Scan playlist for tracks, recursively
-    Args:
-        playlist_path: Playlist name
-    Returns: Paths iterator
+    Returns: Whether this file or directory is trashed, by checking for the
+    trash prefix in all path parts.
     """
-    yield from scan_music(from_relpath(playlist_path))
+    for part in path.parts:
+        if part.startswith('.trash.'):
+            return True
+    return False
 
 
-def scan_music(path) -> Iterator[Path]:
+def is_music_file(path: Path) -> bool:
+    """
+    Returns: Whether the provided path is a music file, by checking its extension
+    """
+    for ext in MUSIC_EXTENSIONS:
+        if path.name.endswith(ext):
+            return True
+    return False
+
+
+def list_tracks_recursively(path) -> Iterator[Path]:
     """
     Scan directory for tracks, recursively
     Args:
@@ -85,19 +96,8 @@ def scan_music(path) -> Iterator[Path]:
     """
     for ext in MUSIC_EXTENSIONS:
         for track_path in path.glob('**/*' + ext):
-            if not track_path.name.startswith('.trash.'):
+            if not is_trashed(track_path):
                 yield track_path
-
-
-def has_music_extension(path: Path) -> bool:
-    """
-    Check if file is a music file
-    """
-    for ext in MUSIC_EXTENSIONS:
-        if path.name.endswith(ext):
-            return True
-    return False
-
 
 
 class AudioType(Enum):
@@ -161,23 +161,28 @@ class Track:
         log.info('Finding cover for: %s', meta.relpath)
 
         if meme:
+            title = meta.title if meta.title else meta.display_title()
+            if '-' in title:
+                title = title[title.index('-')+1:]
+
             if random.random() > 0.4:
-                query = next(meta.lyrics_search_queries())
-                image_bytes = reddit.get_image(query)
+                image_bytes = reddit.get_image(title)
                 if image_bytes:
                     return image_bytes
 
-            query = next(meta.lyrics_search_queries()) + ' meme'
-            if '-' in query:
-                query = query[query.index('-')+1:]
-            image_bytes = bing.image_search(query)
+            image_bytes = bing.image_search(title + ' meme')
             if image_bytes:
                 return image_bytes
 
         # Try MusicBrainz first
-        mb_query = meta.album_release_query()
-        if image_bytes := musicbrainz.get_cover(mb_query):
-            return image_bytes
+
+        if (meta.title or meta.album) and (meta.album_artist or meta.artists):
+            album = meta.album if meta.album else meta.title
+            artist = meta.album_artist if meta.album_artist else ' '.join(meta.artists)
+            if image_bytes := musicbrainz.get_cover(artist, album):
+                return image_bytes
+        else:
+            log.info('Skip MusicBrainz search, not enough metadata')
 
         # Otherwise try bing
         for query in meta.album_search_queries():
@@ -335,13 +340,17 @@ class Track:
 
 
     @staticmethod
-    def by_relpath(conn: Connection, relpath: str) -> 'Track':
+    def by_relpath(conn: Connection, relpath: str) -> 'Track' | None:
         """
         Find track by relative path
         """
-        mtime, = conn.execute('SELECT mtime FROM track WHERE path=?',
+        row = conn.execute('SELECT mtime FROM track WHERE path=?',
                               (relpath,)).fetchone()
-        return Track(conn, relpath, from_relpath(relpath), mtime)
+        if row:
+            mtime, = row
+            return Track(conn, relpath, from_relpath(relpath), mtime)
+
+        return None
 
 
 @dataclass
@@ -422,14 +431,14 @@ class Playlist:
             tags: List of tags
         Returns: Track object
         """
-        random_choices = max(5, min(50, self.track_count // 6))
+        random_choices = max(3, min(10, self.track_count // 6))
 
         query = """
                 SELECT track.path, last_played
                 FROM track
                 WHERE track.playlist=?
                 """
-        params = [self.name]
+        params: list[str | int] = [self.name]
 
         if user is not None:
             query += ' AND path NOT IN (SELECT track FROM never_play WHERE user = ?)'
@@ -559,6 +568,13 @@ def playlist(conn: Connection, name: str) -> Playlist:
 
 
 def user_playlist(conn: Connection, name: str, user_id: int) -> UserPlaylist:
+    """
+    Get list of favorite playlists
+    Args:
+        conn
+        user_id
+    Returns: List of UserPlaylist objects
+    """
     # TODO merge to single query when bookworm is released, with a version of sqlite3 supporting outer join
 
     row1 = conn.execute('''

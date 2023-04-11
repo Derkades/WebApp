@@ -15,10 +15,16 @@ class Track {
     title;
     /** @type {Array<string> | null} */
     artists;
+    /** @type {Array<string> | null} */
+    artistsUppercase;
     /** @type {string | null} */
     album;
     /** @type {string | null} */
-    albumArist;
+    albumUppercase;
+    /** @type {string | null} */
+    albumArtist;
+    /** @type {string | null} */
+    albumArtistUppercase;
     /** @type {number | null} */
     year;
 
@@ -31,8 +37,11 @@ class Track {
         this.tags = trackData.tags;
         this.title = trackData.title;
         this.artists = trackData.artists;
+        if (this.artists) this.artistsUppercase = this.artists.map(s => s.toUpperCase());
         this.album = trackData.album;
+        if (this.album) this.albumUppercase = this.album.toUpperCase()
         this.albumArtist = trackData.album_artist;
+        if (this.albumArtist) this.albumArtistUppercase = this.albumArtist.toUpperCase();
         this.year = trackData.year;
     };
 
@@ -87,7 +96,7 @@ class Track {
             html.append(titleHtml);
 
             if (this.year !== null) {
-                html.append(' [' + this.year + ']');
+                html.append(` [${this.year}]`);
             }
         } else {
             // Use half-decent display name generated from file name by python backend
@@ -121,7 +130,7 @@ class Track {
         const audioBlobUrlGetter = async function() {
             // Get track audio
             console.info('queue | download audio');
-            const trackResponse = await fetch('/get_track?path=' + encodedPath + '&type=' + encodedAudioType);
+            const trackResponse = await fetch(`/get_track?path=${encodedPath}&type=${encodedAudioType}`);
             checkResponseCode(trackResponse);
             const audioBlob = await trackResponse.blob();
             return URL.createObjectURL(audioBlob);
@@ -131,7 +140,7 @@ class Track {
             // Get cover image
             console.info('queue | download album cover image');
             const meme = document.getElementById('settings-meme-mode').checked ? '1' : '0';
-            const imageUrl = '/get_album_cover?path=' + encodedPath + '&quality=' + imageQuality + '&meme=' + meme;
+            const imageUrl = `/get_album_cover?path=${encodedPath}&quality=${imageQuality}&meme=${meme}`;
             const coverResponse = await fetch(imageUrl);
             checkResponseCode(coverResponse);
             const imageBlob = await coverResponse.blob();
@@ -141,18 +150,15 @@ class Track {
         const lyricsGetter = async function() {
             // Get lyrics
             console.info('queue | download lyrics');
-            const lyricsResponse = await fetch('/get_lyrics?path=' + encodedPath);
+            const lyricsResponse = await fetch(`/get_lyrics?path=${encodedPath}`);
             checkResponseCode(lyricsResponse);
             const lyricsJson = await lyricsResponse.json();
             return new Lyrics(lyricsJson.found, lyricsJson.source, lyricsJson.html);
         };
 
         // Resolve all, download in parallel
-        const resolved = await Promise.all([audioBlobUrlGetter(), imageBlobUrlGetter(), lyricsGetter()]);
-
-        const audioBlobUrl = resolved[0];
-        const imageBlobUrl = resolved[1];
-        const lyrics = resolved[2];
+        const promises = Promise.all([audioBlobUrlGetter(), imageBlobUrlGetter(), lyricsGetter()]);
+        const [audioBlobUrl, imageBlobUrl, lyrics] = await promises;
 
         const queuedTrack = new QueuedTrack(this, audioBlobUrl, imageBlobUrl, lyrics);
 

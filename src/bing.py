@@ -22,11 +22,15 @@ def _download(image_url: str) -> bytes | None:
         image_url
     Returns: Image bytes, or None if the image failed to download
     """
-    resp = requests.get(image_url,
-                        timeout=10,
-                        headers={'User-Agent': settings.webscraping_user_agent})
-    if resp.status_code != 200:
-        log.warning('Could not download %s, status code %s', image_url, resp.status_code)
+    try:
+        resp = requests.get(image_url,
+                            timeout=10,
+                            headers={'User-Agent': settings.webscraping_user_agent})
+        if resp.status_code != 200:
+            log.warning('Could not download %s, status code %s', image_url, resp.status_code)
+            return None
+    except requests.exceptions.RequestException:
+        log.warning('Could not download %s, connection error', image_url)
         return None
 
     img_bytes = resp.content

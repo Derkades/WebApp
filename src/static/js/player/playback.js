@@ -55,7 +55,7 @@ function replaceAudioSource() {
 function replaceAlbumImages() {
     const imageUrl = queue.currentTrack.imageBlobUrl;
 
-    const cssUrl = 'url("' + imageUrl + '")';
+    const cssUrl = `url("${imageUrl}")`;
 
     const bgBottom = document.getElementById('bg-image-1');
     const bgTop = document.getElementById('bg-image-2');

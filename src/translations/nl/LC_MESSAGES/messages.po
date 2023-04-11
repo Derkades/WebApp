@@ -540,7 +540,7 @@ msgstr "Verwijder nummer dat op dit moment speelt"
 
 #: templates/player.jinja2:75
 msgid "Copy track to your primary playlist"
-msgstr "Verander primaire afspeellijst"
+msgstr "Kopieer nummer naar primaire afspeellijst"
 
 #: templates/player.jinja2:76
 msgid "Open settings"

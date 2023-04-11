@@ -14,7 +14,7 @@ def handle_useradd(args):
     """
     Handle command to add user
     """
-    import bcrypt
+    import bcrypt  # pylint: disable=import-outside-toplevel
     username = args.username
     is_admin = int(args.admin)
     password = input('Enter password:')
@@ -123,6 +123,9 @@ def handle_scan(_args):
 
 
 def handle_cleanup(_args):
+    """
+    Handle command to clean up old entries from databases
+    """
     import cleanup  # pylint: disable=import-outside-toplevel
 
     cleanup.cleanup()
@@ -137,29 +140,36 @@ if __name__ == '__main__':
 
     cmd_useradd = subparsers.add_parser('useradd', help='create new user')
     cmd_useradd.add_argument('username')
-    cmd_useradd.add_argument('--admin', action='store_true', help='created user should have administrative rights')
+    cmd_useradd.add_argument('--admin', action='store_true',
+                             help='created user should have administrative rights')
     cmd_useradd.set_defaults(func=handle_useradd)
 
-    cmd_userdel = subparsers.add_parser('userdel', help='delete a user')
+    cmd_userdel = subparsers.add_parser('userdel',
+                                        help='delete a user')
     cmd_userdel.add_argument('username')
     cmd_userdel.set_defaults(func=handle_userdel)
 
-    cmd_userlist = subparsers.add_parser('userlist', help='list users')
+    cmd_userlist = subparsers.add_parser('userlist',
+                                         help='list users')
     cmd_userlist.set_defaults(func=handle_userlist)
 
-    cmd_passwd = subparsers.add_parser('passwd', help='change password')
+    cmd_passwd = subparsers.add_parser('passwd',
+                                       help='change password')
     cmd_passwd.add_argument('username')
     cmd_passwd.set_defaults(func=handle_passwd)
 
-    cmd_playlist = subparsers.add_parser('playlist', help='give write access to playlist')
+    cmd_playlist = subparsers.add_parser('playlist',
+                                         help='give write access to playlist')
     cmd_playlist.add_argument('username')
     cmd_playlist.add_argument('playlist_path')
     cmd_playlist.set_defaults(func=handle_playlist)
 
-    cmd_scan = subparsers.add_parser('scan', help='scan playlists for changes')
+    cmd_scan = subparsers.add_parser('scan',
+                                     help='scan playlists for changes')
     cmd_scan.set_defaults(func=handle_scan)
 
-    cmd_cleanup = subparsers.add_parser('cleanup', help='clean old or unused data from the database')
+    cmd_cleanup = subparsers.add_parser('cleanup',
+                                        help='clean old or unused data from the database')
     cmd_cleanup.set_defaults(func=handle_cleanup)
 
     parsed_args = parser.parse_args()

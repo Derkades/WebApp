@@ -51,10 +51,10 @@ class Queue {
 
         if (state.playlistOverrides.length > 0) {
             playlist = state.playlistOverrides.pop();
-            console.info('queue | override: ' + playlist)
+            console.info('queue | override: ' + playlist);
         } else {
             playlist = getNextPlaylist(state.lastChosenPlaylist);
-            console.info('queue | round robin: ' + state.lastChosenPlaylist + ' -> ' + playlist)
+            console.info(`queue | round robin: ${state.lastChosenPlaylist} -> ${playlist}`);
             state.lastChosenPlaylist = playlist;
         }
 
@@ -74,7 +74,7 @@ class Queue {
         }, error => {
             console.warn('queue | error');
             console.warn(error);
-            this.#fillBusy = false
+            this.#fillBusy = false;
             setTimeout(() => this.fill(), 5000);
         });
     };
@@ -84,8 +84,9 @@ class Queue {
      */
     static async downloadRandomAndAddToQueue(playlist) {
         console.info('queue | choose track');
-        const token = encodeURIComponent(csrf.getToken());
-        const chooseResponse = await fetch('/choose_track?playlist_dir=' + encodeURIComponent(playlist) + '&' + getTagFilter() + '&csrf=' + token);
+        const encToken = encodeURIComponent(csrf.getToken());
+        const encPlaylist = encodeURIComponent(playlist);
+        const chooseResponse = await fetch(`/choose_track?playlist_dir=${encPlaylist}&${getTagFilter()}&csrf=${encToken}`);
         checkResponseCode(chooseResponse);
         const path = (await chooseResponse.json()).path;
 
@@ -114,7 +115,7 @@ class Queue {
 
             // Trash can that appears when hovering - click to remove track
             const tdCover = document.getElementById('template-td-cover').content.cloneNode(true).firstElementChild;
-            tdCover.style.backgroundImage = 'url("' + queuedTrack.imageBlobUrl + '")';
+            tdCover.style.backgroundImage = `url("${queuedTrack.imageBlobUrl}")`;
             const rememberI = i;
             tdCover.onclick = () => queue.removeFromQueue(rememberI);
 

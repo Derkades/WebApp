@@ -407,11 +407,13 @@ def route_files():
         else:
             browse_path = music.from_relpath('.')
 
+        show_trashed = 'trash' in request.args
+
         if browse_path.resolve() == Path(settings.music_dir).resolve():
-            parent_path_uri = None
+            parent_path = None
             write_permission = user.admin
         else:
-            parent_path_uri = urlencode(music.to_relpath(browse_path.parent))
+            parent_path = music.to_relpath(browse_path.parent)
             # If the base directory is writable, all paths inside it will be, too.
             playlist = Playlist.from_path(conn, browse_path)
             write_permission = playlist.has_write_permission(user)
@@ -419,7 +421,7 @@ def route_files():
         children = []
 
         for path in browse_path.iterdir():
-            if path.name.startswith('.trash.'):
+            if music.is_trashed(path) != show_trashed:
                 continue
 
             file_info = {
@@ -430,25 +432,25 @@ def route_files():
 
             if path.is_dir():
                 file_info['type'] = 'dir'
-            elif music.has_music_extension(path):
-                file_info['type'] = 'music'
-                track = Track.by_relpath(conn, music.to_relpath(path))
-                meta = track.metadata()
-                file_info['artist'] = ' & '.join(meta.artists) if meta.artists else ''
-                file_info['title'] = meta.title if meta.title else ''
             else:
                 file_info['type'] = 'file'
+                track = Track.by_relpath(conn, music.to_relpath(path))
+                if track:
+                    meta = track.metadata()
+                    file_info['type'] = 'music'
+                    file_info['artist'] = ' & '.join(meta.artists) if meta.artists else ''
+                    file_info['title'] = meta.title if meta.title else ''
 
     children = sorted(children, key=lambda x: x['name'])
 
     return render_template('files.jinja2',
                            base_path=music.to_relpath(browse_path),
-                           base_path_uri=urlencode(music.to_relpath(browse_path)),
+                           parent_path=parent_path,
                            write_permission=write_permission,
-                           parent_path_uri=parent_path_uri,
                            files=children,
                            music_extensions=','.join(music.MUSIC_EXTENSIONS),
-                           csrf_token=csrf_token)
+                           csrf_token=csrf_token,
+                           show_trashed=show_trashed)
 
 
 def check_filename(name: str) -> None:

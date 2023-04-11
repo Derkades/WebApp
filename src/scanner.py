@@ -4,7 +4,6 @@ from sqlite3 import Connection
 from dataclasses import dataclass
 import time
 
-import db
 import metadata
 import music
 import settings
@@ -19,7 +18,7 @@ def scan_playlists(conn: Connection) -> set[str]:
     where necessary.
     """
     paths_db = {row[0] for row in conn.execute('SELECT path FROM playlist').fetchall()}
-    paths_disk = {p.name for p in Path(settings.music_dir).iterdir() if p.is_dir() and not p.name.startswith('.trash.')}
+    paths_disk = {p.name for p in Path(settings.music_dir).iterdir() if p.is_dir() and not music.is_trashed(p)}
 
     add_to_db = []
 
@@ -118,7 +117,7 @@ def scan_tracks(conn: Connection, playlist_name: str) -> None:
                          VALUES (?, 'update', ?, ?)
                          ''', (int(time.time()), playlist_name, track_relpath))
 
-    for track_path in music.scan_playlist(playlist_name):
+    for track_path in music.list_tracks_recursively(music.from_relpath(playlist_name)):
         relpath = music.to_relpath(track_path)
         if relpath not in paths_db:
             mtime = int(track_path.stat().st_mtime)

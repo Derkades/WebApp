@@ -26,10 +26,16 @@ class Browse {
         }, 250);
     };
 
+    /**
+     * @param {string} textContent
+     */
     setHeader(textContent) {
         document.getElementById('dialog-browse').getElementsByTagName('h3')[0].textContent = textContent;
     };
 
+    /**
+     * @param {HTMLTableElement} table
+     */
     setContent(table) {
         if (table === null) {
             document.getElementById('browse-no-content').classList.remove('hidden');
@@ -44,6 +50,15 @@ class Browse {
         dialogs.open('dialog-browse');
     };
 
+    /**
+     * @callback TrackFilter
+     * @param {Track} track
+     * @returns {boolean}
+     */
+    /**
+     * @param {string} title
+     * @param {TrackFilter} filter
+     */
     browse(title, filter) {
         document.getElementById('browse-filter-query').value = ''; // Clear previous search query
         this.open();
@@ -149,17 +164,33 @@ class Browse {
         this.setContent(table);
     }
 
+    /**
+     * @param {string} artistName
+     */
     browseArtist(artistName) {
-        const artistText = document.getElementById('trans-artist').textContent;
-        this.browse(artistText + artistName, track => track.artists !== null && track.artists.indexOf(artistName) !== -1);
+        const title = document.getElementById('trans-artist').textContent + artistName;
+        artistName = artistName.toUpperCase();
+        this.browse(title, track => track.artists !== null && track.artistsUppercase.indexOf(artistName) !== -1);
     };
 
+    /**
+     * @param {string} albumName
+     * @param {string} albumArtistName
+     */
     browseAlbum(albumName, albumArtistName) {
-        const albumText = document.getElementById('trans-album').textContent;
-        const title = albumArtistName === null ? albumName : albumArtistName + ' - ' + albumName;
-        this.browse(albumText + title, track => track.album === albumName && track.albumArtist === albumArtistName);
+        const title = document.getElementById('trans-album').textContent + (albumArtistName === null ? '' : albumArtistName + ' - ') + albumName;
+        albumName = albumName.toUpperCase();
+        if (albumArtistName) {
+            albumArtistName = albumArtistName.toUpperCase();
+            this.browse(title, track => track.albumUppercase === albumName && track.albumArtistUppercase === albumArtistName);
+        } else {
+            this.browse(title, track => track.albumUppercase === albumName);
+        }
     };
 
+    /**
+     * @param {string} tagName
+     */
     browseTag(tagName) {
         const tagText = document.getElementById('trans-tag').textContent;
         this.browse(tagText + tagName, track => track.tags.indexOf(tagName) !== -1)
@@ -180,6 +211,7 @@ class Browse {
 
     /**
      * @param {Array<Track>} tracks
+     * @returns {HTMLTableElement}
      */
     generateTrackList(tracks) {
         const table = document.createElement('table');

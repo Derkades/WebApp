@@ -9,11 +9,11 @@
 {% if base_path == '.' %}
     {{ page_heading(gettext('File manager')) }}
 {% else %}
-    {% if parent_path_uri == '.' %}
+    {% if parent_path == '.' %}
         {# Not necessary, but looks better #}
         {% set back_url = '/files' %}
     {% elif parent_path_uri %}
-        {% set back_url = '/files?path=' + parent_path_uri %}
+        {% set back_url = '/files?path=' + (parent_path|urlencode) %}
     {% endif %}
     {{ page_heading(gettext('Files in: %(dir)s', dir=base_path), back_url=back_url) }}
 {% endif %}
@@ -63,6 +63,15 @@
         <p>{% trans %}You don't have permission to upload files or create directories here.{% endtrans %}</p>
     {% endif %}
 {% endif %}
+<form method="GET">
+    <input type="hidden" name="path" value="{{ base_path }}">
+    {% if show_trashed %}
+        <input type="submit" value="{% trans %}Hide trashed files{% endtrans %}">
+    {% else %}
+        <input type="hidden" name="trash">
+        <input type="submit" value="{% trans %}Show trashed files{% endtrans %}">
+    {% endif %}
+</form>
 
 <br>
 
@@ -85,7 +94,7 @@
                 {{ icon('folder') }}
             </td>
             <td>
-                <a href="?path={{ file['path'] }}">{{ file.name }}/</a>
+                <a href="?path={{ file['path']|urlencode }}">{{ file.name }}/</a>
             </td>
             <td class="collapse-col"></td>
             <td class="collapse-col"></td>

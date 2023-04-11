@@ -6,9 +6,14 @@ from typing import Any
 import logging
 import json
 import time
+import random
 
 import db
 
+
+# Number of seconds after which cache entries are considered outdated
+CACHE_OUTDATED_TIME = 60*60*24*60  # 2 months
+CACHE_OUTDATED_PROB = 0.05
 
 log = logging.getLogger('app.cache')
 
@@ -38,18 +43,26 @@ def retrieve(key: str) -> bytes | None:
     Returns: Cached data bytes or None if data is not cached.
     """
     with db.cache() as conn:
-        row = conn.execute('SELECT data FROM cache WHERE key=?',
+        row = conn.execute('SELECT data, update_time FROM cache WHERE key=?',
                            (key,)).fetchone()
 
         if row is None:
             # Not cached
             return None
 
-        data, = row
+        data, update_time = row
 
-        timestamp = int(time.time())
+        current_time = int(time.time())
+
+        # log.info('Cache entry last updated %s days ago', int((current_time - update_time) / (60 * 60 * 24)))
+
+        if current_time - update_time > CACHE_OUTDATED_TIME and random.random() < CACHE_OUTDATED_PROB:
+            log.info('Cache entry is outdated, pretend it doesn\'t exist')
+            # Pretend it's not cached
+            return None
+
         conn.execute('UPDATE cache SET access_time=? WHERE key=?',
-                     (timestamp, key))
+                     (current_time, key))
 
         return data
 

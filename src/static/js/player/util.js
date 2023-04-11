@@ -38,7 +38,7 @@ function secondsToString(seconds) {
     if (hours == 0) {
         return mmss;
     } else {
-        return hours + ':' + mmss;
+        return `${hours}:${mmss}`;
     }
 }
 

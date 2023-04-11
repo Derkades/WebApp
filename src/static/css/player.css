@@ -228,9 +228,9 @@ body.light .progress-time {
     text-align: center;
 }
 
-#queue-table tr.active {
+/* #queue-table tr.active {
     background: darkgoldenrod;
-}
+} */
 
 .delete-overlay {
     height: 100%;
@@ -391,7 +391,7 @@ body.light #loading-overlay {
 #visualiser {
     position: absolute;
     bottom: 0;
-    z-index: 1;
+    z-index: -1;
     height: 20vh;
     width: 100vw;
     pointer-events: none;
