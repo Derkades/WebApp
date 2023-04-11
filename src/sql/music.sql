@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS history (
     timestamp INTEGER NOT NULL, -- Seconds since UNIX epoch
     user INTEGER NOT NULL, -- Intentionally not a foreign key, so history remains when user is deleted
     track TEXT NOT NULL, -- Intentionally not a foreign key, so history remains when user is deleted
-    playlist TEXT -- Could be obtained from track info, but included anyway for convenience
+    playlist TEXT -- Could be obtained from track info, but included separately so it is remembered for deleted tracks or playlists
 );
 
 CREATE TABLE IF NOT EXISTS now_playing (
