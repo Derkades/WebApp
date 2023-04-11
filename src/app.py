@@ -745,6 +745,10 @@ def route_lastfm_connect():
 
 @app.route('/now_playing', methods=['POST'])
 def route_now_playing():
+    if settings.offline_mode:
+        log.info('Ignoring now playing in offline mode')
+        return
+
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
