@@ -96,7 +96,7 @@ class Track {
             html.append(titleHtml);
 
             if (this.year !== null) {
-                html.append(' [' + this.year + ']');
+                html.append(` [${this.year}]`);
             }
         } else {
             // Use half-decent display name generated from file name by python backend
@@ -130,7 +130,7 @@ class Track {
         const audioBlobUrlGetter = async function() {
             // Get track audio
             console.info('queue | download audio');
-            const trackResponse = await fetch('/get_track?path=' + encodedPath + '&type=' + encodedAudioType);
+            const trackResponse = await fetch(`/get_track?path=${encodedPath}&type=${encodedAudioType}`);
             checkResponseCode(trackResponse);
             const audioBlob = await trackResponse.blob();
             return URL.createObjectURL(audioBlob);
@@ -140,7 +140,7 @@ class Track {
             // Get cover image
             console.info('queue | download album cover image');
             const meme = document.getElementById('settings-meme-mode').checked ? '1' : '0';
-            const imageUrl = '/get_album_cover?path=' + encodedPath + '&quality=' + imageQuality + '&meme=' + meme;
+            const imageUrl = `/get_album_cover?path=${encodedPath}&quality=${imageQuality}&meme=${meme}`;
             const coverResponse = await fetch(imageUrl);
             checkResponseCode(coverResponse);
             const imageBlob = await coverResponse.blob();
@@ -150,7 +150,7 @@ class Track {
         const lyricsGetter = async function() {
             // Get lyrics
             console.info('queue | download lyrics');
-            const lyricsResponse = await fetch('/get_lyrics?path=' + encodedPath);
+            const lyricsResponse = await fetch(`/get_lyrics?path=${encodedPath}`);
             checkResponseCode(lyricsResponse);
             const lyricsJson = await lyricsResponse.json();
             return new Lyrics(lyricsJson.found, lyricsJson.source, lyricsJson.html);

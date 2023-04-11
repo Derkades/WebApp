@@ -56,7 +56,7 @@ function youTubeDownload(event) {
     (async function(){
         const response = await jsonPost('/ytdl', {directory: directory, url: url});
         const json = await response.json();
-        output.textContent = 'Status code: ' + json.code + '\n--- stdout ---\n' + json.stdout + '\n--- stderr ---\n' + json.stderr;
+        output.textContent = `Status code: ${json.code}\n--- stdout ---\n${json.stdout}\n--- stderr ---\n${json.stderr}`;
         if (json.code == 0) {
             output.append('\n--- javascript ---\n')
             output.append('Updating local track list...\n');

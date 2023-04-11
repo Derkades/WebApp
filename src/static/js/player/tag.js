@@ -45,6 +45,8 @@ function getTagFilter() {
             tags.push(checkbox.dataset.tag);
         }
     }
+
+    const encodedMode = encodeURIComponent(mode);
     const encodedTags = encodeURIComponent(tags.join(';'));
-    return 'tag_mode=' + encodeURIComponent(mode) + '&tags=' + encodedTags;
+    return `tag_mode=${encodedMode}&tags=${encodedTags}`;
 }
