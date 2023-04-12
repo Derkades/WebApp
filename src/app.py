@@ -28,7 +28,9 @@ from radio import RadioTrack
 import scanner
 import settings
 import packer
-import stats_plots
+if not settings.offline_mode:
+    # Matplotlib is slow to import, skip if not needed
+    import stats_plots
 
 
 LANGUAGES = (
@@ -88,7 +90,8 @@ def route_home():
     with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn, redirect_to_login=True)
     return render_template('home.jinja2',
-                           user_is_admin=user.admin)
+                           user_is_admin=user.admin,
+                           offline_mode=settings.offline_mode)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -148,7 +151,8 @@ def route_player():
                            csrf_token=csrf_token,
                            languages=LANGUAGES,
                            language=get_locale(),
-                           primary_playlist=primary_playlist)
+                           primary_playlist=primary_playlist,
+                           offline_mode=settings.offline_mode)
 
 
 @app.route('/player.js')
@@ -187,9 +191,7 @@ def route_choose_track():
         playlist = music.playlist(conn, dir_name)
         chosen_track = playlist.choose_track(user, tag_mode=tag_mode, tags=tags)
 
-    return {
-        'path': chosen_track.relpath,
-    }
+    return {'path': chosen_track.relpath}
 
 
 @app.route('/get_track')
@@ -197,6 +199,13 @@ def route_get_track() -> Response:
     """
     Get transcoded audio for the given track path.
     """
+    if settings.offline_mode:
+        with db.offline(read_only=True) as conn:
+            path = request.args['path']
+            music_data, = conn.execute('SELECT music_data FROM content WHERE path=?',
+                                       (path,))
+            return Response(music_data, content_type='audio/webm')
+
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
         track = Track.by_relpath(conn, request.args['path'])
@@ -228,6 +237,13 @@ def route_get_album_cover() -> Response:
     """
     Get album cover image for the provided track path.
     """
+    if settings.offline_mode:
+        with db.offline(read_only=True) as conn:
+            path = request.args['path']
+            cover_data, = conn.execute('SELECT cover_data FROM content WHERE path=?',
+                                       (path,))
+            return Response(cover_data, content_type='image/webp')
+
     meme = 'meme' in request.args and bool(int(request.args['meme']))
 
     with db.connect(read_only=True) as conn:
@@ -254,6 +270,13 @@ def route_get_lyrics():
     """
     Get lyrics for the provided track path.
     """
+    if settings.offline_mode:
+        with db.offline(read_only=True) as conn:
+            path = request.args['path']
+            lyrics_json, = conn.execute('SELECT lyrics_json FROM content WHERE path=?',
+                                        (path,))
+            return Response(lyrics_json, content_type='application/json')
+
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
 
@@ -646,14 +669,20 @@ def route_account():
         csrf_token = user.get_csrf()
         sessions = user.sessions()
 
-        return render_template('account.jinja2',
-                               user=user,
-                               csrf_token=csrf_token,
-                               sessions=sessions,
-                               lastfm_enabled=lastfm.is_configured(),
-                               lastfm_name=user.lastfm_name,
-                               lastfm_key=user.lastfm_key,
-                               lastfm_connect_url=lastfm.CONNECT_URL)
+        result = conn.execute('SELECT name FROM user_lastfm WHERE user=?',
+                              (user.user_id)).fetchone()
+        if result:
+            lastfm_name, = result
+        else:
+            lastfm_name = None
+
+    return render_template('account.jinja2',
+                            user=user,
+                            csrf_token=csrf_token,
+                            sessions=sessions,
+                            lastfm_enabled=lastfm.is_configured(),
+                            lastfm_name=lastfm_name,
+                            lastfm_connect_url=lastfm.CONNECT_URL)
 
 
 @app.route('/change_password_form', methods=['POST'])
@@ -743,6 +772,10 @@ def route_lastfm_connect():
 
 @app.route('/now_playing', methods=['POST'])
 def route_now_playing():
+    if settings.offline_mode:
+        log.info('Ignoring now playing in offline mode')
+        return Response(None, 200)
+
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
@@ -788,6 +821,19 @@ def route_now_playing():
 
 @app.route('/history_played', methods=['POST'])
 def route_history_played():
+    if settings.offline_mode:
+        with db.offline() as conn:
+            track = request.json['track']
+            playlist = request.json['playlist']
+
+            timestamp = int(time.time())
+            conn.execute('''
+                        INSERT INTO history (timestamp, track, playlist)
+                        VALUES (?, ?, ?)
+                        ''',
+                        (timestamp, track, playlist))
+        return Response(None, 200)
+
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])

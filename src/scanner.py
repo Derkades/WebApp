@@ -143,6 +143,10 @@ def scan(conn: Connection) -> None:
     """
     Main function for scanning music directory structure
     """
+    if settings.offline_mode:
+        log.info('Skip scanner in offline mode')
+        return
+
     start_time_ns = time.time_ns()
     playlists = scan_playlists(conn)
     for playlist in playlists:

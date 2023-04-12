@@ -6,14 +6,16 @@ import logging
 import settings
 
 
-db_path = Path(settings.data_path, 'music.db')
 log = logging.getLogger('app.db')
 
 
+def _open_sql(db_name: str):
+    return open(f'sql/{db_name}.sql', 'r', encoding='utf-8')
+
+
 def _connect(db_name: str, read_only: bool) -> Connection:
-    db_uri = 'file:' + \
-          Path(settings.data_path, db_name + '.db').absolute().as_posix() + \
-          ('?mode=ro' if read_only else '')
+    db_path = Path(settings.data_path, db_name + '.db').absolute().as_posix()
+    db_uri = f'file:{db_path}' + ('?mode=ro' if read_only else '')
     conn = sqlite3.connect(db_uri, uri=True, timeout=10.0)
     conn.execute('PRAGMA foreign_keys = ON')
     conn.execute('PRAGMA journal_mode = WAL')
@@ -22,7 +24,7 @@ def _connect(db_name: str, read_only: bool) -> Connection:
 
 def connect(read_only: bool = False) -> Connection:
     """
-    Create new SQLite database connection
+    Create new SQLite database connection to main music database
     """
     return _connect('music', read_only)
 
@@ -34,15 +36,22 @@ def cache(read_only: bool = False) -> Connection:
     return _connect('cache', read_only)
 
 
+def offline(read_only: bool = False) -> Connection:
+    """
+    Create new SQLite database connection to offline database
+    """
+    return _connect('offline', read_only)
+
+
 def create_tables():
     """
     Initialize SQLite databases using SQL scripts
     """
-    with open('sql/music.sql', 'r', encoding='utf-8') as music_sql_f:
-        connect().executescript(music_sql_f.read())
+    log.info('Initializing databases')
 
-    with open('sql/cache.sql', 'r', encoding='utf-8') as cache_sql_f:
-        cache().executescript(cache_sql_f.read())
+    for db_name in ['music', 'cache', 'offline']:
+        with _open_sql(db_name) as sql_file:
+            _connect(db_name, False).executescript(sql_file.read())
 
 
 if __name__ == '__main__':
