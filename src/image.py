@@ -64,7 +64,7 @@ def thumbnail(input_img: Path | bytes | Callable,
         square: Whether the thumbnail should be cropped to 1:1 aspect ratio
     Returns: Compressed thumbnail image bytes.
     """
-    cache_key += 'thumbnail' + img_format.value + img_quality.value
+    cache_key += 'thumbnail2' + img_format.value + img_quality.value
     cache_data = cache.retrieve(cache_key)
 
     if cache_data is not None:
