@@ -64,13 +64,12 @@ function getNextPlaylist(currentPlaylist) {
  * @param {number} index
  * @returns {HTMLSpanElement}
  */
-function createPlaylistCheckbox(playlist, index) {
+function createPlaylistCheckbox(playlist, index, defaultChecked) {
     const id = 'checkbox-' + playlist.name;
 
     // Re-use state from previous checkbox if it exists
-    // Otherwise, playlist should be enabled if favorite
     const previousCheckbox = document.getElementById(id);
-    const checked = previousCheckbox !== null ? previousCheckbox.checked : playlist.favorite;
+    const checked = previousCheckbox !== null ? previousCheckbox.checked : defaultChecked;
 
     const span = document.createElement("span");
     span.classList.add("checkbox-with-label");
@@ -110,12 +109,13 @@ function updatePlaylistCheckboxHtml() {
     const mainDiv = document.createElement('div');
     const otherDiv = document.createElement('div');
     otherDiv.classList.add('other-checkboxes');
+    const offlineMode = document.getElementById('offline-mode-enabled') !== null;
 
     for (const playlist of Object.values(state.playlists)) {
-        if (playlist.favorite) {
-            mainDiv.appendChild(createPlaylistCheckbox(playlist, index++));
+        if (offlineMode || playlist.favorite) {
+            mainDiv.appendChild(createPlaylistCheckbox(playlist, index++, true));
         } else {
-            otherDiv.appendChild(createPlaylistCheckbox(playlist, 10));
+            otherDiv.appendChild(createPlaylistCheckbox(playlist, 10, false));
         }
     }
 

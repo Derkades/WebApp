@@ -94,7 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('Editor button missing from page, this is normal if you are not an admin user');
     }
 
-    document.getElementById('button-copy').addEventListener('click', () => {
+    const copyButton = document.getElementById('button-copy');
+    copyButton.addEventListener('click', () => {
         const onError = response => {
             if (response.status == 200) {
                 response.text().then(text => alert(text));
@@ -104,6 +105,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         jsonPost('/player_copy_track', {track: queue.currentTrack.trackPath}, onError)
     });
+    if (document.getElementById('offline-mode-enabled') !== null) {
+        copyButton.classList.add('hidden');
+    }
 
     queue.next();
 });

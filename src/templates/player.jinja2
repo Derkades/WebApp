@@ -208,7 +208,7 @@
                     <label for="settings-language">{% trans %}Language (reload required){% endtrans %}</label>
                 </div>
                 <div>
-                    {% if offline %}
+                    {% if offline_mode %}
                         <input id="settings-meme-mode" type="hidden">
                     {% else %}
                         <input id="settings-meme-mode" type="checkbox">
@@ -216,7 +216,7 @@
                     {% endif %}
                 </div>
 
-                {% if not offline %}
+                {% if not offline_mode %}
                     <h4>{% trans %}YouTube download{% endtrans %}</h4>
                     <p>
                         {% trans %}Select a playlist and paste a link from YouTube, Soundcloud, Bandcamp, etc. Finally, press <kbd>Download</kbd>.{% endtrans %}
@@ -344,10 +344,14 @@
     <div class="vignette"></div>
 
     <script src="/static/js/lib/fuse-6.6.2.js"></script>
+
     <script src="/player.js"></script>
 
     <div class="hidden" id="csrf-token">{{ csrf_token }}</div>
     <div class="hidden" id="primary-playlist">{{ primary_playlist }}</div>
+    {% if offline_mode %}
+        <div class="hidden" id="offline-mode-enabled"></div>
+    {% endif %}
     <div class="hidden" id="trans-artist">{% trans %}Artist: {% endtrans %}</div>
     <div class="hidden" id="trans-album">{% trans %}Album: {% endtrans %}</div>
     <div class="hidden" id="trans-tag">{% trans %}Tag: {% endtrans %}</div>
