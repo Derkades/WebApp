@@ -117,7 +117,7 @@ def get_lyrics(query: str) -> Lyrics | None:
 
     if cached_data is not None:
         if not cached_data['found']:
-            log.info('Returning no lyrics, from cache')
+            log.info('Returning no lyrics, from cache: %s', query)
             return None
 
         log.info('Returning cached lyrics')
@@ -133,7 +133,7 @@ def get_lyrics(query: str) -> Lyrics | None:
         return Lyrics(None, 'Error during lyrics search, please report this issue if it persists.')
 
     if genius_url is None:
-        log.info('No lyrics found')
+        log.info('No lyrics found: %s', query)
         cache.store_json(cache_key, {'found': False})
         return None
 
