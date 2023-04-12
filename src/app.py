@@ -670,7 +670,7 @@ def route_account():
         sessions = user.sessions()
 
         result = conn.execute('SELECT name FROM user_lastfm WHERE user=?',
-                              (user.user_id)).fetchone()
+                              (user.user_id,)).fetchone()
         if result:
             lastfm_name, = result
         else:
