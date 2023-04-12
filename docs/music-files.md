@@ -18,14 +18,12 @@ music
 │   ├── Tom Misch & Yussef Dayes - Storm Before The Calm (feat. Kaidi Akinnibi) (Official Audio).webm
 │   ├── U & ME - Alt J (Official Audio) [RMkxrJuxRsk].webm
 │   └── Zes - Juniper [UNYiVK3Cl98].webm
-├── WD
-│   └── 08. Watercolors (feat. Dave Koz).mp3
 └── JK
     ├── Aerosmith - Dream On.mp3
     ├── A spaceman came travelling.mp3
     └── A Warrior's Call.mp3
 ```
 
-Don't worry about removing strings like "(Official Audio)" from song titles, these are automatically removed. If possible, do add the following metadata to each file: artist, album artist, album title, song title, album cover image.
+Don't worry about removing strings like "(Official Audio)" from song titles, these are automatically removed. If possible, do add metadata to each file, like artist, album artist, album title, song title. This can be done using the metadata editor in the music player itself.
 
 The first startup wil be slow, since all files need to be scanned. Later, unmodified files can be skipped (based on the file modification time).

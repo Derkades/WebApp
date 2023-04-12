@@ -16,3 +16,5 @@ To install the music player in offline mode, follow the [standard installation i
 ## Synchronization
 
 Run `docker compose exec music python3 offline_sync.py`.
+
+It is safe to abort synchronization using Ctrl+C. When restarted, it will resume where it left off.

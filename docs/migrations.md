@@ -1,7 +1,13 @@
 # Migrations
 
+To run a migration:
+1. Shut down the music player (`docker compose stop`)
+2. Run `sqlite3 data/music.db`
+3. Execute the migrations by copying it line by line from top to bottom, pressing enter after every line.
+4. Exit using <kbd>Ctrl</kbd>+<kbd>D</kbd>
+
 ## 2023-03-14
-```
+```sql
 BEGIN;
 CREATE TABLE session_new (
     user INTEGER NOT NULL REFERENCES user(id) ON DELETE CASCADE,
