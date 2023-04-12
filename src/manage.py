@@ -131,6 +131,22 @@ def handle_cleanup(_args):
     cleanup.cleanup()
 
 
+def handle_vacuum(_args):
+    log.info('Going to vacuum databases. This will take a long time if you have large databases. Do not abort.')
+
+    log.info('Vacuuming music.db')
+    with db.connect() as conn:
+        conn.execute('VACUUM')
+
+    log.info('Vacuuming cache.db')
+    with db.cache() as conn:
+        conn.execute('VACUUM')
+
+    log.info('Vacuuming offline.db')
+    with db.offline() as conn:
+        conn.execute('VACUUM')
+
+
 if __name__ == '__main__':
     import logconfig
     logconfig.apply()
@@ -171,6 +187,10 @@ if __name__ == '__main__':
     cmd_cleanup = subparsers.add_parser('cleanup',
                                         help='clean old or unused data from the database')
     cmd_cleanup.set_defaults(func=handle_cleanup)
+
+    cmd_vacuum = subparsers.add_parser('vacuum',
+                                       help='issue vacuum command to clean up sqlite databases')
+    cmd_vacuum.set_defaults(func=handle_vacuum)
 
     parsed_args = parser.parse_args()
     parsed_args.func(parsed_args)
