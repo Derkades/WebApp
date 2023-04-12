@@ -119,8 +119,9 @@ class OfflineSync:
 
         log.info('Updating metadata')
 
-        self.db_music.execute('UPDATE track SET duration=?, title=?, album=?, album_artist=?, year=?, mtime=?',
-                              (track['duration'], track['title'], track['album'], track['album_artist'], track['year']))
+        self.db_music.execute('UPDATE track SET duration=?, title=?, album=?, album_artist=?, year=?, mtime=? WHERE path=?',
+                              (track['duration'], track['title'], track['album'], track['album_artist'], track['year'],
+                               track['mtime'], track['path']))
 
         self.db_music.execute('DELETE FROM track_artist WHERE track=?', (track['path'],))
 
