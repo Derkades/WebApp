@@ -768,7 +768,7 @@ def route_lastfm_connect():
 def route_now_playing():
     if settings.offline_mode:
         log.info('Ignoring now playing in offline mode')
-        return
+        return Response(None, 200)
 
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
@@ -826,7 +826,7 @@ def route_history_played():
                         VALUES (?, ?, ?)
                         ''',
                         (timestamp, track, playlist))
-        return
+        return Response(None, 200)
 
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
