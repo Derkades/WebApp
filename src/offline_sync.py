@@ -115,6 +115,10 @@ class OfflineSync:
              'lyrics_json': lyrics_json})
 
     def _update_track(self, track):
+        self._download_track_content(track['path'])
+
+        log.info('Updating metadata')
+
         self.db_music.execute('UPDATE track SET duration=?, title=?, album=?, album_artist=?, year=?, mtime=?',
                               (track['duration'], track['title'], track['album'], track['album_artist'], track['year']))
 
@@ -124,9 +128,11 @@ class OfflineSync:
             insert = [(track['path'], artist) for artist in track['artists']]
             self.db_music.executemany('INSERT INTO track_artist (track, artist) VALUES (?, ?)', insert)
 
+    def _insert_track(self, playlist, track):
         self._download_track_content(track['path'])
 
-    def _insert_track(self, playlist, track):
+        log.info('Storing metadata')
+
         self.db_music.execute(
             """
             INSERT INTO track (path, playlist, duration, title, album,
@@ -140,8 +146,6 @@ class OfflineSync:
         if track['artists']:
             insert = [(track['path'], artist) for artist in track['artists']]
             self.db_music.executemany('INSERT INTO track_artist (track, artist) VALUES (?, ?)', insert)
-
-        self._download_track_content(track['path'])
 
     def _prune_tracks(self, track_paths: set[str]):
         rows = self.db_music.execute('SELECT path FROM track').fetchall()
