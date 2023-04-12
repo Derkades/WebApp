@@ -142,8 +142,9 @@ def route_player():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn, redirect_to_login=True)
         csrf_token = user.get_csrf()
-        primary_playlist, = conn.execute('SELECT primary_playlist FROM user WHERE id=?',
-                                        (user.user_id,)).fetchone()
+        row = conn.execute('SELECT primary_playlist FROM user WHERE id=?',
+                           (user.user_id,)).fetchone()
+        primary_playlist = row[0] if row else None
 
     return render_template('player.jinja2',
                            mobile=is_mobile(),
