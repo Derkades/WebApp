@@ -21,4 +21,3 @@ services:
     environment:
       TZ: Europe/Amsterdam
       MUSIC_ENV: dev
-      MUSIC_OFFLINE_MODE: 1
