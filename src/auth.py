@@ -90,17 +90,20 @@ class User(ABC):
         Generate CSRF token and store it for later validation
         """
 
+    @abstractmethod
     def verify_csrf(self, token: str) -> None:
         """
         Verify request token, raising RequestTokenException if not valid
         """
 
+    @abstractmethod
     def verify_password(self, password: str) -> bool:
         """
         Verify password matches user's existing password
         Returns: True if password matches, False if not.
         """
 
+    @abstractmethod
     def update_password(self, new_password: str) -> None:
         """
         Update user password and delete all existing sessions.
