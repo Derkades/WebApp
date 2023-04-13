@@ -28,6 +28,9 @@
 
 ![screenshot](https://downloads.rkslot.nl/music-player-screenshots/album-view.png)
 
+## Album cover meme mode
+![screenshot](https://downloads.rkslot.nl/music-player-screenshots/meme.png)
+
 ## Account settings (outdated)
 
 ![screenshot](https://downloads.rkslot.nl/music-player-screenshots/account.png)
