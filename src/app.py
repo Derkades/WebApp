@@ -784,7 +784,7 @@ def route_now_playing():
      - csrf (str): CSRF token
      - track (str): Track relpath
      - paused (bool): Whether track is paused
-     - progress (int): Track position, in seconds
+     - progress (int): Track position, as a percentage
     """
     if settings.offline_mode:
         log.info('Ignoring now playing in offline mode')
@@ -929,7 +929,7 @@ def route_history():
         # Now playing
 
         result = conn.execute('''
-                              SELECT user.username, track.playlist, track
+                              SELECT user.username, track.playlist, track, progress
                               FROM now_playing
                                 JOIN user ON now_playing.user = user.id
                                 JOIN track ON now_playing.track = track.path
@@ -937,7 +937,7 @@ def route_history():
                               ''',
                               (int(time.time()) - 20,))  # based on JS update interval
         now_playing_items = []
-        for username, playlist_name, relpath in result:
+        for username, playlist_name, relpath, progress in result:
             track = Track.by_relpath(conn, relpath)
             meta = track.metadata()
             now_playing_items.append({'image': '/get_album_cover?quality=tiny&path=' + urlencode(relpath),
@@ -945,7 +945,8 @@ def route_history():
                                       'playlist': playlist_name,
                                       'title': meta.title,
                                       'artists': meta.artists,
-                                      'fallback_title': meta.display_title()})
+                                      'fallback_title': meta.display_title(),
+                                      'progress': progress})
 
 
     return render_template('history.jinja2',

@@ -61,7 +61,7 @@ class History {
         const data = {
             track: this.currentlyPlayingTrack.path,
             paused: audio.paused,
-            progress: Math.floor(audio.currentTime),
+            progress: Math.round((audio.currentTime / audio.duration) * 100),
         };
         await jsonPost('/now_playing', data);
     }

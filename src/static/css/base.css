@@ -323,6 +323,11 @@ kbd {
     padding: .5rem;
 }
 
+.card-progress {
+    height: 2px;
+    background-color: white;
+}
+
 .table {
     width: 100%;
     border-spacing: 0;
