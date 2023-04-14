@@ -1,23 +1,8 @@
-from typing import Optional
-from os import environ as env
+from os import getenv
 
 
 def split_by_semicolon(inp: str) -> list[str]:
     return [s.strip() for s in inp.split(';') if s.strip() != '']
-
-
-def getenv(key: str, default: Optional[str]) -> str:
-    """
-    Get environment variable. If the environment variable is not set, the
-    default value is returned. If no default value is set, an exception
-    will be raised.
-    """
-    if key in env:
-        return env[key]
-    elif default is not None:
-        return default
-    else:
-        raise ValueError('Required environment variable ' + key + ' not configured.')
 
 
 def _to_bool(val: str):
