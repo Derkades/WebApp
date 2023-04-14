@@ -49,13 +49,6 @@ class History {
 
         console.debug('history | playing, counter:', this.playingCounter, '/', this.requiredPlayingCounter);
 
-        // Send 'Now playing' after 5 seconds, then every minute
-        // If you modify this, also modify history() in app.py
-        if (this.playingCounter % (60) === 5) {
-            console.info('history | update now playing');
-            await this.updateNowPlaying();
-        }
-
         if (!this.hasScrobbled && this.playingCounter > this.requiredPlayingCounter) {
             console.info('history | played');
             this.hasScrobbled = true;
@@ -64,7 +57,13 @@ class History {
     }
 
     async updateNowPlaying() {
-        await jsonPost('/now_playing', {track: this.currentlyPlayingTrack.path});
+        const audio = getAudioElement();
+        const data = {
+            track: this.currentlyPlayingTrack.path,
+            paused: audio.paused,
+            progress: Math.floor(audio.currentTime),
+        };
+        await jsonPost('/now_playing', data);
     }
 
     async scrobble() {
@@ -82,4 +81,7 @@ const history = new History();
 
 document.addEventListener('DOMContentLoaded', () => {
     setInterval(() => history.update(), 1_000);
+
+    // If you modify the interval, also modify route_history() in app.py
+    setInterval(() => history.updateNowPlaying(), 10_000);
 });

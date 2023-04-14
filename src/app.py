@@ -778,6 +778,14 @@ def route_lastfm_connect():
 
 @app.route('/now_playing', methods=['POST'])
 def route_now_playing():
+    """
+    Send info about currently playing track. Sent frequently by the music player.
+    POST body should contain a json object with:
+     - csrf (str): CSRF token
+     - track (str): Track relpath
+     - paused (bool): Whether track is paused
+     - progress (int): Track position, in seconds
+    """
     if settings.offline_mode:
         log.info('Ignoring now playing in offline mode')
         return Response(None, 200)
@@ -787,6 +795,11 @@ def route_now_playing():
         user.verify_csrf(request.json['csrf'])
 
         relpath = request.json['track']
+        assert isinstance(relpath, str)
+        paused = request.json['paused']
+        assert isinstance(paused, bool)
+        progress = request.json['progress']
+        assert isinstance(progress, int)
 
         user_key = lastfm.get_user_key(user)
 
@@ -798,14 +811,16 @@ def route_now_playing():
             previous_update = None if result is None else result[0]
 
         conn.execute('''
-                     INSERT INTO now_playing (user, timestamp, track)
-                     VALUES (:user_id, :timestamp, :relpath)
+                     INSERT INTO now_playing (user, timestamp, track, paused, progress)
+                     VALUES (:user_id, :timestamp, :relpath, :paused, :progress)
                      ON CONFLICT(user) DO UPDATE
-                         SET timestamp=:timestamp, track=:relpath
+                         SET timestamp=:timestamp, track=:relpath, paused=:paused, progress=:progress
                      ''',
                      {'user_id': user.user_id,
                       'timestamp': int(time.time()),
-                      'relpath': relpath})
+                      'relpath': relpath,
+                      'paused': paused,
+                      'progress': progress})
 
         if not user_key:
             log.info('Skip last.fm now playing, account is not linked')
@@ -920,7 +935,7 @@ def route_history():
                                 JOIN track ON now_playing.track = track.path
                               WHERE now_playing.timestamp > ?
                               ''',
-                              (int(time.time()) - 70,))  # JS updates now playing every minute
+                              (int(time.time()) - 20,))  # based on JS update interval
         now_playing_items = []
         for username, playlist_name, relpath in result:
             track = Track.by_relpath(conn, relpath)
