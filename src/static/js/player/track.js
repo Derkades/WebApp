@@ -106,7 +106,7 @@ class Track {
     };
 
     static async updateLocalTrackList() {
-        console.info('Requesting track list');
+        console.info('downloading track list');
         const response = await fetch('/track_list');
         const json = await response.json();
 
@@ -129,7 +129,7 @@ class Track {
 
         const audioBlobUrlGetter = async function() {
             // Get track audio
-            console.info('queue | download audio');
+            console.debug('download audio');
             const trackResponse = await fetch(`/get_track?path=${encodedPath}&type=${encodedAudioType}`);
             checkResponseCode(trackResponse);
             const audioBlob = await trackResponse.blob();
@@ -138,7 +138,7 @@ class Track {
 
         const imageBlobUrlGetter = async function() {
             // Get cover image
-            console.info('queue | download album cover image');
+            console.debug('download album cover image');
             const meme = document.getElementById('settings-meme-mode').checked ? '1' : '0';
             const imageUrl = `/get_album_cover?path=${encodedPath}&quality=${imageQuality}&meme=${meme}`;
             const coverResponse = await fetch(imageUrl);
@@ -149,7 +149,7 @@ class Track {
 
         const lyricsGetter = async function() {
             // Get lyrics
-            console.info('queue | download lyrics');
+            console.debug('download lyrics');
             const lyricsResponse = await fetch(`/get_lyrics?path=${encodedPath}`);
             checkResponseCode(lyricsResponse);
             const lyricsJson = await lyricsResponse.json();
@@ -164,14 +164,12 @@ class Track {
 
         // Add track to queue and update HTML
         queue.add(queuedTrack, top);
-        console.info("queue | done");
     };
 };
 
 function initTrackList() {
     Track.updateLocalTrackList().catch(err => {
-        console.warn('track list | error');
-        console.warn(err);
+        console.warn('track list error', err);
         setTimeout(initTrackList, 1000);
     });
 }

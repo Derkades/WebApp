@@ -23,7 +23,7 @@ class History {
             this.currentlyPlayingTrack = false;
             return;
         }
-        console.info('history | track changed');
+        console.debug('history | track changed');
         this.currentlyPlayingTrack = track;
         this.hasScrobbled = false;
         this.playingCounter = 0;

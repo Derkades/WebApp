@@ -51,15 +51,15 @@ class Queue {
 
         if (state.playlistOverrides.length > 0) {
             playlist = state.playlistOverrides.pop();
-            console.info('queue | override: ' + playlist);
+            console.debug('queue override', playlist);
         } else {
             playlist = getNextPlaylist(state.lastChosenPlaylist);
-            console.info(`queue | round robin: ${state.lastChosenPlaylist} -> ${playlist}`);
+            console.debug(`queue round robin: ${state.lastChosenPlaylist} -> ${playlist}`);
             state.lastChosenPlaylist = playlist;
         }
 
         if (playlist === null) {
-            console.info('queue | no playlists selected, trying again later');
+            console.debug('queue no playlists selected, trying again later');
             document.getElementById('no-playlists-selected').classList.remove('hidden');
             setTimeout(() => this.fill(), 500);
             return;
@@ -83,12 +83,14 @@ class Queue {
      * @param {string} playlist Playlist directory name
      */
     static async downloadRandomAndAddToQueue(playlist) {
-        console.info('queue | choose track');
+        console.debug('choose track');
         const encToken = encodeURIComponent(csrf.getToken());
         const encPlaylist = encodeURIComponent(playlist);
         const chooseResponse = await fetch(`/choose_track?playlist_dir=${encPlaylist}&${getTagFilter()}&csrf=${encToken}`);
         checkResponseCode(chooseResponse);
         const path = (await chooseResponse.json()).path;
+
+        console.info('chosen track', path);
 
         // Find track info for this file
         const track = state.tracks[path];
@@ -249,7 +251,7 @@ class Queue {
 
     next() {
         if (this.queuedTracks.length === 0) {
-            console.log('music | queue is empty, trying again later');
+            console.log('queue is empty, trying again later');
             setTimeout(() => this.next(), 1000);
             return;
         }
