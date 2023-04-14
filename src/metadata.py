@@ -51,6 +51,7 @@ FILENAME_STRIP_KEYWORDS = [
     '(Dance Video)',
     'Offisiell video',
     '[FREE DL]',
+    'Official Music Video',
 ]
 
 
@@ -177,7 +178,7 @@ class Metadata:
         title = self._meta_title()
         if title:
             return title
-        return self.filename_title() + ' ~'
+        return self.filename_title()
 
     def album_search_queries(self) -> Iterator[str]:
         """

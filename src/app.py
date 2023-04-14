@@ -7,6 +7,7 @@ from pathlib import Path
 from urllib.parse import quote as urlencode
 import time
 import shutil
+import re
 
 import bcrypt
 from flask import Flask, request, render_template, Response, redirect, send_file
@@ -236,6 +237,9 @@ def route_get_track() -> Response:
     audio = track.transcoded_audio(audio_type)
     response = Response(audio, mimetype=media_type)
     response.accept_ranges = 'bytes'  # Workaround for Chromium bug https://stackoverflow.com/a/65804889
+    if audio_type == AudioType.MP3_WITH_METADATA:
+        mp3_name = re.sub(r'[^\x00-\x7f]',r'', track.metadata().display_title())
+        response.headers['Content-Disposition'] = f'attachment; filename="{mp3_name}"'
     return response
 
 
