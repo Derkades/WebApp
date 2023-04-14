@@ -847,7 +847,11 @@ def route_history_played():
         track = request.json['track']
         playlist = request.json['playlist']
 
-        timestamp = int(time.time())
+        if 'timestamp' in request.json:
+            timestamp = int(request.json['timestamp'])
+        else:
+            timestamp = int(time.time())
+
         conn.execute('''
                      INSERT INTO history (timestamp, user, track, playlist)
                      VALUES (?, ?, ?, ?)
