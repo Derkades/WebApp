@@ -94,6 +94,7 @@ class OfflineSync:
         response = self.request_get('/get_track?type=webm_opus_high&path=' + urlencode(path))
         assert response.status_code == 200
         music_data = response.content
+
         log.info('Downloading album cover')
         response = self.request_get('/get_album_cover?quality=high&path=' + urlencode(path))
         assert response.status_code == 200
@@ -102,6 +103,7 @@ class OfflineSync:
         response = self.request_get('/get_lyrics?path=' + urlencode(path))
         assert response.status_code == 200
         lyrics_json = response.text
+
         self.db_offline.execute(
             """
             INSERT INTO content (path, music_data, cover_data, lyrics_json)
@@ -158,6 +160,14 @@ class OfflineSync:
                 self.db_music.execute('DELETE FROM track WHERE path=?',
                                       (path,))
 
+    def _prune_playlists(self, playlists: set[str]):
+        rows = self.db_music.execute('SELECT path FROM playlist').fetchall()
+        for name, in rows:
+            if name not in playlists:
+                log.info('delete playlist: %s', name)
+                self.db_music.execute('DELETE FROM playlist WHERE path=?',
+                                      (name,))
+
     def sync_tracks(self):
         log.info('Downloading track list')
         response = self.request_get('/track_list').json()
@@ -165,7 +175,6 @@ class OfflineSync:
         track_paths: set[str] = set()
 
         for playlist in response['playlists']:
-            log.info('Processing playlist %s', playlist['name'])
             self.db_music.execute('INSERT INTO playlist VALUES (?) ON CONFLICT (path) DO NOTHING',
                                   (playlist['name'],))
 
@@ -190,6 +199,9 @@ class OfflineSync:
                 self.db_music.commit()
 
         self._prune_tracks(track_paths)
+        self._prune_playlists({playlist['name'] for playlist in response['playlists']})
+
+        log.info('Done!')
 
 
 def main():
