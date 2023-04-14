@@ -181,7 +181,7 @@ class Metadata:
 
     def album_search_queries(self) -> Iterator[str]:
         """
-        Generate possible search queries to find album art using a general search engine
+        Generate possible search queries to find album art using a search engine
         """
         if self.album_artist and not contains_collection_keyword(self.album_artist):
             artist = self.album_artist
@@ -204,14 +204,17 @@ class Metadata:
 
         yield self._filename_title_search()
 
-    def lyrics_search_queries(self) -> Iterator[str]:
+    def lyrics_search_query(self) -> str:
         """
-        Generate possible search queries to find lyrics
+        Generate a search query to find lyrics
         """
-        if self.artists and self.title:
-            yield ' '.join(self.artists) + ' - ' + self.title
+        if self.album_artist and self.title:
+            return self.album_artist + ' - ' + self.title
 
-        yield self._filename_title_search()
+        if self.artists and self.title:
+            return ' '.join(self.artists) + ' - ' + self.title
+
+        return self._filename_title_search()
 
 
 def probe(path: Path) -> Metadata:

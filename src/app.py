@@ -283,16 +283,15 @@ def route_get_lyrics():
         track = Track.by_relpath(conn, request.args['path'])
         meta = track.metadata()
 
-    for search_query in meta.lyrics_search_queries():
-        lyrics = genius.get_lyrics(search_query)
-        if lyrics is not None:
-            return {
-                'found': True,
-                'source': lyrics.source_url,
-                'html': lyrics.lyrics_html,
-            }
+    lyrics = genius.get_lyrics(meta.lyrics_search_query())
+    if lyrics is None:
+        return {'found': False}
 
-    return {'found': False}
+    return {
+        'found': True,
+        'source': lyrics.source_url,
+        'html': lyrics.lyrics_html,
+    }
 
 
 @app.route('/ytdl', methods=['POST'])
