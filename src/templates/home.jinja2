@@ -28,14 +28,17 @@
     {{ nav('/files', 'folder', _('File manager')) }}
     {{ nav('/playlists', 'playlist-music', _('Playlist manager')) }}
 
+    <h2>{% trans %}Settings{% endtrans %}</h2>
+    {{ nav('/account', 'account-cog', _('Account')) }}
+    {{ nav('/never_play', 'cancel', _('Manage track blocklist')) }}
+
+    <h2>{% trans %}Help{% endtrans %}</h2>
+    {{ nav('/info', 'help-circle', _('Manual')) }}
+
     <h2>{% trans %}Statistics{%endtrans %}</h2>
     {{ nav('/history', 'history', _('Playback history')) }}
     {{ nav('/stats', 'chart-line-variant', _('Statistics')) }}
     {{ nav('/recent_changes', 'file-edit', _('Recent file changes')) }}
-
-    <h2>{% trans %}Settings{%endtrans %}</h2>
-    {{ nav('/account', 'account-cog', _('Account')) }}
-    {{ nav('/never_play', 'cancel', _('Manage track blocklist')) }}
 
     <h2>{% trans %}Experimental{% endtrans %}</h2>
     {{ nav('/radio', 'radio', _('Radio')) }}

@@ -1,0 +1,65 @@
+{% extends "base_static.jinja2" %}
+
+{% block title %}
+    {% trans %}Information{% endtrans %}
+{% endblock title %}
+
+{% block content %}
+
+{{ page_heading(gettext('Information')) }}
+
+<h2>{% trans %}Hotkeys{% endtrans %}</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <td>{% trans %}Key combination{% endtrans %}</td>
+            <td>{% trans %}Description{% endtrans %}</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><kbd>1</kbd> - <kbd>9</kbd></td>
+            <td>{% trans %}Toggle playlists{% endtrans %}</td>
+        </tr>
+        <tr>
+            <td><kbd>←</kbd> / <kbd>→</kbd></td>
+            <td>{% trans %}Previous or next track{% endtrans %}</td>
+        </tr>
+        <tr>
+            <td><kbd>↑</kbd> / <kbd>↓</kbd></td>
+            <td>{% trans %}Increase or decrease volume{% endtrans %}</td>
+        </tr>
+        <tr>
+            <td><kbd>&lt;</kbd> / <kbd>&gt;</kbd></td>
+            <td>{% trans %}Seek in track (don't use shift){% endtrans %}</td>
+        </tr>
+        <tr>
+            <td><kbd>Esc</kbd></td>
+            <td>{% trans %}Close dialog{% endtrans %}</td>
+        </tr>
+        <tr>
+            <td><kbd>l</kbd></td>
+            <td>{% trans %}Show or hide lyrics{% endtrans %}</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>{% trans %}Android app{% endtrans %}</h2>
+
+<p>{% trans link_start='<a href="https://github.com/Derkades/music-player-android/releases" target="_blank">' %}The music player offline sync app can sync favorited playlists to your phone efficiently. Download the latest version {{link_start}}from GitHub releases</a>.{% endtrans %}</p>
+
+<h2>{% trans %}Server management{% endtrans %}</h2>
+
+<p>{% trans link_start='<a href="https://github.com/DanielKoomen/WebApp/tree/main/docs" target="_blank">' %}Server management documentation can be found {{link_start}}here.</a>{% endtrans %}</p>
+
+<h2>{% trans %}Credits{% endtrans %}</h2>
+<p>
+    {% trans trimmed gh="https://github.com/DanielKoomen/WebApp", robin_gh="https://github.com/Derkades", insp_gh="https://github.com/DanielKoomen/MusicPlayer", daniel_gh="https://github.com/DanielKoomen" %}
+    <a href="{{gh}}" target="_blank">Super fancy music player 2.0</a> is a project largely made by
+    <a href="{{robin_gh}}" target="_blank">Robin Slot</a>, inspired by
+    <a href="{{insp_gh}}" target="_blank">Super fancy music player</a> by
+    <a href="{{daniel_gh}}" target="_blank">Daniël Koomen</a>. Enjoy!
+    {% endtrans %}
+</p>
+
+{% endblock content %}

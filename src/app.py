@@ -164,6 +164,13 @@ def route_player_js():
                     content_type='application/javascript')
 
 
+@app.route('/info')
+def route_info():
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn)
+    return render_template('info.jinja2')
+
+
 @app.route('/get_csrf')
 def route_get_csrf():
     """

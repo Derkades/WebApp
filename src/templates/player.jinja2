@@ -131,36 +131,6 @@
         <div class="box-rounded box-solid">
             {{ dialog_header('dialog-settings', gettext('Settings')) }}
             <div class="scroll">
-                <h4>{% trans %}Hotkeys{% endtrans %}</h4>
-                <table class="hotkeys-table">
-                    <tbody>
-                        <tr>
-                            <td><kbd>1</kbd> - <kbd>9</kbd></td>
-                            <td>{% trans %}Toggle playlists{% endtrans %}</td>
-                        </tr>
-                        <tr>
-                            <td><kbd>←</kbd> / <kbd>→</kbd></td>
-                            <td>{% trans %}Previous or next track{% endtrans %}</td>
-                        </tr>
-                        <tr>
-                            <td><kbd>↑</kbd> / <kbd>↓</kbd></td>
-                            <td>{% trans %}Increase or decrease volume{% endtrans %}</td>
-                        </tr>
-                        <tr>
-                            <td><kbd>&lt;</kbd> / <kbd>&gt;</kbd></td>
-                            <td>{% trans %}Seek in track (don't use shift){% endtrans %}</td>
-                        </tr>
-                        <tr>
-                            <td><kbd>Esc</kbd></td>
-                            <td>{% trans %}Close dialog{% endtrans %}</td>
-                        </tr>
-                        <tr>
-                            <td><kbd>l</kbd></td>
-                            <td>{% trans %}Show or hide lyrics{% endtrans %}</td>
-                        </tr>
-                    </tbody>
-                </table>
-
                 <h4>{% trans %}Settings{% endtrans %}</h4>
                 <div>
                     <input type="number" value="5" size="3" id="settings-queue-size">
@@ -237,16 +207,6 @@
                     <button id="scan-button">{% trans %}Force update track list cache{% endtrans %}</button>
                     <div id="scan-spinner" class="spinner hidden"></div>
                 </div>
-
-                <h4>{% trans %}Credits{% endtrans %}</h4>
-                <p>
-                    {% trans trimmed gh="https://github.com/DanielKoomen/WebApp", robin_gh="https://github.com/Derkades", insp_gh="https://github.com/DanielKoomen/MusicPlayer", daniel_gh="https://github.com/DanielKoomen" %}
-                    <a href="{{gh}}">Super fancy music player 2.0</a> is a project largely made by
-                    <a href="{{robin_gh}}">Robin Slot</a>, inspired by
-                    <a href="{{insp_gh}}" target="_blank">Super fancy music player</a> by
-                    <a href="{{daniel_gh}}" target="_blank">Daniël Koomen</a>. Enjoy!
-                    {% endtrans %}
-                </p>
             </div>
         </div>
     </div>
