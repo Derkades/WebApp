@@ -65,20 +65,15 @@ function getNextPlaylist(currentPlaylist) {
  * @returns {HTMLSpanElement}
  */
 function createPlaylistCheckbox(playlist, index, defaultChecked) {
-    const id = 'checkbox-' + playlist.name;
-
-    // Re-use state from previous checkbox if it exists
-    const previousCheckbox = document.getElementById(id);
-    const checked = previousCheckbox !== null ? previousCheckbox.checked : defaultChecked;
-
     const span = document.createElement("span");
     span.classList.add("checkbox-with-label");
 
     const input = document.createElement("input");
     input.type = 'checkbox';
     input.classList.add('playlist-checkbox');
-    input.id = id;
-    input.checked = checked;
+    input.id = 'checkbox-' + playlist.name;
+    input.checked = defaultChecked;
+    input.oninput = savePlaylistState;
 
     const label = document.createElement("label");
     label.htmlFor = "checkbox-" + playlist.name;
@@ -109,10 +104,9 @@ function updatePlaylistCheckboxHtml() {
     const mainDiv = document.createElement('div');
     const otherDiv = document.createElement('div');
     otherDiv.classList.add('other-checkboxes');
-    const offlineMode = document.getElementById('offline-mode-enabled') !== null;
 
     for (const playlist of Object.values(state.playlists)) {
-        if (offlineMode || playlist.favorite) {
+        if (playlist.favorite) {
             mainDiv.appendChild(createPlaylistCheckbox(playlist, index++, true));
         } else {
             otherDiv.appendChild(createPlaylistCheckbox(playlist, 10, false));
@@ -121,6 +115,8 @@ function updatePlaylistCheckboxHtml() {
 
     const parent = document.getElementById('playlist-checkboxes');
     parent.replaceChildren(mainDiv, otherDiv);
+
+    loadPlaylistState();
 }
 eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, updatePlaylistCheckboxHtml);
 
@@ -150,3 +146,31 @@ function createPlaylistDropdowns() {
     }
 }
 eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, createPlaylistDropdowns);
+
+function loadPlaylistState() {
+    const playlistsString = localStorage.getItem('playlists');
+    if (!playlistsString) {
+        console.info('No playlists state saved');
+        return;
+    }
+    const playlists = JSON.parse(playlistsString);
+    console.debug('Restoring playlists state', playlists);
+    for (const playlist of Object.values(state.playlists)) {
+        const checkbox = document.getElementById('checkbox-' + playlist.name);
+        if (checkbox) {
+            checkbox.checked = playlists.indexOf(playlist.name) !== -1;
+        }
+    }
+}
+
+function savePlaylistState() {
+    const checkedPlaylists = [];
+    for (const playlist of Object.values(state.playlists)) {
+        const checkbox = document.getElementById('checkbox-' + playlist.name);
+        if (checkbox && checkbox.checked) {
+            checkedPlaylists.push(playlist.name);
+        }
+    }
+    console.debug('Saving playlists state', checkedPlaylists);
+    localStorage.setItem('playlists', JSON.stringify(checkedPlaylists));
+}
