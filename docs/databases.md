@@ -16,6 +16,8 @@ This databse can be deleted, but it is highly recommended to never delete it and
 
 Outdated cache entries are automatically removed, but the database usually won't get smaller unless it is vacuumed.
 
+The database size varies depending on how many audio quality levels you use, but expect it to be at least 10GB for every 1000 tracks.
+
 ## `offline.db`
 
 The offline database stores downloaded track data when the music player operates in [offline mode](./offline.md). It is **not** safe to delete this database if you are using the music player in offline mode. If you accidentally lost or deleted this database, run the following command to force all tracks to be downloaded again:
