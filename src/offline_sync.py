@@ -4,6 +4,7 @@ import traceback
 from urllib.parse import quote as urlencode
 
 import requests
+from requests import Response
 from requests.exceptions import RequestException
 
 import settings
@@ -37,13 +38,13 @@ class OfflineSync:
                                     (self.base_url,))
             self.db_offline.commit()
 
-    def request_get(self, route: str):
+    def request_get(self, route: str) -> Response:
         response = requests.get(self.base_url + route,
                                 headers={'Cookie': 'token=' + self.token,
                                          'User-Agent': settings.user_agent})
         return response
 
-    def request_post(self, route: str, data):
+    def request_post(self, route: str, data) -> Response:
         headers = {'User-Agent': settings.user_agent}
         if self.token is not None:
             headers['Cookie'] = 'token=' + self.token
@@ -201,7 +202,21 @@ class OfflineSync:
         self._prune_tracks(track_paths)
         self._prune_playlists({playlist['name'] for playlist in response['playlists']})
 
-        log.info('Done!')
+    def sync_history(self):
+        csrf_token = self.request_get('/get_csrf').json()['token']
+
+        rows = self.db_offline.execute('SELECT rowid, timestamp, track, playlist FROM history ORDER BY timestamp ASC')
+        for rowid, timestamp, track, playlist in rows:
+            log.info('Played: %s', track)
+            response = self.request_post('/history_played',
+                              {'csrf': csrf_token,
+                               'track': track,
+                               'playlist': playlist,
+                               'timestamp': timestamp,
+                               'lastfmEligible': False})
+            assert response.status_code == 200
+            self.db_offline.execute('DELETE FROM history WHERE rowid=?', (rowid,))
+            self.db_offline.commit()
 
 
 def main():
@@ -209,9 +224,12 @@ def main():
         return
 
     with db.connect() as db_music, db.offline() as db_offline:
-        log.info('Starting sync')
         sync = OfflineSync(db_offline, db_music)
+        log.info('Sync history')
+        sync.sync_history()
+        log.info('Sync tracks')
         sync.sync_tracks()
+        log.info('Done!')
 
 
 if __name__ == '__main__':
