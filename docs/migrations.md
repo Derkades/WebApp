@@ -2,7 +2,7 @@
 
 To run a migration:
 1. Shut down the music player (`docker compose stop`)
-2. Run `sqlite3 data/music.db`
+2. Run `sqlite3 data/music.db` (`sqlite3` package on Debian, `sqlite` package on Fedora)
 3. Execute the migration by copying it line by line from top to bottom, pressing enter after every line.
 4. Exit using <kbd>Ctrl</kbd>+<kbd>D</kbd>
 
