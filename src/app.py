@@ -827,19 +827,21 @@ def route_now_playing():
                       'progress': progress})
 
         if not user_key:
-            log.info('Skip last.fm now playing, account is not linked')
+            # Skip last.fm now playing, account is not linked
             return Response(None, 200)
 
         # If now playing has already been sent for this track, only send an update to
         # last.fm if it was more than 5 minutes ago.
         if previous_update is not None and int(time.time()) - previous_update < 5*60:
-            log.info('Skip last.fm now playing, already sent recently')
+            # Skip last.fm now playing, already sent recently
             return Response(None, 200)
 
         track = Track.by_relpath(conn, relpath)
         meta = track.metadata()
 
-    # Scrobble request takes a while, so close database connection first
+    # Request to last.fm takes a while, so close database connection first
+
+    log.info('Sending now playing to last.fm: %s', track.relpath)
     lastfm.update_now_playing(user_key, meta)
     return Response(None, 200)
 
@@ -894,7 +896,7 @@ def route_history_played():
             return Response('ok', 200)
 
     # Scrobble request takes a while, so close database connection first
-
+    log.info('Scrobbling to last.fm: %s', track.relpath)
     start_timestamp = request.json['startTimestamp']
     lastfm.scrobble(lastfm_key, meta, start_timestamp)
 
