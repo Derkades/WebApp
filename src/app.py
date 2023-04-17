@@ -906,8 +906,6 @@ def route_history():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
 
-        # History
-
         result = conn.execute('''
                               SELECT history.timestamp, user.username, history.playlist, history.track, track.path IS NOT NULL
                               FROM history
@@ -916,7 +914,7 @@ def route_history():
                               ORDER BY history.id DESC
                               LIMIT 250
                               ''')
-        history_items = []
+        history = []
         for timestamp, username, playlist, relpath, track_exists in result:
             if track_exists:
                 track = Track.by_relpath(conn, relpath)
@@ -925,37 +923,46 @@ def route_history():
             else:
                 title = relpath
 
-            history_items.append({'time': timestamp,
-                                  'username': username,
-                                  'playlist': playlist,
-                                  'title': title})
+            history.append({'time': timestamp,
+                            'username': username,
+                            'playlist': playlist,
+                            'title': title})
 
-        # Now playing
+    return render_template('history.jinja2',
+                           history=history)
+
+
+@app.route('/history_now_playing')
+def route_history_info():
+    response: dict[str, Any] = {}
+
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn)
 
         result = conn.execute('''
-                              SELECT user.username, track.playlist, track, progress
+                              SELECT user.username, track.playlist, track, paused, progress
                               FROM now_playing
                                 JOIN user ON now_playing.user = user.id
                                 JOIN track ON now_playing.track = track.path
                               WHERE now_playing.timestamp > ?
                               ''',
                               (int(time.time()) - 20,))  # based on JS update interval
-        now_playing_items = []
-        for username, playlist_name, relpath, progress in result:
+
+        response = []
+        for username, playlist_name, relpath, paused, progress in result:
             track = Track.by_relpath(conn, relpath)
             meta = track.metadata()
-            now_playing_items.append({'image': '/get_album_cover?quality=tiny&path=' + urlencode(relpath),
-                                      'username': username,
-                                      'playlist': playlist_name,
-                                      'title': meta.title,
-                                      'artists': meta.artists,
-                                      'fallback_title': meta.display_title(),
-                                      'progress': progress})
+            image_url = '/get_album_cover?quality=tiny&path=' + urlencode(relpath)
+            response.append({'image': image_url,
+                             'username': username,
+                             'playlist': playlist_name,
+                             'title': meta.title,
+                             'artists': meta.artists,
+                             'fallback_title': meta.display_title(),
+                             'paused': paused,
+                             'progress': progress})
 
-
-    return render_template('history.jinja2',
-                           history=history_items,
-                           now_playing=now_playing_items)
+    return response
 
 
 @app.route('/stats')

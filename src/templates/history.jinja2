@@ -10,32 +10,9 @@
 
 <h2>{% trans %}Now playing{% endtrans %}</h2>
 
-{% if now_playing %}
-    <div class="card-container">
-        {% for track in now_playing %}
-            <div class="card">
-                <div class="card-header">
-                    {{ track['username'] }}
-                </div>
-                <div class="card-body" style="display: flex">
-                    <img src="{{ track['image'] }} " height="100" width="100" style="border-radius: var(--border-radius-amount)">
-                    <div style="margin-left: .5rem">
-                        {% if track['title'] and track['artists'] %}
-                            <div style="font-size: 1.3em;">{{ track['title'] }}</div>
-                            <div style="font-size: 1.1em;">{{ track['artists']|join(', ') }}</div>
-                        {% else %}
-                            <div style="font-size: 1.1em;">{{ track['fallback_title'] }}</div>
-                        {% endif %}
-                        <div class="secondary" style="margin-top: .5rem;">{{ track['playlist'] }}</div>
-                    </div>
-                </div>
-                <div class="card-progress" style="width: {{ track['progress'] }}%"></div>
-            </div>
-        {% endfor %}
-    </div>
-{% else %}
-    {% trans %}<p>No one is playing music.</p>{% endtrans %}
-{% endif %}
+<div class="hidden" id="nothing-playing-text">{% trans %}No one is playing music.{% endtrans %}</div>
+
+<div class="card-container" id="now-playing"></div>
 
 <h2>{% trans %}History{% endtrans %}</h2>
 
@@ -69,4 +46,83 @@
 </table>
 
 <script src="/static/js/format.js"></script>
+
+<script>
+
+function getCardHtml(info) {
+    const card = document.createElement('div');
+    card.classList.add('card');
+
+    const cardHeader = document.createElement('div');
+    cardHeader.classList.add('card-header');
+    cardHeader.textContent = info.username;
+    card.append(cardHeader);
+
+    const cardBody = document.createElement('div');
+    cardBody.classList.add('card-body');
+    cardBody.style.display = 'flex';
+    card.append(cardBody);
+
+    const img = document.createElement('img');
+    img.src = info.image;
+    img.height = 100;
+    img.width = 100;
+    img.style.borderRadius = 'var(--border-radius-amount)';
+    cardBody.append(img);
+
+    const infoDiv = document.createElement('div');
+    infoDiv.style.marginLeft = '.5rem';
+    cardBody.append(infoDiv);
+
+    if (info.title && info.artists) {
+        const titleDiv = document.createElement('div');
+        titleDiv.style.fontSize = '1.3em';
+        titleDiv.textContent = info.title;
+        const artistDiv = document.createElement('div');
+        artistDiv.style.fontSize = '1.1em';
+        artistDiv.textContent = info.artists;
+        infoDiv.append(titleDiv, artistDiv);
+    } else {
+        const fallbackDiv = document.createElement('div');
+        fallbackDiv.style.fontSize = '1.1em';
+        fallbackDiv.textContent = fallback_title;
+        infoDiv.append(fallbackDiv);
+    }
+
+    const playlistDiv = document.createElement('div');
+    playlistDiv.classList.add('secondary');
+    playlistDiv.style.marginTop = '.5rem';
+    playlistDiv.textContent = info.playlist;
+    infoDiv.append(playlistDiv);
+
+    const progressBar = document.createElement('div');
+    progressBar.classList.add('card-progress');
+    progressBar.style.width = info.progress + '%';
+    card.append(progressBar);
+
+    return card;
+}
+
+const nowPlayingDiv = document.getElementById('now-playing');
+const nothingPlayingText = document.getElementById('nothing-playing-text').textContent;
+
+async function updateNowPlaying() {
+    const response = await fetch('/history_now_playing');
+    const items = await response.json();
+    console.debug('Fetched now playing', items);
+    const cards = items.filter(e => !e.paused).map(getCardHtml);
+    if (cards.length > 0) {
+        nowPlayingDiv.replaceChildren(...cards);
+    } else {
+        nowPlayingDiv.textContent = nothingPlayingText;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateNowPlaying();
+    setInterval(updateNowPlaying, 10_000);
+});
+
+</script>
+
 {% endblock content %}
