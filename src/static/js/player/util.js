@@ -76,7 +76,7 @@ function getCookie(cname) {
  * @returns {Response}
  */
 async function jsonPost(url, postDataObject, onErrorStatus) {
-    postDataObject.csrf = csrf.getToken();
+    postDataObject.csrf = await csrf.getToken();
     const options = {
         method: 'POST',
         body: JSON.stringify(postDataObject),

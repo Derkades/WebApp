@@ -1,17 +1,31 @@
+const CSRF_EXPIRY_MILLIS = 20*60*1000; // 20 minutes
+
 class CSRF {
     csrfToken;
+    lastTokenUpdate;
 
     constructor() {
-        // Initial CSRF token is supplied using hidden page element
-        document.addEventListener('DOMContentLoaded', () => {
-            this.csrfToken = document.getElementById('csrf-token').textContent;
-        });
+        this.csrfToken = null;
+        this.lastTokenUpdate = null;
     }
 
     /**
-     * @returns {string} CSRF token
+     * @returns {Promise<string>} CSRF token
      */
-    getToken() {
+    async getToken() {
+
+        if (this.csrfToken == null) {
+            console.info('No CSRF token stored');
+            await this.update();
+        } else {
+            const age = Date.now() - this.lastTokenUpdate;
+            console.debug(`CSRF last updated ${Math.round(age/1000)} seconds ago`);
+            if (age > CSRF_EXPIRY_MILLIS) {
+                console.info('Stored CSRF token has expired');
+                await this.update();
+            }
+        }
+
         return this.csrfToken;
     }
 
@@ -20,11 +34,8 @@ class CSRF {
         checkResponseCode(response);
         const json = await response.json();
         this.csrfToken = json.token;
+        this.lastTokenUpdate = Date.now();
     }
 }
 
 const csrf = new CSRF();
-
-document.addEventListener('DOMContentLoaded', () => {
-    setInterval(() => csrf.update(), 15*60*1000);
-});

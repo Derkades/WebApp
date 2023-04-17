@@ -84,7 +84,7 @@ class Queue {
      */
     static async downloadRandomAndAddToQueue(playlist) {
         console.debug('choose track');
-        const encToken = encodeURIComponent(csrf.getToken());
+        const encToken = encodeURIComponent(await csrf.getToken());
         const encPlaylist = encodeURIComponent(playlist);
         const chooseResponse = await fetch(`/choose_track?playlist_dir=${encPlaylist}&${getTagFilter()}&csrf=${encToken}`);
         checkResponseCode(chooseResponse);

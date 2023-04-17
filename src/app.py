@@ -140,16 +140,14 @@ def route_player():
     """
     Main player page. Serves player.jinja2 template file.
     """
-    with db.connect() as conn:
+    with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn, redirect_to_login=True)
-        csrf_token = user.get_csrf()
         row = conn.execute('SELECT primary_playlist FROM user WHERE id=?',
                            (user.user_id,)).fetchone()
         primary_playlist = row[0] if row else None
 
     return render_template('player.jinja2',
                            mobile=is_mobile(),
-                           csrf_token=csrf_token,
                            languages=LANGUAGES,
                            language=get_locale(),
                            primary_playlist=primary_playlist,
