@@ -6,6 +6,7 @@ import requests
 
 import settings
 from auth import User
+import metadata
 from metadata import Metadata
 
 
@@ -89,24 +90,30 @@ def update_now_playing(user_key: str, metadata: Metadata):
                   sk=user_key)
 
 
-def scrobble(user_key: str, metadata: Metadata, start_timestamp: int):
+def scrobble(user_key: str, meta: Metadata, start_timestamp: int):
     if not is_configured():
         log.info('Skipped scrobble, last.fm not configured')
         return
 
-    if metadata.title and metadata.album_artist:
-        artist = metadata.album_artist
-    elif metadata.title and metadata.artists:
-        artist = ' & '.join(metadata.artists)
+    if meta.title and meta.album_artist:
+        artist = meta.album_artist
+    elif meta.title and meta.artists:
+        artist = ' & '.join(meta.artists)
     else:
         log.info('Skipped scrobble, missing metadata')
         return
 
-    _make_request('post', 'track.scrobble',
-                  artist=artist,
-                  track=metadata.title,
-                  chosenByUser='0',
-                  timestamp=str(start_timestamp),
-                  sk=user_key)
+    params = {
+        'artist': artist,
+        'track': meta.title,
+        'chosenByUser': '0',
+        'timestamp': str(start_timestamp),
+        'sk': user_key,
+    }
 
-    log.info('Scrobbled to last.fm: %s - %s', artist, metadata.title)
+    if meta.album and not metadata.contains_collection_keyword(meta.album):
+        params['album'] = meta.album
+
+    _make_request('post', 'track.scrobble', **params)
+
+    log.info('Scrobbled to last.fm: %s - %s', artist, meta.title)
