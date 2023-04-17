@@ -57,6 +57,9 @@ class History {
     }
 
     async updateNowPlaying() {
+        if (this.currentlyPlayingTrack == null) {
+            return;
+        }
         const audio = getAudioElement();
         const data = {
             track: this.currentlyPlayingTrack.path,
