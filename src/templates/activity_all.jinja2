@@ -1,0 +1,42 @@
+{% extends "base_static.jinja2" %}
+
+{% block title %}
+    {% trans %}Playback history{% endtrans %}
+{% endblock title %}
+
+{% block content %}
+
+{{ page_heading(gettext('Playback history'), back_url='/activity') }}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                {% trans %}Time{% endtrans %}
+            </th>
+            <th>
+                {% trans %}User{% endtrans %}
+            </th>
+            <th>
+                {% trans %}Playlist{% endtrans %}
+            </th>
+            <th>
+                {% trans %}Track{% endtrans %}
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for track in history %}
+            <tr>
+                <td class="format-timestamp">{{ track['time'] }}</td>
+                <td>{{ track['username'] }}</td>
+                <td>{{ track['playlist'] }}</td>
+                <td>{{ track['title'] }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script src="/static/js/base.js"></script>
+
+{% endblock content %}

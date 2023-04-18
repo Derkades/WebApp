@@ -1,12 +1,12 @@
 {% extends "base_static.jinja2" %}
 
 {% block title %}
-    {% trans %}Playback history{% endtrans %}
+    {% trans %}Activity{% endtrans %}
 {% endblock title %}
 
 {% block content %}
 
-{{ page_heading(gettext('Playback history')) }}
+{{ page_heading(gettext('Activity')) }}
 
 <h2>{% trans %}Now playing{% endtrans %}</h2>
 
@@ -14,7 +14,7 @@
 
 <div class="card-container" id="now-playing"></div>
 
-<h2>{% trans %}History{% endtrans %}</h2>
+<h2>{% trans %}Playback history{% endtrans %}</h2>
 
 <table class="table">
     <thead>
@@ -33,23 +33,17 @@
             </th>
         </tr>
     </thead>
-    <tbody>
-        {% for track in history %}
-            <tr>
-                <td class="format-timestamp">{{ track['time'] }}</td>
-                <td>{{ track['username'] }}</td>
-                <td>{{ track['playlist'] }}</td>
-                <td>{{ track['title'] }}</td>
-            </tr>
-        {% endfor %}
+    <tbody id="tbody-history">
     </tbody>
 </table>
 
-<script src="/static/js/format.js"></script>
+<a href="/activity_all" style="display: block; margin-top: .5rem">{% trans %}View more{% endtrans %}</a>
+
+<script src="/static/js/base.js"></script>
 
 <script>
 
-function getCardHtml(info) {
+function getNowPlayingCardHtml(info) {
     const card = document.createElement('div');
     card.classList.add('card');
 
@@ -103,19 +97,43 @@ function getCardHtml(info) {
     return card;
 }
 
+function getHistoryRowHtml(info) {
+    const colTime = document.createElement('td');
+    colTime.textContent = timestampToString(info.time);
+
+    const colUsername = document.createElement('td');
+    colUsername.textContent = info.username;
+
+    const colPlaylist = document.createElement('td');
+    colPlaylist.textContent = info.playlist;
+
+    const colTitle = document.createElement('td');
+    colTitle.textContent = info.title;
+
+    const row = document.createElement('tr');
+    row.append(colTime, colUsername, colPlaylist, colTitle);
+
+    return row;
+}
+
 const nowPlayingDiv = document.getElementById('now-playing');
 const nothingPlayingText = document.getElementById('nothing-playing-text').textContent;
+const historyTable = document.getElementById('tbody-history');
 
 async function updateNowPlaying() {
-    const response = await fetch('/history_now_playing');
-    const items = await response.json();
-    console.debug('Fetched now playing', items);
-    const cards = items.filter(e => !e.paused).map(getCardHtml);
+    const response = await fetch('/activity_data');
+    const json = await response.json();
+    console.debug('Fetched data', json);
+
+    const cards = json.now_playing.filter(e => !e.paused).map(getNowPlayingCardHtml);
     if (cards.length > 0) {
         nowPlayingDiv.replaceChildren(...cards);
     } else {
         nowPlayingDiv.textContent = nothingPlayingText;
     }
+
+    const rows = json.history.map(getHistoryRowHtml);
+    historyTable.replaceChildren(...rows);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
