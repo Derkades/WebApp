@@ -85,7 +85,7 @@ function getCardHtml(info) {
     } else {
         const fallbackDiv = document.createElement('div');
         fallbackDiv.style.fontSize = '1.1em';
-        fallbackDiv.textContent = fallback_title;
+        fallbackDiv.textContent = info.fallback_title;
         infoDiv.append(fallbackDiv);
     }
 
