@@ -35,10 +35,12 @@
     <h2>{% trans %}Settings{% endtrans %}</h2>
     {{ nav('/account', 'account-cog', _('Account')) }}
     {{ nav('/never_play', 'cancel', _('Track blocklist')) }}
+{% endif %}
 
-    <h2>{% trans %}Help{% endtrans %}</h2>
-    {{ nav('/info', 'help-circle', _('Manual')) }}
+<h2>{% trans %}Help{% endtrans %}</h2>
+{{ nav('/info', 'help-circle', _('Manual')) }}
 
+{% if not offline_mode %}
     <h2>{% trans %}Experimental{% endtrans %}</h2>
     {{ nav('/radio', 'radio', _('Radio')) }}
     {{ nav('/playlist_stats', 'chart-line-variant', _('Playlist statistics')) }}
