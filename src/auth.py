@@ -30,12 +30,12 @@ class Session:
 
     @property
     def creation_date(self) -> str:
-        seconds_ago = -(int(time.time()) - self.creation_timestamp)
+        seconds_ago = self.creation_timestamp - int(time.time())
         return flask_babel.format_timedelta(seconds_ago, add_direction=True)
 
     @property
     def last_use_ago(self) -> str:
-        seconds_ago = -(int(time.time()) - self.last_use)
+        seconds_ago = self.last_use- int(time.time())
         return flask_babel.format_timedelta(seconds_ago, add_direction=True)
 
     @property

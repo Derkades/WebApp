@@ -12,7 +12,7 @@ import re
 import bcrypt
 from flask import Flask, request, render_template, Response, redirect, send_file
 from flask_babel import Babel
-from flask_babel import _
+from flask_babel import _, format_timedelta
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import auth
@@ -946,6 +946,7 @@ def route_activity_data():
                               ''')
         history = []
         for timestamp, username, playlist, relpath in result:
+            time_ago = format_timedelta(timestamp - int(time.time()), add_direction=True)
             track = Track.by_relpath(conn, relpath)
             if track:
                 meta = track.metadata()
@@ -953,7 +954,7 @@ def route_activity_data():
             else:
                 title = relpath
 
-            history.append({'time': timestamp,
+            history.append({'time_ago': time_ago,
                             'username': username,
                             'playlist': playlist,
                             'title': title})

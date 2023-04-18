@@ -99,7 +99,7 @@ function getNowPlayingCardHtml(info) {
 
 function getHistoryRowHtml(info) {
     const colTime = document.createElement('td');
-    colTime.textContent = timestampToString(info.time);
+    colTime.textContent = info.time_ago;
 
     const colUsername = document.createElement('td');
     colUsername.textContent = info.username;
@@ -122,6 +122,7 @@ const historyTable = document.getElementById('tbody-history');
 
 async function updateNowPlaying() {
     const response = await fetch('/activity_data');
+    checkResponseCode(response);
     const json = await response.json();
     console.debug('Fetched data', json);
 
