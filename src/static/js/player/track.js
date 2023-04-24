@@ -106,7 +106,7 @@ class Track {
     };
 
     static async updateLocalTrackList() {
-        console.info('downloading track list');
+        console.info('Updating local track list');
         const response = await fetch('/track_list');
         const json = await response.json();
 

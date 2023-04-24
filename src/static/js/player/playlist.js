@@ -100,6 +100,8 @@ function createPlaylistCheckbox(playlist, index, defaultChecked) {
 }
 
 function updatePlaylistCheckboxHtml() {
+    console.debug('Updating playlist checkboxes');
+
     let index = 1;
     const mainDiv = document.createElement('div');
     const otherDiv = document.createElement('div');
@@ -121,6 +123,8 @@ function updatePlaylistCheckboxHtml() {
 eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, updatePlaylistCheckboxHtml);
 
 function createPlaylistDropdowns() {
+    console.debug('Updating playlist dropdowns');
+
     for (const select of document.getElementsByClassName('playlist-select')) {
         // Remove all children except the ones that should be kept
         const keptChildren = []
@@ -171,6 +175,6 @@ function savePlaylistState() {
             checkedPlaylists.push(playlist.name);
         }
     }
-    console.debug('Saving playlists state', checkedPlaylists);
+    console.debug('Saving playlists checkbox state', checkedPlaylists);
     localStorage.setItem('playlists', JSON.stringify(checkedPlaylists));
 }
