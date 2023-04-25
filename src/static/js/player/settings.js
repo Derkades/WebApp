@@ -32,6 +32,7 @@ function syncCookiesWithInputs() {
         'settings-audio-type',
         'settings-volume',
         'settings-queue-removal-behaviour',
+        'settings-download-mode',
         'settings-theme',
         'settings-meme-mode',
         'settings-language',

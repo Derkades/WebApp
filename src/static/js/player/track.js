@@ -127,14 +127,22 @@ class Track {
         const imageQuality = document.getElementById('settings-audio-type').value == 'webm_opus_low' ? 'low' : 'high';
         const encodedPath = encodeURIComponent(this.path);
 
-        const audioBlobUrlGetter = async function() {
-            // Get track audio
-            console.debug('download audio');
-            const trackResponse = await fetch(`/get_track?path=${encodedPath}&type=${encodedAudioType}`);
-            checkResponseCode(trackResponse);
-            const audioBlob = await trackResponse.blob();
-            return URL.createObjectURL(audioBlob);
-        };
+        const audioUrl = `/get_track?path=${encodedPath}&type=${encodedAudioType}`;
+        let audioUrlGetter;
+        if (document.getElementById('settings-download-mode').value === 'download') {
+            audioUrlGetter = async function() {
+                // Get track audio
+                console.debug('download audio');
+                const trackResponse = await fetch(audioUrl);
+                checkResponseCode(trackResponse);
+                const audioBlob = await trackResponse.blob();
+                return URL.createObjectURL(audioBlob);
+            };
+        } else {
+            audioUrlGetter = async function() {
+                return audioUrl;
+            }
+        }
 
         const imageBlobUrlGetter = async function() {
             // Get cover image
@@ -157,10 +165,10 @@ class Track {
         };
 
         // Resolve all, download in parallel
-        const promises = Promise.all([audioBlobUrlGetter(), imageBlobUrlGetter(), lyricsGetter()]);
-        const [audioBlobUrl, imageBlobUrl, lyrics] = await promises;
+        const promises = Promise.all([audioUrlGetter(), imageBlobUrlGetter(), lyricsGetter()]);
+        const [audioUrl2, imageBlobUrl, lyrics] = await promises;
 
-        const queuedTrack = new QueuedTrack(this, audioBlobUrl, imageBlobUrl, lyrics);
+        const queuedTrack = new QueuedTrack(this, audioUrl2, imageBlobUrl, lyrics);
 
         // Add track to queue and update HTML
         queue.add(queuedTrack, top);

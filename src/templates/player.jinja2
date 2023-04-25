@@ -158,6 +158,13 @@
                     <label for="settings-queue-removal-behaviour">{% trans %}Queue removal behaviour{% endtrans %}</label>
                 </div>
                 <div>
+                    <select id="settings-download-mode">
+                        <option value="download" selected>{% trans %}Download full track when queued{% endtrans %}</option>
+                        <option value="stream">{% trans %}Stream audio (experimental){% endtrans %}</option>
+                    </select>
+                    <label for="settings-download-mode">{% trans %}Download mode{% endtrans %}</label>
+                </div>
+                <div>
                     <select id="settings-theme">
                         <option value="dark" selected>{% trans %}Dark{% endtrans%}</option>
                         <option value="light">{% trans %}Light{% endtrans%}</option>
