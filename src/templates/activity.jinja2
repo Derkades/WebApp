@@ -57,12 +57,25 @@ function getNowPlayingCardHtml(info) {
     cardBody.style.display = 'flex';
     card.append(cardBody);
 
-    const img = document.createElement('img');
-    img.src = info.image;
-    img.height = 100;
-    img.width = 100;
-    img.style.borderRadius = 'var(--border-radius-amount)';
-    cardBody.append(img);
+    const imgOuter = document.createElement('div');
+    imgOuter.style.height = '8rem';
+    imgOuter.style.width = '8rem';
+    imgOuter.style.borderRadius = 'var(--border-radius-amount)';
+    imgOuter.style.background = `url("${info.image}") no-repeat center`;
+    imgOuter.style.backgroundSize = 'cover';
+
+    const imgInner = document.createElement('div');
+    imgInner.style.width = '100%';
+    imgInner.style.height = '100%';
+
+    if (info.paused) {
+        imgInner.style.background = `url("/static/icon/pause.svg") no-repeat center`;
+        imgInner.style.backgroundSize = 'cover';
+        imgInner.style.filter = 'invert(1)';
+    }
+
+    imgOuter.append(imgInner);
+    cardBody.append(imgOuter);
 
     const infoDiv = document.createElement('div');
     infoDiv.style.marginLeft = '.5rem';
@@ -126,7 +139,7 @@ async function updateNowPlaying() {
     const json = await response.json();
     console.debug('Fetched data', json);
 
-    const cards = json.now_playing.filter(e => !e.paused).map(getNowPlayingCardHtml);
+    const cards = json.now_playing.map(getNowPlayingCardHtml);
     if (cards.length > 0) {
         nowPlayingDiv.replaceChildren(...cards);
     } else {
