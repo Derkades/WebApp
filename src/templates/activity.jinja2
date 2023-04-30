@@ -87,7 +87,7 @@ function getNowPlayingCardHtml(info) {
         titleDiv.textContent = info.title;
         const artistDiv = document.createElement('div');
         artistDiv.style.fontSize = '1.1em';
-        artistDiv.textContent = info.artists;
+        artistDiv.textContent = info.artists.join(', ');
         infoDiv.append(titleDiv, artistDiv);
     } else {
         const fallbackDiv = document.createElement('div');
