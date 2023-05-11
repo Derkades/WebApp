@@ -157,9 +157,9 @@ def _plots_last_played() -> list[str]:
 
     fig, ax = fig_start()
     ax.hist(words, bins=5, orientation='horizontal', range=(-0.5, 4.5))
-    ax.set_title(_('Last played'))
+    ax.set_title(_('Last chosen'))
     ax.set_xlabel(_('Number of tracks'))
-    ax.set_ylabel(_('Last played'))
+    ax.set_ylabel(_('Last chosen'))
     plt.yticks((0, 1, 2, 3, 4), (_('Today'), _('This week'), _('This month'), _('Long ago'), _('Never')))
     plot = fig_end(fig)
     return plot,
