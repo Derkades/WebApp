@@ -4,6 +4,7 @@ from multiprocessing.pool import Pool
 from collections import Counter
 from datetime import datetime
 import time
+from itertools import count
 
 from flask_babel import _
 from matplotlib import pyplot as plt
@@ -47,7 +48,20 @@ def rows_to_xy(rows: list[tuple]):
     return xs, ys
 
 
+def _time_xticks(hour_offset: int):
+    xticks_x = []
+    xticks_y = []
+    for i in count(hour_offset, 3):
+        if i > hour_offset + 24:
+            break
+        xticks_x.append(i - hour_offset)
+        xticks_y.append(f'{i % 24:02}:00')
+    plt.xticks(xticks_x, xticks_y)
+
+
 def _plots_history(after_timestamp: int) -> list[str]:
+    tod_offset = 3
+
     with db.connect(read_only=True) as conn:
         result = conn.execute('''
                             SELECT timestamp, user.username, history.track, history.playlist
@@ -69,7 +83,7 @@ def _plots_history(after_timestamp: int) -> list[str]:
             user_counter.update((username,))
 
             dt = datetime.fromtimestamp(timestamp)
-            time_of_day.append(dt.hour)
+            time_of_day.append(dt.hour - tod_offset)
             day_of_week.append(dt.weekday())
 
             track = Track.by_relpath(conn, relpath)
@@ -98,12 +112,11 @@ def _plots_history(after_timestamp: int) -> list[str]:
     plot_users = fig_end(fig)
 
     fig, ax = fig_start()
-    ax.hist(time_of_day, bins=24, range=(-0.5, 23.5))
+    ax.hist(time_of_day, bins=24, range=(0, 24))
     ax.set_title(_('Time of day'))
     ax.set_xlabel(_('Time of day'))
     ax.set_ylabel(_('Tracks played'))
-    # plt.xticks([n for n in range(0, 24)], [f'{n:02}:00' for n in range(0, 24)])
-    plt.xticks([0, 6, 12, 18, 24], ['00:00', '06:00', '12:00', '18:00', '00:00'])
+    _time_xticks(tod_offset)
     plot_tod = fig_end(fig)
 
     fig, ax = fig_start()
