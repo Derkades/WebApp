@@ -181,8 +181,8 @@ def _plots_last_played() -> list[str]:
 def _plots_playlists() -> list[str]:
     with db.connect(read_only=True) as conn:
         counts = conn.execute('SELECT playlist, COUNT(*) FROM track GROUP BY playlist ORDER BY COUNT(*) DESC').fetchall()
-        totals = conn.execute('SELECT playlist, SUM(duration) FROM track GROUP BY playlist ORDER BY SUM(duration) DESC').fetchall()
-        means = conn.execute('SELECT playlist, AVG(duration) FROM track GROUP BY playlist ORDER BY AVG(duration) DESC').fetchall()
+        totals = conn.execute('SELECT playlist, SUM(duration)/60 FROM track GROUP BY playlist ORDER BY SUM(duration) DESC').fetchall()
+        means = conn.execute('SELECT playlist, AVG(duration)/60 FROM track GROUP BY playlist ORDER BY AVG(duration) DESC').fetchall()
 
     fig, ax = fig_start()
     bars = ax.barh(*rows_to_xy(counts))
