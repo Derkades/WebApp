@@ -74,7 +74,7 @@ class Track {
                 if (first) {
                     first = false;
                 } else {
-                    html.append(' & ');
+                    html.append(', ');
                 }
 
                 const artistHtml = document.createElement('a');

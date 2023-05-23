@@ -135,7 +135,7 @@ class Metadata:
         Returns: Generated title, or None if the track lacks the required metadata
         """
         if self.artists and self.title:
-            title = ' & '.join(self.artists) + ' - ' + self.title
+            title = ', '.join(self.artists) + ' - ' + self.title
             if self.year:
                 title += ' [' + str(self.year) + ']'
             return title
