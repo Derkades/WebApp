@@ -19,4 +19,4 @@ Run `docker compose exec music python3 offline_sync.py`.
 
 It is safe to abort synchronization using Ctrl+C. When restarted, it will resume where it left off.
 
-Note that only favorite playlists will be downloaded.
+Note that only favorite playlists will be downloaded. About 5GB of disk space is used for every 1000 tracks.

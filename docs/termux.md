@@ -28,7 +28,7 @@ cd WebApp
 termux/sync
 ```
 
-Note that only favorite playlists will be downloaded.
+Note that only favorite playlists will be downloaded. About 5GB of disk space is used for every 1000 tracks.
 
 ## Start music player
 ```
