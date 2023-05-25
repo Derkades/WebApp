@@ -1,0 +1,43 @@
+# Offline music player in Termux
+
+## Installation
+
+Install an F-Droid client like [Droid-ify](https://f-droid.org/repo/com.looker.droidify_57.apk).
+
+Install "Termux" from F-Droid. Open Termux. You will be presented with a Linux terminal environment.
+
+Install Python and Git:
+```
+pkg install git python python-pip
+```
+
+Clone repository:
+```
+git clone https://github.com/DanielKoomen/WebApp
+```
+
+Install requirements:
+```
+cd WebApp
+termux/install
+```
+
+## Sync music
+```
+cd WebApp
+termux/sync
+```
+
+## Start music player
+```
+cd WebApp
+termux/start
+```
+
+Visit http://localhost:5000 in a web browser.
+
+## Updating
+1. Enter the correct directory.
+2. Run `git pull` to download new source code.
+3. Check the [migrations](./migrations.md) wiki page to see if there were any new database migrations since your previous update.
+4. Run `termux/install` to ensure dependencies are up-to-date.

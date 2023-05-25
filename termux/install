@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# Some Python extensions must be installed from the Termux repositories:
+pkg install -y python-bcrypt python-numpy matplotlib
+
+# Install dependencies for lxml:
+pkg install -y libxml2 libxslt
+
+# Other Python extensions can be installed directly from PyPi
+pip install -r requirements.txt

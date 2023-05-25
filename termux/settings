@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+export MUSIC_ENV=dev
+export MUSIC_OFFLINE_MODE=1
+export MUSIC_DATA_PATH=../data
