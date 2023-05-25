@@ -28,6 +28,8 @@ cd WebApp
 termux/sync
 ```
 
+Note that only favorite playlists will be downloaded.
+
 ## Start music player
 ```
 cd WebApp

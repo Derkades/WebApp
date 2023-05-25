@@ -176,6 +176,9 @@ class OfflineSync:
         track_paths: set[str] = set()
 
         for playlist in response['playlists']:
+            if not playlist['favorite']:
+                continue
+
             self.db_music.execute('INSERT INTO playlist VALUES (?) ON CONFLICT (path) DO NOTHING',
                                   (playlist['name'],))
 
@@ -229,7 +232,7 @@ def main():
         sync.sync_history()
         log.info('Sync tracks')
         sync.sync_tracks()
-        log.info('Done!')
+        log.info('Done! Please wait for program to exit.')
 
 
 if __name__ == '__main__':
