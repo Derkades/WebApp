@@ -33,7 +33,7 @@ class OfflineSync:
             self.base_url, = row
         else:
             log.info('No sync server is configured')
-            self.base_url = input('Enter URL: ')
+            self.base_url = input('Enter server URL (https://example.com): ')
             self.db_offline.execute("INSERT INTO settings (key, value) VALUES ('sync_url', ?)",
                                     (self.base_url,))
             self.db_offline.commit()
