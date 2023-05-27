@@ -36,7 +36,7 @@ cd WebApp
 termux/start
 ```
 
-Visit http://localhost:5000 in a web browser.
+Visit http://localhost:8080 in a web browser.
 
 ## Updating
 1. Enter the correct directory.
