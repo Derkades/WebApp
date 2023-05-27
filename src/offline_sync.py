@@ -155,7 +155,7 @@ class OfflineSync:
         rows = self.db_music.execute('SELECT path FROM track').fetchall()
         for path, in rows:
             if path not in track_paths:
-                log.info('delete: %s', path)
+                log.info('Delete: %s', path)
                 self.db_offline.execute('DELETE FROM content WHERE path=?',
                                         (path,))
                 self.db_music.execute('DELETE FROM track WHERE path=?',
@@ -165,7 +165,7 @@ class OfflineSync:
         rows = self.db_music.execute('SELECT path FROM playlist').fetchall()
         for name, in rows:
             if name not in playlists:
-                log.info('delete playlist: %s', name)
+                log.info('Delete playlist: %s', name)
                 self.db_music.execute('DELETE FROM playlist WHERE path=?',
                                       (name,))
 
@@ -190,13 +190,13 @@ class OfflineSync:
                 if row:
                     mtime, = row
                     if mtime == track['mtime']:
-                        # log.info('up to date: %s', track['path'])
+                        # log.info('Up to date: %s', track['path'])
                         pass
                     else:
-                        log.info('out of date: %s', track['path'])
+                        log.info('Out of date: %s', track['path'])
                         self._update_track(track)
                 else:
-                    log.info('missing: %s', track['path'])
+                    log.info('Missing: %s', track['path'])
                     self._insert_track(playlist, track)
 
                 self.db_offline.commit()
@@ -211,12 +211,19 @@ class OfflineSync:
         rows = self.db_offline.execute('SELECT rowid, timestamp, track, playlist FROM history ORDER BY timestamp ASC')
         for rowid, timestamp, track, playlist in rows:
             log.info('Played: %s', track)
+            duration_row = self.db_music.execute('SELECT duration FROM track WHERE path=?', (track,)).fetchone()
+            if duration_row:
+                duration, = duration_row
+                lastfm = duration > 30
+            else:
+                log.warning('Duration unknown, assuming not eligible for scrobbling')
+                lastfm = False
             response = self.request_post('/history_played',
                               {'csrf': csrf_token,
                                'track': track,
                                'playlist': playlist,
                                'timestamp': timestamp,
-                               'lastfmEligible': False})
+                               'lastfmEligible': lastfm})
             assert response.status_code == 200
             self.db_offline.execute('DELETE FROM history WHERE rowid=?', (rowid,))
             self.db_offline.commit()
