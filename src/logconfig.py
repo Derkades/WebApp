@@ -38,6 +38,11 @@ LOGCONFIG_DICT = {
 }
 
 
+if settings.short_log_format:
+    LOGCONFIG_DICT['formatters']['default']['format'] = '%(asctime)s %(levelname)s %(module)s: %(message)s'
+    LOGCONFIG_DICT['formatters']['default']['datefmt'] = '%H:%M:%S'
+
+
 def apply():
     """
     Apply dictionary config
