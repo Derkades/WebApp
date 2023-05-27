@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -ex
+set -e
 source termux/settings
 cd src
 python db.py

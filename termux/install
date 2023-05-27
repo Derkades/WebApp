@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 # Some Python extensions must be installed from the Termux repositories:
 pkg install -y python-bcrypt python-numpy matplotlib

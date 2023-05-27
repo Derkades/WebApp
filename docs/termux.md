@@ -36,7 +36,7 @@ cd WebApp
 termux/start
 ```
 
-Visit http://localhost:8080 in a web browser.
+Visit http://localhost:8080 in a web browser. Use Ctrl+C to stop the web server.
 
 ## Updating
 1. Enter the correct directory.

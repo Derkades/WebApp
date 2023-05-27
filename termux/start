@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -ex
+set -e
 # Start music player in offline mode
 # Intended for running music player in Termux environment
 source termux/settings
