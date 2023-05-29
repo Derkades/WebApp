@@ -56,6 +56,12 @@ document.addEventListener('DOMContentLoaded', () => {
     seekBar.addEventListener('wheel', event => {
         seek(event.deltaY < 0 ? 3 : -3);
     });
+
+    const volume = document.getElementById('settings-volume');
+    volume.addEventListener('wheel', event => {
+        volume.value = parseInt(volume.value) + (event.deltaY < 0 ? 1 : -1);
+        onVolumeChange();
+    });
 });
 
 // Update seek bar
