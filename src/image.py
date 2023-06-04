@@ -33,17 +33,10 @@ class ThumbnailParameters:
     resolution: int
 
 
-PARAMS_TABLE: dict[ImageFormat, dict[ImageQuality, ThumbnailParameters]] = {
-    ImageFormat.JPEG: {
-        ImageQuality.HIGH: ThumbnailParameters(100, 1024),
-        ImageQuality.LOW: ThumbnailParameters(50, 512),
-        ImageQuality.TINY: ThumbnailParameters(40, 128),
-    },
-    ImageFormat.WEBP: {
-        ImageQuality.HIGH: ThumbnailParameters(100, 1024),
-        ImageQuality.LOW: ThumbnailParameters(50, 512),
-        ImageQuality.TINY: ThumbnailParameters(40, 128),
-    }
+QUALITY_PARAMS_TABLE: dict[ImageQuality, ThumbnailParameters] = {
+    ImageQuality.HIGH: ThumbnailParameters(100, 1024),
+    ImageQuality.LOW: ThumbnailParameters(60, 512),
+    ImageQuality.TINY: ThumbnailParameters(60, 128),
 }
 
 
@@ -90,7 +83,7 @@ def thumbnail(input_img: Path | bytes | Callable,
 
     if input_bytes is not None:
         try:
-            params = PARAMS_TABLE[img_format][img_quality]
+            params = QUALITY_PARAMS_TABLE[img_quality]
             img = Image.open(BytesIO(input_bytes))
             img.thumbnail((params.resolution, params.resolution), Image.ANTIALIAS)
 
@@ -121,7 +114,7 @@ def thumbnail(input_img: Path | bytes | Callable,
     # Return fallback thumbnail if input_bytes was None or an Exception was raised
     fallback_path = Path('static', 'raphson.png')
     if input_img == fallback_path:  # or was this already the fallback cover?
-        raise Exception('Error during fallback cover generation')
+        raise RuntimeError('Error during fallback cover generation')
     return thumbnail(fallback_path, 'raphson', img_format, img_quality, square)
 
 
