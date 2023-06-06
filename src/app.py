@@ -1198,11 +1198,8 @@ def route_users_edit():
                 hashed_password = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt())
                 conn.execute('UPDATE user SET password=? WHERE username=?',
                              (hashed_password, username))
-                # TODO Join does not work in DELETE FROM query?
                 conn.execute('''
-                             DELETE FROM session
-                                 JOIN user ON session.user = user.id
-                             WHERE user.username = ?
+                             DELETE FROM session WHERE user = (SELECT id FROM user WHERE username=?)
                              ''', (username,))
 
             if new_username != username:
