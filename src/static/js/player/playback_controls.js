@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const volume = document.getElementById('settings-volume');
     volume.addEventListener('wheel', event => {
-        volume.value = parseInt(volume.value) + (event.deltaY < 0 ? 1 : -1);
+        volume.value = parseInt(volume.value) + (event.deltaY < 0 ? 2 : -2);
         onVolumeChange();
     });
 });
