@@ -243,7 +243,7 @@ class Track:
 
         if audio_type in {AudioType.WEBM_OPUS_HIGH, AudioType.WEBM_OPUS_LOW}:
             input_options = ['-map_metadata', '-1']
-            bit_rate = '128k' if audio_type == AudioType.WEBM_OPUS_HIGH else '64k'
+            bit_rate = '112k' if audio_type == AudioType.WEBM_OPUS_HIGH else '48k'
             audio_options = ['-f', 'webm',
                              '-c:a', 'libopus',
                              '-b:a', bit_rate,
@@ -254,7 +254,7 @@ class Track:
             input_options = ['-map_metadata', '-1']
             audio_options = ['-f', 'mp4',
                              '-c:a', 'aac',
-                             '-b:a', '192k',
+                             '-b:a', '128k',
                              '-vn']  # remove video track (and album covers)
         elif audio_type == AudioType.MP3_WITH_METADATA:
             cover = self.get_cover_thumbnail(False, ImageFormat.JPEG, ImageQuality.HIGH)

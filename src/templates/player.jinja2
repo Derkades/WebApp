@@ -133,22 +133,22 @@
             <div class="scroll">
                 <h4>{% trans %}Settings{% endtrans %}</h4>
                 <div>
-                    <input type="number" value="5" size="3" id="settings-queue-size">
+                    <input type="number" value="3" size="3" id="settings-queue-size">
                     <label for="settings-queue-size">{% trans %}Minimum queue length{% endtrans %}</label>
                 </div>
                 <div>
                     {% if offline_mode %}
                         <select id="settings-audio-type" disabled>
-                            <option value="webm_opus_high" selected>{% trans %}High quality Opus audio (offline){% endtrans %}</option>
+                            <option value="webm_opus_high" selected>{% trans %}112k Opus (very high quality, offline){% endtrans %}</option>
                         </select>
                     {% else %}
                         <select id="settings-audio-type">
-                            <option value="webm_opus_high" selected>{% trans %}High quality Opus audio (~60MB per hour){% endtrans %}</option>
-                            <option value="webm_opus_low">{% trans %}Low quality Opus audio (~30MB per hour){% endtrans %}</option>
-                            <option value="mp4_aac">{% trans %}High quality AAC audio, for old Safari or old iOS (~90MB per hour){% endtrans %}</option>
+                            <option value="webm_opus_high" selected>{% trans %}112k Opus (very high quality, 60MB per hour){% endtrans %}</option>
+                            <option value="webm_opus_low">{% trans %}48k Opus (low quality, 20MB per hour){% endtrans %}</option>
+                            <option value="mp4_aac">{% trans %}128k AAC (high quality, for iOS/Safari, 70MB per hour){% endtrans %}</option>
                         </select>
                     {% endif %}
-                    <label for="settings-audio-type">{% trans %}Audio quality{% endtrans %}</label>
+                    <label for="settings-audio-type">{% trans %}Audio and image quality{% endtrans %}</label>
                 </div>
                 <div>
                     <select id="settings-queue-removal-behaviour">
