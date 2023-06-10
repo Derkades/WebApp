@@ -30,7 +30,7 @@ class Browse {
      * @param {string} textContent
      */
     setHeader(textContent) {
-        document.getElementById('dialog-browse').getElementsByTagName('h3')[0].textContent = textContent;
+        document.getElementById('dialog-browse').getElementsByTagName('h2')[0].textContent = textContent;
     };
 
     /**

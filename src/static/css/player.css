@@ -115,10 +115,6 @@ body.light input::placeholder {
     height: 35vh;
 }
 
-.queue-buttons {
-    margin-top: .5rem;
-}
-
 .lyrics-outer {
     padding: 1rem;
     width: 100%;
@@ -140,30 +136,58 @@ audio {
 }
 
 .box-solid {
-    background-color: rgba(20, 20, 20, 0.4);
+    background-color: var(--box-background-color);
     padding: 1rem;
 }
 
 body.light .box-solid {
-    background-color: rgba(200, 200, 200, 0.7);
+    background-color: var(--box-background-color-light);
+}
+
+.dialog {
+    box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
+    border-radius: var(--border-radius-amount);
+    background-color: var(--box-background-color);
+    overflow: hidden; /* prevent header from overlapping rounded corners */
+}
+
+body.light .dialog {
+    background-color: var(--box-background-color-light);
+}
+
+.dialog-header {
+    background-color: var(--box-background-color);
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+body.light .dialog-header {
+    background-color: var(--box-background-color-light);
+}
+
+.dialog-header > * {
+    display: inline;
+    margin: 0;
+}
+
+.dialog-body {
+    padding: .5rem 1rem;
+    overflow-y: auto;
 }
 
 #outer-progress-bar {
     border-radius: var(--border-radius-amount);
     height: 1.5rem;
-    border: 1px solid #ccc;
+    border: 1px solid var(--elem-border-color);
     width: 100%;
     margin: .5rem 0;
     position: relative; /* required for positioning of child */
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: var(--elem-background-color);
     cursor: col-resize;
     /* Hide part of inner progress bar (corners) that goes outside of outer element) */
     overflow: hidden;
-}
-
-body.light #outer-progress-bar {
-    border: 1px solid #202020;
-    background-color: rgba(255, 255, 255, 0.4);
 }
 
 #outer-progress-bar > div {
@@ -178,10 +202,6 @@ body.light #outer-progress-bar {
     /* Inner progress bar needs to overlap border of outer bar to have matching corner radius */
     height: calc(1.5rem + 2px);
     margin: -1px;
-}
-
-body.light #progress-bar {
-    background-color: #202020;
 }
 
 .progress-time {
@@ -234,6 +254,8 @@ body.light .progress-time {
 
 .delete-overlay > .icon {
     opacity: 0;
+    height: 3rem;
+    width: 3rem;
 }
 
 .delete-overlay {
@@ -295,11 +317,10 @@ h4 > .icon {
     justify-content: center;
     align-items: center;
     backdrop-filter: blur(2rem);
-    pointer-events: none; /* Allow closing dialogs behind top dialog */
     transition: opacity .2s, visibility .2s;
 }
 
-.full-page-overlay .box-solid {
+.full-page-overlay .dialog {
     /* blur backdrop filter doesn't work on firefox <=102, make the box darker or text won't be readable */
     /* the current ESR is 102, when the next ESR is released (summer 2023) this can be removed */
     background-color: rgba(20, 20, 20, 0.6);
@@ -320,8 +341,8 @@ h4 > .icon {
     visibility: hidden;
 }
 
-.full-page-overlay.overlay-hidden .box-solid {
-    scale: .9;
+.full-page-overlay.overlay-hidden .dialog {
+    scale: .95;
 }
 
 .scroll {

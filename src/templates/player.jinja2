@@ -1,24 +1,14 @@
 {% extends "base.jinja2" %}
 
-{% macro dialog_close_button(id) %}
-    <button class="dialog-close-button icon-button" data-for="{{id}}">
-        <div class="icon" style="background-image: url('/static/icon/close.svg')"></div>
-    </button>
-{% endmacro %}
-
 {% macro dialog_header(id, title, back_id = None) %}
-    <div class="flex-space-between">
+    <div class="dialog-header">
         {% if back_id %}
-            <span>
-                {{ icon_button('arrow-left', back_id) }}
-            </span>
+            {{ icon_button('arrow-left', back_id) }}
         {% endif %}
-        <span>
-            <h3>{{ title }}</h3>
-        </span>
-        <span>
-            {{ dialog_close_button(id) }}
-        </span>
+        <h2>{{ title }}</h2>
+        <button class="dialog-close-button icon-button" data-for="{{id}}">
+            <div class="icon" style="background-image: url('/static/icon/close.svg')"></div>
+        </button>
     </div>
 {% endmacro %}
 
@@ -67,13 +57,12 @@
                 {{ icon_button('play', 'button-play', title=gettext('Play')) }}
                 {{ icon_button('pause', 'button-pause', title=gettext('Pause')) }}
                 {{ icon_button('skip-next', 'button-next', title=gettext('Skip to next track')) }}
-                {{ icon_button('microphone', 'button-lyrics', title=gettext('Show lyrics instead of album cover')) }}
-                {{ icon_button('album', 'button-album', title=gettext('Show album cover instead of lyrics')) }}
-                {{ icon_button('thumb-down', 'button-never-play', title=gettext('Never play again')) }}
+                {# {{ icon_button('microphone', 'button-lyrics', title=gettext('Show lyrics instead of album cover')) }}
+                {{ icon_button('album', 'button-album', title=gettext('Show album cover instead of lyrics')) }} #}
                 {{ icon_button('pencil', 'button-edit', title=gettext('Open metadata editor')) }}
+                {{ icon_button('thumb-down', 'button-never-play', title=gettext('Never play again')) }}
                 {{ icon_button('delete', 'button-delete-track', title=gettext('Delete currently playing track from playlist')) }}
                 {{ icon_button('content-duplicate', 'button-copy', title=gettext('Copy track to your primary playlist')) }}
-                {{ icon_button('gear', 'open-dialog-settings', title=gettext('Open settings')) }}
 
                 <div id="delete-spinner" class="spinner hidden"></div>
 
@@ -91,17 +80,12 @@
                     <div>
                         {{ icon_button('tag-multiple', 'open-dialog-tags', title=gettext('Open tag selection')) }}
                         {{ icon_button('text-search', 'browse-all', title=gettext('Browse all tags')) }}
+                        {{ icon_button('cog', 'open-dialog-settings', title=gettext('Open settings')) }}
                     </div>
                 </div>
                 <div class="scroll" id="queue-scroll">
                     <span id="no-playlists-selected" class="hidden">{% trans %}No playlists are selected{% endtrans %}</span>
                     <table id="queue-table"></table>
-                </div>
-                {# Was a fix for a mobile scroll issue, but it seems to be fixed... #}
-                {# Instead of removing it, hide it for now until we're sure it can be removed #}
-                <div class="queue-buttons flex-space-between hidden">
-                    {{ icon_button('arrow-down', 'queue-down')}}
-                    {{ icon_button('arrow-up', 'queue-up')}}
                 </div>
             </div>
 
@@ -127,103 +111,67 @@
         </div>
     </div>
 
-    <div id="dialog-settings" class="full-page-overlay overlay-hidden dialog-overlay">
-        <div class="box-rounded box-solid">
+    <div id="dialog-settings" class="full-page-overlay dialog-overlay overlay-hidden">
+        <div class="dialog">
             {{ dialog_header('dialog-settings', gettext('Settings')) }}
-            <div class="scroll">
+            <div class="dialog-body">
                 <h4>{% trans %}Settings{% endtrans %}</h4>
-                <table>
-                    <tr>
-                        <td>
-                         <label for="settings-language">{% trans %}Language (reload required){% endtrans %}</label>
-                        </td>
-                        <td>
-                            <select id="settings-language">
-                                {% for lang_id, lang_display in languages %}
-                                    {% if lang_id == language %}
-                                        <option value="{{ lang_id }}" selected>{{ lang_display }}</option>
-                                    {% else %}
-                                        <option value="{{ lang_id }}">{{ lang_display }}</option>
-                                    {% endif %}
-                                {% endfor %}
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label for="settings-theme">{% trans %}Theme{% endtrans %}</label>
-                        </td>
-                        <td>
-                            <select id="settings-theme">
-                                <option value="dark" selected>{% trans %}Dark{% endtrans%}</option>
-                                <option value="light">{% trans %}Light{% endtrans%}</option>
-                                <option value="browser">{% trans %}Use system preference{% endtrans%}</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label for="settings-queue-size">{% trans %}Minimum queue size{% endtrans %}</label>
-                        </td>
-                        <td>
-                            <input type="number" value="3" size="3" id="settings-queue-size">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label for="settings-audio-type">{% trans %}Audio and image quality{% endtrans %}</label>
-                        </td>
-                        <td>
-                            {% if offline_mode %}
-                                <select id="settings-audio-type" disabled>
-                                    <option value="webm_opus_high" selected>{% trans %}112k Opus (very high quality, offline){% endtrans %}</option>
-                                </select>
-                            {% else %}
-                                <select id="settings-audio-type">
-                                    <option value="webm_opus_high" selected>{% trans %}112k Opus (very high quality, 60MB per hour){% endtrans %}</option>
-                                    <option value="webm_opus_low">{% trans %}48k Opus (low quality, 20MB per hour){% endtrans %}</option>
-                                    <option value="mp4_aac">{% trans %}128k AAC (high quality, for iOS/Safari, 70MB per hour){% endtrans %}</option>
-                                </select>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label for="settings-queue-removal-behaviour">{% trans %}Queue removal behaviour{% endtrans %}</label>
-                        </td>
-                        <td>
-                            <select id="settings-queue-removal-behaviour">
-                                <option value="roundrobin" selected>{% trans %}New track from next round-robin playlist{% endtrans %}</option>
-                                <option value="same">{% trans %}New track from same playlist{% endtrans %}</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label for="settings-download-mode">{% trans %}Audio download mode{% endtrans %}</label>
-                        </td>
-                        <td>
-                            <select id="settings-download-mode">
-                                <option value="download" selected>{% trans %}Download full track when queued{% endtrans %}</option>
-                                <option value="stream">{% trans %}Stream audio (experimental){% endtrans %}</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        {% if offline_mode %}
-                            <td colspan="2">
-                                <input id="settings-meme-mode" type="hidden">
-                            </td>
+                <label for="settings-language">{% trans %}Language (reload required){% endtrans %}</label><br>
+                <select id="settings-language">
+                    {% for lang_id, lang_display in languages %}
+                        {% if lang_id == language %}
+                            <option value="{{ lang_id }}" selected>{{ lang_display }}</option>
                         {% else %}
-                            <td>
-                                <label for="settings-meme-mode">{% trans %}Album cover art memes{% endtrans %}</label>
-                            </td>
-                            <td>
-                                <input id="settings-meme-mode" type="checkbox">
-                            </td>
+                            <option value="{{ lang_id }}">{{ lang_display }}</option>
                         {% endif %}
-                    </tr>
-                </table>
+                    {% endfor %}
+                </select><br>
+
+                {# <label for="settings-theme">{% trans %}Theme{% endtrans %}</label><br>
+
+                <select id="settings-theme">
+                    <option value="dark" selected>{% trans %}Dark{% endtrans%}</option>
+                    <option value="light">{% trans %}Light{% endtrans%}</option>
+                    <option value="browser">{% trans %}Use system preference{% endtrans%}</option>
+                </select><br> #}
+
+                <label for="settings-queue-size">{% trans %}Minimum queue size{% endtrans %}</label><br>
+                <input type="number" value="3" size="3" id="settings-queue-size"><br>
+
+
+
+                {% if offline_mode %}
+                    <select id="settings-audio-type" disabled class="hidden">
+                        <option value="webm_opus_high" selected>{% trans %}112k Opus (very high quality, offline){% endtrans %}</option>
+                    </select>
+                {% else %}
+                    <label for="settings-audio-type">{% trans %}Audio and image quality{% endtrans %}</label><br>
+                    <select id="settings-audio-type">
+                        <option value="webm_opus_high" selected>{% trans %}112k Opus (very high quality, 60MB per hour){% endtrans %}</option>
+                        <option value="webm_opus_low">{% trans %}48k Opus (low quality, 20MB per hour){% endtrans %}</option>
+                        <option value="mp4_aac">{% trans %}128k AAC (high quality, for iOS/Safari, 70MB per hour){% endtrans %}</option>
+                    </select><br>
+                {% endif %}
+
+
+                <label for="settings-queue-removal-behaviour">{% trans %}Queue removal behaviour{% endtrans %}</label><br>
+                <select id="settings-queue-removal-behaviour">
+                    <option value="roundrobin" selected>{% trans %}New track from next round-robin playlist{% endtrans %}</option>
+                    <option value="same">{% trans %}New track from same playlist{% endtrans %}</option>
+                </select><br>
+
+                <label for="settings-download-mode">{% trans %}Audio download mode{% endtrans %}</label><br>
+                <select id="settings-download-mode">
+                    <option value="download" selected>{% trans %}Download full track when queued{% endtrans %}</option>
+                    <option value="stream">{% trans %}Stream audio (experimental){% endtrans %}</option>
+                </select><br>
+
+                {% if offline_mode %}
+                    <input id="settings-meme-mode" type="hidden">
+                {% else %}
+                    <label for="settings-meme-mode">{% trans %}Album cover art memes{% endtrans %}</label><br>
+                    <input id="settings-meme-mode" type="checkbox"><br>
+                {% endif %}
 
                 {% if not offline_mode %}
                     <h4>{% trans %}YouTube download{% endtrans %}</h4>
@@ -250,11 +198,10 @@
         </div>
     </div>
 
-    <div id="dialog-tags" class="full-page-overlay overlay-hidden dialog-overlay">
-        <div class="box-rounded box-solid">
+    <div id="dialog-tags" class="full-page-overlay dialog-overlay overlay-hidden">
+        <div class="dialog">
             {{ dialog_header('dialog-tags', gettext('Tags')) }}
-
-            <div class="scroll">
+            <div class="dialog-body">
                 <select id="tag-mode">
                     <option value="allow">{% trans %}Only choose tracks with enabled tags (tracks without tags are never chosen){% endtrans %}</option>
                     <option value="deny" selected>{% trans %}Don't choose tracks with disabled tags (tracks with enabled tags or no tags are chosen){% endtrans %}</option>
@@ -264,10 +211,10 @@
         </div>
     </div>
 
-    <div id="dialog-browse" class="full-page-overlay overlay-hidden dialog-overlay">
-        <div class="box-rounded box-solid">
+    <div id="dialog-browse" class="full-page-overlay dialog-overlay overlay-hidden">
+        <div class="dialog">
             {{ dialog_header('dialog-browse', 'placeholder', back_id='browse-back') }}
-            <div class="scroll">
+            <div class="dialog-body">
                 <select id="browse-filter-playlist" class="playlist-select">
                     <option value="all" data-keep="true">{% trans %}All{% endtrans %}</option>
                 </select>
@@ -281,10 +228,10 @@
         </div>
     </div>
 
-    <div id="dialog-editor" class="full-page-overlay overlay-hidden dialog-overlay">
-        <div class="box-rounded box-solid">
+    <div id="dialog-editor" class="full-page-overlay dialog-overlay overlay-hidden">
+        <div class="dialog">
             {{ dialog_header('dialog-editor', gettext('Metadata editor')) }}
-            <div id="editor-content" class="scroll">
+            <div class="dialog-body" id="editor-content">
                 <p>
                     {% trans %}Editing metadata for: {% endtrans %}<span id="editor-html-title"></span>
                 </p>
@@ -366,7 +313,7 @@
     <template id="template-td-cover">
         <td class="box-rounded">
             <div class="delete-overlay">
-                <div class="icon" style="background-image: url('/static/icon/delete.svg')"></div>
+                {{ icon('delete') }}
             </div>
         </td>
     </template>

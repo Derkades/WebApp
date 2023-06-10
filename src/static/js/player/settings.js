@@ -33,7 +33,7 @@ function syncCookiesWithInputs() {
         'settings-volume',
         'settings-queue-removal-behaviour',
         'settings-download-mode',
-        'settings-theme',
+        // 'settings-theme',
         'settings-meme-mode',
         'settings-language',
     ].forEach(syncCookieWithInput);

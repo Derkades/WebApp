@@ -152,8 +152,8 @@ function toggleLyrics() {
  * Display lyrics, hide album art
  */
 function switchLyrics() {
-    document.getElementById('button-album').classList.remove('hidden');
-    document.getElementById('button-lyrics').classList.add('hidden');
+    // document.getElementById('button-album').classList.remove('hidden');
+    // document.getElementById('button-lyrics').classList.add('hidden');
     document.getElementById('sidebar-lyrics').classList.remove('hidden');
     document.getElementById('sidebar-album-covers').classList.add('hidden');
 }
@@ -162,8 +162,8 @@ function switchLyrics() {
  * Display album art, hide lyrics
  */
 function switchAlbumCover() {
-    document.getElementById('button-album').classList.add('hidden');
-    document.getElementById('button-lyrics').classList.remove('hidden');
+    // document.getElementById('button-album').classList.add('hidden');
+    // document.getElementById('button-lyrics').classList.remove('hidden');
     document.getElementById('sidebar-lyrics').classList.add('hidden');
     document.getElementById('sidebar-album-covers').classList.remove('hidden');
 }

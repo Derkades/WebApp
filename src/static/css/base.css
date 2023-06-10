@@ -1,5 +1,10 @@
 :root {
     --border-radius-amount: .5rem;
+    --elem-border-color: rgba(255, 255, 255, 0.3);
+    --elem-background-color: rgba(50, 50, 50, 0.5);
+    --elem-background-color-true: rgba(255, 255, 255, 0.8);
+    --box-background-color: rgba(20, 20, 20, 0.4);
+    --box-background-color-light: rgba(200, 200, 200, 0.7);
 }
 
 @font-face {
@@ -36,9 +41,8 @@ body.light {
     color: black;
 }
 
-h1, h2, h3, h4, h5, h6,
-p, label, th, td, div, a,
-.progress-time {
+body,
+input, select, textarea, button {
     font-family: 'Quicksand', Verdana, sans-serif;
 }
 
@@ -83,7 +87,6 @@ input[type=submit]:hover {
 
 button:hover,
 input[type=submit]:hover {
-    border: 1px solid white;
     background-color: rgba(150, 150, 150, 0.7);
 }
 
@@ -108,13 +111,15 @@ input[type=password],
 input[type=checkbox],
 input[type=range],
 .logbox {
-    padding: .3rem;
-    background-color: rgba(50, 50, 50, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.6);
+    padding: .25rem;
+    background-color: var(--elem-background-color);
     border-radius: var(--border-radius-amount);
+    border: none;
     color: white;
     margin-right: .3rem;
     margin-bottom: .3rem;
+    border: 1px solid var(--elem-border-color);
+    font-size: 0.9em;
 }
 
 .logbox {
@@ -130,7 +135,7 @@ input[type=checkbox] {
 }
 
 input[type=checkbox]:checked {
-    background: url('/static/icon/check-bold.svg') no-repeat center, rgba(255, 255, 255, 0.8);
+    background: url('/static/icon/check-bold.svg') no-repeat center, var(--elem-background-color-true);
 }
 
 input[type=range] {
@@ -141,7 +146,7 @@ input[type=range] {
 }
 
 input[type=range]::-moz-range-thumb {
-    background: rgba(255, 255, 255, 0.8);
+    background: var(--elem-background-color-true);
     height: calc(1.25rem + 2px);
     width: calc(1.5rem + 2px);
     margin: 0;
@@ -151,7 +156,7 @@ input[type=range]::-moz-range-thumb {
 
 input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    background: rgba(255, 255, 255, 0.8);
+    background: var(--elem-background-color-true);
     height: calc(1.25rem + 2px);
     width: calc(1.5rem + 2px);
     margin: 0;
@@ -173,8 +178,30 @@ body.light input {
     filter: invert();
 }
 
+.icon {
+    height: 1.9rem;
+    width: 1.9rem;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    display: inline-block;
+    filter: invert(1);
+}
+
+body.light .icon {
+    filter: none;
+}
+
 body.light button > .icon {
     filter: invert();
+}
+
+.icon-button {
+    aspect-ratio: 1/1;
+    margin: 0;
+    /* margin: 0;
+    height: 2.75rem;
+    width: 2.75rem; */
 }
 
 .inline-block {
@@ -203,27 +230,6 @@ main {
     main {
         width: calc(100rem - 4rem);
     }
-}
-
-.icon {
-    height: 2rem;
-    width: 2rem;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: contain;
-    display: inline-block;
-    filter: invert(1);
-}
-
-body.light .icon {
-    filter: none;
-}
-
-.icon-button {
-    padding: .25rem;
-    margin: 0;
-    height: 2.75rem;
-    width: 2.75rem;
 }
 
 .hidden {
@@ -308,7 +314,7 @@ kbd {
 .card {
     background: rgba(0, 0, 0, 0.5);
     border-radius: var(--border-radius-amount);
-    overflow: hidden; /* prevent top row from overlapping rounded corners */
+    overflow: hidden; /* prevent header from overlapping rounded corners */
     flex: 1; /* grow to fill container width */
     min-width: 25rem;
 }
@@ -370,12 +376,14 @@ kbd {
     display: inline;
 }
 
-.flex-space-between > span > h3 {
-    margin: .75rem 0;
-}
-
 form {
     display: inline-block;
+}
+
+.page-heading {
+    display: flex;
+    justify-content: left;
+    align-items: center;
 }
 
 .page-heading > * {

@@ -24,13 +24,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Queue
     queue.fill();
-    document.getElementById('queue-up').addEventListener('click', () => queue.scroll('up'));
-    document.getElementById('queue-down').addEventListener('click', () => queue.scroll('down'));
 
     // Lyrics / album cover switch
-    document.getElementById('button-lyrics').addEventListener('click', switchLyrics);
-    document.getElementById('button-album').addEventListener('click', switchAlbumCover);
-    document.getElementById('button-album').classList.add('hidden');
+    // document.getElementById('button-lyrics').addEventListener('click', switchLyrics);
+    // document.getElementById('button-album').addEventListener('click', switchAlbumCover);
+    // document.getElementById('button-album').classList.add('hidden');
     document.getElementById('album-covers').addEventListener('click', event => {
         event.preventDefault();
         switchLyrics();
@@ -62,7 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
         button.classList.remove('hidden');
     })());
     document.getElementById('settings-queue-size').addEventListener('input', () => queue.fill());
-    document.getElementById('settings-theme').addEventListener('input', applyTheme);
 
     // Never play button
     document.getElementById('button-never-play').addEventListener('click', () => {
