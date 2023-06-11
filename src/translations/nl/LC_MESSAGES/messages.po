@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-05-11 10:36+0200\n"
-"PO-Revision-Date: 2023-05-11 10:36+0200\n"
+"POT-Creation-Date: 2023-06-11 11:42+0200\n"
+"PO-Revision-Date: 2023-06-11 11:41+0200\n"
 "Last-Translator: \n"
 "Language: nl\n"
 "Language-Team: nl <LL@li.org>\n"
@@ -46,7 +46,7 @@ msgstr "afgelopen 7 dagen"
 msgid "last 30 days"
 msgstr "afgelopen 30 dagen"
 
-#: app.py:1277
+#: app.py:1274
 msgid ""
 "No playlist configured. Please configure a primay playlist in playlist "
 "manager."
@@ -54,16 +54,16 @@ msgstr ""
 "Geen afspeellijst ingesteld. Je kan een playlist instellen in "
 "playlistbeheer."
 
-#: app.py:1281
+#: app.py:1278
 #, python-format
 msgid "No write permission for playlist: %(playlist)s"
 msgstr "Geen schrijftoegang tot de afspeellijst: '%(playlist)s'"
 
-#: app.py:1286
+#: app.py:1283
 msgid "Track is already in this playlist"
 msgstr "Nummer zit al in deze afspeellijst"
 
-#: app.py:1292
+#: app.py:1289
 #, python-format
 msgid "File has been successfully copied to your playlist: %(playlist)s"
 msgstr "Bestand is gekopieerd naar jouw playlist: '%(playlist)s'"
@@ -88,108 +88,108 @@ msgstr ""
 "Je bent geen administrator, maar deze pagina vereist administratieve "
 "rechten"
 
-#: stats_plots.py:88
+#: stats_plots.py:102
 msgid "Top playlists"
 msgstr "Populairste afspeellijsten"
 
-#: stats_plots.py:90 stats_plots.py:97 stats_plots.py:121 stats_plots.py:128
-#: stats_plots.py:135
+#: stats_plots.py:104 stats_plots.py:111 stats_plots.py:134 stats_plots.py:141
+#: stats_plots.py:148
 msgid "Times played"
 msgstr "Aantal keer afgespeeld"
 
-#: stats_plots.py:95
+#: stats_plots.py:109
 msgid "Most active users"
 msgstr "Meest actieve gebruikers"
 
-#: stats_plots.py:102 stats_plots.py:103
+#: stats_plots.py:116 stats_plots.py:117
 msgid "Time of day"
 msgstr "Moment van de dag"
 
-#: stats_plots.py:104 stats_plots.py:112
+#: stats_plots.py:118 stats_plots.py:125
 msgid "Tracks played"
 msgstr "Nummers afgespeeld"
 
-#: stats_plots.py:111 stats_plots.py:113
+#: stats_plots.py:124 stats_plots.py:126
 msgid "Day of week"
 msgstr "Dag van de week"
 
-#: stats_plots.py:114
+#: stats_plots.py:127
 msgid "Monday"
 msgstr "Maandag"
 
-#: stats_plots.py:114
+#: stats_plots.py:127
 msgid "Tuesday"
 msgstr "Dinsdag"
 
-#: stats_plots.py:114
+#: stats_plots.py:127
 msgid "Wednesday"
 msgstr "Woensdag"
 
-#: stats_plots.py:114
+#: stats_plots.py:127
 msgid "Thursday"
 msgstr "Donderdag"
 
-#: stats_plots.py:114
+#: stats_plots.py:127
 msgid "Friday"
 msgstr "Vrijdag"
 
-#: stats_plots.py:114
+#: stats_plots.py:127
 msgid "Saturday"
 msgstr "Zaterdag"
 
-#: stats_plots.py:114
+#: stats_plots.py:127
 msgid "Sunday"
 msgstr "Zondag"
 
-#: stats_plots.py:119
+#: stats_plots.py:132
 msgid "Most played tracks"
 msgstr "Meest gespeelde nummers"
 
-#: stats_plots.py:126
+#: stats_plots.py:139
 msgid "Most played artists"
 msgstr "Meest gespeelde artiesten"
 
-#: stats_plots.py:133
+#: stats_plots.py:146
 msgid "Most played albums"
 msgstr "Meest gespeelde albums"
 
-#: stats_plots.py:160 stats_plots.py:162
+#: stats_plots.py:173 stats_plots.py:175
 msgid "Last chosen"
 msgstr "Laatst gekozen"
 
-#: stats_plots.py:161 stats_plots.py:178
+#: stats_plots.py:174 stats_plots.py:191
 msgid "Number of tracks"
 msgstr "Aantal nummers"
 
-#: stats_plots.py:163
+#: stats_plots.py:176
 msgid "Today"
 msgstr "Vandaag"
 
-#: stats_plots.py:163
+#: stats_plots.py:176
 msgid "This week"
 msgstr "Deze week"
 
-#: stats_plots.py:163
+#: stats_plots.py:176
 msgid "This month"
 msgstr "Deze maand"
 
-#: stats_plots.py:163
+#: stats_plots.py:176
 msgid "Long ago"
 msgstr "Lang geleden"
 
-#: stats_plots.py:163
+#: stats_plots.py:176
 msgid "Never"
 msgstr "Nooit"
 
-#: stats_plots.py:176
+#: stats_plots.py:189
 msgid "Number of tracks in playlists"
 msgstr "Aantal nummers in afspeellijsten"
 
-#: stats_plots.py:183
+#: stats_plots.py:196
 msgid "Total duration of tracks in playlists"
 msgstr "Totale lengte van nummers in afspeellijsten"
 
-#: stats_plots.py:189
+#: stats_plots.py:202
 msgid "Mean duration of tracks in playlist"
 msgstr "Gemiddelde lengte van nummers in afspeellijsten"
 
@@ -307,7 +307,7 @@ msgid "View more"
 msgstr "Meer tonen"
 
 #: templates/download.jinja2:4 templates/download.jinja2:9
-#: templates/player.jinja2:204
+#: templates/player.jinja2:184
 msgid "Download"
 msgstr "Download"
 
@@ -324,7 +324,7 @@ msgid "Progress"
 msgstr "Voortgang"
 
 #: templates/download.jinja2:26 templates/download.jinja2:41
-#: templates/files.jinja2:84 templates/player.jinja2:261
+#: templates/files.jinja2:84 templates/player.jinja2:240
 #: templates/playlist_stats.jinja2:34
 msgid "Title"
 msgstr "Titel"
@@ -484,8 +484,8 @@ msgstr "Afspeellijstbeheer"
 msgid "Changelog"
 msgstr "Wijzigingen"
 
-#: templates/home.jinja2:35 templates/player.jinja2:132
-#: templates/player.jinja2:134
+#: templates/home.jinja2:35 templates/player.jinja2:116
+#: templates/player.jinja2:118
 msgid "Settings"
 msgstr "Instellingen"
 
@@ -656,167 +656,143 @@ msgstr "Geblokkeerde nummers"
 msgid "Remove"
 msgstr "Verwijderen"
 
-#: templates/player.jinja2:45 templates/player.jinja2:299
+#: templates/player.jinja2:35 templates/player.jinja2:278
 msgid "Loading..."
 msgstr "Laden..."
 
-#: templates/player.jinja2:51
+#: templates/player.jinja2:41
 msgid "Waiting for music in queue..."
 msgstr "Wachten op muziek in wachtrij..."
 
-#: templates/player.jinja2:54
+#: templates/player.jinja2:44
 msgid "Previously: "
 msgstr "Vorige: "
 
-#: templates/player.jinja2:65
+#: templates/player.jinja2:55
 msgid "Open home page in a new tab"
 msgstr "Open hoofdpagina in een new tabblad"
 
-#: templates/player.jinja2:66
+#: templates/player.jinja2:56
 msgid "Go to beginning of current track, or previous track"
 msgstr "Ga naar begin van huidig nummer, of vorig nummer"
 
-#: templates/player.jinja2:67
+#: templates/player.jinja2:57
 msgid "Play"
 msgstr "Upload"
 
-#: templates/player.jinja2:68
+#: templates/player.jinja2:58
 msgid "Pause"
 msgstr "Pauzeer"
 
-#: templates/player.jinja2:69
+#: templates/player.jinja2:59
 msgid "Skip to next track"
 msgstr "Ga naar volgend nummer"
 
-#: templates/player.jinja2:70
-msgid "Show lyrics instead of album cover"
-msgstr "Toon lyrics in plaats van albumhoes"
-
-#: templates/player.jinja2:71
-msgid "Show album cover instead of lyrics"
-msgstr "Toon albumhoes in plaats van lyrics"
-
-#: templates/player.jinja2:72
-msgid "Never play again"
-msgstr "Nooit meer afspelen"
-
-#: templates/player.jinja2:73
+#: templates/player.jinja2:62
 msgid "Open metadata editor"
 msgstr "Open metadata editor"
 
-#: templates/player.jinja2:74
+#: templates/player.jinja2:63
+msgid "Never play again"
+msgstr "Nooit meer afspelen"
+
+#: templates/player.jinja2:64
 msgid "Delete currently playing track from playlist"
 msgstr "Verwijder nummer dat op dit moment speelt"
 
-#: templates/player.jinja2:75
+#: templates/player.jinja2:65
 msgid "Copy track to your primary playlist"
 msgstr "Kopieer nummer naar primaire afspeellijst"
 
-#: templates/player.jinja2:76
-msgid "Open settings"
-msgstr "Open instellingen"
-
-#: templates/player.jinja2:90
+#: templates/player.jinja2:79
 msgid "Queue"
 msgstr "Wachtrij"
 
-#: templates/player.jinja2:92
+#: templates/player.jinja2:81
 msgid "Open tag selection"
 msgstr "Open label selectie"
 
-#: templates/player.jinja2:93
-msgid "Browse all tags"
-msgstr "Verken alle labels"
+#: templates/player.jinja2:82
+msgid "Browse all tracks"
+msgstr "Verken alle nummers"
 
-#: templates/player.jinja2:97
+#: templates/player.jinja2:83
+msgid "Open settings"
+msgstr "Open instellingen"
+
+#: templates/player.jinja2:87
 msgid "No playlists are selected"
 msgstr "Er zijn geen afspeellijsten geselecteerd"
 
-#: templates/player.jinja2:122
+#: templates/player.jinja2:106
 msgid "No lyrics found"
 msgstr "Geen songtekst gevonden"
 
-#: templates/player.jinja2:125
+#: templates/player.jinja2:109
 msgid "Source"
 msgstr "Bron"
 
-#: templates/player.jinja2:137
-msgid "Minimum queue length"
-msgstr "Minimum wachtrijlengte"
-
-#: templates/player.jinja2:142
-msgid "High quality Opus audio (offline)"
-msgstr "Hoge kwaliteit Opus audio (offline)"
-
-#: templates/player.jinja2:146
-msgid "High quality Opus audio (~60MB per hour)"
-msgstr "Hoge kwaliteit Opus audio (~60MB per uur)"
-
-#: templates/player.jinja2:147
-msgid "Low quality Opus audio (~30MB per hour)"
-msgstr "Lage kwaliteit Opus audio (~30MB per uur)"
-
-#: templates/player.jinja2:148
-msgid "High quality AAC audio, for old Safari or old iOS (~90MB per hour)"
-msgstr "Hoge kwaliteit AAC audio, voor oude Safari en iOS versies (~90MB per uur)"
-
-#: templates/player.jinja2:151
-msgid "Audio quality"
-msgstr "Audiokwaliteit"
-
-#: templates/player.jinja2:155
-msgid "New track from next round-robin playlist"
-msgstr "Nieuw nummer uit de volgende afspeellijst"
-
-#: templates/player.jinja2:156
-msgid "New track from same playlist"
-msgstr "Nieuw nummer uit dezelfde afspeellijst"
-
-#: templates/player.jinja2:158
-msgid "Queue removal behaviour"
-msgstr "Vervanging voor nummer uit wachtrij"
-
-#: templates/player.jinja2:162
-msgid "Download full track when queued"
-msgstr "Download gehele nummer in de wachtrij"
-
-#: templates/player.jinja2:163
-msgid "Stream audio (experimental)"
-msgstr "Stream audio (experimenteel)"
-
-#: templates/player.jinja2:165
-msgid "Download mode"
-msgstr "Downloadmodus"
-
-#: templates/player.jinja2:169
-msgid "Dark"
-msgstr "Donker"
-
-#: templates/player.jinja2:170
-msgid "Light"
-msgstr "Licht"
-
-#: templates/player.jinja2:171
-msgid "Use system preference"
-msgstr "Gebruik systeemvoorkeur"
-
-#: templates/player.jinja2:173
-msgid "Theme"
-msgstr "Thema"
-
-#: templates/player.jinja2:185
+#: templates/player.jinja2:119
 msgid "Language (reload required)"
 msgstr "Taal (herladen vereist)"
 
-#: templates/player.jinja2:192
-msgid "Album cover meme mode"
-msgstr "Album cover meme modus"
+#: templates/player.jinja2:138
+msgid "Minimum queue size"
+msgstr "Minimum wachtrijlengte"
 
-#: templates/player.jinja2:197
+#: templates/player.jinja2:145
+msgid "112k Opus (very high quality, offline)"
+msgstr "112k Opus (zeer hoge kwaliteit, offline)"
+
+#: templates/player.jinja2:148
+msgid "Audio and image quality"
+msgstr "Audio- en afbeeldingkwaliteit"
+
+#: templates/player.jinja2:150
+msgid "112k Opus (very high quality, 60MB per hour)"
+msgstr "112k Opus (zeer hoge kwaliteit, 60MB per uur)"
+
+#: templates/player.jinja2:151
+msgid "48k Opus (low quality, 20MB per hour)"
+msgstr "48k Opus (lage kwaliteit, 20MB per uur)"
+
+#: templates/player.jinja2:152
+msgid "128k AAC (high quality, for iOS/Safari, 70MB per hour)"
+msgstr "128k AAC (hoge kwaliteit, voor iOS/Safari, 70MB per uur)"
+
+#: templates/player.jinja2:157
+msgid "Queue removal behaviour"
+msgstr "Vervanging voor nummer uit wachtrij"
+
+#: templates/player.jinja2:159
+msgid "New track from next round-robin playlist"
+msgstr "Nieuw nummer uit de volgende afspeellijst"
+
+#: templates/player.jinja2:160
+msgid "New track from same playlist"
+msgstr "Nieuw nummer uit dezelfde afspeellijst"
+
+#: templates/player.jinja2:163
+msgid "Audio download mode"
+msgstr "Audio downloadmodus"
+
+#: templates/player.jinja2:165
+msgid "Download full track when queued"
+msgstr "Download gehele nummer in de wachtrij"
+
+#: templates/player.jinja2:166
+msgid "Stream audio (experimental)"
+msgstr "Stream audio (experimenteel)"
+
+#: templates/player.jinja2:172
+msgid "Album cover art memes"
+msgstr "Albumhoes memes"
+
+#: templates/player.jinja2:177
 msgid "YouTube download"
 msgstr "YouTube download"
 
-#: templates/player.jinja2:199
+#: templates/player.jinja2:179
 msgid ""
 "Select a playlist and paste a link from YouTube, Soundcloud, Bandcamp, "
 "etc. Finally, press <kbd>Download</kbd>."
@@ -824,15 +800,15 @@ msgstr ""
 "Selecteer een afspeellijst en plak een link van YouTube, Soundcloud, "
 "Bandcamp, etc. Druk dan op <kbd>Download</kbd>."
 
-#: templates/player.jinja2:207
+#: templates/player.jinja2:187
 msgid "yt-dlp output will appear here"
 msgstr "hier komt output van yt-dlp"
 
-#: templates/player.jinja2:211
+#: templates/player.jinja2:191
 msgid "Update track list"
 msgstr "Ververs lijst van nummers"
 
-#: templates/player.jinja2:213
+#: templates/player.jinja2:193
 msgid ""
 "The local music cache is updated every 15 minutes. If you've added, "
 "removed, or otherwise modified files externally, you may want to force an"
@@ -842,15 +818,15 @@ msgstr ""
 "bestanden hebt toegevoegd, verwijderd of anderszins gewijzigd, kun je een"
 " update forceren."
 
-#: templates/player.jinja2:214
+#: templates/player.jinja2:194
 msgid "Force update track list cache"
 msgstr "Forceer update van cache"
 
-#: templates/player.jinja2:223
+#: templates/player.jinja2:203
 msgid "Tags"
 msgstr "Tags"
 
-#: templates/player.jinja2:227
+#: templates/player.jinja2:206
 msgid ""
 "Only choose tracks with enabled tags (tracks without tags are never "
 "chosen)"
@@ -858,7 +834,7 @@ msgstr ""
 "Kies alleen nummers met geselecteerde tags (nummers zonder tags worden "
 "nooit gekozen)"
 
-#: templates/player.jinja2:228
+#: templates/player.jinja2:207
 msgid ""
 "Don't choose tracks with disabled tags (tracks with enabled tags or no "
 "tags are chosen)"
@@ -866,77 +842,77 @@ msgstr ""
 "Kies geen nummers met niet-geselecteerde tags (kies nummers zonder tags "
 "of met geselecteerde tags)"
 
-#: templates/player.jinja2:229
+#: templates/player.jinja2:208
 msgid "Tag mode"
 msgstr "Tagmodus"
 
-#: templates/player.jinja2:240
+#: templates/player.jinja2:219
 msgid "All"
 msgstr "Alles"
 
-#: templates/player.jinja2:243
+#: templates/player.jinja2:222
 msgid "Search query"
 msgstr "Zoekopdracht"
 
-#: templates/player.jinja2:245
+#: templates/player.jinja2:224
 msgid "Please select a playlist or enter a search query."
 msgstr "Gelieve een afspeelijst te selecteren, of een zoekopdracht in te voeren."
 
-#: templates/player.jinja2:254
+#: templates/player.jinja2:233
 msgid "Metadata editor"
 msgstr "Metadata wijzigen"
 
-#: templates/player.jinja2:257
+#: templates/player.jinja2:236
 msgid "Editing metadata for: "
 msgstr "Metadata bewerken: "
 
-#: templates/player.jinja2:265 templates/playlist_stats.jinja2:35
+#: templates/player.jinja2:244 templates/playlist_stats.jinja2:35
 msgid "Album"
 msgstr "Album"
 
-#: templates/player.jinja2:269
+#: templates/player.jinja2:248
 msgid "Artists (delimit multiple using <kbd>;</kbd>)"
 msgstr "Artiesten (scheid meerdere met <kbd>;</kbd>)"
 
-#: templates/player.jinja2:273 templates/playlist_stats.jinja2:36
+#: templates/player.jinja2:252 templates/playlist_stats.jinja2:36
 msgid "Album artist"
 msgstr "Albumartiest"
 
-#: templates/player.jinja2:277
+#: templates/player.jinja2:256
 msgid "Tags (delimit multiple using <kbd>;</kbd>)"
 msgstr "Tags (scheid meerdere met <kbd>;</kbd>)"
 
-#: templates/player.jinja2:281
+#: templates/player.jinja2:260
 msgid "Year (4 characters)"
 msgstr "Jaar (4 tekens)"
 
-#: templates/player.jinja2:287
+#: templates/player.jinja2:266
 msgid "Writing metadata..."
 msgstr "Metadata schrijven..."
 
-#: templates/player.jinja2:288
+#: templates/player.jinja2:267
 msgid "Reloading tracks..."
 msgstr "Nummers herladen..."
 
-#: templates/player.jinja2:301
+#: templates/player.jinja2:280
 msgid "If this is taking longer than expected, please check the browser console."
 msgstr ""
 "Als dit langer duurt van verwacht, gelieve in de browser console te "
 "kijken."
 
-#: templates/player.jinja2:321
+#: templates/player.jinja2:300
 msgid "Artist: "
 msgstr "Artiest: "
 
-#: templates/player.jinja2:322
+#: templates/player.jinja2:301
 msgid "Album: "
 msgstr "Album: "
 
-#: templates/player.jinja2:323
+#: templates/player.jinja2:302
 msgid "Tag: "
 msgstr "Tag: "
 
-#: templates/player.jinja2:324
+#: templates/player.jinja2:303
 msgid "All tracks"
 msgstr "Alle nummers"
 
@@ -1142,7 +1118,4 @@ msgstr "Nieuw wachtwoord (laat leeg om niet te veranderen)"
 #: templates/users_edit.jinja2:18
 msgid "Submit"
 msgstr "Versturen"
-
-#~ msgid "Last played"
-#~ msgstr "Laatst afgespeeld"
 
