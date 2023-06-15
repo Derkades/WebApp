@@ -42,7 +42,6 @@
 <script src="/static/js/base.js"></script>
 
 <script>
-
 function getNowPlayingCardHtml(info) {
     const card = document.createElement('div');
     card.classList.add('card');
@@ -152,8 +151,14 @@ async function updateNowPlaying() {
 
 document.addEventListener('DOMContentLoaded', () => {
     updateNowPlaying();
-    setInterval(updateNowPlaying, 10_000);
+    setInterval(updateNowPlaying, 5_000);
+    addEventListener("visibilitychange", event => {
+        if (!document.hidden) {
+            updateNowPlaying();
+        }
+    });
 });
+
 
 </script>
 
