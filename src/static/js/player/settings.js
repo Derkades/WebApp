@@ -55,14 +55,27 @@ function youTubeDownload(event) {
     const url = document.getElementById('youtube-dl-url').value;
 
     (async function(){
+        const decoder = new TextDecoder();
+
+        function handleResponse(result) {
+            output.textContent += decoder.decode(result.value);
+            output.scrollTop = output.scrollHeight;
+            return result
+        }
+
         const response = await jsonPost('/ytdl', {directory: directory, url: url});
-        const json = await response.json();
-        output.textContent = `Status code: ${json.code}\n--- stdout ---\n${json.stdout}\n--- stderr ---\n${json.stderr}`;
-        if (json.code == 0) {
-            output.append('\n--- javascript ---\n')
-            output.append('Updating local track list...\n');
-            await Track.updateLocalTrackList();
-            output.append('Done!');
+        const reader = await response.body.getReader();
+        await reader.read().then(function process(result) {
+            if (result.done) {
+                console.log("stream done");
+                return reader.closed;
+            }
+            return reader.read().then(handleResponse).then(process)
+        });
+
+        await Track.updateLocalTrackList();
+
+        if (output.textContent.endsWith('Done!')) {
             output.style.backgroundColor = 'darkgreen';
         } else {
             output.style.backgroundColor = 'darkred';

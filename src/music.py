@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Iterator, Literal, Optional, TYPE_CHECKING
 from datetime import datetime
 import subprocess
-from subprocess import CompletedProcess
 import logging
 import tempfile
 import shutil
@@ -11,9 +10,7 @@ from dataclasses import dataclass
 from sqlite3 import Connection
 from enum import Enum
 import random
-import os
-
-from yt_dlp import YoutubeDL
+from typing import Generator
 
 from auth import User
 import cache
@@ -25,6 +22,7 @@ import musicbrainz
 import reddit
 import image
 from image import ImageFormat, ImageQuality
+import downloader
 
 if TYPE_CHECKING:
     from metadata import Metadata
@@ -484,33 +482,15 @@ class Playlist:
                                  (self.name,)).fetchall()
         return [Track.by_relpath(self.conn, row[0]) for row in rows]
 
-    def download(self, url: str) -> int:
+    def download(self, url: str) -> Generator[str, ]:
         """
         Start a download using yt-dlp
         Args:
             url: URL to download
-        Returns: status code
+        Yields: yt-dlp log output
+        Returns: yt-dlp status code
         """
-        original_cwd = os.getcwd()
-        os.chdir(self.path)
-
-        yt_opts = {
-            'format': 'bestaudio',
-            'paths': {'temp': '/tmp'},
-            'noplaylist': True,
-            'postprocessors': [
-                {
-                    'key': 'FFmpegVideoConvertor',
-                    'preferedformat': 'webm>ogg/mp3>mp3/mka'
-                }
-            ]
-        }
-
-        try:
-            with YoutubeDL(yt_opts) as ytdl:
-                return ytdl.download([url])
-        finally:
-            os.chdir(original_cwd)
+        return downloader.download(self.path, url)
 
 
     def has_write_permission(self, user: User) -> bool:
