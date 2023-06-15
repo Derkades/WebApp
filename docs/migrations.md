@@ -6,6 +6,11 @@ To run a migration:
 3. Execute the migration by copying it line by line from top to bottom, pressing enter after every line.
 4. Exit using <kbd>Ctrl</kbd>+<kbd>D</kbd>
 
+## 2023-06-15
+```sql
+DROP TABLE now_playing;
+```
+
 ## 2023-04-14
 ```sql
 DROP TABLE now_playing;

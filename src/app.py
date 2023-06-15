@@ -796,6 +796,8 @@ def route_now_playing():
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
 
+        player_id = request.json['player_id']
+        assert isinstance(player_id, str)
         relpath = request.json['track']
         assert isinstance(relpath, str)
         paused = request.json['paused']
@@ -813,12 +815,13 @@ def route_now_playing():
             previous_update = None if result is None else result[0]
 
         conn.execute('''
-                     INSERT INTO now_playing (user, timestamp, track, paused, progress)
-                     VALUES (:user_id, :timestamp, :relpath, :paused, :progress)
-                     ON CONFLICT(user) DO UPDATE
+                     INSERT INTO now_playing (player_id, user, timestamp, track, paused, progress)
+                     VALUES (:player_id, :user_id, :timestamp, :relpath, :paused, :progress)
+                     ON CONFLICT(player_id) DO UPDATE
                          SET timestamp=:timestamp, track=:relpath, paused=:paused, progress=:progress
                      ''',
-                     {'user_id': user.user_id,
+                     {'player_id': player_id,
+                      'user_id': user.user_id,
                       'timestamp': int(time.time()),
                       'relpath': relpath,
                       'paused': paused,

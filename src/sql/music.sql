@@ -89,7 +89,8 @@ CREATE TABLE IF NOT EXISTS history (
 );
 
 CREATE TABLE IF NOT EXISTS now_playing (
-    user INTEGER NOT NULL UNIQUE PRIMARY KEY,
+    player_id TEXT NOT NULL UNIQUE PRIMARY KEY, -- UUID with dashes
+    user INTEGER NOT NULL,
     timestamp INTEGER NOT NULL,
     track TEXT NOT NULL REFERENCES track(path) ON DELETE CASCADE,
     progress INTEGER NOT NULL, -- Number of seconds into the track

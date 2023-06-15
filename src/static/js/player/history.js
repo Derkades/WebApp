@@ -1,4 +1,6 @@
 class History {
+    /** @type {string} */
+    playerId;
     /** @type {Track} */
     currentlyPlayingTrack;
     /** @type {boolean} */
@@ -11,6 +13,7 @@ class History {
     startTimestamp;
 
     constructor() {
+        this.playerId = uuidv4();
         this.currentlyPlayingTrack = null;
 
         eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => this.signalNewTrack());
@@ -62,6 +65,7 @@ class History {
         }
         const audio = getAudioElement();
         const data = {
+            player_id: this.playerId,
             track: this.currentlyPlayingTrack.path,
             paused: audio.paused,
             progress: Math.round((audio.currentTime / audio.duration) * 100),
