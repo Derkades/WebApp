@@ -1,11 +1,13 @@
 function updateTagCheckboxes() {
-    const tags = new Set();
+    const tagsSet = new Set();
 
     for (const track of Object.values(state.tracks)) {
         for (const tag of track.tags) {
-            tags.add(tag);
+            tagsSet.add(tag);
         }
     }
+
+    const tags = [...tagsSet].sort();
 
     const newChildren = [];
 
