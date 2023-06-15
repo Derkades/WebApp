@@ -323,16 +323,16 @@ def route_ytdl():
 
     # Release database connection during download
 
-    result = playlist.download(url)
+    status = playlist.download(url)
 
     with db.connect() as conn:
         playlist = music.playlist(conn, directory)
         scanner.scan_tracks(conn, playlist.name)
 
     return {
-        'code': result.returncode,
-        'stdout': result.stdout,
-        'stderr': result.stderr,
+        'code': status,
+        'stdout': '<output not available>',
+        'stderr': '<output not available>',
     }
 
 

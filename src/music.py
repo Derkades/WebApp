@@ -11,6 +11,9 @@ from dataclasses import dataclass
 from sqlite3 import Connection
 from enum import Enum
 import random
+import os
+
+from yt_dlp import YoutubeDL
 
 from auth import User
 import cache
@@ -481,25 +484,34 @@ class Playlist:
                                  (self.name,)).fetchall()
         return [Track.by_relpath(self.conn, row[0]) for row in rows]
 
-    def download(self, url: str) -> CompletedProcess:
+    def download(self, url: str) -> int:
         """
         Start a download using yt-dlp
         Args:
             url: URL to download
-        Returns: CompletedProcess object
+        Returns: status code
         """
-        return subprocess.run(['yt-dlp',
-                               '--no-progress',
-                               '-f', 'bestaudio',
-                               '--remux-video', 'webm>ogg/mp3>mp3/mka',
-                               '--no-playlist',
-                               '--paths', 'temp:/tmp',
-                               url],
-                              shell=False,
-                              check=False,  # No exception on non-zero exit code
-                              cwd=self.path,
-                              capture_output=True,
-                              text=True)
+        original_cwd = os.getcwd()
+        os.chdir(self.path)
+
+        yt_opts = {
+            'format': 'bestaudio',
+            'paths': {'temp': '/tmp'},
+            'noplaylist': True,
+            'postprocessors': [
+                {
+                    'key': 'FFmpegVideoConvertor',
+                    'preferedformat': 'webm>ogg/mp3>mp3/mka'
+                }
+            ]
+        }
+
+        try:
+            with YoutubeDL(yt_opts) as ytdl:
+                return ytdl.download([url])
+        finally:
+            os.chdir(original_cwd)
+
 
     def has_write_permission(self, user: User) -> bool:
         """
