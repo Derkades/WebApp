@@ -9,9 +9,8 @@ function applyTheme() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    return;
-    applyTheme();
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
-    document.getElementById('settings-theme').addEventListener('input', applyTheme);
-});
+// document.addEventListener('DOMContentLoaded', () => {
+//     applyTheme();
+//     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+//     document.getElementById('settings-theme').addEventListener('input', applyTheme);
+// });
