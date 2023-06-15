@@ -79,7 +79,8 @@
                     <h3>{% trans %}Queue{% endtrans %} (<span id="current-queue-size">0</span>)</h3>
                     <div>
                         {{ icon_button('tag-multiple', 'open-dialog-tags', title=gettext('Open tag selection')) }}
-                        {{ icon_button('text-search', 'browse-all', title=gettext('Browse all tracks')) }}
+                        {# {{ icon_button('text-search', 'browse-all', title=gettext('Browse all tracks')) }} #}
+                        {{ icon_button('text-search', 'open-dialog-search', title=gettext('Search in tracks')) }}
                         {{ icon_button('cog', 'open-dialog-settings', title=gettext('Open settings')) }}
                     </div>
                 </div>
@@ -137,8 +138,6 @@
 
                 <label for="settings-queue-size">{% trans %}Minimum queue size{% endtrans %}</label><br>
                 <input type="number" value="3" size="3" id="settings-queue-size"><br>
-
-
 
                 {% if offline_mode %}
                     <select id="settings-audio-type" disabled class="hidden">
@@ -224,6 +223,24 @@
                 <p id="browse-no-content">{% trans %}Please select a playlist or enter a search query.{% endtrans %}</p>
 
                 <div id="browse-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dialog-search" class="full-page-overlay dialog-overlay overlay-hidden">
+        <div class="dialog">
+            {{ dialog_header('dialog-search', gettext('Search')) }}
+            <div class="dialog-body">
+                <input id="search-query" type="text" placeholder="{% trans %}Search query{% endtrans %}">
+
+                <h3>{% trans %}Tracks{% endtrans %}</h3>
+                <div id="search-result-tracks"></div>
+
+                <h3>{% trans %}Artists{% endtrans %}</h3>
+                <div id="search-result-artists"></div>
+
+                <h3>{% trans %}Albums{% endtrans %}</h3>
+                <div id="search-result-albums"></div>
             </div>
         </div>
     </div>

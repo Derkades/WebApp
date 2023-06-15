@@ -271,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('browse-filter-query').addEventListener('input', () => browse.searchQueryChanged = true);
 
     // Button to open browse dialog ("add to queue" button)
-    document.getElementById('browse-all').addEventListener('click', () => browse.browseAll());
+    // document.getElementById('browse-all').addEventListener('click', () => browse.browseAll());
 
     // Back button in top left corner of browse window
     document.getElementById('browse-back').addEventListener('click', () => browse.back());

@@ -246,6 +246,8 @@ def route_get_album_cover() -> Response:
     """
     Get album cover image for the provided track path.
     """
+    # TODO Album title and album artist as parameters, instead of track path
+
     if settings.offline_mode:
         with db.offline(read_only=True) as conn:
             path = request.args['path']
