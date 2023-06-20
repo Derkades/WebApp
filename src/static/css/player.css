@@ -107,12 +107,12 @@ body.light input::placeholder {
 }
 
 .other-checkboxes {
-    max-height: 10vh;
+    max-height: 20vh;
     overflow-y: auto;
 }
 
 .box-queue .scroll {
-    height: 35vh;
+    height: 30vh;
 }
 
 .lyrics-outer {
@@ -221,8 +221,7 @@ body.light .progress-time {
 }
 
 #queue-table td {
-    height: 4rem;
-    font-size: .95rem;
+    height: 3.5rem;
     cursor: grab;
 }
 
@@ -231,7 +230,7 @@ body.light .progress-time {
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
-    width: 4rem;
+    width: 3.5rem;
     cursor: pointer;
 }
 
@@ -239,10 +238,6 @@ body.light .progress-time {
 #queue-table td:nth-child(2) {
     text-align: center;
 }
-
-/* #queue-table tr.active {
-    background: darkgoldenrod;
-} */
 
 .delete-overlay {
     height: 100%;
@@ -254,8 +249,6 @@ body.light .progress-time {
 
 .delete-overlay > .icon {
     opacity: 0;
-    height: 3rem;
-    width: 3rem;
 }
 
 .delete-overlay {

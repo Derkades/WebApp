@@ -187,7 +187,7 @@ class Queue {
         for (let row of items) {
             row.draggable = true; // Make draggable
 
-            // The .hint and .active classes are purely cosmetic, they may be styled using css
+            // The .hint and is purely cosmetic, they may be styled using css
 
             row.ondragstart = () => {
                 current = row;
@@ -198,18 +198,9 @@ class Queue {
                 }
             };
 
-            row.ondragenter = () => {
-                if (row != current) {
-                    row.classList.add("active");
-                }
-            };
-
-            row.ondragleave = () => row.classList.remove("active");
-
             row.ondragend = () => {
                 for (let it of items) {
                     it.classList.remove("hint");
-                    it.classList.remove("active");
                 }
             };
 
@@ -288,24 +279,6 @@ class Queue {
         }
         this.updateHtml();
     };
-
-    scroll(direction) {
-        let delta;
-        if (direction === 'up') {
-            delta = -200;
-        } else if (direction === 'down') {
-            delta = 200;
-        } else {
-            throw new Error();
-        }
-
-        const elem = document.getElementById('queue-scroll');
-        elem.scrollBy({
-            top: delta,
-            behavior: 'smooth',
-        });
-    };
-
 };
 
 class QueuedTrack {
