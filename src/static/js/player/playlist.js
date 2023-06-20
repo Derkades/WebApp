@@ -85,7 +85,8 @@ function createPlaylistCheckbox(playlist, index, defaultChecked) {
 
     const trackCount = document.createElement('span');
     trackCount.classList.add('secondary');
-    trackCount.textContent = ` (${playlist.trackCount})`;
+    trackCount.textContent = ' ' + playlist.trackCount;
+    trackCount.style.fontSize = '.75rem';
 
     label.replaceChildren(
         playlist.name,
