@@ -30,10 +30,10 @@ def fig_end(fig) -> str:
     return 'data:image/svg+xml;base64,' + b64encode(out.read()).decode()
 
 
-def counter_to_xy(counter: Counter):
+def counter_to_xy(counter: Counter, limit=COUNTER_AMOUNT):
     xs = []
     ys = []
-    for x, y in counter.most_common(COUNTER_AMOUNT):
+    for x, y in counter.most_common(limit):
         xs.append(x)
         ys.append(y)
     return xs, ys
@@ -206,6 +206,29 @@ def _plots_playlists() -> list[str]:
     return plot_counts, plot_totals, plot_means
 
 
+def _plots_metadata() -> list[str]:
+    with db.connect(read_only=True) as conn:
+        result = conn.execute('''
+                                SELECT year
+                                FROM track
+                                ''')
+
+        year_counter: Counter[int] = Counter()
+
+        for year, in result:
+            if year is not None:
+                year_counter.update((year,))
+
+    fig, ax = fig_start()
+    bars = ax.bar(*counter_to_xy(year_counter, limit=None))
+    ax.set_title(_('Track release year distribution'))
+    ax.bar_label(bars)
+    ax.set_xlabel(_('Release year'))
+    plot_years = fig_end(fig)
+
+    return plot_years,
+
+
 def get_plots(after_timestamp: int) -> list[str]:
     """
     Get list of plots
@@ -218,7 +241,9 @@ def get_plots(after_timestamp: int) -> list[str]:
         r_history = p.apply_async(_plots_history, (after_timestamp,))
         r_last_played = p.apply_async(_plots_last_played)
         r_playlists = p.apply_async(_plots_playlists)
+        r_metadata = p.apply_async(_plots_metadata)
 
         return [*r_history.get(),
                 *r_last_played.get(),
-                *r_playlists.get()]
+                *r_playlists.get(),
+                *r_metadata.get()]
