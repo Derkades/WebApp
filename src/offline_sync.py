@@ -41,7 +41,8 @@ class OfflineSync:
     def request_get(self, route: str) -> Response:
         response = requests.get(self.base_url + route,
                                 headers={'Cookie': 'token=' + self.token,
-                                         'User-Agent': settings.user_agent})
+                                         'User-Agent': settings.user_agent},
+                                timeout=30)
         return response
 
     def request_post(self, route: str, data) -> Response:
@@ -50,7 +51,8 @@ class OfflineSync:
             headers['Cookie'] = 'token=' + self.token
         response = requests.post(self.base_url + route,
                                  json=data,
-                                 headers=headers)
+                                 headers=headers,
+                                 timeout=30)
         return response
 
     def set_token(self):
