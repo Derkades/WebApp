@@ -30,8 +30,6 @@ class EventBus {
 
 const eventBus = new EventBus();
 
-eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => eventBus.publish(MusicEvent.PLAYBACK_CHANGE));
-
 document.addEventListener('DOMContentLoaded', () => {
     setInterval(() => eventBus.publish(MusicEvent.PLAYBACK_CHANGE), 1000);
 
