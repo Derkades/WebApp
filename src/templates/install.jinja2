@@ -15,6 +15,7 @@
 <div id="no-support">
     <p>{% trans %}It looks like your browser does not support PWAs. Note that:{% endtrans %}</p>
     <ul>
+        <li>{% trans %}Firefox on Android DOES support PWAs, but the PWA needs to be installed manually from the triple-dot menu{% endtrans %}</li>
         <li>{% trans %}The desktop version of Firefox does not support PWAs{% endtrans %}</li>
         <li>{% trans %}Safari on macOS does not support PWAs{% endtrans %}</li>
         <li>{% trans %}Browsers other than Safari are not allowed to install PWAs on iOS{% endtrans %}</li>
@@ -22,7 +23,6 @@
 
     <p>{% trans %}Browsers with PWA support:{% endtrans %}</p>
     <ul>
-        <li>{% trans %}Firefox on Android{% endtrans %}</li>
         <li>{% trans %}Chromium-based browers on Linux, Windows, or macOS (Chrome, Edge, Opera, Brave, ...){% endtrans %}</li>
         <li>{% trans %}Chromium-based browsers on Android{% endtrans %}</li>
         <li>{% trans %}Safari on iOS{% endtrans %}</li>
@@ -31,7 +31,6 @@
 
 <div id="yes-support" class="hidden">
     <p>{% trans %}It looks like your browser supports PWAs! Click the install button below.{% endtrans %}</p>
-
     {{ icon_button('application-import', id='install-button')}}
 </div>
 
@@ -44,7 +43,8 @@ window.addEventListener('beforeinstallprompt', (e) => {
     deferredPrompt = e;
 
     const no = document.getElementById('no-support');
-    const yes = document.getElementById('yes-support');
+    const yes = document.getElement
+    ById('yes-support');
     yes.classList.remove('hidden');
     no.classList.add('hidden');
 
