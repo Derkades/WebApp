@@ -13,24 +13,23 @@
 <br>
 
 <div id="no-support">
-    <p>{% trans %}It looks like your browser does not support PWAs. Note that:{% endtrans %}</p>
-    <ul>
-        <li>{% trans %}Firefox on Android DOES support PWAs, but the PWA needs to be installed manually from the triple-dot menu{% endtrans %}</li>
-        <li>{% trans %}The desktop version of Firefox does not support PWAs{% endtrans %}</li>
-        <li>{% trans %}Safari on macOS does not support PWAs{% endtrans %}</li>
-        <li>{% trans %}Browsers other than Safari are not allowed to install PWAs on iOS{% endtrans %}</li>
-    </ul>
+
+    <p>{% trans %}Look for an "Install" option in your browser menu or navigation bar.{% endtrans %}</p>
+
+    <img src="/static/img/pwa_install_chromium.webp" width="257">
+    <img src="/static/img/pwa_install_firefox_android.webp" width="257">
 
     <p>{% trans %}Browsers with PWA support:{% endtrans %}</p>
     <ul>
-        <li>{% trans %}Chromium-based browers on Linux, Windows, or macOS (Chrome, Edge, Opera, Brave, ...){% endtrans %}</li>
-        <li>{% trans %}Chromium-based browsers on Android{% endtrans %}</li>
-        <li>{% trans %}Safari on iOS{% endtrans %}</li>
+        <li>{% trans %}Firefox on Android{% endtrans %}</li>
+        <li>{% trans %}Chromium-based browers for Linux, Windows, or macOS (Chrome, Edge, Opera, Brave, ...){% endtrans %}</li>
+        <li>{% trans %}Chromium-based browsers on Android (recommended, better MediaSession support){% endtrans %}</li>
+        <li>{% trans %}Safari on iOS (other browsers are not allowed to install PWAs){% endtrans %}</li>
     </ul>
 </div>
 
 <div id="yes-support" class="hidden">
-    <p>{% trans %}It looks like your browser supports PWAs! Click the install button below.{% endtrans %}</p>
+    <p>{% trans %}Click the install button below to install the music player as an application:{% endtrans %}</p>
     {{ icon_button('application-import', id='install-button')}}
 </div>
 
