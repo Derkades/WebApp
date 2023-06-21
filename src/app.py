@@ -1293,6 +1293,11 @@ def route_player_copy_track():
         return Response(_('File has been successfully copied to your playlist: %(playlist)s', playlist=playlist.name), 200)
 
 
+@app.route('/install')
+def route_install():
+    return render_template('install.jinja2')
+
+
 def is_mobile() -> bool:
     """
     Checks whether User-Agent looks like a mobile device (Android or iOS)

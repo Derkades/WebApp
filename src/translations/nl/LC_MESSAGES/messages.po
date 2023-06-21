@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-06-11 11:42+0200\n"
-"PO-Revision-Date: 2023-06-11 11:41+0200\n"
+"POT-Creation-Date: 2023-06-21 17:52+0200\n"
+"PO-Revision-Date: 2023-06-21 17:52+0200\n"
 "Last-Translator: \n"
 "Language: nl\n"
 "Language-Team: nl <LL@li.org>\n"
@@ -18,15 +18,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.11.0\n"
 
-#: app.py:705
+#: app.py:706
 msgid "Incorrect password."
 msgstr "Onjuist wachtwoord."
 
-#: app.py:708
+#: app.py:709
 msgid "Repeated new passwords do not match."
 msgstr "Herhaalde wachtwoorden komen niet overeen."
 
-#: app.py:711
+#: app.py:712
 msgid ""
 "Password updated. All sessions have been invalidated. You will need to "
 "log in again."
@@ -34,19 +34,19 @@ msgstr ""
 "Wachtwoord veranderd. Alle sessies zijn ongeldig gemaakt. Je zal opnieuw "
 "moeten inloggen."
 
-#: app.py:1007
+#: app.py:1011
 msgid "last 24 hours"
 msgstr "afgelopen 24 uur"
 
-#: app.py:1010 app.py:1016
+#: app.py:1014 app.py:1020
 msgid "last 7 days"
 msgstr "afgelopen 7 dagen"
 
-#: app.py:1013
+#: app.py:1017
 msgid "last 30 days"
 msgstr "afgelopen 30 dagen"
 
-#: app.py:1274
+#: app.py:1278
 msgid ""
 "No playlist configured. Please configure a primay playlist in playlist "
 "manager."
@@ -54,16 +54,16 @@ msgstr ""
 "Geen afspeellijst ingesteld. Je kan een playlist instellen in "
 "playlistbeheer."
 
-#: app.py:1278
+#: app.py:1282
 #, python-format
 msgid "No write permission for playlist: %(playlist)s"
 msgstr "Geen schrijftoegang tot de afspeellijst: '%(playlist)s'"
 
-#: app.py:1283
+#: app.py:1287
 msgid "Track is already in this playlist"
 msgstr "Nummer zit al in deze afspeellijst"
 
-#: app.py:1289
+#: app.py:1293
 #, python-format
 msgid "File has been successfully copied to your playlist: %(playlist)s"
 msgstr "Bestand is gekopieerd naar jouw playlist: '%(playlist)s'"
@@ -192,6 +192,14 @@ msgstr "Totale lengte van nummers in afspeellijsten"
 #: stats_plots.py:202
 msgid "Mean duration of tracks in playlist"
 msgstr "Gemiddelde lengte van nummers in afspeellijsten"
+
+#: stats_plots.py:224
+msgid "Track release year distribution"
+msgstr "Distributie van jaar van uitgave"
+
+#: stats_plots.py:226
+msgid "Release year"
+msgstr "Jaar van uitgave"
 
 #: templates/403.jinja2:4 templates/403.jinja2:9
 msgid "Permission denied"
@@ -497,32 +505,37 @@ msgstr "Account"
 msgid "Track blocklist"
 msgstr "Geblokkeerde nummers"
 
-#: templates/home.jinja2:40
+#: templates/home.jinja2:38 templates/install.jinja2:4
+#: templates/install.jinja2:9
+msgid "Install as PWA"
+msgstr "Installeer als PWA"
+
+#: templates/home.jinja2:41
 msgid "Help"
 msgstr "Hulp"
 
-#: templates/home.jinja2:41
+#: templates/home.jinja2:42
 msgid "Manual"
 msgstr "Handleiding"
 
-#: templates/home.jinja2:44
+#: templates/home.jinja2:45
 msgid "Experimental"
 msgstr "Experimenteel"
 
-#: templates/home.jinja2:45 templates/radio.jinja2:4 templates/radio.jinja2:9
+#: templates/home.jinja2:46 templates/radio.jinja2:4 templates/radio.jinja2:9
 msgid "Radio"
 msgstr "Radio"
 
-#: templates/home.jinja2:46 templates/playlist_stats.jinja2:4
+#: templates/home.jinja2:47 templates/playlist_stats.jinja2:4
 #: templates/playlist_stats.jinja2:9
 msgid "Playlist statistics"
 msgstr "Afspeellijststatistieken"
 
-#: templates/home.jinja2:49
+#: templates/home.jinja2:50
 msgid "Administrative"
 msgstr "Administratief"
 
-#: templates/home.jinja2:50 templates/users.jinja2:4 templates/users.jinja2:9
+#: templates/home.jinja2:51 templates/users.jinja2:4 templates/users.jinja2:9
 msgid "User management"
 msgstr "Gebruikerbeheer"
 
@@ -609,6 +622,64 @@ msgstr ""
 "href=\"%(insp_gh)s\" target=\"_blank\">Super fancy music player</a> van "
 "<a href=\"%(daniel_gh)s\" target=\"_blank\">Daniël Koomen</a>. Veel "
 "luisterplezier!"
+
+#: templates/install.jinja2:11
+msgid ""
+"This website can be installed as a Progressive Web App (PWA). This will "
+"add it to your application launcher on your desktop computer or mobile "
+"device."
+msgstr ""
+"Deze website kan geïnstalleerd worden als een \"Progressive Web App\" "
+"(PWA). Dat betekent dat het aan je applicatielijst wordt toegevoegd op je"
+" desktop computer of mobiele telefoon."
+
+#: templates/install.jinja2:16
+msgid "It looks like your browser does not support PWAs. Note that:"
+msgstr ""
+"Het lijkt erop dat je browser geen ondersteuning heeft voor PWAs. Let op "
+"dat:"
+
+#: templates/install.jinja2:18
+msgid "The desktop version of Firefox does not support PWAs"
+msgstr "De desktopversie van Firefox geen ondersteuning biedt voor PWAs"
+
+#: templates/install.jinja2:19
+msgid "Safari on macOS does not support PWAs"
+msgstr "Safari op macOS geen ondersteuning biedt voor PWAs"
+
+#: templates/install.jinja2:20
+msgid "Browsers other than Safari are not allowed to install PWAs on iOS"
+msgstr "Browser behalve Safari geen PWAs mogen installeren op iOS"
+
+#: templates/install.jinja2:23
+msgid "Browsers with PWA support:"
+msgstr "Browsers met PWA ondersteuning:"
+
+#: templates/install.jinja2:25
+msgid "Firefox on Android"
+msgstr "Firefox op Android"
+
+#: templates/install.jinja2:26
+msgid ""
+"Chromium-based browers on Linux, Windows, or macOS (Chrome, Edge, Opera, "
+"Brave, ...)"
+msgstr ""
+"Chromium-gebaseerde browsers op Linux, Windows of macOS (Chrome, Edge, "
+"Opera, Brave, ...)"
+
+#: templates/install.jinja2:27
+msgid "Chromium-based browsers on Android"
+msgstr "Chromium-gebaseerde browsers op Android"
+
+#: templates/install.jinja2:28
+msgid "Safari on iOS"
+msgstr "Safari op iOS"
+
+#: templates/install.jinja2:33
+msgid "It looks like your browser supports PWAs! Click the install button below."
+msgstr ""
+"Het lijkt erop dat je browser ondersteuning biedt voor PWAs! Klik op de "
+"installatieknop hieronder."
 
 #: templates/lastfm_callback.jinja2:5 templates/lastfm_connected.jinja2:5
 msgid "Last.fm connection"

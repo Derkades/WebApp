@@ -1,0 +1,56 @@
+{% extends "base_static.jinja2" %}
+
+{% block title %}
+    {% trans %}Install as PWA{% endtrans %}
+{% endblock title %}
+
+{% block content %}
+
+{{ page_heading(gettext('Install as PWA')) }}
+
+<p>{% trans %}This website can be installed as a Progressive Web App (PWA). This will add it to your application launcher on your desktop computer or mobile device.{% endtrans %}</p>
+
+<br>
+
+<div id="no-support">
+    <p>{% trans %}It looks like your browser does not support PWAs. Note that:{% endtrans %}</p>
+    <ul>
+        <li>{% trans %}The desktop version of Firefox does not support PWAs{% endtrans %}</li>
+        <li>{% trans %}Safari on macOS does not support PWAs{% endtrans %}</li>
+        <li>{% trans %}Browsers other than Safari are not allowed to install PWAs on iOS{% endtrans %}</li>
+    </ul>
+
+    <p>{% trans %}Browsers with PWA support:{% endtrans %}</p>
+    <ul>
+        <li>{% trans %}Firefox on Android{% endtrans %}</li>
+        <li>{% trans %}Chromium-based browers on Linux, Windows, or macOS (Chrome, Edge, Opera, Brave, ...){% endtrans %}</li>
+        <li>{% trans %}Chromium-based browsers on Android{% endtrans %}</li>
+        <li>{% trans %}Safari on iOS{% endtrans %}</li>
+    </ul>
+</div>
+
+<div id="yes-support" class="hidden">
+    <p>{% trans %}It looks like your browser supports PWAs! Click the install button below.{% endtrans %}</p>
+
+    {{ icon_button('application-import', id='install-button')}}
+</div>
+
+<script>
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevents the default mini-infobar or install dialog from appearing on mobile
+    e.preventDefault();
+    // Save the event because you'll need to trigger it later.
+    deferredPrompt = e;
+
+    const no = document.getElementById('no-support');
+    const yes = document.getElementById('yes-support');
+    yes.classList.remove('hidden');
+    no.classList.add('hidden');
+
+    document.getElementById('install-button').addEventListener('click', () => {
+        deferredPrompt.prompt();
+    })
+});
+</script>
+{% endblock content %}
