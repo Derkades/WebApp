@@ -1,7 +1,7 @@
 {
     "name": "MusicPlayer",
     "short_name": "MusicPlayer",
-    "start_url": "/player",
+    "start_url": "/pwa",
     "display": "standalone",
     "background_color": "#000",
     "description": "Raphson music player",

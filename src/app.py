@@ -1298,6 +1298,13 @@ def route_install():
     return render_template('install.jinja2')
 
 
+@app.route('/pwa')
+def route_pwa():
+    # Cannot have /player as an entrypoint directly, because for some reason the first request
+    # to the start_url does not include cookies. Even a regular 302 redirect doesn't work!
+    return '<meta http-equiv="refresh" content="0;URL=\'/player\'">'
+
+
 def is_mobile() -> bool:
     """
     Checks whether User-Agent looks like a mobile device (Android or iOS)
