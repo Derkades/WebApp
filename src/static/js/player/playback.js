@@ -44,12 +44,17 @@ function getAudioElement() {
     return document.getElementById('audio');
 }
 
-function replaceAudioSource() {
+async function replaceAudioSource() {
     const sourceUrl = queue.currentTrack.audioBlobUrl;
     const audio = getAudioElement();
     audio.src = sourceUrl;
     // Ensure audio volume matches slider
     onVolumeChange();
+    try {
+        await audio.play();
+    } catch (exception) {
+        console.error(error);
+    }
 }
 
 function replaceAlbumImages() {
