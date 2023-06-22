@@ -931,8 +931,7 @@ def route_activity_data():
         for username, playlist_name, relpath, paused, progress in result:
             track = Track.by_relpath(conn, relpath)
             meta = track.metadata()
-            image_url = '/get_album_cover?quality=tiny&path=' + urlencode(relpath)
-            now_playing.append({'image': image_url,
+            now_playing.append({'path': relpath,
                              'username': username,
                              'playlist': playlist_name,
                              'title': meta.title,

@@ -56,11 +56,16 @@ function getNowPlayingCardHtml(info) {
     cardBody.style.display = 'flex';
     card.append(cardBody);
 
-    const imgOuter = document.createElement('div');
+    const imageThumb = '/get_album_cover?quality=tiny&path=' + encodeURIComponent(info.path);
+    const imageFull = '/get_album_cover?quality=high&path=' + encodeURIComponent(info.path);
+
+    const imgOuter = document.createElement('a');
+    imgOuter.href = imageFull;
+    imgOuter.style.display = 'block';
     imgOuter.style.height = '8rem';
     imgOuter.style.width = '8rem';
     imgOuter.style.borderRadius = 'var(--border-radius-amount)';
-    imgOuter.style.background = `url("${info.image}") no-repeat center`;
+    imgOuter.style.background = `url("${imageThumb}") no-repeat center`;
     imgOuter.style.backgroundSize = 'cover';
 
     const imgInner = document.createElement('div');
