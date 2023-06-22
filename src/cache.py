@@ -82,5 +82,5 @@ def cleanup() -> int:
     Returns: Number of removed entries
     """
     with db.cache() as conn:
-        one_month_ago = int(time.time()) - 60*60*24*30
-        return conn.execute('DELETE FROM cache WHERE access_time < ?', (one_month_ago,)).rowcount
+        two_months_ago = int(time.time()) - 60*60*24*30*2
+        return conn.execute('DELETE FROM cache WHERE access_time < ?', (two_months_ago,)).rowcount
