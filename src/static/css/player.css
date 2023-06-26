@@ -40,6 +40,10 @@ body.light input::placeholder {
     filter: blur(3rem);
 }
 
+#album-covers, #lyrics-box {
+    cursor: pointer;
+}
+
 #album-covers {
     aspect-ratio: 1 / 1; /* deze is heel nieuw, bestaat sinds 2021! */
     width: 100%;
