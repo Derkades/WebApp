@@ -48,19 +48,19 @@ def rows_to_xy(rows: list[tuple]):
     return xs, ys
 
 
-def _time_xticks(hour_offset: int):
-    xticks_x = []
-    xticks_y = []
-    for i in count(hour_offset, 3):
-        if i > hour_offset + 24:
-            break
-        xticks_x.append(i - hour_offset)
-        xticks_y.append(f'{i % 24:02}:00')
-    plt.xticks(xticks_x, xticks_y)
+# def _time_xticks(hour_offset: int):
+#     xticks_x = []
+#     xticks_y = []
+#     for i in count(hour_offset, 3):
+#         if i > hour_offset + 24:
+#             break
+#         xticks_x.append(i - hour_offset)
+#         xticks_y.append(f'{i % 24:02}:00')
+#     plt.xticks(xticks_x, xticks_y)
 
 
 def _plots_history(after_timestamp: int) -> list[str]:
-    tod_offset = 3
+    # tod_offset = 3
 
     with db.connect(read_only=True) as conn:
         result = conn.execute('''
@@ -83,7 +83,8 @@ def _plots_history(after_timestamp: int) -> list[str]:
             user_counter.update((username,))
 
             dt = datetime.fromtimestamp(timestamp)
-            time_of_day.append(dt.hour - tod_offset)
+            # time_of_day.append(dt.hour - tod_offset)
+            time_of_day.append(dt.hour)
             day_of_week.append(dt.weekday())
 
             track = Track.by_relpath(conn, relpath)
@@ -116,7 +117,9 @@ def _plots_history(after_timestamp: int) -> list[str]:
     ax.set_title(_('Time of day'))
     ax.set_xlabel(_('Time of day'))
     ax.set_ylabel(_('Tracks played'))
-    _time_xticks(tod_offset)
+    ax.set_xticks(list(range(0, 24, 3)) + [24])
+    ax.set_xticklabels([f'{i:02}:00' for i in range(0, 24, 3)] + ['00:00'])
+    # _time_xticks(tod_offset)
     plot_tod = fig_end(fig)
 
     fig, ax = fig_start()
