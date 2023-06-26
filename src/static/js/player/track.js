@@ -4,8 +4,6 @@ class Track {
     /** @type {string} */
     path;
     /** @type {string} */
-    display;
-    /** @type {string} */
     playlistName;
     /** @type {number} */
     duration;
@@ -31,7 +29,6 @@ class Track {
     constructor(playlistName, trackData) {
         this.trackData = trackData;
         this.path = trackData.path;
-        this.display = trackData.display;
         this.playlistName = playlistName;
         this.duration = trackData.duration;
         this.tags = trackData.tags;
@@ -99,10 +96,34 @@ class Track {
                 html.append(` [${this.year}]`);
             }
         } else {
-            // Use half-decent display name generated from file name by python backend
-            html.append(this.display);
+            const span = document.createElement('span');
+            span.style.color = COLOR_MISSING_METADATA;
+            span.textContent = this.path
+            html.append(span);
         }
         return html;
+    };
+
+    displayText(showPlaylist = false) {
+        let text = '';
+
+        if (showPlaylist) {
+            text += `${this.playlistName}: `
+        }
+
+        if (this.artists !== null && this.title !== null) {
+            text += this.artists.join(', ');
+            text += ' - ';
+            text += this.title;
+
+            if (this.year !== null) {
+                text += ` [${this.year}]`;
+            }
+        } else {
+            text += this.path;
+        }
+
+        return text;
     };
 
     static async updateLocalTrackList() {

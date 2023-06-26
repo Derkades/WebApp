@@ -19,15 +19,24 @@ eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {
         return;
     }
 
-    navigator.mediaSession.metadata = new MediaMetadata({
-        title: track.title !== null ? track.title : track.display,
-        album: track.album !== null ? track.album : 'Unknown Album',
-        artist: track.artists !== null ? track.artists.join(' & ') : 'Unknown Artist',
+    const metaObj = {
         // For some unknown reason this does not work everywhere. For example, it works on Chromium
         // mobile and desktop, but not the KDE media player widget with Firefox or Chromium.
         // Firefox mobile doesn't seem to support the MediaSession API at all.
         artwork: [{src: queue.currentTrack.imageBlobUrl}],
-    });
+    }
+
+    if (track.title && track.artists) {
+        metaObj.title = track.title;
+        metaObj.artist = track.artists.join(', ');
+        if (track.album) {
+            metaObj.album = track.album;
+        }
+    } else {
+        metaObj.title = track.displayText();
+    }
+
+    navigator.mediaSession.metadata = new MediaMetadata(metaObj);
 });
 
 document.addEventListener('DOMContentLoaded', () => {

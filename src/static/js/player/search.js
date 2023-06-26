@@ -22,7 +22,7 @@ class Search {
 
         this.#trackFuse = new Fuse(tracks, {keys: [
             {name: 'title'},
-            {name: 'display'}
+            {name: 'path'}
         ]});
 
         this.#artistFuse = new Fuse(tracks, {keys: [

@@ -105,15 +105,22 @@ function replaceLyrics() {
     document.getElementById('lyrics-scroll').scrollTo({top: 0, behavior: 'smooth'});
 }
 
+function trackInfoUnavailableSpan() {
+    const span = document.createElement('span');
+    span.style.color = COLOR_MISSING_METADATA;
+    span.textContent = '[track info unavailable]';
+    return span;
+}
+
 function replaceTrackDisplayTitle() {
     if (queue.currentTrack !== null) {
         const track = queue.currentTrack.track();
         if (track !== null) {
             document.getElementById('current-track').replaceChildren(track.displayHtml(true));
-            document.title = track.display;
+            document.title = track.displayText(true);
         } else {
-            document.getElementById('current-track').replaceChildren('[track info unavailable]');
-            document.title = '';
+            document.getElementById('current-track').replaceChildren(trackInfoUnavailableSpan());
+            document.title = track.displayText(true);
         }
     } else {
         // Nothing playing
@@ -126,7 +133,7 @@ function replaceTrackDisplayTitle() {
         if (previousTrack !== null) {
             document.getElementById('previous-track').replaceChildren(previousTrack.displayHtml(true));
         } else {
-            document.getElementById('previous-track').replaceChildren('[track info unavailable]');
+            document.getElementById('previous-track').replaceChildren(trackInfoUnavailableSpan());
         }
     } else {
         document.getElementById('previous-track').textContent = '-';

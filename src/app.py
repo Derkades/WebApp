@@ -364,7 +364,7 @@ def route_track_list():
                 playlist_json['tracks'].append({
                     'path': track.relpath,
                     'mtime': track.mtime,
-                    'display': meta.display_title(),
+                    'display': meta.display_title(),  # TODO can be removed
                     'duration': meta.duration,
                     'tags': meta.tags,
                     'title': meta.title,
