@@ -26,8 +26,7 @@ class Search {
         ]});
 
         this.#artistFuse = new Fuse(tracks, {keys: [
-            {name: 'artists'},
-            {name: 'albumArtist'}
+            {name: 'artists'}
         ]});
 
         this.#albumFuse = new Fuse(tracks, {keys: [
