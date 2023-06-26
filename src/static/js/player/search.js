@@ -37,23 +37,31 @@ class Search {
     }
 
     #performSearch() {
-        console.log('Searching');
         const query = this.#queryInput.value;
-        const tracks = this.#trackFuse.search(query, {limit: state.maxTrackListSizeSearch}).map(e => e.item.path);
 
         {
-            const results = this.#artistFuse.search(query, {limit: 5}).map(e => e.item);
+            const tracks = this.#trackFuse.search(query, {limit: 5}).map(e => e.item);
+            document.getElementById('search-result-tracks').replaceChildren(browse.generateTrackList(tracks));
+        }
+
+        {
+            const tracks = this.#artistFuse.search(query, {limit: 5}).map(e => e.item);
             const table = document.createElement('table');
             const listedArtists = new Set();
-            for (const result of results) {
-                for (const artist of result.artists) {
+            for (const track of tracks) {
+                for (const artist of track.artists) {
                     if (listedArtists.has(artist)) {
                         continue;
                     }
                     listedArtists.add(artist);
-                    const row = document.createElement('tr');
+
+                    const artistLink = document.createElement('a');
+                    artistLink.textContent = artist;
+                    artistLink.onclick = () => browse.browseArtist(artist);
+
                     const td = document.createElement('td');
-                    td.textContent = artist;
+                    td.append(artistLink);
+                    const row = document.createElement('tr');
                     row.append(td);
                     table.append(row);
                 }
@@ -62,31 +70,30 @@ class Search {
         }
 
         {
-            const results = this.#albumFuse.search(query, {limit: 5}).map(e => e.item);
-            const table = document.createElement('table');
+            const tracks = this.#albumFuse.search(query, {limit: 5}).map(e => e.item);
+            const newChildren = [];
             const listedAlbums = new Set();
-            for (const result of results) {
-                if (listedAlbums.has(result.album)) {
+            for (const track of tracks) {
+                if (listedAlbums.has(track.album)) {
                     continue;
                 }
-                listedAlbums.add(result.album);
+                listedAlbums.add(track.album);
 
-                const imgUri = `/get_album_cover?quality=tiny&path=${encodeURIComponent(result.path)}`
+                const imgUri = `/get_album_cover?quality=low&path=${encodeURIComponent(track.path)}`
                 const img = document.createElement('div');
-                img.style.height = '8rem';
-                img.style.width = '8rem';
+                img.style.display = 'inline-block';
+                img.style.margin = '.5rem';
+                img.style.height = '16rem';
+                img.style.width = '16rem';
                 img.style.borderRadius = 'var(--border-radius-amount)';
                 img.style.background = `url("${imgUri}") no-repeat center`;
                 img.style.backgroundSize = 'cover';
-                const tdCover = document.createElement('td');
-                tdCover.append(img);
-                const tdText = document.createElement('td');
-                tdText.textContent = result.album;
-                const row = document.createElement('tr');
-                row.append(tdCover, tdText);
-                table.append(row);
+                img.onclick = () => browse.browseAlbum(track.album, track.albumArtist);
+
+                newChildren.push(img);
+
             }
-            document.getElementById('search-result-albums').replaceChildren(table);
+            document.getElementById('search-result-albums').replaceChildren(...newChildren);
         }
     }
 }
