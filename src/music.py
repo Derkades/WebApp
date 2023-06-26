@@ -244,7 +244,7 @@ class Track:
 
         if audio_type in {AudioType.WEBM_OPUS_HIGH, AudioType.WEBM_OPUS_LOW}:
             input_options = ['-map_metadata', '-1']
-            bit_rate = '112k' if audio_type == AudioType.WEBM_OPUS_HIGH else '48k'
+            bit_rate = '96k' if audio_type == AudioType.WEBM_OPUS_HIGH else '48k'
             audio_options = ['-f', 'webm',
                              '-c:a', 'libopus',
                              '-b:a', bit_rate,

@@ -141,12 +141,12 @@
 
                 {% if offline_mode %}
                     <select id="settings-audio-type" disabled class="hidden">
-                        <option value="webm_opus_high" selected>{% trans %}112k Opus (very high quality, offline){% endtrans %}</option>
+                        <option value="webm_opus_high" selected>hidden</option>
                     </select>
                 {% else %}
                     <label for="settings-audio-type">{% trans %}Audio and image quality{% endtrans %}</label><br>
                     <select id="settings-audio-type">
-                        <option value="webm_opus_high" selected>{% trans %}112k Opus (very high quality, 60MB per hour){% endtrans %}</option>
+                        <option value="webm_opus_high" selected>{% trans %}96k Opus (high quality, 50MB per hour){% endtrans %}</option>
                         <option value="webm_opus_low">{% trans %}48k Opus (low quality, 20MB per hour){% endtrans %}</option>
                         <option value="mp4_aac">{% trans %}128k AAC (high quality, for iOS/Safari, 70MB per hour){% endtrans %}</option>
                     </select><br>
