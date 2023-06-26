@@ -4,9 +4,11 @@ from multiprocessing.pool import Pool
 from collections import Counter
 from datetime import datetime
 import time
-from itertools import count
+import tempfile
+import os
 
 from flask_babel import _
+os.environ['MPLCONFIGDIR'] = tempfile.mkdtemp(prefix='music-matplotlib')
 from matplotlib import pyplot as plt
 
 import db
