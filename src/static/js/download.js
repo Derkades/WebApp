@@ -14,10 +14,10 @@ function addToTotal(add) {
 }
 
 /**
- * @param {string} playlist
+ * @param {string} selectedPlaylist
  * @param {IDBDatabase} db
  */
-async function updateTrackList(playlist, db) {
+async function updateTrackList(selectedPlaylist, db) {
     const response = await fetch('/track_list');
     const json = await response.json();
 
@@ -27,38 +27,40 @@ async function updateTrackList(playlist, db) {
 
     const tx = db.transaction('audio', 'readonly');
 
-    for (const track of json.tracks) {
-        if (track.playlist !== playlist) {
+    for (const playlist of json.playlists) {
+        if (playlist.name !== selectedPlaylist) {
             continue;
         }
 
-        const req = tx.objectStore('audio').get(track.path);
-        req.onerror = () => console.warn(req);
+        for (const track of playlist.tracks) {
+            const req = tx.objectStore('audio').get(track.path);
+            req.onerror = () => console.warn(req);
 
-        req.onsuccess = () => {
-            /** @type {ArrayBuffer | undefined} */
-            const buffer = req.result;
-            if (buffer === undefined) {
-                const downloadedCol = document.createElement('td');
-                downloadedCol.classList.add('icon-col');
+            req.onsuccess = () => {
+                /** @type {ArrayBuffer | undefined} */
+                const buffer = req.result;
+                if (buffer === undefined) {
+                    const downloadedCol = document.createElement('td');
+                    downloadedCol.classList.add('icon-col');
 
-                const titleCol = document.createElement('td');
-                titleCol.textContent = track.display;
+                    const titleCol = document.createElement('td');
+                    titleCol.textContent = track.path;
 
-                const row = document.createElement('tr');
-                row.dataset.path = track.path;
-                row.append(downloadedCol, titleCol);
-                document.getElementById('table-body').appendChild(row);
-            } else {
-                const sizeCol = document.createElement('td');
-                const sizeMiB = buffer.byteLength / (1024*1024);
-                addToTotal(sizeMiB);
-                sizeCol.textContent = round(sizeMiB) + " MiB";
-                const titleCol = document.createElement('td');
-                titleCol.textContent = track.display;
-                const row = document.createElement('tr');
-                row.append(sizeCol, titleCol);
-                document.getElementById('table-body-downloaded').appendChild(row);
+                    const row = document.createElement('tr');
+                    row.dataset.path = track.path;
+                    row.append(downloadedCol, titleCol);
+                    document.getElementById('table-body').appendChild(row);
+                } else {
+                    const sizeCol = document.createElement('td');
+                    const sizeMiB = buffer.byteLength / (1024*1024);
+                    addToTotal(sizeMiB);
+                    sizeCol.textContent = round(sizeMiB) + " MiB";
+                    const titleCol = document.createElement('td');
+                    titleCol.textContent = track.path;
+                    const row = document.createElement('tr');
+                    row.append(sizeCol, titleCol);
+                    document.getElementById('table-body-downloaded').appendChild(row);
+                }
             }
         }
     }
@@ -73,8 +75,11 @@ async function downloadTracks(db) {
         const downloadCol = row.childNodes[0];
         downloadCol.textContent = '...';
         const path = row.dataset.path;
-        const audioUrl = '/get_track?path=' + encodeURIComponent(path);
+        const audioUrl = '/get_track?type=webm_opus_high&path=' + encodeURIComponent(path);
         const response = await fetch(audioUrl);
+        if (response.status != 200) {
+            throw new Error("Error status " + response.status);
+        }
         const audioData = await response.arrayBuffer();
         const tx = db.transaction('audio', 'readwrite');
         tx.objectStore('audio').add(audioData, path);
