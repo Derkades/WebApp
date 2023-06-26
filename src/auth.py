@@ -244,10 +244,9 @@ def log_in(conn: Connection, username: str, password: str) -> Optional[str]:
     remote_addr = request.remote_addr
     user_agent = request.headers['User-Agent'] if 'User-Agent' in request.headers else None
 
-    # TODO use unixepoch() after update to debian bookworm
     conn.execute("""
                  INSERT INTO session (user, token, creation_date, user_agent, remote_address, last_use)
-                 VALUES (?, ?, strftime('%s', 'now'), ?, ?, strftime('%s', 'now'))
+                 VALUES (?, ?, unixepoch(), ?, ?, unixepoch())
                  """,
                  (user_id, token, user_agent, remote_addr))
 
@@ -282,7 +281,7 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
         # TODO use unixepoch() after update to debian bookworm
         conn.execute("""
                      UPDATE session
-                     SET user_agent=?, remote_address=?, last_use=strftime('%s', 'now')
+                     SET user_agent=?, remote_address=?, last_use=unixepoch()
                      WHERE rowid=?
                      """,
                      (user_agent, remote_addr, session_rowid))
