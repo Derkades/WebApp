@@ -16,9 +16,20 @@ def _search_release_group(artist: str, title: str) -> str:
     """
     Search for a release group id using the provided search query
     """
-    result = musicbrainzngs.search_release_groups(title, artist=artist)
+    log.info('Looking for album release group: %s - %s', artist, title)
+    result = musicbrainzngs.search_release_groups(title, artist=artist, limit=1, type='album')
     groups = result['release-group-list']
-    return groups[0]['id'] if groups else None
+    if groups:
+        return groups[0]['id']
+
+    log.info('Looking for single/EP/other release group: %s - %s', artist, title)
+    result = musicbrainzngs.search_release_groups(title, artist=artist, limit=1)
+    groups = result['release-group-list']
+    if groups:
+        return groups[0]['id']
+
+    log.info('No release group found')
+    return None
 
 
 def _get_image(release_id: str) -> bytes | None:
@@ -50,16 +61,15 @@ def get_cover(artist: str, album: str) -> bytes | None:
     try:
         release = _search_release_group(artist, album)
         if release is None:
-            log.info('No release found')
             cache.store(cache_key, b'magic_no_cover')
             return None
 
-        log.info('Found release %s, downloading image...', release)
+        log.info('Found release group %s, downloading image...', release)
 
         image_bytes = _get_image(release)
 
         if not image_bytes:
-            log.info('Release has no front cover image')
+            log.info('Release group has no front cover image')
             cache.store(cache_key, b'magic_no_cover')
             return None
 
