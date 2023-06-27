@@ -120,7 +120,7 @@ function replaceTrackDisplayTitle() {
             document.title = track.displayText(true);
         } else {
             document.getElementById('current-track').replaceChildren(trackInfoUnavailableSpan());
-            document.title = track.displayText(true);
+            document.title = '[track info unavailable]';
         }
     } else {
         // Nothing playing
