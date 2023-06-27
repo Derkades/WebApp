@@ -34,9 +34,9 @@ class ThumbnailParameters:
 
 
 QUALITY_PARAMS_TABLE: dict[ImageQuality, ThumbnailParameters] = {
-    ImageQuality.HIGH: ThumbnailParameters(100, 1024),
-    ImageQuality.LOW: ThumbnailParameters(60, 512),
-    ImageQuality.TINY: ThumbnailParameters(60, 128),
+    ImageQuality.HIGH: ThumbnailParameters(95, 1024),
+    ImageQuality.LOW: ThumbnailParameters(70, 512),
+    ImageQuality.TINY: ThumbnailParameters(70, 128),
 }
 
 
