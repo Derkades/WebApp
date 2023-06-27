@@ -567,29 +567,13 @@ def user_playlist(conn: Connection, name: str, user_id: int) -> UserPlaylist:
         user_id
     Returns: List of UserPlaylist objects
     """
-    # TODO merge to single query when bookworm is released, with a version of sqlite3 supporting outer join
-
-    row1 = conn.execute('''
-                        SELECT (SELECT COUNT(*) FROM track WHERE playlist=playlist.path)
-                        FROM playlist
-                        WHERE path=?
-                        ''', (name,)).fetchone()
-    row2 = conn.execute('''
-                        SELECT write, favorite
-                        FROM user_playlist
-                        WHERE user=? and playlist=?
-                        ''', (user_id, name)).fetchone()
-
-    track_count, = row1
-
-    if row2 is not None:
-        write = row2[0] == 1
-        favorite = row2[1] == 1
-    else:
-        write = False
-        favorite = False
-
-    return UserPlaylist(conn, name, from_relpath(name), track_count, write, favorite)
+    row = conn.execute('''
+                       SELECT (SELECT COUNT(*) FROM track WHERE playlist=playlist.path), write, favorite
+                       FROM playlist LEFT JOIN user_playlist ON path = playlist AND user=?
+                       WHERE path=?
+                       ''', (user_id, name)).fetchone()
+    track_count, write, favorite = row
+    return UserPlaylist(conn, name, from_relpath(name), track_count, write == 1, favorite == 1)
 
 
 def playlists(conn: Connection) -> list[Playlist]:
@@ -607,30 +591,15 @@ def playlists(conn: Connection) -> list[Playlist]:
 
 
 def user_playlists(conn: Connection, user_id: int) -> list[UserPlaylist]:
+    rows = conn.execute('''
+                        SELECT path, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path), write, favorite
+                        FROM playlist LEFT JOIN user_playlist ON path = playlist AND user=?
+                        ORDER BY path ASC
+                        ''', (user_id,))
+
     playlist_list = []
-    # TODO merge to single query when bookworm is released, with a version of sqlite3 supporting outer join
 
-    rows1 = conn.execute('''
-                         SELECT playlist, write, favorite FROM user_playlist WHERE user=?
-                         ORDER BY favorite DESC, write DESC, playlist ASC
-                         ''', (user_id,)).fetchall()
-    rows2 = conn.execute('''
-                         SELECT path, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path)
-                         FROM playlist
-                         ORDER BY path ASC
-                         ''').fetchall()
-
-    names: set[str] = set()
-    for name, write, favorite in rows1:
-        for name2, track_count in rows2:
-            if name == name2:
-                names.add(name)
-                playlist_list.append(UserPlaylist(conn, name, from_relpath(name), track_count, write == 1, favorite == 1))
-                break
-
-    for name, track_count in rows2:
-        if name in names:
-            continue
-        playlist_list.append(UserPlaylist(conn, name, from_relpath(name), track_count, False, False))
+    for name, track_count, write, favorite in rows:
+        playlist_list.append(UserPlaylist(conn, name, from_relpath(name), track_count, write == 1, favorite == 1))
 
     return playlist_list
