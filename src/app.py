@@ -359,23 +359,35 @@ def route_track_list():
                 'write': playlist.write or user.admin,
                 'tracks': [],
             }
-            for track in playlist.tracks():
-                meta = track.metadata()
-                playlist_json['tracks'].append({
-                    'path': track.relpath,
-                    'mtime': track.mtime,
-                    'display': meta.display_title(),  # TODO can be removed
-                    'duration': meta.duration,
-                    'tags': meta.tags,
-                    'title': meta.title,
-                    'artists': meta.artists,
-                    'album': meta.album,
-                    'album_artist': meta.album_artist,
-                    # 'track_number': meta.track_number,
-                    'year': meta.year,
-                })
             playlist_response.append(playlist_json)
 
+            track_rows = conn.execute('''
+                                      SELECT path, mtime, duration, title, album, album_artist, year
+                                      FROM track
+                                      WHERE playlist=?
+                                      ''', (playlist.name,)).fetchall()
+
+            for relpath, mtime, duration, title, album, album_artist, year in track_rows:
+                track_json = {
+                    'path': relpath,
+                    'mtime': mtime,
+                    'duration': duration,
+                    'title': title,
+                    'album': album,
+                    'album_artist': album_artist,
+                    'year': year,
+                    'artists': None,
+                    'tags': [],
+                }
+                playlist_json['tracks'].append(track_json)
+
+                artist_rows = conn.execute('SELECT artist FROM track_artist WHERE track=?', (relpath,)).fetchall()
+                if artist_rows:
+                    track_json['artists'] = [row[0] for row in artist_rows]
+
+                tag_rows = conn.execute('SELECT tag FROM track_tag WHERE track=?', (relpath,))
+                for tag, in tag_rows:
+                    track_json['tags'].append(tag)
 
     return {'playlists': playlist_response}
 

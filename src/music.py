@@ -474,14 +474,6 @@ class Playlist:
 
         return Track.by_relpath(self.conn, track)
 
-    def tracks(self) -> list[Track]:
-        """
-        Get all tracks in this playlist as a list of Track objects
-        """
-        rows = self.conn.execute('SELECT path FROM track WHERE playlist=?',
-                                 (self.name,)).fetchall()
-        return [Track.by_relpath(self.conn, row[0]) for row in rows]
-
     def download(self, url: str) -> Generator[str, ]:
         """
         Start a download using yt-dlp
