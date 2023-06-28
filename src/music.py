@@ -424,7 +424,7 @@ class Playlist:
     path: Path
     track_count: int
 
-    def choose_track(self, user: Optional[User], tag_mode: Optional[Literal['allow', 'deny']], tags: Optional[list[str]]) -> Track:
+    def choose_track(self, user: Optional[User], tag_mode: Optional[Literal['allow', 'deny']] = None, tags: Optional[list[str]] = None) -> Track:
         """
         Randomly choose a track from this playlist directory
         Args:

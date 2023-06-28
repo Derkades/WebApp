@@ -191,11 +191,14 @@ def route_choose_track():
         user.verify_csrf(request.args['csrf'])
 
         dir_name = request.args['playlist_dir']
-        tag_mode = request.args['tag_mode']
-        assert tag_mode in {'allow', 'deny'}
-        tags = request.args['tags'].split(';')
         playlist = music.playlist(conn, dir_name)
-        chosen_track = playlist.choose_track(user, tag_mode=tag_mode, tags=tags)
+        if 'tag_mode' in request.args:
+            tag_mode = request.args['tag_mode']
+            assert tag_mode in {'allow', 'deny'}
+            tags = request.args['tags'].split(';')
+            chosen_track = playlist.choose_track(user, tag_mode=tag_mode, tags=tags)
+        else:
+            chosen_track = playlist.choose_track(user)
 
     return {'path': chosen_track.relpath}
 
