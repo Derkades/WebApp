@@ -76,7 +76,6 @@ class History {
     async scrobble() {
         const data = {
             track: this.currentlyPlayingTrack.path,
-            playlist: this.currentlyPlayingTrack.playlistName,
             startTimestamp: this.startTimestamp,
             lastfmEligible: this.currentlyPlayingTrack.duration > 30, // last.fm requires track to be at least 30 seconds
         }

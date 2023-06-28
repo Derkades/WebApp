@@ -885,7 +885,7 @@ def route_history_played():
         user.verify_csrf(request.json['csrf'])
 
         track = request.json['track']
-        playlist = request.json['playlist']
+        playlist = track[:track.index('/')]
 
         if 'timestamp' in request.json:
             timestamp = int(request.json['timestamp'])
