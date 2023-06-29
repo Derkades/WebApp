@@ -2,6 +2,7 @@ import logging
 from sqlite3 import Connection
 import traceback
 from urllib.parse import quote as urlencode
+import time
 
 import requests
 from requests import Response
@@ -95,6 +96,10 @@ class OfflineSync:
         log.info('Logged in successfully')
 
     def _download_track_content(self, path: str):
+        wait_period = 2
+        log.info('Waiting %s seconds to prevent exceeding API quotas', wait_period)
+        time.sleep(wait_period)
+
         log.info('Downloading audio data')
         response = self.request_get('/get_track?type=webm_opus_high&path=' + urlencode(path))
         assert response.status_code == 200
