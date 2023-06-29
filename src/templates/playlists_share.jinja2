@@ -1,12 +1,12 @@
 {% extends "base_static.jinja2" %}
 
 {% block title %}
-    {% trans %}Share playlist{% endtrans %}
+    {% trans %}Share playlist write access{% endtrans %}
 {% endblock title %}
 
 {% block content %}
 
-{{ page_heading(gettext('Share playlist'), back_url='/playlists') }}
+{{ page_heading(gettext('Share playlist write access'), back_url='/playlists') }}
 
 <p>{% trans %}Give someone else write access to the playlist: '{{ playlist }}'{% endtrans %}</p>
 <br>
