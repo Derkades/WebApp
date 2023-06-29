@@ -8,39 +8,76 @@
 
 {{ page_heading(gettext('Playlist manager')) }}
 
+<h2>{% trans %}My playlist{% endtrans %}</h2>
+<p>
+    {% trans %}Whenever a playlist needs to be selected, your playlist will be selected by default.{% endtrans %}
+    {% if primary_playlist %}
+        {% trans %}Your current primary playlist is '{{ primary_playlist }}'.{% endtrans %}
+    {% else %}
+        {% trans %}You do not have a playlist configured.{% endtrans %}
+    {% endif %}
+</p>
+
+<form action="/playlists_set_primary" method="POST">
+    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+    <select name="primary-playlist">
+        {% for playlist in playlists %}
+            <option value="{{ playlist.name }}" {% if playlist.name == primary_playlist %}selected{% endif %}>{{ playlist.name }}</option>
+        {% endfor %}
+    </select>
+    <input type="submit" value="{% trans %}Set as my playlist{% endtrans %}">
+</form>
+
+<h2>{% trans %}Create new playlist{% endtrans %}</h2>
+<form action="/playlists_create" method="POST">
+    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+    <input type="text" name="path" placeholder="{% trans %}Directory name{% endtrans %}">
+    <input type="submit" value="{% trans %}Create{% endtrans %}">
+</form>
+
+<h2>{% trans %}Playlists{% endtrans %}</h2>
 
 {% if user_is_admin %}
     <p>{% trans %}As an administrator, you can modify tracks in all playlists even without write access.{% endtrans %}</p>
-    <br>
 {% endif %}
+
+<p>
+{{ icon('star') }} Favorite playlist. Shows in the top row and is enabled by default.<br>
+{{ icon('file-edit') }} You are allowed to modify files in this playlist.<br>
+{{ icon('account-star') }} This is your primary playlist.<br>
+</p><br>
 
 <table class="table">
     <thead>
         <tr>
-            <th class="icon-col">{% trans %}Favorite{% endtrans %}</th>
+            {# <th class="icon-col">{% trans %}Favorite{% endtrans %}</th>
+            <th class="icon-col">{% trans %}Write access{% endtrans %}</th> #}
             <th>{% trans %}Name{% endtrans %}</th>
-            <th>{% trans %}Write access{% endtrans %}</th>
+            <th>{% trans %}Info{% endtrans %}</th>
             <th>{% trans %}Actions{% endtrans %}</th>
         </tr>
     </thead>
     <tbody>
         {% for playlist in playlists %}
             <tr>
-                <td class="icon-col">
-                    {% if playlist.favorite %}
-                        {{ icon('star') }}
-                    {% else %}
-                        {{ icon('star-off') }}
-                    {% endif %}
+                {# <td class="icon-col">
+
                 </td>
+                <td>
+
+                </td> #}
                 <td>
                     {{ playlist.name }}
                 </td>
                 <td>
+                    {% if playlist.favorite %}
+                        {{ icon('star') }}
+                    {% endif %}
                     {% if playlist.write  %}
-                        {% trans %}Yes{% endtrans %}
-                    {% else %}
-                        {% trans%}No{% endtrans %}
+                        {{ icon('file-edit') }}
+                    {% endif %}
+                    {% if playlist.name == primary_playlist  %}
+                        {{ icon('account-star') }}
                     {% endif %}
                 </td>
                 <td>
@@ -72,32 +109,5 @@
         {% endfor %}
     </tbody>
 </table>
-
-<h2>{% trans %}Primary playlist{% endtrans %}</h2>
-<p>
-    {% trans %}Whenever a playlist needs to be selected, your primary playlist will be selected by default.{% endtrans %}
-    {% if primary_playlist %}
-        {% trans %}Your current primary playlist is '{{ primary_playlist }}'.{% endtrans %}
-    {% else %}
-        {% trans %}You do not have a primary playlist configured.{% endtrans %}
-    {% endif %}
-</p>
-
-<form action="/playlists_set_primary" method="POST">
-    <input type="hidden" name="csrf" value="{{ csrf_token }}">
-    <select name="primary-playlist">
-        {% for playlist in playlists %}
-            <option value="{{ playlist.name }}" {% if playlist.name == primary_playlist %}selected{% endif %}>{{ playlist.name }}</option>
-        {% endfor %}
-    </select>
-    <input type="submit" value="{% trans %}Change primary playlist{% endtrans %}">
-</form>
-
-<h2>{% trans %}Create new playlist{% endtrans %}</h2>
-<form action="/playlists_create" method="POST">
-    <input type="hidden" name="csrf" value="{{ csrf_token }}">
-    <input type="text" name="path" placeholder="{% trans %}Directory name{% endtrans %}">
-    <input type="submit" value="{% trans %}Create{% endtrans %}">
-</form>
 
 {% endblock content %}
