@@ -316,7 +316,7 @@ kbd {
     border-radius: var(--border-radius-amount);
     overflow: hidden; /* prevent header from overlapping rounded corners */
     flex: 1; /* grow to fill container width */
-    min-width: 25rem;
+    min-width: min(100%, 25rem);
 }
 
 .card .card-header {
