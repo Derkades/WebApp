@@ -218,12 +218,12 @@ class Metadata:
         return self._filename_title_search()
 
 
-def probe(path: Path) -> Metadata:
+def probe(path: Path) -> Metadata | None:
     """
     Create Metadata object by running ffprobe on a file
     Args:
         path: Path to file
-    Returns: Metadata object
+    Returns: Metadata object, or None if ffprobe failed to read the file
     """
     command = [
         'ffprobe',
@@ -233,10 +233,14 @@ def probe(path: Path) -> Metadata:
         path.absolute().as_posix(),
     ]
 
-    result = subprocess.run(command,
-                            shell=False,
-                            check=True,
-                            capture_output=True)
+    try:
+        result = subprocess.run(command,
+                                shell=False,
+                                check=True,
+                                capture_output=True)
+    except subprocess.CalledProcessError:
+        log.warning('Error scanning track %s, is it corrupt?', path)
+        return None
 
     output_bytes = result.stdout
 

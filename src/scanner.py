@@ -44,11 +44,14 @@ class QueryParams:
     tag_data: list[dict[str, str]]
 
 
-def query_params(relpath: str, path: Path) -> QueryParams:
+def query_params(relpath: str, path: Path) -> QueryParams | None:
     """
     Create dictionary of track metadata, to be used as SQL query parameters
     """
     meta = metadata.probe(path)
+
+    if not meta:
+        return None
 
     main_data: dict[str, str|int|None] = {'path': relpath,
                                           'duration': meta.duration,
@@ -80,7 +83,7 @@ def scan_tracks(conn: Connection, playlist_name: str) -> None:
                                           (playlist_name,)).fetchall():
         track_path = music.from_relpath(track_relpath)
         if not track_path.exists():
-            log.info('deleting: %s', track_relpath)
+            log.info('Deleted: %s', track_relpath)
             conn.execute('DELETE FROM track WHERE path=?', (track_relpath,))
             conn.execute('''
                          INSERT INTO scanner_log (timestamp, action, playlist, track)
@@ -92,8 +95,12 @@ def scan_tracks(conn: Connection, playlist_name: str) -> None:
 
         file_mtime = int(track_path.stat().st_mtime)
         if file_mtime != track_db_mtime:
-            log.info('changed, update: %s (%s, %s)', track_relpath, file_mtime, track_db_mtime)
+            log.info('Changed, update: %s (%s, %s)', track_relpath, file_mtime, track_db_mtime)
             params = query_params(track_relpath, track_path)
+            if not params:
+                log.warning('Metadata error, delete track from database')
+                conn.execute('DELETE FROM track WHERE path=?', (track_relpath,))
+                continue
             conn.execute('''
                          UPDATE track
                          SET duration=:duration,
@@ -121,8 +128,11 @@ def scan_tracks(conn: Connection, playlist_name: str) -> None:
         relpath = music.to_relpath(track_path)
         if relpath not in paths_db:
             mtime = int(track_path.stat().st_mtime)
-            log.info('new track, insert: %s', relpath)
+            log.info('New track, insert: %s', relpath)
             params = query_params(relpath, track_path)
+            if not params:
+                log.warning('Skipping due to metadata error')
+                continue
             conn.execute('''
                          INSERT INTO track (path, playlist, duration, title, album, album_artist, track_number, year, mtime)
                          VALUES (:path, :playlist, :duration, :title, :album, :album_artist, :track_number, :year, :mtime)
