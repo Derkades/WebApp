@@ -16,7 +16,7 @@ class Editor {
         this.#currentlyEditingPath = track.path;
 
         // Set content of HTML input fields
-        document.getElementById('editor-html-title').replaceChildren(track.displayHtml());
+        document.getElementById('editor-html-title').textContent = track.path;
         document.getElementById('editor-title').value = track.title;
         document.getElementById('editor-album').value = track.album;
         document.getElementById('editor-artists').value = track.artists !== null ? track.artists.join('; ') : '';
