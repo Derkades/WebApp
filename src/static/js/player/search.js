@@ -1,50 +1,28 @@
 class Search {
     /** @type {HTMLInputElement} */
     #queryInput;
-    /** @type {Fuse} */
-    #trackFuse;
-    /** @type {Fuse} */
-    #artistFuse;
-    /** @type {Fuse} */
-    #albumFuse;
 
     constructor() {
         eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, () => {
-            this.initFuse();
             this.#performSearch();
         });
         this.#queryInput = document.getElementById('search-query');
         this.#queryInput.addEventListener('input', () => this.#performSearch());
     }
 
-    initFuse() {
-        const tracks = Object.values(state.tracks);
-
-        this.#trackFuse = new Fuse(tracks, {keys: [
-            {name: 'title'},
-            {name: 'path'}
-        ]});
-
-        this.#artistFuse = new Fuse(tracks, {keys: [
-            {name: 'artists'}
-        ]});
-
-        this.#albumFuse = new Fuse(tracks, {keys: [
-            {name: 'album', weight: 2},
-            {name: 'albumArtist'}
-        ]});
-    }
-
     #performSearch() {
         const query = this.#queryInput.value;
+        const allTracks = Object.values(state.tracks);
 
         {
-            const tracks = this.#trackFuse.search(query, {limit: 5}).map(e => e.item);
+            const tracks = fuzzysort.go(query, allTracks, {keys: ['title', 'path', 'artistsJoined', 'album'], limit: 10}).map(e => e.obj);
             document.getElementById('search-result-tracks').replaceChildren(browse.generateTrackList(tracks));
         }
 
         {
-            const tracks = this.#artistFuse.search(query, {limit: 5}).map(e => e.item);
+            const results = fuzzysort.go(query, allTracks, {key: 'artistsJoined', limit: 5});
+            const tracks = results.map(e => e.obj);
+
             const table = document.createElement('table');
             const listedArtists = new Set();
             for (const track of tracks) {
@@ -69,7 +47,7 @@ class Search {
         }
 
         {
-            const tracks = this.#albumFuse.search(query, {limit: 5}).map(e => e.item);
+            const tracks = fuzzysort.go(query, allTracks, {keys: ['album', 'albumArtist', 'artistsJoined'], limit: 5}).map(e => e.obj);
             const newChildren = [];
             const listedAlbums = new Set();
             for (const track of tracks) {

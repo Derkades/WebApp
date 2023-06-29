@@ -13,8 +13,10 @@ class Track {
     title;
     /** @type {Array<string> | null} */
     artists;
+    /** @type {string | null} */
+    artistsJoined;
     /** @type {Array<string> | null} */
-    artistsUppercase;
+    artistsUppercase; // for search library
     /** @type {string | null} */
     album;
     /** @type {string | null} */
@@ -34,7 +36,10 @@ class Track {
         this.tags = trackData.tags;
         this.title = trackData.title;
         this.artists = trackData.artists;
-        if (this.artists) this.artistsUppercase = this.artists.map(s => s.toUpperCase());
+        if (this.artists) {
+            this.artistsUppercase = this.artists.map(s => s.toUpperCase());
+            this.artistsJoined = this.artists.join('😀');
+        }
         this.album = trackData.album;
         if (this.album) this.albumUppercase = this.album.toUpperCase()
         this.albumArtist = trackData.album_artist;
