@@ -1122,7 +1122,7 @@ def route_file_changes():
                               SELECT timestamp, action, playlist, track
                               FROM scanner_log
                               ORDER BY id DESC
-                              LIMIT 500
+                              LIMIT 2000
                               ''')
 
         changes = [{'timestamp': timestamp,
