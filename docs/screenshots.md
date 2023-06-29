@@ -1,36 +1,41 @@
 # Screenshots
 
-## Music player
+## Music player (June 2023)
 
-![screenshot](https://downloads.rkslot.nl/music-player-screenshots/player2.png)
+![screenshot](https://downloads.rkslot.nl/music-player-screenshots/player3.png)
 
-## Home
+## Home (June 2023)
 
-![screenshot](https://downloads.rkslot.nl/music-player-screenshots/home.png)
+![screenshot](https://downloads.rkslot.nl/music-player-screenshots/home2.png)
 
-## Playback history
+## Playback history (March 2023)
 
 ![screenshot](https://downloads.rkslot.nl/music-player-screenshots/history.png)
 
-## Lyrics (outdated)
+## Lyrics (January 2023)
 
 ![screenshot](https://downloads.rkslot.nl/music-player-screenshots/lyrics.png)
 
-## Metadata editor
+## Metadata editor (January 2023)
 
 ![screenshot](https://downloads.rkslot.nl/music-player-screenshots/metadata-editor.png)
 
-## Browse and search
+## Browse and search (January 2023)
 
 ![screenshot](https://downloads.rkslot.nl/music-player-screenshots/browse.png)
 
-## Album view
+## Album view (January 2023)
 
 ![screenshot](https://downloads.rkslot.nl/music-player-screenshots/album-view.png)
 
-## Album cover meme mode
+## Album cover meme mode (April 2023)
+
 ![screenshot](https://downloads.rkslot.nl/music-player-screenshots/meme.png)
 
-## Account settings (outdated)
+## Account settings (January 2023)
 
 ![screenshot](https://downloads.rkslot.nl/music-player-screenshots/account.png)
+
+## Statistics (June 2023)
+
+![screenshot](https://downloads.rkslot.nl/music-player-screenshots/stats.png)
