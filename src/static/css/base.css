@@ -305,35 +305,6 @@ kbd {
     border-radius: .2rem;
 }
 
-.card-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.card {
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: var(--border-radius-amount);
-    overflow: hidden; /* prevent header from overlapping rounded corners */
-    flex: 1; /* grow to fill container width */
-    min-width: min(100%, 25rem);
-}
-
-.card .card-header {
-    background: rgba(0, 0, 0, 0.2);
-    padding: .5rem;
-    font-size: 1.3em;
-}
-
-.card .card-body {
-    padding: .5rem;
-}
-
-.card-progress {
-    height: 2px;
-    background-color: white;
-}
-
 .table {
     width: 100%;
     border-spacing: 0;
