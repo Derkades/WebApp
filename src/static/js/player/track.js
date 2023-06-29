@@ -98,7 +98,7 @@ class Track {
         } else {
             const span = document.createElement('span');
             span.style.color = COLOR_MISSING_METADATA;
-            span.textContent = this.path
+            span.textContent = this.path.substring(this.path.indexOf('/') + 1);
             html.append(span);
         }
         return html;
@@ -120,7 +120,7 @@ class Track {
                 text += ` [${this.year}]`;
             }
         } else {
-            text += this.path;
+            text += this.path.substring(this.path.indexOf('/') + 1);
         }
 
         return text;
