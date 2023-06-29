@@ -46,7 +46,7 @@ function youTubeDownload(event) {
 
     const output = document.getElementById('youtube-dl-output');
     output.style.backgroundColor = '';
-    output.textContent = 'downloading...';
+    output.textContent = 'Starting download...\n';
 
     const spinner = document.getElementById('youtube-dl-spinner');
     spinner.classList.remove('hidden');
