@@ -586,7 +586,7 @@ def user_playlists(conn: Connection, user_id: int) -> list[UserPlaylist]:
     rows = conn.execute('''
                         SELECT path, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path), write, favorite
                         FROM playlist LEFT JOIN user_playlist ON path = playlist AND user=?
-                        ORDER BY path ASC
+                        ORDER BY favorite DESC, write DESC, path ASC
                         ''', (user_id,))
 
     playlist_list = []
