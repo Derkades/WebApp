@@ -13,6 +13,7 @@ def _boolenv(name: str):
 csrf_validity_seconds = 3600
 
 user_agent = 'Super fancy music player (https://github.com/DanielKoomen/WebApp/)'
+user_agent_offline_sync = 'Super fancy music player (offline sync) (https://github.com/DanielKoomen/WebApp/)'
 music_dir = getenv('MUSIC_MUSIC_DIR', '/music')
 data_path = getenv('MUSIC_DATA_PATH', '/data')
 ffmpeg_loglevel = getenv('MUSIC_FFMPEG_LOGLEVEL', 'info')

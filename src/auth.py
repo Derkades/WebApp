@@ -52,6 +52,9 @@ class Session:
         if self.user_agent == settings.user_agent:
             return 'MusicPlayer'
 
+        if self.user_agent == settings.user_agent_offline_sync:
+            return 'MusicPlayer offline sync'
+
         browsers = ['Firefox', 'Chromium', 'Chrome', 'Vivaldi', 'Opera', 'Safari']
         systems = ['Windows', 'macOS', 'Android', 'iOS', 'Ubuntu', 'Debian', 'Fedora', 'Linux']
 

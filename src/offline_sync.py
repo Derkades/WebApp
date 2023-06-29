@@ -41,13 +41,13 @@ class OfflineSync:
     def request_get(self, route: str) -> Response:
         response = requests.get(self.base_url + route,
                                 headers={'Cookie': 'token=' + self.token,
-                                         'User-Agent': settings.user_agent},
+                                         'User-Agent': settings.user_agent_offline_sync},
                                 timeout=30)
         response.raise_for_status()
         return response
 
     def request_post(self, route: str, data) -> Response:
-        headers = {'User-Agent': settings.user_agent}
+        headers = {'User-Agent': settings.user_agent_offline_sync}
         if self.token is not None:
             headers['Cookie'] = 'token=' + self.token
         response = requests.post(self.base_url + route,
