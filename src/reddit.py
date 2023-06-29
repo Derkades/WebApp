@@ -80,20 +80,25 @@ def get_image(query: str) -> Optional[bytes]:
         query: Search query string
     Returns: Downloaded image bytes, or None if no image was found or an error occurred
     """
-    image_url = search(query)
-    if image_url is None:
-        return None
 
-    r = requests.get(image_url,
-                     timeout=10,
-                     headers={'User-Agent': settings.webscraping_user_agent})
+    # Disabled to prepare for Reddit API shutdown on 2023-07-01.
+    # Perhaps we can still get it to work with a personal API key
+    return None
 
-    if r.status_code != 200:
-        log.warning('Received status code %s while downloading image from Reddit', r.status_code)
-        return None
+    # image_url = search(query)
+    # if image_url is None:
+    #     return None
 
-    image_bytes = r.content
+    # r = requests.get(image_url,
+    #                  timeout=10,
+    #                  headers={'User-Agent': settings.webscraping_user_agent})
 
-    if not image.check_valid(image_bytes):
-        return None
-    return image_bytes
+    # if r.status_code != 200:
+    #     log.warning('Received status code %s while downloading image from Reddit', r.status_code)
+    #     return None
+
+    # image_bytes = r.content
+
+    # if not image.check_valid(image_bytes):
+    #     return None
+    # return image_bytes

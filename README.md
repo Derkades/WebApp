@@ -34,7 +34,7 @@ Music is important. However, when you're with a group, who is in charge? Everyon
 - Fair!
     - Audio is RMS-normalized. Loudly mastered EDM will be just as loud as quiet 80s tracks.
 - Fun!
-    - Enable 'Album cover meme mode' to replace album covers by memes that are sometimes funny (chosen memes are related to the song title).
+    - Enable 'Album cover meme mode' to replace album covers by (sometimes) funny memes related to the song title.
 
 ## Screenshots
 
