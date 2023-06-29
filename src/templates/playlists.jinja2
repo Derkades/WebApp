@@ -50,8 +50,6 @@
 <table class="table">
     <thead>
         <tr>
-            {# <th class="icon-col">{% trans %}Favorite{% endtrans %}</th>
-            <th class="icon-col">{% trans %}Write access{% endtrans %}</th> #}
             <th>{% trans %}Name{% endtrans %}</th>
             <th>{% trans %}Info{% endtrans %}</th>
             <th>{% trans %}Actions{% endtrans %}</th>
@@ -60,12 +58,6 @@
     <tbody>
         {% for playlist in playlists %}
             <tr>
-                {# <td class="icon-col">
-
-                </td>
-                <td>
-
-                </td> #}
                 <td>
                     {{ playlist.name }}
                 </td>

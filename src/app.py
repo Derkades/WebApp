@@ -1135,8 +1135,8 @@ def route_file_changes():
                            changes=changes)
 
 
-@app.route('/add_never_play', methods=['POST'])
-def route_add_never_play():
+@app.route('/dislikes_add', methods=['POST'])
+def route_add_dislikes_add():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
@@ -1146,22 +1146,25 @@ def route_add_never_play():
     return Response(None, 200)
 
 
-@app.route('/never_play')
-def route_never_play():
+@app.route('/dislikes')
+def route_dislikes():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         csrf_token = user.get_csrf()
         result = conn.execute('SELECT track FROM never_play WHERE user=?',
                               (user.user_id,)).fetchall()
-        tracks = [track for track, in result]
+        tracks = []
+        for path, in result:
+            track = Track.by_relpath(conn, path)
+            tracks.append((path, track.playlist, track.metadata().display_title()))
 
-    return render_template('never_play.jinja2',
+    return render_template('dislikes.jinja2',
                            csrf_token=csrf_token,
                            tracks=tracks)
 
 
-@app.route('/remove_never_play', methods=['POST'])
-def route_remove_never_play():
+@app.route('/dislikes_remove', methods=['POST'])
+def route_dislikes_remove():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.form['csrf'])
@@ -1169,7 +1172,7 @@ def route_remove_never_play():
         conn.execute('DELETE FROM never_play WHERE user=? AND track=?',
                      (user.user_id, track))
 
-    return redirect('/never_play')
+    return redirect('/dislikes')
 
 
 @app.route('/users')
