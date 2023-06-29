@@ -199,13 +199,13 @@ def _plots_playlists() -> list[str]:
     fig, ax = fig_start()
     ax.barh(*rows_to_xy(totals))
     ax.set_title(_('Total duration of tracks in playlists'))
-    ax.set_xlabel('Total duration in minutes')
+    ax.set_xlabel(_('Total duration in minutes'))
     plot_totals = fig_end(fig)
 
     fig, ax = fig_start()
     ax.barh(*rows_to_xy(means))
     ax.set_title(_('Mean duration of tracks in playlist'))
-    ax.set_xlabel('Mean duration in minutes')
+    ax.set_xlabel(_('Mean duration in minutes'))
     plot_means = fig_end(fig)
 
     return plot_counts, plot_totals, plot_means
