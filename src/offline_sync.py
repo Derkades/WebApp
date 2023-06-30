@@ -90,15 +90,19 @@ class OfflineSync:
             return
 
         token = response.json()['token']
-        self.db_offline.execute("INSERT INTO settings (key, value) VALUES ('sync_token', ?)",
-                                (token,))
+        self.db_offline.execute('''
+                                INSERT INTO settings (key, value)
+                                VALUES ('sync_token', ?)
+                                ON CONFLICT (key)
+                                    DO UPDATE SET value=?
+                                ''',
+                                (token, token))
         self.db_offline.commit()
         log.info('Logged in successfully')
 
     def _download_track_content(self, path: str):
-        wait_period = 2
-        log.info('Waiting %s seconds to prevent exceeding API quotas', wait_period)
-        time.sleep(wait_period)
+        log.info('Waiting to avoid API quotas')
+        time.sleep(2)
 
         log.info('Downloading audio data')
         response = self.request_get('/get_track?type=webm_opus_high&path=' + urlencode(path))
@@ -170,13 +174,20 @@ class OfflineSync:
                 self.db_music.execute('DELETE FROM track WHERE path=?',
                                       (path,))
 
-    def _prune_playlists(self, playlists: set[str]):
-        rows = self.db_music.execute('SELECT path FROM playlist').fetchall()
+    def _prune_playlists(self):
+        # Remove empty playlists
+        rows = self.db_music.execute(
+            '''
+            SELECT path
+            FROM playlist
+            WHERE (SELECT COUNT(*) FROM track WHERE track.playlist=playlist.path) = 0
+            ''').fetchall()
+
         for name, in rows:
-            if name not in playlists:
-                log.info('Delete playlist: %s', name)
-                self.db_music.execute('DELETE FROM playlist WHERE path=?',
-                                      (name,))
+            log.info('Delete empty playlist: %s', name)
+            self.db_music.execute('DELETE FROM playlist WHERE path=?',
+                                  (name,))
+
 
     def sync_tracks(self):
         log.info('Downloading track list')
@@ -198,10 +209,7 @@ class OfflineSync:
                                             (track['path'],)).fetchone()
                 if row:
                     mtime, = row
-                    if mtime == track['mtime']:
-                        # log.info('Up to date: %s', track['path'])
-                        pass
-                    else:
+                    if mtime != track['mtime']:
                         log.info('Out of date: %s', track['path'])
                         self._update_track(track)
                 else:
@@ -212,7 +220,7 @@ class OfflineSync:
                 self.db_music.commit()
 
         self._prune_tracks(track_paths)
-        self._prune_playlists({playlist['name'] for playlist in response['playlists']})
+        self._prune_playlists()
 
     def sync_history(self):
         csrf_token = self.request_get('/get_csrf').json()['token']
@@ -240,6 +248,7 @@ class OfflineSync:
 
 def main():
     if not settings.offline_mode:
+        log.warning('Refusing to sync, music player is not in offline mode')
         return
 
     with db.connect() as db_music, db.offline() as db_offline:
