@@ -1218,7 +1218,7 @@ def route_users_edit():
             new_password = request.form['new_password']
 
             if new_password != '':
-                hashed_password = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt())
+                hashed_password = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
                 conn.execute('UPDATE user SET password=? WHERE username=?',
                              (hashed_password, username))
                 conn.execute('''
