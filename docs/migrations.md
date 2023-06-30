@@ -6,6 +6,12 @@ To run a migration:
 3. Execute the migration by copying it line by line from top to bottom, pressing enter after every line.
 4. Exit using <kbd>Ctrl</kbd>+<kbd>D</kbd>
 
+## 2023-06-30
+offline.db (not music.db)
+```sql
+DROP TABLE settings;
+```
+
 ## 2023-06-15
 ```sql
 DROP TABLE now_playing;
