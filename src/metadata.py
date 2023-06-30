@@ -111,8 +111,9 @@ def split_meta_list(meta_list: str) -> list[str]:
     """
     entries = []
     for entry in meta_list.split(';'):
-        if entry.strip() != '':
-            entries.append(entry.strip())
+        entry = entry.strip()
+        if entry != '' and entry not in entries:
+            entries.append(entry)
     return entries
 
 
