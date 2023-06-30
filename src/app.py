@@ -1324,6 +1324,11 @@ def route_pwa():
     return '<meta http-equiv="refresh" content="0;URL=\'/player\'">'
 
 
+@app.route('/health_check')
+def route_health_check():
+    return Response('ok', content_type='text/plain')
+
+
 def is_mobile() -> bool:
     """
     Checks whether User-Agent looks like a mobile device (Android or iOS)
