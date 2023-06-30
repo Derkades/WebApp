@@ -132,6 +132,9 @@ def handle_cleanup(_args):
 
 
 def handle_vacuum(_args):
+    """
+    Handle command for database vacuuming
+    """
     log.info('Going to vacuum databases. This will take a long time if you have large databases. Do not abort.')
 
     log.info('Vacuuming music.db')
@@ -145,6 +148,14 @@ def handle_vacuum(_args):
     log.info('Vacuuming offline.db')
     with db.offline() as conn:
         conn.execute('VACUUM')
+
+
+def handle_sync(_args):
+    """
+    Handle command for offline mode sync
+    """
+    import offline_sync
+    offline_sync.sync()
 
 
 if __name__ == '__main__':
@@ -191,6 +202,10 @@ if __name__ == '__main__':
     cmd_vacuum = subparsers.add_parser('vacuum',
                                        help='issue vacuum command to clean up sqlite databases')
     cmd_vacuum.set_defaults(func=handle_vacuum)
+
+    cmd_sync = subparsers.add_parser('sync',
+                                     help='sync tracks from main server (offline mode)')
+    cmd_sync.set_defaults(func=handle_sync)
 
     parsed_args = parser.parse_args()
     parsed_args.func(parsed_args)

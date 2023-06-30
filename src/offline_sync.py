@@ -10,7 +10,6 @@ from requests.exceptions import RequestException
 
 import settings
 import db
-import logconfig
 
 
 log = logging.getLogger('app.offline')
@@ -246,7 +245,7 @@ class OfflineSync:
             self.db_offline.commit()
 
 
-def main():
+def sync():
     if not settings.offline_mode:
         log.warning('Refusing to sync, music player is not in offline mode')
         return
@@ -261,5 +260,6 @@ def main():
 
 
 if __name__ == '__main__':
+    import logconfig
     logconfig.apply()
-    main()
+    log.error('This script can no longer be executed directly, please use the manage command. See offline.md for more info.')

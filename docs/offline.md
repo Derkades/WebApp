@@ -15,7 +15,10 @@ To install the music player in offline mode, follow the [standard installation i
 
 ## Synchronization
 
-Run `docker compose exec music python3 offline_sync.py`.
+To synchronize history and music, run:
+```
+docker compose exec music manage sync
+```
 
 It is safe to abort synchronization using Ctrl+C. When restarted, it will resume where it left off.
 
@@ -23,7 +26,7 @@ Note that only favorite playlists will be downloaded. About 5GB of disk space is
 
 ## Reset
 
-To clear settings:
+To clear settings (like server URL, username, password):
 ```
 sqlite3 data/offline.db 'DELETE FROM settings;'
 ```
