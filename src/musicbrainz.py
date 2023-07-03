@@ -48,7 +48,7 @@ def _pick_release(release_group: str) -> str | None:
 
     # Try to find digital release, it usually has the highest quality cover
     for release in with_artwork:
-        if release['packaging'] == 'None':
+        if 'packaging' in release and release['packaging'] == 'None':
             log.info('Found packaging==None release: %s', release['id'])
             return release['id']
 
