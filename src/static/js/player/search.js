@@ -10,6 +10,13 @@ class Search {
         this.#queryInput.addEventListener('input', () => this.#performSearch());
     }
 
+    clearSearch() {
+        document.getElementById('search-query').value = '';
+        document.getElementById('search-result-tracks').replaceChildren();
+        document.getElementById('search-result-artists').replaceChildren();
+        document.getElementById('search-result-albums').replaceChildren();
+    }
+
     #performSearch() {
         const query = this.#queryInput.value;
         const allTracks = Object.values(state.tracks);
@@ -78,5 +85,7 @@ class Search {
 const search = new Search();
 
 document.addEventListener('DOMContentLoaded', () => {
-
+    document.getElementById('open-dialog-search').addEventListener('click', () => {
+        search.clearSearch();
+    })
 });
