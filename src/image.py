@@ -34,7 +34,7 @@ class ThumbnailParameters:
 
 
 QUALITY_PARAMS_TABLE: dict[ImageQuality, ThumbnailParameters] = {
-    ImageQuality.HIGH: ThumbnailParameters(95, 1024),
+    ImageQuality.HIGH: ThumbnailParameters(95, 1200), # 1200x1200 matches MusicBrainz cover
     ImageQuality.LOW: ThumbnailParameters(70, 512),
     ImageQuality.TINY: ThumbnailParameters(70, 128),
 }
