@@ -10,17 +10,22 @@
 
 <form method="GET">
     <input type="hidden" name="period" value="day">
-    <input type="submit" value="Day">
+    <input type="submit" value="{% trans %}Day{% endtrans %}">
 </form>
 
 <form method="GET">
     <input type="hidden" name="period" value="week">
-    <input type="submit" value="Week">
+    <input type="submit" value="{% trans %}Week{% endtrans %}">
 </form>
 
 <form method="GET">
     <input type="hidden" name="period" value="month">
-    <input type="submit" value="Month">
+    <input type="submit" value="{% trans %}Month{% endtrans %}">
+</form>
+
+<form method="GET">
+    <input type="hidden" name="period" value="year">
+    <input type="submit" value="{% trans %}Year{% endtrans %}">
 </form>
 
 <h2>{% trans %}Summary ({{ period_str }}){% endtrans %}</h2>

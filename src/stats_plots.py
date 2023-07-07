@@ -32,11 +32,11 @@ class StatsPeriod(Enum):
 
     def translated_str(self):
         if self == StatsPeriod.DAY:
-            return _('last 24 hours')
+            return _('last day')
         elif self == StatsPeriod.WEEK:
-            return _('last 7 days')
+            return _('last week')
         elif self == StatsPeriod.MONTH:
-            return _('last 30 days')
+            return _('last month')
         elif self == StatsPeriod.YEAR:
             return _('last year')
 
