@@ -1,3 +1,4 @@
+from enum import Enum, unique
 from io import BytesIO
 from base64 import b64encode
 from multiprocessing.pool import Pool
@@ -20,6 +21,40 @@ import cache
 COUNTER_AMOUNT = 10
 
 plt.style.use(('dark_background', 'fast'))
+
+
+@unique
+class StatsPeriod(Enum):
+    DAY = 24*60*60
+    WEEK = 7*DAY
+    MONTH = 30*DAY
+    YEAR = 365*DAY
+
+    def translated_str(self):
+        if self == StatsPeriod.DAY:
+            return _('last 24 hours')
+        elif self == StatsPeriod.WEEK:
+            return _('last 7 days')
+        elif self == StatsPeriod.MONTH:
+            return _('last 30 days')
+        elif self == StatsPeriod.YEAR:
+            return _('last year')
+
+        raise ValueError()
+
+    @staticmethod
+    def from_str(period: str):
+        if period == 'day':
+            return StatsPeriod.DAY
+        elif period == 'week':
+            return StatsPeriod.WEEK
+        elif period == 'month':
+            return StatsPeriod.MONTH
+        elif period == 'year':
+            return StatsPeriod.YEAR
+
+        raise ValueError()
+
 
 def fig_start():
     fig = plt.figure(figsize=(7, 4),)
@@ -52,8 +87,9 @@ def rows_to_xy(rows: list[tuple]):
     return xs, ys
 
 
-def _plots_history(after_timestamp: int) -> list[str]:
+def _plots_history(period: StatsPeriod) -> list[str]:
     with db.connect(read_only=True) as conn:
+        after_timestamp = int(time.time()) - period.value
         result = conn.execute('''
                             SELECT timestamp, user.username, history.track, history.playlist
                             FROM history
@@ -221,24 +257,28 @@ def _plots_metadata() -> list[str]:
     return plot_years,
 
 
-def _plots_cached(plots_fun):
-    plots_result = cache.retrieve_json(plots_fun.__name__, return_expired=False)
+def _plots_cached(plots_fun, key = None):
+    if key is None:
+        key = plots_fun.__name__
+
+    plots_result = cache.retrieve_json(key, return_expired=False)
     if plots_result is None:
         plots_result = plots_fun()
-        cache.store_json(plots_fun.__name__, plots_result, duration=3600)
+        cache.store_json(key, plots_result, duration=3600)
     return plots_result
 
 
-def get_plots(after_timestamp: int) -> list[str]:
+def get_plots(period: StatsPeriod) -> list[str]:
     """
     Get list of plots
     Args:
-        after_timestamp: Unix timestamp (seconds). Only history data more recent than
+        period: Unix timestamp (seconds). Only history data more recent than
                          this timestamp is considered.
     Returns: List of plots, as strings containing base64 encoded SVG data
     """
+
     return [
-        *_plots_history(after_timestamp),
+        *_plots_cached(lambda: _plots_history(period), 'plots_history' + str(period.value)),
         *_plots_cached(_plots_last_played),
         *_plots_cached(_plots_playlists),
         *_plots_cached(_plots_metadata)

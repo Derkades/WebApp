@@ -32,6 +32,7 @@ import packer
 if not settings.offline_mode:
     # Matplotlib is slow to import, skip if not needed
     import stats_plots
+    from stats_plots import StatsPeriod
 
 
 LANGUAGES = (
@@ -1019,27 +1020,16 @@ def route_stats():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
 
-        current = int(time.time())
         if 'period' in request.args:
-            period = request.args['period']
-            if period == 'day':
-                before = current - 60*60*24
-                period_str = _('last 24 hours')
-            elif period == 'week':
-                before = current - 60*60*24*7
-                period_str = _('last 7 days')
-            elif period == 'month':
-                before = current - 60*60*24*30
-                period_str = _('last 30 days')
+            period = StatsPeriod.from_str(request.args['period'])
         else:
-            before = current - 60*60*24*7
-            period_str = _('last 7 days')
+            period = StatsPeriod.WEEK
 
     # This takes a long time, so the database connection is closed
-    plots = stats_plots.get_plots(before)
+    plots = stats_plots.get_plots(period)
 
     return render_template('stats.jinja2',
-                           period_str=period_str,
+                           period_str=period.translated_str(),
                            plots=plots)
 
 
