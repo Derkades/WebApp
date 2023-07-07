@@ -13,6 +13,8 @@ from matplotlib import pyplot as plt
 
 import db
 from music import Track
+import cache
+
 
 # Number of entries to display in a plot, for counters
 COUNTER_AMOUNT = 10
@@ -50,20 +52,7 @@ def rows_to_xy(rows: list[tuple]):
     return xs, ys
 
 
-# def _time_xticks(hour_offset: int):
-#     xticks_x = []
-#     xticks_y = []
-#     for i in count(hour_offset, 3):
-#         if i > hour_offset + 24:
-#             break
-#         xticks_x.append(i - hour_offset)
-#         xticks_y.append(f'{i % 24:02}:00')
-#     plt.xticks(xticks_x, xticks_y)
-
-
 def _plots_history(after_timestamp: int) -> list[str]:
-    # tod_offset = 3
-
     with db.connect(read_only=True) as conn:
         result = conn.execute('''
                             SELECT timestamp, user.username, history.track, history.playlist
@@ -85,7 +74,6 @@ def _plots_history(after_timestamp: int) -> list[str]:
             user_counter.update((username,))
 
             dt = datetime.fromtimestamp(timestamp)
-            # time_of_day.append(dt.hour - tod_offset)
             time_of_day.append(dt.hour)
             day_of_week.append(dt.weekday())
 
@@ -121,7 +109,6 @@ def _plots_history(after_timestamp: int) -> list[str]:
     ax.set_ylabel(_('Tracks played'))
     ax.set_xticks(list(range(0, 24, 3)) + [24])
     ax.set_xticklabels([f'{i:02}:00' for i in range(0, 24, 3)] + ['00:00'])
-    # _time_xticks(tod_offset)
     plot_tod = fig_end(fig)
 
     fig, ax = fig_start()
@@ -234,6 +221,14 @@ def _plots_metadata() -> list[str]:
     return plot_years,
 
 
+def _plots_cached(plots_fun):
+    plots_result = cache.retrieve_json(plots_fun.__name__, return_expired=False)
+    if plots_result is None:
+        plots_result = plots_fun()
+        cache.store_json(plots_fun.__name__, plots_result, duration=3600)
+    return plots_result
+
+
 def get_plots(after_timestamp: int) -> list[str]:
     """
     Get list of plots
@@ -242,13 +237,9 @@ def get_plots(after_timestamp: int) -> list[str]:
                          this timestamp is considered.
     Returns: List of plots, as strings containing base64 encoded SVG data
     """
-    with Pool(4) as p:
-        r_history = p.apply_async(_plots_history, (after_timestamp,))
-        r_last_played = p.apply_async(_plots_last_played)
-        r_playlists = p.apply_async(_plots_playlists)
-        r_metadata = p.apply_async(_plots_metadata)
-
-        return [*r_history.get(),
-                *r_last_played.get(),
-                *r_playlists.get(),
-                *r_metadata.get()]
+    return [
+        *_plots_history(after_timestamp),
+        *_plots_cached(_plots_last_played),
+        *_plots_cached(_plots_playlists),
+        *_plots_cached(_plots_metadata)
+    ]

@@ -79,18 +79,18 @@ def cleanup():
                             (int(time.time()),)).rowcount
 
 
-def store_json(key: str, data: Any) -> None:
+def store_json(key: str, data: Any, **kwargs) -> None:
     """
     Dump object as json, encode as utf-8 and then use store()
     """
-    store(key, json.dumps(data).encode())
+    store(key, json.dumps(data).encode(), **kwargs)
 
 
-def retrieve_json(cache_key: str) -> Any | None:
+def retrieve_json(cache_key: str, **kwargs) -> Any | None:
     """
     Retrieve bytes, if exists decode and return object
     """
-    data = retrieve(cache_key)
+    data = retrieve(cache_key, **kwargs)
     if data is None:
         return None
 
