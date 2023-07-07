@@ -11,23 +11,72 @@ import random
 import db
 
 
-# Number of seconds after which cache entries are considered outdated
-CACHE_OUTDATED_TIME = 60*60*24*60  # 2 months
-CACHE_OUTDATED_PROB = 0.05
-
 log = logging.getLogger('app.cache')
 
 
-def store(key: str, data: bytes) -> None:
+def _legacy_cleanup() -> int:
     """
-    Save data to cache
+    Remove entries from cache that have not been used for a long time
+    Returns: Number of removed entries
     """
     with db.cache() as conn:
-        timestamp = int(time.time())
+        month_ago = int(time.time()) - 30*24*60*60
+        return conn.execute('DELETE FROM cache WHERE access_time < ?', (month_ago,)).rowcount
+
+
+def store(key: str,
+          data: bytes,
+          duration: int | None = None) -> None:
+    with db.cache() as conn:
+        if duration is None:
+            # Varying cache duration, between 30 and 60 days
+            duration = random.randint(30*24*60*60, 60*24*60*60)
+
+        expire_time = int(time.time()) + duration
         conn.execute("""
-                     INSERT OR REPLACE INTO cache (key, data, update_time, access_time)
-                     VALUES (?, ?, ?, ?)
-                     """, (key, data, timestamp, timestamp))
+                     INSERT OR REPLACE INTO cache2 (key, data, expire_time)
+                     VALUES (?, ?, ?)
+                     """, (key, data, expire_time))
+
+
+def retrieve(key: str,
+             return_expired: bool = True) -> bytes | None:
+    with db.cache(read_only=True) as conn:
+        row = conn.execute('SELECT data, expire_time FROM cache2 WHERE key=?',
+                           (key,)).fetchone()
+
+        if row is None:
+            # Not cached, try legacy cache
+            # Don't update access_time, so entries are slowly deleted by cleanup()
+            row = conn.execute('SELECT data FROM cache WHERE key=?',
+                               (key,)).fetchone()
+
+            if row is None:
+                return None
+
+            log.info('Cache entry returned from legacy cache')
+            return row[0]
+
+        data, expire_time = row
+
+        if expire_time < time.time():
+            if return_expired:
+                log.info('Cache entry has expired, returning it anyway')
+                return data
+
+            return None
+
+        return data
+
+
+def cleanup():
+    # Also cleanup old table
+    legacy_rowcount = _legacy_cleanup()
+    log.info('Deleted %s entries from legacy cache', legacy_rowcount)
+
+    with db.cache() as conn:
+        return conn.execute('DELETE FROM cache2 WHERE expire_time < ?',
+                            (int(time.time()),)).rowcount
 
 
 def store_json(key: str, data: Any) -> None:
@@ -36,35 +85,6 @@ def store_json(key: str, data: Any) -> None:
     """
     store(key, json.dumps(data).encode())
 
-
-def retrieve(key: str) -> bytes | None:
-    """
-    Retrieve data from cache.
-    Returns: Cached data bytes or None if data is not cached.
-    """
-    with db.cache() as conn:
-        row = conn.execute('SELECT data, update_time FROM cache WHERE key=?',
-                           (key,)).fetchone()
-
-        if row is None:
-            # Not cached
-            return None
-
-        data, update_time = row
-
-        current_time = int(time.time())
-
-        # log.info('Cache entry last updated %s days ago', int((current_time - update_time) / (60 * 60 * 24)))
-
-        if current_time - update_time > CACHE_OUTDATED_TIME and random.random() < CACHE_OUTDATED_PROB:
-            log.info('Cache entry is outdated, pretend it doesn\'t exist')
-            # Pretend it's not cached
-            return None
-
-        conn.execute('UPDATE cache SET access_time=? WHERE key=?',
-                     (current_time, key))
-
-        return data
 
 def retrieve_json(cache_key: str) -> Any | None:
     """
@@ -75,12 +95,3 @@ def retrieve_json(cache_key: str) -> Any | None:
         return None
 
     return json.loads(data.decode())
-
-def cleanup() -> int:
-    """
-    Remove entries from cache that have not been used for a long time
-    Returns: Number of removed entries
-    """
-    with db.cache() as conn:
-        two_months_ago = int(time.time()) - 60*60*24*30*2
-        return conn.execute('DELETE FROM cache WHERE access_time < ?', (two_months_ago,)).rowcount
