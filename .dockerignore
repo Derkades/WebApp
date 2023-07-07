@@ -1,7 +1,7 @@
 /music/
 /data/
 /.git/
-__pycache__/
-.mypy_cache/
-messages.pot
-messages.mo
+**/__pycache__/
+**/.mypy_cache/
+**/messages.pot
+**/messages.mo
