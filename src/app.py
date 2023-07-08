@@ -479,21 +479,17 @@ def route_files():
             if music.is_trashed(path) != show_trashed:
                 continue
 
-            file_info = {
-                'path': music.to_relpath(path),
-                'name': path.name,
-            }
+            file_info = {'path': music.to_relpath(path),
+                         'name': path.name,
+                         'type': 'dir' if path.is_dir() else 'file'}
             children.append(file_info)
 
-            if path.is_dir():
-                file_info['type'] = 'dir'
-            else:
-                file_info['type'] = 'file'
+            if not path.is_dir():
                 track = Track.by_relpath(conn, music.to_relpath(path))
                 if track:
                     meta = track.metadata()
                     file_info['type'] = 'music'
-                    file_info['artist'] = ' & '.join(meta.artists) if meta.artists else ''
+                    file_info['artist'] = ', '.join(meta.artists) if meta.artists else ''
                     file_info['title'] = meta.title if meta.title else ''
 
     children = sorted(children, key=lambda x: x['name'])
@@ -728,7 +724,7 @@ def route_change_password_form():
             return _('Repeated new passwords do not match.')
 
         user.update_password(request.form['new_password'])
-        return _('Password updated. All sessions have been invalidated. You will need to log in again.')
+        return redirect('/')
 
 
 def radio_track_response(track: RadioTrack):
@@ -1026,7 +1022,6 @@ def route_stats():
         else:
             period = StatsPeriod.WEEK
 
-    # This takes a long time, so the database connection is closed
     plots = stats_plots.get_plots(period)
 
     return render_template('stats.jinja2',
