@@ -155,7 +155,7 @@ def handle_sync(_args):
     Handle command for offline mode sync
     """
     import offline_sync
-    offline_sync.sync()
+    offline_sync.do_sync()
 
 
 if __name__ == '__main__':

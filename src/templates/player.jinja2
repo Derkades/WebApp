@@ -61,7 +61,9 @@
                 {{ icon_button('album', 'button-album', title=gettext('Show album cover instead of lyrics')) }} #}
                 {{ icon_button('pencil', 'button-edit', title=gettext('Open metadata editor')) }}
                 {{ icon_button('thumb-down', 'button-never-play', title=gettext('Never play again')) }}
-                {{ icon_button('delete', 'button-delete-track', title=gettext('Delete currently playing track from playlist')) }}
+                {% if not offline_mode %}
+                    {{ icon_button('delete', 'button-delete-track', title=gettext('Delete currently playing track from playlist')) }}
+                {% endif %}
                 {{ icon_button('content-duplicate', 'button-copy', title=gettext('Copy track to your primary playlist')) }}
 
                 <div id="delete-spinner" class="spinner hidden"></div>
@@ -286,6 +288,20 @@
         </div>
     </div>
 
+    {% if not offline_mode %}
+        <div id="dialog-copy" class="full-page-overlay dialog-overlay overlay-hidden">
+            <div class="dialog">
+                {{ dialog_header('dialog-copy', gettext('Copy track')) }}
+                <div class="dialog-body">
+                    <p>{% trans %}Select playlist to copy track to:{% endtrans %}</p>
+                    <input type="hidden" id="copy-track">
+                    <select id="copy-playlist" class="playlist-select playlist-select-writable"></select>
+                    <button id="copy-do-button">{% trans %}Copy{% endtrans %}</button>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
     <div id="loading-overlay" class="full-page-overlay">
         <div>
             <div class="flex-content-center">
@@ -312,9 +328,6 @@
     <script src="/player.js"></script>
 
     <div class="hidden" id="primary-playlist">{{ primary_playlist }}</div>
-    {% if offline_mode %}
-        <div class="hidden" id="offline-mode-enabled"></div>
-    {% endif %}
     <div class="hidden" id="trans-artist">{% trans %}Artist: {% endtrans %}</div>
     <div class="hidden" id="trans-album">{% trans %}Album: {% endtrans %}</div>
     <div class="hidden" id="trans-tag">{% trans %}Tag: {% endtrans %}</div>

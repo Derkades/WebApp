@@ -91,19 +91,30 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('Editor button missing from page, this is normal if you are not an admin user');
     }
 
-    const copyButton = document.getElementById('button-copy');
-    copyButton.addEventListener('click', () => {
-        const onError = response => {
+    const copyOpenButton = document.getElementById('button-copy');
+    if (copyOpenButton) { // Missing in offline mode
+        const copyTrack = document.getElementById('copy-track');
+        const copyPlaylist = document.getElementById('copy-playlist');
+        const copyButton = document.getElementById('copy-do-button');
+        copyOpenButton.addEventListener('click', () => {
+            copyTrack.value = queue.currentTrack.path;
+            dialogs.open('dialog-copy');
+        });
+        copyButton.addEventListener('click', async function() {
+            copyButton.disabled = true;
+            const response = await jsonPost('/player_copy_track', {playlist: copyPlaylist.value, track: queue.currentTrack.trackPath}, false);
+            console.log(response.status);
             if (response.status == 200) {
-                response.text().then(text => alert(text));
+                const text = await response.text();
+                if (text != "") {
+                    alert(text);
+                }
             } else {
-                alert('error');
+                alert('Error');
             }
-        }
-        jsonPost('/player_copy_track', {track: queue.currentTrack.trackPath}, onError)
-    });
-    if (document.getElementById('offline-mode-enabled') !== null) {
-        copyButton.classList.add('hidden');
+            dialogs.close('dialog-copy');
+            copyButton.disabled = false;
+        });
     }
 
     queue.next();

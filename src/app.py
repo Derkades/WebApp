@@ -1248,12 +1248,10 @@ def route_player_copy_track():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
-        if user.primary_playlist is None:
-            return Response(_('No playlist configured. Please configure a primay playlist in playlist manager.'), 200)
+        playlist_name = request.json['playlist']
 
-        playlist = music.user_playlist(conn, user.primary_playlist, user.user_id)
-        if not playlist.write and not user.admin:
-            return Response(_('No write permission for playlist: %(playlist)s', playlist=playlist.name), 200)
+        playlist = music.user_playlist(conn, playlist_name, user.user_id)
+        assert playlist.write or user.admin
 
         track = Track.by_relpath(conn, request.json['track'])
 
@@ -1264,7 +1262,7 @@ def route_player_copy_track():
 
         scanner.scan_tracks(conn, playlist.name)
 
-        return Response(_('File has been successfully copied to your playlist: %(playlist)s', playlist=playlist.name), 200)
+        return Response(None, 200)
 
 
 @app.route('/install')

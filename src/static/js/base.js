@@ -65,13 +65,3 @@ function getCookie(cname) {
 function choice(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
 }
-
-/**
- * Throw error if response status code is an error code
- * @param {Response} response
- */
-function checkResponseCode(response) {
-    if (response.status != 200) {
-        throw 'response code ' + response.status;
-    }
-}

@@ -187,7 +187,6 @@ class OfflineSync:
             self.db_music.execute('DELETE FROM playlist WHERE path=?',
                                   (name,))
 
-
     def sync_tracks(self):
         log.info('Downloading track list')
         response = self.request_get('/track_list').json()
@@ -245,7 +244,7 @@ class OfflineSync:
             self.db_offline.commit()
 
 
-def sync():
+def do_sync():
     if not settings.offline_mode:
         log.warning('Refusing to sync, music player is not in offline mode')
         return

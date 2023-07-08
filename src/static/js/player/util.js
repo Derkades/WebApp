@@ -12,11 +12,21 @@ function createIconButton(iconName, classes) {
 }
 
 /**
+ * Throw error if response status code is an error code
+ * @param {Response} response
+ */
+function checkResponseCode(response) {
+    if (response.status != 200) {
+        throw 'response code ' + response.status;
+    }
+}
+
+/**
  * @param {string} url
  * @param {object} postDataObject
- * @returns {Response}
+ * @returns {Promise<Response>}
  */
-async function jsonPost(url, postDataObject, onErrorStatus) {
+async function jsonPost(url, postDataObject, checkError = true) {
     postDataObject.csrf = await csrf.getToken();
     const options = {
         method: 'POST',
@@ -26,10 +36,8 @@ async function jsonPost(url, postDataObject, onErrorStatus) {
         }),
     };
     const response = await fetch(new Request(url, options));
-    if (onErrorStatus === undefined) {
+    if (checkError) {
         checkResponseCode(response);
-    } else {
-        onErrorStatus(response);
     }
     return response;
 }
