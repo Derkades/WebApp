@@ -149,7 +149,7 @@
                 {% endif %}
             </td>
 
-            <td class="button-col">
+            {# <td class="button-col">
                 {% if file['type'] != 'dir' %}
                     <form method="GET" action="/get_track" class="inline-block">
                         <input type="hidden" name="type" value="mp3_with_metadata">
@@ -157,7 +157,7 @@
                         {{ icon_button('earbuds', title=gettext('Download transcoded MP3 with metadata')) }}
                     </form>
                 {% endif %}
-            </td>
+            </td> #}
         </tr>
         {% endfor %}
     </tbody>
