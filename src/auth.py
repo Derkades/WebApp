@@ -55,6 +55,9 @@ class Session:
         if self.user_agent == settings.user_agent_offline_sync:
             return 'MusicPlayer offline sync'
 
+        if self.user_agent == 'rmp-playback-server':
+            return 'Playback server'
+
         browsers = ['Firefox', 'Chromium', 'Chrome', 'Vivaldi', 'Opera', 'Safari']
         systems = ['Windows', 'macOS', 'Android', 'iOS', 'Ubuntu', 'Debian', 'Fedora', 'Linux']
 
