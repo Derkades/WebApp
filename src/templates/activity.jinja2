@@ -170,7 +170,9 @@ const historyTable = document.getElementById('tbody-history');
 
 async function updateNowPlaying() {
     const response = await fetch('/activity_data');
-    checkResponseCode(response);
+    if (response.status != 200) {
+        return;
+    }
     const json = await response.json();
     console.debug('Fetched data', json);
 
