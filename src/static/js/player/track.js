@@ -106,7 +106,11 @@ class Track {
             if (this.album) {
                 const albumHtml = document.createElement('a');
                 albumHtml.onclick = () => browse.browseAlbum(this.album, this.albumArtist);
-                albumHtml.textContent = this.album;
+                if (this.albumArtist) {
+                    albumHtml.textContent = this.albumArtist + ' - ' + this.album;
+                } else {
+                    albumHtml.textContent = this.album;
+                }
                 secondary.append(albumHtml);
                 if (this.year) {
                     secondary.append(', ');
