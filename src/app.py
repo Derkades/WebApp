@@ -18,18 +18,19 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 import auth
 from auth import AuthError, RequestTokenError
 import db
+import downloader
 import genius
 import image
 from image import ImageFormat, ImageQuality
 import lastfm
 import music
 from music import AudioType, Playlist, Track
+import metadata
 import radio
 from radio import RadioTrack
 import scanner
 import settings
 import packer
-import downloader
 
 if not settings.offline_mode:
     # Matplotlib is slow to import, skip if not needed
@@ -1137,12 +1138,13 @@ def route_dislikes():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         csrf_token = user.get_csrf()
-        result = conn.execute('SELECT track FROM never_play WHERE user=?',
-                              (user.user_id,)).fetchall()
-        tracks = []
-        for path, in result:
-            track = Track.by_relpath(conn, path)
-            tracks.append((path, track.playlist, track.metadata().display_title()))
+        rows = conn.execute('''
+                            SELECT playlist, track
+                            FROM never_play JOIN track on never_play.track = track.path
+                            WHERE user=?
+                            ''', (user.user_id,)).fetchall()
+        tracks = [(path, playlist, metadata.cached(conn, path).display_title())
+                  for playlist, path in rows]
 
     return render_template('dislikes.jinja2',
                            csrf_token=csrf_token,
