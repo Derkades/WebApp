@@ -17,14 +17,14 @@
         </tr>
     </thead>
     <tbody>
-        {% for path, playlist, display in tracks %}
+        {% for track in tracks %}
             <tr>
-                <td>{{ playlist }}</td>
-                <td>{{ display }}</td>
+                <td>{{ track.playlist }}</td>
+                <td>{{ track.title }}</td>
                 <td>
                     <form action="/dislikes_remove" method="POST">
                         <input type="hidden" name="csrf" value="{{ csrf_token }}">
-                        <input type="hidden" name="track" value="{{ path }}">
+                        <input type="hidden" name="track" value="{{ track.path }}">
                         <input type="submit" value="{% trans %}Undo{% endtrans %}">
                     </form>
                 </td>

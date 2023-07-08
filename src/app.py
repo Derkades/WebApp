@@ -1143,7 +1143,9 @@ def route_dislikes():
                             FROM never_play JOIN track on never_play.track = track.path
                             WHERE user=?
                             ''', (user.user_id,)).fetchall()
-        tracks = [(path, playlist, metadata.cached(conn, path).display_title())
+        tracks = [{'path': path,
+                   'playlist': playlist,
+                   'title': metadata.cached(conn, path).display_title()}
                   for playlist, path in rows]
 
     return render_template('dislikes.jinja2',
@@ -1156,9 +1158,8 @@ def route_dislikes_remove():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.form['csrf'])
-        track = request.form['track']
         conn.execute('DELETE FROM never_play WHERE user=? AND track=?',
-                     (user.user_id, track))
+                     (user.user_id, request.form['track']))
 
     return redirect('/dislikes')
 
@@ -1237,40 +1238,6 @@ def route_users_new():
                      (username, hashed_password))
 
     return redirect('/users')
-
-
-@app.route('/users_add_playlist', methods=['GET', 'POST'])
-def route_users_add_playlist():
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, require_admin=True)
-
-        if request.method == 'GET':
-            csrf_token = user.get_csrf()
-            username = request.args['username']
-
-            result = conn.execute('SELECT path FROM playlist')
-            playlists = [row[0] for row in result]
-
-            return render_template('users_add_playlist.jinja2',
-                                   csrf_token=csrf_token,
-                                   username=username,
-                                   playlists=playlists)
-        else:
-            user.verify_csrf(request.form['csrf'])
-            username = request.form['username']
-            playlist = request.form['playlist']
-
-            user_id, = conn.execute('SELECT id FROM user WHERE username=?',
-                                    (username,)).fetchone()
-
-            conn.execute('''
-                         INSERT INTO user_playlist (user, playlist, write)
-                         VALUES (?, ?, 1)
-                         ON CONFLICT (user, playlist)
-                         DO UPDATE SET write=1
-                         ''', (user_id, playlist))
-
-            return redirect('/users')
 
 
 @app.route('/player_copy_track', methods=['POST'])

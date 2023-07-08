@@ -27,7 +27,6 @@
             <th>{% trans %}Admin{% endtrans %}</th>
             <th>{% trans %}Primary playlist{% endtrans %}</th>
             <th>{% trans %}Writable playlists{% endtrans %}</th>
-            <th>{% trans %}Edit{% endtrans %}</th>
         </tr>
     </thead>
     <tbody>
@@ -53,10 +52,6 @@
                     <form action="/users_edit">
                         <input type="hidden" name="username" value="{{ user.username }}">
                         <input type="submit" value="{% trans %}Edit{% endtrans %}">
-                    </form>
-                    <form action="/users_add_playlist">
-                        <input type="hidden" name="username" value="{{ user.username }}">
-                        <input type="submit" value="{% trans %}Add playlist{% endtrans %}">
                     </form>
                 </td>
             </tr>
