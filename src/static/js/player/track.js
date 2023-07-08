@@ -133,24 +133,6 @@ class Track {
             text += this.artists.join(', ');
             text += ' - ';
             text += this.title;
-
-            if (this.year || this.album) {
-                text += ' [';
-                if (this.album) {
-                    text += this.album;
-                    if (this.year) {
-                        text += ', ';
-                    }
-                }
-                if (this.year) {
-                    text += this.year;
-                }
-                this.text += ']';
-            }
-
-            if (this.year !== null) {
-                text += ` [${this.year}]`;
-            }
         } else {
             text += this.path.substring(this.path.indexOf('/') + 1);
         }
