@@ -474,17 +474,6 @@ class Playlist:
 
         return Track.by_relpath(self.conn, track)
 
-    def download(self, url: str) -> Generator[str, ]:
-        """
-        Start a download using yt-dlp
-        Args:
-            url: URL to download
-        Yields: yt-dlp log output
-        Returns: yt-dlp status code
-        """
-        return downloader.download(self.path, url)
-
-
     def has_write_permission(self, user: User) -> bool:
         """
         Check if user is allowed to modify files in a playlist.
@@ -498,10 +487,7 @@ class Playlist:
         row = self.conn.execute('SELECT write FROM user_playlist WHERE playlist=? AND user=?',
                                 (self.name, user.user_id)).fetchone()
 
-        if row is None:
-            return False
-
-        return row[0]
+        return row is not None and row[0]
 
     def stats(self) -> PlaylistStats:
         """
@@ -536,10 +522,11 @@ class UserPlaylist(Playlist):
 
 def playlist(conn: Connection, name: str) -> Playlist:
     """
-    Get playlist object from the name of a music directory, using information from the database.
+    Get playlist by name
     Args:
+        conn: Database connection
         name: Name of directory
-    Returns: Playlist instance
+    Returns: Playlist object
     """
     row = conn.execute('''
                         SELECT (SELECT COUNT(*) FROM track WHERE playlist=playlist.path)
@@ -553,11 +540,12 @@ def playlist(conn: Connection, name: str) -> Playlist:
 
 def user_playlist(conn: Connection, name: str, user_id: int) -> UserPlaylist:
     """
-    Get list of favorite playlists
+    Get playlist by name, with user-specific information
     Args:
-        conn
+        conn: Database connection
+        name: Playlist name
         user_id
-    Returns: List of UserPlaylist objects
+    Returns: UserPlaylist object
     """
     row = conn.execute('''
                        SELECT (SELECT COUNT(*) FROM track WHERE playlist=playlist.path), write, favorite
@@ -583,15 +571,18 @@ def playlists(conn: Connection) -> list[Playlist]:
 
 
 def user_playlists(conn: Connection, user_id: int) -> list[UserPlaylist]:
+    """
+    List playlists, with user-specific information
+    Args:
+        conn: Database connection
+        user_id
+    Returns: List of UserPlaylist objects
+    """
     rows = conn.execute('''
                         SELECT path, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path), write, favorite
                         FROM playlist LEFT JOIN user_playlist ON path = playlist AND user=?
                         ORDER BY favorite DESC, write DESC, path ASC
                         ''', (user_id,))
 
-    playlist_list = []
-
-    for name, track_count, write, favorite in rows:
-        playlist_list.append(UserPlaylist(conn, name, from_relpath(name), track_count, write == 1, favorite == 1))
-
-    return playlist_list
+    return [UserPlaylist(conn, name, from_relpath(name), track_count, write == 1, favorite == 1)
+            for name, track_count, write, favorite in rows]

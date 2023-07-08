@@ -35,7 +35,7 @@ class Session:
 
     @property
     def last_use_ago(self) -> str:
-        seconds_ago = self.last_use- int(time.time())
+        seconds_ago = self.last_use - int(time.time())
         return flask_babel.format_timedelta(seconds_ago, add_direction=True)
 
     @property
@@ -284,7 +284,6 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
     try:
         remote_addr = request.remote_addr
         user_agent = request.headers['User-Agent'] if 'User-Agent' in request.headers else None
-        # TODO use unixepoch() after update to debian bookworm
         conn.execute("""
                      UPDATE session
                      SET user_agent=?, remote_address=?, last_use=unixepoch()

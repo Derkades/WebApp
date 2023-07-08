@@ -29,6 +29,8 @@ from radio import RadioTrack
 import scanner
 import settings
 import packer
+import downloader
+
 if not settings.offline_mode:
     # Matplotlib is slow to import, skip if not needed
     import stats_plots
@@ -330,7 +332,7 @@ def route_ytdl():
     # Release database connection during download
 
     def generate():
-        status_code = yield from playlist.download(url)
+        status_code = yield from downloader.download(playlist.path, url)
         if status_code == 0:
             yield 'Scanning playlists...\n'
             with db.connect() as conn:
@@ -390,8 +392,7 @@ def route_track_list():
                     track_json['artists'] = [row[0] for row in artist_rows]
 
                 tag_rows = conn.execute('SELECT tag FROM track_tag WHERE track=?', (relpath,))
-                for tag, in tag_rows:
-                    track_json['tags'].append(tag)
+                track_json['tags'] = [tag for tag, in tag_rows]
 
     return {'playlists': playlist_response}
 
