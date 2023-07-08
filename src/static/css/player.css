@@ -225,7 +225,7 @@ body.light .progress-time {
 }
 
 #queue-table td {
-    height: 3.5rem;
+    height: 4.5rem;
     cursor: grab;
 }
 
@@ -234,13 +234,16 @@ body.light .progress-time {
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
-    width: 3.5rem;
+    width: 4.5rem;
     cursor: pointer;
 }
 
-#queue-table td.downloading,
-#queue-table td:nth-child(2) {
+#queue-table td.downloading {
     text-align: center;
+}
+
+#queue-table td:nth-child(2) {
+    padding-left: .5rem;
 }
 
 .delete-overlay {

@@ -63,13 +63,6 @@ class Track {
         const html = document.createElement('span');
         html.classList.add('track-display-html');
 
-        if (showPlaylist) {
-            const playlistHtml = document.createElement('a');
-            playlistHtml.onclick = () => browse.browsePlaylist(this.playlistName);
-            playlistHtml.textContent = this.playlistName;
-            html.append(playlistHtml, ': ');
-        }
-
         if (this.artists !== null && this.title !== null) {
             let first = true;
             for (const artist of this.artists) {
@@ -85,27 +78,47 @@ class Track {
                 html.append(artistHtml);
             }
 
-            html.append(' - ');
-
-            let titleHtml;
-            if (this.album !== null) {
-                titleHtml = document.createElement('a');;
-                titleHtml.onclick = () => browse.browseAlbum(this.album, this.albumArtist);
-            } else {
-                titleHtml = document.createElement('span');
-            }
-            titleHtml.textContent = this.title;
-            html.append(titleHtml);
-
-            if (this.year !== null) {
-                html.append(` [${this.year}]`);
-            }
+            html.append(' - ' + this.title);
         } else {
             const span = document.createElement('span');
             span.style.color = COLOR_MISSING_METADATA;
             span.textContent = this.path.substring(this.path.indexOf('/') + 1);
             html.append(span);
         }
+
+        const secondary = document.createElement('span');
+        secondary.classList.add('secondary');
+        secondary.append(document.createElement('br'));
+        html.append(secondary);
+
+        if (showPlaylist) {
+            const playlistHtml = document.createElement('a');
+            playlistHtml.onclick = () => browse.browsePlaylist(this.playlistName);
+            playlistHtml.textContent = this.playlistName;
+            secondary.append(playlistHtml);
+        }
+
+        if (this.year || this.album) {
+            if (showPlaylist) {
+                secondary.append(', ');
+            }
+
+            if (this.album) {
+                const albumHtml = document.createElement('a');
+                albumHtml.onclick = () => browse.browseAlbum(this.album, this.albumArtist);
+                albumHtml.textContent = this.album;
+                secondary.append(albumHtml);
+                if (this.year) {
+                    secondary.append(', ');
+                }
+            }
+
+            if (this.year) {
+                secondary.append(this.year);
+            }
+
+        }
+
         return html;
     };
 
@@ -120,6 +133,20 @@ class Track {
             text += this.artists.join(', ');
             text += ' - ';
             text += this.title;
+
+            if (this.year || this.album) {
+                text += ' [';
+                if (this.album) {
+                    text += this.album;
+                    if (this.year) {
+                        text += ', ';
+                    }
+                }
+                if (this.year) {
+                    text += this.year;
+                }
+                this.text += ']';
+            }
 
             if (this.year !== null) {
                 text += ` [${this.year}]`;

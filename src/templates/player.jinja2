@@ -40,7 +40,7 @@
                 <p>
                     <span id="current-track">{% trans %}Waiting for music in queue...{% endtrans %}</span>
                 </p>
-                <p class="secondary">
+                <p class="seconday hidden">
                     {% trans %}Previously: {% endtrans %} <span id="previous-track">-</span>
                 </p>
 
@@ -106,7 +106,7 @@
     <div class="sidebar sidebar-right hidden" id="sidebar-lyrics">
         <div id="lyrics-box" class="lyrics-outer box-rounded box-solid">
             <div id="lyrics-scroll">
-                <i id="lyrics-not-found" class="secondary hidden">{% trans %}No lyrics found{% endtrans %}</i>
+                <i id="lyrics-not-found" class="hidden">{% trans %}No lyrics found{% endtrans %}</i>
                 <span id="lyrics-text"></span>
                 <br>
                 <a id="lyrics-source" class="secondary hidden" href="#" target="_blank">{% trans %}Source{% endtrans %}</a>
@@ -335,7 +335,7 @@
 
     <template id="template-queue-spinner">
         <tr>
-            <td colspan="3" class="secondary downloading">
+            <td colspan="2" class="secondary downloading">
                 <span class="spinner"></span>
             </td>
         </tr>

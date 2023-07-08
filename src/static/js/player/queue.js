@@ -121,21 +121,10 @@ class Queue {
             const rememberI = i;
             tdCover.onclick = () => queue.removeFromQueue(rememberI);
 
-            // Playlist link that opens browse view
-            const aPlaylist = document.createElement('a');
-            if (track !== null) {
-                aPlaylist.textContent = track.playlistName;
-                aPlaylist.onclick = () => browse.browsePlaylist(track.playlistName);
-            } else {
-                aPlaylist.textContent = '?';
-            }
-            const tdPlaylist = document.createElement('td');
-            tdPlaylist.append(aPlaylist);
-
             // Track title HTML
             const tdTrack = document.createElement('td');
             if (track !== null) {
-                tdTrack.appendChild(track.displayHtml());
+                tdTrack.appendChild(track.displayHtml(true));
             } else {
                 tdTrack.textContent = '[track info unavailable]';
             }
@@ -144,7 +133,6 @@ class Queue {
             const row = document.createElement('tr');
             row.dataset.queuePos = i;
             row.appendChild(tdCover);
-            row.appendChild(tdPlaylist);
             row.appendChild(tdTrack);
 
             rows.push(row);
@@ -251,7 +239,7 @@ class Queue {
         if (this.currentTrack !== null) {
             this.previousTracks.push(this.currentTrack);
             // If history exceeded maximum length, remove first (oldest) element
-            if (this.previousTracks.length > 5) {
+            if (this.previousTracks.length > state.maxHistorySize) {
                 const removedTrack = this.previousTracks.shift();
                 console.info('Revoke objects', removedTrack.trackPath)
                 URL.revokeObjectURL(removedTrack.audioBlobUrl);

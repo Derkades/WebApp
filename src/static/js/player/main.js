@@ -3,6 +3,8 @@ const state = {
     maxTrackListSize: 500,
     /** @type {int} */
     maxTrackListSizeSearch: 25,
+    /** @type {int} */
+    maxHistorySize: 3,
     /** @type {string} */
     lastChosenPlaylist: null,
     /** @type {Array<string>} */

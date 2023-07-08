@@ -76,7 +76,7 @@ body.light .secondary {
     color: #303030;
 }
 
-p.secondary {
+.secondary {
     font-size: .8em;
 }
 
