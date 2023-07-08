@@ -8,10 +8,10 @@
 
 {{ page_heading(gettext('Rename file'), back_url=back_url) }}
 
-<form method="POST">
+<form method="POST" style="width: 100%;">
     <input type="hidden" name="csrf" value="{{ csrf_token }}">
     <input type="hidden" name="path" value="{{ path }}">
-    <input type="text" name="new-name" value="{{ name }}" size="70">
+    <input type="text" name="new-name" value="{{ name }}" size="100" style="max-width: 100%;"><br>
     <input type="submit" value="{% trans %}Rename{% endtrans %}">
 </form>
 
