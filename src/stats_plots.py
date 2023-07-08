@@ -1,7 +1,6 @@
 from enum import Enum, unique
 from io import BytesIO
 from base64 import b64encode
-from multiprocessing.pool import Pool
 from collections import Counter
 from datetime import datetime
 import time
@@ -257,17 +256,6 @@ def _plots_metadata() -> list[str]:
     return plot_years,
 
 
-def _plots_cached(plots_fun, key = None):
-    if key is None:
-        key = plots_fun.__name__
-
-    plots_result = cache.retrieve_json(key, return_expired=False)
-    if plots_result is None:
-        plots_result = plots_fun()
-        cache.store_json(key, plots_result, duration=3600)
-    return plots_result
-
-
 def get_plots(period: StatsPeriod) -> list[str]:
     """
     Get list of plots
@@ -277,9 +265,18 @@ def get_plots(period: StatsPeriod) -> list[str]:
     Returns: List of plots, as strings containing base64 encoded SVG data
     """
 
-    return [
-        *_plots_cached(lambda: _plots_history(period), 'plots_history' + str(period.value)),
-        *_plots_cached(_plots_last_played),
-        *_plots_cached(_plots_playlists),
-        *_plots_cached(_plots_metadata)
-    ]
+    cache_duration = 3600
+
+    plots_time_based = cache.retrieve_json(f'plots_time_based{period.value}', return_expired=False)
+    if plots_time_based is None:
+        plots_time_based = _plots_history(period)
+        cache.store_json(f'plots_time_based{period.value}', plots_time_based, duration=cache_duration)
+
+    plots_other = cache.retrieve_json('plots', return_expired=False)
+    if plots_other is None:
+        plots_other = [*_plots_last_played(),
+                       *_plots_playlists(),
+                       *_plots_metadata()]
+        cache.store_json('plots', plots_other, duration=cache_duration)
+
+    return [*plots_time_based, *plots_other]
