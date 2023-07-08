@@ -17,7 +17,13 @@ services:
       - type: bind
         source: ./src
         target: /app
+      - type: tmpfs
+        target: /tmp
+        tmpfs:
+          size: 128M
     user: "1000"
+    read_only: true
+    cap_drop: ['all']
     environment:
       TZ: Europe/Amsterdam
       MUSIC_ENV: dev

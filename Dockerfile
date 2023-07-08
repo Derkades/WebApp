@@ -15,6 +15,11 @@ WORKDIR /app
 
 RUN PYTHONDONTWRITEBYTECODE=1 pybabel compile -d translations
 
-ENV PYTHONUNBUFFERED=1
+ENV PYTHONUNBUFFERED 1
+
+# For fontconfig: https://wiki.archlinux.org/title/Font_configuration#Fontconfig_configuration
+ENV XDG_CACHE_HOME /tmp
+
+USER 1000
 
 ENTRYPOINT ["/entrypoint.sh"]

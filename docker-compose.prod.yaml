@@ -12,7 +12,13 @@ services:
       - type: bind
         source: ./data
         target: /data
-    user: "1000"
+      - type: tmpfs
+        target: /tmp
+        tmpfs:
+          size: 128M
+    # user: '1000' # optionally, change user id
+    read_only: true
+    cap_drop: ['all']
     environment:
       TZ: Europe/Amsterdam
       MUSIC_PROXIES_X_FORWARDED_FOR: 1

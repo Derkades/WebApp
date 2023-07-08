@@ -10,7 +10,6 @@ from dataclasses import dataclass
 from sqlite3 import Connection
 from enum import Enum
 import random
-from typing import Generator
 
 from auth import User
 import cache
@@ -22,7 +21,6 @@ import musicbrainz
 import reddit
 import image
 from image import ImageFormat, ImageQuality
-import downloader
 
 if TYPE_CHECKING:
     from metadata import Metadata
@@ -60,10 +58,10 @@ def from_relpath(relpath: str) -> Path:
     traversal protection.
     """
     if relpath.startswith('/'):
-        raise Exception('Relative path must not start with /')
+        raise ValueError('Relative path must not start with /')
     path = Path(settings.music_dir, relpath).absolute()
     if not path.is_relative_to(Path(settings.music_dir)):
-        raise Exception('Must not go outside of music base directory')
+        raise ValueError('Must not go outside of music base directory')
     return path
 
 
