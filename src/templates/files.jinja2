@@ -12,7 +12,7 @@
     {% if parent_path == '.' %}
         {# Not necessary, but looks better #}
         {% set back_url = '/files' %}
-    {% elif parent_path_uri %}
+    {% elif parent_path %}
         {% set back_url = '/files?path=' + (parent_path|urlencode) %}
     {% endif %}
     {{ page_heading(gettext('Files in: %(dir)s', dir=base_path), back_url=back_url) }}
@@ -51,7 +51,6 @@
                     </td>
                     <td>
                         <input type="submit" value="{% trans %}Create{% endtrans %}">
-
                     </td>
                 </tr>
             </form>
