@@ -359,6 +359,9 @@ def route_track_list():
         playlist_response: list[dict[str, Any]] = []
 
         for playlist in user_playlists:
+            if playlist.track_count == 0:
+                continue
+
             playlist_json = {
                 'name': playlist.name,
                 'track_count': playlist.track_count,
