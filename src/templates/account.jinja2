@@ -39,16 +39,8 @@
             <tr>
                 <td>{{ session.creation_date }}</td>
                 <td>{{ session.last_use_ago }}</td>
-                <td>
-                    {# {% if session == user.session %} #}
-                        {# {% trans device=session.last_device %}{{ device }} (current session){%endtrans%} #}
-                    {# {% else %} #}
-                        {{ session.last_device }}
-                    {# {% endif %} #}
-                </td>
-                <td>
-                    {{ session.remote_address }}
-                </td>
+                <td>{{ session.last_device }}</td>
+                <td>{{ session.remote_address }}</td>
             </tr>
         {% endfor %}
     </tbody>
@@ -64,6 +56,13 @@
     {% trans %}Repeat new password{% endtrans %}<br>
     <input type="password" value="" name="repeat_new_password"><br>
     <input type="submit" value="{% trans %}Change password{% endtrans %}">
+</form>
+
+<h2>{% trans %}Change nickname{% endtrans %}</h2>
+<form method="POST" action="/change_nickname_form">
+    <input type="hidden" value="{{ csrf_token }}" name="csrf_token">
+    <input type="text" value="{{ user.nickname }}" name="nickname"><br>
+    <input type="submit" value="{% trans %}Change nickname{% endtrans %}">
 </form>
 
 {% endblock content %}

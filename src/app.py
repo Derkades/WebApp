@@ -731,6 +731,21 @@ def route_change_password_form():
         return redirect('/')
 
 
+@app.route('/change_nickname_form', methods=['POST'])
+def route_change_nickname_form():
+    """
+    Form target to change nickname, called from /account page
+    """
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
+        user.verify_csrf(request.form['csrf_token'])
+
+        conn.execute('UPDATE user SET nickname=? WHERE id=?',
+                     (request.form['nickname'], user.user_id))
+
+        return redirect('/account')
+
+
 def radio_track_response(track: RadioTrack):
     return {
         'path': track.track.relpath,
@@ -938,7 +953,7 @@ def route_activity_data():
         auth.verify_auth_cookie(conn)
 
         result = conn.execute('''
-                              SELECT user.username, track.playlist, track, paused, progress
+                              SELECT user.username, user.nickname, track.playlist, track, paused, progress
                               FROM now_playing
                                 JOIN user ON now_playing.user = user.id
                                 JOIN track ON now_playing.track = track.path
@@ -947,11 +962,11 @@ def route_activity_data():
                               (int(time.time()) - 20,))  # based on JS update interval
 
         now_playing = []
-        for username, playlist_name, relpath, paused, progress in result:
+        for username, nickname, playlist_name, relpath, paused, progress in result:
             track = Track.by_relpath(conn, relpath)
             meta = track.metadata()
             now_playing.append({'path': relpath,
-                             'username': username,
+                             'username': nickname if nickname else username,
                              'playlist': playlist_name,
                              'title': meta.title,
                              'artists': meta.artists,
