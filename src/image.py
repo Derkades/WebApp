@@ -28,15 +28,15 @@ class ImageQuality(Enum):
 
 
 @dataclass
-class ThumbnailParameters:
+class ImageParameters:
     quality: int
     resolution: int
 
 
-QUALITY_PARAMS_TABLE: dict[ImageQuality, ThumbnailParameters] = {
-    ImageQuality.HIGH: ThumbnailParameters(95, 1200), # 1200x1200 matches MusicBrainz cover
-    ImageQuality.LOW: ThumbnailParameters(70, 512),
-    ImageQuality.TINY: ThumbnailParameters(70, 128),
+QUALITY_PARAMS_TABLE: dict[ImageQuality, ImageParameters] = {
+    ImageQuality.HIGH: ImageParameters(95, 1200), # 1200x1200 matches MusicBrainz cover
+    ImageQuality.LOW: ImageParameters(70, 600),
+    ImageQuality.TINY: ImageParameters(70, 250),
 }
 
 

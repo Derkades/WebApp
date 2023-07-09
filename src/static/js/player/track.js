@@ -13,10 +13,8 @@ class Track {
     title;
     /** @type {Array<string> | null} */
     artists;
-    /** @type {string | null} */
-    artistsJoined;
     /** @type {Array<string> | null} */
-    artistsUppercase; // for search library
+    artistsUppercase; // for browse.js
     /** @type {string | null} */
     album;
     /** @type {string | null} */
@@ -24,9 +22,11 @@ class Track {
     /** @type {string | null} */
     albumArtist;
     /** @type {string | null} */
-    albumArtistUppercase;
+    albumArtistUppercase; // for browse.js
     /** @type {number | null} */
     year;
+    /** @type {string} */
+    searchString;
 
     constructor(playlistName, trackData) {
         this.trackData = trackData;
@@ -38,13 +38,26 @@ class Track {
         this.artists = trackData.artists;
         if (this.artists) {
             this.artistsUppercase = this.artists.map(s => s.toUpperCase());
-            this.artistsJoined = this.artists.join('😀');
         }
         this.album = trackData.album;
         if (this.album) this.albumUppercase = this.album.toUpperCase()
         this.albumArtist = trackData.album_artist;
         if (this.albumArtist) this.albumArtistUppercase = this.albumArtist.toUpperCase();
         this.year = trackData.year;
+
+        this.searchString = this.path;
+        if (this.title) {
+            this.searchString += this.title;
+        }
+        if (this.artists) {
+            this.searchString += this.artists.join(' ');
+        }
+        if (this.album) {
+            this.searchString += this.album;
+        }
+        if (this.albumArtist) {
+            this.searchString += this.albumArtist;
+        }
     };
 
     /**

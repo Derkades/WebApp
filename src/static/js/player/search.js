@@ -11,7 +11,6 @@ class Search {
     }
 
     clearSearch() {
-        document.getElementById('search-query').value = '';
         document.getElementById('search-result-tracks').replaceChildren();
         document.getElementById('search-result-artists').replaceChildren();
         document.getElementById('search-result-albums').replaceChildren();
@@ -19,15 +18,21 @@ class Search {
 
     #performSearch() {
         const query = this.#queryInput.value;
+
+        if (query.length < 4) {
+            this.clearSearch();
+            return;
+        }
+
         const allTracks = Object.values(state.tracks);
 
         {
-            const tracks = fuzzysort.go(query, allTracks, {keys: ['title', 'path', 'artistsJoined', 'album'], limit: 10}).map(e => e.obj);
+            const tracks = fuzzysort.go(query, allTracks, {keys: ['searchString'], threshold: -1000, limit: 25}).map(e => e.obj);
             document.getElementById('search-result-tracks').replaceChildren(browse.generateTrackList(tracks));
         }
 
         {
-            const results = fuzzysort.go(query, allTracks, {key: 'artistsJoined', limit: 5});
+            const results = fuzzysort.go(query, allTracks, {key: 'searchString', limit: 5});
             const tracks = results.map(e => e.obj);
 
             const table = document.createElement('table');
@@ -54,7 +59,7 @@ class Search {
         }
 
         {
-            const tracks = fuzzysort.go(query, allTracks, {keys: ['album', 'albumArtist', 'artistsJoined'], limit: 5}).map(e => e.obj);
+            const tracks = fuzzysort.go(query, allTracks, {keys: ['searchString'], limit: 5}).map(e => e.obj);
             const newChildren = [];
             const listedAlbums = new Set();
             for (const track of tracks) {
@@ -63,12 +68,12 @@ class Search {
                 }
                 listedAlbums.add(track.album);
 
-                const imgUri = `/get_album_cover?quality=low&path=${encodeURIComponent(track.path)}`
+                const imgUri = `/get_album_cover?quality=tiny&path=${encodeURIComponent(track.path)}`
                 const img = document.createElement('div');
                 img.style.display = 'inline-block';
                 img.style.margin = '.5rem';
-                img.style.height = '16rem';
-                img.style.width = '16rem';
+                img.style.height = '8rem';
+                img.style.width = '8rem';
                 img.style.borderRadius = 'var(--border-radius-amount)';
                 img.style.background = `url("${imgUri}") no-repeat center`;
                 img.style.backgroundSize = 'cover';
@@ -86,6 +91,7 @@ const search = new Search();
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('open-dialog-search').addEventListener('click', () => {
+        document.getElementById('search-query').value = '';
         search.clearSearch();
     })
 });
