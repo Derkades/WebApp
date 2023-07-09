@@ -264,8 +264,12 @@ def get_plots(period: StatsPeriod) -> list[str]:
                          this timestamp is considered.
     Returns: List of plots, as strings containing base64 encoded SVG data
     """
-
-    cache_duration = 3600
+    if period in {period.MONTH, period.YEAR}:
+        cache_duration = 24*60*60
+    elif period == period.WEEK:
+        cache_duration = 6*60*60
+    elif period == period.DAY:
+        cache_duration = 60*60
 
     plots_time_based = cache.retrieve_json(f'plots_time_based{period.value}', return_expired=False)
     if plots_time_based is None:
@@ -277,6 +281,6 @@ def get_plots(period: StatsPeriod) -> list[str]:
         plots_other = [*_plots_last_played(),
                        *_plots_playlists(),
                        *_plots_metadata()]
-        cache.store_json('plots', plots_other, duration=cache_duration)
+        cache.store_json('plots', plots_other, duration=6*60*60)
 
     return [*plots_time_based, *plots_other]
