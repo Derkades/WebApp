@@ -123,19 +123,21 @@ def _plots_history(period: StatsPeriod) -> list[str]:
             else:
                 track_counter.update((relpath,))
 
+    plots = []
+
     fig, ax = fig_start()
     bars = ax.barh(*counter_to_xy(playlist_counter))
     ax.set_title(_('Top playlists'))
     ax.bar_label(bars)
     ax.set_xlabel(_('Times played'))
-    plot_playlists = fig_end(fig)
+    plots.append(fig_end(fig))
 
     fig, ax = fig_start()
     bars = ax.barh(*counter_to_xy(user_counter))
     ax.set_title(_('Most active users'))
     ax.bar_label(bars)
     ax.set_xlabel(_('Times played'))
-    plot_users = fig_end(fig)
+    plots.append(fig_end(fig))
 
     fig, ax = fig_start()
     ax.hist(time_of_day, bins=24, range=(0, 24))
@@ -144,38 +146,39 @@ def _plots_history(period: StatsPeriod) -> list[str]:
     ax.set_ylabel(_('Tracks played'))
     ax.set_xticks(list(range(0, 24, 3)) + [24])
     ax.set_xticklabels([f'{i:02}:00' for i in range(0, 24, 3)] + ['00:00'])
-    plot_tod = fig_end(fig)
+    plots.append(fig_end(fig))
 
-    fig, ax = fig_start()
-    ax.hist(day_of_week, bins=7, range=(-0.5, 6.5), orientation='horizontal')
-    ax.set_title(_('Day of week'))
-    ax.set_xlabel(_('Tracks played'))
-    ax.set_ylabel(_('Day of week'))
-    plt.yticks((0, 1, 2, 3, 4, 5, 6), (_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday'), _('Saturday'), _('Sunday')))
-    plot_dow = fig_end(fig)
+    if period != StatsPeriod.DAY:
+        fig, ax = fig_start()
+        ax.hist(day_of_week, bins=7, range=(-0.5, 6.5), orientation='horizontal')
+        ax.set_title(_('Day of week'))
+        ax.set_xlabel(_('Tracks played'))
+        ax.set_ylabel(_('Day of week'))
+        plt.yticks((0, 1, 2, 3, 4, 5, 6), (_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday'), _('Saturday'), _('Sunday')))
+        plots.append(fig_end(fig))
 
     fig, ax = fig_start()
     bars = ax.barh(*counter_to_xy(track_counter))
     ax.set_title(_('Most played tracks'))
     ax.bar_label(bars)
     ax.set_xlabel(_('Times played'))
-    plot_tracks = fig_end(fig)
+    plots.append(fig_end(fig))
 
     fig, ax = fig_start()
     bars = ax.barh(*counter_to_xy(artist_counter))
     ax.set_title(_('Most played artists'))
     ax.bar_label(bars)
     ax.set_xlabel(_('Times played'))
-    plot_artists = fig_end(fig)
+    plots.append(fig_end(fig))
 
     fig, ax = fig_start()
     bars = ax.barh(*counter_to_xy(album_counter))
     ax.set_title(_('Most played albums'))
     ax.bar_label(bars)
     ax.set_xlabel(_('Times played'))
-    plot_albums = fig_end(fig)
+    plots.append(fig_end(fig))
 
-    return plot_playlists, plot_users, plot_tod, plot_dow, plot_tracks, plot_artists, plot_albums
+    return plots
 
 
 def _plots_last_played() -> list[str]:
