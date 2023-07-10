@@ -90,7 +90,7 @@ def _plots_history(period: StatsPeriod) -> list[str]:
     with db.connect(read_only=True) as conn:
         after_timestamp = int(time.time()) - period.value
         result = conn.execute('''
-                            SELECT timestamp, user.username, history.track, history.playlist
+                            SELECT timestamp, user.username, user.nickname, history.track, history.playlist
                             FROM history
                                 JOIN user ON history.user = user.id
                             WHERE timestamp > ?
@@ -104,9 +104,9 @@ def _plots_history(period: StatsPeriod) -> list[str]:
         track_counter: Counter[str] = Counter()
         album_counter: Counter[str] = Counter()
 
-        for timestamp, username, relpath, playlist in result:
+        for timestamp, username, nickname, relpath, playlist in result:
             playlist_counter.update((playlist,))
-            user_counter.update((username,))
+            user_counter.update((nickname if nickname else username,))
 
             dt = datetime.fromtimestamp(timestamp)
             time_of_day.append(dt.hour)
