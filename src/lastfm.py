@@ -111,7 +111,7 @@ def scrobble(user_key: str, meta: Metadata, start_timestamp: int):
         'sk': user_key,
     }
 
-    if meta.album and not metadata.contains_collection_keyword(meta.album):
+    if meta.album and not metadata.ignore_album(meta.album):
         params['album'] = meta.album
 
     _make_request('post', 'track.scrobble', **params)

@@ -176,7 +176,7 @@ class Track:
         # Try MusicBrainz first
 
         if (meta.title or meta.album) and (meta.album_artist or meta.artists):
-            album = meta.album if meta.album and not metadata.contains_collection_keyword(meta.album) else meta.title
+            album = meta.album if meta.album and not metadata.ignore_album(meta.album) else meta.title
             artist = meta.album_artist if meta.album_artist else ' '.join(meta.artists)
             if image_bytes := musicbrainz.get_cover(artist, album):
                 return image_bytes
