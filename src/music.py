@@ -277,7 +277,7 @@ class Track:
                              '-c:v', 'copy',  # Leave cover as JPEG, don't re-encode as PNG
                              '-q:a', '5']  # VBR ~130kbps (usually 120-150kbps), close to transparent
 
-        filters = 'dynaudnorm=targetrms=0.3:gausssize=101'
+        filters = 'dynaudnorm=targetrms=0.5:gausssize=101'
 
         with tempfile.NamedTemporaryFile() as temp_file:
             command = ['ffmpeg',
@@ -286,9 +286,9 @@ class Track:
                     '-loglevel', settings.ffmpeg_loglevel,
                     '-i', self.path.absolute().as_posix(),
                     *input_options,
-                    '-filter:a', filters,
                     *audio_options,
                     '-ac', '2',
+                    '-filter:a', filters,
                     temp_file.name]
             subprocess.run(command, shell=False, check=True, capture_output=False)
 
