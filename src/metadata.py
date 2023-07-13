@@ -55,7 +55,7 @@ FILENAME_STRIP_KEYWORDS = [
 ]
 
 
-COLLECTION_KEYWORDS = [
+ALBUM_IGNORE_KEYWORDS = [
     'top 2000',
     'top 500',
     'top 100',
@@ -70,15 +70,26 @@ COLLECTION_KEYWORDS = [
     'hits collection',
     'top40',
     'hitdossier',
+    '100 beste',
+    'top hits',
+    'the very best',
 ]
 
+ALBUM_ARTIST_IGNORE = {
+    'various artists',
+}
 
-def contains_collection_keyword(text: str) -> bool:
-    text = text.lower()
-    for keyword in COLLECTION_KEYWORDS:
-        if keyword in text:
+
+def ignore_album(album: str) -> bool:
+    album = album.lower()
+    for keyword in ALBUM_IGNORE_KEYWORDS:
+        if keyword in album:
             return True
     return False
+
+
+def ignore_album_artist(artist: str) -> bool:
+    return artist.lower() in ALBUM_ARTIST_IGNORE
 
 
 def strip_keywords(inp: str) -> str:
@@ -185,14 +196,14 @@ class Metadata:
         """
         Generate possible search queries to find album art using a search engine
         """
-        if self.album_artist and not contains_collection_keyword(self.album_artist):
+        if self.album_artist and not ignore_album_artist(self.album_artist):
             artist = self.album_artist
         elif self.artists is not None and len(self.artists) > 0:
             artist = ' '.join(self.artists)
         else:
             artist = None
 
-        if artist and self.album and not contains_collection_keyword(self.album):
+        if artist and self.album and not ignore_album(self.album):
             yield artist + ' - ' + self.album + ' cover'
             yield artist + ' - ' + self.album
 
@@ -210,7 +221,7 @@ class Metadata:
         """
         Generate a search query to find lyrics
         """
-        if self.album_artist and self.title:
+        if self.album_artist and not ignore_album_artist(self.album_artist) and self.title:
             return self.album_artist + ' - ' + self.title
 
         if self.artists and self.title:
