@@ -204,15 +204,15 @@ class Metadata:
             artist = None
 
         if artist and self.album and not ignore_album(self.album):
-            yield artist + ' - ' + self.album + ' cover'
+            yield artist + ' - ' + self.album + ' album cover art'
             yield artist + ' - ' + self.album
 
         if artist and self.title:
-            yield artist + ' - ' + self.title + ' cover'
+            yield artist + ' - ' + self.title + ' album cover art'
             yield artist + ' - ' + self.title
 
         if self.title:
-            yield self.title + ' cover'
+            yield self.title + ' album cover art'
             yield self.title
 
         yield self._filename_title_search()
