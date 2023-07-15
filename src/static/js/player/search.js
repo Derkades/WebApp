@@ -38,6 +38,10 @@ class Search {
             const table = document.createElement('table');
             const listedArtists = new Set();
             for (const track of tracks) {
+                if (track.artists == null) {
+                    continue;
+                }
+
                 for (const artist of track.artists) {
                     if (listedArtists.has(artist)) {
                         continue;
