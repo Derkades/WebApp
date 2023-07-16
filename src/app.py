@@ -975,14 +975,14 @@ def route_activity_data():
                              'progress': progress})
 
         result = conn.execute('''
-                              SELECT history.timestamp, user.username, history.playlist, history.track
+                              SELECT history.timestamp, user.username, user.nickname, history.playlist, history.track
                               FROM history
                                   LEFT JOIN user ON history.user = user.id
                               ORDER BY history.id DESC
                               LIMIT 10
                               ''')
         history = []
-        for timestamp, username, playlist, relpath in result:
+        for timestamp, username, nickname, playlist, relpath in result:
             time_ago = format_timedelta(timestamp - int(time.time()), add_direction=True)
             track = Track.by_relpath(conn, relpath)
             if track:
@@ -992,7 +992,7 @@ def route_activity_data():
                 title = relpath
 
             history.append({'time_ago': time_ago,
-                            'username': username,
+                            'username': nickname if nickname else username,
                             'playlist': playlist,
                             'title': title})
 
@@ -1006,7 +1006,7 @@ def route_activity_all():
         auth.verify_auth_cookie(conn)
 
         result = conn.execute('''
-                              SELECT history.timestamp, user.username, history.playlist, history.track, track.path IS NOT NULL
+                              SELECT history.timestamp, user.username, user.nickname, history.playlist, history.track, track.path IS NOT NULL
                               FROM history
                                   LEFT JOIN user ON history.user = user.id
                                   LEFT JOIN track ON history.track = track.path
@@ -1014,7 +1014,7 @@ def route_activity_all():
                               LIMIT 1000
                               ''')
         history = []
-        for timestamp, username, playlist, relpath, track_exists in result:
+        for timestamp, username, nickname, playlist, relpath, track_exists in result:
             if track_exists:
                 track = Track.by_relpath(conn, relpath)
                 meta = track.metadata()
@@ -1023,7 +1023,7 @@ def route_activity_all():
                 title = relpath
 
             history.append({'time': timestamp,
-                            'username': username,
+                            'username': nickname if nickname else username,
                             'playlist': playlist,
                             'title': title})
 
