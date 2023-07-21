@@ -1,34 +1,60 @@
 import logging
 import traceback
-import urllib
+import re
 
-import musicbrainzngs
+import requests
 
 import cache
 import image
 
-musicbrainzngs.set_useragent('Super fancy music player 2.0', 0.1, 'https://github.com/DanielKoomen/WebApp')
 
 log = logging.getLogger('app.musicbrainz')
+
+
+# https://lucene.apache.org/core/4_3_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#Escaping_Special_Characters
+# https://github.com/alastair/python-musicbrainzngs/blob/1638c6271e0beb9560243c2123d354461ec9f842/musicbrainzngs/musicbrainz.py#L27
+LUCENE_SPECIAL = re.compile(r'([+\-&|!(){}\[\]\^"~*?:\\\/])')
+
+def lucene_escape(text: str):
+    return re.sub(LUCENE_SPECIAL, r'\\\1', text)
+
+
+def _mb_get(url: str, params):
+    r = requests.get('https://musicbrainz.org/ws/2/' + url,
+                     headers={'Accept': 'application/json',
+                              'User-Agent': 'Super-fancy-music-player/2.0 (https://github.com/DanielKoomen/WebApp)'},
+                     params=params,
+                     timeout=10)
+    r.raise_for_status()
+    return r.json()
+
+
+caa_base = 'https://coverartarchive.org/release'
+
+def _caa_get(release_id: str, img_type: str, size: int):
+    r = requests.get(f'https://coverartarchive.org/release/{release_id}/{img_type}-{size}',
+                     headers={'User-Agent': 'Super-fancy-music-player/2.0 (https://github.com/DanielKoomen/WebApp)'},
+                     allow_redirects=True,
+                     timeout=20)
+    r.raise_for_status()
+    return r.content
 
 
 def _search_release_group(artist: str, title: str) -> str | None:
     """
     Search for a release group id using the provided search query
     """
-    log.info('Looking for album release group: %s - %s', artist, title)
-    result = musicbrainzngs.search_release_groups(title, artist=artist, limit=1, type='album')
-    groups = result['release-group-list']
-    if groups:
-        log.info('Found release group: %s', groups[0]['id'])
-        return groups[0]['id']
-
-    log.info('Looking for single/EP/other release group: %s - %s', artist, title)
-    result = musicbrainzngs.search_release_groups(title, artist=artist, limit=1)
-    groups = result['release-group-list']
-    if groups:
-        log.info('Found release group: %s', groups[0]['id'])
-        return groups[0]['id']
+    for query in (f'artist:{lucene_escape(artist)} AND releasegroup:{lucene_escape(title)}',
+                  f'artist:{lucene_escape(artist)} AND releasegroup:{lucene_escape(title)} AND primarytype:Album'):
+        log.info('Performing MB search for query: %s', query)
+        result = _mb_get('release-group',
+                         {'query': query,
+                            'limit': '1',
+                            'primarytype': 'Album'})
+        groups = result['release-groups']
+        if groups:
+            log.info('Found release group: %s', groups[0]['id'])
+            return groups[0]['id']
 
     log.info('No release group found')
     return None
@@ -39,9 +65,10 @@ def _pick_release(release_group: str) -> str | None:
     Choose a release from a release group, to download cover art
     Returns: release id, or None if no suitable release was found
     """
-    result = musicbrainzngs.browse_releases(release_group=release_group)
-    releases = result['release-list']
-    with_artwork = [r for r in releases if r['cover-art-archive']['front'] == 'true']
+    result = _mb_get('release',
+                     params={'release-group': release_group})
+    releases = result['releases']
+    with_artwork = [r for r in releases if r['cover-art-archive']['front']]
     if not with_artwork:
         log.warning('No releases with artwork available')
         return None
@@ -54,18 +81,6 @@ def _pick_release(release_group: str) -> str | None:
 
     log.info('Returning first release in release group')
     return with_artwork[0]['id']
-
-
-def _get_release_image(release_id: str) -> bytes | None:
-    """
-    Get album cover URL from MusicBrainz release id
-    """
-    try:
-        return musicbrainzngs.get_image_front(release_id, size="1200")
-    except musicbrainzngs.musicbrainz.ResponseError as ex:
-        if isinstance(ex.cause, urllib.error.HTTPError) and ex.cause.code == 404:
-            return None
-        raise ex
 
 
 def get_cover(artist: str, album: str, disable_cache=False) -> bytes | None:
@@ -94,7 +109,8 @@ def get_cover(artist: str, album: str, disable_cache=False) -> bytes | None:
         if release is None:
             return None
 
-        image_bytes = _get_release_image(release)
+        log.info('Downloading artwork from internet archive')
+        image_bytes = _caa_get(release, "front", 1200)
 
         if image_bytes is None:
             log.info('Release has no front cover art image image')
@@ -119,5 +135,6 @@ if __name__ == '__main__':
     logconfig.apply()
 
     cover = get_cover('London Grammar', 'If You Wait', disable_cache=True)
+    # cover = get_cover('Elle Exxe', 'Lately', disable_cache=True) # release exists, but has no cover
     with open('cover.jpg', 'wb') as cover_file:
         cover_file.write(cover)

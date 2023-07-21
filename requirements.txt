@@ -4,7 +4,6 @@ flask-babel~=3.0
 requests~=2.0
 beautifulsoup4~=4.0
 lxml~=4.0
-musicbrainzngs~=0.7.0
 pillow~=9.0
 bcrypt~=4.0
 matplotlib~=3.0

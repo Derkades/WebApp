@@ -11,14 +11,14 @@ Music is important. However, when you're with a group, who is in charge? Everyon
 - No repetition!
     - Shuffle algorithm ensures the least recently played songs are picked first.
 - No metadata hassle!
-    - Album covers are automatically fetched from MusicBrainz or using a bing web scraper
+    - Album covers are automatically fetched from MusicBrainz or using a web scraper
     - Lyrics are automatically fetched using a web scraper
     - Metadata editor to easily correct metadata during music playback
 - Easy file management!
     - Built-in web file browser to download, upload, rename and delete files
     - Built-in music downloader using `yt-dlp`
 - Performant!
-    - Written in pure HTML, CSS and JavaScript without third party libraries. The frontend is fast even, on an old laptop or cheap single board computer!
+    - Written in pure HTML, CSS and JavaScript with minimal third party libraries. The frontend is fast, even on an old laptop or cheap single board computer!
     - Queued songs are stored as blobs in the browser's storage. Temporary internet connection issues are no problem.
 - Mobile compatible!
     - Responsive design, made for desktop and mobile
@@ -32,7 +32,7 @@ Music is important. However, when you're with a group, who is in charge? Everyon
 - Statistics!
     - Last.fm scrobbling (each user can connect their own last.fm account)
 - Fair!
-    - Audio is RMS-normalized. Loudly mastered EDM will be just as loud as quiet 80s tracks.
+    - Audio is RMS-normalized. Loudly mastered EDM will be just as loud as 80s tracks.
 - Fun!
     - Enable 'Album cover meme mode' to replace album covers by (sometimes) funny memes related to the song title.
 
@@ -63,7 +63,7 @@ This project is using many open source software and libraries, such as:
 - [Python requests](https://pypi.org/project/requests)
 - [Python BeautifulSoup](https://pypi.org/project/beautifulsoup4)
 - [Python lxml](https://pypi.org/project/beautifulsoup4)
-- [MusicBrainz](https://musicbrainz.org) and Python musicbrainzngs
+- [MusicBrainz](https://musicbrainz.org)
 - [Python Pillow](https://pillow.readthedocs.io)
 - [Python bcrypt](https://pypi.org/project/bcrypt/)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)

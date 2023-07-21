@@ -276,7 +276,7 @@ def route_get_album_cover() -> Response:
         elif quality_str == 'tiny':
             quality = ImageQuality.TINY
         else:
-            raise Exception('invalid quality')
+            raise ValueError('invalid quality')
 
         image_bytes = track.get_cover_thumbnail(meme, ImageFormat.WEBP, quality)
 
