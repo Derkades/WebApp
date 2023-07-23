@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-07-09 10:47+0200\n"
-"PO-Revision-Date: 2023-07-09 10:47+0200\n"
+"POT-Creation-Date: 2023-07-23 12:46+0200\n"
+"PO-Revision-Date: 2023-07-23 12:46+0200\n"
 "Last-Translator: \n"
 "Language: nl\n"
 "Language-Team: nl <LL@li.org>\n"
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.11.0\n"
+"Generated-By: Babel 2.12.1\n"
 
 #: app.py:725
 msgid "Incorrect password."
@@ -26,7 +26,7 @@ msgstr "Onjuist wachtwoord."
 msgid "Repeated new passwords do not match."
 msgstr "Herhaalde wachtwoorden komen niet overeen."
 
-#: app.py:1262
+#: app.py:1277
 msgid "Track is already in this playlist"
 msgstr "Nummer zit al in deze afspeellijst"
 
@@ -34,15 +34,15 @@ msgstr "Nummer zit al in deze afspeellijst"
 msgid "Unknown"
 msgstr "Onbekend"
 
-#: auth.py:200
+#: auth.py:203
 msgid "You are not logged in, please log in."
 msgstr "Je bent niet ingelogd, gelieve in te loggen."
 
-#: auth.py:202
+#: auth.py:205
 msgid "Your current session is invalid, please log in again."
 msgstr "Je huidige sessie is ongeldig, gelieve opnieuw in te loggen."
 
-#: auth.py:204
+#: auth.py:207
 msgid ""
 "Your are not an administrator, but this page requires administrative "
 "privileges"
@@ -66,124 +66,124 @@ msgstr "afgelopen maand"
 msgid "last year"
 msgstr "afgelopen jaar"
 
-#: stats_plots.py:128
+#: stats_plots.py:130
 msgid "Top playlists"
 msgstr "Populairste afspeellijsten"
 
-#: stats_plots.py:130 stats_plots.py:137 stats_plots.py:161 stats_plots.py:168
-#: stats_plots.py:175
+#: stats_plots.py:132 stats_plots.py:139 stats_plots.py:164 stats_plots.py:171
+#: stats_plots.py:178
 msgid "Times played"
 msgstr "Aantal keer afgespeeld"
 
-#: stats_plots.py:135
+#: stats_plots.py:137
 msgid "Most active users"
 msgstr "Meest actieve gebruikers"
 
-#: stats_plots.py:142 stats_plots.py:143
+#: stats_plots.py:144 stats_plots.py:145
 msgid "Time of day"
 msgstr "Moment van de dag"
 
-#: stats_plots.py:144 stats_plots.py:152
+#: stats_plots.py:146 stats_plots.py:155
 msgid "Tracks played"
 msgstr "Nummers afgespeeld"
 
-#: stats_plots.py:151 stats_plots.py:153
+#: stats_plots.py:154 stats_plots.py:156
 msgid "Day of week"
 msgstr "Dag van de week"
 
-#: stats_plots.py:154
+#: stats_plots.py:157
 msgid "Monday"
 msgstr "Maandag"
 
-#: stats_plots.py:154
+#: stats_plots.py:157
 msgid "Tuesday"
 msgstr "Dinsdag"
 
-#: stats_plots.py:154
+#: stats_plots.py:157
 msgid "Wednesday"
 msgstr "Woensdag"
 
-#: stats_plots.py:154
+#: stats_plots.py:157
 msgid "Thursday"
 msgstr "Donderdag"
 
-#: stats_plots.py:154
+#: stats_plots.py:157
 msgid "Friday"
 msgstr "Vrijdag"
 
-#: stats_plots.py:154
+#: stats_plots.py:157
 msgid "Saturday"
 msgstr "Zaterdag"
 
-#: stats_plots.py:154
+#: stats_plots.py:157
 msgid "Sunday"
 msgstr "Zondag"
 
-#: stats_plots.py:159
+#: stats_plots.py:162
 msgid "Most played tracks"
 msgstr "Meest gespeelde nummers"
 
-#: stats_plots.py:166
+#: stats_plots.py:169
 msgid "Most played artists"
 msgstr "Meest gespeelde artiesten"
 
-#: stats_plots.py:173
+#: stats_plots.py:176
 msgid "Most played albums"
 msgstr "Meest gespeelde albums"
 
-#: stats_plots.py:200 stats_plots.py:202
+#: stats_plots.py:203 stats_plots.py:205
 msgid "Last chosen"
 msgstr "Laatst gekozen"
 
-#: stats_plots.py:201 stats_plots.py:218
+#: stats_plots.py:204 stats_plots.py:221
 msgid "Number of tracks"
 msgstr "Aantal nummers"
 
-#: stats_plots.py:203
+#: stats_plots.py:206
 msgid "Today"
 msgstr "Vandaag"
 
-#: stats_plots.py:203
+#: stats_plots.py:206
 msgid "This week"
 msgstr "Deze week"
 
-#: stats_plots.py:203
+#: stats_plots.py:206
 msgid "This month"
 msgstr "Deze maand"
 
-#: stats_plots.py:203
+#: stats_plots.py:206
 msgid "Long ago"
 msgstr "Lang geleden"
 
-#: stats_plots.py:203
+#: stats_plots.py:206
 msgid "Never"
 msgstr "Nooit"
 
-#: stats_plots.py:216
+#: stats_plots.py:219
 msgid "Number of tracks in playlists"
 msgstr "Aantal nummers in afspeellijsten"
 
-#: stats_plots.py:223
+#: stats_plots.py:226
 msgid "Total duration of tracks in playlists"
 msgstr "Totale lengte van nummers in afspeellijsten"
 
-#: stats_plots.py:224
+#: stats_plots.py:227
 msgid "Total duration in minutes"
 msgstr "Totale lengte in minuten"
 
-#: stats_plots.py:229
+#: stats_plots.py:232
 msgid "Mean duration of tracks in playlist"
 msgstr "Gemiddelde lengte van nummers in afspeellijsten"
 
-#: stats_plots.py:230
+#: stats_plots.py:233
 msgid "Mean duration in minutes"
 msgstr "Gemiddelde lengte in minuten"
 
-#: stats_plots.py:251
+#: stats_plots.py:254
 msgid "Track release year distribution"
 msgstr "Distributie van jaar van uitgave"
 
-#: stats_plots.py:253
+#: stats_plots.py:256
 msgid "Release year"
 msgstr "Jaar van uitgave"
 
@@ -243,21 +243,25 @@ msgstr "Apparaat"
 msgid "IP address"
 msgstr "IP-adres"
 
-#: templates/account.jinja2:57 templates/account.jinja2:66
+#: templates/account.jinja2:49 templates/account.jinja2:58
 msgid "Change password"
 msgstr "Wachtwoord"
 
-#: templates/account.jinja2:60
+#: templates/account.jinja2:52
 msgid "Current password"
 msgstr "Huidig wachtwoord"
 
-#: templates/account.jinja2:62
+#: templates/account.jinja2:54
 msgid "New password"
 msgstr "Nieuw wachtwoord"
 
-#: templates/account.jinja2:64
+#: templates/account.jinja2:56
 msgid "Repeat new password"
 msgstr "Herhaal nieuw wachtwoord"
+
+#: templates/account.jinja2:61 templates/account.jinja2:65
+msgid "Change nickname"
+msgstr "Verander bijnaam"
 
 #: templates/activity.jinja2:4 templates/activity.jinja2:9
 #: templates/home.jinja2:27
@@ -840,10 +844,10 @@ msgstr "YouTube download"
 #: templates/player.jinja2:180
 msgid ""
 "Select a playlist and paste a link from YouTube, Soundcloud, Bandcamp, "
-"etc. Finally, press <kbd>Download</kbd>."
+"etc."
 msgstr ""
 "Selecteer een afspeellijst en plak een link van YouTube, Soundcloud, "
-"Bandcamp, etc. Druk dan op <kbd>Download</kbd>."
+"Bandcamp, etc."
 
 #: templates/player.jinja2:192
 msgid "Update track list"
@@ -1192,3 +1196,4 @@ msgstr "Nieuw wachtwoord (laat leeg om niet te veranderen)"
 #: templates/users_edit.jinja2:18
 msgid "Submit"
 msgstr "Versturen"
+
