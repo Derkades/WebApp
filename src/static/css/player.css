@@ -46,7 +46,6 @@ body.light input::placeholder {
 
 #album-covers {
     aspect-ratio: 1 / 1; /* deze is heel nieuw, bestaat sinds 2021! */
-    width: 100%;
     position: relative;
 }
 
@@ -103,7 +102,6 @@ body.light input::placeholder {
 
 .sidebar > div {
     width: 100%;
-    max-width: 60rem;
 }
 
 .sidebar-left > div > .box-solid {
