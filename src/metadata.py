@@ -73,6 +73,7 @@ ALBUM_IGNORE_KEYWORDS = [
     '100 beste',
     'top hits',
     'the very best',
+    'top trax',
 ]
 
 ALBUM_ARTIST_IGNORE = {
