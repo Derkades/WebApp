@@ -74,6 +74,8 @@ ALBUM_IGNORE_KEYWORDS = [
     'top hits',
     'the very best',
     'top trax',
+    'ultimate rock collection',
+    'absolute music',
 ]
 
 ALBUM_ARTIST_IGNORE = {
