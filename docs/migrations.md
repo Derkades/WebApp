@@ -6,13 +6,19 @@ To run a migration:
 3. Execute the migration by copying it line by line from top to bottom, pressing enter after every line.
 4. Exit using <kbd>Ctrl</kbd>+<kbd>D</kbd>
 
+## 2023-08-13
+cache.db
+```sql
+DROP TABLE cache;
+```
+
 ## 2023-07-09
 ```sql
 ALTER TABLE user ADD COLUMN nickname TEXT NULL;
 ```
 
 ## 2023-06-30
-offline.db (not music.db)
+offline.db
 ```sql
 DROP TABLE settings;
 ```

@@ -14,16 +14,6 @@ import db
 log = logging.getLogger('app.cache')
 
 
-def _legacy_cleanup() -> int:
-    """
-    Remove entries from cache that have not been used for a long time
-    Returns: Number of removed entries
-    """
-    with db.cache() as conn:
-        month_ago = int(time.time()) - 30*24*60*60
-        return conn.execute('DELETE FROM cache WHERE access_time < ?', (month_ago,)).rowcount
-
-
 def store(key: str,
           data: bytes,
           duration: int | None = None) -> None:
@@ -46,16 +36,7 @@ def retrieve(key: str,
                            (key,)).fetchone()
 
         if row is None:
-            # Not cached, try legacy cache
-            # Don't update access_time, so entries are slowly deleted by cleanup()
-            row = conn.execute('SELECT data FROM cache WHERE key=?',
-                               (key,)).fetchone()
-
-            if row is None:
-                return None
-
-            log.info('Cache entry returned from legacy cache')
-            return row[0]
+            return None
 
         data, expire_time = row
 
@@ -70,10 +51,6 @@ def retrieve(key: str,
 
 
 def cleanup():
-    # Also cleanup old table
-    legacy_rowcount = _legacy_cleanup()
-    log.info('Deleted %s entries from legacy cache', legacy_rowcount)
-
     with db.cache() as conn:
         return conn.execute('DELETE FROM cache2 WHERE expire_time < ?',
                             (int(time.time()),)).rowcount
