@@ -247,7 +247,7 @@ class Track:
         meas_command = ['ffmpeg',
                         '-hide_banner',
                         '-i', self.path.absolute().as_posix(),
-                        '-af', 'loudnorm=I=-14:TP=-1:LRA=11:print_format=json',
+                        '-af', 'loudnorm=print_format=json',
                         '-f', 'null',
                         '-']
         # Annoyingly, loudnorm outputs to stderr instead of stdout. Disabling logging also hides the loudnorm output...
