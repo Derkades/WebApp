@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from sqlite3 import Connection
 from enum import Enum
 import random
+import json
 
 from auth import User
 import cache
@@ -233,21 +234,47 @@ class Track:
         Returns: Compressed audio bytes
         """
 
-        cache_key = 'audio' + str(audio_type) + self.relpath + str(self.mtime)
+        cache_key = 'audio2' + str(audio_type) + self.relpath + str(self.mtime)
 
         cached_data = cache.retrieve(cache_key)
         if cached_data is not None:
             log.info('Returning cached audio')
             return cached_data
 
+        # First phase of 2-phase loudness normalization
+        # http://k.ylo.ph/2016/04/04/loudnorm.html
+        log.info('Measuring loudness...')
+        meas_command = ['ffmpeg',
+                        '-hide_banner',
+                        '-i', self.path.absolute().as_posix(),
+                        '-af', 'loudnorm=I=-14:TP=-1:LRA=11:print_format=json',
+                        '-f', 'null',
+                        '-']
+        # Annoyingly, loudnorm outputs to stderr instead of stdout. Disabling logging also hides the loudnorm output...
+        meas_out = subprocess.run(meas_command, shell=False, check=True, capture_output=True).stderr.decode()
+        # Manually find the start of loudnorm info json
+        meas_json = json.loads(meas_out[meas_out.index('Parsed_loudnorm_0')+37:])
+        loudnorm = \
+            'loudnorm=I=-16:' \
+            'TP=-1.5:' \
+            'LRA=11:' \
+            f"measured_I={meas_json['input_i']}:" \
+            f"measured_TP={meas_json['input_tp']}:" \
+            f"measured_LRA={meas_json['input_lra']}:" \
+            f"measured_thresh={meas_json['input_thresh']}:" \
+            f"offset={meas_json['target_offset']}:" \
+            'linear=true'
+
+        log.info('Measured integrated loudness: %s', meas_json['input_i'])
+
         if audio_type in {AudioType.WEBM_OPUS_HIGH, AudioType.WEBM_OPUS_LOW}:
             input_options = ['-map_metadata', '-1']
-            bit_rate = '96k' if audio_type == AudioType.WEBM_OPUS_HIGH else '48k'
+            bit_rate = '128k' if audio_type == AudioType.WEBM_OPUS_HIGH else '48k'
             audio_options = ['-f', 'webm',
                              '-c:a', 'libopus',
                              '-b:a', bit_rate,
                              '-vbr', 'on',
-                             '-frame_duration', '60',
+                             '-frame_duration', '60', # Higher frame duration offers better compression at the cost of latency
                              '-vn']  # remove video track (and album covers)
         elif audio_type == AudioType.MP4_AAC:
             input_options = ['-map_metadata', '-1']
@@ -277,29 +304,24 @@ class Track:
                              '-c:v', 'copy',  # Leave cover as JPEG, don't re-encode as PNG
                              '-q:a', '5']  # VBR ~130kbps (usually 120-150kbps), close to transparent
 
-        filters = 'dynaudnorm=targetrms=0.5:gausssize=101'
-
-        with tempfile.NamedTemporaryFile() as temp_file:
-            command = ['ffmpeg',
-                    '-y',  # overwrite existing file
-                    '-hide_banner',
-                    '-loglevel', settings.ffmpeg_loglevel,
-                    '-i', self.path.absolute().as_posix(),
-                    *input_options,
-                    *audio_options,
-                    '-ac', '2',
-                    '-filter:a', filters,
-                    temp_file.name]
-            subprocess.run(command, shell=False, check=True, capture_output=False)
-
-            temp_file.seek(0)
-            data = temp_file.read()
+        command = ['ffmpeg',
+                '-y',  # overwrite existing file
+                '-hide_banner',
+                '-loglevel', settings.ffmpeg_loglevel,
+                '-i', self.path.absolute().as_posix(),
+                *input_options,
+                *audio_options,
+                '-ac', '2',
+                '-filter:a', loudnorm,
+                '-']
+        xc_result = subprocess.run(command, shell=False, check=True, stdout=subprocess.PIPE)
+        audio_data = xc_result.stdout
 
         if audio_type == AudioType.MP3_WITH_METADATA:
             cover_temp_file.close()
 
-        cache.store(cache_key, data)
-        return data
+        cache.store(cache_key, audio_data)
+        return audio_data
 
     def write_metadata(self, **meta_dict: str):
         """

@@ -148,12 +148,11 @@
                 {% else %}
                     <label for="settings-audio-type">{% trans %}Audio and image quality{% endtrans %}</label><br>
                     <select id="settings-audio-type">
-                        <option value="webm_opus_high" selected>{% trans %}96k Opus (high quality, 50MB per hour){% endtrans %}</option>
-                        <option value="webm_opus_low">{% trans %}48k Opus (low quality, 20MB per hour){% endtrans %}</option>
-                        <option value="mp4_aac">{% trans %}128k AAC (high quality, for iOS/Safari, 70MB per hour){% endtrans %}</option>
+                        <option value="webm_opus_high" selected>{% trans %}Very high quality (128k Opus){% endtrans %}</option>
+                        <option value="webm_opus_low">{% trans %}Low quality (48k Opus){% endtrans %}</option>
+                        <option value="mp4_aac">{% trans %}iOS/Safari (128k AAC){% endtrans %}</option>
                     </select><br>
                 {% endif %}
-
 
                 <label for="settings-queue-removal-behaviour">{% trans %}Queue removal behaviour{% endtrans %}</label><br>
                 <select id="settings-queue-removal-behaviour">
