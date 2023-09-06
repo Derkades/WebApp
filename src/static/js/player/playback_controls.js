@@ -40,8 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     seekBar.addEventListener('mousedown', event => {
-        audioElem.currentTime = ((event.clientX - seekBar.offsetLeft) / seekBar.offsetWidth) * audioElem.duration;
-        eventBus.publish(MusicEvent.PLAYBACK_CHANGE)
+        seekAbsolute(((event.clientX - seekBar.offsetLeft) / seekBar.offsetWidth) * audioElem.duration);
 
         // Keep updating while mouse is moving
         document.addEventListener('mousemove', onMove);

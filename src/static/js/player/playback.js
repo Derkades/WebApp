@@ -3,13 +3,21 @@ function seek(delta) {
 
     const newTime = audioElem.currentTime + delta;
     if (newTime < 0) {
-        audioElem.currentTime = 0;
+        seekAbsolute(0);
     } else if (newTime > audioElem.duration) {
-        audioElem.currentTime = audioElem.duration;
+        seekAbsolute(audioElem.duration);
     } else {
-        audioElem.currentTime = newTime;
+        seekAbsolute(newTime);
+    }
+}
+
+function seekAbsolute(position) {
+    if (audioElem.duration == NaN) {
+        console.warn('Ignoring seek, media is not loaded');
+        return;
     }
 
+    audioElem.currentTime = position;
     eventBus.publish(MusicEvent.PLAYBACK_CHANGE);
 }
 
