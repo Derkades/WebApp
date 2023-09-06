@@ -53,7 +53,7 @@ async function replaceAudioSource() {
     try {
         await audio.play();
     } catch (exception) {
-        console.error(error);
+        console.warn(exception);
     }
 }
 
