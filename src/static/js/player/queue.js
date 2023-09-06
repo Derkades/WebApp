@@ -90,7 +90,7 @@ class Queue {
         checkResponseCode(chooseResponse);
         const path = (await chooseResponse.json()).path;
 
-        console.info('chosen track', path);
+        console.info('Chosen track', path);
 
         // Find track info for this file
         const track = state.tracks[path];
@@ -230,7 +230,7 @@ class Queue {
 
     next() {
         if (this.queuedTracks.length === 0) {
-            console.log('queue is empty, trying again later');
+            console.log('Queue is empty, try to play next track again later');
             setTimeout(() => this.next(), 1000);
             return;
         }
