@@ -54,13 +54,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Scroll to seek
     seekBar.addEventListener('wheel', event => {
         seekRelative(event.deltaY < 0 ? 3 : -3);
-    });
+    }, {passive: true});
 
     const volume = document.getElementById('settings-volume');
     volume.addEventListener('wheel', event => {
         volume.value = parseInt(volume.value) + (event.deltaY < 0 ? 2 : -2);
         onVolumeChange();
-    });
+    }, {passive: true});
 });
 
 // Update seek bar
