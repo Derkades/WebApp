@@ -165,7 +165,7 @@ class Track:
             if '-' in title:
                 title = title[title.index('-')+1:]
 
-            if random.random() > 0.4:
+            if random.random() > 0.5:
                 image_bytes = reddit.get_image(title)
                 if image_bytes:
                     return image_bytes
