@@ -488,13 +488,15 @@ def route_files():
                          'type': 'dir' if path.is_dir() else 'file'}
             children.append(file_info)
 
-            if not path.is_dir():
-                track = Track.by_relpath(conn, music.to_relpath(path))
-                if track:
-                    meta = track.metadata()
-                    file_info['type'] = 'music'
-                    file_info['artist'] = ', '.join(meta.artists) if meta.artists else ''
-                    file_info['title'] = meta.title if meta.title else ''
+            if path.is_dir():
+                continue
+
+            track = Track.by_relpath(conn, music.to_relpath(path))
+            if track:
+                meta = track.metadata()
+                file_info['type'] = 'music'
+                file_info['artist'] = ', '.join(meta.artists) if meta.artists else ''
+                file_info['title'] = meta.title if meta.title else ''
 
     children = sorted(children, key=lambda x: x['name'])
 
