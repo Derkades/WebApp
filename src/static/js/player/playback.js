@@ -1,4 +1,4 @@
-function seek(delta) {
+function seekRelative(delta) {
     const audioElem = getAudioElement();
 
     const newTime = audioElem.currentTime + delta;
@@ -12,6 +12,7 @@ function seek(delta) {
 }
 
 function seekAbsolute(position) {
+    const audioElem = getAudioElement();
     if (audioElem.duration == NaN) {
         console.warn('Ignoring seek, media is not loaded');
         return;

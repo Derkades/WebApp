@@ -48,9 +48,9 @@ function handleKey(key) {
         }
         onVolumeChange();
     } else if (key === '.') {
-        seek(3);
+        seekRelative(3);
     } else if (key === ',') {
-        seek(-3);
+        seekRelative(-3);
     } else if (key === 'Escape') {
         dialogs.closeTop();
     } else if (key === 'l') {

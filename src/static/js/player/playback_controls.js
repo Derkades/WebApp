@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Scroll to seek
     seekBar.addEventListener('wheel', event => {
-        seek(event.deltaY < 0 ? 3 : -3);
+        seekRelative(event.deltaY < 0 ? 3 : -3);
     });
 
     const volume = document.getElementById('settings-volume');
