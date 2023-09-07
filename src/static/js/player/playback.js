@@ -12,13 +12,12 @@ function seekRelative(delta) {
 }
 
 function seekAbsolute(position) {
-    const audioElem = getAudioElement();
-    if (audioElem.duration == NaN) {
-        console.warn('Ignoring seek, media is not loaded');
+    if (!isFinite(position)) {
+        console.warn('Ignoring seek with non-finite position', position);
         return;
     }
 
-    audioElem.currentTime = position;
+    getAudioElement().currentTime = position;
     eventBus.publish(MusicEvent.PLAYBACK_CHANGE);
 }
 

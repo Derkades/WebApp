@@ -3,13 +3,19 @@ eventBus.subscribe(MusicEvent.PLAYBACK_CHANGE, () => {
 
     navigator.mediaSession.playbackState = audioElem.paused ? 'paused' : 'playing';
 
-    if (audioElem != null && isFinite(audioElem.duration) && isFinite(audioElem.currentTime) && isFinite(audioElem.playbackRate)) {
-        navigator.mediaSession.setPositionState({
-            duration: audioElem.duration,
-            playbackRate: audioElem.playbackRate,
-            position: audioElem.currentTime,
-        });
+    if (!history.currentlyPlayingTrack) {
+        return;
     }
+
+    if (audioElem == null || !isFinite(audioElem.currentTime) || !isFinite(audioElem.playbackRate)) {
+        return;
+    }
+
+    navigator.mediaSession.setPositionState({
+        duration: history.currentlyPlayingTrack.duration,
+        playbackRate: audioElem.playbackRate,
+        position: audioElem.currentTime,
+    });
 });
 
 eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {

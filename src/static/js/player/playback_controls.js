@@ -29,7 +29,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const seekBar = document.getElementById('outer-progress-bar');
 
     const onMove = event => {
-        audioElem.currentTime = ((event.clientX - seekBar.offsetLeft) / seekBar.offsetWidth) * audioElem.duration;
+        if (!history.currentlyPlayingTrack) {
+            return;
+        }
+
+        audioElem.currentTime = ((event.clientX - seekBar.offsetLeft) / seekBar.offsetWidth) * history.currentlyPlayingTrack.duration;
         eventBus.publish(MusicEvent.PLAYBACK_CHANGE)
         event.preventDefault(); // Prevent accidental text selection
     };
@@ -40,7 +44,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     seekBar.addEventListener('mousedown', event => {
-        seekAbsolute(((event.clientX - seekBar.offsetLeft) / seekBar.offsetWidth) * audioElem.duration);
+        if (!history.currentlyPlayingTrack) {
+            return;
+        }
+
+        seekAbsolute(((event.clientX - seekBar.offsetLeft) / seekBar.offsetWidth) * history.currentlyPlayingTrack.duration);
 
         // Keep updating while mouse is moving
         document.addEventListener('mousemove', onMove);
@@ -67,15 +75,23 @@ document.addEventListener('DOMContentLoaded', () => {
 eventBus.subscribe(MusicEvent.PLAYBACK_CHANGE, () => {
     const audioElem = getAudioElement();
 
-    if (isFinite(audioElem.currentTime) && isFinite(audioElem.duration)) {
-        const current = secondsToString(Math.round(audioElem.currentTime));
-        const max = secondsToString(Math.round(audioElem.duration));
-        const percentage = (audioElem.currentTime / audioElem.duration) * 100;
+    var barCurrent;
+    var barDuration;
+    var barWidth;
 
-        document.getElementById('progress-bar').style.width = percentage + '%';
-        document.getElementById('progress-time-current').innerText = current;
-        document.getElementById('progress-time-duration').innerText = max;
+    if (history.currentlyPlayingTrack && isFinite(audioElem.currentTime)) {
+        barCurrent = secondsToString(Math.round(audioElem.currentTime));
+        barDuration = secondsToString(Math.round(history.currentlyPlayingTrack.duration));
+        barWidth = ((audioElem.currentTime / history.currentlyPlayingTrack.duration) * 100) + '%';
+    } else {
+        barCurrent = '--:--';
+        barDuration = '--:--';
+        barWidth = 0;
     }
+
+    document.getElementById('progress-time-current').innerText = barCurrent;
+    document.getElementById('progress-time-duration').innerText = barDuration;
+    document.getElementById('progress-bar').style.width = barWidth
 });
 
 // Update play/pause buttons

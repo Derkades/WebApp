@@ -16,10 +16,10 @@ class History {
         this.playerId = uuidv4();
         this.currentlyPlayingTrack = null;
 
-        eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => this.signalNewTrack());
+        eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => this.#onNewTrack());
     }
 
-    signalNewTrack() {
+    #onNewTrack() {
         const track = queue.currentTrack.track();
         if (track === null) {
             console.warn('history | missing track info');
@@ -63,12 +63,12 @@ class History {
         if (this.currentlyPlayingTrack == null) {
             return;
         }
-        const audio = getAudioElement();
+        const audioElem = getAudioElement();
         const data = {
             player_id: this.playerId,
             track: this.currentlyPlayingTrack.path,
-            paused: audio.paused,
-            progress: Math.round((audio.currentTime / audio.duration) * 100),
+            paused: audioElem.paused,
+            progress: Math.round((audioElem.currentTime / this.currentlyPlayingTrack.duration) * 100),
         };
         await jsonPost('/now_playing', data);
     }
