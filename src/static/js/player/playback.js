@@ -23,9 +23,11 @@ function seekAbsolute(position) {
 
 function getTransformedVolume(volumeZeroToHundred) {
     // https://www.dr-lex.be/info-stuff/volumecontrols.html
-    // According to this article, x^4 seems to be a pretty good approximation of the perceived loudness curve
-    const e = 4;
-    return volumeZeroToHundred ** e / 100 ** e;
+    // Values for 60dB dynamic range
+    const a = 1e-3
+    const b = 6.907 // slightly lower than value in article so result never exceeds 1.0
+    const x = volumeZeroToHundred / 100;
+    return a * Math.exp(x * b);
 }
 
 function onVolumeChange() {
