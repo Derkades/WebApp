@@ -175,11 +175,19 @@ class Track {
     };
 
     async downloadAndAddToQueue(top = false) {
-        const encodedAudioType = encodeURIComponent(document.getElementById('settings-audio-type').value);
-        const imageQuality = document.getElementById('settings-audio-type').value == 'webm_opus_low' ? 'low' : 'high';
+        const audioType = document.getElementById('settings-audio-type').value;
+
+        if (audioType.startsWith('webm') && getAudioElement().canPlayType("audio/webm;codecs=opus") != "probably") {
+            audioType = "mp4_aac";
+            alert("WEBM/OPUS audio not supported by your browser, changed to MP4/AAC");
+            document.getElementById('settings-audio-type').value = "mp4_aac";
+            audioType = "mp4_aac";
+        }
+
+        const imageQuality = audioType == 'webm_opus_low' ? 'low' : 'high';
         const encodedPath = encodeURIComponent(this.path);
 
-        const audioUrl = `/get_track?path=${encodedPath}&type=${encodedAudioType}`;
+        const audioUrl = `/get_track?path=${encodedPath}&type=${audioType}`;
         let audioUrlGetter;
         if (document.getElementById('settings-download-mode').value === 'download') {
             audioUrlGetter = async function() {
