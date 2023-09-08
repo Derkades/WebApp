@@ -227,19 +227,12 @@ class Track:
         metadata_options.extend(('-metadata', 'genre=' + metadata.join_meta_list(meta.tags)))
         return metadata_options
 
-    def transcoded_audio(self,
-                         audio_type: AudioType) -> bytes:
-        """
-        Normalize and compress audio using ffmpeg
-        Returns: Compressed audio bytes
-        """
-
-        cache_key = 'audio2' + str(audio_type) + self.relpath + str(self.mtime)
-
+    def get_loudnorm_filter(self) -> str:
+        cache_key = 'loud' + self.relpath + str(self.mtime)
         cached_data = cache.retrieve(cache_key)
         if cached_data is not None:
-            log.info('Returning cached audio')
-            return cached_data
+            log.info('Returning cached loudness data')
+            return cached_data.decode()
 
         # First phase of 2-phase loudness normalization
         # http://k.ylo.ph/2016/04/04/loudnorm.html
@@ -254,6 +247,9 @@ class Track:
         meas_out = subprocess.run(meas_command, shell=False, check=True, capture_output=True).stderr.decode()
         # Manually find the start of loudnorm info json
         meas_json = json.loads(meas_out[meas_out.index('Parsed_loudnorm_0')+37:])
+
+        log.info('Measured integrated loudness: %s', meas_json['input_i'])
+
         loudnorm = \
             'loudnorm=I=-16:' \
             'TP=-1.5:' \
@@ -265,10 +261,30 @@ class Track:
             f"offset={meas_json['target_offset']}:" \
             'linear=true'
 
-        log.info('Measured integrated loudness: %s', meas_json['input_i'])
+        cache.store(cache_key, loudnorm.encode())
+        return loudnorm
+
+
+    def transcoded_audio(self,
+                         audio_type: AudioType) -> bytes:
+        """
+        Normalize and compress audio using ffmpeg
+        Returns: Compressed audio bytes
+        """
+        cache_key = 'audio5' + str(audio_type) + self.relpath + str(self.mtime)
+
+        cached_data = cache.retrieve(cache_key)
+
+        if cached_data is not None:
+            log.info('Returning cached audio')
+            return cached_data
+
+        loudnorm = self.get_loudnorm_filter()
+
+        input_options = ['-map', '0:a', # only keep audio
+                         '-map_metadata', '-1']  # discard metadata
 
         if audio_type in {AudioType.WEBM_OPUS_HIGH, AudioType.WEBM_OPUS_LOW}:
-            input_options = ['-map_metadata', '-1']
             bit_rate = '128k' if audio_type == AudioType.WEBM_OPUS_HIGH else '48k'
             audio_options = ['-f', 'webm',
                              '-c:a', 'libopus',
@@ -277,45 +293,47 @@ class Track:
                              '-frame_duration', '60', # Higher frame duration offers better compression at the cost of latency
                              '-vn']  # remove video track (and album covers)
         elif audio_type == AudioType.MP4_AAC:
-            input_options = ['-map_metadata', '-1']
+            # https://trac.ffmpeg.org/wiki/Encode/AAC
             audio_options = ['-f', 'mp4',
                              '-c:a', 'aac',
-                             '-b:a', '128k',
+                             '-q:a', '3', # 96k-144k
+                             # +faststart to allow playback without downloading entire file
+                             '-movflags', '+faststart',
                              '-vn']  # remove video track (and album covers)
         elif audio_type == AudioType.MP3_WITH_METADATA:
+            # https://trac.ffmpeg.org/wiki/Encode/MP3
             cover = self.get_cover_thumbnail(False, ImageFormat.JPEG, ImageQuality.HIGH)
             # Write cover to temp file so ffmpeg can read it
             cover_temp_file = tempfile.NamedTemporaryFile('wb')
             cover_temp_file.write(cover)
 
             input_options = ['-i', cover_temp_file.name,  # Add album cover
-                             '-map', '0:0',
-                             '-map', '1:0',  # map album image to audio stream
+                             '-map', '0:a', # include audio stream from first input
+                             '-map', '1:0', # include first stream from second input
                              '-id3v2_version', '3',
+                             '-map_metadata', '-1',  # discard original metadata
                              '-metadata:s:v', 'title=Album cover',
-                             '-metadata:s:v', 'comment=Cover (front)']
-
-            input_options.extend(['-map_metadata', '-1'])  # Discard original metadata
-            metadata_options = self._get_ffmpeg_metadata_options()
-            input_options.extend(metadata_options)  # Set new metadata
+                             '-metadata:s:v', 'comment=Cover (front)',
+                             *self._get_ffmpeg_metadata_options()]  # set new metadata
 
             audio_options = ['-f', 'mp3',
                              '-c:a', 'libmp3lame',
                              '-c:v', 'copy',  # Leave cover as JPEG, don't re-encode as PNG
-                             '-q:a', '5']  # VBR ~130kbps (usually 120-150kbps), close to transparent
+                             '-q:a', '5']  # VBR 128kbps
 
-        command = ['ffmpeg',
-                '-y',  # overwrite existing file
-                '-hide_banner',
-                '-loglevel', settings.ffmpeg_loglevel,
-                '-i', self.path.absolute().as_posix(),
-                *input_options,
-                *audio_options,
-                '-ac', '2',
-                '-filter:a', loudnorm,
-                '-']
-        xc_result = subprocess.run(command, shell=False, check=True, stdout=subprocess.PIPE)
-        audio_data = xc_result.stdout
+        with tempfile.NamedTemporaryFile() as temp_output:
+            command = ['ffmpeg',
+                    '-y',  # overwrite existing file
+                    '-hide_banner',
+                    '-loglevel', settings.ffmpeg_loglevel,
+                    '-i', self.path.absolute().as_posix(),
+                    *input_options,
+                    *audio_options,
+                    '-ac', '2',
+                    '-filter:a', loudnorm,
+                    temp_output.name]
+            subprocess.run(command, shell=False, check=True)
+            audio_data = temp_output.read()
 
         if audio_type == AudioType.MP3_WITH_METADATA:
             cover_temp_file.close()
