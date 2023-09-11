@@ -58,7 +58,7 @@ body.light input::placeholder {
     position: absolute;
 }
 
-@media screen and (min-width: 1000px) {
+@media screen and (min-width: 900px) {
     .sidebar {
         position: absolute;
         top: 0;
@@ -84,7 +84,7 @@ body.light input::placeholder {
     }
 }
 
-@media screen and (max-width: 999px) {
+@media screen and (max-width: 899px) {
     .sidebar {
         padding: 0 1rem;
     }
