@@ -88,3 +88,20 @@ function youTubeDownload(event) {
         alert('error, check console');
     });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('youtube-dl-submit').addEventListener('click', youTubeDownload);
+
+    document.getElementById('scan-button').addEventListener('click', () => (async function() {
+        const spinner = document.getElementById('scan-spinner');
+        const button = document.getElementById('scan-button');
+        spinner.classList.remove('hidden');
+        button.classList.add('hidden');
+        await jsonPost('/scan_music', {});
+        await Track.updateLocalTrackList();
+        spinner.classList.add('hidden');
+        button.classList.remove('hidden');
+    })());
+
+    document.getElementById('settings-queue-size').addEventListener('input', () => queue.fill());
+});

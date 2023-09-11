@@ -21,32 +21,6 @@ function seekAbsolute(position) {
     eventBus.publish(MusicEvent.PLAYBACK_CHANGE);
 }
 
-function getTransformedVolume(volumeZeroToHundred) {
-    // https://www.dr-lex.be/info-stuff/volumecontrols.html
-    // Values for 60dB dynamic range
-    const a = 1e-3
-    const b = 6.907 // slightly lower than value in article so result never exceeds 1.0
-    const x = volumeZeroToHundred / 100;
-    return a * Math.exp(x * b);
-}
-
-function onVolumeChange() {
-    const slider = document.getElementById('settings-volume');
-    const volume = slider.value;
-
-    slider.classList.remove('input-volume-high', 'input-volume-medium', 'input-volume-low');
-    if (volume > 60) {
-        slider.classList.add('input-volume-high');
-    } else if (volume > 20) {
-        slider.classList.add('input-volume-medium');
-    } else {
-        slider.classList.add('input-volume-low');
-    }
-
-    const audioElem = getAudioElement();
-    audioElem.volume = getTransformedVolume(volume);
-}
-
 /**
  * @returns {HTMLAudioElement}
  */
@@ -189,3 +163,83 @@ function switchAlbumCover() {
     document.getElementById('sidebar-lyrics').classList.add('hidden');
     document.getElementById('sidebar-album-covers').classList.remove('hidden');
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Lyrics / album cover switch buttons
+    // document.getElementById('button-lyrics').addEventListener('click', switchLyrics);
+    // document.getElementById('button-album').addEventListener('click', switchAlbumCover);
+    // document.getElementById('button-album').classList.add('hidden');
+
+    // Switch between album cover and lyrics by clicking in lyrics/cover
+    document.getElementById('album-covers').addEventListener('click', event => {
+        event.preventDefault();
+        switchLyrics();
+    });
+    document.getElementById('lyrics-box').addEventListener('click', event => {
+        if (event.target.nodeName === 'A') {
+            // Allow clicking 'source' link
+            return;
+        }
+        event.preventDefault();
+        switchAlbumCover();
+    });
+
+    // Never play button
+    document.getElementById('button-never-play').addEventListener('click', () => {
+        const data = {track: queue.currentTrack.trackPath};
+        jsonPost('/dislikes_add', data);
+        queue.next();
+    });
+
+    // Delete track button
+    const deleteButton = document.getElementById('button-delete-track');
+    if (deleteButton !== null) {
+        deleteButton.addEventListener('click', () => {
+            if (queue.currentTrack === null) {
+                return;
+            }
+            const deleteSpinner = document.getElementById('delete-spinner');
+            deleteSpinner.classList.remove('hidden');
+            const path = queue.currentTrack.trackPath;
+            const oldName = path.split('/').pop();
+            const newName = '.trash.' + oldName;
+            (async function() {
+                await jsonPost('/files_rename', {path: path, new_name: newName});
+                await Track.updateLocalTrackList();
+                queue.next();
+                deleteSpinner.classList.add('hidden');
+            })();
+        });
+    } else {
+        console.warn('Editor button missing from page, this is normal if you are not an admin user');
+    }
+
+    // Copy track to other playlist
+    const copyOpenButton = document.getElementById('button-copy');
+    if (copyOpenButton) { // Missing in offline mode
+        const copyTrack = document.getElementById('copy-track');
+        const copyPlaylist = document.getElementById('copy-playlist');
+        const copyButton = document.getElementById('copy-do-button');
+        copyOpenButton.addEventListener('click', () => {
+            copyTrack.value = queue.currentTrack.path;
+            dialogs.open('dialog-copy');
+        });
+        copyButton.addEventListener('click', async function() {
+            copyButton.disabled = true;
+            const response = await jsonPost('/player_copy_track', {playlist: copyPlaylist.value, track: queue.currentTrack.trackPath}, false);
+            console.log(response.status);
+            if (response.status == 200) {
+                const text = await response.text();
+                if (text != "") {
+                    alert(text);
+                }
+            } else {
+                alert('Error');
+            }
+            dialogs.close('dialog-copy');
+            copyButton.disabled = false;
+        });
+    }
+
+    queue.next();
+});

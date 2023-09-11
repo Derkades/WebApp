@@ -1,3 +1,9 @@
+/**
+ * Create button element containing an icon
+ * @param {string} iconName
+ * @param {Array<string>} classes
+ * @returns {HTMLButtonElement}
+ */
 function createIconButton(iconName, classes) {
     const button = document.createElement('button');
     button.classList.add('icon-button');

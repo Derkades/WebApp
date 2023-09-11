@@ -139,6 +139,11 @@ class Track {
         return html;
     };
 
+    /**
+     * Generates display text for this track
+     * @param {boolean} showPlaylist
+     * @returns {string}
+     */
     displayText(showPlaylist = false) {
         let text = '';
 
@@ -174,6 +179,10 @@ class Track {
         eventBus.publish(MusicEvent.TRACK_LIST_CHANGE);
     };
 
+    /**
+     * Download track data, and add to queue
+     * @param {boolean} top
+     */
     async downloadAndAddToQueue(top = false) {
         const audioType = document.getElementById('settings-audio-type').value;
 
