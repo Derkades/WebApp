@@ -1,5 +1,3 @@
-version: "3.6"
-
 services:
 
   music:
@@ -15,7 +13,7 @@ services:
       - type: tmpfs
         target: /tmp
         tmpfs:
-          size: 1.5G
+          size: 1G
     # user: '1000' # optionally, change user id
     read_only: true
     cap_drop: ['all']
