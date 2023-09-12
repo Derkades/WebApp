@@ -329,6 +329,7 @@ class Track:
                     '-i', self.path.absolute().as_posix(),
                     *input_options,
                     *audio_options,
+                    '-t', str(settings.track_limit_seconds),
                     '-ac', '2',
                     '-filter:a', loudnorm,
                     temp_output.name]

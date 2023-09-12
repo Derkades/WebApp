@@ -30,9 +30,9 @@ Log level for all python loggers.
 
 User agent used for web scraper. The default value is a common web browser user agent.
 
-## `MUSIC_TRACK_LIMIT_SECONDS` = `900`
+## `MUSIC_TRACK_LIMIT_SECONDS` = `1200`
 
-Maximum track length. If a track is longer than this value, it is cut.
+Maximum track length. If a track is longer than this value, it is truncated.
 
 ## `MUSIC_RADIO_PLAYLISTS`
 
