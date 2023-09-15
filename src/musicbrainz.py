@@ -6,6 +6,7 @@ import requests
 
 import cache
 import image
+import settings
 
 
 log = logging.getLogger('app.musicbrainz')
@@ -20,20 +21,20 @@ def lucene_escape(text: str):
 
 
 def _mb_get(url: str, params):
-    r = requests.get('https://musicbrainz.org/ws/2/' + url,
-                     headers={'Accept': 'application/json',
-                              'User-Agent': 'Super-fancy-music-player/2.0 (https://github.com/DanielKoomen/WebApp)'},
+    response = requests.get('https://musicbrainz.org/ws/2/' + url,
+                            headers={'Accept': 'application/json',
+                                     'User-Agent': settings.user_agent},
                      params=params,
                      timeout=10)
-    r.raise_for_status()
-    return r.json()
+    response.raise_for_status()
+    return response.json()
 
 
 caa_base = 'https://coverartarchive.org/release'
 
 def _caa_get(release_id: str, img_type: str, size: int):
     r = requests.get(f'https://coverartarchive.org/release/{release_id}/{img_type}-{size}',
-                     headers={'User-Agent': 'Super-fancy-music-player/2.0 (https://github.com/DanielKoomen/WebApp)'},
+                     headers={'User-Agent': settings.user_agent},
                      allow_redirects=True,
                      timeout=20)
     r.raise_for_status()

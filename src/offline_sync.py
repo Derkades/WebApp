@@ -2,7 +2,6 @@ import logging
 from sqlite3 import Connection
 import traceback
 from urllib.parse import quote as urlencode
-import time
 
 import requests
 from requests import Response
@@ -24,40 +23,52 @@ class OfflineSync:
     def __init__(self, db_offline: Connection, db_music: Connection):
         self.db_offline = db_offline
         self.db_music = db_music
-        self.set_base_url()
+        self.base_url = self.get_base_url()
         self.set_token()
 
-    def set_base_url(self):
-        row = self.db_offline.execute("SELECT value FROM settings WHERE key='sync_url'").fetchone()
-        if row:
-            self.base_url, = row
-        else:
-            log.info('No sync server is configured')
-            self.base_url = input('Enter server URL (https://example.com): ')
-            self.db_offline.execute("INSERT INTO settings (key, value) VALUES ('sync_url', ?)",
-                                    (self.base_url,))
-            self.db_offline.commit()
+    def get_headers(self):
+        """
+        Returns header dictionary for use by requests library
+        """
+        headers = {'User-Agent': settings.user_agent_offline_sync}
+        if self.token is not None:
+            headers['Cookie'] = 'token=' + self.token
+        return headers
 
     def request_get(self, route: str) -> Response:
         response = requests.get(self.base_url + route,
-                                headers={'Cookie': 'token=' + self.token,
-                                         'User-Agent': settings.user_agent_offline_sync},
+                                headers=self.get_headers(),
                                 timeout=30)
         response.raise_for_status()
         return response
 
     def request_post(self, route: str, data) -> Response:
-        headers = {'User-Agent': settings.user_agent_offline_sync}
-        if self.token is not None:
-            headers['Cookie'] = 'token=' + self.token
         response = requests.post(self.base_url + route,
                                  json=data,
-                                 headers=headers,
+                                 headers=self.get_headers(),
                                  timeout=30)
         response.raise_for_status()
         return response
 
+    def get_base_url(self):
+        """
+        Get base URL variable from database. If not stored in the database, the user is asked to enter one.
+        """
+        row = self.db_offline.execute("SELECT value FROM settings WHERE key='sync_url'").fetchone()
+        if row:
+            base_url, = row
+        else:
+            log.info('No sync server is configured')
+            base_url = input('Enter server URL (https://example.com): ')
+            self.db_offline.execute("INSERT INTO settings (key, value) VALUES ('sync_url', ?)",
+                                    (base_url,))
+            self.db_offline.commit()
+        return base_url
+
     def set_token(self):
+        """
+        Set local token variable from database. If no token is stored, the user is asked to log in.
+        """
         row = self.db_offline.execute("SELECT value FROM settings WHERE key='sync_token'").fetchone()
         if row:
             self.token, = row
@@ -75,6 +86,9 @@ class OfflineSync:
             self.set_token()
 
     def login_prompt(self):
+        """
+        Ask user to log in, and store resulting token in database.
+        """
         username = input('Enter username: ')
         password = input('Enter password: ')
 
@@ -100,6 +114,9 @@ class OfflineSync:
         log.info('Logged in successfully')
 
     def _download_track_content(self, path: str):
+        """
+        Download audio, album cover and lyrics for a track and store in the 'content' database table.
+        """
         log.info('Downloading audio data')
         response = self.request_get('/get_track?type=webm_opus_high&path=' + urlencode(path))
         assert response.status_code == 200
@@ -185,6 +202,9 @@ class OfflineSync:
                                   (name,))
 
     def sync_tracks(self):
+        """
+        Download added or modified tracks from the server, and delete local tracks that were deleted on the server
+        """
         log.info('Downloading track list')
         response = self.request_get('/track_list').json()
 
@@ -218,6 +238,9 @@ class OfflineSync:
         self._prune_playlists()
 
     def sync_history(self):
+        """
+        Send local playback history to server
+        """
         csrf_token = self.request_get('/get_csrf').json()['token']
 
         rows = self.db_offline.execute('SELECT rowid, timestamp, track, playlist FROM history ORDER BY timestamp ASC')
