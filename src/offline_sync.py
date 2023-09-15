@@ -100,9 +100,6 @@ class OfflineSync:
         log.info('Logged in successfully')
 
     def _download_track_content(self, path: str):
-        log.info('Waiting to avoid API quotas')
-        time.sleep(2)
-
         log.info('Downloading audio data')
         response = self.request_get('/get_track?type=webm_opus_high&path=' + urlencode(path))
         assert response.status_code == 200
