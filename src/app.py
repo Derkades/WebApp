@@ -186,7 +186,8 @@ def route_get_csrf():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         csrf_token = user.get_csrf()
-    return {'token': csrf_token}
+    return Response(json.dumps({'token': csrf_token}),
+                    headers={'Cache-Control': "max-age=600"})
 
 
 @app.route('/choose_track', methods=['GET'])
