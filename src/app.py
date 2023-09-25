@@ -8,12 +8,16 @@ from urllib.parse import quote as urlencode
 import time
 import shutil
 import re
+import hashlib
+import json
+from datetime import datetime, timezone
 
 import bcrypt
 from flask import Flask, request, render_template, Response, redirect, send_file
 from flask_babel import Babel
 from flask_babel import _, format_timedelta
 from werkzeug.middleware.proxy_fix import ProxyFix
+from werkzeug.http import http_date
 
 import auth
 from auth import AuthError, RequestTokenError
@@ -354,6 +358,24 @@ def route_track_list():
     with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn)
 
+        result = conn.execute('''
+                              SELECT timestamp FROM scanner_log
+                              ORDER BY id DESC
+                              LIMIT 1
+                              ''').fetchone()
+
+        if result:
+            last_modified = datetime.fromtimestamp(result[0], timezone.utc)
+            if_modified_since = request.if_modified_since
+            if if_modified_since and last_modified <= if_modified_since:
+                log.info('Last modified before If-Modified-Since header')
+                return Response(None, 304)  # Not Modified
+
+            headers = {'Last-Modified': http_date(last_modified),
+                       'Cache-Control': 'no-cache'}
+        else:
+            headers = {}
+
         user_playlists = music.user_playlists(conn, user.user_id)
 
         playlist_response: list[dict[str, Any]] = []
@@ -398,7 +420,7 @@ def route_track_list():
                 tag_rows = conn.execute('SELECT tag FROM track_tag WHERE track=?', (relpath,))
                 track_json['tags'] = [tag for tag, in tag_rows]
 
-    return {'playlists': playlist_response}
+    return Response(json.dumps({'playlists': playlist_response}), headers=headers)
 
 
 @app.route('/scan_music', methods=['POST'])
