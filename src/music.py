@@ -240,12 +240,21 @@ class Track:
         meas_command = ['ffmpeg',
                         '-hide_banner',
                         '-i', self.path.absolute().as_posix(),
+                        '-map', '0:a',
                         '-af', 'loudnorm=print_format=json',
                         '-f', 'null',
                         '-']
         # Annoyingly, loudnorm outputs to stderr instead of stdout. Disabling logging also hides the loudnorm output...
-        meas_out = subprocess.run(meas_command, shell=False, check=True, capture_output=True).stderr.decode()
+        meas_result = subprocess.run(meas_command, shell=False, capture_output=True, check=False)
+
+        if meas_result.returncode != 0:
+            log.warning('FFmpeg exited with exit code %s', meas_result.returncode)
+            log.warning('--- stdout ---\n%s', meas_result.stdout.decode())
+            log.warning('--- stderr ---\n%s', meas_result.stderr.decode())
+            raise RuntimeError()
+
         # Manually find the start of loudnorm info json
+        meas_out = meas_result.stderr.decode()
         meas_json = json.loads(meas_out[meas_out.index('Parsed_loudnorm_0')+37:])
 
         log.info('Measured integrated loudness: %s', meas_json['input_i'])
