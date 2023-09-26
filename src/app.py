@@ -136,8 +136,6 @@ def route_player():
 
     return render_template('player.jinja2',
                            mobile=is_mobile(),
-                           languages=LANGUAGES,
-                           language=get_locale(),
                            primary_playlist=primary_playlist,
                            offline_mode=settings.offline_mode)
 
