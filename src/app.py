@@ -53,10 +53,10 @@ def get_locale() -> str:
     Returns two letter language code, matching a language code in
     the LANGUAGES constant
     """
-    if 'settings-language' in request.cookies:
-        for language in LANGUAGES:
-            if language[0] == request.cookies['settings-language']:
-                return request.cookies['settings-language']
+    # if 'settings-language' in request.cookies:
+    #     for language in LANGUAGES:
+    #         if language[0] == request.cookies['settings-language']:
+    #             return request.cookies['settings-language']
 
     best_match = request.accept_languages.best_match(['nl', 'nl-NL', 'nl-BE', 'en'])
     header_lang = best_match[:2] if best_match else 'en'

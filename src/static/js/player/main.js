@@ -18,8 +18,6 @@ const state = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    syncCookiesWithInputs();
-
     document.getElementById('button-home').addEventListener('click', () => window.open('/', '_blank'));
 
     // Queue

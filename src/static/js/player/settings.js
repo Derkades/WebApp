@@ -1,4 +1,4 @@
-function syncCookieWithInput(elemId) {
+function syncInputWithStorage(elemId) {
     const elem = document.getElementById(elemId);
     const isCheckbox = elem.matches('input[type="checkbox"]');
 
@@ -6,27 +6,24 @@ function syncCookieWithInput(elemId) {
         return;
     }
 
-    // If cookie exists, set input value to cookie value
-    const value = getCookie(elemId);
+    // Initialize input form local storage
+    const value = window.localStorage.getItem(elemId);
     if (value !== null) {
         if (isCheckbox) {
-            elem.checked = value === '1';
+            elem.checked = value === 'true';
         } else {
             elem.value = value;
         }
     }
 
-    // If input value is updated, set cookie accordingly
+    // If input value is updated, change storage accordingly
     elem.addEventListener('input', event => {
-        if (isCheckbox) {
-            setCookie(elemId, event.target.checked ? '1' : '0');
-        } else {
-            setCookie(elemId, event.target.value);
-        }
+        const value = isCheckbox ? event.target.checked : event.target.value;
+        window.localStorage.setItem(elemId, value);
     });
 }
 
-function syncCookiesWithInputs() {
+function syncInputsWithStorage() {
     [
         'settings-queue-size',
         'settings-audio-type',
@@ -35,8 +32,8 @@ function syncCookiesWithInputs() {
         'settings-download-mode',
         // 'settings-theme',
         'settings-meme-mode',
-        'settings-language',
-    ].forEach(syncCookieWithInput);
+        // 'settings-language',
+    ].forEach(syncInputWithStorage);
 
     onVolumeChange();
 }
@@ -90,6 +87,8 @@ function youTubeDownload(event) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    syncInputsWithStorage();
+
     document.getElementById('youtube-dl-submit').addEventListener('click', youTubeDownload);
 
     document.getElementById('scan-button').addEventListener('click', () => (async function() {

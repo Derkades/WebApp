@@ -119,7 +119,7 @@
             {{ dialog_header('dialog-settings', gettext('Settings')) }}
             <div class="dialog-body">
                 <h4>{% trans %}Settings{% endtrans %}</h4>
-                <label for="settings-language">{% trans %}Language (reload required){% endtrans %}</label><br>
+                {# <label for="settings-language">{% trans %}Language (reload required){% endtrans %}</label><br>
                 <select id="settings-language">
                     {% for lang_id, lang_display in languages %}
                         {% if lang_id == language %}
@@ -128,7 +128,7 @@
                             <option value="{{ lang_id }}">{{ lang_display }}</option>
                         {% endif %}
                     {% endfor %}
-                </select><br>
+                </select><br> #}
 
                 {# <label for="settings-theme">{% trans %}Theme{% endtrans %}</label><br>
 
