@@ -46,7 +46,8 @@ CREATE TABLE IF NOT EXISTS user (
     nickname TEXT NULL,
     password TEXT NOT NULL,
     admin INTEGER NOT NULL DEFAULT 0,
-    primary_playlist TEXT NULL REFERENCES playlist(path) ON DELETE SET NULL
+    primary_playlist TEXT NULL REFERENCES playlist(path) ON DELETE SET NULL,
+    language TEXT NULL
 );
 
 CREATE TABLE IF NOT EXISTS user_playlist (

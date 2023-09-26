@@ -2,38 +2,48 @@
 
 To run a migration:
 1. Shut down the music player (`docker compose stop`)
-2. Run `sqlite3 data/music.db` (`sqlite3` package on Debian, `sqlite` package on Fedora)
+2. Open the required database using `sqlite3 <database>` (`sqlite3` package on Debian, `sqlite` package on Fedora)
 3. Execute the migration by copying it line by line from top to bottom, pressing enter after every line.
 4. Exit using <kbd>Ctrl</kbd>+<kbd>D</kbd>
 
+## 2023-09-26
+`music.db`
+```sql
+ALTER TABLE user ADD COLUMN language TEXT NULL;
+```
+
 ## 2023-08-13
-cache.db
+`cache.db`
 ```sql
 DROP TABLE cache;
 ```
 
 ## 2023-07-09
+`music.db`
 ```sql
 ALTER TABLE user ADD COLUMN nickname TEXT NULL;
 ```
 
 ## 2023-06-30
-offline.db
+`offline.db`
 ```sql
 DROP TABLE settings;
 ```
 
 ## 2023-06-15
+`music.db`
 ```sql
 DROP TABLE now_playing;
 ```
 
 ## 2023-04-14
+`music.db`
 ```sql
 DROP TABLE now_playing;
 ```
 
 ## 2023-03-14
+`music.db`
 ```sql
 BEGIN;
 CREATE TABLE session_new (
@@ -51,21 +61,21 @@ COMMIT;
 ```
 
 ## 2023-01-31
+`music.db`
 ```sql
 ALTER TABLE session RENAME COLUMN last_user_agent TO user_agent;
 ALTER TABLE session RENAME COLUMN last_address TO remote_address;
 ```
 
 ## 2023-01-30
+`music.db`
 ```sql
 ALTER TABLE user ADD COLUMN primary_playlist TEXT NULL REFERENCES playlist(path) ON DELETE SET NULL;
 ```
 
 ## 2023-01-27
+`music.db`
 ```sql
 ALTER TABLE playlist DROP COLUMN name;
-```
-
-```sql
 ALTER TABLE track RENAME COLUMN album_index TO track_number;
 ```

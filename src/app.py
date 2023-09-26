@@ -26,6 +26,7 @@ import downloader
 import genius
 import image
 from image import ImageFormat, ImageQuality
+import language
 import lastfm
 import music
 from music import AudioType, Playlist, Track
@@ -42,30 +43,9 @@ if not settings.offline_mode:
     from stats_plots import StatsPeriod
 
 
-LANGUAGES = (
-    ('en', 'English'),
-    ('nl', 'Nederlands'),
-)
-
-
-def get_locale() -> str:
-    """
-    Returns two letter language code, matching a language code in
-    the LANGUAGES constant
-    """
-    # if 'settings-language' in request.cookies:
-    #     for language in LANGUAGES:
-    #         if language[0] == request.cookies['settings-language']:
-    #             return request.cookies['settings-language']
-
-    best_match = request.accept_languages.best_match(['nl', 'nl-NL', 'nl-BE', 'en'])
-    header_lang = best_match[:2] if best_match else 'en'
-    return header_lang
-
-
 app = Flask(__name__, template_folder='templates')
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=settings.proxies_x_forwarded_for)
-babel = Babel(app, locale_selector=get_locale)
+babel = Babel(app, locale_selector=language.get_locale)
 log = logging.getLogger('app')
 static_dir = Path('static')
 raphson_png_path = Path(static_dir, 'raphson.png')
@@ -731,6 +711,7 @@ def route_account():
 
     return render_template('account.jinja2',
                             user=user,
+                            languages=language.LANGUAGES.items(),
                             csrf_token=csrf_token,
                             sessions=sessions,
                             lastfm_enabled=lastfm.is_configured(),
@@ -768,7 +749,26 @@ def route_change_nickname_form():
         conn.execute('UPDATE user SET nickname=? WHERE id=?',
                      (request.form['nickname'], user.user_id))
 
-        return redirect('/account')
+    return redirect('/account')
+
+
+@app.route('/change_language_form', methods=['POST'])
+def route_change_language_form():
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
+        user.verify_csrf(request.form['csrf_token'])
+
+        lang_code = request.form['language']
+        if lang_code == '':
+            conn.execute('UPDATE user SET language = NULL')
+        else:
+            if lang_code not in language.LANGUAGES:
+                return Response('Invalid language code', 400)
+
+            conn.execute('UPDATE user SET language=?',
+                         (lang_code,))
+
+    return redirect('/account')
 
 
 def radio_track_response(track: RadioTrack):

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-09-07 09:25+0200\n"
-"PO-Revision-Date: 2023-09-07 09:21+0200\n"
+"POT-Creation-Date: 2023-09-26 09:26+0200\n"
+"PO-Revision-Date: 2023-09-26 09:26+0200\n"
 "Last-Translator: \n"
 "Language: nl\n"
 "Language-Team: nl <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.12.1\n"
 
-#: app.py:727
+#: app.py:708
 msgid "Incorrect password."
 msgstr "Onjuist wachtwoord."
 
-#: app.py:730
+#: app.py:711
 msgid "Repeated new passwords do not match."
 msgstr "Herhaalde wachtwoorden komen niet overeen."
 
@@ -30,19 +30,19 @@ msgstr "Herhaalde wachtwoorden komen niet overeen."
 msgid "Track is already in this playlist"
 msgstr "Nummer zit al in deze afspeellijst"
 
-#: auth.py:47 auth.py:69 auth.py:76
+#: auth.py:48 auth.py:70 auth.py:77
 msgid "Unknown"
 msgstr "Onbekend"
 
-#: auth.py:203
+#: auth.py:206
 msgid "You are not logged in, please log in."
 msgstr "Je bent niet ingelogd, gelieve in te loggen."
 
-#: auth.py:205
+#: auth.py:208
 msgid "Your current session is invalid, please log in again."
 msgstr "Je huidige sessie is ongeldig, gelieve opnieuw in te loggen."
 
-#: auth.py:207
+#: auth.py:210
 msgid ""
 "Your are not an administrator, but this page requires administrative "
 "privileges"
@@ -262,6 +262,14 @@ msgstr "Herhaal nieuw wachtwoord"
 #: templates/account.jinja2:61 templates/account.jinja2:65
 msgid "Change nickname"
 msgstr "Verander bijnaam"
+
+#: templates/account.jinja2:68 templates/account.jinja2:81
+msgid "Change language"
+msgstr "Taal wijzigen"
+
+#: templates/account.jinja2:72
+msgid "System language"
+msgstr "Systeemvoorkeur"
 
 #: templates/activity.jinja2:4 templates/activity.jinja2:9
 #: templates/home.jinja2:27
@@ -789,10 +797,6 @@ msgstr "Geen songtekst gevonden"
 msgid "Source"
 msgstr "Bron"
 
-#: templates/player.jinja2:122
-msgid "Language (reload required)"
-msgstr "Taal (herladen vereist)"
-
 #: templates/player.jinja2:141
 msgid "Minimum queue size"
 msgstr "Minimum wachtrijlengte"
@@ -810,8 +814,8 @@ msgid "Low quality (48k Opus)"
 msgstr "Lage kwaliteit (48k Opus)"
 
 #: templates/player.jinja2:153
-msgid "iOS/Safari (128k AAC)"
-msgstr "iOS/Safari (128k AAC)"
+msgid "iOS/Safari (VBR 128kbps AAC)"
+msgstr "iOS/Safari (VBR 128k AAC)"
 
 #: templates/player.jinja2:157
 msgid "Queue removal behaviour"
@@ -1200,4 +1204,7 @@ msgstr "Nieuw wachtwoord (laat leeg om niet te veranderen)"
 #: templates/users_edit.jinja2:18
 msgid "Submit"
 msgstr "Versturen"
+
+#~ msgid "Language (reload required)"
+#~ msgstr "Taal (herladen vereist)"
 

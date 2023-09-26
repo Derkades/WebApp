@@ -65,4 +65,20 @@
     <input type="submit" value="{% trans %}Change nickname{% endtrans %}">
 </form>
 
+<h2>{% trans %}Change language{% endtrans %}</h2>
+<form method="POST" action="/change_language_form">
+    <input type="hidden" value="{{ csrf_token }}" name="csrf_token">
+    <select name="language">
+        <option value="" {% if not user.language %}selected{% endif %}>{% trans %}System language{% endtrans %}</option>
+        {% for lang_code, lang_display in languages %}
+            {% if lang_code == user.language %}
+                <option value="{{ lang_code }}" selected>{{ lang_display }}</option>
+            {% else %}
+                <option value="{{ lang_code }}">{{ lang_display }}</option>
+            {% endif %}
+        {% endfor %}
+    </select><br>
+    <input type="submit" value="{% trans %}Change language{% endtrans %}">
+</form>
+
 {% endblock content %}

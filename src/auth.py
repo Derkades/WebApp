@@ -14,6 +14,7 @@ import flask_babel
 from flask_babel import _
 
 import settings
+import language
 
 
 log = logging.getLogger('app.auth')
@@ -125,6 +126,7 @@ class StandardUser(User):
     nickname: str
     admin: bool
     primary_playlist: Optional[str]
+    language: Optional[str]
 
     def sessions(self) -> list[Session]:
         results = self.conn.execute("""
@@ -168,6 +170,7 @@ class OfflineUser(User):
         self.nickname = 'Fake offline user'
         self.admin = False
         self.primary_playlist = None
+        self.language = language.DEFAULT_LANGUAGE
 
     def sessions(self) -> list[Session]:
         return []
@@ -273,7 +276,7 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
     Returns: User object if session token is valid, or None if invalid
     """
     result = conn.execute("""
-                          SELECT session.rowid, user.id, user.username, user.nickname, user.admin, user.primary_playlist
+                          SELECT session.rowid, user.id, user.username, user.nickname, user.admin, user.primary_playlist, user.language
                           FROM user
                               INNER JOIN session ON user.id = session.user
                           WHERE session.token=?
@@ -282,7 +285,7 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
         log.warning('Invalid auth token: %s', token)
         return None
 
-    session_rowid, user_id, username, nickname, admin, primary_playlist = result
+    session_rowid, user_id, username, nickname, admin, primary_playlist, language = result
 
     try:
         remote_addr = request.remote_addr
@@ -298,7 +301,7 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
         if ex.sqlite_errorname != 'SQLITE_READONLY':
             raise ex
 
-    return StandardUser(conn, user_id, username, nickname, admin == 1, primary_playlist)
+    return StandardUser(conn, user_id, username, nickname, admin == 1, primary_playlist, language)
 
 
 def verify_auth_cookie(conn: Connection, require_admin = False, redirect_to_login = False) -> User:
