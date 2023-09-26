@@ -9,6 +9,8 @@ const state = {
     lastChosenPlaylist: null,
     /** @type {Array<string>} */
     playlistOverrides: [],
+    /** @type {string | null} */
+    trackListLastModified: null,
     /** @type {Object.<string, Playlist>} */
     playlists: null,
     /** @type {Object.<string, Track> | null} */

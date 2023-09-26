@@ -165,6 +165,14 @@ class Track {
     static async updateLocalTrackList() {
         console.info('Updating local track list');
         const response = await fetch('/track_list');
+        const lastModified = response.headers.get('Last-Modified')
+
+        if (lastModified == state.trackListLastModified) {
+            console.info('Track list is unchanged');
+            return;
+        }
+        state.trackListLastModified = lastModified;
+
         const json = await response.json();
 
         state.playlists = {};

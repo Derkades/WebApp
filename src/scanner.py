@@ -75,7 +75,7 @@ def scan_tracks(conn: Connection, playlist_name: str) -> None:
     """
     Scan for added, removed or changed tracks in a playlist.
     """
-    log.info('Scanning playlist: %s', playlist_name)
+    # log.info('Scanning playlist: %s', playlist_name)
 
     paths_db: set[str] = set()
 
@@ -162,4 +162,4 @@ def scan(conn: Connection) -> None:
     for playlist in playlists:
         scan_tracks(conn, playlist)
     duration_ms = (time.time_ns() - start_time_ns) // 1000000
-    log.info('Done scanning all playlists, took %sms', duration_ms)
+    log.info('Took %sms', duration_ms)
