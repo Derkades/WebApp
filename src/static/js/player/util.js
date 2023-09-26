@@ -22,7 +22,7 @@ function createIconButton(iconName, classes) {
  * @param {Response} response
  */
 function checkResponseCode(response) {
-    if (response.status != 200) {
+    if (!response.ok) {
         throw 'response code ' + response.status;
     }
 }
