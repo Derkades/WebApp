@@ -8,7 +8,6 @@ from urllib.parse import quote as urlencode
 import time
 import shutil
 import re
-import hashlib
 import json
 from datetime import datetime, timezone
 
@@ -17,7 +16,6 @@ from flask import Flask, request, render_template, Response, redirect, send_file
 from flask_babel import Babel
 from flask_babel import _, format_timedelta
 from werkzeug.middleware.proxy_fix import ProxyFix
-from werkzeug.http import http_date
 
 import auth
 from auth import AuthError, RequestTokenError
@@ -206,6 +204,10 @@ def route_get_track() -> Response:
         auth.verify_auth_cookie(conn)
         track = Track.by_relpath(conn, request.args['path'])
 
+    parsed_mtime = datetime.fromtimestamp(track.mtime, timezone.utc)
+    if request.if_modified_since and parsed_mtime <= request.if_modified_since:
+        return Response(None, 304)
+
     type_str = request.args['type']
     if type_str == 'webm_opus_high':
         audio_type = AudioType.WEBM_OPUS_HIGH
@@ -224,6 +226,8 @@ def route_get_track() -> Response:
 
     audio = track.transcoded_audio(audio_type)
     response = Response(audio, mimetype=media_type)
+    response.last_modified = parsed_mtime
+    response.cache_control.no_cache = True  # always revalidate cache
     response.accept_ranges = 'bytes'  # Workaround for Chromium bug https://stackoverflow.com/a/65804889
     if audio_type == AudioType.MP3_WITH_METADATA:
         mp3_name = re.sub(r'[^\x00-\x7f]',r'', track.metadata().display_title())
@@ -392,9 +396,10 @@ def route_track_list():
                 tag_rows = conn.execute('SELECT tag FROM track_tag WHERE track=?', (relpath,))
                 track_json['tags'] = [tag for tag, in tag_rows]
 
-    return Response(json.dumps({'playlists': playlist_response}),
-                    headers={'Last-Modified': http_date(last_modified),
-                             'Cache-Control': 'no-cache'})
+    response = Response(json.dumps({'playlists': playlist_response}))
+    response.last_modified = last_modified
+    response.cache_control.no_cache = True  # always revalidate cache
+    return response
 
 
 @app.route('/scan_music', methods=['POST'])
