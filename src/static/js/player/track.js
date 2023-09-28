@@ -256,14 +256,14 @@ class Track {
 
 function initTrackList() {
     Track.updateLocalTrackList().catch(err => {
-        console.warn('track list error', err);
+        console.warn('Error retrieving initial track list', err);
         setTimeout(initTrackList, 1000);
     });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     initTrackList();
-    setInterval(initTrackList, 15*60*1000);
+    setInterval(Track.updateLocalTrackList, 2*60*1000);
 });
 
 class Lyrics {
