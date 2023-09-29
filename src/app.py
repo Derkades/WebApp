@@ -46,7 +46,6 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=settings.proxies_x_forwarded_for)
 babel = Babel(app, locale_selector=language.get_locale)
 log = logging.getLogger('app')
 static_dir = Path('static')
-raphson_png_path = Path(static_dir, 'raphson.png')
 
 
 @app.errorhandler(AuthError)
@@ -138,7 +137,7 @@ def route_player():
                            offline_mode=settings.offline_mode)
 
 
-@app.route('/player.js')
+@app.route('/static/js/player.js')
 def route_player_js():
     """
     Concatenated javascript file for music player. Only used during development.
@@ -440,17 +439,6 @@ def route_update_metadata():
                              date=payload['metadata']['year'])
 
     return Response(None, 200)
-
-
-@app.route('/raphson')
-def route_raphson() -> Response:
-    """
-    Serve raphson logo image
-    """
-    thumb = image.thumbnail(raphson_png_path, 'raphson', ImageFormat.WEBP, ImageQuality.LOW, True)
-    response = Response(thumb, mimetype='image/webp')
-    response.cache_control.max_age = 24*3600
-    return response
 
 
 @app.route('/files')

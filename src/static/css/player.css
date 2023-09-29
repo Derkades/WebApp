@@ -280,7 +280,7 @@ body.light .progress-time {
     animation: rotate 1.25s linear infinite;
     display: inline-block;
     margin-left: 1rem;
-    background-image: url('/raphson');
+    background-image: url('/static/img/raphson_small.webp');
     height: 2rem;
     width: 2rem;
 }
