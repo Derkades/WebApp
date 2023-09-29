@@ -311,6 +311,8 @@ def probe(path: Path) -> Metadata | None:
         if name == 'genre':
             tags = split_meta_list(value)
 
+    artists = music.sort_artists(artists, album_artist)
+
     return Metadata(music.to_relpath(path),
                     duration,
                     artists,

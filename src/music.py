@@ -100,6 +100,17 @@ def list_tracks_recursively(path) -> Iterator[Path]:
                 yield track_path
 
 
+def sort_artists(artists: Optional[list[str]], album_artist: Optional[str]):
+    """
+    Move album artist to start of artist list
+    """
+    if artists and album_artist and album_artist in artists:
+        artists.remove(album_artist)
+        return [album_artist] + artists
+
+    return artists
+
+
 class AudioType(Enum):
     """
     Opus audio in WebM container, for music player streaming.

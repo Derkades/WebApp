@@ -390,7 +390,7 @@ def route_track_list():
 
                 artist_rows = conn.execute('SELECT artist FROM track_artist WHERE track=?', (relpath,)).fetchall()
                 if artist_rows:
-                    track_json['artists'] = [row[0] for row in artist_rows]
+                    track_json['artists'] = music.sort_artists([row[0] for row in artist_rows], album_artist)
 
                 tag_rows = conn.execute('SELECT tag FROM track_tag WHERE track=?', (relpath,))
                 track_json['tags'] = [tag for tag, in tag_rows]
