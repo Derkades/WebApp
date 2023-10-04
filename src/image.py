@@ -85,7 +85,7 @@ def thumbnail(input_img: Path | bytes | Callable,
         try:
             params = QUALITY_PARAMS_TABLE[img_quality]
             img = Image.open(BytesIO(input_bytes))
-            img.thumbnail((params.resolution, params.resolution), Image.ANTIALIAS)
+            img.thumbnail((params.resolution, params.resolution))
 
             if square:
                 new_dim = min(img.height, img.width)
