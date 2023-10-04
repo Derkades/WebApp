@@ -40,7 +40,11 @@ def offline(read_only: bool = False) -> Connection:
     """
     Create new SQLite database connection to offline database
     """
-    return _connect('offline', read_only)
+    conn = _connect('offline', read_only)
+    # Slow writes don't matter for the offline database, as writing only happens when syncing
+    # which is slow anyway.
+    conn.execute('PRAGMA auto_vacuum = FULL')
+    return conn
 
 
 def create_tables():
