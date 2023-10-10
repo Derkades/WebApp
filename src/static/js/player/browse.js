@@ -232,7 +232,7 @@ class Browse {
             colPlaylist.textContent = track.playlistName;
 
             const colDuration = document.createElement('td');
-            colDuration.append(secondsToString(track.duration));
+            colDuration.append(durationToString(track.duration));
 
             const colTitle = document.createElement('td');
             colTitle.replaceChildren(track.displayHtml());

@@ -11,7 +11,7 @@
 <table class="table">
     <thead>
         <tr>
-            <th>
+            <th colspan="2">
                 {% trans %}Time{% endtrans %}
             </th>
             <th>
@@ -29,15 +29,8 @@
         {% for change in changes %}
             <tr>
                 <td class="format-timestamp">{{ change['timestamp'] }}</td>
-                <td>
-                    {% if change['action'] == 'insert' %}
-                        {% trans %}Added{% endtrans %}
-                    {% elif change['action'] == 'delete' %}
-                        {% trans %}Deleted{% endtrans %}
-                    {% elif change['action'] == 'update' %}
-                        {% trans %}Changed{% endtrans %}
-                    {% endif %}
-                </td>
+                <td>{{ change['time_ago'] }}</td>
+                <td>{{ change['action'] }}</td>
                 <td>{{ change['playlist'] }}</td>
                 <td>{{ change['track'] }}</td>
             </tr>

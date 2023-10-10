@@ -39,6 +39,32 @@
 
 <a href="/activity_all" style="display: block; margin-top: .5rem">{% trans %}View more{% endtrans %}</a>
 
+<h2>{% trans %}Recent file changes{% endtrans %}</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                {% trans %}Time{% endtrans %}
+            </th>
+            <th>
+                {% trans %}Action{% endtrans %}
+            </th>
+            <th>
+                {% trans %}Playlist{% endtrans %}
+            </th>
+            <th>
+                {% trans %}Track{% endtrans %}
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tbody id="tbody-changes"></tbody>
+    </tbody>
+</table>
+
+<a href="/file_changes" style="display: block; margin-top: .5rem">{% trans %}View more{% endtrans %}</a>
+
 <style>
 .card-container {
     display: flex;
@@ -160,13 +186,31 @@ function getHistoryRowHtml(info) {
 
     const row = document.createElement('tr');
     row.append(colTime, colUsername, colPlaylist, colTitle);
+    return row;
+}
 
+function getFileChangeRowHtml(info) {
+    const colTime = document.createElement('td');
+    colTime.textContent = info.time_ago;
+
+    const colAction = document.createElement('td');
+    colAction.textContent = info.action;
+
+    const colPlaylist = document.createElement('td');
+    colPlaylist.textContent = info.playlist;
+
+    const colTrack = document.createElement('td');
+    colTrack.textContent = info.track;
+
+    const row = document.createElement('tr');
+    row.append(colTime, colAction, colPlaylist, colTrack);
     return row;
 }
 
 const nowPlayingDiv = document.getElementById('now-playing');
 const nothingPlayingText = document.getElementById('nothing-playing-text').textContent;
 const historyTable = document.getElementById('tbody-history');
+const fileChangesTable = document.getElementById('tbody-changes');
 
 async function updateNowPlaying() {
     const response = await fetch('/activity_data');
@@ -183,8 +227,9 @@ async function updateNowPlaying() {
         nowPlayingDiv.textContent = nothingPlayingText;
     }
 
-    const rows = json.history.map(getHistoryRowHtml);
-    historyTable.replaceChildren(...rows);
+    historyTable.replaceChildren(...json.history.map(getHistoryRowHtml));
+
+    fileChangesTable.replaceChildren(...json.file_changes.map(getFileChangeRowHtml));
 }
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -74,8 +74,8 @@ eventBus.subscribe(MusicEvent.PLAYBACK_CHANGE, () => {
     var barWidth;
 
     if (history.currentlyPlayingTrack && isFinite(audioElem.currentTime)) {
-        barCurrent = secondsToString(Math.round(audioElem.currentTime));
-        barDuration = secondsToString(Math.round(history.currentlyPlayingTrack.duration));
+        barCurrent = durationToString(Math.round(audioElem.currentTime));
+        barDuration = durationToString(Math.round(history.currentlyPlayingTrack.duration));
         barWidth = ((audioElem.currentTime / history.currentlyPlayingTrack.duration) * 100) + '%';
     } else {
         barCurrent = '--:--';

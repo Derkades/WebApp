@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     for (const elem of document.getElementsByClassName('format-duration')) {
-        elem.textContent = secondsToString(elem.textContent);
+        elem.textContent = durationToString(elem.textContent);
     }
 });
 
@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
  * @param {seconds} seconds
  * @returns {string} formatted duration
  */
-function secondsToString(seconds) {
+function durationToString(seconds) {
     // If you modify this function, also copy it to util.js!
     const isoString = new Date(1000 * seconds).toISOString();
     const days = Math.floor(seconds / (24*60*60));
