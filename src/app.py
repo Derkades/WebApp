@@ -349,7 +349,7 @@ def route_track_list():
         if timestamp_row:
             last_modified = datetime.fromtimestamp(timestamp_row[0], timezone.utc)
         else:
-            last_modified = datetime.now()
+            last_modified = datetime.now(timezone.utc)
 
         if request.if_modified_since and last_modified <= request.if_modified_since:
             log.info('Last modified before If-Modified-Since header')
