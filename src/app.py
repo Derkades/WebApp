@@ -1085,16 +1085,18 @@ def route_stats():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
 
-        if 'period' in request.args:
-            period = StatsPeriod.from_str(request.args['period'])
-        else:
-            period = StatsPeriod.WEEK
+    return render_template('stats.jinja2')
+
+
+@app.route('/stats_data')
+def route_stats_data():
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn)
+
+        period = StatsPeriod.from_str(request.args['period'])
 
     plots = stats_plots.get_plots(period)
-
-    return render_template('stats.jinja2',
-                           period_str=period.translated_str(),
-                           plots=plots)
+    return plots
 
 
 @app.route('/playlist_stats')

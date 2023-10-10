@@ -8,30 +8,52 @@
 
 {{ page_heading(gettext('Playback statistics')) }}
 
-<form method="GET">
-    <input type="hidden" name="period" value="day">
-    <input type="submit" value="{% trans %}Day{% endtrans %}">
-</form>
+<button id="day">{% trans %}Day{% endtrans %}</button>
+<button id="week">{% trans %}Week{% endtrans %}</button>
+<button id="month">{% trans %}Month{% endtrans %}</button>
+<button id="year">{% trans %}Year{% endtrans %}</button>
 
-<form method="GET">
-    <input type="hidden" name="period" value="week">
-    <input type="submit" value="{% trans %}Week{% endtrans %}">
-</form>
+<p id="loading">{% trans %}Generating charts...{% endtrans %}</p>
 
-<form method="GET">
-    <input type="hidden" name="period" value="month">
-    <input type="submit" value="{% trans %}Month{% endtrans %}">
-</form>
+<div id="plots"></div>
 
-<form method="GET">
-    <input type="hidden" name="period" value="year">
-    <input type="submit" value="{% trans %}Year{% endtrans %}">
-</form>
+<script>
 
-<h2>{% trans %}Summary ({{ period_str }}){% endtrans %}</h2>
+const loading = document.getElementById('loading');
+const plots = document.getElementById('plots');
+const buttons = ['day', 'week', 'month', 'year'].map(id => document.getElementById(id));
 
-{% for plot in plots %}
-    <img src="{{ plot }}" class="stats-plot">
-{% endfor %}
+async function loadPlots(button) {
+    for (const otherButton of buttons) {
+        otherButton.disabled = false;
+    }
+    button.disabled = true;
+
+    loading.classList.remove('hidden');
+    plots.classList.add('hidden');
+    plots.replaceChildren();
+
+    const response = await fetch('/stats_data?period=' + encodeURIComponent(button.id));
+    const json = await response.json();
+    for (const plot of json) {
+        const img = document.createElement('img');
+        img.src = plot;
+        img.classList.add('stats-plot');
+        plots.append(img);
+    }
+
+    plots.classList.remove('hidden');
+    loading.classList.add('hidden');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    for (const button of buttons) {
+        button.addEventListener('click', () => loadPlots(button));
+    }
+
+    loadPlots(buttons[1]);
+});
+
+</script>
 
 {% endblock content %}

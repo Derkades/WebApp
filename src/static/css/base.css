@@ -121,6 +121,12 @@ input[type=range],
     font-size: 0.9em;
 }
 
+button:disabled,
+input:disabled {
+    cursor: not-allowed;
+    color: gray;
+}
+
 .logbox {
     white-space: pre-wrap; /* Render \n as <br> */
     overflow: auto;
