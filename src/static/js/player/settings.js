@@ -89,7 +89,10 @@ function youTubeDownload(event) {
 document.addEventListener('DOMContentLoaded', () => {
     syncInputsWithStorage();
 
-    document.getElementById('youtube-dl-submit').addEventListener('click', youTubeDownload);
+    const ytButton = document.getElementById('youtube-dl-submit');
+    if (ytButton) { // Missing in offline mode
+        ytButton.addEventListener('click', youTubeDownload);
+    }
 
     document.getElementById('scan-button').addEventListener('click', () => (async function() {
         const spinner = document.getElementById('scan-spinner');
