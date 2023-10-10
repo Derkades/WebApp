@@ -341,12 +341,15 @@ def route_track_list():
     with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn)
 
-        timestamp, = conn.execute('''
+        timestamp_row = conn.execute('''
                                   SELECT timestamp FROM scanner_log
                                   ORDER BY id DESC
                                   LIMIT 1
                                   ''').fetchone()
-        last_modified = datetime.fromtimestamp(timestamp, timezone.utc)
+        if timestamp_row:
+            last_modified = datetime.fromtimestamp(timestamp_row[0], timezone.utc)
+        else:
+            last_modified = datetime.now()
 
         if request.if_modified_since and last_modified <= request.if_modified_since:
             log.info('Last modified before If-Modified-Since header')
