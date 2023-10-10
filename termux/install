@@ -9,8 +9,3 @@ pkg install -y libxml2 libxslt
 
 # Other Python extensions can be installed directly from PyPi
 pip install -r requirements.txt
-
-# Gunicorn must be installed from master because of https://github.com/benoitc/gunicorn/issues/2729
-# Last public release on PyPi was 2021...
-pip uninstall gunicorn
-pip install https://github.com/benoitc/gunicorn/archive/refs/heads/master.zip
