@@ -213,6 +213,10 @@ const historyTable = document.getElementById('tbody-history');
 const fileChangesTable = document.getElementById('tbody-changes');
 
 async function updateNowPlaying() {
+    if (document.visibilityState == "hidden") {
+        return;
+    }
+
     const response = await fetch('/activity_data');
     if (response.status != 200) {
         return;
