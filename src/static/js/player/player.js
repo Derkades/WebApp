@@ -193,26 +193,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Delete track button
     const deleteButton = document.getElementById('button-delete-track');
-    if (deleteButton !== null) {
-        deleteButton.addEventListener('click', () => {
-            if (queue.currentTrack === null) {
-                return;
-            }
-            const deleteSpinner = document.getElementById('delete-spinner');
-            deleteSpinner.classList.remove('hidden');
-            const path = queue.currentTrack.trackPath;
-            const oldName = path.split('/').pop();
-            const newName = '.trash.' + oldName;
-            (async function() {
-                await jsonPost('/files_rename', {path: path, new_name: newName});
-                await Track.updateLocalTrackList();
-                queue.next();
-                deleteSpinner.classList.add('hidden');
-            })();
-        });
-    } else {
-        console.warn('Editor button missing from page, this is normal if you are not an admin user');
-    }
+    deleteButton.addEventListener('click', () => {
+        if (queue.currentTrack === null) {
+            return;
+        }
+        const deleteSpinner = document.getElementById('delete-spinner');
+        deleteSpinner.classList.remove('hidden');
+        const path = queue.currentTrack.trackPath;
+        const oldName = path.split('/').pop();
+        const newName = '.trash.' + oldName;
+        (async function() {
+            await jsonPost('/files_rename', {path: path, new_name: newName});
+            await Track.updateLocalTrackList();
+            queue.next();
+            deleteSpinner.classList.add('hidden');
+        })();
+    });
 
     // Copy track to other playlist
     const copyOpenButton = document.getElementById('button-copy');
