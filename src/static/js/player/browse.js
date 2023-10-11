@@ -1,29 +1,13 @@
 class Browse {
     #history;
-    /** @type {Fuse} */
-    #fuse;
-    /** @type {Array.<Track>} */
-    #filteredTracks;
-    /** @type {boolean} */
-    #hasFilter;
-    /** @type {boolean} */
-    searchQueryChanged
     constructor() {
         this.#history = [];
-        this.searchQueryChanged = false;
 
         eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, () => {
             if (dialogs.isOpen('dialog-browse')) {
                 this.updateFilter();
             }
         });
-
-        setInterval(() => {
-            if (this.searchQueryChanged) {
-                this.searchQueryChanged = false;
-                this.search();
-            }
-        }, 250);
     };
 
     /**
@@ -60,7 +44,6 @@ class Browse {
      * @param {TrackFilter} filter
      */
     browse(title, filter) {
-        document.getElementById('browse-filter-query').value = ''; // Clear previous search query
         this.open();
         this.setHeader(title);
         this.#history.push({
@@ -84,19 +67,21 @@ class Browse {
             return;
         }
 
+        const start = performance.now();
+
         const current = this.#history[this.#history.length - 1];
         this.setHeader(current.title);
 
         // Playlist filter (or 'all')
         const playlist = document.getElementById('browse-filter-playlist').value;
 
-        this.#hasFilter = true;
+        let hasFilter = true;
         let filter;
         if (playlist === 'all') {
             if (current.filter === null) {
                 // Show all tracks
                 filter = () => true;
-                this.#hasFilter = false;
+                hasFilter = false;
             } else {
                 // Apply filter to tracks in all playlist
                 filter = current.filter;
@@ -111,56 +96,18 @@ class Browse {
             }
         }
 
-        // https://fusejs.io/api/options.html
-        const options = {
-            keys: [
-                {
-                    name: 'title',
-                    weight: 2,
-                },
-                {
-                    name: 'display',
-                },
-                {
-                    name: 'artists',
-                    weight: 0.5,
-                },
-                {
-                    name: 'albumArtist',
-                    weight: 0.5,
-                },
-            ],
-        };
-        this.#filteredTracks = Object.values(state.tracks).filter(filter)
-        this.#fuse = new Fuse(this.#filteredTracks, options);
-
-        this.search();
-    }
-
-    search() {
-        const query = document.getElementById('browse-filter-query').value.trim().toLowerCase();
-
-        let tracks;
-        if (query === ''){
-            if (!this.#hasFilter) {
-                // No search query, selected playlist, or filter. For performance reasons, don't display entire track list.
-                this.setContent(null);
-                return;
-            }
-
-            // No search query, display all tracks
-            tracks = this.#filteredTracks;
-        } else {
-            const start = performance.now();
-            tracks = this.#fuse.search(query, {limit: state.maxTrackListSizeSearch}).map(e => e.item);
-            const end = performance.now();
-            console.debug(`Search took ${end - start} ms`);
+        if (!hasFilter) {
+            // No selected playlist, or filter. For performance reasons, don't display entire track list.
+            this.setContent(null);
+            return;
         }
 
-        const start = performance.now();
+        const tracks = Object.values(state.tracks).filter(filter);
         const table = this.generateTrackList(tracks);
+
         const end = performance.now();
-        console.debug(`Generating table took ${end - start} ms`);
+        console.debug(`Updating browse table took ${end - start} ms`);
+
         this.setContent(table);
     }
 
@@ -267,9 +214,6 @@ const browse = new Browse();
 document.addEventListener('DOMContentLoaded', () => {
     // Playlist dropdown
     document.getElementById('browse-filter-playlist').addEventListener('input', () => browse.updateFilter());
-
-    // Search query input
-    document.getElementById('browse-filter-query').addEventListener('input', () => browse.searchQueryChanged = true);
 
     // Button to open browse dialog
     document.getElementById('browse-all').addEventListener('click', () => browse.browseAll());
