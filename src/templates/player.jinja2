@@ -219,18 +219,24 @@
 
     <div id="dialog-search" class="full-page-overlay dialog-overlay overlay-hidden">
         <div class="dialog">
-            {{ dialog_header('dialog-search', gettext('Search v2 (beta)')) }}
+            {{ dialog_header('dialog-search', gettext('Search')) }}
             <div class="dialog-body">
                 <input id="search-query" type="text" placeholder="{% trans %}Search query{% endtrans %}">
 
-                <h3>{% trans %}Tracks{% endtrans %}</h3>
-                <div id="search-result-tracks" class="scroll"></div>
+                <div id="search-result-empty">
+                    {% trans %}Please enter a search query.{% endtrans %}
+                </div>
 
-                <h3>{% trans %}Artists{% endtrans %}</h3>
-                <div id="search-result-artists"></div>
+                <div id="search-result-parent" class="hidden">
+                    <h3>{% trans %}Tracks{% endtrans %}</h3>
+                    <div id="search-result-tracks" class="scroll"></div>
 
-                <h3>{% trans %}Albums{% endtrans %}</h3>
-                <div id="search-result-albums"></div>
+                    <h3>{% trans %}Artists{% endtrans %}</h3>
+                    <div id="search-result-artists"></div>
+
+                    <h3>{% trans %}Albums{% endtrans %}</h3>
+                    <div id="search-result-albums"></div>
+                </div>
             </div>
         </div>
     </div>

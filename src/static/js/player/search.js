@@ -1,25 +1,31 @@
 class Search {
+    #searchResultEmpty = document.getElementById('search-result-empty');
+    #searchResultParent = document.getElementById('search-result-parent');
+    #searchResultTracks = document.getElementById('search-result-tracks');
+    #searchResultArtists = document.getElementById('search-result-artists');
+    #searchResultAlbums = document.getElementById('search-result-albums');
     /** @type {HTMLInputElement} */
-    #queryInput;
+    #queryInput =  document.getElementById('search-query');
 
     constructor() {
         eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, () => {
             this.#performSearch();
         });
-        this.#queryInput = document.getElementById('search-query');
         this.#queryInput.addEventListener('input', () => this.#performSearch());
     }
 
     clearSearch() {
-        document.getElementById('search-result-tracks').replaceChildren();
-        document.getElementById('search-result-artists').replaceChildren();
-        document.getElementById('search-result-albums').replaceChildren();
+        this.#searchResultParent.classList.add('hidden');
+        this.#searchResultTracks.replaceChildren();
+        this.#searchResultArtists.replaceChildren();
+        this.#searchResultAlbums.replaceChildren();
+        this.#searchResultEmpty.classList.remove('hidden');
     }
 
     #performSearch() {
         const query = this.#queryInput.value;
 
-        if (query.length < 4) {
+        if (query.length < 3) {
             this.clearSearch();
             return;
         }
@@ -28,7 +34,7 @@ class Search {
 
         {
             const tracks = fuzzysort.go(query, allTracks, {keys: ['searchString'], threshold: -1000, limit: 25}).map(e => e.obj);
-            document.getElementById('search-result-tracks').replaceChildren(browse.generateTrackList(tracks));
+            this.#searchResultTracks.replaceChildren(browse.generateTrackList(tracks));
         }
 
         {
@@ -59,7 +65,7 @@ class Search {
                     table.append(row);
                 }
             }
-            document.getElementById('search-result-artists').replaceChildren(table);
+            this.#searchResultArtists.replaceChildren(table);
         }
 
         {
@@ -79,15 +85,18 @@ class Search {
                 img.style.height = '8rem';
                 img.style.width = '8rem';
                 img.style.borderRadius = 'var(--border-radius-amount)';
-                img.style.background = `url("${imgUri}") no-repeat center`;
+                img.style.background = `black url("${imgUri}") no-repeat center`;
                 img.style.backgroundSize = 'cover';
                 img.onclick = () => browse.browseAlbum(track.album, track.albumArtist);
 
                 newChildren.push(img);
 
             }
-            document.getElementById('search-result-albums').replaceChildren(...newChildren);
+            this.#searchResultAlbums.replaceChildren(...newChildren);
         }
+
+        this.#searchResultEmpty.classList.add('hidden');
+        this.#searchResultParent.classList.remove('hidden');
     }
 }
 
