@@ -126,6 +126,8 @@ function createPlaylistDropdowns() {
     console.debug('Updating playlist dropdowns');
 
     for (const select of document.getElementsByClassName('playlist-select')) {
+        const previouslySelectedValue = select.value;
+
         // Remove all children except the ones that should be kept
         const keptChildren = []
         for (const child of select.children) {
@@ -147,6 +149,9 @@ function createPlaylistDropdowns() {
             option.selected = keptChildren.length == 0 && playlist.name == primaryPlaylist;
             select.appendChild(option);
         }
+
+        // After all options have been replaced, the previously selected option should be restored
+        select.value = previouslySelectedValue;
     }
 }
 eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, createPlaylistDropdowns);
