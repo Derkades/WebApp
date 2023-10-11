@@ -1,0 +1,5 @@
+pylint
+mypy
+types-Pillow
+types-beautifulsoup4
+types-requests

@@ -206,7 +206,7 @@ def _plots_last_played() -> list[str]:
     ax.set_ylabel(_('Last chosen'))
     plt.yticks((0, 1, 2, 3, 4), (_('Today'), _('This week'), _('This month'), _('Long ago'), _('Never')))
     plot = fig_end(fig)
-    return plot,
+    return [plot]
 
 
 def _plots_playlists() -> list[str]:
@@ -234,7 +234,7 @@ def _plots_playlists() -> list[str]:
     ax.set_xlabel(_('Mean duration in minutes'))
     plot_means = fig_end(fig)
 
-    return plot_counts, plot_totals, plot_means
+    return [plot_counts, plot_totals, plot_means]
 
 
 def _plots_metadata() -> list[str]:
@@ -257,7 +257,7 @@ def _plots_metadata() -> list[str]:
     ax.set_xlabel(_('Release year'))
     plot_years = fig_end(fig)
 
-    return plot_years,
+    return [plot_years]
 
 
 def get_plots(period: StatsPeriod) -> list[str]:

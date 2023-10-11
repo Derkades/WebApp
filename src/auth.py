@@ -31,11 +31,17 @@ class Session:
 
     @property
     def creation_date(self) -> str:
+        """
+        When session was created, formatted as time ago string
+        """
         seconds_ago = self.creation_timestamp - int(time.time())
         return flask_babel.format_timedelta(seconds_ago, add_direction=True)
 
     @property
     def last_use_ago(self) -> str:
+        """
+        When account was last used, formatted as time ago string
+        """
         seconds_ago = self.last_use - int(time.time())
         return flask_babel.format_timedelta(seconds_ago, add_direction=True)
 
@@ -85,6 +91,7 @@ class User(ABC):
     nickname: str
     admin: bool
     primary_playlist: Optional[str]
+    language: Optional[str]
 
     @abstractmethod
     def sessions(self) -> list[Session]:
@@ -170,7 +177,7 @@ class OfflineUser(User):
         self.nickname = 'Fake offline user'
         self.admin = False
         self.primary_playlist = None
-        self.language = language.DEFAULT_LANGUAGE
+        self.language = None
 
     def sessions(self) -> list[Session]:
         return []
@@ -285,7 +292,7 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
         log.warning('Invalid auth token: %s', token)
         return None
 
-    session_rowid, user_id, username, nickname, admin, primary_playlist, language = result
+    session_rowid, user_id, username, nickname, admin, primary_playlist, lang_code = result
 
     try:
         remote_addr = request.remote_addr
@@ -301,16 +308,17 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
         if ex.sqlite_errorname != 'SQLITE_READONLY':
             raise ex
 
-    return StandardUser(conn, user_id, username, nickname, admin == 1, primary_playlist, language)
+    return StandardUser(conn, user_id, username, nickname, admin == 1, primary_playlist, lang_code)
 
 
-def verify_auth_cookie(conn: Connection, require_admin = False, redirect_to_login = False) -> User:
+def verify_auth_cookie(conn: Connection, require_admin=False, redirect_to_login=False) -> User:
     """
     Verify auth token sent as cookie, raising AuthError if missing or not valid.
     Args:
         conn: Read-only database connection
         require_admin: Whether logging in as a non-admin account should be treated as an authentication failure
-        redirect_to_login: Whether the user should sent a redirect if authentication failed, instead of showing a 403 page
+        redirect_to_login: Whether the user should sent a redirect if authentication failed, instead
+                           of showing a 403 page
     """
     if settings.offline_mode:
         return OFFLINE_DUMMY_USER

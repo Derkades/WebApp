@@ -23,7 +23,6 @@ from auth import AuthError, RequestTokenError
 import db
 import downloader
 import genius
-import image
 from image import ImageFormat, ImageQuality
 import language
 import lastfm
@@ -149,6 +148,9 @@ def route_player_js():
 
 @app.route('/info')
 def route_info():
+    """
+    Information/manual page
+    """
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
     return render_template('info.jinja2')
@@ -203,6 +205,9 @@ def route_get_track() -> Response:
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
         track = Track.by_relpath(conn, request.args['path'])
+
+    if track is None:
+        return Response('Track does not exist', 404)
 
     parsed_mtime = datetime.fromtimestamp(track.mtime, timezone.utc)
     if request.if_modified_since and parsed_mtime <= request.if_modified_since:
@@ -1227,11 +1232,11 @@ def route_users():
                   'primary_playlist': primary_playlist}
                  for user_id, username, admin, primary_playlist in result]
 
-        for user in users:
+        for user_dict in users:
             result = conn.execute('SELECT playlist FROM user_playlist WHERE user=? AND write=1',
-                                  (user['id'],))
-            user['writable_playlists'] = [playlist for playlist, in result]
-            user['writable_playlists_str'] = ', '.join(user['writable_playlists'])
+                                  (user_dict['id'],))
+            user_dict['writable_playlists'] = [playlist for playlist, in result]
+            user_dict['writable_playlists_str'] = ', '.join(user_dict['writable_playlists'])
 
     return render_template('users.jinja2',
                            csrf_token=new_csrf_token,

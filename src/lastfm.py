@@ -5,7 +5,7 @@ import logging
 import requests
 
 import settings
-from auth import User
+from auth import StandardUser
 import metadata
 from metadata import Metadata
 
@@ -49,7 +49,7 @@ def _make_request(method: str, api_method: str, **extra_params):
     return r.json()
 
 
-def get_user_key(user: User) -> str | None:
+def get_user_key(user: StandardUser) -> str | None:
     """
     Get a user's last.fm session key from local database
     Returns session key, or None if the user has not set up last.fm
@@ -59,7 +59,7 @@ def get_user_key(user: User) -> str | None:
     return result[0] if result else None
 
 
-def obtain_session_key(user: User, auth_token: str) -> str:
+def obtain_session_key(user: StandardUser, auth_token: str) -> str:
     """
     Fetches session key from last.fm API and saves it to the database
     Params:
@@ -75,18 +75,18 @@ def obtain_session_key(user: User, auth_token: str) -> str:
     return name
 
 
-def update_now_playing(user_key: str, metadata: Metadata):
+def update_now_playing(user_key: str, meta: Metadata):
     if not is_configured():
         log.info('Skipped scrobble, last.fm not configured')
         return
 
-    if not metadata.artists or not metadata.title:
+    if not meta.artists or not meta.title:
         log.info('Skipped update_now_playing, missing metadata')
         return
 
     _make_request('post', 'track.updateNowPlaying',
-                  artist=metadata.artists[0],
-                  track=metadata.title,
+                  artist=meta.artists[0],
+                  track=meta.title,
                   sk=user_key)
 
 

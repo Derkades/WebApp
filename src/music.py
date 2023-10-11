@@ -531,7 +531,10 @@ class Playlist:
 
         self.conn.execute('UPDATE track SET last_played = ? WHERE path=?', (current_timestamp, track))
 
-        return Track.by_relpath(self.conn, track)
+        track = Track.by_relpath(self.conn, track)
+        if track is None:
+            raise RuntimeError('Track has just been selected from the database so it must exist')
+        return track
 
     def has_write_permission(self, user: User) -> bool:
         """
