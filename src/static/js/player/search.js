@@ -78,13 +78,9 @@ class Search {
                 }
                 listedAlbums.add(track.album);
 
-                const imgUri = `/get_album_cover?quality=tiny&path=${encodeURIComponent(track.path)}`
                 const img = document.createElement('div');
-                img.style.display = 'inline-block';
-                img.style.margin = '.5rem';
-                img.style.height = '8rem';
-                img.style.width = '8rem';
-                img.style.borderRadius = 'var(--border-radius-amount)';
+                img.classList.add('search-result-album');
+                const imgUri = `/get_album_cover?quality=tiny&path=${encodeURIComponent(track.path)}`;
                 img.style.background = `black url("${imgUri}") no-repeat center`;
                 img.style.backgroundSize = 'cover';
                 img.onclick = () => browse.browseAlbum(track.album, track.albumArtist);
