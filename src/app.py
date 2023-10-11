@@ -34,11 +34,8 @@ from radio import RadioTrack
 import scanner
 import settings
 import packer
-
-if not settings.offline_mode:
-    # Matplotlib is slow to import, skip if not needed
-    import stats_plots
-    from stats_plots import StatsPeriod
+import stats_plots
+from stats_plots import StatsPeriod
 
 
 app = Flask(__name__, template_folder='templates')
@@ -1103,8 +1100,8 @@ def route_stats_data():
 
         period = StatsPeriod.from_str(request.args['period'])
 
-    plots = stats_plots.get_plots(period)
-    return plots
+    data = stats_plots.get_data(period)
+    return data
 
 
 @app.route('/playlist_stats')
