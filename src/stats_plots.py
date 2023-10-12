@@ -176,6 +176,15 @@ def chart_track_year(conn: Connection):
 
 def charts_history(conn: Connection, period: StatsPeriod):
     after_timestamp = int(time.time()) - period.value
+
+    time_of_day: dict[str, list[int]] = {}
+    day_of_week: dict[str, list[int]] = {}
+    for username, in conn.execute('''SELECT DISTINCT user.username
+                                     FROM history JOIN user ON history.user = user.id
+                                     WHERE timestamp > ?''', (after_timestamp,)):
+        time_of_day[username] = [0] * 24
+        day_of_week[username] = [0] * 7
+
     result = conn.execute('''
                           SELECT timestamp, user.username, user.nickname, history.track, history.playlist
                           FROM history
@@ -185,8 +194,6 @@ def charts_history(conn: Connection, period: StatsPeriod):
 
     playlist_counter: Counter[str] = Counter()
     user_counter: Counter[str] = Counter()
-    time_of_day: list[int] = [0] * 24
-    day_of_week: list[int] = [0] * 7
     artist_counter: Counter[str] = Counter()
     track_counter: Counter[str] = Counter()
     album_counter: Counter[str] = Counter()
@@ -196,8 +203,8 @@ def charts_history(conn: Connection, period: StatsPeriod):
         user_counter.update((nickname if nickname else username,))
 
         dt = datetime.fromtimestamp(timestamp)
-        time_of_day[dt.hour] += 1
-        day_of_week[dt.weekday()] += 1
+        time_of_day[username][dt.hour] += 1
+        day_of_week[username][dt.weekday()] += 1
 
         track = Track.by_relpath(conn, relpath)
         if track:
@@ -220,12 +227,14 @@ def charts_history(conn: Connection, period: StatsPeriod):
 
     charts['time-of-day'] = bar_chart(_('Time of day'),
                                       [f'{i:02}:00' for i in range(0, 24)],
-                                      {_('Tracks played'): time_of_day},
+                                      time_of_day,
+                                      stack=True,
                                       vertical=True)
 
     charts['day-of-week'] = bar_chart(_('Day of week'),
                                       [_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday'), _('Saturday'), _('Sunday')],
-                                      {_('Tracks played'): day_of_week},
+                                      day_of_week,
+                                      stack=True,
                                       vertical=True)
 
     return charts
