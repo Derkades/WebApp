@@ -47,6 +47,48 @@ class StatsPeriod(Enum):
         raise ValueError()
 
 
+# https://github.com/nhn/tui.chart/blob/main/docs/en/common-theme.md
+THEME = {
+    'chart': {
+        'backgroundColor': 'transparent',
+    },
+    'title': {
+        'color': 'white',
+    },
+    'xAxis': {
+        'title': {
+            'color': 'white',
+        },
+        'label': {
+            'color': 'white',
+        },
+        'color': 'white',
+    },
+    'yAxis': {
+        'title': {
+            'color': 'white',
+        },
+        'label': {
+            'color': 'white',
+        },
+        'color': 'white',
+    },
+    'legend': {
+        'label': {
+            'color': 'white',
+        }
+    },
+    'plot': {
+        'vertical': {
+            'lineColor': 'transparent',
+        },
+        'horizontal': {
+            'lineColor': 'transparent',
+        }
+    }
+}
+
+
 def bar_chart(title, categories, series_dict: dict, vertical=False, stack=False):
     return {
         'type': 'column' if vertical else 'bar',
@@ -59,6 +101,7 @@ def bar_chart(title, categories, series_dict: dict, vertical=False, stack=False)
                 'width': 'auto',
                 'height': 'auto',
             },
+            'theme': THEME,
         },
         'data': {
             'categories': categories,
