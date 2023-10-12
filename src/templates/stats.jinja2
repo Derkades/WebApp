@@ -22,8 +22,6 @@
 
 <style>
 .chart {
-    /* width: 100%;
-    height: 30rem; */
     border-radius: var(--border-radius-amount);
     margin-bottom: 1rem;
     overflow: hidden;
@@ -31,19 +29,29 @@
 </style>
 
 <script>
-const loading = document.getElementById('loading');
-const plots = document.getElementById('plots');
+const chartsContainer = document.getElementById('charts');
 const buttons = ['day', 'week', 'month', 'year'].map(id => document.getElementById(id));
 
-function createCharts(data) {
-    const chartsElements = []
+async function loadCharts(button) {
+    // Immediately change buttons and remove old charts for responsiveness
+    for (const otherButton of buttons) {
+        otherButton.disabled = false;
+    }
+    button.disabled = true;
 
-    for (const chart of Object.values(data)) {
+    chartsContainer.replaceChildren();
+
+    // Download data
+    const response = await fetch('/stats_data?period=' + encodeURIComponent(button.id));
+    const json = await response.json();
+
+    // Render charts
+    for (const chart of Object.values(json)) {
         const chartElem = document.createElement('div');
         chartElem.style.width = '100%';
         chartElem.style.height = '30rem';
         chartElem.classList.add('chart');
-        chartsElements.push(chartElem);
+        chartsContainer.append(chartElem);
         const args = {el: chartElem, data: chart['data'], options: chart['options']};
         switch (chart['type']) {
             case 'bar':
@@ -57,28 +65,14 @@ function createCharts(data) {
                 break;
         }
     }
-
-    const chartsContainer = document.getElementById('charts');
-    chartsContainer.replaceChildren(...chartsElements);
-}
-
-async function loadPlots(button) {
-    for (const otherButton of buttons) {
-        otherButton.disabled = false;
-    }
-    button.disabled = true;
-
-    const response = await fetch('/stats_data?period=' + encodeURIComponent(button.id));
-    const json = await response.json();
-    createCharts(json);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     for (const button of buttons) {
-        button.addEventListener('click', () => loadPlots(button));
+        button.addEventListener('click', () => loadCharts(button));
     }
 
-    loadPlots(buttons[1]);
+    loadCharts(buttons[1]);
 });
 
 </script>
