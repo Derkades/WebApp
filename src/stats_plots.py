@@ -125,8 +125,8 @@ def charts_history(conn, period: StatsPeriod):
 
     playlist_counter: Counter[str] = Counter()
     user_counter: Counter[str] = Counter()
-    time_of_day: list[int] = []
-    day_of_week: list[int] = []
+    time_of_day: list[int] = [0] * 24
+    day_of_week: list[int] = [0] * 7
     artist_counter: Counter[str] = Counter()
     track_counter: Counter[str] = Counter()
     album_counter: Counter[str] = Counter()
@@ -136,8 +136,8 @@ def charts_history(conn, period: StatsPeriod):
         user_counter.update((nickname if nickname else username,))
 
         dt = datetime.fromtimestamp(timestamp)
-        time_of_day.append(dt.hour)
-        day_of_week.append(dt.weekday())
+        time_of_day[dt.hour] += 1
+        day_of_week[dt.weekday()] += 1
 
         track = Track.by_relpath(conn, relpath)
         if track:
@@ -150,7 +150,7 @@ def charts_history(conn, period: StatsPeriod):
         else:
             track_counter.update((relpath,))
 
-    return {
+    charts = {
         'top-playlists': counter_to_column_chart(playlist_counter, _('Top playlists'), _('Times played')),
         'top-users': counter_to_column_chart(user_counter, _('Most active users'), _('Times played')),
         'top-tracks': counter_to_column_chart(track_counter, _('Most played tracks'), _('Times played')),
@@ -158,25 +158,20 @@ def charts_history(conn, period: StatsPeriod):
         'top-albums': counter_to_column_chart(album_counter, _('Most played albums'), _('Times played')),
     }
 
-    # TODO add back time of day chart
-    # fig, ax = fig_start()
-    # ax.hist(time_of_day, bins=24, range=(0, 24))
-    # ax.set_title(_('Time of day'))
-    # ax.set_xlabel(_('Time of day'))
-    # ax.set_ylabel(_('Tracks played'))
-    # ax.set_xticks(list(range(0, 24, 3)) + [24])
-    # ax.set_xticklabels([f'{i:02}:00' for i in range(0, 24, 3)] + ['00:00'])
-    # plots.append(fig_end(fig))
+    charts['time-of-day'] = simple_bar_chart(_('Time of day'),
+                                             [f'{i:02}:00' for i in range(0, 24)],
+                                             _('Tracks played'),
+                                             time_of_day,
+                                             vertical=True)
 
-    # TODO add back day of week chart
-    # if period != StatsPeriod.DAY:
-    #     fig, ax = fig_start()
-    #     ax.hist(day_of_week, bins=7, range=(-0.5, 6.5), orientation='horizontal')
-    #     ax.set_title(_('Day of week'))
-    #     ax.set_xlabel(_('Tracks played'))
-    #     ax.set_ylabel(_('Day of week'))
-    #     plt.yticks((0, 1, 2, 3, 4, 5, 6), (_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday'), _('Saturday'), _('Sunday')))
-    #     plots.append(fig_end(fig))
+    charts['day-of-week'] = simple_bar_chart(_('Day of week'),
+                                             [_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday'), _('Saturday'), _('Sunday')],
+                                             _('Tracks played'),
+                                             day_of_week,
+                                             vertical=True)
+
+    return charts
+
 
 def get_data(period: StatsPeriod):
     with db.connect(read_only=True) as conn:
