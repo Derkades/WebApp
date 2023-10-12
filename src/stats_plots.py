@@ -2,6 +2,7 @@ from enum import Enum, unique
 from collections import Counter
 from datetime import datetime
 import time
+from sqlite3 import Connection
 
 from flask_babel import _
 
@@ -46,31 +47,35 @@ class StatsPeriod(Enum):
         raise ValueError()
 
 
-def simple_bar_chart(title, categories, series_name, series_data, vertical):
+def bar_chart(title, categories, series_dict: dict, vertical=False, stack=False):
     return {
-        'title': title,
         'type': 'column' if vertical else 'bar',
+        'options': {
+            'series': {
+                'stack': stack,
+            },
+            'chart': {
+                'title': title,
+                'width': 'auto',
+                'height': 'auto',
+            },
+        },
         'data': {
             'categories': categories,
-            'series': [
-                {
-                    'name': series_name,
-                    'data': series_data,
-                }
-            ]
+            'series': [{'name': name, 'data': data} for name, data in series_dict.items()],
         }
     }
 
 
 def rows_to_column_chart(rows: list[tuple[str, int]], title: str, series_name: str, vertical=False):
-    return simple_bar_chart(title, [row[0] for row in rows], series_name, [row[1] for row in rows], vertical)
+    return bar_chart(title, [row[0] for row in rows], {series_name: [row[1] for row in rows]}, vertical)
 
 
 def counter_to_column_chart(counter: Counter, title: str, series_name: str, vertical=False):
     return rows_to_column_chart(counter.most_common(COUNTER_AMOUNT), title, series_name, vertical)
 
 
-def chart_last_chosen(conn):
+def chart_last_chosen(conn: Connection):
     result = conn.execute('SELECT last_played FROM track')
     counts = [0, 0, 0, 0, 0]
     current = int(time.time())
@@ -86,35 +91,47 @@ def chart_last_chosen(conn):
         else:
             counts[3] += 1 # long ago
 
-    return simple_bar_chart(_('Last chosen'),
-                               [_('Today'), _('This week'), _('This month'), _('Long ago'), _('Never')],
-                               _('Number of tracks'),
-                               counts,
-                               False)
+    return bar_chart(_('Last chosen'),
+                    [_('Today'), _('This week'), _('This month'), _('Long ago'), _('Never')],
+                    {_('Number of tracks'): counts})
 
 
-def chart_playlist_track_count(conn):
+def chart_playlist_track_count(conn: Connection):
     rows = conn.execute('SELECT playlist, COUNT(*) FROM track GROUP BY playlist ORDER BY COUNT(*) DESC').fetchall()
     return rows_to_column_chart(rows, _('Number of tracks in playlists'), _('Number of tracks'))
 
 
-def chart_playlist_track_duration_total(conn):
+def chart_playlist_track_duration_total(conn: Connection):
     rows = conn.execute('SELECT playlist, SUM(duration)/60 FROM track GROUP BY playlist ORDER BY SUM(duration) DESC').fetchall()
     return rows_to_column_chart(rows, _('Total duration of tracks in playlists'), _('Track duration'))
 
 
-def chart_playlist_track_duration_mean(conn):
+def chart_playlist_track_duration_mean(conn: Connection):
     rows = conn.execute('SELECT playlist, AVG(duration)/60 FROM track GROUP BY playlist ORDER BY AVG(duration) DESC').fetchall()
     return rows_to_column_chart(rows, _('Mean duration of tracks in playlists'), _('Track duration'))
 
 
-def chart_track_year(conn):
-    # TODO per playlist
-    rows = conn.execute('SELECT year, COUNT(year) FROM track WHERE year IS NOT NULL GROUP BY year ORDER BY year ASC').fetchall()
-    return rows_to_column_chart(rows, _('Track release year distribution'), _('Release year'), vertical=True)
+def chart_track_year(conn: Connection):
+    min_year, max_year = conn.execute('SELECT MAX(1950, MIN(year)), MIN(2030, MAX(year)) FROM track').fetchone()
+
+    data = {}
+    for playlist, in conn.execute('SELECT path FROM playlist').fetchall():
+        data[playlist] = [0] * (max_year - min_year + 1)
+
+    rows = conn.execute('SELECT playlist, year, COUNT(year) FROM track WHERE year IS NOT NULL GROUP BY playlist, year ORDER BY year ASC').fetchall()
+    for playlist, year, count in rows:
+        if year < min_year or year > max_year:
+            continue
+        data[playlist][year - min_year] = count
+
+    return bar_chart(_('Track release year distribution'),
+                    list(range(min_year, max_year+1)),
+                    data,
+                    vertical=True,
+                    stack=True)
 
 
-def charts_history(conn, period: StatsPeriod):
+def charts_history(conn: Connection, period: StatsPeriod):
     after_timestamp = int(time.time()) - period.value
     result = conn.execute('''
                           SELECT timestamp, user.username, user.nickname, history.track, history.playlist
@@ -158,17 +175,15 @@ def charts_history(conn, period: StatsPeriod):
         'top-albums': counter_to_column_chart(album_counter, _('Most played albums'), _('Times played')),
     }
 
-    charts['time-of-day'] = simple_bar_chart(_('Time of day'),
-                                             [f'{i:02}:00' for i in range(0, 24)],
-                                             _('Tracks played'),
-                                             time_of_day,
-                                             vertical=True)
+    charts['time-of-day'] = bar_chart(_('Time of day'),
+                                      [f'{i:02}:00' for i in range(0, 24)],
+                                      {_('Tracks played'): time_of_day},
+                                      vertical=True)
 
-    charts['day-of-week'] = simple_bar_chart(_('Day of week'),
-                                             [_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday'), _('Saturday'), _('Sunday')],
-                                             _('Tracks played'),
-                                             day_of_week,
-                                             vertical=True)
+    charts['day-of-week'] = bar_chart(_('Day of week'),
+                                      [_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday'), _('Saturday'), _('Sunday')],
+                                      {_('Tracks played'): day_of_week},
+                                      vertical=True)
 
     return charts
 
