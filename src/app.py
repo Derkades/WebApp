@@ -20,6 +20,8 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 import auth
 from auth import AuthError, RequestTokenError
+import charts
+from charts import StatsPeriod
 import db
 import downloader
 import genius
@@ -29,13 +31,11 @@ import lastfm
 import music
 from music import AudioType, Playlist, Track
 import metadata
+import packer
 import radio
 from radio import RadioTrack
 import scanner
 import settings
-import packer
-import stats_plots
-from stats_plots import StatsPeriod
 
 
 app = Flask(__name__, template_folder='templates')
@@ -1100,7 +1100,7 @@ def route_stats_data():
 
         period = StatsPeriod.from_str(request.args['period'])
 
-    data = stats_plots.get_data(period)
+    data = charts.get_data(period)
     return data
 
 
