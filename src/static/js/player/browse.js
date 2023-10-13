@@ -174,6 +174,8 @@ class Browse {
         const hcolEdit = document.createElement('th')
         headerRow.replaceChildren(hcolPlaylist, hcolDuration, hcolTitle, hcolAddTop, hcolAddBottom, hcolEdit);
 
+
+
         for (const track of tracks) {
             const colPlaylist = document.createElement('td');
             colPlaylist.textContent = track.playlistName;
@@ -186,13 +188,33 @@ class Browse {
 
             const colAddTop = document.createElement('td');
             const addTopButton = createIconButton('playlist-plus.svg', ['vflip']);
-            addTopButton.onclick = () => track.downloadAndAddToQueue(true);
             colAddTop.replaceChildren(addTopButton);
 
             const colAddBottom = document.createElement('td');
-            const addButton = createIconButton('playlist-plus.svg');
-            addButton.onclick = () => track.downloadAndAddToQueue();
-            colAddBottom.replaceChildren(addButton);
+            const addBottomButton = createIconButton('playlist-plus.svg');
+            colAddBottom.replaceChildren(addBottomButton);
+
+            const addButtonFunction = async function(top) {
+                for (const button of [addTopButton, addBottomButton]) {
+                    replaceIconButton(button, 'loading.svg');
+                    button.firstChild.classList.add('spinning');
+                    button.disabled = true;
+                }
+                try {
+                    await track.downloadAndAddToQueue(top);
+                } catch (ex) {
+                    console.error('Error adding track to queue', ex)
+                }
+
+                for (const button of [addTopButton, addBottomButton]) {
+                    replaceIconButton(button, 'playlist-plus.svg')
+                    button.firstChild.classList.remove('spinning');
+                    button.disabled = false;
+                }
+            }
+
+            addTopButton.onclick = () => addButtonFunction(true);
+            addBottomButton.onclick = () => addButtonFunction(false);
 
             const colEdit = document.createElement('td');
             if (track.playlist().write) {

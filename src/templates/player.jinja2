@@ -66,7 +66,7 @@
                     {{ icon_button('content-duplicate', 'button-copy', title=gettext('Copy track to your primary playlist')) }}
                 {% endif %}
 
-                <div id="delete-spinner" class="spinner hidden"></div>
+                <div id="delete-spinner" class="raphson-spinner hidden"></div>
 
                 {% if mobile %}
                     {# 'data-restore=false' ensures volume is not overwritten from cookie #}
@@ -171,7 +171,7 @@
                         <select id="youtube-dl-directory" class="playlist-select playlist-select-writable"></select>
                         <input id="youtube-dl-url" type="text" placeholder="https://youtube.com/watch?v=..." size="45">
                         <input id="youtube-dl-submit" type="submit" value="{% trans %}Download{% endtrans %}">
-                        <div id="youtube-dl-spinner" class="spinner hidden"></div>
+                        <div id="youtube-dl-spinner" class="spinning raphson-spinner hidden"></div>
                         <br>
                         <div id="youtube-dl-output" class="logbox"></div>
                     </form>
@@ -181,7 +181,7 @@
                 <div>
                     <p>{% trans %}The local music cache is updated every 15 minutes. If you've added, removed, or otherwise modified files externally, you may want to force an update.{% endtrans %}</p>
                     <button id="scan-button">{% trans %}Force update track list cache{% endtrans %}</button>
-                    <div id="scan-spinner" class="spinner hidden"></div>
+                    <div id="scan-spinner" class="raphson-spinner hidden"></div>
                 </div>
             </div>
         </div>
@@ -297,7 +297,7 @@
     <div id="loading-overlay" class="full-page-overlay">
         <div>
             <div class="flex-content-center">
-                <div class="spinner spinner-large"></div>
+                <div class="raphson-spinner large"></div>
             </div>
             <div>
                 <h3 class="loading-text">{% trans %}Loading...{% endtrans %}</h3>
@@ -327,7 +327,7 @@
     <template id="template-queue-spinner">
         <tr>
             <td colspan="2" class="secondary downloading">
-                <span class="spinner"></span>
+                <span class="raphson-spinner"></span>
             </td>
         </tr>
     </template>

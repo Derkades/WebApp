@@ -273,7 +273,11 @@ body.light .progress-time {
     opacity: 1.0;
 }
 
-.spinner {
+.spinning {
+    animation: rotate 1s linear infinite;
+}
+
+.raphson-spinner {
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -285,7 +289,7 @@ body.light .progress-time {
     width: 2rem;
 }
 
-.spinner.spinner-large {
+.raphson-spinner.large {
     height: 12rem;
     width: 12rem;
     animation-duration: 2.5s;
