@@ -60,6 +60,9 @@ async function loadCharts(button) {
             case 'column':
                 toastui.Chart.columnChart(args);
                 break;
+            case 'line':
+                toastui.Chart.lineChart(args);
+                break;
             default:
                 throw new Error('invalid type: ' + chart['type']);
                 break;

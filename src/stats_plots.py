@@ -1,6 +1,6 @@
 from enum import Enum, unique
 from collections import Counter
-from datetime import datetime
+from datetime import datetime, date, timedelta
 import time
 from sqlite3 import Connection
 
@@ -89,9 +89,9 @@ THEME = {
 }
 
 
-def bar_chart(title, categories, series_dict: dict, vertical=False, stack=False):
+def chart(chart_type, title, categories, series_dict: dict, stack=False):
     return {
-        'type': 'column' if vertical else 'bar',
+        'type': chart_type,
         'options': {
             'series': {
                 'stack': stack,
@@ -108,6 +108,10 @@ def bar_chart(title, categories, series_dict: dict, vertical=False, stack=False)
             'series': [{'name': name, 'data': data} for name, data in series_dict.items()],
         }
     }
+
+
+def bar_chart(title, categories, series_dict: dict, vertical=False, **kwargs):
+    return chart('column' if vertical else 'bar', title, categories, series_dict, **kwargs)
 
 
 def rows_to_column_chart(rows: list[tuple[str, int]], title: str, series_name: str, vertical=False):
@@ -177,19 +181,27 @@ def chart_track_year(conn: Connection):
 def charts_history(conn: Connection, period: StatsPeriod):
     after_timestamp = int(time.time()) - period.value
 
+    min_time, max_time = conn.execute('SELECT MIN(timestamp), MAX(timestamp) FROM history WHERE timestamp > ?',
+                                      (after_timestamp,)).fetchone()
+    min_day = date.fromtimestamp(min_time)
+    num_days = (date.fromtimestamp(max_time) - min_day).days + 1
+
     time_of_day: dict[str, list[int]] = {}
     day_of_week: dict[str, list[int]] = {}
+    day_counts: dict[str, list[int]] = {}
     for username, in conn.execute('''SELECT DISTINCT user.username
                                      FROM history JOIN user ON history.user = user.id
                                      WHERE timestamp > ?''', (after_timestamp,)):
         time_of_day[username] = [0] * 24
         day_of_week[username] = [0] * 7
+        day_counts[username] = [0] * num_days
 
     result = conn.execute('''
                           SELECT timestamp, user.username, user.nickname, history.track, history.playlist
                           FROM history
                               JOIN user ON history.user = user.id
                           WHERE timestamp > ?
+                          ORDER BY timestamp ASC
                           ''', (after_timestamp,))
 
     playlist_counter: Counter[str] = Counter()
@@ -205,6 +217,7 @@ def charts_history(conn: Connection, period: StatsPeriod):
         dt = datetime.fromtimestamp(timestamp)
         time_of_day[username][dt.hour] += 1
         day_of_week[username][dt.weekday()] += 1
+        day_counts[username][(dt.date() - min_day).days] += 1
 
         track = Track.by_relpath(conn, relpath)
         if track:
@@ -236,6 +249,12 @@ def charts_history(conn: Connection, period: StatsPeriod):
                                       day_of_week,
                                       stack=True,
                                       vertical=True)
+
+    charts['historic-play-count'] = chart('line',
+                                          _('Historic play count'),
+                                      [(min_day + timedelta(days=i)).isoformat() for i in range(0, num_days + 1)],
+                                      day_counts,
+                                      stack=True)
 
     return charts
 
