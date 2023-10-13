@@ -83,6 +83,11 @@ ALBUM_ARTIST_IGNORE = {
 }
 
 
+METADATA_ADVERTISEMENT_KEYWORDS = [
+    'http://electronicfresh.com'
+]
+
+
 def ignore_album(album: str) -> bool:
     album = album.lower()
     for keyword in ALBUM_IGNORE_KEYWORDS:
@@ -129,6 +134,13 @@ def split_meta_list(meta_list: str) -> list[str]:
         if entry != '' and entry not in entries:
             entries.append(entry)
     return entries
+
+
+def has_advertisement(metadata_str: str) -> bool:
+    for keyword in METADATA_ADVERTISEMENT_KEYWORDS:
+        if keyword in metadata_str.lower():
+            return True
+    return False
 
 
 @dataclass
@@ -283,6 +295,10 @@ def probe(path: Path) -> Metadata | None:
     for name, value in meta_tags:
         # sometimes ffprobe returns tags in uppercase
         name = name.lower()
+
+        if has_advertisement(value):
+            log.info('Ignoring advertisement: %s = %s', name, value)
+            continue
 
         if name == 'album':
             album = value
