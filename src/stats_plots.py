@@ -110,16 +110,12 @@ def chart(chart_type, title, categories, series_dict: dict, stack=False):
     }
 
 
-def bar_chart(title, categories, series_dict: dict, vertical=False, **kwargs):
-    return chart('column' if vertical else 'bar', title, categories, series_dict, **kwargs)
+def data_from_rows(series_name: str, rows: list[tuple[str, int]]):
+    return [row[0] for row in rows], {series_name: [row[1] for row in rows]}
 
 
-def rows_to_column_chart(rows: list[tuple[str, int]], title: str, series_name: str, vertical=False):
-    return bar_chart(title, [row[0] for row in rows], {series_name: [row[1] for row in rows]}, vertical)
-
-
-def counter_to_column_chart(counter: Counter, title: str, series_name: str, vertical=False):
-    return rows_to_column_chart(counter.most_common(COUNTER_AMOUNT), title, series_name, vertical)
+def data_from_counter(series_name: str, counter: Counter):
+    return data_from_rows(series_name, counter.most_common(COUNTER_AMOUNT))
 
 
 def chart_last_chosen(conn: Connection):
@@ -138,24 +134,18 @@ def chart_last_chosen(conn: Connection):
         else:
             counts[3] += 1 # long ago
 
-    return bar_chart(_('Last chosen'),
-                    [_('Today'), _('This week'), _('This month'), _('Long ago'), _('Never')],
-                    {_('Number of tracks'): counts})
+    return chart('bar',
+                 _('When tracks were last chosen by algorithm'),
+                 [_('Today'), _('This week'), _('This month'), _('Long ago'), _('Never')],
+                 {_('Number of tracks'): counts})
 
-
-def chart_playlist_track_count(conn: Connection):
-    rows = conn.execute('SELECT playlist, COUNT(*) FROM track GROUP BY playlist ORDER BY COUNT(*) DESC').fetchall()
-    return rows_to_column_chart(rows, _('Number of tracks in playlists'), _('Number of tracks'))
-
-
-def chart_playlist_track_duration_total(conn: Connection):
-    rows = conn.execute('SELECT playlist, SUM(duration)/60 FROM track GROUP BY playlist ORDER BY SUM(duration) DESC').fetchall()
-    return rows_to_column_chart(rows, _('Total duration of tracks in playlists'), _('Track duration'))
-
-
-def chart_playlist_track_duration_mean(conn: Connection):
-    rows = conn.execute('SELECT playlist, AVG(duration)/60 FROM track GROUP BY playlist ORDER BY AVG(duration) DESC').fetchall()
-    return rows_to_column_chart(rows, _('Mean duration of tracks in playlists'), _('Track duration'))
+def charts_playlists(conn: Connection):
+    counts = conn.execute('SELECT playlist, COUNT(*) FROM track GROUP BY playlist ORDER BY COUNT(*) DESC').fetchall()
+    means = conn.execute('SELECT playlist, SUM(duration)/60 FROM track GROUP BY playlist ORDER BY SUM(duration) DESC').fetchall()
+    totals = conn.execute('SELECT playlist, AVG(duration)/60 FROM track GROUP BY playlist ORDER BY AVG(duration) DESC').fetchall()
+    return [chart('column', _('Number of tracks in playlists'), *data_from_rows(_('Number of tracks'), counts)),
+            chart('column', _('Mean duration of tracks in playlists'), *data_from_rows(_('Track duration'), means)),
+            chart('column', _('Total duration of tracks in playlists'), *data_from_rows(_('Track duration'), totals))]
 
 
 def chart_track_year(conn: Connection):
@@ -165,17 +155,21 @@ def chart_track_year(conn: Connection):
     for playlist, in conn.execute('SELECT path FROM playlist').fetchall():
         data[playlist] = [0] * (max_year - min_year + 1)
 
-    rows = conn.execute('SELECT playlist, year, COUNT(year) FROM track WHERE year IS NOT NULL GROUP BY playlist, year ORDER BY year ASC').fetchall()
+    rows = conn.execute('''SELECT playlist, year, COUNT(year)
+                           FROM track
+                           WHERE year IS NOT NULL
+                           GROUP BY playlist, year
+                           ORDER BY year ASC''').fetchall()
     for playlist, year, count in rows:
         if year < min_year or year > max_year:
             continue
         data[playlist][year - min_year] = count
 
-    return bar_chart(_('Track release year distribution'),
-                    list(range(min_year, max_year+1)),
-                    data,
-                    vertical=True,
-                    stack=True)
+    return chart('column',
+                 _('Track release year distribution'),
+                 list(range(min_year, max_year+1)),
+                 data,
+                 stack=True)
 
 
 def charts_history(conn: Connection, period: StatsPeriod):
@@ -238,48 +232,28 @@ def charts_history(conn: Connection, period: StatsPeriod):
         else:
             track_counter.update((relpath,))
 
-    charts = {
-        'top-users': counter_to_column_chart(user_counter, _('Most active users'), _('Times played')),
-        'top-tracks': counter_to_column_chart(track_counter, _('Most played tracks'), _('Times played')),
-        'top-artists': counter_to_column_chart(artist_counter, _('Most played artists'), _('Times played')),
-        'top-albums': counter_to_column_chart(album_counter, _('Most played albums'), _('Times played')),
-    }
-
-    charts['top-playlists'] = bar_chart(_('Top playlists'),
-                                        playlists,
-                                        playlists_counts,
-                                        stack=True)
-
-    charts['time-of-day'] = bar_chart(_('Time of day'),
-                                      [f'{i:02}:00' for i in range(0, 24)],
-                                      time_of_day,
-                                      stack=True,
-                                      vertical=True)
-
-    charts['day-of-week'] = bar_chart(_('Day of week'),
-                                      [_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday'), _('Saturday'), _('Sunday')],
-                                      day_of_week,
-                                      stack=True,
-                                      vertical=True)
-
-    charts['historic-play-count'] = chart('line',
-                                          _('Historic play count'),
-                                      [(min_day + timedelta(days=i)).isoformat() for i in range(0, num_days + 1)],
-                                      day_counts,
-                                      stack=True)
+    charts = [
+        chart('bar', _('Most active users'), *data_from_counter(_('Times played'), user_counter)),
+        chart('bar', _('Most played playlists'), playlists, playlists_counts, stack=True),
+        chart('bar', _('Most played tracks'), *data_from_counter(_('Times played'), track_counter)),
+        chart('bar', _('Most played artists'), *data_from_counter(_('Times played'), artist_counter)),
+        chart('bar', _('Most played albums'), *data_from_counter(_('Times played'), album_counter)),
+        chart('column', _('Time of day'), [f'{i:02}:00' for i in range(0, 24)], time_of_day, stack=True),
+        chart('column', _('Day of week'),
+              [_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday'), _('Saturday'), _('Sunday')],
+              day_of_week, stack=True),
+        chart('line', _('Historic play count'),
+              [(min_day + timedelta(days=i)).isoformat() for i in range(0, num_days + 1)], day_counts, stack=True)
+    ]
 
     return charts
 
 
 def get_data(period: StatsPeriod):
     with db.connect(read_only=True) as conn:
-        data = {
-            **charts_history(conn, period),
-            'last-played': chart_last_chosen(conn),
-            'playlist-track-count': chart_playlist_track_count(conn),
-            'playlist-track-duration-total': chart_playlist_track_duration_total(conn),
-            'playlist-track-duration-mean': chart_playlist_track_duration_mean(conn),
-            'track-year': chart_track_year(conn),
-        }
+        data = [*charts_history(conn, period),
+                *charts_playlists(conn),
+                chart_track_year(conn),
+                chart_last_chosen(conn)]
 
     return data

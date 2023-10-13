@@ -43,10 +43,10 @@ async function loadCharts(button) {
 
     // Download data
     const response = await fetch('/stats_data?period=' + encodeURIComponent(button.id));
-    const json = await response.json();
+    const data = await response.json();
 
     // Render charts
-    for (const chart of Object.values(json)) {
+    for (const chart of data) {
         const chartElem = document.createElement('div');
         chartElem.style.width = '100%';
         chartElem.style.height = '30rem';
