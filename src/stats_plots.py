@@ -189,12 +189,18 @@ def charts_history(conn: Connection, period: StatsPeriod):
     time_of_day: dict[str, list[int]] = {}
     day_of_week: dict[str, list[int]] = {}
     day_counts: dict[str, list[int]] = {}
+
+    playlists: list[str] = [row[0] for row in conn.execute('SELECT DISTINCT playlist FROM history WHERE timestamp > ?', (after_timestamp,))]
+    playlists_counts: dict[str, list[int]] = {}
+
     for username, in conn.execute('''SELECT DISTINCT user.username
                                      FROM history JOIN user ON history.user = user.id
                                      WHERE timestamp > ?''', (after_timestamp,)):
         time_of_day[username] = [0] * 24
         day_of_week[username] = [0] * 7
         day_counts[username] = [0] * num_days
+
+        playlists_counts[username] = [0] * len(playlists)
 
     result = conn.execute('''
                           SELECT timestamp, user.username, user.nickname, history.track, history.playlist
@@ -219,6 +225,8 @@ def charts_history(conn: Connection, period: StatsPeriod):
         day_of_week[username][dt.weekday()] += 1
         day_counts[username][(dt.date() - min_day).days] += 1
 
+        playlists_counts[username][playlists.index(playlist)] += 1
+
         track = Track.by_relpath(conn, relpath)
         if track:
             meta = track.metadata()
@@ -231,12 +239,16 @@ def charts_history(conn: Connection, period: StatsPeriod):
             track_counter.update((relpath,))
 
     charts = {
-        'top-playlists': counter_to_column_chart(playlist_counter, _('Top playlists'), _('Times played')),
         'top-users': counter_to_column_chart(user_counter, _('Most active users'), _('Times played')),
         'top-tracks': counter_to_column_chart(track_counter, _('Most played tracks'), _('Times played')),
         'top-artists': counter_to_column_chart(artist_counter, _('Most played artists'), _('Times played')),
         'top-albums': counter_to_column_chart(album_counter, _('Most played albums'), _('Times played')),
     }
+
+    charts['top-playlists'] = bar_chart(_('Top playlists'),
+                                        playlists,
+                                        playlists_counts,
+                                        stack=True)
 
     charts['time-of-day'] = bar_chart(_('Time of day'),
                                       [f'{i:02}:00' for i in range(0, 24)],
