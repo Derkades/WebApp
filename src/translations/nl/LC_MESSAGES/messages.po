@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-10-11 08:29+0200\n"
-"PO-Revision-Date: 2023-10-11 08:29+0200\n"
+"POT-Creation-Date: 2023-10-13 09:28+0200\n"
+"PO-Revision-Date: 2023-10-13 09:27+0200\n"
 "Last-Translator: \n"
 "Language: nl\n"
 "Language-Team: nl <LL@li.org>\n"
@@ -18,27 +18,27 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.12.1\n"
 
-#: app.py:726
+#: app.py:723
 msgid "Incorrect password."
 msgstr "Onjuist wachtwoord."
 
-#: app.py:729
+#: app.py:726
 msgid "Repeated new passwords do not match."
 msgstr "Herhaalde wachtwoorden komen niet overeen."
 
-#: app.py:971
+#: app.py:968
 msgid "Added"
 msgstr "Toegevoegd"
 
-#: app.py:972
+#: app.py:969
 msgid "Removed"
 msgstr "Verwijderd"
 
-#: app.py:973
+#: app.py:970
 msgid "Modified"
 msgstr "Aangepast"
 
-#: app.py:1314
+#: app.py:1311
 msgid "Track is already in this playlist"
 msgstr "Nummer zit al in deze afspeellijst"
 
@@ -62,142 +62,133 @@ msgstr ""
 "Je bent geen administrator, maar deze pagina vereist administratieve "
 "rechten"
 
-#: stats_plots.py:35
+#: stats_plots.py:26
 msgid "last day"
 msgstr "afgelopen dag"
 
-#: stats_plots.py:37
+#: stats_plots.py:28
 msgid "last week"
 msgstr "afgelopen week"
 
-#: stats_plots.py:39
+#: stats_plots.py:30
 msgid "last month"
 msgstr "afgelopen maand"
 
-#: stats_plots.py:41
+#: stats_plots.py:32
 msgid "last year"
 msgstr "afgelopen jaar"
 
-#: stats_plots.py:131
-msgid "Top playlists"
-msgstr "Populairste afspeellijsten"
-
-#: stats_plots.py:133 stats_plots.py:140 stats_plots.py:165 stats_plots.py:172
-#: stats_plots.py:179
-msgid "Times played"
-msgstr "Aantal keer afgespeeld"
-
 #: stats_plots.py:138
-msgid "Most active users"
-msgstr "Meest actieve gebruikers"
+msgid "When tracks were last chosen by algorithm"
+msgstr "Wanneer nummers voor het laatst gekozen zijn door het algoritme"
 
-#: stats_plots.py:145 stats_plots.py:146
-msgid "Time of day"
-msgstr "Moment van de dag"
-
-#: stats_plots.py:147 stats_plots.py:156
-msgid "Tracks played"
-msgstr "Nummers afgespeeld"
-
-#: stats_plots.py:155 stats_plots.py:157
-msgid "Day of week"
-msgstr "Dag van de week"
-
-#: stats_plots.py:158
-msgid "Monday"
-msgstr "Maandag"
-
-#: stats_plots.py:158
-msgid "Tuesday"
-msgstr "Dinsdag"
-
-#: stats_plots.py:158
-msgid "Wednesday"
-msgstr "Woensdag"
-
-#: stats_plots.py:158
-msgid "Thursday"
-msgstr "Donderdag"
-
-#: stats_plots.py:158
-msgid "Friday"
-msgstr "Vrijdag"
-
-#: stats_plots.py:158
-msgid "Saturday"
-msgstr "Zaterdag"
-
-#: stats_plots.py:158
-msgid "Sunday"
-msgstr "Zondag"
-
-#: stats_plots.py:163
-msgid "Most played tracks"
-msgstr "Meest gespeelde nummers"
-
-#: stats_plots.py:170
-msgid "Most played artists"
-msgstr "Meest gespeelde artiesten"
-
-#: stats_plots.py:177
-msgid "Most played albums"
-msgstr "Meest gespeelde albums"
-
-#: stats_plots.py:204 stats_plots.py:206
-msgid "Last chosen"
-msgstr "Laatst gekozen"
-
-#: stats_plots.py:205 stats_plots.py:222
-msgid "Number of tracks"
-msgstr "Aantal nummers"
-
-#: stats_plots.py:207
+#: stats_plots.py:139
 msgid "Today"
 msgstr "Vandaag"
 
-#: stats_plots.py:207
+#: stats_plots.py:139
 msgid "This week"
 msgstr "Deze week"
 
-#: stats_plots.py:207
+#: stats_plots.py:139
 msgid "This month"
 msgstr "Deze maand"
 
-#: stats_plots.py:207
+#: stats_plots.py:139
 msgid "Long ago"
 msgstr "Lang geleden"
 
-#: stats_plots.py:207
+#: stats_plots.py:139
 msgid "Never"
 msgstr "Nooit"
 
-#: stats_plots.py:220
+#: stats_plots.py:140 stats_plots.py:146
+msgid "Number of tracks"
+msgstr "Aantal nummers"
+
+#: stats_plots.py:146
 msgid "Number of tracks in playlists"
 msgstr "Aantal nummers in afspeellijsten"
 
-#: stats_plots.py:227
+#: stats_plots.py:147
+msgid "Mean duration of tracks in playlists"
+msgstr "Gemiddelde lengte van nummers in afspeellijsten"
+
+#: stats_plots.py:147 stats_plots.py:148
+msgid "Track duration"
+msgstr "Lengte van nummer"
+
+#: stats_plots.py:148
 msgid "Total duration of tracks in playlists"
 msgstr "Totale lengte van nummers in afspeellijsten"
 
-#: stats_plots.py:228
-msgid "Total duration in minutes"
-msgstr "Totale lengte in minuten"
-
-#: stats_plots.py:233
-msgid "Mean duration of tracks in playlist"
-msgstr "Gemiddelde lengte van nummers in afspeellijsten"
-
-#: stats_plots.py:234
-msgid "Mean duration in minutes"
-msgstr "Gemiddelde lengte in minuten"
-
-#: stats_plots.py:255
+#: stats_plots.py:169
 msgid "Track release year distribution"
 msgstr "Distributie van jaar van uitgave"
 
-#: stats_plots.py:257
-msgid "Release year"
-msgstr "Jaar van uitgave"
+#: stats_plots.py:236
+msgid "Most active users"
+msgstr "Meest actieve gebruikers"
+
+#: stats_plots.py:236 stats_plots.py:238 stats_plots.py:239 stats_plots.py:240
+msgid "Times played"
+msgstr "Aantal keer afgespeeld"
+
+#: stats_plots.py:237
+msgid "Most played playlists"
+msgstr "Meest gespeelde afspeellijsten"
+
+#: stats_plots.py:238
+msgid "Most played tracks"
+msgstr "Meest gespeelde nummers"
+
+#: stats_plots.py:239
+msgid "Most played artists"
+msgstr "Meest gespeelde artiesten"
+
+#: stats_plots.py:240
+msgid "Most played albums"
+msgstr "Meest gespeelde albums"
+
+#: stats_plots.py:241
+msgid "Time of day"
+msgstr "Moment van de dag"
+
+#: stats_plots.py:242
+msgid "Day of week"
+msgstr "Dag van de week"
+
+#: stats_plots.py:243
+msgid "Monday"
+msgstr "Maandag"
+
+#: stats_plots.py:243
+msgid "Tuesday"
+msgstr "Dinsdag"
+
+#: stats_plots.py:243
+msgid "Wednesday"
+msgstr "Woensdag"
+
+#: stats_plots.py:243
+msgid "Thursday"
+msgstr "Donderdag"
+
+#: stats_plots.py:243
+msgid "Friday"
+msgstr "Vrijdag"
+
+#: stats_plots.py:243
+msgid "Saturday"
+msgstr "Zaterdag"
+
+#: stats_plots.py:243
+msgid "Sunday"
+msgstr "Zondag"
+
+#: stats_plots.py:245
+msgid "Historic play count"
+msgstr "Aantal gespeelde nummers door de tijd"
 
 #: templates/403.jinja2:4 templates/403.jinja2:9
 msgid "Permission denied"
@@ -367,7 +358,7 @@ msgid "Progress"
 msgstr "Voortgang"
 
 #: templates/download.jinja2:26 templates/download.jinja2:41
-#: templates/files.jinja2:83 templates/player.jinja2:247
+#: templates/files.jinja2:83 templates/player.jinja2:251
 #: templates/playlist_stats.jinja2:34
 msgid "Title"
 msgstr "Titel"
@@ -444,7 +435,7 @@ msgstr "Type"
 msgid "File name"
 msgstr "Bestandsnaam"
 
-#: templates/files.jinja2:82 templates/player.jinja2:229
+#: templates/files.jinja2:82 templates/player.jinja2:232
 #: templates/playlist_stats.jinja2:31
 msgid "Artists"
 msgstr "Artiesten"
@@ -720,13 +711,13 @@ msgstr "Gebruikersnaam"
 msgid "Password"
 msgstr "Wachtwoord"
 
-#: templates/player.jinja2:35 templates/player.jinja2:299
-msgid "Loading..."
-msgstr "Laden..."
+#: templates/player.jinja2:35
+msgid "Loading&mldr;"
+msgstr "Laden&mldr;"
 
 #: templates/player.jinja2:41
-msgid "Waiting for music in queue..."
-msgstr "Wachten op muziek in wachtrij..."
+msgid "Waiting for music in queue&mldr;"
+msgstr "Wachten op muziek in wachtrij&mldr;"
 
 #: templates/player.jinja2:44
 msgid "Previously: "
@@ -906,93 +897,101 @@ msgstr "Tagmodus"
 msgid "All"
 msgstr "Alles"
 
-#: templates/player.jinja2:211 templates/player.jinja2:224
+#: templates/player.jinja2:211
+msgid "Please select a playlist."
+msgstr "Selecteer een afspeellijst."
+
+#: templates/player.jinja2:220
+msgid "Search"
+msgstr "Zoeken"
+
+#: templates/player.jinja2:222
 msgid "Search query"
 msgstr "Zoekopdracht"
 
-#: templates/player.jinja2:213
-msgid "Please select a playlist or enter a search query."
-msgstr "Gelieve een afspeelijst te selecteren, of een zoekopdracht in te voeren."
+#: templates/player.jinja2:225
+msgid "Please enter a search query."
+msgstr "Gelieve een zoekopdracht in te voeren."
 
-#: templates/player.jinja2:222
-msgid "Search v2 (beta)"
-msgstr "Zoeken v2 (beta)"
-
-#: templates/player.jinja2:226 templates/playlist_stats.jinja2:30
+#: templates/player.jinja2:229 templates/playlist_stats.jinja2:30
 msgid "Tracks"
 msgstr "Nummers"
 
-#: templates/player.jinja2:232
+#: templates/player.jinja2:235
 msgid "Albums"
 msgstr "Albums"
 
-#: templates/player.jinja2:240
+#: templates/player.jinja2:244
 msgid "Metadata editor"
 msgstr "Metadata wijzigen"
 
-#: templates/player.jinja2:243
+#: templates/player.jinja2:247
 msgid "Editing metadata for: "
 msgstr "Metadata bewerken: "
 
-#: templates/player.jinja2:251 templates/playlist_stats.jinja2:35
+#: templates/player.jinja2:255 templates/playlist_stats.jinja2:35
 msgid "Album"
 msgstr "Album"
 
-#: templates/player.jinja2:255
+#: templates/player.jinja2:259
 msgid "Artists (delimit multiple using <kbd>;</kbd>)"
 msgstr "Artiesten (scheid meerdere met <kbd>;</kbd>)"
 
-#: templates/player.jinja2:259 templates/playlist_stats.jinja2:36
+#: templates/player.jinja2:263 templates/playlist_stats.jinja2:36
 msgid "Album artist"
 msgstr "Albumartiest"
 
-#: templates/player.jinja2:263
+#: templates/player.jinja2:267
 msgid "Tags (delimit multiple using <kbd>;</kbd>)"
 msgstr "Tags (scheid meerdere met <kbd>;</kbd>)"
 
-#: templates/player.jinja2:267
+#: templates/player.jinja2:271
 msgid "Year (4 characters)"
 msgstr "Jaar (4 tekens)"
 
-#: templates/player.jinja2:273
+#: templates/player.jinja2:277
 msgid "Writing metadata..."
 msgstr "Metadata schrijven..."
 
-#: templates/player.jinja2:274
+#: templates/player.jinja2:278
 msgid "Reloading tracks..."
 msgstr "Nummers herladen..."
 
-#: templates/player.jinja2:282
+#: templates/player.jinja2:286
 msgid "Copy track"
 msgstr "Kopieer nummer"
 
-#: templates/player.jinja2:284
+#: templates/player.jinja2:288
 msgid "Select playlist to copy track to:"
 msgstr "Selecteer afspeellijst waarnaar dit nummer gekopieerd moet worden:"
 
-#: templates/player.jinja2:287
+#: templates/player.jinja2:291
 msgid "Copy"
 msgstr "Kopiëren"
 
-#: templates/player.jinja2:301
+#: templates/player.jinja2:303
+msgid "Loading..."
+msgstr "Laden..."
+
+#: templates/player.jinja2:305
 msgid "If this is taking longer than expected, please check the browser console."
 msgstr ""
 "Als dit langer duurt van verwacht, gelieve in de browser console te "
 "kijken."
 
-#: templates/player.jinja2:319
+#: templates/player.jinja2:322
 msgid "Artist: "
 msgstr "Artiest: "
 
-#: templates/player.jinja2:320
+#: templates/player.jinja2:323
 msgid "Album: "
 msgstr "Album: "
 
-#: templates/player.jinja2:321
+#: templates/player.jinja2:324
 msgid "Tag: "
 msgstr "Tag: "
 
-#: templates/player.jinja2:322
+#: templates/player.jinja2:325
 msgid "All tracks"
 msgstr "Alle nummers"
 
@@ -1144,9 +1143,9 @@ msgstr "Week"
 msgid "Month"
 msgstr "Maand"
 
-#: templates/stats.jinja2:16
-msgid "Generating charts..."
-msgstr "Grafieken genereren..."
+#: templates/stats.jinja2:17
+msgid "Loading charts&mldr;"
+msgstr "Grafieken laden&mldr;"
 
 #: templates/users.jinja2:12
 msgid "To create admin users or to delete users, please use the CLI interface."
@@ -1206,16 +1205,4 @@ msgstr "Nieuw wachtwoord (laat leeg om niet te veranderen)"
 #: templates/users_edit.jinja2:18
 msgid "Submit"
 msgstr "Versturen"
-
-#~ msgid "Language (reload required)"
-#~ msgstr "Taal (herladen vereist)"
-
-#~ msgid "Deleted"
-#~ msgstr "Verwijderd"
-
-#~ msgid "Changed"
-#~ msgstr "Gewijzigd"
-
-#~ msgid "Summary (%(period_str)s)"
-#~ msgstr "Samenvatting van de %(period_str)s"
 
