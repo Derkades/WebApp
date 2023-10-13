@@ -2,6 +2,7 @@ import logging
 from sqlite3 import Connection
 import traceback
 from urllib.parse import quote as urlencode
+import sys
 
 import requests
 from requests import Response
@@ -35,19 +36,21 @@ class OfflineSync:
             headers['Cookie'] = 'token=' + self.token
         return headers
 
-    def request_get(self, route: str) -> Response:
+    def request_get(self, route: str, raise_for_status=True) -> Response:
         response = requests.get(self.base_url + route,
                                 headers=self.get_headers(),
                                 timeout=30)
-        response.raise_for_status()
+        if raise_for_status:
+            response.raise_for_status()
         return response
 
-    def request_post(self, route: str, data) -> Response:
+    def request_post(self, route: str, data, raise_for_status=True) -> Response:
         response = requests.post(self.base_url + route,
                                  json=data,
                                  headers=self.get_headers(),
                                  timeout=30)
-        response.raise_for_status()
+        if raise_for_status:
+            response.raise_for_status()
         return response
 
     def get_base_url(self):
@@ -73,13 +76,18 @@ class OfflineSync:
         if row:
             self.token, = row
             try:
-                self.request_get('/get_csrf')
-                log.info('Authentication token is valid')
+                response = self.request_get('/get_csrf', raise_for_status=False)
+                if response.status_code == 403:
+                    log.info('Got 403 response, authentication token is invalid, please log in again.')
+                    self.login_prompt()
+                    self.set_token()
+                else:
+                    response.raise_for_status()
+                    log.info('Authentication token is valid')
             except RequestException:
                 traceback.print_exc()
-                log.info('Error testing authentication token. Please log in again.')
-                self.login_prompt()
-                self.set_token()
+                log.info('Error testing authentication token')
+                sys.exit(1)
         else:
             log.info('No authentication token stored, please log in')
             self.login_prompt()
