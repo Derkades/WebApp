@@ -16,11 +16,16 @@ log = logging.getLogger('app.cache')
 
 def store(key: str,
           data: bytes,
-          duration: int | None = None) -> None:
+          duration: int = 60*24*60*60) -> None:
+    """
+    Args:
+        key: Cache key
+        data: Data to cache
+        duration: Suggested cache duration in seconds. Duration may be extended by up to 50%.
+    """
     with db.cache() as conn:
-        if duration is None:
-            # Varying cache duration, between 30 and 60 days
-            duration = random.randint(30*24*60*60, 60*24*60*60)
+        # Vary cache duration so cached data doesn't all expire at once
+        duration += random.randint(0, duration // 2)
 
         expire_time = int(time.time()) + duration
         conn.execute("""
