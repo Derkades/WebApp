@@ -89,7 +89,15 @@ THEME = {
 }
 
 
-def chart(chart_type, title, categories, series_dict: dict, stack=False):
+def chart(chart_type: str, title: str, categories: list[str], series_dict: dict, stack=False):
+    """
+    Create chart json expected by javascript in stats.jinja2
+    Args:
+        chart_type: Chart type, see stats.jinja2 for accepted values
+        title: Chart type
+        categories: List of category names (names for each value column)
+        series_dict: Dict with series name as key and data points as values (must be same length as categories)
+    """
     return {
         'type': chart_type,
         'options': {
@@ -111,14 +119,30 @@ def chart(chart_type, title, categories, series_dict: dict, stack=False):
 
 
 def data_from_rows(series_name: str, rows: list[tuple[str, int]]):
+    """
+    Args:
+        series_name: Name for single series (single color in chart)
+        rows: Table rows as returned by sqlite .fetchall() for query:
+              SELECT column, COUNT(*) GROUP BY column
+    Returns: series_dict for chart() function
+    """
     return [row[0] for row in rows], {series_name: [row[1] for row in rows]}
 
 
 def data_from_counter(series_name: str, counter: Counter):
+    """
+    Args:
+        series_name: Name for single series (single color in chart)
+        counter: Counter
+    Returns: series_dict for chart() function
+    """
     return data_from_rows(series_name, counter.most_common(COUNTER_AMOUNT))
 
 
 def chart_last_chosen(conn: Connection):
+    """
+    Last chosen chart
+    """
     result = conn.execute('SELECT last_played FROM track')
     counts = [0, 0, 0, 0, 0]
     current = int(time.time())
@@ -140,6 +164,9 @@ def chart_last_chosen(conn: Connection):
                  {_('Number of tracks'): counts})
 
 def charts_playlists(conn: Connection):
+    """
+    Playlist related charts
+    """
     counts = conn.execute('SELECT playlist, COUNT(*) FROM track GROUP BY playlist ORDER BY COUNT(*) DESC').fetchall()
     means = conn.execute('SELECT playlist, SUM(duration)/60 FROM track GROUP BY playlist ORDER BY SUM(duration) DESC').fetchall()
     totals = conn.execute('SELECT playlist, AVG(duration)/60 FROM track GROUP BY playlist ORDER BY AVG(duration) DESC').fetchall()
@@ -149,6 +176,9 @@ def charts_playlists(conn: Connection):
 
 
 def chart_track_year(conn: Connection):
+    """
+    Track release year chart
+    """
     min_year, max_year = conn.execute('SELECT MAX(1950, MIN(year)), MIN(2030, MAX(year)) FROM track').fetchone()
 
     data = {}
@@ -173,6 +203,9 @@ def chart_track_year(conn: Connection):
 
 
 def charts_history(conn: Connection, period: StatsPeriod):
+    """
+    Playback history related charts
+    """
     after_timestamp = int(time.time()) - period.value
 
     min_time, max_time = conn.execute('SELECT MIN(timestamp), MAX(timestamp) FROM history WHERE timestamp > ?',
@@ -250,6 +283,9 @@ def charts_history(conn: Connection, period: StatsPeriod):
 
 
 def get_data(period: StatsPeriod):
+    """
+    Generate charts as json data for stats.jinja2
+    """
     with db.connect(read_only=True) as conn:
         data = [*charts_history(conn, period),
                 *charts_playlists(conn),
