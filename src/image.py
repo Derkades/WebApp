@@ -8,7 +8,12 @@ import logging
 from enum import Enum
 from dataclasses import dataclass
 
-from PIL import Image
+import settings
+# In offline mode, images are downloaded from the central server and served without
+# modification. The functions in this module are never actually called. As such, an
+# installation of PIL is not needed.
+if not settings.offline_mode:
+    from PIL import Image
 
 import cache
 

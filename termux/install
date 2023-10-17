@@ -2,7 +2,7 @@
 set -e
 
 # Some Python extensions must be installed from the Termux repositories:
-pkg install -y python-bcrypt python-numpy matplotlib
+pkg install -y python-bcrypt
 
 # Install dependencies for lxml:
 pkg install -y libxml2 libxslt
