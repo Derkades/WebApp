@@ -335,6 +335,21 @@ def route_ytdl():
     return Response(generate(), mimetype='text/plain')
 
 
+@app.route('/ytdl_search', methods=['POST'])
+def route_ytdl_search():
+    """
+    Use yt-dlp to send a search query to YouTube
+    """
+    with db.connect(read_only=True) as conn:
+        # user = auth.verify_auth_cookie(conn)
+        # user.verify_csrf(request.json['csrf'])
+
+        query = request.json['query']
+        results = downloader.search(query)
+
+    return results
+
+
 @app.route('/track_list')
 def route_track_list():
     """

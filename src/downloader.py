@@ -18,12 +18,12 @@ class YtDone:
 
 
 class YtQueueLogger:
-    q: Queue
+    queue: Queue  # contains log strings or YtDone object to indicate yt-dlp has finished
 
     def __init__(self):
-        self.q = Queue()
+        self.queue = Queue()
 
-    def debug(self, msg):
+    def debug(self, msg: str):
         # For compatibility with youtube-dl, both debug and info are passed into debug
         # You can distinguish them by the prefix '[debug] '
         if msg.startswith('[debug] '):
@@ -31,20 +31,23 @@ class YtQueueLogger:
         else:
             self.info(msg)
 
-    def info(self, msg):
-        self.q.put(msg + '\n')
+    def info(self, msg: str):
+        self.queue.put(msg + '\n')
         log.info(msg)
-        self.q.join()
+        self.queue.join()
 
-    def warning(self, msg):
-        self.q.put(msg + '\n')
+    def warning(self, msg: str):
+        self.queue.put(msg + '\n')
         log.warning(msg)
-        self.q.join()
+        self.queue.join()
 
-    def error(self, msg):
-        self.q.put(msg + '\n')
+    def error(self, msg: str):
+        self.queue.put(msg + '\n')
         log.error(msg)
-        self.q.join()
+        self.queue.join()
+
+    def done(self, status_code: int):
+        self.queue.put(YtDone(status_code))
 
 
 def download(download_to: Path, url: str) -> Generator[str, None, int]:
@@ -68,16 +71,43 @@ def download(download_to: Path, url: str) -> Generator[str, None, int]:
         with YoutubeDL(yt_opts) as ytdl:
             try:
                 status_code = ytdl.download([url])
-                logger.q.put(YtDone(status_code))
+                logger.done(status_code)
             except DownloadError:
-                logger.q.put(YtDone(1))
+                logger.done(1)
 
     Thread(target=download_thread, daemon=True).start()
 
     while True:
-        next_item = logger.q.get(True, 30)
+        next_item = logger.queue.get(True, 30)
         if isinstance(next_item, YtDone):
             return next_item.status_code
 
         yield next_item
-        logger.q.task_done()
+        logger.queue.task_done()
+
+
+@dataclass
+class SearchResult:
+    url: str
+    title: str
+    channel_name: str
+    channel_subscribers: str
+    view_count: int
+    duration: int
+    duration_string: str
+    upload_date: str
+
+
+def search(search_query: str, search_type: str = 'ytsearch3') -> list[SearchResult]:
+    with YoutubeDL({'default_search': search_type}) as ytdl:
+        info = ytdl.extract_info(search_query, download=False)
+        results = [SearchResult(entry['original_url'],
+                                entry['title'],
+                                entry['uploader'],
+                                entry['channel_follower_count'],
+                                entry['view_count'],
+                                entry['duration'],
+                                entry['duration_string'],
+                                entry['upload_date'])
+                   for entry in info['entries']]
+        return results
