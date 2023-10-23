@@ -168,8 +168,8 @@ def charts_playlists(conn: Connection):
     Playlist related charts
     """
     counts = conn.execute('SELECT playlist, COUNT(*) FROM track GROUP BY playlist ORDER BY COUNT(*) DESC').fetchall()
-    means = conn.execute('SELECT playlist, SUM(duration)/60 FROM track GROUP BY playlist ORDER BY SUM(duration) DESC').fetchall()
-    totals = conn.execute('SELECT playlist, AVG(duration)/60 FROM track GROUP BY playlist ORDER BY AVG(duration) DESC').fetchall()
+    totals = conn.execute('SELECT playlist, SUM(duration)/60 FROM track GROUP BY playlist ORDER BY SUM(duration) DESC').fetchall()
+    means = conn.execute('SELECT playlist, AVG(duration)/60 FROM track GROUP BY playlist ORDER BY AVG(duration) DESC').fetchall()
     return [chart('column', _('Number of tracks in playlists'), *data_from_rows(_('Number of tracks'), counts)),
             chart('column', _('Mean duration of tracks in playlists'), *data_from_rows(_('Track duration'), means)),
             chart('column', _('Total duration of tracks in playlists'), *data_from_rows(_('Track duration'), totals))]
@@ -270,7 +270,7 @@ def charts_history(conn: Connection, period: StatsPeriod):
             track_counter.update((relpath,))
 
     charts = [
-        chart('bar', _('Most active users'), *data_from_counter(_('Times played'), user_counter)),
+        chart('bar', _('Most active users'), *data_from_counter(_('Tracks played'), user_counter)),
         chart('bar', _('Most played playlists'), playlists, playlists_counts, stack=True),
         chart('bar', _('Most played tracks'), *data_from_counter(_('Times played'), track_counter)),
         chart('bar', _('Most played artists'), *data_from_counter(_('Times played'), artist_counter)),
