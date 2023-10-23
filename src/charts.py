@@ -210,6 +210,10 @@ def charts_history(conn: Connection, period: StatsPeriod):
 
     min_time, max_time = conn.execute('SELECT MIN(timestamp), MAX(timestamp) FROM history WHERE timestamp > ?',
                                       (after_timestamp,)).fetchone()
+    # If no tracks are played in the specified period
+    if min_time is None:
+        return []
+
     min_day = date.fromtimestamp(min_time)
     num_days = (date.fromtimestamp(max_time) - min_day).days + 1
 
