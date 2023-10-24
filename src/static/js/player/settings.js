@@ -38,6 +38,7 @@ function syncInputsWithStorage() {
     onVolumeChange();
 }
 
+// TODO To be removed once new download page is fully working
 function youTubeDownload(event) {
     event.preventDefault();
 
@@ -89,6 +90,7 @@ function youTubeDownload(event) {
 document.addEventListener('DOMContentLoaded', () => {
     syncInputsWithStorage();
 
+    // TODO To be removed once new download page is fully working
     const ytButton = document.getElementById('youtube-dl-submit');
     if (ytButton) { // Missing in offline mode
         ytButton.addEventListener('click', youTubeDownload);

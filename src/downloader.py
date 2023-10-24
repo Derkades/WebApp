@@ -98,7 +98,7 @@ class SearchResult:
     upload_date: str
 
 
-def search(search_query: str, search_type: str = 'ytsearch3') -> list[SearchResult]:
+def search(search_query: str, search_type: str = 'ytsearch') -> list[SearchResult]:
     with YoutubeDL({'default_search': search_type}) as ytdl:
         info = ytdl.extract_info(search_query, download=False)
         results = [SearchResult(entry['original_url'],

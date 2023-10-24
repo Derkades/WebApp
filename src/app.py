@@ -335,19 +335,34 @@ def route_ytdl():
     return Response(generate(), mimetype='text/plain')
 
 
-@app.route('/ytdl_search', methods=['POST'])
-def route_ytdl_search():
-    """
-    Use yt-dlp to send a search query to YouTube
-    """
+@app.route('/download_search', methods=['POST'])
+def route_download_search():
     with db.connect(read_only=True) as conn:
-        # user = auth.verify_auth_cookie(conn)
-        # user.verify_csrf(request.json['csrf'])
+        user = auth.verify_auth_cookie(conn)
+        user.verify_csrf(request.json['csrf'])
 
         query = request.json['query']
         results = downloader.search(query)
 
-    return results
+    return {'results': results}
+
+
+@app.route('/download')
+def route_download():
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
+        csrf_token = user.get_csrf()
+        if user.admin:
+            playlists = [(playlist.name, True)
+                         for playlist in music.playlists(conn)]
+        else:
+            playlists = [(playlist.name, playlist.write)
+                         for playlist in music.user_playlists(conn, user.user_id)]
+
+    return render_template('download.jinja2',
+                           csrf_token=csrf_token,
+                           primary_playlist=user.primary_playlist,
+                           playlists=playlists)
 
 
 @app.route('/track_list')
@@ -1179,13 +1194,13 @@ def route_playlists_set_primary():
     return redirect('/playlists')
 
 
-@app.route('/download')
-def route_download():
+@app.route('/download_offline')
+def route_download_offline():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
         playlists = music.playlists(conn)
 
-    return render_template('download.jinja2',
+    return render_template('download_offline.jinja2',
                            playlists=playlists)
 
 

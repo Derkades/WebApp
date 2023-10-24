@@ -37,3 +37,45 @@ function timestampToString(seconds) {
 function choice(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
 }
+
+function formatLargeNumber(number) {
+    if (number > 1_000_000) {
+        return (number / 1_000_000).toFixed(1) + 'M';
+    } else if (number > 1_000) {
+        return (number / 1_000).toFixed(1) + 'k';
+    } else {
+        return number + '';
+    }
+}
+
+/**
+ * Create button element containing an icon
+ * @param {string} iconName
+ * @param {Array<string>} classes
+ * @returns {HTMLButtonElement}
+ */
+function createIconButton(iconName, classes) {
+    const button = document.createElement('button');
+    button.classList.add('icon-button');
+    const icon = document.createElement('div');
+    icon.classList.add('icon');
+    icon.style.backgroundImage = `url("/static/icon/${iconName}")`;
+    if (classes !== undefined) {
+        icon.classList.add(...classes);
+    }
+    button.appendChild(icon);
+    return button;
+}
+
+/**
+ * Replace icon in icon button
+ * @param {HTMLButtonElement} iconButton
+ * @param {string} iconName
+ */
+function replaceIconButton(iconButton, iconName, classes) {
+    const icon = iconButton.firstChild;
+    icon.style.backgroundImage = `url("/static/icon/${iconName}")`
+    if (classes !== undefined) {
+        icon.classList.add(...classes);
+    }
+}

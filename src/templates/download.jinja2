@@ -1,49 +1,157 @@
 {% extends "base_static.jinja2" %}
 
 {% block title %}
-    {% trans %}Download{% endtrans %}
+    {% trans %}Music downloader{% endtrans %}
 {% endblock title %}
 
 {% block content %}
 
-{{ page_heading(gettext('Download')) }}
+{{ page_heading(gettext('Music downloader')) }}
 
-<select id="select-playlist">
-    <option id="dummy-value" name="dummy">{% trans %}Select a playlist{% endtrans %}</option>
-    {% for playlist in playlists %}
-        <option name="{{ playlist.relpath }}">{{ playlist.name }}</option>
+<h2>{% trans %}Search{% endtrans %}</h2>
+
+<input id="csrf-token" type="hidden" value="{{ csrf_token }}">
+
+{# <label for="search-type">{% trans %}Service{% endtrans %}</label><br>
+<select id="search-type">
+    <option name="youtube">YouTube</option>
+</select><br> #}
+
+<input id="search-query" type="text" placeholder="{% trans %}Search query{% endtrans %}">
+
+{# <label for="search-multiple">{% trans %}Search multiple (slower){% endtrans %}</label>
+<input id="multiple" type="checkbox"><br> #}
+
+<button id="search-button">{% trans %}Search{% endtrans %}</button>
+<div id="search-loading" class="icon spinning hidden" style="background-image: url('/static/icon/loading.svg')"></div>
+<br>
+
+<table class="table">
+    <thead>
+        <th>Title</th>
+        <th>Views</th>
+        <th>Duration</th>
+        <th>Channel</th>
+    </thead>
+    <tbody id="search-results"></tbody>
+</table>
+
+<h2>Download</h2>
+
+<label for="url">{% trans %}Enter URL manually or use the search function above (click on a table row to copy the URL here).{% endtrans %}</label><br>
+<input id="download-url" type="text" class="fill-width"><br>
+
+<select id="download-playlist">
+    {% for playlist, write in playlists %}
+        <option name="{{ playlist }}" {% if not write %}disabled{% endif %} {% if playlist.name == primary_playlist %}selected{% endif %}>{{ playlist }}</option>
     {% endfor %}
-</select>
+</select><br>
 
-{{ icon_button('download', id='download-button') }}
+<button id="download-button">{% trans %}Download{% endtrans %}</button>
+<div id="download-loading" class="icon spinning hidden" style="background-image: url('/static/icon/loading.svg')"></div>
+<br>
 
-<h2>{% trans %}To be downloaded{% endtrans %}</h2>
+<div id="download-log" class="logbox fill-width" style="height: 20rem;"></div><br>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th class="icon-col">{% trans %}Progress{% endtrans %}</th>
-            <th>{% trans %}Title{% endtrans %}</th>
-        </tr>
-    </thead>
-    <tbody id="table-body">
-    </tbody>
-</table>
+<script src="/static/js/base.js"></script>
+<script>
 
-<h2>{% trans %}Already downloaded{% endtrans %}</h2>
+async function jsonPost(url, postDataObject) {
+    postDataObject.csrf = document.getElementById('csrf-token').value;
+    const options = {
+        method: 'POST',
+        body: JSON.stringify(postDataObject),
+        headers: new Headers({
+            'Content-Type': 'application/json'
+        }),
+    };
+    const response = await fetch(new Request(url, options));
+    if (!response.ok) {
+        throw 'Unexpected response code: ' + response.status;
+    }
+    return response;
+}
 
-<p>{% trans %}Total size: {% endtrans%}<span id="total-size-mib"></span>MiB</p>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchType = document.getElementById('search-type');
+    const searchQuery = document.getElementById('search-query');
+    const searchButton = document.getElementById('search-button');
+    const searchLoading = document.getElementById('search-loading');
+    const searchResults = document.getElementById('search-results');
+    const downloadUrl = document.getElementById('download-url');
+    const downloadPlaylist = document.getElementById('download-playlist');
+    const downloadButton = document.getElementById('download-button');
+    const downloadLoading = document.getElementById('download-loading');
+    const downloadLog = document.getElementById('download-log');
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>{% trans %}Size{% endtrans %}</th>
-            <th>{% trans %}Title{% endtrans %}</th>
-        </tr>
-    </thead>
-    <tbody id="table-body-downloaded">
-    </tbody>
-</table>
+    searchButton.addEventListener('click', async function() {
+        searchResults.replaceChildren();
+        searchButton.classList.add('hidden');
+        searchLoading.classList.remove('hidden');
 
-<script src="/static/js/download.js"></script>
+        const response = await jsonPost('/download_search', {query: searchQuery.value});
+        const json = await response.json();
+
+        for (const result of json.results) {
+            const tdTitle = document.createElement('td');
+            tdTitle.textContent = result.title;
+            const tdViews = document.createElement('td');
+            tdViews.textContent = formatLargeNumber(result.view_count);
+            const tdDuration = document.createElement('td');
+            tdDuration.textContent = result.duration_string;
+            const tdChannel = document.createElement('td');
+            tdChannel.textContent = result.channel_name + ' (' + formatLargeNumber(result.channel_subscribers) + ')';
+
+            const row = document.createElement('tr');
+            row.style.cursor = 'pointer';
+            row.append(tdTitle, tdViews, tdDuration, tdChannel);
+            searchResults.append(row);
+
+            row.addEventListener('click', () => downloadUrl.value = result.url);
+        }
+
+        searchButton.classList.remove('hidden');
+        searchLoading.classList.add('hidden');
+    });
+
+    downloadButton.addEventListener('click', () => {
+        downloadButton.classList.add('hidden');
+        downloadLoading.classList.remove('hidden');
+
+        (async function(){
+            const decoder = new TextDecoder();
+
+            function handleResponse(result) {
+                downloadLog.textContent += decoder.decode(result.value);
+                downloadLog.scrollTop = downloadLog.scrollHeight;
+                return result
+            }
+
+            const response = await jsonPost('/ytdl', {directory: downloadPlaylist.value, url: downloadUrl.value});
+            const reader = await response.body.getReader();
+            await reader.read().then(function process(result) {
+                if (result.done) {
+                    console.log("stream done");
+                    return reader.closed;
+                }
+                return reader.read().then(handleResponse).then(process)
+            });
+
+            if (downloadLog.textContent.endsWith('Done!')) {
+                downloadLog.style.backgroundColor = 'darkgreen';
+            } else {
+                downloadLog.style.backgroundColor = 'darkred';
+            }
+        })().then(() => {
+            downloadButton.classList.remove('hidden');
+            downloadLoading.classList.add('hidden');
+        }).catch(err => {
+            downloadButton.classList.remove('hidden');
+            downloadLoading.classList.add('hidden');
+            console.error(err);
+            alert('error, check console');
+        });
+    });
+});
+</script>
 {% endblock content %}
