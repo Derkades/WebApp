@@ -146,12 +146,15 @@ function createPlaylistDropdowns() {
             option.value = playlist.name;
             option.textContent = playlist.name;
             option.disabled = onlyWritable && !playlist.write;
-            option.selected = keptChildren.length == 0 && playlist.name == primaryPlaylist;
             select.appendChild(option);
         }
 
         // After all options have been replaced, the previously selected option should be restored
-        select.value = previouslySelectedValue;
+        if (previouslySelectedValue == "") {
+            select.value = primaryPlaylist;
+        } else {
+            select.value = previouslySelectedValue;
+        }
     }
 }
 eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, createPlaylistDropdowns);
