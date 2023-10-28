@@ -14,18 +14,25 @@ import db
 log = logging.getLogger('app.cache')
 
 
+WEEK = 7*24*60*60
+MONTH = 30*24*60*60
+DEFAULT = 90*24*60*60
+YEAR = 365*24*60*60
+
+
 def store(key: str,
           data: bytes,
-          duration: int = 60*24*60*60) -> None:
+          duration: int = DEFAULT) -> None:
     """
     Args:
         key: Cache key
         data: Data to cache
-        duration: Suggested cache duration in seconds. Duration may be extended by up to 50%.
+        duration: Suggested cache duration in seconds. Cache duration is varied by up to 25%, to
+                  avoid high load when cache entries all expire at roughly the same time.
     """
     with db.cache() as conn:
         # Vary cache duration so cached data doesn't all expire at once
-        duration += random.randint(0, duration // 2)
+        duration += random.randint(-duration // 4, duration // 4)
 
         expire_time = int(time.time()) + duration
         conn.execute("""

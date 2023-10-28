@@ -281,7 +281,7 @@ class Track:
             f"offset={meas_json['target_offset']}:" \
             'linear=true'
 
-        cache.store(cache_key, loudnorm.encode())
+        cache.store(cache_key, loudnorm.encode(), cache.YEAR)
         return loudnorm
 
 
@@ -359,7 +359,7 @@ class Track:
         if audio_type == AudioType.MP3_WITH_METADATA:
             cover_temp_file.close()
 
-        cache.store(cache_key, audio_data)
+        cache.store(cache_key, audio_data, cache.YEAR)
         return audio_data
 
     def write_metadata(self, **meta_dict: str):
