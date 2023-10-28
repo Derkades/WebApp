@@ -266,7 +266,7 @@ class Track:
 
         # Manually find the start of loudnorm info json
         meas_out = meas_result.stderr.decode()
-        meas_json = json.loads(meas_out[meas_out.index('Parsed_loudnorm_0')+37:])
+        meas_json = json.loads(meas_out[meas_out.rindex('Parsed_loudnorm_0')+37:])
 
         log.info('Measured integrated loudness: %s', meas_json['input_i'])
 
