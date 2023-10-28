@@ -33,7 +33,9 @@ def cache(read_only: bool = False) -> Connection:
     """
     Create new SQLite database connection to cache database
     """
-    return _connect('cache', read_only)
+    conn = _connect('cache', read_only)
+    conn.execute('PRAGMA auto_vacuum = INCREMENTAL')
+    return conn
 
 
 def offline(read_only: bool = False) -> Connection:

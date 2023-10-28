@@ -55,10 +55,14 @@ def retrieve(key: str,
         return data
 
 
-def cleanup():
+def cleanup() -> None:
     with db.cache() as conn:
-        return conn.execute('DELETE FROM cache2 WHERE expire_time < ?',
+        # The number of deleted rows and vacuumed pages is limited to prevent this
+        # function from blocking for too long.
+        count = conn.execute('DELETE FROM cache2 WHERE expire_time < ? LIMIT 100',
                             (int(time.time()),)).rowcount
+        conn.execute('PRAGMA incremental_vacuum(65536)') # max 65536 pages = 256MiB
+        log.info('Deleted %s entries from cache', count)
 
 
 def store_json(key: str, data: Any, **kwargs) -> None:

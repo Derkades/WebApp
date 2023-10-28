@@ -19,5 +19,4 @@ def cleanup():
         count = conn.execute('DELETE FROM now_playing').rowcount
         log.info('Deleted %s now playing entries', count)
 
-    count = cache.cleanup()
-    log.info('Deleted %s entries from cache', count)
+    cache.cleanup()
