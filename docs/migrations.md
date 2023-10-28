@@ -6,6 +6,15 @@ To run a migration:
 3. Execute the migration by copying it line by line from top to bottom, pressing enter after every line.
 4. Exit using <kbd>Ctrl</kbd>+<kbd>D</kbd>
 
+## 2023-10-28
+New automatic migration system was introduced. In the future, manual migrations will no longer be required.
+
+`meta.db`
+```sql
+CREATE TABLE db_version (version INTEGER NOT NULL) STRICT;
+INSERT INTO db_version VALUES(0);
+```
+
 ## 2023-09-26
 `music.db`
 ```sql
