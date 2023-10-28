@@ -76,7 +76,7 @@ def create_databases() -> None:
 
         log.info('Setting initial database version to %s', version)
 
-        conn.execute('INESRT INTO db_version VALUES(?)', (version,))
+        conn.execute('INSERT INTO db_version VALUES(?)', (version,))
 
 
 @dataclass
