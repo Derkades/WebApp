@@ -13,7 +13,7 @@ services:
       - type: tmpfs
         target: /tmp
         tmpfs:
-          size: 1G
+          size: 5G
     # user: '1000' # optionally, change user id
     read_only: true
     cap_drop: ['all']
