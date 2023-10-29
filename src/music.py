@@ -239,6 +239,8 @@ class Track:
         return metadata_options
 
     def get_loudnorm_filter(self) -> str:
+        return 'loudnorm=I=-16'
+
         cache_key = 'loud' + self.relpath + str(self.mtime)
         cached_data = cache.retrieve(cache_key)
         if cached_data is not None:
@@ -266,14 +268,13 @@ class Track:
 
         # Manually find the start of loudnorm info json
         meas_out = meas_result.stderr.decode()
+
         meas_json = json.loads(meas_out[meas_out.rindex('Parsed_loudnorm_0')+37:])
 
         log.info('Measured integrated loudness: %s', meas_json['input_i'])
 
         loudnorm = \
             'loudnorm=I=-16:' \
-            'TP=-1.5:' \
-            'LRA=11:' \
             f"measured_I={meas_json['input_i']}:" \
             f"measured_TP={meas_json['input_tp']}:" \
             f"measured_LRA={meas_json['input_lra']}:" \
