@@ -10,23 +10,24 @@
 
 <h2>{% trans %}Search{% endtrans %}</h2>
 
-<input id="csrf-token" type="hidden" value="{{ csrf_token }}">
+<form action="javascript:searchFormAction();">
+    <input id="csrf-token" type="hidden" value="{{ csrf_token }}">
 
-{# <label for="search-type">{% trans %}Service{% endtrans %}</label><br>
-<select id="search-type">
-    <option name="youtube">YouTube</option>
-</select><br> #}
+    {# <label for="search-type">{% trans %}Service{% endtrans %}</label><br>
+    <select id="search-type">
+        <option name="youtube">YouTube</option>
+    </select><br> #}
 
-<input id="search-query" type="text" placeholder="{% trans %}Search query{% endtrans %}">
+    <input id="search-query" type="text" placeholder="{% trans %}Search query{% endtrans %}">
 
-{# <label for="search-multiple">{% trans %}Search multiple (slower){% endtrans %}</label>
-<input id="multiple" type="checkbox"><br> #}
+    {# <label for="search-multiple">{% trans %}Search multiple (slower){% endtrans %}</label>
+    <input id="multiple" type="checkbox"><br> #}
 
-<button id="search-button">{% trans %}Search{% endtrans %}</button>
-<div id="search-loading" class="icon spinning hidden" style="background-image: url('/static/icon/loading.svg')"></div>
-<br>
+    <input type="submit" id="search-button" value="{% trans %}Search{% endtrans %}">
+    <div id="search-loading" class="icon spinning hidden" style="background-image: url('/static/icon/loading.svg')"></div>
+</form>
 
-<table class="table">
+<table class="table hidden" id="search-table">
     <thead>
         <th>Title</th>
         <th>Views</th>
@@ -72,47 +73,51 @@ async function jsonPost(url, postDataObject) {
     return response;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+async function searchFormAction() {
     const searchType = document.getElementById('search-type');
     const searchQuery = document.getElementById('search-query');
     const searchButton = document.getElementById('search-button');
     const searchLoading = document.getElementById('search-loading');
+    const searchTable = document.getElementById('search-table');
     const searchResults = document.getElementById('search-results');
+    const downloadUrl = document.getElementById('download-url');
+
+    searchResults.replaceChildren();
+    searchButton.classList.add('hidden');
+    searchLoading.classList.remove('hidden');
+
+    const response = await jsonPost('/download_search', {query: searchQuery.value});
+    const json = await response.json();
+
+    for (const result of json.results) {
+        const tdTitle = document.createElement('td');
+        tdTitle.textContent = result.title;
+        const tdViews = document.createElement('td');
+        tdViews.textContent = formatLargeNumber(result.view_count);
+        const tdDuration = document.createElement('td');
+        tdDuration.textContent = result.duration_string;
+        const tdChannel = document.createElement('td');
+        tdChannel.textContent = result.channel_name + ' (' + formatLargeNumber(result.channel_subscribers) + ')';
+
+        const row = document.createElement('tr');
+        row.style.cursor = 'pointer';
+        row.append(tdTitle, tdViews, tdDuration, tdChannel);
+        searchResults.append(row);
+
+        row.addEventListener('click', () => downloadUrl.value = result.url);
+    }
+
+    searchButton.classList.remove('hidden');
+    searchLoading.classList.add('hidden');
+    searchTable.classList.remove('hidden');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
     const downloadUrl = document.getElementById('download-url');
     const downloadPlaylist = document.getElementById('download-playlist');
     const downloadButton = document.getElementById('download-button');
     const downloadLoading = document.getElementById('download-loading');
     const downloadLog = document.getElementById('download-log');
-
-    searchButton.addEventListener('click', async function() {
-        searchResults.replaceChildren();
-        searchButton.classList.add('hidden');
-        searchLoading.classList.remove('hidden');
-
-        const response = await jsonPost('/download_search', {query: searchQuery.value});
-        const json = await response.json();
-
-        for (const result of json.results) {
-            const tdTitle = document.createElement('td');
-            tdTitle.textContent = result.title;
-            const tdViews = document.createElement('td');
-            tdViews.textContent = formatLargeNumber(result.view_count);
-            const tdDuration = document.createElement('td');
-            tdDuration.textContent = result.duration_string;
-            const tdChannel = document.createElement('td');
-            tdChannel.textContent = result.channel_name + ' (' + formatLargeNumber(result.channel_subscribers) + ')';
-
-            const row = document.createElement('tr');
-            row.style.cursor = 'pointer';
-            row.append(tdTitle, tdViews, tdDuration, tdChannel);
-            searchResults.append(row);
-
-            row.addEventListener('click', () => downloadUrl.value = result.url);
-        }
-
-        searchButton.classList.remove('hidden');
-        searchLoading.classList.add('hidden');
-    });
 
     downloadButton.addEventListener('click', () => {
         downloadButton.classList.add('hidden');
