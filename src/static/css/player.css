@@ -352,12 +352,6 @@ body.light #loading-overlay {
     margin-top: 4rem;
 }
 
-/* TODO To be removed */
-#youtube-dl-output {
-    min-height: 5rem;
-    max-height: 15rem;
-}
-
 .checkbox-with-label {
     display: inline-block;
     margin-right: 1rem;

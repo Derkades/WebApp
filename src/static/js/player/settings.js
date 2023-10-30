@@ -38,63 +38,8 @@ function syncInputsWithStorage() {
     onVolumeChange();
 }
 
-// TODO To be removed once new download page is fully working
-function youTubeDownload(event) {
-    event.preventDefault();
-
-    const output = document.getElementById('youtube-dl-output');
-    output.style.backgroundColor = '';
-    output.textContent = 'Starting download...\n';
-
-    const spinner = document.getElementById('youtube-dl-spinner');
-    spinner.classList.remove('hidden');
-
-    const directory = document.getElementById('youtube-dl-directory').value;
-    const url = document.getElementById('youtube-dl-url').value;
-
-    (async function(){
-        const decoder = new TextDecoder();
-
-        function handleResponse(result) {
-            output.textContent += decoder.decode(result.value);
-            output.scrollTop = output.scrollHeight;
-            return result
-        }
-
-        const response = await jsonPost('/ytdl', {directory: directory, url: url});
-        const reader = await response.body.getReader();
-        await reader.read().then(function process(result) {
-            if (result.done) {
-                console.log("stream done");
-                return reader.closed;
-            }
-            return reader.read().then(handleResponse).then(process)
-        });
-
-        await Track.updateLocalTrackList();
-
-        if (output.textContent.endsWith('Done!')) {
-            output.style.backgroundColor = 'darkgreen';
-        } else {
-            output.style.backgroundColor = 'darkred';
-        }
-    })().then(() => {
-        spinner.classList.add('hidden');
-    }).catch(err => {
-        console.error(err);
-        spinner.classList.add('hidden');
-        alert('error, check console');
-    });
-}
-
 document.addEventListener('DOMContentLoaded', () => {
     syncInputsWithStorage();
-
-    // TODO To be removed once new download page is fully working
-    const ytButton = document.getElementById('youtube-dl-submit');
-    if (ytButton) { // Missing in offline mode
-        ytButton.addEventListener('click', youTubeDownload);
-    }
 
     document.getElementById('scan-button').addEventListener('click', () => (async function() {
         const spinner = document.getElementById('scan-spinner');
