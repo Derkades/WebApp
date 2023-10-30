@@ -29,10 +29,12 @@
 
 <table class="table hidden" id="search-table">
     <thead>
-        <th>Title</th>
-        <th>Views</th>
-        <th>Duration</th>
-        <th>Channel</th>
+        <tr>
+            <th>Title</th>
+            <th>Views</th>
+            <th>Duration</th>
+            <th>Channel</th>
+        </tr>
     </thead>
     <tbody id="search-results"></tbody>
 </table>
@@ -44,7 +46,7 @@
 
 <select id="download-playlist">
     {% for playlist, write in playlists %}
-        <option name="{{ playlist }}" {% if not write %}disabled{% endif %} {% if playlist.name == primary_playlist %}selected{% endif %}>{{ playlist }}</option>
+        <option name="{{ playlist }}" {% if not write %}disabled{% endif %} {% if playlist == primary_playlist %}selected{% endif %}>{{ playlist }}</option>
     {% endfor %}
 </select><br>
 
