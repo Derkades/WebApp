@@ -1,5 +1,6 @@
 -- Update track table to strict mode
 
+PRAGMA foreign_keys=OFF;
 BEGIN;
 CREATE TABLE IF NOT EXISTS track_new (
     path TEXT NOT NULL UNIQUE PRIMARY KEY,

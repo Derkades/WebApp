@@ -19,11 +19,11 @@ def _open_sql(db_name: str):
     return open(f'sql/{db_name}.sql', 'r', encoding='utf-8')
 
 
-def _connect(db_name: str, read_only: bool, foreign_keys: bool = True) -> Connection:
+def _connect(db_name: str, read_only: bool) -> Connection:
     db_path = Path(settings.data_path, db_name + '.db').absolute().as_posix()
     db_uri = f'file:{db_path}' + ('?mode=ro' if read_only else '')
     conn = sqlite3.connect(db_uri, uri=True, timeout=10.0)
-    conn.execute('PRAGMA foreign_keys = ' + ('ON' if foreign_keys else 'OFF'))
+    conn.execute('PRAGMA foreign_keys = ON')
     if not read_only:  # pragma sometimes throws error when executed in read-only mode
         conn.execute('PRAGMA journal_mode = WAL')
     if db_name == 'cache':
@@ -86,8 +86,7 @@ class Migration:
     db_name: str
 
     def run(self):
-        # Very important to disable foreign keys here, or data might get deleted!
-        with _connect(self.db_name, False, False) as conn:
+        with _connect(self.db_name, False) as conn:
             with open(Path(MIGRATION_DIR, self.file_name), encoding='utf-8') as migration_sql:
                 conn.executescript(migration_sql.read())
 

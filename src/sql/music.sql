@@ -2,7 +2,7 @@ BEGIN;
 
 CREATE TABLE playlist (
     path TEXT NOT NULL UNIQUE PRIMARY KEY
-);
+) STRICT;
 
 CREATE TABLE track (
     path TEXT NOT NULL UNIQUE PRIMARY KEY,
@@ -23,7 +23,7 @@ CREATE TABLE track_artist (
     track TEXT NOT NULL REFERENCES track(path) ON DELETE CASCADE,
     artist TEXT NOT NULL,
     UNIQUE (track, artist)
-);
+) STRICT;
 
 CREATE INDEX idx_track_artist_track ON track_artist(track);
 
@@ -31,7 +31,7 @@ CREATE TABLE track_tag (
     track TEXT NOT NULL REFERENCES track(path) ON DELETE CASCADE,
     tag TEXT NOT NULL,
     UNIQUE (track, tag)
-);
+) STRICT;
 
 CREATE INDEX idx_track_tag_track ON track_tag(track);
 
@@ -48,7 +48,7 @@ CREATE TABLE user (
     admin INTEGER NOT NULL DEFAULT 0,
     primary_playlist TEXT NULL REFERENCES playlist(path) ON DELETE SET NULL,
     language TEXT NULL
-);
+) STRICT;
 
 CREATE TABLE user_playlist (
     user INTEGER NOT NULL REFERENCES user(id) ON DELETE CASCADE,
@@ -56,7 +56,7 @@ CREATE TABLE user_playlist (
     favorite INTEGER DEFAULT 0,
     write INTEGER DEFAULT 0,
     UNIQUE (user, playlist)
-);
+) STRICT;
 
 CREATE INDEX idx_user_playlist_user ON user_playlist(user);
 
@@ -64,7 +64,7 @@ CREATE TABLE user_lastfm (
     user INTEGER NOT NULL UNIQUE PRIMARY KEY REFERENCES user(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     key TEXT NOT NULL
-);
+) STRICT;
 
 CREATE TABLE session (
     user INTEGER NOT NULL REFERENCES user(id) ON DELETE CASCADE,
