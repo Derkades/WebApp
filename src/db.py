@@ -97,7 +97,7 @@ def get_migrations() -> list[Migration]:
 
     migrations: list[Migration] = []
 
-    for i, file_name in enumerate(migration_file_names):
+    for i, file_name in enumerate(sorted(migration_file_names)):
         name_split = file_name.split('-')
         assert len(name_split) == 2, name_split
         to_version = int(name_split[0])
