@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-10-25 08:50+0200\n"
-"PO-Revision-Date: 2023-10-25 08:50+0200\n"
+"POT-Creation-Date: 2023-10-30 21:31+0100\n"
+"PO-Revision-Date: 2023-10-30 21:31+0100\n"
 "Last-Translator: \n"
 "Language: nl\n"
 "Language-Team: nl <LL@li.org>\n"
@@ -18,27 +18,27 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.12.1\n"
 
-#: app.py:753
+#: app.py:754
 msgid "Incorrect password."
 msgstr "Onjuist wachtwoord."
 
-#: app.py:756
+#: app.py:757
 msgid "Repeated new passwords do not match."
 msgstr "Herhaalde wachtwoorden komen niet overeen."
 
-#: app.py:998
+#: app.py:999
 msgid "Added"
 msgstr "Toegevoegd"
 
-#: app.py:999
+#: app.py:1000
 msgid "Removed"
 msgstr "Verwijderd"
 
-#: app.py:1000
+#: app.py:1001
 msgid "Modified"
 msgstr "Aangepast"
 
-#: app.py:1341
+#: app.py:1342
 msgid "Track is already in this playlist"
 msgstr "Nummer zit al in deze afspeellijst"
 
@@ -348,27 +348,46 @@ msgstr "Ongedaan maken"
 msgid "Music downloader"
 msgstr "Muziekdownloader"
 
-#: templates/download.jinja2:11 templates/download.jinja2:25
+#: templates/download.jinja2:11 templates/download.jinja2:26
 #: templates/player.jinja2:221
 msgid "Search"
 msgstr "Zoeken"
 
-#: templates/download.jinja2:20 templates/player.jinja2:223
+#: templates/download.jinja2:21 templates/player.jinja2:223
 msgid "Search query"
 msgstr "Zoekopdracht"
 
-#: templates/download.jinja2:41
+#: templates/download.jinja2:33 templates/download_offline.jinja2:26
+#: templates/download_offline.jinja2:41 templates/files.jinja2:83
+#: templates/player.jinja2:252 templates/playlist_stats.jinja2:34
+msgid "Title"
+msgstr "Titel"
+
+#: templates/download.jinja2:34
+msgid "Views"
+msgstr "Weergaven"
+
+#: templates/download.jinja2:35
+msgid "Duration"
+msgstr "Lengte"
+
+#: templates/download.jinja2:36
+msgid "Channel"
+msgstr "Kanaal"
+
+#: templates/download.jinja2:42 templates/download.jinja2:53
+#: templates/download_offline.jinja2:4 templates/download_offline.jinja2:9
+#: templates/player.jinja2:174
+msgid "Download"
+msgstr "Download"
+
+#: templates/download.jinja2:44
 msgid ""
 "Enter URL manually or use the search function above (click on a table row"
 " to copy the URL here)."
 msgstr ""
 "Vul handmatig een URL in, of gebruik de zoekfunctie hierboven (klik op "
 "een rij in de tabel om de URL hierheen te kopiëren)."
-
-#: templates/download.jinja2:50 templates/download_offline.jinja2:4
-#: templates/download_offline.jinja2:9 templates/player.jinja2:174
-msgid "Download"
-msgstr "Download"
 
 #: templates/download_offline.jinja2:12
 msgid "Select a playlist"
@@ -381,12 +400,6 @@ msgstr "Moet worden gedownload"
 #: templates/download_offline.jinja2:25
 msgid "Progress"
 msgstr "Voortgang"
-
-#: templates/download_offline.jinja2:26 templates/download_offline.jinja2:41
-#: templates/files.jinja2:83 templates/player.jinja2:252
-#: templates/playlist_stats.jinja2:34
-msgid "Title"
-msgstr "Titel"
 
 #: templates/download_offline.jinja2:33
 msgid "Already downloaded"
@@ -520,8 +533,8 @@ msgid "Changelog"
 msgstr "Wijzigingen"
 
 #: templates/home.jinja2:34
-msgid "Downloader (new)"
-msgstr "Downloader (nieuw)"
+msgid "Downloader"
+msgstr "Downloader"
 
 #: templates/home.jinja2:37 templates/player.jinja2:119
 #: templates/player.jinja2:121

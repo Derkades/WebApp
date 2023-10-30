@@ -30,16 +30,16 @@
 <table class="table hidden" id="search-table">
     <thead>
         <tr>
-            <th>Title</th>
-            <th>Views</th>
-            <th>Duration</th>
-            <th>Channel</th>
+            <th>{% trans %}Title{% endtrans %}</th>
+            <th>{% trans %}Views{% endtrans %}</th>
+            <th>{% trans %}Duration{% endtrans %}</th>
+            <th>{% trans %}Channel{% endtrans %}</th>
         </tr>
     </thead>
     <tbody id="search-results"></tbody>
 </table>
 
-<h2>Download</h2>
+<h2>{% trans %}Download{% endtrans %}</h2>
 
 <label for="url">{% trans %}Enter URL manually or use the search function above (click on a table row to copy the URL here).{% endtrans %}</label><br>
 <input id="download-url" type="text" class="fill-width"><br>
