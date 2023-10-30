@@ -374,10 +374,10 @@ def route_track_list():
         user = auth.verify_auth_cookie(conn)
 
         timestamp_row = conn.execute('''
-                                  SELECT timestamp FROM scanner_log
-                                  ORDER BY id DESC
-                                  LIMIT 1
-                                  ''').fetchone()
+                                     SELECT timestamp FROM scanner_log
+                                     ORDER BY id DESC
+                                     LIMIT 1
+                                     ''').fetchone()
         if timestamp_row:
             last_modified = datetime.fromtimestamp(timestamp_row[0], timezone.utc)
         else:
@@ -397,7 +397,7 @@ def route_track_list():
 
             playlist_json = {
                 'name': playlist.name,
-                'track_count': playlist.track_count,
+                'track_count': playlist.track_count,  # TODO: No longer used by frontend, remove
                 'favorite': playlist.favorite,
                 'write': playlist.write or user.admin,
                 'tracks': [],
@@ -434,6 +434,7 @@ def route_track_list():
     response = Response(json.dumps({'playlists': playlist_response}))
     response.last_modified = last_modified
     response.cache_control.no_cache = True  # always revalidate cache
+    response.content_type = 'application/json'
     return response
 
 

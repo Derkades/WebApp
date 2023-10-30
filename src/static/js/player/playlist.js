@@ -13,7 +13,7 @@ class Playlist {
      */
     constructor(objectFromApi) {
         this.name = objectFromApi.name;
-        this.trackCount = objectFromApi.track_count;
+        this.trackCount = objectFromApi.tracks.length;
         this.favorite = objectFromApi.favorite;
         this.write = objectFromApi.write;
     }
