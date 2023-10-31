@@ -935,7 +935,7 @@ def route_history_played():
     if settings.offline_mode:
         with db.offline() as conn:
             track = request.json['track']
-            playlist = request.json['playlist']
+            playlist = track[:track.index('/')]
 
             timestamp = int(time.time())
             conn.execute('''
