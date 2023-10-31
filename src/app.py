@@ -1247,6 +1247,19 @@ def route_dislikes_remove():
     return redirect('/dislikes')
 
 
+@app.route('/never_play_json')
+def route_never_play_json():
+    """
+    Return "never play" track paths in json format, for offline mode sync
+    """
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
+        rows = conn.execute('SELECT track FROM never_play WHERE user=?',
+                            (user.user_id,)).fetchall()
+
+    return {'tracks': [row[0] for row in rows]}
+
+
 @app.route('/users')
 def route_users():
     with db.connect() as conn:
