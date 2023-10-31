@@ -251,8 +251,8 @@ class OfflineSync:
         """
         csrf_token = self.request_get('/get_csrf').json()['token']
 
-        rows = self.db_offline.execute('SELECT rowid, timestamp, track, playlist FROM history ORDER BY timestamp ASC')
-        for rowid, timestamp, track, playlist in rows:
+        rows = self.db_offline.execute('SELECT rowid, timestamp, track FROM history ORDER BY timestamp ASC')
+        for rowid, timestamp, track in rows:
             log.info('Played: %s', track)
             duration_row = self.db_music.execute('SELECT duration FROM track WHERE path=?', (track,)).fetchone()
             if duration_row:
@@ -264,7 +264,6 @@ class OfflineSync:
             response = self.request_post('/history_played',
                               {'csrf': csrf_token,
                                'track': track,
-                               'playlist': playlist,
                                'timestamp': timestamp,
                                'lastfmEligible': lastfm})
             assert response.status_code == 200

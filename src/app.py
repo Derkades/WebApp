@@ -935,14 +935,9 @@ def route_history_played():
     if settings.offline_mode:
         with db.offline() as conn:
             track = request.json['track']
-            playlist = track[:track.index('/')]
-
             timestamp = int(time.time())
-            conn.execute('''
-                        INSERT INTO history (timestamp, track, playlist)
-                        VALUES (?, ?, ?)
-                        ''',
-                        (timestamp, track, playlist))
+            conn.execute('INSERT INTO history VALUES (?, ?)',
+                         (timestamp, track))
         return Response(None, 200)
 
     with db.connect() as conn:
@@ -952,7 +947,7 @@ def route_history_played():
         track = request.json['track']
         playlist = track[:track.index('/')]
 
-        if 'timestamp' in request.json:
+        if 'timestamp' in request.json:  # Sent by offline mode sync
             timestamp = int(request.json['timestamp'])
         else:
             timestamp = int(time.time())
