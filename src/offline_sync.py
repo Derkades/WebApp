@@ -214,11 +214,12 @@ class OfflineSync:
         Download added or modified tracks from the server, and delete local tracks that were deleted on the server
         """
         log.info('Downloading track list')
-        response = self.request_get('/track_list').json()
+        playlists = self.request_get('/track_list').json()['playlists']
+        never_play = set(self.request_get('/never_play_json').json()['tracks'])
 
-        track_paths: set[str] = set()
+        all_track_paths: set[str] = set()
 
-        for playlist in response['playlists']:
+        for playlist in playlists:
             if not playlist['favorite']:
                 continue
 
@@ -226,7 +227,10 @@ class OfflineSync:
                                   (playlist['name'],))
 
             for track in playlist['tracks']:
-                track_paths.add(track['path'])
+                if track['path'] in never_play:
+                    continue
+
+                all_track_paths.add(track['path'])
 
                 row = self.db_music.execute('SELECT mtime FROM track WHERE path=?',
                                             (track['path'],)).fetchone()
@@ -242,7 +246,7 @@ class OfflineSync:
                 self.db_offline.commit()
                 self.db_music.commit()
 
-        self._prune_tracks(track_paths)
+        self._prune_tracks(all_track_paths)
         self._prune_playlists()
 
     def sync_history(self):
