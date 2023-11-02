@@ -20,15 +20,62 @@
 <link rel="stylesheet" href="/static/lib/toastui-chart-4.6.1.css">
 <script src="/static/lib/toastui-chart-4.6.1.js"></script>
 
-<style>
-.chart {
-    border-radius: var(--border-radius-amount);
-    margin-bottom: 1rem;
-    overflow: hidden;
-}
-</style>
-
 <script>
+// https://github.com/nhn/tui.chart/blob/main/docs/en/common-theme.md
+const theme = {
+    chart: {
+        backgroundColor: 'transparent',
+    },
+    title: {
+        color: 'white',
+        fontFamily: 'Quicksand',
+    },
+    xAxis: {
+        title: {
+            color: 'white',
+            fontFamily: 'Quicksand',
+        },
+        label: {
+            color: 'white',
+            fontFamily: 'Quicksand',
+        },
+        color: 'white',
+    },
+    yAxis: {
+        title: {
+            color: 'white',
+            fontFamily: 'Quicksand',
+        },
+        label: {
+            color: 'white',
+            fontFamily: 'Quicksand',
+        },
+        color: 'white',
+    },
+    legend: {
+        label: {
+            color: 'white',
+            fontFamily: 'Quicksand',
+        }
+    },
+    tooltip: {
+        header: {
+            fontFamily: 'Quicksand',
+        },
+        body: {
+            fontFamily: 'Quicksand',
+        },
+    },
+    plot: {
+        vertical: {
+            lineColor: 'transparent',
+        },
+        horizontal: {
+            lineColor: 'transparent',
+        }
+    },
+}
+
 const chartsContainer = document.getElementById('charts');
 const buttons = ['day', 'week', 'month', 'year'].map(id => document.getElementById(id));
 
@@ -50,9 +97,10 @@ async function loadCharts(button) {
         const chartElem = document.createElement('div');
         chartElem.style.width = '100%';
         chartElem.style.height = '30rem';
-        chartElem.classList.add('chart');
+        chartElem.style.marginBottom = '1rem';
         chartsContainer.append(chartElem);
         const args = {el: chartElem, data: chart['data'], options: chart['options']};
+        args.options.theme = theme;
         switch (chart['type']) {
             case 'bar':
                 toastui.Chart.barChart(args);

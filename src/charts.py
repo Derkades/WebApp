@@ -47,62 +47,6 @@ class StatsPeriod(Enum):
         raise ValueError()
 
 
-# https://github.com/nhn/tui.chart/blob/main/docs/en/common-theme.md
-THEME = {
-    'chart': {
-        'backgroundColor': 'transparent',
-    },
-    'title': {
-        'color': 'white',
-        'fontFamily': 'Quicksand',
-    },
-    'xAxis': {
-        'title': {
-            'color': 'white',
-            'fontFamily': 'Quicksand',
-        },
-        'label': {
-            'color': 'white',
-            'fontFamily': 'Quicksand',
-        },
-        'color': 'white',
-    },
-    'yAxis': {
-        'title': {
-            'color': 'white',
-            'fontFamily': 'Quicksand',
-        },
-        'label': {
-            'color': 'white',
-            'fontFamily': 'Quicksand',
-        },
-        'color': 'white',
-    },
-    'legend': {
-        'label': {
-            'color': 'white',
-            'fontFamily': 'Quicksand',
-        }
-    },
-    'tooltip': {
-        'header': {
-            'fontFamily': 'Quicksand',
-        },
-        'body': {
-            'fontFamily': 'Quicksand',
-        },
-    },
-    'plot': {
-        'vertical': {
-            'lineColor': 'transparent',
-        },
-        'horizontal': {
-            'lineColor': 'transparent',
-        }
-    },
-}
-
-
 def chart(chart_type: str, title: str, categories: list[str], series_dict: dict, stack=False):
     """
     Create chart json expected by javascript in stats.jinja2
@@ -123,7 +67,6 @@ def chart(chart_type: str, title: str, categories: list[str], series_dict: dict,
                 'width': 'auto',
                 'height': 'auto',
             },
-            'theme': THEME,
         },
         'data': {
             'categories': categories,
