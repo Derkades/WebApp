@@ -9,7 +9,6 @@ from urllib.parse import quote as urlencode
 import time
 import shutil
 import re
-import json
 from datetime import datetime, timezone
 
 import bcrypt
@@ -26,6 +25,7 @@ import db
 import downloader
 import genius
 from image import ImageFormat, ImageQuality
+import jsonw
 import language
 import lastfm
 import music
@@ -161,8 +161,10 @@ def route_get_csrf():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         csrf_token = user.get_csrf()
-    return Response(json.dumps({'token': csrf_token}),
-                    headers={'Cache-Control': "private, max-age=600"})
+    response = jsonw.json_response({'token': csrf_token})
+    response.cache_control.max_age = 600
+    response.cache_control.private = True
+    return response
 
 
 @app.route('/choose_track', methods=['GET'])
@@ -427,11 +429,7 @@ def route_track_list():
                 tag_rows = conn.execute('SELECT tag FROM track_tag WHERE track=?', (relpath,))
                 track_json['tags'] = [tag for tag, in tag_rows]
 
-    response = Response(json.dumps({'playlists': playlist_response}))
-    response.last_modified = last_modified
-    response.cache_control.no_cache = True  # always revalidate cache
-    response.content_type = 'application/json'
-    return response
+    return jsonw.json_response({'playlists': playlist_response}, last_modified=last_modified)
 
 
 @app.route('/scan_music', methods=['POST'])
@@ -1115,7 +1113,7 @@ def route_stats_data():
         period = StatsPeriod.from_str(request.args['period'])
 
     data = charts.get_data(period)
-    return data
+    return jsonw.json_response(data)
 
 
 @app.route('/playlist_stats')

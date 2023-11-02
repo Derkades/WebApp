@@ -4,11 +4,11 @@ Functions related to the cache (cache.db)
 
 from typing import Any
 import logging
-import json
 import time
 import random
 
 import db
+import jsonw
 
 
 log = logging.getLogger('app.cache')
@@ -76,7 +76,7 @@ def store_json(key: str, data: Any, **kwargs) -> None:
     """
     Dump object as json, encode as utf-8 and then use store()
     """
-    store(key, json.dumps(data).encode(), **kwargs)
+    store(key, jsonw.to_json(data).encode(), **kwargs)
 
 
 def retrieve_json(cache_key: str, **kwargs) -> Any | None:
@@ -87,4 +87,4 @@ def retrieve_json(cache_key: str, **kwargs) -> Any | None:
     if data is None:
         return None
 
-    return json.loads(data.decode())
+    return jsonw.from_json(data.decode())
