@@ -50,15 +50,17 @@ CREATE TABLE user (
     language TEXT NULL
 ) STRICT;
 
-CREATE TABLE user_playlist (
+CREATE TABLE user_playlist_favorite (
     user INTEGER NOT NULL REFERENCES user(id) ON DELETE CASCADE,
     playlist TEXT NOT NULL REFERENCES playlist(path) ON DELETE CASCADE,
-    favorite INTEGER DEFAULT 0,
-    write INTEGER DEFAULT 0,
     UNIQUE (user, playlist)
 ) STRICT;
 
-CREATE INDEX idx_user_playlist_user ON user_playlist(user);
+CREATE TABLE user_playlist_write (
+    user INTEGER NOT NULL REFERENCES user(id) ON DELETE CASCADE,
+    playlist TEXT NOT NULL REFERENCES playlist(path) ON DELETE CASCADE,
+    UNIQUE(user, playlist)
+) STRICT;
 
 CREATE TABLE user_lastfm (
     user INTEGER NOT NULL UNIQUE PRIMARY KEY REFERENCES user(id) ON DELETE CASCADE,

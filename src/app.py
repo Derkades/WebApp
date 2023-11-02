@@ -352,12 +352,8 @@ def route_download():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         csrf_token = user.get_csrf()
-        if user.admin:
-            playlists = [(playlist.name, True)
-                         for playlist in music.playlists(conn)]
-        else:
-            playlists = [(playlist.name, playlist.write)
-                         for playlist in music.user_playlists(conn, user.user_id)]
+        playlists = [(playlist.name, playlist.write)
+                     for playlist in music.user_playlists(conn, user.user_id, all_writable=user.admin)]
 
     return render_template('download.jinja2',
                            csrf_token=csrf_token,
@@ -387,19 +383,19 @@ def route_track_list():
             log.info('Last modified before If-Modified-Since header')
             return Response(None, 304)  # Not Modified
 
-        user_playlists = music.user_playlists(conn, user.user_id)
+        user_playlists = music.user_playlists(conn, user.user_id, all_writable=user.admin)
 
         playlist_response: list[dict[str, Any]] = []
 
         for playlist in user_playlists:
+            print(playlist.path, playlist.track_count)
             if playlist.track_count == 0:
                 continue
 
             playlist_json = {
                 'name': playlist.name,
-                'track_count': playlist.track_count,  # TODO: No longer used by frontend, remove
                 'favorite': playlist.favorite,
-                'write': playlist.write or user.admin,
+                'write': playlist.write,
                 'tracks': [],
             }
             playlist_response.append(playlist_json)
@@ -566,7 +562,8 @@ def route_playlists_create():
 
         scanner.scan(conn)  # This creates a row for the playlist in the playlist table
 
-        conn.execute('INSERT INTO user_playlist (user, playlist, write) VALUES (?, ?, 1)',
+        # New playlist should be writable for user who created it
+        conn.execute('INSERT INTO user_playlist_write VALUES (user, playlist)',
                      (user.user_id, dir_name))
 
         return redirect('/playlists')
@@ -600,12 +597,8 @@ def route_playlists_share():
         if not playlist.write and not user.admin:
             return Response('Cannot share playlist if you do not have write permission', 403)
 
-        conn.execute('''
-                     INSERT INTO user_playlist (user, playlist, write)
-                     VALUES (?, ?, 1)
-                     ON CONFLICT (user, playlist) DO UPDATE
-                         SET write = 1
-                     ''', (target_user_id, playlist_relpath))
+        conn.execute('INSERT INTO user_playlist_write VALUES(?, ?) ON CONFLICT DO NOTHING',
+                     (target_user_id, playlist_relpath))
 
         return redirect('/playlists')
 
@@ -1161,13 +1154,12 @@ def route_playlists_favorite():
         user.verify_csrf(request.form['csrf'])
         playlist = request.form['playlist']
         is_favorite = request.form['favorite']
-        assert is_favorite in {'0', '1'}
-        conn.execute('''
-                     INSERT INTO user_playlist (user, playlist, favorite)
-                     VALUES (?, ?, ?)
-                     ON CONFLICT (user, playlist) DO UPDATE
-                        SET favorite = ?
-                     ''', (user.user_id, playlist, int(is_favorite), int(is_favorite)))
+        if is_favorite == '1':
+            conn.execute('INSERT INTO user_playlist_favorite VALUES (?, ?) ON CONFLICT DO NOTHING',
+                         (user.user_id, playlist))
+        else:
+            conn.execute('DELETE FROM user_playlist_favorite WHERE user=? AND playlist=?',
+                         (user.user_id, playlist))
 
     return redirect('/playlists')
 
@@ -1264,7 +1256,7 @@ def route_users():
                  for user_id, username, admin, primary_playlist in result]
 
         for user_dict in users:
-            result = conn.execute('SELECT playlist FROM user_playlist WHERE user=? AND write=1',
+            result = conn.execute('SELECT playlist FROM user_playlist_write WHERE user=?',
                                   (user_dict['id'],))
             user_dict['writable_playlists'] = [playlist for playlist, in result]
             user_dict['writable_playlists_str'] = ', '.join(user_dict['writable_playlists'])

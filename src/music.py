@@ -547,10 +547,10 @@ class Playlist:
         if user.admin:
             return True
 
-        row = self.conn.execute('SELECT write FROM user_playlist WHERE playlist=? AND user=?',
+        row = self.conn.execute('SELECT user FROM user_playlist_write WHERE playlist=? AND user=?',
                                 (self.name, user.user_id)).fetchone()
 
-        return row is not None and row[0]
+        return row is not None
 
     def stats(self) -> PlaylistStats:
         """
@@ -611,10 +611,13 @@ def user_playlist(conn: Connection, name: str, user_id: int) -> UserPlaylist:
     Returns: UserPlaylist object
     """
     row = conn.execute('''
-                       SELECT (SELECT COUNT(*) FROM track WHERE playlist=playlist.path), write, favorite
-                       FROM playlist LEFT JOIN user_playlist ON path = playlist AND user=?
-                       WHERE path=?
-                       ''', (user_id, name)).fetchone()
+                       SELECT (SELECT COUNT(*) FROM track WHERE playlist=path),
+                              EXISTS(SELECT * FROM user_playlist_write WHERE playlist=path AND user=:user) AS write,
+                              EXISTS(SELECT * FROM user_playlist_favorite WHERE playlist=path AND user=:user) AS favorite
+                       FROM playlist
+                       WHERE path=:playlist
+                       ORDER BY favorite DESC, write DESC, path ASC
+                       ''', {'user': user_id, 'playlist': name}).fetchone()
     track_count, write, favorite = row
     return UserPlaylist(conn, name, from_relpath(name), track_count, write == 1, favorite == 1)
 
@@ -633,7 +636,7 @@ def playlists(conn: Connection) -> list[Playlist]:
             for name, track_count in rows]
 
 
-def user_playlists(conn: Connection, user_id: int) -> list[UserPlaylist]:
+def user_playlists(conn: Connection, user_id: int, all_writable=False) -> list[UserPlaylist]:
     """
     List playlists, with user-specific information
     Args:
@@ -642,10 +645,13 @@ def user_playlists(conn: Connection, user_id: int) -> list[UserPlaylist]:
     Returns: List of UserPlaylist objects
     """
     rows = conn.execute('''
-                        SELECT path, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path), write, favorite
-                        FROM playlist LEFT JOIN user_playlist ON path = playlist AND user=?
+                        SELECT path,
+                               (SELECT COUNT(*) FROM track WHERE playlist=playlist.path),
+                               EXISTS(SELECT * FROM user_playlist_write WHERE playlist=path AND user=:user) AS write,
+                               EXISTS(SELECT * FROM user_playlist_favorite WHERE playlist=path AND user=:user) AS favorite
+                        FROM playlist
                         ORDER BY favorite DESC, write DESC, path ASC
-                        ''', (user_id,))
+                        ''', {'user': user_id})
 
-    return [UserPlaylist(conn, name, from_relpath(name), track_count, write == 1, favorite == 1)
+    return [UserPlaylist(conn, name, from_relpath(name), track_count, write == 1 or all_writable, favorite == 1)
             for name, track_count, write, favorite in rows]
