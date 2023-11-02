@@ -54,29 +54,43 @@ THEME = {
     },
     'title': {
         'color': 'white',
+        'fontFamily': 'Quicksand',
     },
     'xAxis': {
         'title': {
             'color': 'white',
+            'fontFamily': 'Quicksand',
         },
         'label': {
             'color': 'white',
+            'fontFamily': 'Quicksand',
         },
         'color': 'white',
     },
     'yAxis': {
         'title': {
             'color': 'white',
+            'fontFamily': 'Quicksand',
         },
         'label': {
             'color': 'white',
+            'fontFamily': 'Quicksand',
         },
         'color': 'white',
     },
     'legend': {
         'label': {
             'color': 'white',
+            'fontFamily': 'Quicksand',
         }
+    },
+    'tooltip': {
+        'header': {
+            'fontFamily': 'Quicksand',
+        },
+        'body': {
+            'fontFamily': 'Quicksand',
+        },
     },
     'plot': {
         'vertical': {
@@ -85,7 +99,7 @@ THEME = {
         'horizontal': {
             'lineColor': 'transparent',
         }
-    }
+    },
 }
 
 
