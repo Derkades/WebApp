@@ -390,7 +390,6 @@ def route_track_list():
         playlist_response: list[dict[str, Any]] = []
 
         for playlist in user_playlists:
-            print(playlist.path, playlist.track_count)
             if playlist.track_count == 0:
                 continue
 
