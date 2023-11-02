@@ -2,7 +2,7 @@
 
 PRAGMA foreign_keys=OFF;
 BEGIN;
-CREATE TABLE IF NOT EXISTS track_new (
+CREATE TABLE track_new (
     path TEXT NOT NULL UNIQUE PRIMARY KEY,
     playlist TEXT NOT NULL REFERENCES playlist(path) ON DELETE CASCADE,
     duration INTEGER NOT NULL,

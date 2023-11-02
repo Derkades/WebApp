@@ -82,7 +82,7 @@ CREATE TABLE csrf (
     token TEXT NOT NULL UNIQUE,
     creation_date INTEGER NOT NULL, -- Seconds since UNIX epoch
     UNIQUE(user, token)
-);
+) STRICT;
 
 CREATE TABLE history (
     id INTEGER NOT NULL UNIQUE PRIMARY KEY AUTOINCREMENT,
@@ -105,8 +105,8 @@ CREATE TABLE scanner_log (
     id INTEGER NOT NULL UNIQUE PRIMARY KEY AUTOINCREMENT,
     timestamp INTEGER NOT NULL, -- Seconds since UNIX epoch
     action TEXT NOT NULL, -- Literal string 'insert', 'delete', or 'update'
-    playlist TEXT NOT NULL, -- Intentionally not a foreign key, log should be kept for deleted playlists
-    track TEXT NOT NULL  -- Intentionally not a foreign key, log contains deleted tracks
+    playlist TEXT NOT NULL, -- Intentionally not a foreign key, log may contain deleted playlists. Can be derived from track path, but stored for fast and easy lookup
+    track TEXT NOT NULL  -- Intentionally not a foreign key, log may contain deleted tracks
 );
 
 CREATE TABLE never_play (
