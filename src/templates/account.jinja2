@@ -10,12 +10,15 @@
 
 <p>{% trans name=user.username %}Logged in as: {{ name }}{% endtrans %}</p>
 
-
 <h2>{% trans %}Last.fm scrobbling{% endtrans%}</h2>
 <p>
     {% if lastfm_enabled %}
         {% if lastfm_name %}
-            {% trans name=lastfm_name %}Connected to last.fm account: {{ name }}{% endtrans%}
+            {% trans name=lastfm_name %}Connected to last.fm account: {{ name }}{% endtrans%}<br>
+            <form action="/lastfm_disconnect" method="POST">
+                <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                <input type="submit" value="{% trans %}Disconnect last.fm account{% endtrans %}">
+            </form>
         {% else %}
             <a href="{{ lastfm_connect_url }}">{% trans %}Connect your last.fm account{% endtrans %}</a>
         {% endif %}

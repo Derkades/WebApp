@@ -851,6 +851,15 @@ def route_lastfm_connect():
     return render_template('lastfm_connected.jinja2',
                            name=name)
 
+@app.route('/lastfm_disconnect', methods=['POST'])
+def route_lastfm_disconnect():
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
+        user.verify_csrf(request.form['csrf'])
+        conn.execute('DELETE FROM user_lastfm WHERE user=?',
+                     (user.user_id))
+    return redirect('/account')
+
 
 @app.route('/now_playing', methods=['POST'])
 def route_now_playing():
