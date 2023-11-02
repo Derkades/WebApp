@@ -45,8 +45,8 @@ def _search_release_group(artist: str, title: str) -> str | None:
     """
     Search for a release group id using the provided search query
     """
-    for query in (f'artist:{lucene_escape(artist)} AND releasegroup:{lucene_escape(title)}',
-                  f'artist:{lucene_escape(artist)} AND releasegroup:{lucene_escape(title)} AND primarytype:Album'):
+    for query in (f'artist:{lucene_escape(artist)} AND releasegroup:{lucene_escape(title)} AND primarytype:Album',
+                  f'artist:{lucene_escape(artist)} AND releasegroup:{lucene_escape(title)}'):
         log.info('Performing MB search for query: %s', query)
         result = _mb_get('release-group',
                          {'query': query,
@@ -135,7 +135,7 @@ if __name__ == '__main__':
     import logconfig
     logconfig.apply()
 
-    cover = get_cover('London Grammar', 'If You Wait', disable_cache=True)
+    cover = get_cover('Dire Straits', 'Brothers In Arms', disable_cache=True)
     # cover = get_cover('Elle Exxe', 'Lately', disable_cache=True) # release exists, but has no cover
     with open('cover.jpg', 'wb') as cover_file:
         cover_file.write(cover)
