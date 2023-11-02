@@ -935,7 +935,7 @@ def route_history_played():
     if settings.offline_mode:
         with db.offline() as conn:
             track = request.json['track']
-            timestamp = int(time.time())
+            timestamp = request.json['timestamp']
             conn.execute('INSERT INTO history VALUES (?, ?)',
                          (timestamp, track))
         return Response(None, 200)
@@ -946,11 +946,7 @@ def route_history_played():
 
         track = request.json['track']
         playlist = track[:track.index('/')]
-
-        if 'timestamp' in request.json:  # Sent by offline mode sync
-            timestamp = int(request.json['timestamp'])
-        else:
-            timestamp = int(time.time())
+        timestamp = request.json['timestamp']
 
         conn.execute('''
                      INSERT INTO history (timestamp, user, track, playlist)
@@ -976,8 +972,7 @@ def route_history_played():
 
     # Scrobble request takes a while, so close database connection first
     log.info('Scrobbling to last.fm: %s', track.relpath)
-    start_timestamp = request.json['startTimestamp']
-    lastfm.scrobble(lastfm_key, meta, start_timestamp)
+    lastfm.scrobble(lastfm_key, meta, timestamp)
 
     return Response('ok', 200)
 
