@@ -99,7 +99,7 @@ CREATE TABLE now_playing (
     track TEXT NOT NULL REFERENCES track(path) ON DELETE CASCADE,
     progress INTEGER NOT NULL, -- Number of seconds into the track
     paused INTEGER NOT NULL
-);
+) STRICT;
 
 CREATE TABLE scanner_log (
     id INTEGER NOT NULL UNIQUE PRIMARY KEY AUTOINCREMENT,
