@@ -856,7 +856,7 @@ def route_lastfm_disconnect():
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.form['csrf'])
         conn.execute('DELETE FROM user_lastfm WHERE user=?',
-                     (user.user_id))
+                     (user.user_id,))
     return redirect('/account')
 
 

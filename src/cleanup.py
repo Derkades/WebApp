@@ -3,6 +3,7 @@ import logging
 import db
 import auth
 import cache
+import time
 
 
 log = logging.getLogger('app.cleanup')
@@ -16,7 +17,8 @@ def cleanup():
         count = auth.prune_old_session_tokens(conn)
         log.info('Deleted %s session tokens', count)
 
-        count = conn.execute('DELETE FROM now_playing').rowcount
+        count = conn.execute('DELETE FROM now_playing WHERE timestamp < ?',
+                             (time.time() - 300,)).rowcount
         log.info('Deleted %s now playing entries', count)
 
     cache.cleanup()
