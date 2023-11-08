@@ -47,7 +47,8 @@ CREATE TABLE user (
     password TEXT NOT NULL,
     admin INTEGER NOT NULL DEFAULT 0,
     primary_playlist TEXT NULL REFERENCES playlist(path) ON DELETE SET NULL,
-    language TEXT NULL
+    language TEXT NULL,
+    privacy TEXT NULL
 ) STRICT;
 
 CREATE TABLE user_playlist_favorite (

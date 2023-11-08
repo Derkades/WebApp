@@ -18,7 +18,7 @@ from flask_babel import _, format_timedelta
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import auth
-from auth import AuthError, RequestTokenError
+from auth import AuthError, RequestTokenError, PrivacyOption
 import charts
 from charts import StatsPeriod
 import db
@@ -784,6 +784,23 @@ def route_change_language_form():
     return redirect('/account')
 
 
+@app.route('/change_privacy_setting', methods=['POST'])
+def route_change_privacy_setting():
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
+        user.verify_csrf(request.form['csrf_token'])
+
+        privacy = request.form['privacy']
+        assert privacy in {'none', 'aggregate', 'hidden'}
+
+        if privacy == 'none':
+            conn.execute('UPDATE user SET privacy = NULL');
+        else:
+            conn.execute('UPDATE user SET privacy = ?', (privacy,))
+
+    return redirect('/account')
+
+
 def radio_track_response(track: RadioTrack):
     return {
         'path': track.track.relpath,
@@ -878,6 +895,10 @@ def route_now_playing():
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
 
+        if user.privacy == PrivacyOption.HIDDEN:
+            log.info('Ignoring because privacy==hidden')
+            return Response('ok', 200)
+
         player_id = request.json['player_id']
         assert isinstance(player_id, str)
         relpath = request.json['track']
@@ -942,6 +963,10 @@ def route_history_played():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
+
+        if user.privacy == PrivacyOption.HIDDEN:
+            log.info('Ignoring because privacy==hidden')
+            return Response('ok', 200)
 
         track = request.json['track']
         playlist = track[:track.index('/')]

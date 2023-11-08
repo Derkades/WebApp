@@ -14,7 +14,6 @@ import flask_babel
 from flask_babel import _
 
 import settings
-import language
 
 
 log = logging.getLogger('app.auth')
@@ -85,6 +84,12 @@ class Session:
         return f'{browser}, {system}'
 
 
+class PrivacyOption(Enum):
+    NONE = None
+    AGGREGATE = 'aggregate'
+    HIDDEN = 'hidden'
+
+
 class User(ABC):
     user_id: int
     username: str
@@ -92,6 +97,7 @@ class User(ABC):
     admin: bool
     primary_playlist: Optional[str]
     language: Optional[str]
+    privacy: PrivacyOption
 
     @abstractmethod
     def sessions(self) -> list[Session]:
@@ -134,6 +140,7 @@ class StandardUser(User):
     admin: bool
     primary_playlist: Optional[str]
     language: Optional[str]
+    privacy: PrivacyOption
 
     def sessions(self) -> list[Session]:
         results = self.conn.execute("""
@@ -178,6 +185,7 @@ class OfflineUser(User):
         self.admin = False
         self.primary_playlist = None
         self.language = None
+        self.privacy = PrivacyOption.NONE
 
     def sessions(self) -> list[Session]:
         return []
@@ -283,7 +291,7 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
     Returns: User object if session token is valid, or None if invalid
     """
     result = conn.execute("""
-                          SELECT session.rowid, user.id, user.username, user.nickname, user.admin, user.primary_playlist, user.language
+                          SELECT session.rowid, user.id, user.username, user.nickname, user.admin, user.primary_playlist, user.language, user.privacy
                           FROM user
                               INNER JOIN session ON user.id = session.user
                           WHERE session.token=?
@@ -292,7 +300,7 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
         log.warning('Invalid auth token: %s', token)
         return None
 
-    session_rowid, user_id, username, nickname, admin, primary_playlist, lang_code = result
+    session_rowid, user_id, username, nickname, admin, primary_playlist, lang_code, privacy_str = result
 
     try:
         remote_addr = request.remote_addr
@@ -308,7 +316,7 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
         if ex.sqlite_errorname != 'SQLITE_READONLY':
             raise ex
 
-    return StandardUser(conn, user_id, username, nickname, admin == 1, primary_playlist, lang_code)
+    return StandardUser(conn, user_id, username, nickname, admin == 1, primary_playlist, lang_code, PrivacyOption(privacy_str))
 
 
 def verify_auth_cookie(conn: Connection, require_admin=False, redirect_to_login=False) -> User:
