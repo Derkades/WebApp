@@ -149,7 +149,11 @@ def get_lyrics(query: str) -> Lyrics | None:
         log.info('Error retrieving lyrics')
         traceback.print_exc()
         # Don't cache so we try again in the future when the bug is fixed
-        return Lyrics(genius_url, 'Error retrieving lyrics, please report this issue. Make sure to include the source URL in your report. Please look at the logs for a more detailed message, if you are able to.')
+        return Lyrics(genius_url,
+                      '''
+                      Error retrieving lyrics, please report this issue. Make sure to include the source URL in
+                      your report. Please look at the logs for a more detailed message, if you are able to.
+                      ''')
 
     cache.store_json(cache_key,
                      {'found': True,

@@ -1,16 +1,14 @@
 {
-    "python.linting.enabled": true,
-    "python.linting.pylintEnabled": true,
-    "python.linting.pylintArgs": [
+    "pylint.args": [
         "--max-line-length=120",
         "--disable=missing-class-docstring,missing-module-docstring,broad-except",
         "--generated-members=application.logger"
     ],
-    "python.linting.mypyEnabled": true,
-    "python.linting.mypyArgs": [
+    "mypy-type-checker.preferDaemon": true,
+    "mypy-type-checker.args": [
         "--show-column-numbers",
         "--no-pretty",
         "--disallow-untyped-signatures"
     ],
-    "python.linting.pycodestyleEnabled": false,
+    "mypy-type-checker.reportingScope": "workspace"
 }
