@@ -1,15 +1,14 @@
-from dataclasses import dataclass
 import logging
+import random
+from dataclasses import dataclass
 from datetime import datetime
 from sqlite3 import Connection
-import random
+from typing import Optional
 
-from music import Track
 import music
-from metadata import Metadata
 import settings
-from auth import User
-
+from metadata import Metadata
+from music import Track
 
 log = logging.getLogger('app.radio')
 
@@ -22,7 +21,7 @@ class RadioTrack:
     duration: int
 
 
-def _choose_track(conn: Connection, previous_playlist = None) -> Track:
+def _choose_track(conn: Connection, previous_playlist: Optional[str] = None) -> Track:
     playlist_candidates = [p for p in settings.radio_playlists if p != previous_playlist]
     playlist_name = random.choice(playlist_candidates)
 
@@ -63,9 +62,9 @@ def get_current_track(conn: Connection) -> RadioTrack:
     log.info('Return current track')
 
     # Return current song from database
-    track = Track.by_relpath(conn, track_path)
-    meta = track.metadata()
-    return RadioTrack(track, meta, start_time, duration)
+    current_track = Track.by_relpath(conn, track_path)
+    meta = current_track.metadata()
+    return RadioTrack(current_track, meta, start_time, duration)
 
 
 def get_next_track(conn: Connection) -> RadioTrack:

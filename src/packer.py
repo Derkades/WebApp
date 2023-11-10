@@ -4,11 +4,13 @@ import settings
 
 
 def pack(path: Path) -> bytes:
+    """
+    Combine all files in a directory into a single file
+    """
     if not settings.dev:
-        raise Exception('Python asset packer must only be used during development')
+        raise RuntimeError('Python asset packer must only be used during development')
 
     content = b''
     for path in sorted(path.iterdir()):
-        with open(path, 'rb') as file:
-            content += file.read()
+        content += path.read_bytes()
     return content

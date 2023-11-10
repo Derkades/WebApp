@@ -3,7 +3,6 @@ from flask import request
 import auth
 import db
 
-
 LANGUAGES = {
     'en': 'English',
     'nl': 'Nederlands',

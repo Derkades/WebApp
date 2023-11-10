@@ -1,13 +1,12 @@
-from pathlib import Path
 import logging
-from sqlite3 import Connection
-from dataclasses import dataclass
 import time
+from dataclasses import dataclass
+from pathlib import Path
+from sqlite3 import Connection
 
 import metadata
 import music
 import settings
-
 
 log = logging.getLogger('app.scanner')
 

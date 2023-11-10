@@ -1,14 +1,13 @@
-from pathlib import Path
-import subprocess
-import re
-from typing import Optional, Iterator
-import logging
 import json
+import logging
+import re
+import subprocess
 from dataclasses import dataclass
+from pathlib import Path
 from sqlite3 import Connection
+from typing import Iterator, Optional
 
 import music
-
 
 log = logging.getLogger('app.cache')
 
@@ -89,6 +88,7 @@ METADATA_ADVERTISEMENT_KEYWORDS = [
 
 
 def ignore_album(album: str) -> bool:
+    """Check whether album name should be ignored"""
     album = album.lower()
     for keyword in ALBUM_IGNORE_KEYWORDS:
         if keyword in album:
@@ -97,6 +97,7 @@ def ignore_album(album: str) -> bool:
 
 
 def ignore_album_artist(artist: str) -> bool:
+    """Check whether album artist should be ignored"""
     return artist.lower() in ALBUM_ARTIST_IGNORE
 
 
@@ -109,7 +110,7 @@ def strip_keywords(inp: str) -> str:
     return inp
 
 
-def is_alpha(char):
+def is_alpha(char: str) -> bool:
     """
     Check whether given character is alphanumeric, a dash or a space
     """
@@ -121,6 +122,7 @@ def is_alpha(char):
 
 
 def join_meta_list(entries: list[str]) -> str:
+    """Join list with semicolons"""
     return '; '.join(entries)
 
 
@@ -137,6 +139,7 @@ def split_meta_list(meta_list: str) -> list[str]:
 
 
 def has_advertisement(metadata_str: str) -> bool:
+    """Check whether string contains advertisements and should be ignored"""
     for keyword in METADATA_ADVERTISEMENT_KEYWORDS:
         if keyword in metadata_str.lower():
             return True

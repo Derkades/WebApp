@@ -1,13 +1,12 @@
-from dataclasses import dataclass
-import os
-from threading import Thread
-from queue import Queue
-from pathlib import Path
-from typing import Generator
 import logging
+import os
+from dataclasses import dataclass
+from pathlib import Path
+from queue import Queue
+from threading import Thread
+from typing import Generator
 
-from yt_dlp import YoutubeDL, DownloadError
-
+from yt_dlp import DownloadError, YoutubeDL
 
 log = logging.getLogger('app.downloader')
 
@@ -20,10 +19,10 @@ class YtDone:
 class YtQueueLogger:
     queue: Queue  # contains log strings or YtDone object to indicate yt-dlp has finished
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.queue = Queue()
 
-    def debug(self, msg: str):
+    def debug(self, msg: str) -> None:
         # For compatibility with youtube-dl, both debug and info are passed into debug
         # You can distinguish them by the prefix '[debug] '
         if msg.startswith('[debug] '):
@@ -31,22 +30,22 @@ class YtQueueLogger:
         else:
             self.info(msg)
 
-    def info(self, msg: str):
+    def info(self, msg: str) -> None:
         self.queue.put(msg + '\n')
         log.info(msg)
         self.queue.join()
 
-    def warning(self, msg: str):
+    def warning(self, msg: str) -> None:
         self.queue.put(msg + '\n')
         log.warning(msg)
         self.queue.join()
 
-    def error(self, msg: str):
+    def error(self, msg: str) -> None:
         self.queue.put(msg + '\n')
         log.error(msg)
         self.queue.join()
 
-    def done(self, status_code: int):
+    def done(self, status_code: int) -> None:
         self.queue.put(YtDone(status_code))
 
 
@@ -66,7 +65,7 @@ def download(download_to: Path, url: str) -> Generator[str, None, int]:
         'logger': logger
     }
 
-    def download_thread():
+    def download_thread() -> None:
         os.chdir(download_to)
         with YoutubeDL(yt_opts) as ytdl:
             try:

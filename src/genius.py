@@ -1,16 +1,15 @@
-import json
 import html
+import json
 import logging
+import sys
 import traceback
 from dataclasses import dataclass
-import sys
 
 import requests
 from bs4 import BeautifulSoup, NavigableString, PageElement, Tag
 
 import cache
 import settings
-
 
 log = logging.getLogger('app.genius')
 
@@ -40,7 +39,7 @@ def _search(title: str) -> str | None:
     return None
 
 
-def _html_tree_to_lyrics(elements: list[PageElement], level=0) -> str:
+def _html_tree_to_lyrics(elements: list[PageElement], level: int = 0) -> str:
     lyrics_str = ''
     for element in elements:
         if isinstance(element, NavigableString):

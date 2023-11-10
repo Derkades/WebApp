@@ -1,42 +1,41 @@
 """
 Main application file, containing all Flask routes
 """
+import logging
+import re
+import shutil
+import time
+from datetime import datetime, timezone
+from pathlib import Path
 from sqlite3 import Connection
 from typing import Any
-import logging
-from pathlib import Path
 from urllib.parse import quote as urlencode
-import time
-import shutil
-import re
-from datetime import datetime, timezone
 
 import bcrypt
-from flask import Flask, request, render_template, Response, redirect, send_file
-from flask_babel import Babel
-from flask_babel import _, format_timedelta
+from flask import (Flask, Response, redirect, render_template, request,
+                   send_file)
+from flask_babel import Babel, _, format_timedelta
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import auth
-from auth import AuthError, RequestTokenError, PrivacyOption
 import charts
-from charts import StatsPeriod
 import db
 import downloader
 import genius
-from image import ImageFormat, ImageQuality
 import jsonw
 import language
 import lastfm
-import music
-from music import AudioType, Playlist, Track
 import metadata
+import music
 import packer
 import radio
-from radio import RadioTrack
 import scanner
 import settings
-
+from auth import AuthError, PrivacyOption, RequestTokenError
+from charts import StatsPeriod
+from image import ImageFormat, ImageQuality
+from music import AudioType, Playlist, Track
+from radio import RadioTrack
 
 app = Flask(__name__, template_folder='templates')
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=settings.proxies_x_forwarded_for)
@@ -794,7 +793,7 @@ def route_change_privacy_setting():
         assert privacy in {'none', 'aggregate', 'hidden'}
 
         if privacy == 'none':
-            conn.execute('UPDATE user SET privacy = NULL');
+            conn.execute('UPDATE user SET privacy = NULL')
         else:
             conn.execute('UPDATE user SET privacy = ?', (privacy,))
 

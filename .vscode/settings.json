@@ -8,7 +8,9 @@
     "mypy-type-checker.args": [
         "--show-column-numbers",
         "--no-pretty",
-        "--disallow-untyped-signatures"
+        "--check-untyped-defs",
+        "--enable-incomplete-feature=Unpack",
     ],
-    "mypy-type-checker.reportingScope": "workspace"
+    "mypy-type-checker.reportingScope": "workspace",
+    "mypy-type-checker.cwd": "${workspaceFolder}/src"
 }

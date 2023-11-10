@@ -1,20 +1,19 @@
-import os
 import base64
 import logging
+import os
 import time
-from typing import Optional
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum, unique
 from sqlite3 import Connection, OperationalError
-from abc import ABC, abstractmethod
+from typing import Optional
 
 import bcrypt
-from flask import request
 import flask_babel
+from flask import request
 from flask_babel import _
 
 import settings
-
 
 log = logging.getLogger('app.auth')
 
@@ -178,7 +177,7 @@ class StandardUser(User):
 
 
 class OfflineUser(User):
-    def __init__(self):
+    def __init__(self) -> None:
         self.user_id = 0
         self.username = 'fake_offline_user'
         self.nickname = 'Fake offline user'
@@ -193,10 +192,10 @@ class OfflineUser(User):
     def get_csrf(self) -> str:
         return 'fake_csrf_token'
 
-    def verify_csrf(self, token: str) -> bool:
-        return token == 'fake_csrf_token'
+    def verify_csrf(self, token: str) -> None:
+        pass
 
-    def verify_password(self, _password: str):
+    def verify_password(self, _password: str) -> bool:
         raise RuntimeError('Password login is not available in offline mode')
 
     def update_password(self, _new_password: str) -> None:

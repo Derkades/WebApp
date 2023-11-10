@@ -1,26 +1,26 @@
 from __future__ import annotations
-from pathlib import Path
-from typing import Iterator, Literal, Optional, TYPE_CHECKING
-from datetime import datetime
-import subprocess
-import logging
-import tempfile
-import shutil
-from dataclasses import dataclass
-from sqlite3 import Connection
-from enum import Enum
-import random
-import json
 
-from auth import User
-import cache
-import metadata
-import settings
-import scanner
+import logging
+import random
+import shutil
+import subprocess
+import tempfile
+from dataclasses import dataclass
+from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from sqlite3 import Connection
+from typing import TYPE_CHECKING, Iterator, Literal, Optional
+
 import bing
+import cache
+import image
+import metadata
 import musicbrainz
 import reddit
-import image
+import scanner
+import settings
+from auth import User
 from image import ImageFormat, ImageQuality
 
 if TYPE_CHECKING:
@@ -87,7 +87,7 @@ def is_music_file(path: Path) -> bool:
     return False
 
 
-def list_tracks_recursively(path) -> Iterator[Path]:
+def list_tracks_recursively(path: Path) -> Iterator[Path]:
     """
     Scan directory for tracks, recursively
     Args:
@@ -100,7 +100,7 @@ def list_tracks_recursively(path) -> Iterator[Path]:
                 yield track_path
 
 
-def sort_artists(artists: Optional[list[str]], album_artist: Optional[str]):
+def sort_artists(artists: Optional[list[str]], album_artist: Optional[str]) -> Optional[list[str]]:
     """
     Move album artist to start of artist list
     """
@@ -189,7 +189,7 @@ class Track:
 
         if (meta.title or meta.album) and (meta.album_artist or meta.artists):
             album = meta.album if meta.album and not metadata.ignore_album(meta.album) else meta.title
-            artist = meta.album_artist if meta.album_artist else ' '.join(meta.artists)
+            artist = meta.album_artist if meta.album_artist else ' '.join(meta.artists)  # mypy: disable=arg-type
             if image_bytes := musicbrainz.get_cover(artist, album):
                 return image_bytes
         else:
@@ -239,51 +239,53 @@ class Track:
         return metadata_options
 
     def get_loudnorm_filter(self) -> str:
+        """Get ffmpeg loudnorm filter string"""
         return 'loudnorm=I=-16'
 
-        cache_key = 'loud' + self.relpath + str(self.mtime)
-        cached_data = cache.retrieve(cache_key)
-        if cached_data is not None:
-            log.info('Returning cached loudness data')
-            return cached_data.decode()
+        # cache_key = 'loud' + self.relpath + str(self.mtime)
+        # cached_data = cache.retrieve(cache_key)
+        # if cached_data is not None:
+        #     log.info('Returning cached loudness data')
+        #     return cached_data.decode()
 
-        # First phase of 2-phase loudness normalization
-        # http://k.ylo.ph/2016/04/04/loudnorm.html
-        log.info('Measuring loudness...')
-        meas_command = ['ffmpeg',
-                        '-hide_banner',
-                        '-i', self.path.absolute().as_posix(),
-                        '-map', '0:a',
-                        '-af', 'loudnorm=print_format=json',
-                        '-f', 'null',
-                        '-']
-        # Annoyingly, loudnorm outputs to stderr instead of stdout. Disabling logging also hides the loudnorm output...
-        meas_result = subprocess.run(meas_command, shell=False, capture_output=True, check=False)
+        # # First phase of 2-phase loudness normalization
+        # # http://k.ylo.ph/2016/04/04/loudnorm.html
+        # log.info('Measuring loudness...')
+        # meas_command = ['ffmpeg',
+        #                 '-hide_banner',
+        #                 '-i', self.path.absolute().as_posix(),
+        #                 '-map', '0:a',
+        #                 '-af', 'loudnorm=print_format=json',
+        #                 '-f', 'null',
+        #                 '-']
+        # # Annoyingly, loudnorm outputs to stderr instead of stdout.
+        # # Disabling logging also hides the loudnorm output...
+        # meas_result = subprocess.run(meas_command, shell=False, capture_output=True, check=False)
 
-        if meas_result.returncode != 0:
-            log.warning('FFmpeg exited with exit code %s', meas_result.returncode)
-            log.warning('--- stdout ---\n%s', meas_result.stdout.decode())
-            log.warning('--- stderr ---\n%s', meas_result.stderr.decode())
-            raise RuntimeError()
+        # if meas_result.returncode != 0:
+        #     log.warning('FFmpeg exited with exit code %s', meas_result.returncode)
+        #     log.warning('--- stdout ---\n%s', meas_result.stdout.decode())
+        #     log.warning('--- stderr ---\n%s', meas_result.stderr.decode())
+        #     raise RuntimeError()
 
-        # Manually find the start of loudnorm info json
-        meas_out = meas_result.stderr.decode()
+        # # Manually find the start of loudnorm info json
+        # meas_out = meas_result.stderr.decode()
 
-        meas_json = json.loads(meas_out[meas_out.rindex('Parsed_loudnorm_0')+37:])
+        # meas_json = json.loads(meas_out[meas_out.rindex('Parsed_loudnorm_0')+37:])
 
-        log.info('Measured integrated loudness: %s', meas_json['input_i'])
+        # log.info('Measured integrated loudness: %s', meas_json['input_i'])
 
-        loudnorm = \
-            'loudnorm=I=-16:' \
-            f"measured_I={meas_json['input_i']}:" \
-            f"measured_TP={meas_json['input_tp']}:" \
-            f"measured_LRA={meas_json['input_lra']}:" \
-            f"measured_thresh={meas_json['input_thresh']}:" \
-            f"offset={meas_json['target_offset']}:" \
-            'linear=true'
+        # loudnorm = \
+        #     'loudnorm=I=-16:' \
+        #     f"measured_I={meas_json['input_i']}:" \
+        #     f"measured_TP={meas_json['input_tp']}:" \
+        #     f"measured_LRA={meas_json['input_lra']}:" \
+        #     f"measured_thresh={meas_json['input_thresh']}:" \
+        #     f"offset={meas_json['target_offset']}:" \
+        #     'linear=true'
 
-        cache.store(cache_key, loudnorm.encode(), cache.YEAR)
-        return loudnorm
+        # cache.store(cache_key, loudnorm.encode(), cache.YEAR)
+        # return loudnorm
 
 
     def transcoded_audio(self,
@@ -311,7 +313,8 @@ class Track:
                              '-c:a', 'libopus',
                              '-b:a', bit_rate,
                              '-vbr', 'on',
-                             '-frame_duration', '60', # Higher frame duration offers better compression at the cost of latency
+                             # Higher frame duration offers better compression at the cost of latency
+                             '-frame_duration', '60',
                              '-vn']  # remove video track (and album covers)
         elif audio_type == AudioType.MP4_AAC:
             # https://trac.ffmpeg.org/wiki/Encode/AAC
@@ -484,7 +487,10 @@ class Playlist:
     path: Path
     track_count: int
 
-    def choose_track(self, user: Optional[User], tag_mode: Optional[Literal['allow', 'deny']] = None, tags: Optional[list[str]] = None) -> Track:
+    def choose_track(self,
+                     user: Optional[User],
+                     tag_mode: Optional[Literal['allow', 'deny']] = None,
+                     tags: Optional[list[str]] = None) -> Track:
         """
         Randomly choose a track from this playlist directory
         Args:

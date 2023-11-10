@@ -1,21 +1,21 @@
 """
 Image conversion and thumbnailing
 """
-from typing import Callable, Optional
+import logging
+from dataclasses import dataclass
+from enum import Enum
 from io import BytesIO
 from pathlib import Path
-import logging
-from enum import Enum
-from dataclasses import dataclass
+from typing import Callable, Optional
 
 import settings
+import cache
+
 # In offline mode, images are downloaded from the central server and served without
 # modification. The functions in this module are never actually called. As such, an
 # installation of PIL is not needed.
 if not settings.offline_mode:
     from PIL import Image
-
-import cache
 
 
 log = logging.getLogger('app.image')
@@ -74,8 +74,7 @@ def thumbnail(input_img: Path | bytes | Callable,
     input_bytes: Optional[bytes]
 
     if isinstance(input_img, Path):
-        with open(input_img, 'rb') as inp_img_f:
-            input_bytes = inp_img_f.read()
+        input_bytes = input_img.read_bytes()
     elif callable(input_img):
         input_bytes = input_img()
     elif isinstance(input_img, bytes):

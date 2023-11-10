@@ -1,12 +1,11 @@
-from typing import Optional
-import random
 import logging
+import random
+from typing import Optional
 
 import requests
 
-import settings
 import image
-
+import settings
 
 log = logging.getLogger('app.reddit')
 

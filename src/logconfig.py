@@ -1,7 +1,8 @@
+from typing import Any
+
 import settings
 
-
-LOGCONFIG_DICT = {
+LOGCONFIG_DICT: dict[str, Any] = {
     'version': 1,
     'formatters': {
         'default': {
@@ -43,7 +44,7 @@ if settings.short_log_format:
     LOGCONFIG_DICT['formatters']['default']['datefmt'] = '%H:%M:%S'
 
 
-def apply():
+def apply() -> None:
     """
     Apply dictionary config
     """

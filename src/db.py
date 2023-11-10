@@ -1,22 +1,18 @@
-import sqlite3
-from sqlite3 import Connection
-from pathlib import Path
 import logging
-from dataclasses import dataclass
+import sqlite3
 import sys
+from dataclasses import dataclass
+from pathlib import Path
+from sqlite3 import Connection
+from typing import TextIO
 
 import settings
-
 
 log = logging.getLogger('app.db')
 
 
 MIGRATION_DIR = Path('migrations')
 DATABASE_NAMES = ['cache', 'music', 'offline', 'meta']
-
-
-def _open_sql(db_name: str):
-    return open(f'sql/{db_name}.sql', 'r', encoding='utf-8')
 
 
 def _connect(db_name: str, read_only: bool) -> Connection:
@@ -63,9 +59,8 @@ def create_databases() -> None:
 
     for db_name in DATABASE_NAMES:
         log.info('Creating database: %s', db_name)
-        with _open_sql(db_name) as sql_file:
-            with _connect(db_name, False) as conn:
-                conn.executescript(sql_file.read())
+        with _connect(db_name, False) as conn:
+            conn.executescript(Path('sql', f'{db_name}.sql').read_text(encoding='utf-8'))
 
     with _connect('meta', False) as conn:
         migrations = get_migrations()
@@ -85,10 +80,10 @@ class Migration:
     to_version: int
     db_name: str
 
-    def run(self):
+    def run(self) -> None:
+        """Execute migration file"""
         with _connect(self.db_name, False) as conn:
-            with open(Path(MIGRATION_DIR, self.file_name), encoding='utf-8') as migration_sql:
-                conn.executescript(migration_sql.read())
+            conn.executescript(Path(MIGRATION_DIR, self.file_name).read_text(encoding='utf-8'))
 
 
 def get_migrations() -> list[Migration]:
@@ -109,7 +104,7 @@ def get_migrations() -> list[Migration]:
     return migrations
 
 
-def migrate():
+def migrate() -> None:
     log.info('Migrating databases...')
     create_databases()
 

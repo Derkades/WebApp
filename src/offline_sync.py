@@ -1,16 +1,15 @@
 import logging
-from sqlite3 import Connection
-import traceback
-from urllib.parse import quote as urlencode
 import sys
+import traceback
+from sqlite3 import Connection
+from urllib.parse import quote as urlencode
 
 import requests
 from requests import Response
 from requests.exceptions import RequestException
 
-import settings
 import db
-
+import settings
 
 log = logging.getLogger('app.offline')
 
@@ -27,7 +26,7 @@ class OfflineSync:
         self.base_url = self.get_base_url()
         self.set_token()
 
-    def get_headers(self):
+    def get_headers(self) -> dict[str, str]:
         """
         Returns header dictionary for use by requests library
         """
@@ -36,7 +35,7 @@ class OfflineSync:
             headers['Cookie'] = 'token=' + self.token
         return headers
 
-    def request_get(self, route: str, raise_for_status=True) -> Response:
+    def request_get(self, route: str, raise_for_status: bool = True) -> Response:
         response = requests.get(self.base_url + route,
                                 headers=self.get_headers(),
                                 timeout=30)
@@ -44,7 +43,7 @@ class OfflineSync:
             response.raise_for_status()
         return response
 
-    def request_post(self, route: str, data, raise_for_status=True) -> Response:
+    def request_post(self, route: str, data, raise_for_status: bool = True) -> Response:
         response = requests.post(self.base_url + route,
                                  json=data,
                                  headers=self.get_headers(),
@@ -209,7 +208,7 @@ class OfflineSync:
             self.db_music.execute('DELETE FROM playlist WHERE path=?',
                                   (name,))
 
-    def sync_tracks(self):
+    def sync_tracks(self) -> None:
         """
         Download added or modified tracks from the server, and delete local tracks that were deleted on the server
         """

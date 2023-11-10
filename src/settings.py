@@ -7,7 +7,7 @@ def split_by_semicolon(inp: str) -> list[str]:
     return [s.strip() for s in inp.split(';') if s.strip() != '']
 
 
-def _boolenv(name: str):
+def _boolenv(name: str) -> bool:
     val = getenv(name, '')
     return val == '1' or bool(val)
 

@@ -1,14 +1,14 @@
 import hashlib
-from urllib.parse import quote as urlencode
 import logging
+from typing import Any
+from urllib.parse import quote as urlencode
 
 import requests
 
+import metadata
 import settings
 from auth import StandardUser
-import metadata
 from metadata import Metadata
-
 
 CONNECT_URL = 'https://www.last.fm/api/auth/?api_key=' + settings.lastfm_api_key
 
@@ -16,10 +16,11 @@ log = logging.getLogger('app.radio')
 
 
 def is_configured() -> bool:
+    """Check whether last.fm API key is set"""
     return bool(settings.lastfm_api_key) and bool(settings.lastfm_api_secret)
 
 
-def _make_request(method: str, api_method: str, **extra_params):
+def _make_request(method: str, api_method: str, **extra_params) -> dict[Any, Any]:
     params = {
         'api_key': settings.lastfm_api_key,
         'method': api_method,
@@ -76,6 +77,7 @@ def obtain_session_key(user: StandardUser, auth_token: str) -> str:
 
 
 def update_now_playing(user_key: str, meta: Metadata):
+    """Send now playing status to last.fm"""
     if not is_configured():
         log.info('Skipped scrobble, last.fm not configured')
         return
@@ -91,6 +93,7 @@ def update_now_playing(user_key: str, meta: Metadata):
 
 
 def scrobble(user_key: str, meta: Metadata, start_timestamp: int):
+    """Send played track to last.fm"""
     if not is_configured():
         log.info('Skipped scrobble, last.fm not configured')
         return

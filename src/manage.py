@@ -1,20 +1,21 @@
 """
 Management command
 """
-from argparse import ArgumentParser
 import logging
+# pylint: disable=import-outside-toplevel
+from argparse import ArgumentParser
+from typing import Any
 
 import db
-
 
 log = logging.getLogger('app.manage')
 
 
-def handle_useradd(args):
+def handle_useradd(args: Any) -> None:
     """
     Handle command to add user
     """
-    import bcrypt  # pylint: disable=import-outside-toplevel
+    import bcrypt
     username = args.username
     is_admin = int(args.admin)
     password = input('Enter password:')
@@ -28,7 +29,7 @@ def handle_useradd(args):
     log.info('User added successfully')
 
 
-def handle_userdel(args):
+def handle_userdel(args: Any) -> None:
     """
     Handle command to delete user
     """
@@ -41,7 +42,7 @@ def handle_userdel(args):
             log.info('User deleted successfully')
 
 
-def handle_userlist(_args):
+def handle_userlist(_args: Any) -> None:
     """
     Handle command to list users
     """
@@ -60,11 +61,11 @@ def handle_userlist(_args):
                 log.info('- %s', username)
 
 
-def handle_passwd(args):
+def handle_passwd(args: Any) -> None:
     """
     Handle command to change a user's password
     """
-    import bcrypt  # pylint: disable=import-outside-toplevel
+    import bcrypt
 
     with db.connect() as conn:
         result = conn.execute('SELECT id FROM user WHERE username=?',
@@ -83,7 +84,7 @@ def handle_passwd(args):
         print('Password updated successfully.')
 
 
-def handle_playlist(args):
+def handle_playlist(args: Any) -> None:
     """
     Handle command to give a user write access to a playlist
     """
@@ -111,26 +112,26 @@ def handle_playlist(args):
         log.info('Given user %s access to playlist %s', args.username, args.playlist_path)
 
 
-def handle_scan(_args):
+def handle_scan(_args: Any) -> None:
     """
     Handle command to scan playlists
     """
-    import scanner  # pylint: disable=import-outside-toplevel
+    import scanner
 
     with db.connect() as conn:
         scanner.scan(conn)
 
 
-def handle_cleanup(_args):
+def handle_cleanup(_args: Any) -> None:
     """
     Handle command to clean up old entries from databases
     """
-    import cleanup  # pylint: disable=import-outside-toplevel
+    import cleanup
 
     cleanup.cleanup()
 
 
-def handle_vacuum(_args):
+def handle_vacuum(_args: Any) -> None:
     """
     Handle command for database vacuuming
     """
@@ -149,7 +150,7 @@ def handle_vacuum(_args):
         conn.execute('VACUUM')
 
 
-def handle_sync(_args):
+def handle_sync(_args: Any) -> None:
     """
     Handle command for offline mode sync
     """

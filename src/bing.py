@@ -1,9 +1,10 @@
 import json
-import sys
 import logging
+import sys
 import traceback
-from typing import Optional
 from multiprocessing.pool import ThreadPool
+from pathlib import Path
+from typing import Optional
 
 import requests
 from bs4 import BeautifulSoup
@@ -124,6 +125,4 @@ if __name__ == '__main__':
         print('no result found')
         sys.exit(1)
 
-    with open('test_bing_result', 'wb') as test_file:
-        test_file.truncate(0)
-        test_file.write(result_bytes)
+    Path('test_bing_result').write_bytes(result_bytes)

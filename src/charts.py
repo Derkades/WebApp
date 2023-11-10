@@ -1,13 +1,16 @@
-from enum import Enum, unique
-from collections import Counter
-from datetime import datetime, date, timedelta
 import time
+from collections import Counter
+from datetime import date, datetime, timedelta
+from enum import Enum, unique
 from sqlite3 import Connection
+from typing import Any
 
 from flask_babel import _
 
 import db
 from music import Track
+
+ChartT = dict[str, Any]
 
 
 # Number of entries to display in a plot, for counters
@@ -21,7 +24,7 @@ class StatsPeriod(Enum):
     MONTH = 30*DAY
     YEAR = 365*DAY
 
-    def translated_str(self):
+    def translated_str(self) -> str:
         if self == StatsPeriod.DAY:
             return _('last day')
         elif self == StatsPeriod.WEEK:
@@ -34,7 +37,7 @@ class StatsPeriod(Enum):
         raise ValueError()
 
     @staticmethod
-    def from_str(period: str):
+    def from_str(period: str) -> 'StatsPeriod':
         if period == 'day':
             return StatsPeriod.DAY
         elif period == 'week':
@@ -47,7 +50,7 @@ class StatsPeriod(Enum):
         raise ValueError()
 
 
-def chart(chart_type: str, title: str, categories: list[str], series_dict: dict, stack=False):
+def chart(chart_type: str, title: str, categories: list[str], series_dict: dict, stack=False) -> ChartT:
     """
     Create chart json expected by javascript in stats.jinja2
     Args:
@@ -154,7 +157,7 @@ def chart_track_year(conn: Connection):
 
     return chart('column',
                  _('Track release year distribution'),
-                 list(range(min_year, max_year+1)),
+                 [str(year) for year in range(min_year, max_year+1)],
                  data,
                  stack=True)
 
@@ -178,7 +181,8 @@ def charts_history(conn: Connection, period: StatsPeriod):
     day_of_week: dict[str, list[int]] = {}
     day_counts: dict[str, list[int]] = {}
 
-    playlists: list[str] = [row[0] for row in conn.execute('SELECT DISTINCT playlist FROM history WHERE timestamp > ?', (after_timestamp,))]
+    playlists: list[str] = [row[0] for row in
+                            conn.execute('SELECT DISTINCT playlist FROM history WHERE timestamp > ?', (after_timestamp,))]
     playlists_counts: dict[str, list[int]] = {}
 
     for username, in conn.execute('''SELECT DISTINCT user.username

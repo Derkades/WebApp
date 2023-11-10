@@ -1,15 +1,14 @@
 import logging
-
-import db
-import auth
-import cache
 import time
 
+import auth
+import cache
+import db
 
 log = logging.getLogger('app.cleanup')
 
 
-def cleanup():
+def cleanup() -> None:
     with db.connect() as conn:
         count = auth.prune_old_csrf_tokens(conn)
         log.info('Deleted %s CSRF tokens', count)

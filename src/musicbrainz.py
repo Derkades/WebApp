@@ -1,13 +1,14 @@
 import logging
-import traceback
 import re
+import traceback
+from pathlib import Path
+from typing import Any
 
 import requests
 
 import cache
 import image
 import settings
-
 
 log = logging.getLogger('app.musicbrainz')
 
@@ -16,11 +17,12 @@ log = logging.getLogger('app.musicbrainz')
 # https://github.com/alastair/python-musicbrainzngs/blob/1638c6271e0beb9560243c2123d354461ec9f842/musicbrainzngs/musicbrainz.py#L27
 LUCENE_SPECIAL = re.compile(r'([+\-&|!(){}\[\]\^"~*?:\\\/])')
 
-def lucene_escape(text: str):
+def lucene_escape(text: str) -> str:
+    """Escape string for MB"""
     return re.sub(LUCENE_SPECIAL, r'\\\1', text)
 
 
-def _mb_get(url: str, params):
+def _mb_get(url: str, params: dict[str, str]) -> dict[str, Any]:
     response = requests.get('https://musicbrainz.org/ws/2/' + url,
                             headers={'Accept': 'application/json',
                                      'User-Agent': settings.user_agent},
@@ -30,9 +32,7 @@ def _mb_get(url: str, params):
     return response.json()
 
 
-caa_base = 'https://coverartarchive.org/release'
-
-def _caa_get(release_id: str, img_type: str, size: int):
+def _caa_get(release_id: str, img_type: str, size: int) -> bytes:
     r = requests.get(f'https://coverartarchive.org/release/{release_id}/{img_type}-{size}',
                      headers={'User-Agent': settings.user_agent},
                      allow_redirects=True,
@@ -137,5 +137,4 @@ if __name__ == '__main__':
 
     cover = get_cover('Dire Straits', 'Brothers In Arms', disable_cache=True)
     # cover = get_cover('Elle Exxe', 'Lately', disable_cache=True) # release exists, but has no cover
-    with open('cover.jpg', 'wb') as cover_file:
-        cover_file.write(cover)
+    Path('cover.jpg').write_bytes(cover)

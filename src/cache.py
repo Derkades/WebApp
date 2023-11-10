@@ -2,14 +2,13 @@
 Functions related to the cache (cache.db)
 """
 
-from typing import Any
 import logging
-import time
 import random
+import time
+from typing import Any
 
 import db
 import jsonw
-
 
 log = logging.getLogger('app.cache')
 
@@ -43,6 +42,13 @@ def store(key: str,
 
 def retrieve(key: str,
              return_expired: bool = True) -> bytes | None:
+    """
+    Retrieve object from cache
+    Args:
+        key: Cache key
+        return_expired: Whether to return the object from cache even when expired, but not cleaned
+                        up yet. Should be set to False for short lived cache objects.
+    """
     with db.cache(read_only=True) as conn:
         row = conn.execute('SELECT data, expire_time FROM cache2 WHERE key=?',
                            (key,)).fetchone()
