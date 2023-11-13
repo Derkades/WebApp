@@ -7,27 +7,27 @@ With docker and docker-compose-plugin installed, run the following command to st
 docker compose up --build
 ```
 
-Before doing so, you will need to create a music and cache directory. You may need to change `user` in the docker compose file if your user is not using the default id of 1000.
+Before doing so, you will need to create a music and cache directory. You may need to change `user` in the `compose.yaml` file if your user is not using the default id of 1000.
 
 ## Installing dependencies locally
 
 Installing python and dependencies locally may be useful, for example to get linting and suggestions in your IDE.
 
-### Fedora
-Main packages:
 ```
-sudo dnf install python3 pylint python3-mypy python3-types-requests python3-flask python3-flask-babel python3-requests python3-beautifulsoup4 python3-musicbrainzngs python3-pillow python3-bcrypt python3-matplotlib
+pip3 install -r requirements.txt
+pip3 install -r requirements-dev.txt
 ```
-Translations:
+
+Fedora packages, if you prefer (missing some types packages):
 ```
-sudo dnf install babel poedit
+sudo dnf install python3-flask python3-flask-babel python3-requests python3-beautifulsoup4 python3-pillow python3-bcrypt yt-dlp babel poedit pylint python3-mypy python3-types-requests python3-types-beautifulsoup4
 ```
 
 ## Preparing for offline development
 
 ### Docker images
 
-Download the base image locally: `docker pull python:3.11`. If you don't do this, buildx will attempt to pull the image very frequently while rebuilding, which won't work offline.
+Download the base image locally: `docker pull python:3.12-slim`. If you don't do this, buildx will attempt to pull the image very frequently while rebuilding, which won't work offline.
 
 Then, build and start the container: `docker compose up --build`. Following builds will be cached, unless you change one of the `RUN` instructions in the `Dockerfile`.
 
