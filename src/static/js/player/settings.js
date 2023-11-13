@@ -46,7 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const button = document.getElementById('scan-button');
         spinner.classList.remove('hidden');
         button.classList.add('hidden');
-        await jsonPost('/scan_music', {});
         await Track.updateLocalTrackList();
         spinner.classList.add('hidden');
         button.classList.remove('hidden');

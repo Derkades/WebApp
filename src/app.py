@@ -430,20 +430,6 @@ def route_track_list():
     return jsonw.json_response({'playlists': playlist_response}, last_modified=last_modified)
 
 
-@app.route('/scan_music', methods=['POST'])
-def route_scan_music():
-    """
-    Scans all playlists for new music
-    """
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
-
-        scanner.scan(conn)
-
-    return Response(None, 200)
-
-
 @app.route('/update_metadata', methods=['POST'])
 def route_update_metadata():
     """
