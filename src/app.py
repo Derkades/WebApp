@@ -894,8 +894,8 @@ def route_now_playing():
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
 
-        if user.privacy == PrivacyOption.HIDDEN:
-            log.info('Ignoring because privacy==hidden')
+        if user.privacy != PrivacyOption.NONE:
+            log.info('Ignoring, user has enabled private mode')
             return Response('ok', 200, content_type='text/plain')
 
         player_id = request.json['player_id']
@@ -970,14 +970,15 @@ def route_history_played():
         track = request.json['track']
         playlist = track[:track.index('/')]
         timestamp = request.json['timestamp']
+        private = user.privacy == PrivacyOption.AGGREGATE
 
         conn.execute('''
-                     INSERT INTO history (timestamp, user, track, playlist)
-                     VALUES (?, ?, ?, ?)
+                     INSERT INTO history (timestamp, user, track, playlist, private)
+                     VALUES (?, ?, ?, ?, ?)
                      ''',
-                     (timestamp, user.user_id, track, playlist))
+                     (timestamp, user.user_id, track, playlist, private))
 
-        if not request.json['lastfmEligible']:
+        if private or not request.json['lastfmEligible']:
             # No need to scrobble, nothing more to do
             return Response('ok', 200, content_type='text/plain')
 
@@ -1071,6 +1072,7 @@ def route_activity_data():
                               SELECT history.timestamp, user.username, user.nickname, history.playlist, history.track
                               FROM history
                                   LEFT JOIN user ON history.user = user.id
+                              WHERE history.private = 0
                               ORDER BY history.id DESC
                               LIMIT 10
                               ''')

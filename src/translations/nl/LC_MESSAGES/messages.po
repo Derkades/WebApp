@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-11-08 10:35+0100\n"
-"PO-Revision-Date: 2023-11-08 10:35+0100\n"
+"POT-Creation-Date: 2023-11-13 09:08+0100\n"
+"PO-Revision-Date: 2023-11-13 09:08+0100\n"
 "Last-Translator: \n"
 "Language: nl\n"
 "Language-Team: nl <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.12.1\n"
 
-#: app.py:744
+#: app.py:743
 msgid "Incorrect password."
 msgstr "Onjuist wachtwoord."
 
-#: app.py:747
+#: app.py:746
 msgid "Repeated new passwords do not match."
 msgstr "Herhaalde wachtwoorden komen niet overeen."
 
@@ -38,23 +38,23 @@ msgstr "Verwijderd"
 msgid "Modified"
 msgstr "Aangepast"
 
-#: app.py:1368
+#: app.py:1369
 msgid "Track is already in this playlist"
 msgstr "Nummer zit al in deze afspeellijst"
 
-#: auth.py:53 auth.py:75 auth.py:82
+#: auth.py:52 auth.py:74 auth.py:81
 msgid "Unknown"
 msgstr "Onbekend"
 
-#: auth.py:221
+#: auth.py:220
 msgid "You are not logged in, please log in."
 msgstr "Je bent niet ingelogd, gelieve in te loggen."
 
-#: auth.py:223
+#: auth.py:222
 msgid "Your current session is invalid, please log in again."
 msgstr "Je huidige sessie is ongeldig, gelieve opnieuw in te loggen."
 
-#: auth.py:225
+#: auth.py:224
 msgid ""
 "Your are not an administrator, but this page requires administrative "
 "privileges"
@@ -62,135 +62,135 @@ msgstr ""
 "Je bent geen administrator, maar deze pagina vereist administratieve "
 "rechten"
 
-#: charts.py:26
+#: charts.py:29
 msgid "last day"
 msgstr "afgelopen dag"
 
-#: charts.py:28
+#: charts.py:31
 msgid "last week"
 msgstr "afgelopen week"
 
-#: charts.py:30
+#: charts.py:33
 msgid "last month"
 msgstr "afgelopen maand"
 
-#: charts.py:32
+#: charts.py:35
 msgid "last year"
 msgstr "afgelopen jaar"
 
-#: charts.py:119
+#: charts.py:122
 msgid "When tracks were last chosen by algorithm"
 msgstr "Wanneer nummers voor het laatst gekozen zijn door het algoritme"
 
-#: charts.py:120
+#: charts.py:123
 msgid "Today"
 msgstr "Vandaag"
 
-#: charts.py:120
+#: charts.py:123
 msgid "This week"
 msgstr "Deze week"
 
-#: charts.py:120
+#: charts.py:123
 msgid "This month"
 msgstr "Deze maand"
 
-#: charts.py:120
+#: charts.py:123
 msgid "Long ago"
 msgstr "Lang geleden"
 
-#: charts.py:120
+#: charts.py:123
 msgid "Never"
 msgstr "Nooit"
 
-#: charts.py:121 charts.py:130
+#: charts.py:124 charts.py:133
 msgid "Number of tracks"
 msgstr "Aantal nummers"
 
-#: charts.py:130
+#: charts.py:133
 msgid "Number of tracks in playlists"
 msgstr "Aantal nummers in afspeellijsten"
 
-#: charts.py:131
+#: charts.py:134
 msgid "Mean duration of tracks in playlists"
 msgstr "Gemiddelde lengte van nummers in afspeellijsten"
 
-#: charts.py:131 charts.py:132
+#: charts.py:134 charts.py:135
 msgid "Track duration"
 msgstr "Lengte van nummer"
 
-#: charts.py:132
+#: charts.py:135
 msgid "Total duration of tracks in playlists"
 msgstr "Totale lengte van nummers in afspeellijsten"
 
-#: charts.py:156
+#: charts.py:159
 msgid "Track release year distribution"
 msgstr "Distributie van jaar van uitgave"
 
-#: charts.py:230
+#: charts.py:234
 msgid "Most active users"
 msgstr "Meest actieve gebruikers"
 
-#: charts.py:230
+#: charts.py:234
 msgid "Tracks played"
 msgstr "Nummers gespeeld"
 
-#: charts.py:231
+#: charts.py:235
 msgid "Most played playlists"
 msgstr "Meest gespeelde afspeellijsten"
 
-#: charts.py:232
+#: charts.py:236
 msgid "Most played tracks"
 msgstr "Meest gespeelde nummers"
 
-#: charts.py:232 charts.py:233 charts.py:234
+#: charts.py:236 charts.py:237 charts.py:238
 msgid "Times played"
 msgstr "Aantal keer afgespeeld"
 
-#: charts.py:233
+#: charts.py:237
 msgid "Most played artists"
 msgstr "Meest gespeelde artiesten"
 
-#: charts.py:234
+#: charts.py:238
 msgid "Most played albums"
 msgstr "Meest gespeelde albums"
 
-#: charts.py:235
+#: charts.py:239
 msgid "Time of day"
 msgstr "Moment van de dag"
 
-#: charts.py:236
+#: charts.py:240
 msgid "Day of week"
 msgstr "Dag van de week"
 
-#: charts.py:237
+#: charts.py:241
 msgid "Monday"
 msgstr "Maandag"
 
-#: charts.py:237
+#: charts.py:241
 msgid "Tuesday"
 msgstr "Dinsdag"
 
-#: charts.py:237
+#: charts.py:241
 msgid "Wednesday"
 msgstr "Woensdag"
 
-#: charts.py:237
+#: charts.py:241
 msgid "Thursday"
 msgstr "Donderdag"
 
-#: charts.py:237
+#: charts.py:241
 msgid "Friday"
 msgstr "Vrijdag"
 
-#: charts.py:237
+#: charts.py:241
 msgid "Saturday"
 msgstr "Zaterdag"
 
-#: charts.py:237
+#: charts.py:241
 msgid "Sunday"
 msgstr "Zondag"
 
-#: charts.py:239
+#: charts.py:243
 msgid "Historic play count"
 msgstr "Aantal gespeelde nummers door de tijd"
 
@@ -240,12 +240,10 @@ msgid "None - Show up in statistics and now playing"
 msgstr "Geen - Opgenomen worden in statistieken en activiteit"
 
 #: templates/account.jinja2:40
-msgid ""
-"Aggregate - Don't show in now playing, only in long term statistics (not "
-"working yet)"
+msgid "Aggregate - Don't show in now playing, only in long term statistics"
 msgstr ""
 "Gecombineerd - Niet tonen in activiteit en geschiedenis, maar wel in "
-"statistieken op de lange termijn (werkt nog niet)"
+"statistieken op de lange termijn"
 
 #: templates/account.jinja2:41
 msgid "Hiddden - Don't record played tracks at all"
@@ -1256,10 +1254,4 @@ msgstr "Nieuw wachtwoord (laat leeg om niet te veranderen)"
 #: templates/users_edit.jinja2:18
 msgid "Submit"
 msgstr "Versturen"
-
-#~ msgid "Logged in as: %(name)s"
-#~ msgstr "Ingelogd als '%(name)s'"
-
-#~ msgid "Last.fm scrobbling"
-#~ msgstr "Last.fm scrobbelen"
 
