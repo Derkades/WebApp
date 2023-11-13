@@ -13,7 +13,7 @@ from urllib.parse import quote as urlencode
 
 import bcrypt
 from flask import (Flask, Response, redirect, render_template, request,
-                   send_file)
+                   send_file, abort)
 from flask_babel import Babel, _, format_timedelta
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -61,7 +61,7 @@ def handle_token_error(_err: RequestTokenError):
     Return bad request
     """
     log.warning('Invalid CSRF token')
-    return Response('Invalid CSRF token', status=400, content_type='text/plain')
+    return abort(400, 'Invalid CSRF token')
 
 
 @app.route('/')
@@ -189,7 +189,7 @@ def route_choose_track():
 
 
 @app.route('/get_track')
-def route_get_track() -> Response:
+def route_get_track():
     """
     Get transcoded audio for the given track path.
     """
@@ -205,7 +205,7 @@ def route_get_track() -> Response:
         track = Track.by_relpath(conn, request.args['path'])
 
     if track is None:
-        return Response('Track does not exist', 404)
+        return abort(404, 'Track does not exist')
 
     parsed_mtime = datetime.fromtimestamp(track.mtime, timezone.utc)
     if request.if_modified_since and parsed_mtime <= request.if_modified_since:
@@ -316,7 +316,7 @@ def route_ytdl():
 
         playlist = music.playlist(conn, directory)
         if not playlist.has_write_permission(user):
-            return Response('No write permission for this playlist', 403)
+            return abort(403, 'No write permission for this playlist')
 
         log.info('ytdl %s %s', directory, url)
 
@@ -538,7 +538,7 @@ def route_playlists_create():
         path = Path(settings.music_dir, dir_name)
 
         if path.exists():
-            return Response('Playlist path already exists', 400)
+            return abort(400, 'Playlist path already exists')
 
         path.mkdir()
 
@@ -577,7 +577,7 @@ def route_playlists_share():
         playlist = music.user_playlist(conn, playlist_relpath, user.user_id)
 
         if not playlist.write and not user.admin:
-            return Response('Cannot share playlist if you do not have write permission', 403)
+            return abort(403, 'Cannot share playlist if you do not have write permission')
 
         conn.execute('INSERT INTO user_playlist_write VALUES(?, ?) ON CONFLICT DO NOTHING',
                      (target_user_id, playlist_relpath))
@@ -598,11 +598,11 @@ def route_files_upload():
 
         playlist = Playlist.from_path(conn, upload_dir)
         if not playlist.has_write_permission(user):
-            return Response(None, 403)
+            return abort(403, 'No write permission for this playlist')
 
     for uploaded_file in request.files.getlist('upload'):
         if uploaded_file.filename is None or uploaded_file.filename == '':
-            return Response('Blank file name. Did you select a file?', 402, content_type='text/plain')
+            return abort(402, 'Blank file name. Did you select a file?')
 
         check_filename(uploaded_file.filename)
         uploaded_file.save(Path(upload_dir, uploaded_file.filename))
@@ -671,7 +671,7 @@ def route_files_mkdir():
 
     playlist = Playlist.from_path(conn, path)
     if not playlist.has_write_permission(user):
-        return Response(None, 403)
+        return abort(403, 'No write permission for this playlist')
 
     dirname = request.form['dirname']
     check_filename(dirname)
@@ -1352,7 +1352,7 @@ def route_player_copy_track():
         track = Track.by_relpath(conn, request.json['track'])
 
         if track.playlist == playlist.name:
-            return Response(_('Track is already in this playlist'))
+            return Response(_('Track is already in this playlist'), content_type='text/plain')
 
         shutil.copy(track.path, playlist.path)
 
