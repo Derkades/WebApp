@@ -61,7 +61,7 @@ def handle_token_error(_err: RequestTokenError):
     Return bad request
     """
     log.warning('Invalid CSRF token')
-    return Response('Invalid CSRF token', status=400)
+    return Response('Invalid CSRF token', status=400, content_type='text/plain')
 
 
 @app.route('/')
@@ -228,7 +228,7 @@ def route_get_track() -> Response:
         raise ValueError(type_str)
 
     audio = track.transcoded_audio(audio_type)
-    response = Response(audio, mimetype=media_type)
+    response = Response(audio, content_type=media_type)
     response.last_modified = parsed_mtime
     response.cache_control.no_cache = True  # always revalidate cache
     response.accept_ranges = 'bytes'  # Workaround for Chromium bug https://stackoverflow.com/a/65804889
@@ -270,7 +270,7 @@ def route_get_album_cover() -> Response:
 
         image_bytes = track.get_cover_thumbnail(meme, ImageFormat.WEBP, quality)
 
-    return Response(image_bytes, mimetype='image/webp')
+    return Response(image_bytes, content_type='image/webp')
 
 
 @app.route('/get_lyrics')
@@ -333,7 +333,7 @@ def route_ytdl():
         else:
             yield f'Failed with status code {status_code}'
 
-    return Response(generate(), mimetype='text/plain')
+    return Response(generate(), content_type='text/plain')
 
 
 @app.route('/download_search', methods=['POST'])
@@ -458,7 +458,7 @@ def route_update_metadata():
 
         playlist = music.playlist(conn, track.playlist)
         if not playlist.has_write_permission(user):
-            return Response('No write permission for this playlist', 403)
+            return Response('No write permission for this playlist', 403, content_type='text/plain')
 
         track.write_metadata(title=payload['metadata']['title'],
                              album=payload['metadata']['album'],
@@ -616,7 +616,7 @@ def route_files_upload():
 
     for uploaded_file in request.files.getlist('upload'):
         if uploaded_file.filename is None or uploaded_file.filename == '':
-            return Response('Blank file name. Did you select a file?', 402)
+            return Response('Blank file name. Did you select a file?', 402, content_type='text/plain')
 
         check_filename(uploaded_file.filename)
         uploaded_file.save(Path(upload_dir, uploaded_file.filename))
@@ -775,7 +775,7 @@ def route_change_language_form():
             conn.execute('UPDATE user SET language = NULL')
         else:
             if lang_code not in language.LANGUAGES:
-                return Response('Invalid language code', 400)
+                return Response('Invalid language code', 400, content_type='text/plain')
 
             conn.execute('UPDATE user SET language=?',
                          (lang_code,))
@@ -896,7 +896,7 @@ def route_now_playing():
 
         if user.privacy == PrivacyOption.HIDDEN:
             log.info('Ignoring because privacy==hidden')
-            return Response('ok', 200)
+            return Response('ok', 200, content_type='text/plain')
 
         player_id = request.json['player_id']
         assert isinstance(player_id, str)
@@ -931,13 +931,13 @@ def route_now_playing():
 
         if not user_key:
             # Skip last.fm now playing, account is not linked
-            return Response(None, 200)
+            return Response(None, 200, content_type='text/plain')
 
         # If now playing has already been sent for this track, only send an update to
         # last.fm if it was more than 5 minutes ago.
         if previous_update is not None and int(time.time()) - previous_update < 5*60:
             # Skip last.fm now playing, already sent recently
-            return Response(None, 200)
+            return Response(None, 200, content_type='text/plain')
 
         track = Track.by_relpath(conn, relpath)
         meta = track.metadata()
@@ -946,7 +946,7 @@ def route_now_playing():
 
     log.info('Sending now playing to last.fm: %s', track.relpath)
     lastfm.update_now_playing(user_key, meta)
-    return Response(None, 200)
+    return Response(None, 200, content_type='text/plain')
 
 
 @app.route('/history_played', methods=['POST'])
@@ -979,25 +979,25 @@ def route_history_played():
 
         if not request.json['lastfmEligible']:
             # No need to scrobble, nothing more to do
-            return Response('ok', 200)
+            return Response('ok', 200, content_type='text/plain')
 
         lastfm_key = lastfm.get_user_key(user)
 
         if not lastfm_key:
             # User has not linked their account, no need to scrobble
-            return Response('ok', 200)
+            return Response('ok', 200, content_type='text/plain')
 
         track = Track.by_relpath(conn, request.json['track'])
         meta = track.metadata()
         if meta is None:
             log.warning('Track is missing from database. Probably deleted by a rescan after the track was queued.')
-            return Response('ok', 200)
+            return Response('ok', 200, content_type='text/plain')
 
     # Scrobble request takes a while, so close database connection first
     log.info('Scrobbling to last.fm: %s', track.relpath)
     lastfm.scrobble(lastfm_key, meta, timestamp)
 
-    return Response('ok', 200)
+    return Response('ok', 200, content_type='text/plain')
 
 
 def get_file_changes_list(conn: Connection, limit: int) -> list[dict[str, str]]:
