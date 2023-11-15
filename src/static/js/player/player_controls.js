@@ -29,11 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const seekBar = document.getElementById('outer-progress-bar');
 
     const onMove = event => {
-        if (!history.currentlyPlayingTrack) {
-            return;
-        }
-
-        audioElem.currentTime = ((event.clientX - seekBar.offsetLeft) / seekBar.offsetWidth) * history.currentlyPlayingTrack.duration;
+        const audioElem = getAudioElement();
+        audioElem.currentTime = ((event.clientX - seekBar.offsetLeft) / seekBar.offsetWidth) * audioElem.duration;
         eventBus.publish(MusicEvent.PLAYBACK_CHANGE)
         event.preventDefault(); // Prevent accidental text selection
     };
@@ -44,11 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     seekBar.addEventListener('mousedown', event => {
-        if (!history.currentlyPlayingTrack) {
-            return;
-        }
-
-        seekAbsolute(((event.clientX - seekBar.offsetLeft) / seekBar.offsetWidth) * history.currentlyPlayingTrack.duration);
+        const audioElem = getAudioElement();
+        seekAbsolute(((event.clientX - seekBar.offsetLeft) / seekBar.offsetWidth) * audioElem.duration);
 
         // Keep updating while mouse is moving
         document.addEventListener('mousemove', onMove);
@@ -73,10 +67,10 @@ eventBus.subscribe(MusicEvent.PLAYBACK_CHANGE, () => {
     var barDuration;
     var barWidth;
 
-    if (history.currentlyPlayingTrack && isFinite(audioElem.currentTime)) {
+    if (isFinite(audioElem.currentTime) && isFinite(audioElem.duration)) {
         barCurrent = durationToString(Math.round(audioElem.currentTime));
-        barDuration = durationToString(Math.round(history.currentlyPlayingTrack.duration));
-        barWidth = ((audioElem.currentTime / history.currentlyPlayingTrack.duration) * 100) + '%';
+        barDuration = durationToString(Math.round(audioElem.duration));
+        barWidth = ((audioElem.currentTime / audioElem.duration) * 100) + '%';
     } else {
         barCurrent = '--:--';
         barDuration = '--:--';

@@ -3,16 +3,12 @@ eventBus.subscribe(MusicEvent.PLAYBACK_CHANGE, () => {
 
     navigator.mediaSession.playbackState = audioElem.paused ? 'paused' : 'playing';
 
-    if (!history.currentlyPlayingTrack) {
-        return;
-    }
-
-    if (audioElem == null || !isFinite(audioElem.currentTime) || !isFinite(audioElem.playbackRate)) {
+    if (audioElem == null || !isFinite(audioElem.currentTime) || !isFinite(audioElem.playbackRate) || !isFinite(audioElem.duration)) {
         return;
     }
 
     navigator.mediaSession.setPositionState({
-        duration: history.currentlyPlayingTrack.duration,
+        duration: audioElem.duration,
         playbackRate: audioElem.playbackRate,
         position: audioElem.currentTime,
     });
