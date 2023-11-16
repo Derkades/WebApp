@@ -162,6 +162,11 @@ def chart_track_year(conn: Connection):
                  stack=True)
 
 
+def to_usernames(usernames: str, counts: dict[int, list[int]]) -> dict[str, list[int]]:
+    return {usernames[i]: values
+            for i, (user_id, values) in enumerate(counts.items())}
+
+
 def charts_history(conn: Connection, period: StatsPeriod):
     """
     Playback history related charts
@@ -177,47 +182,52 @@ def charts_history(conn: Connection, period: StatsPeriod):
     min_day = date.fromtimestamp(min_time)
     num_days = (date.fromtimestamp(max_time) - min_day).days + 1
 
-    time_of_day: dict[str, list[int]] = {}
-    day_of_week: dict[str, list[int]] = {}
-    day_counts: dict[str, list[int]] = {}
-
     playlists: list[str] = [row[0] for row in
                             conn.execute('SELECT DISTINCT playlist FROM history WHERE timestamp > ?', (after_timestamp,))]
-    playlists_counts: dict[str, list[int]] = {}
+    user_ids: list[int] = []
+    usernames: list[str] = []
+    for user_id, username, nickname in conn.execute('''
+                                                    SELECT id, username, nickname
+                                                    FROM user
+                                                    WHERE id IN (SELECT DISTINCT user FROM history WHERE timestamp > ?)
+                                                    ''', (after_timestamp,)):
+        user_ids.append(user_id)
+        usernames.append(nickname if nickname else username)
 
-    for username, in conn.execute('''SELECT DISTINCT user.username
-                                     FROM history JOIN user ON history.user = user.id
-                                     WHERE timestamp > ?''', (after_timestamp,)):
-        time_of_day[username] = [0] * 24
-        day_of_week[username] = [0] * 7
-        day_counts[username] = [0] * num_days
+    time_of_day: dict[int, list[int]] = {}
+    day_of_week: dict[int, list[int]] = {}
+    day_counts: dict[int, list[int]] = {}
+    playlists_counts: dict[int, list[int]] = {} # playlist plays per user
+    user_counts: dict[str, list[int]] = {} # user plays per playlist
 
-        playlists_counts[username] = [0] * len(playlists)
+    for user_id in user_ids:
+        time_of_day[user_id] = [0] * 24
+        day_of_week[user_id] = [0] * 7
+        day_counts[user_id] = [0] * num_days
+
+        playlists_counts[user_id] = [0] * len(playlists)
+
+    for playlist in playlists:
+        user_counts[playlist] = [0] * len(user_ids)
 
     result = conn.execute('''
-                          SELECT timestamp, user.username, user.nickname, history.track, history.playlist
+                          SELECT timestamp, user, history.track, history.playlist
                           FROM history
-                              JOIN user ON history.user = user.id
                           WHERE timestamp > ?
-                          ORDER BY timestamp ASC
                           ''', (after_timestamp,))
 
-    playlist_counter: Counter[str] = Counter()
-    user_counter: Counter[str] = Counter()
     artist_counter: Counter[str] = Counter()
     track_counter: Counter[str] = Counter()
     album_counter: Counter[str] = Counter()
 
-    for timestamp, username, nickname, relpath, playlist in result:
-        playlist_counter.update((playlist,))
-        user_counter.update((nickname if nickname else username,))
-
+    for timestamp, user_id, relpath, playlist in result:
         dt = datetime.fromtimestamp(timestamp)
-        time_of_day[username][dt.hour] += 1
-        day_of_week[username][dt.weekday()] += 1
-        day_counts[username][(dt.date() - min_day).days] += 1
+        time_of_day[user_id][dt.hour] += 1
+        day_of_week[user_id][dt.weekday()] += 1
+        day_counts[user_id][(dt.date() - min_day).days] += 1
 
-        playlists_counts[username][playlists.index(playlist)] += 1
+        playlists_counts[user_id][playlists.index(playlist)] += 1
+        user_counts[playlist][user_ids.index(user_id)] += 1
 
         track = Track.by_relpath(conn, relpath)
         if track:
@@ -231,17 +241,20 @@ def charts_history(conn: Connection, period: StatsPeriod):
             track_counter.update((relpath,))
 
     charts = [
-        chart('bar', _('Most active users'), *data_from_counter(_('Tracks played'), user_counter)),
-        chart('bar', _('Most played playlists'), playlists, playlists_counts, stack=True),
+        chart('bar', _('Most active users'), usernames, user_counts, stack=True),
+        chart('bar', _('Most played playlists'), playlists, to_usernames(usernames, playlists_counts), stack=True),
         chart('bar', _('Most played tracks'), *data_from_counter(_('Times played'), track_counter)),
         chart('bar', _('Most played artists'), *data_from_counter(_('Times played'), artist_counter)),
         chart('bar', _('Most played albums'), *data_from_counter(_('Times played'), album_counter)),
-        chart('column', _('Time of day'), [f'{i:02}:00' for i in range(0, 24)], time_of_day, stack=True),
+        chart('column', _('Time of day'),
+              [f'{i:02}:00' for i in range(0, 24)],
+              to_usernames(usernames, time_of_day), stack=True),
         chart('column', _('Day of week'),
               [_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday'), _('Saturday'), _('Sunday')],
-              day_of_week, stack=True),
+              to_usernames(usernames, day_of_week), stack=True),
         chart('line', _('Historic play count'),
-              [(min_day + timedelta(days=i)).isoformat() for i in range(0, num_days + 1)], day_counts, stack=True)
+              [(min_day + timedelta(days=i)).isoformat() for i in range(0, num_days + 1)],
+              to_usernames(usernames, day_counts), stack=True)
     ]
 
     return charts
