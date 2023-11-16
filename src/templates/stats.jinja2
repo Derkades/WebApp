@@ -13,8 +13,11 @@
 <button id="month">{% trans %}Month{% endtrans %}</button>
 <button id="year">{% trans %}Year{% endtrans %}</button>
 
+<br>
+
+<div id="spinner" class="icon spinning" style="background-image: url('/static/icon/loading.svg')"></div>
+
 <div id="charts">
-    {% trans %}Loading charts&mldr;{% endtrans %}
 </div>
 
 <link rel="stylesheet" href="/static/lib/toastui-chart-4.6.1.css">
@@ -77,6 +80,7 @@ const theme = {
 }
 
 const chartsContainer = document.getElementById('charts');
+const spinner = document.getElementById('spinner');
 const buttons = ['day', 'week', 'month', 'year'].map(id => document.getElementById(id));
 
 async function loadCharts(button) {
@@ -87,10 +91,13 @@ async function loadCharts(button) {
     button.disabled = true;
 
     chartsContainer.replaceChildren();
+    spinner.classList.remove('hidden');
 
     // Download data
     const response = await fetch('/stats_data?period=' + encodeURIComponent(button.id));
     const data = await response.json();
+
+    spinner.classList.add('hidden');
 
     // Render charts
     for (const chart of data) {
