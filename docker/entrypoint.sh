@@ -1,8 +1,10 @@
 #!/bin/bash
 set -e
 python db.py
-manage scan
-manage cleanup
+
+# scan and cleanup can be run in background after startup
+manage scan &
+manage cleanup &
 
 if [ "$MUSIC_ENV" = "dev" ]
 then
