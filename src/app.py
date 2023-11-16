@@ -1012,13 +1012,13 @@ def get_file_changes_list(conn: Connection, limit: int) -> list[dict[str, str]]:
              for timestamp, action, playlist, track in result]
 
 
-@app.route('/file_changes')
-def route_file_changes():
+@app.route('/activity_files')
+def route_activity_files():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
         changes = get_file_changes_list(conn, 2000)
 
-    return render_template('file_changes.jinja2',
+    return render_template('activity_files.jinja2',
                            changes=changes)
 
 

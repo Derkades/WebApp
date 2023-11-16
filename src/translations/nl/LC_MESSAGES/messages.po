@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-11-13 09:08+0100\n"
+"POT-Creation-Date: 2023-11-16 17:00+0100\n"
 "PO-Revision-Date: 2023-11-13 09:08+0100\n"
 "Last-Translator: \n"
 "Language: nl\n"
@@ -18,27 +18,27 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.12.1\n"
 
-#: app.py:743
+#: app.py:732
 msgid "Incorrect password."
 msgstr "Onjuist wachtwoord."
 
-#: app.py:746
+#: app.py:735
 msgid "Repeated new passwords do not match."
 msgstr "Herhaalde wachtwoorden komen niet overeen."
 
-#: app.py:1013
+#: app.py:1002
 msgid "Added"
 msgstr "Toegevoegd"
 
-#: app.py:1014
+#: app.py:1003
 msgid "Removed"
 msgstr "Verwijderd"
 
-#: app.py:1015
+#: app.py:1004
 msgid "Modified"
 msgstr "Aangepast"
 
-#: app.py:1369
+#: app.py:1358
 msgid "Track is already in this playlist"
 msgstr "Nummer zit al in deze afspeellijst"
 
@@ -126,71 +126,67 @@ msgstr "Totale lengte van nummers in afspeellijsten"
 msgid "Track release year distribution"
 msgstr "Distributie van jaar van uitgave"
 
-#: charts.py:234
+#: charts.py:244
 msgid "Most active users"
 msgstr "Meest actieve gebruikers"
 
-#: charts.py:234
-msgid "Tracks played"
-msgstr "Nummers gespeeld"
-
-#: charts.py:235
+#: charts.py:245
 msgid "Most played playlists"
 msgstr "Meest gespeelde afspeellijsten"
 
-#: charts.py:236
+#: charts.py:246
 msgid "Most played tracks"
 msgstr "Meest gespeelde nummers"
 
-#: charts.py:236 charts.py:237 charts.py:238
+#: charts.py:246 charts.py:247 charts.py:248
 msgid "Times played"
 msgstr "Aantal keer afgespeeld"
 
-#: charts.py:237
+#: charts.py:247
 msgid "Most played artists"
 msgstr "Meest gespeelde artiesten"
 
-#: charts.py:238
+#: charts.py:248
 msgid "Most played albums"
 msgstr "Meest gespeelde albums"
 
-#: charts.py:239
+#: charts.py:249
 msgid "Time of day"
 msgstr "Moment van de dag"
 
-#: charts.py:240
+#: charts.py:252
 msgid "Day of week"
 msgstr "Dag van de week"
 
-#: charts.py:241
+#: charts.py:253
 msgid "Monday"
 msgstr "Maandag"
 
-#: charts.py:241
+#: charts.py:253
 msgid "Tuesday"
 msgstr "Dinsdag"
 
-#: charts.py:241
+#: charts.py:253
 msgid "Wednesday"
 msgstr "Woensdag"
 
-#: charts.py:241
+#: charts.py:253
 msgid "Thursday"
 msgstr "Donderdag"
 
-#: charts.py:241
+#: charts.py:253
 msgid "Friday"
 msgstr "Vrijdag"
 
-#: charts.py:241
+#: charts.py:253
 msgid "Saturday"
 msgstr "Zaterdag"
 
-#: charts.py:241
+#: charts.py:253
 msgid "Sunday"
 msgstr "Zondag"
 
-#: charts.py:243
+#: charts.py:255
 msgid "Historic play count"
 msgstr "Aantal gespeelde nummers door de tijd"
 
@@ -336,7 +332,7 @@ msgid "Playback history"
 msgstr "Afspeelgeschiedenis"
 
 #: templates/activity.jinja2:23 templates/activity.jinja2:48
-#: templates/activity_all.jinja2:15 templates/file_changes.jinja2:15
+#: templates/activity_all.jinja2:15 templates/activity_files.jinja2:15
 msgid "Time"
 msgstr "Tijd"
 
@@ -345,14 +341,14 @@ msgid "User"
 msgstr "Gebruiker"
 
 #: templates/activity.jinja2:29 templates/activity.jinja2:54
-#: templates/activity_all.jinja2:21 templates/dislikes.jinja2:14
-#: templates/file_changes.jinja2:21
+#: templates/activity_all.jinja2:21 templates/activity_files.jinja2:21
+#: templates/dislikes.jinja2:14
 msgid "Playlist"
 msgstr "Afspeellijst"
 
 #: templates/activity.jinja2:32 templates/activity.jinja2:57
-#: templates/activity_all.jinja2:24 templates/dislikes.jinja2:15
-#: templates/file_changes.jinja2:24
+#: templates/activity_all.jinja2:24 templates/activity_files.jinja2:24
+#: templates/dislikes.jinja2:15
 msgid "Track"
 msgstr "Nummer"
 
@@ -360,17 +356,17 @@ msgstr "Nummer"
 msgid "View more"
 msgstr "Meer tonen"
 
-#: templates/activity.jinja2:42 templates/file_changes.jinja2:4
-#: templates/file_changes.jinja2:9
+#: templates/activity.jinja2:42 templates/activity_files.jinja2:4
+#: templates/activity_files.jinja2:9
 msgid "Recent file changes"
 msgstr "Recente bestandswijzigingen"
 
-#: templates/activity.jinja2:51 templates/file_changes.jinja2:18
+#: templates/activity.jinja2:51 templates/activity_files.jinja2:18
 msgid "Action"
 msgstr "Actie"
 
 #: templates/dislikes.jinja2:4 templates/dislikes.jinja2:9
-#: templates/home.jinja2:39
+#: templates/home.jinja2:38
 msgid "Dislikes"
 msgstr "Niet afspelen"
 
@@ -567,52 +563,48 @@ msgid "Playlist manager"
 msgstr "Afspeellijstbeheer"
 
 #: templates/home.jinja2:33
-msgid "Changelog"
-msgstr "Wijzigingen"
-
-#: templates/home.jinja2:34
 msgid "Downloader"
 msgstr "Downloader"
 
-#: templates/home.jinja2:37 templates/player.jinja2:119
+#: templates/home.jinja2:36 templates/player.jinja2:119
 msgid "Settings"
 msgstr "Instellingen"
 
-#: templates/home.jinja2:38
+#: templates/home.jinja2:37
 msgid "Account"
 msgstr "Account"
 
-#: templates/home.jinja2:42
+#: templates/home.jinja2:41
 msgid "Help"
 msgstr "Hulp"
 
-#: templates/home.jinja2:43
+#: templates/home.jinja2:42
 msgid "Manual"
 msgstr "Handleiding"
 
-#: templates/home.jinja2:44 templates/install.jinja2:4
+#: templates/home.jinja2:43 templates/install.jinja2:4
 #: templates/install.jinja2:9
 msgid "Install as PWA"
 msgstr "Installeer als PWA"
 
-#: templates/home.jinja2:47
+#: templates/home.jinja2:46
 msgid "Experimental"
 msgstr "Experimenteel"
 
-#: templates/home.jinja2:48 templates/radio.jinja2:4 templates/radio.jinja2:9
+#: templates/home.jinja2:47 templates/radio.jinja2:4 templates/radio.jinja2:9
 msgid "Radio"
 msgstr "Radio"
 
-#: templates/home.jinja2:49 templates/playlist_stats.jinja2:4
+#: templates/home.jinja2:48 templates/playlist_stats.jinja2:4
 #: templates/playlist_stats.jinja2:9
 msgid "Playlist statistics"
 msgstr "Afspeellijststatistieken"
 
-#: templates/home.jinja2:52
+#: templates/home.jinja2:51
 msgid "Administrative"
 msgstr "Administratief"
 
-#: templates/home.jinja2:53 templates/users.jinja2:4 templates/users.jinja2:9
+#: templates/home.jinja2:52 templates/users.jinja2:4 templates/users.jinja2:9
 msgid "User management"
 msgstr "Gebruikerbeheer"
 
@@ -1191,10 +1183,6 @@ msgstr "Week"
 #: templates/stats.jinja2:13
 msgid "Month"
 msgstr "Maand"
-
-#: templates/stats.jinja2:17
-msgid "Loading charts&mldr;"
-msgstr "Grafieken laden&mldr;"
 
 #: templates/users.jinja2:12
 msgid "To create admin users or to delete users, please use the CLI interface."
