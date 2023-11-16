@@ -16,6 +16,7 @@ from flask import (Flask, Response, redirect, render_template, request,
                    send_file, abort)
 from flask_babel import Babel, _, format_timedelta
 from werkzeug.middleware.proxy_fix import ProxyFix
+import jinja2
 
 import auth
 import charts
@@ -39,6 +40,8 @@ from radio import RadioTrack
 
 app = Flask(__name__, template_folder='templates')
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=settings.proxies_x_forwarded_for)
+app.jinja_env.undefined = jinja2.StrictUndefined
+app.jinja_env.auto_reload = settings.dev
 babel = Babel(app, locale_selector=language.get_locale)
 log = logging.getLogger('app')
 static_dir = Path('static')
