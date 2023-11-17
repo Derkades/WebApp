@@ -9,15 +9,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 from sqlite3 import Connection
 from typing import Any
-from urllib.parse import quote as urlencode
 
 import bcrypt
-from flask import (Flask, Response, redirect, render_template, request,
-                   send_file, abort)
+import jinja2
+from flask import Flask, Response, abort, redirect, render_template, request
 from flask_babel import Babel, _, format_timedelta
 from werkzeug.middleware.proxy_fix import ProxyFix
-import jinja2
 
+import app_files
 import auth
 import charts
 import db
@@ -32,13 +31,15 @@ import packer
 import radio
 import scanner
 import settings
+import util
 from auth import AuthError, PrivacyOption, RequestTokenError
 from charts import StatsPeriod
 from image import ImageFormat, ImageQuality
-from music import AudioType, Playlist, Track
+from music import AudioType, Track
 from radio import RadioTrack
 
 app = Flask(__name__, template_folder='templates')
+app.register_blueprint(app_files.bp)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=settings.proxies_x_forwarded_for)
 app.jinja_env.undefined = jinja2.StrictUndefined
 app.jinja_env.auto_reload = settings.dev
@@ -459,72 +460,6 @@ def route_update_metadata():
     return Response(None, 200)
 
 
-@app.route('/files')
-def route_files():
-    """
-    File manager
-    """
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, redirect_to_login=True)
-        csrf_token = user.get_csrf()
-
-        if 'path' in request.args:
-            browse_path = music.from_relpath(request.args['path'])
-        else:
-            browse_path = music.from_relpath('.')
-
-        show_trashed = 'trash' in request.args
-
-        if browse_path.resolve() == Path(settings.music_dir).resolve():
-            parent_path = None
-            write_permission = user.admin
-        else:
-            parent_path = music.to_relpath(browse_path.parent)
-            # If the base directory is writable, all paths inside it will be, too.
-            playlist = Playlist.from_path(conn, browse_path)
-            write_permission = playlist.has_write_permission(user)
-
-        children = []
-
-        for path in browse_path.iterdir():
-            if music.is_trashed(path) != show_trashed:
-                continue
-
-            file_info = {'path': music.to_relpath(path),
-                         'name': path.name,
-                         'type': 'dir' if path.is_dir() else 'file'}
-            children.append(file_info)
-
-            if path.is_dir():
-                continue
-
-            track = Track.by_relpath(conn, music.to_relpath(path))
-            if track:
-                meta = track.metadata()
-                file_info['type'] = 'music'
-                file_info['artist'] = ', '.join(meta.artists) if meta.artists else ''
-                file_info['title'] = meta.title if meta.title else ''
-
-    children = sorted(children, key=lambda x: x['name'])
-
-    return render_template('files.jinja2',
-                           base_path=music.to_relpath(browse_path),
-                           parent_path=parent_path,
-                           write_permission=write_permission,
-                           files=children,
-                           music_extensions=','.join(music.MUSIC_EXTENSIONS),
-                           csrf_token=csrf_token,
-                           show_trashed=show_trashed)
-
-
-def check_filename(name: str) -> None:
-    """
-    Ensure file name is valid, if not raise ValueError
-    """
-    if '/' in name or name == '.' or name == '..':
-        raise ValueError('illegal name')
-
-
 @app.route('/playlists_create', methods=['POST'])
 def route_playlists_create():
     """
@@ -536,7 +471,7 @@ def route_playlists_create():
 
         dir_name = request.form['path']
 
-        check_filename(dir_name)
+        util.check_filename(dir_name)
 
         path = Path(settings.music_dir, dir_name)
 
@@ -587,110 +522,6 @@ def route_playlists_share():
 
         return redirect('/playlists')
 
-
-@app.route('/files_upload', methods=['POST'])
-def route_files_upload():
-    """
-    Form target to upload file, called from file manager
-    """
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
-
-        upload_dir = music.from_relpath(request.form['dir'])
-
-        playlist = Playlist.from_path(conn, upload_dir)
-        if not playlist.has_write_permission(user):
-            return abort(403, 'No write permission for this playlist')
-
-    for uploaded_file in request.files.getlist('upload'):
-        if uploaded_file.filename is None or uploaded_file.filename == '':
-            return abort(402, 'Blank file name. Did you select a file?')
-
-        check_filename(uploaded_file.filename)
-        uploaded_file.save(Path(upload_dir, uploaded_file.filename))
-
-    with db.connect() as conn:
-        scanner.scan_tracks(conn, playlist.name)
-
-    return redirect('/files?path=' + urlencode(music.to_relpath(upload_dir)))
-
-
-@app.route('/files_rename', methods=['GET', 'POST'])
-def route_files_rename():
-    """
-    Page and form target to rename file
-    """
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-
-        if request.method == 'POST':
-            if request.is_json:
-                csrf = request.json['csrf']
-                relpath = request.json['path']
-                new_name = request.json['new_name']
-            else:
-                csrf = request.form['csrf']
-                relpath = request.form['path']
-                new_name = request.form['new-name']
-
-            user.verify_csrf(csrf)
-
-            path = music.from_relpath(relpath)
-            check_filename(new_name)
-
-            playlist = Playlist.from_path(conn, path)
-            if not playlist.has_write_permission(user):
-                return Response(None, 403)
-
-            path.rename(Path(path.parent, new_name))
-
-            scanner.scan_tracks(conn, playlist.name)
-
-            if request.is_json:
-                return Response(None, 200)
-            else:
-                return redirect('/files?path=' + urlencode(music.to_relpath(path.parent)))
-        else:
-            path = music.from_relpath(request.args['path'])
-            back_url = request.args['back_url']
-            return render_template('files_rename.jinja2',
-                                csrf_token=user.get_csrf(),
-                                path=music.to_relpath(path),
-                                name=path.name,
-                                back_url=back_url)
-
-
-@app.route('/files_mkdir', methods=['POST'])
-def route_files_mkdir():
-    """
-    Create directory, then enter it
-    """
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
-
-    path = music.from_relpath(request.form['path'])
-
-    playlist = Playlist.from_path(conn, path)
-    if not playlist.has_write_permission(user):
-        return abort(403, 'No write permission for this playlist')
-
-    dirname = request.form['dirname']
-    check_filename(dirname)
-    Path(path, dirname).mkdir()
-    return redirect('/files?path=' + urlencode(music.to_relpath(path)))
-
-
-@app.route('/files_download')
-def route_files_download():
-    """
-    Download track
-    """
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
-    path = music.from_relpath(request.args['path'])
-    return send_file(path, as_attachment=True)
 
 
 @app.route('/account')

@@ -203,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const oldName = path.split('/').pop();
         const newName = '.trash.' + oldName;
         (async function() {
-            await jsonPost('/files_rename', {path: path, new_name: newName});
+            await jsonPost('/files/rename', {path: path, new_name: newName});
             await Track.updateLocalTrackList();
             queue.next();
             deleteSpinner.classList.add('hidden');

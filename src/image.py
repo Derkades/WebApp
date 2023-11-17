@@ -8,8 +8,8 @@ from io import BytesIO
 from pathlib import Path
 from typing import Callable, Optional
 
-import settings
 import cache
+import settings
 
 # In offline mode, images are downloaded from the central server and served without
 # modification. The functions in this module are never actually called. As such, an

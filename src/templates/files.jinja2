@@ -24,7 +24,7 @@
     {% if write_permission %}
     <table>
         <tbody>
-            <form method="POST" action="/files_upload" enctype="multipart/form-data">
+            <form method="POST" action="/files/upload" enctype="multipart/form-data">
                 <input type="hidden" name="csrf" value="{{ csrf_token }}">
                 <input type="hidden" name="dir" value="{{ base_path }}">
                 <tr>
@@ -39,7 +39,7 @@
                     </td>
                 </tr>
             </form>
-            <form method="POST" action="/files_mkdir">
+            <form method="POST" action="/files/mkdir">
                 <input type="hidden" name="csrf" value="{{ csrf_token }}">
                 <input type="hidden" name="path" value="{{ base_path }}">
                 <tr>
@@ -108,7 +108,7 @@
             <td class="collapse-col"></td>
             {% elif file['type'] == 'music' %}
             <td class="icon-col">
-                <div class="icon" style="background-image: url('static/icon/music.svg')"></div>
+                <div class="icon" style="background-image: url('/static/icon/music.svg')"></div>
             </td>
             <td>
                 {{ file.name }}
@@ -117,7 +117,7 @@
             <td class="collapse-col">{{ file['title'] }}</td>
             {% else %}
             <td class="icon-col">
-                <div class="icon" style="background-image: url('static/icon/file-question.svg')"></div>
+                <div class="icon" style="background-image: url('/static/icon/file-question.svg')"></div>
             </td>
             <td>
                 {{ file.name }}
@@ -129,7 +129,7 @@
             {% if write_permission %}
                 {% if show_trashed %}
                     <td class="button-col">
-                        <form method="POST" action="/files_rename" class="inline-block">
+                        <form method="POST" action="/files/rename" class="inline-block">
                             <input type="hidden" name="csrf" value="{{ csrf_token }}">
                             <input type="hidden" name="path" value="{{ file['path'] }}">
                             <input type="hidden" name="new-name" value="{{ file['name'][7:] }}">
@@ -138,7 +138,7 @@
                     </td>
                 {% else %}
                     <td class="button-col">
-                        <form method="GET" action="/files_rename" class="inline-block">
+                        <form method="GET" action="/files/rename" class="inline-block">
                             <input type="hidden" name="path" value="{{ file['path'] }}">
                             {% if base_path == '.' %}
                                 <input type="hidden" name="back_url" value="/files">
@@ -150,7 +150,7 @@
                     </td>
 
                     <td class="button-col">
-                        <form method="POST" action="/files_rename" class="inline-block">
+                        <form method="POST" action="/files/rename" class="inline-block">
                             <input type="hidden" name="csrf" value="{{ csrf_token }}">
                             <input type="hidden" name="path" value="{{ file['path'] }}">
                             <input type="hidden" name="new-name" value=".trash.{{ file['name'] }}">
@@ -162,7 +162,7 @@
 
             <td class="button-col">
                 {% if file['type'] != 'dir' %}
-                    <form method="GET" action="/files_download" class="inline-block">
+                    <form method="GET" action="/files/download" class="inline-block">
                         <input type="hidden" name="path" value="{{ file['path'] }}">
                         {{ icon_button('download', title=gettext('Download original file')) }}
                     </form>
