@@ -2,7 +2,7 @@
 
 ## Installation
 
-Install an F-Droid client like [Droid-ify](https://f-droid.org/repo/com.looker.droidify_57.apk).
+Install the F-Droid client from [f-droid.org](https://f-droid.org/F-Droid.apk).
 
 Install "Termux" from F-Droid. Open Termux. You will be presented with a Linux terminal environment.
 
