@@ -37,7 +37,7 @@
     </tbody>
 </table>
 
-<a href="/activity_all" style="display: block; margin-top: .5rem">{% trans %}View more{% endtrans %}</a>
+<a href="/activity/all" style="display: block; margin-top: .5rem">{% trans %}View more{% endtrans %}</a>
 
 <h2>{% trans %}Recent file changes{% endtrans %}</h2>
 
@@ -63,7 +63,7 @@
     </tbody>
 </table>
 
-<a href="/activity_files" style="display: block; margin-top: .5rem">{% trans %}View more{% endtrans %}</a>
+<a href="/activity/files" style="display: block; margin-top: .5rem">{% trans %}View more{% endtrans %}</a>
 
 <style>
 .card-container {
@@ -217,7 +217,7 @@ async function updateNowPlaying() {
         return;
     }
 
-    const response = await fetch('/activity_data');
+    const response = await fetch('/activity/data');
     if (response.status != 200) {
         return;
     }

@@ -7,14 +7,14 @@ import shutil
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from sqlite3 import Connection
 from typing import Any
 
 import jinja2
 from flask import Flask, Response, abort, redirect, render_template, request
-from flask_babel import Babel, _, format_timedelta
+from flask_babel import Babel, _
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+import app_activity
 import app_files
 import app_users
 import auth
@@ -39,6 +39,7 @@ from music import AudioType, Track
 from radio import RadioTrack
 
 app = Flask(__name__, template_folder='templates')
+app.register_blueprint(app_activity.bp)
 app.register_blueprint(app_files.bp)
 app.register_blueprint(app_users.bp)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=settings.proxies_x_forwarded_for)
@@ -820,136 +821,6 @@ def route_history_played():
     lastfm.scrobble(lastfm_key, meta, timestamp)
 
     return Response('ok', 200, content_type='text/plain')
-
-
-def get_file_changes_list(conn: Connection, limit: int) -> list[dict[str, str]]:
-    result = conn.execute(f'''
-                              SELECT timestamp, action, playlist, track
-                              FROM scanner_log
-                              ORDER BY id DESC
-                              LIMIT {limit}
-                              ''')
-
-    action_trans = {
-        'insert': _('Added'),
-        'delete': _('Removed'),
-        'update': _('Modified'),
-    }
-
-    return [{'timestamp': timestamp,
-             'time_ago': format_timedelta(timestamp - int(time.time()), add_direction=True),
-             'action': action_trans[action],
-             'playlist': playlist,
-             'track': track}
-             for timestamp, action, playlist, track in result]
-
-
-@app.route('/activity_files')
-def route_activity_files():
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
-        changes = get_file_changes_list(conn, 2000)
-
-    return render_template('activity_files.jinja2',
-                           changes=changes)
-
-
-@app.route('/activity')
-def route_activity():
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
-
-    return render_template('activity.jinja2')
-
-
-@app.route('/activity_data')
-def route_activity_data():
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
-
-        result = conn.execute('''
-                              SELECT user.username, user.nickname, track.playlist, track, paused, progress
-                              FROM now_playing
-                                JOIN user ON now_playing.user = user.id
-                                JOIN track ON now_playing.track = track.path
-                              WHERE now_playing.timestamp > ?
-                              ''',
-                              (int(time.time()) - 20,))  # based on JS update interval
-
-        now_playing = []
-        for username, nickname, playlist_name, relpath, paused, progress in result:
-            track = Track.by_relpath(conn, relpath)
-            meta = track.metadata()
-            now_playing.append({'path': relpath,
-                             'username': nickname if nickname else username,
-                             'playlist': playlist_name,
-                             'title': meta.title,
-                             'artists': meta.artists,
-                             'fallback_title': meta.display_title(),
-                             'paused': paused,
-                             'progress': progress})
-
-        result = conn.execute('''
-                              SELECT history.timestamp, user.username, user.nickname, history.playlist, history.track
-                              FROM history
-                                  LEFT JOIN user ON history.user = user.id
-                              WHERE history.private = 0
-                              ORDER BY history.id DESC
-                              LIMIT 10
-                              ''')
-        history = []
-        for timestamp, username, nickname, playlist, relpath in result:
-            time_ago = format_timedelta(timestamp - int(time.time()), add_direction=True)
-            track = Track.by_relpath(conn, relpath)
-            if track:
-                meta = track.metadata()
-                title = meta.display_title()
-            else:
-                title = relpath
-
-            history.append({'time_ago': time_ago,
-                            'username': nickname if nickname else username,
-                            'playlist': playlist,
-                            'title': title})
-
-        file_changes = get_file_changes_list(conn, 10)
-
-    return {'now_playing': now_playing,
-            'history': history,
-            'file_changes': file_changes}
-
-
-@app.route('/activity_all')
-def route_activity_all():
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
-
-        result = conn.execute('''
-                              SELECT history.timestamp, user.username, user.nickname, history.playlist, history.track, track.path IS NOT NULL
-                              FROM history
-                                  LEFT JOIN user ON history.user = user.id
-                                  LEFT JOIN track ON history.track = track.path
-                              ORDER BY history.id DESC
-                              LIMIT 1000
-                              ''')
-        history = []
-        for timestamp, username, nickname, playlist, relpath, track_exists in result:
-            if track_exists:
-                track = Track.by_relpath(conn, relpath)
-                meta = track.metadata()
-                title = meta.display_title()
-            else:
-                title = relpath
-
-            history.append({'time': timestamp,
-                            'username': nickname if nickname else username,
-                            'playlist': playlist,
-                            'title': title})
-
-    return render_template('activity_all.jinja2',
-                           history=history)
-
-
 
 
 @app.route('/stats')
