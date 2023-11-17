@@ -12,9 +12,9 @@ This is the main database. All important data is stored here, like accounts, set
 
 The cache database is used to store the result of expensive operations. For example, it stores transcoded audio, lyrics, album cover images and thumbnails. Its size is usually in the same order of magnitude as the size of your music library, but it may be more or less depending on your usage.
 
-This databse can be deleted, but it is highly recommended to never delete it and even to include it in your backups. This is because the music player will slow down significantly without a populated cache.
+This database can be deleted, but it is highly recommended to never delete it and even to include it in your backups. This is because the music player will slow down significantly without a populated cache.
 
-Outdated cache entries are automatically removed, but the database usually won't get smaller unless it is vacuumed.
+Outdated cache entries are automatically removed.
 
 The database size varies depending on how many audio quality levels you use, but expect it to be at least 10GB for every 1000 tracks.
 

@@ -2,8 +2,6 @@
 
 The music player provides a `manage` command for management.
 
-## User management
-
 Help:
 ```
 docker compose exec music manage --help

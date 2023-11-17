@@ -2,7 +2,7 @@
 
 The app is configured using environment variables. Below is a list of all environment variables, with their default values and a brief explanation.
 
-For boolean values, specify `1` or `true` (case insensitive) for true. Anything else is considered as false.
+For boolean values, specify `1` or `true` (case insensitive) for true. Anything else is considered false.
 
 ## `TZ`
 
@@ -50,6 +50,6 @@ Set to `dev` to enable developmnent mode. Default is `prod`.
 
 Number of proxies in front of backend app that append to the X-Forwarded-For header. Defaults to 0. Setting it to less than the actual amount means the app sees the IP address of one of your proxies for all users. Setting it to a value greater than the actual amount of proxies means users can forge their remote address to be any arbitrary string.
 
-## `OFFLINE_MODE` = True
+## `MUSIC_OFFLINE_MODE` = True
 
 Set to true to run the music player in [offline mode](./offline.md)

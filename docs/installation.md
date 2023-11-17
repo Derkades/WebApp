@@ -1,6 +1,6 @@
 # Installation
 
-Installation using Docker (or Podman) is currently the only supported way.
+Installation using Docker is currently the only supported way. Support for rootless Podman is planned.
 
 Take the `docker-compose.prod.yaml` compose file as a starting point
 

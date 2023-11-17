@@ -9,7 +9,7 @@ To run a migration:
 ## 2023-10-28
 New automatic migration system was introduced. In the future, manual migrations will no longer be required.
 
-`meta.db`
+`meta.db` (does not exist yet)
 ```sql
 CREATE TABLE db_version (version INTEGER NOT NULL) STRICT;
 INSERT INTO db_version VALUES(0);

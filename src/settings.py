@@ -16,8 +16,8 @@ csrf_validity_seconds = 3600
 
 user_agent = 'Super-fancy-music-player/2.0 (https://github.com/DanielKoomen/WebApp/)'
 user_agent_offline_sync = 'Super fancy music player (offline sync) (https://github.com/DanielKoomen/WebApp/)'
-music_dir = getenv('MUSIC_MUSIC_DIR', '/music')
-data_path = getenv('MUSIC_DATA_PATH', '/data')
+music_dir = getenv('MUSIC_MUSIC_DIR')
+data_path = getenv('MUSIC_DATA_PATH')
 ffmpeg_loglevel = getenv('MUSIC_FFMPEG_LOGLEVEL', 'info')
 log_level = getenv('MUSIC_LOG_LEVEL', 'INFO')
 webscraping_user_agent = getenv('MUSIC_WEBSCRAPING_USER_AGENT', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/114.0')  # https://useragents.me
