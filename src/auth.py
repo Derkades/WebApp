@@ -8,12 +8,12 @@ from enum import Enum, unique
 from sqlite3 import Connection, OperationalError
 from typing import Optional
 
-import bcrypt
 import flask_babel
 from flask import request
 from flask_babel import _
 
 import settings
+import util
 
 log = logging.getLogger('app.auth')
 
@@ -165,13 +165,13 @@ class StandardUser(User):
     def verify_password(self, password: str) -> bool:
         result = self.conn.execute('SELECT password FROM user WHERE id=?',
                                    (self.user_id,)).fetchone()
-        hashed_password, = result
-        return bcrypt.checkpw(password.encode(), hashed_password.encode())
+        password_hash, = result
+        return util.verify_password(password, password_hash)
 
     def update_password(self, new_password: str) -> None:
-        hashed_password = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
+        password_hash = util.hash_password(new_password)
         self.conn.execute('UPDATE user SET password=? WHERE id=?',
-                          (hashed_password, self.user_id))
+                          (password_hash, self.user_id))
         self.conn.execute('DELETE FROM session WHERE user=?',
                           (self.user_id,))
 

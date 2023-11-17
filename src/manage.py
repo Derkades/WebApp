@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 from typing import Any
 
 import db
+import util
 
 log = logging.getLogger('app.manage')
 
@@ -15,12 +16,11 @@ def handle_useradd(args: Any) -> None:
     """
     Handle command to add user
     """
-    import bcrypt
     username = args.username
     is_admin = int(args.admin)
     password = input('Enter password:')
 
-    hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+    hashed_password = util.hash_password(password)
 
     with db.connect() as conn:
         conn.execute('INSERT INTO user (username, password, admin) VALUES (?, ?, ?)',
@@ -65,8 +65,6 @@ def handle_passwd(args: Any) -> None:
     """
     Handle command to change a user's password
     """
-    import bcrypt
-
     with db.connect() as conn:
         result = conn.execute('SELECT id FROM user WHERE username=?',
                               (args.username,)).fetchone()
@@ -77,7 +75,7 @@ def handle_passwd(args: Any) -> None:
         user_id = result[0]
 
         password = input('Enter new password:')
-        hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+        hashed_password = util.hash_password(password)
 
         conn.execute('UPDATE user SET password=? WHERE id=?', (hashed_password, user_id))
 

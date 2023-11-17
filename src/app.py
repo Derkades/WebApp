@@ -10,13 +10,13 @@ from pathlib import Path
 from sqlite3 import Connection
 from typing import Any
 
-import bcrypt
 import jinja2
 from flask import Flask, Response, abort, redirect, render_template, request
 from flask_babel import Babel, _, format_timedelta
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import app_files
+import app_users
 import auth
 import charts
 import db
@@ -40,6 +40,7 @@ from radio import RadioTrack
 
 app = Flask(__name__, template_folder='templates')
 app.register_blueprint(app_files.bp)
+app.register_blueprint(app_users.bp)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=settings.proxies_x_forwarded_for)
 app.jinja_env.undefined = jinja2.StrictUndefined
 app.jinja_env.auto_reload = settings.dev
@@ -1092,82 +1093,6 @@ def route_never_play_json():
                             (user.user_id,)).fetchall()
 
     return {'tracks': [row[0] for row in rows]}
-
-
-@app.route('/users')
-def route_users():
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, require_admin=True)
-        new_csrf_token = user.get_csrf()
-
-        result = conn.execute('SELECT id, username, admin, primary_playlist FROM user')
-        users = [{'id': user_id,
-                  'username': username,
-                  'admin': admin,
-                  'primary_playlist': primary_playlist}
-                 for user_id, username, admin, primary_playlist in result]
-
-        for user_dict in users:
-            result = conn.execute('SELECT playlist FROM user_playlist_write WHERE user=?',
-                                  (user_dict['id'],))
-            user_dict['writable_playlists'] = [playlist for playlist, in result]
-            user_dict['writable_playlists_str'] = ', '.join(user_dict['writable_playlists'])
-
-    return render_template('users.jinja2',
-                           csrf_token=new_csrf_token,
-                           users=users)
-
-
-@app.route('/users_edit', methods=['GET', 'POST'])
-def route_users_edit():
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, require_admin=True)
-
-        if request.method == 'GET':
-            csrf_token = user.get_csrf()
-            username = request.args['username']
-
-            return render_template('users_edit.jinja2',
-                                   csrf_token=csrf_token,
-                                   username=username)
-        else:
-            user.verify_csrf(request.form['csrf'])
-            username = request.form['username']
-            new_username = request.form['new_username']
-            new_password = request.form['new_password']
-
-            if new_password != '':
-                hashed_password = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
-                conn.execute('UPDATE user SET password=? WHERE username=?',
-                             (hashed_password, username))
-                conn.execute('''
-                             DELETE FROM session WHERE user = (SELECT id FROM user WHERE username=?)
-                             ''', (username,))
-
-            if new_username != username:
-                conn.execute('UPDATE user SET username=? WHERE username=?',
-                             (new_username, username))
-
-            return redirect('/users')
-
-
-@app.route('/users_new', methods=['POST'])
-def route_users_new():
-    form = request.form
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, require_admin=True)
-        user.verify_csrf(form['csrf'])
-
-    # Close connection, bcrypt hash takes a while
-    username = form['username']
-    password = form['password']
-    hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
-
-    with db.connect() as conn:
-        conn.execute('INSERT INTO user (username, password) VALUES (?, ?)',
-                     (username, hashed_password))
-
-    return redirect('/users')
 
 
 @app.route('/player_copy_track', methods=['POST'])

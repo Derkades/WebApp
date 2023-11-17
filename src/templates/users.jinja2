@@ -11,7 +11,7 @@
 <table class="table">
     {% trans %}To create admin users or to delete users, please use the CLI interface.{% endtrans %}
     <h2>{% trans %}Create new user{% endtrans %}</h2>
-    <form method="POST" action="/users_new">
+    <form method="POST" action="/users/new">
         <input type="hidden" name="csrf" value="{{ csrf_token }}">
         {% trans %}Username{% endtrans %}<br>
         <input type="text" name="username"><br>
@@ -49,7 +49,7 @@
                     {{ user.writable_playlists_str }}
                 </td>
                 <td>
-                    <form action="/users_edit">
+                    <form action="/users/edit">
                         <input type="hidden" name="username" value="{{ user.username }}">
                         <input type="submit" value="{% trans %}Edit{% endtrans %}">
                     </form>
