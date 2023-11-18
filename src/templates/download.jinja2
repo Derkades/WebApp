@@ -88,7 +88,7 @@ async function searchFormAction() {
     searchButton.classList.add('hidden');
     searchLoading.classList.remove('hidden');
 
-    const response = await jsonPost('/download_search', {query: searchQuery.value});
+    const response = await jsonPost('/download/search', {query: searchQuery.value});
     const json = await response.json();
 
     for (const result of json.results) {

@@ -9,14 +9,14 @@
 {{ page_heading(gettext("Account settings for '%(username)s'", username=user.username)) }}
 
 <h2>{% trans %}Nickname{% endtrans %}</h2>
-<form method="POST" action="/change_nickname_form">
+<form method="POST" action="/account/change_nickname">
     <input type="hidden" value="{{ csrf_token }}" name="csrf_token">
     <input type="text" value="{{ user.nickname if user.nickname }}" name="nickname"><br>
     <input type="submit" value="{% trans %}Change nickname{% endtrans %}">
 </form>
 
 <h2>{% trans %}Language{% endtrans %}</h2>
-<form method="POST" action="/change_language_form">
+<form method="POST" action="/account/change_language">
     <input type="hidden" value="{{ csrf_token }}" name="csrf_token">
     <select name="language">
         <option value="" {% if not user.language %}selected{% endif %}>{% trans %}System language{% endtrans %}</option>
@@ -33,7 +33,7 @@
 
 <h2>{% trans %}Privacy{% endtrans %}</h2>
 
-<form method="POST" action="/change_privacy_setting">
+<form method="POST" action="/account/change_privacy_setting">
     <input type="hidden" value="{{ csrf_token }}" name="csrf_token">
     <select name="privacy">
         <option value="none" {% if user.privacy.name == 'NONE' %}selected{% endif %}>{% trans %}None - Show up in statistics and now playing{% endtrans %}</option>
@@ -61,7 +61,7 @@
 </p>
 
 <h2>{% trans %}Password{% endtrans %}</h2>
-<form method="POST" action="/change_password_form">
+<form method="POST" action="/account/change_password">
     <input type="hidden" value="{{ csrf_token }}" name="csrf_token">
     {% trans %}Current password{% endtrans %}<br>
     <input type="password" value="" name="current_password"><br>

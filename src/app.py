@@ -14,8 +14,11 @@ from flask import Flask, Response, abort, redirect, render_template, request
 from flask_babel import Babel, _
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+import app_account
 import app_activity
+import app_download
 import app_files
+import app_playlists
 import app_users
 import auth
 import charts
@@ -31,7 +34,6 @@ import packer
 import radio
 import scanner
 import settings
-import util
 from auth import AuthError, PrivacyOption, RequestTokenError
 from charts import StatsPeriod
 from image import ImageFormat, ImageQuality
@@ -39,8 +41,11 @@ from music import AudioType, Track
 from radio import RadioTrack
 
 app = Flask(__name__, template_folder='templates')
+app.register_blueprint(app_account.bp)
 app.register_blueprint(app_activity.bp)
+app.register_blueprint(app_download.bp)
 app.register_blueprint(app_files.bp)
+app.register_blueprint(app_playlists.bp)
 app.register_blueprint(app_users.bp)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=settings.proxies_x_forwarded_for)
 app.jinja_env.undefined = jinja2.StrictUndefined
@@ -342,32 +347,6 @@ def route_ytdl():
     return Response(generate(), content_type='text/plain')
 
 
-@app.route('/download_search', methods=['POST'])
-def route_download_search():
-    with db.connect(read_only=True) as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
-
-        query = request.json['query']
-        results = downloader.search(query)
-
-    return {'results': results}
-
-
-@app.route('/download')
-def route_download():
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        csrf_token = user.get_csrf()
-        playlists = [(playlist.name, playlist.write)
-                     for playlist in music.user_playlists(conn, user.user_id, all_writable=user.admin)]
-
-    return render_template('download.jinja2',
-                           csrf_token=csrf_token,
-                           primary_playlist=user.primary_playlist,
-                           playlists=playlists)
-
-
 @app.route('/track_list')
 def route_track_list():
     """
@@ -460,166 +439,6 @@ def route_update_metadata():
                              date=payload['metadata']['year'])
 
     return Response(None, 200)
-
-
-@app.route('/playlists_create', methods=['POST'])
-def route_playlists_create():
-    """
-    Form target to create playlist, called from /playlists page
-    """
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
-
-        dir_name = request.form['path']
-
-        util.check_filename(dir_name)
-
-        path = Path(settings.music_dir, dir_name)
-
-        if path.exists():
-            return abort(400, 'Playlist path already exists')
-
-        path.mkdir()
-
-        scanner.scan(conn)  # This creates a row for the playlist in the playlist table
-
-        # New playlist should be writable for user who created it
-        conn.execute('INSERT INTO user_playlist_write VALUES (user, playlist)',
-                     (user.user_id, dir_name))
-
-        return redirect('/playlists')
-
-
-@app.route('/playlists_share', methods=['GET', 'POST'])
-def route_playlists_share():
-    if request.method == 'GET':
-        with db.connect(read_only=True) as conn:
-            auth.verify_auth_cookie(conn)
-            usernames = [row[0] for row in conn.execute('SELECT username FROM user')]
-        csrf = request.args['csrf']
-        playlist_relpath = request.args['playlist']
-        return render_template('playlists_share.jinja2',
-                               csrf=csrf,
-                               playlist=playlist_relpath,
-                               usernames=usernames)
-
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
-        playlist_relpath = request.form['playlist']
-        username = request.form['username']
-
-        target_user_id, = conn.execute('SELECT id FROM user WHERE username=?',
-                                    (username,)).fetchone()
-
-        # Verify playlist exists and user has write access
-        playlist = music.user_playlist(conn, playlist_relpath, user.user_id)
-
-        if not playlist.write and not user.admin:
-            return abort(403, 'Cannot share playlist if you do not have write permission')
-
-        conn.execute('INSERT INTO user_playlist_write VALUES(?, ?) ON CONFLICT DO NOTHING',
-                     (target_user_id, playlist_relpath))
-
-        return redirect('/playlists')
-
-
-
-@app.route('/account')
-def route_account():
-    """
-    Account information page
-    """
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        csrf_token = user.get_csrf()
-        sessions = user.sessions()
-
-        result = conn.execute('SELECT name FROM user_lastfm WHERE user=?',
-                              (user.user_id,)).fetchone()
-        if result:
-            lastfm_name, = result
-        else:
-            lastfm_name = None
-
-    return render_template('account.jinja2',
-                            user=user,
-                            languages=language.LANGUAGES.items(),
-                            csrf_token=csrf_token,
-                            sessions=sessions,
-                            lastfm_enabled=lastfm.is_configured(),
-                            lastfm_name=lastfm_name,
-                            lastfm_connect_url=lastfm.CONNECT_URL)
-
-
-@app.route('/change_password_form', methods=['POST'])
-def route_change_password_form():
-    """
-    Form target to change password, called from /account page
-    """
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf_token'])
-        if not user.verify_password(request.form['current_password']):
-            return _('Incorrect password.')
-
-        if request.form['new_password'] != request.form['repeat_new_password']:
-            return _('Repeated new passwords do not match.')
-
-        user.update_password(request.form['new_password'])
-        return redirect('/')
-
-
-@app.route('/change_nickname_form', methods=['POST'])
-def route_change_nickname_form():
-    """
-    Form target to change nickname, called from /account page
-    """
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf_token'])
-
-        conn.execute('UPDATE user SET nickname=? WHERE id=?',
-                     (request.form['nickname'], user.user_id))
-
-    return redirect('/account')
-
-
-@app.route('/change_language_form', methods=['POST'])
-def route_change_language_form():
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf_token'])
-
-        lang_code = request.form['language']
-        if lang_code == '':
-            conn.execute('UPDATE user SET language = NULL')
-        else:
-            if lang_code not in language.LANGUAGES:
-                return Response('Invalid language code', 400, content_type='text/plain')
-
-            conn.execute('UPDATE user SET language=?',
-                         (lang_code,))
-
-    return redirect('/account')
-
-
-@app.route('/change_privacy_setting', methods=['POST'])
-def route_change_privacy_setting():
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf_token'])
-
-        privacy = request.form['privacy']
-        assert privacy in {'none', 'aggregate', 'hidden'}
-
-        if privacy == 'none':
-            conn.execute('UPDATE user SET privacy = NULL')
-        else:
-            conn.execute('UPDATE user SET privacy = ?', (privacy,))
-
-    return redirect('/account')
 
 
 def radio_track_response(track: RadioTrack):
@@ -840,65 +659,6 @@ def route_stats_data():
 
     data = charts.get_data(period)
     return jsonw.json_response(data)
-
-
-@app.route('/playlist_stats')
-def route_playlist_stats():
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
-        playlists = music.playlists(conn)
-        playlists_stats = [{'name': playlist.name,
-                            'stats': playlist.stats()}
-                           for playlist in playlists]
-
-    return render_template('playlist_stats.jinja2',
-                           playlists=playlists_stats)
-
-
-@app.route('/playlists')
-def route_playlists():
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        csrf_token = user.get_csrf()
-        user_playlists = music.user_playlists(conn, user.user_id)
-        primary_playlist, = conn.execute('SELECT primary_playlist FROM user WHERE id=?',
-                                         (user.user_id,)).fetchone()
-
-    return render_template('playlists.jinja2',
-                           user_is_admin=user.admin,
-                           playlists=user_playlists,
-                           csrf_token=csrf_token,
-                           primary_playlist=primary_playlist)
-
-
-@app.route('/playlists_favorite', methods=['POST'])
-def route_playlists_favorite():
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
-        playlist = request.form['playlist']
-        is_favorite = request.form['favorite']
-        if is_favorite == '1':
-            conn.execute('INSERT INTO user_playlist_favorite VALUES (?, ?) ON CONFLICT DO NOTHING',
-                         (user.user_id, playlist))
-        else:
-            conn.execute('DELETE FROM user_playlist_favorite WHERE user=? AND playlist=?',
-                         (user.user_id, playlist))
-
-    return redirect('/playlists')
-
-
-@app.route('/playlists_set_primary', methods=['POST'])
-def route_playlists_set_primary():
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
-        playlist = request.form['primary-playlist']
-
-        conn.execute('UPDATE user SET primary_playlist=? WHERE id=?',
-                     (playlist, user.user_id))
-
-    return redirect('/playlists')
 
 
 @app.route('/download_offline')

@@ -45,7 +45,6 @@
 {% if not offline_mode %}
     <h2>{% trans %}Experimental{% endtrans %}</h2>
     {{ nav('/radio', 'radio', _('Radio')) }}
-    {{ nav('/playlist_stats', 'chart-line-variant', _('Playlist statistics')) }}
 
     {% if user_is_admin %}
         <h2>{% trans %}Administrative{% endtrans %}</h2>
