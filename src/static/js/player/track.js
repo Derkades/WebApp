@@ -164,7 +164,7 @@ class Track {
 
     static async updateLocalTrackList() {
         console.info('Updating local track list');
-        const response = await fetch('/track_list');
+        const response = await fetch('/track/list');
         const lastModified = response.headers.get('Last-Modified')
 
         if (lastModified == state.trackListLastModified) {
@@ -206,7 +206,7 @@ class Track {
         const imageQuality = audioType == 'webm_opus_low' ? 'low' : 'high';
         const encodedPath = encodeURIComponent(this.path);
 
-        const audioUrl = `/get_track?path=${encodedPath}&type=${audioType}`;
+        const audioUrl = `/track/audio?path=${encodedPath}&type=${audioType}`;
         let audioUrlGetter;
         if (document.getElementById('settings-download-mode').value === 'download') {
             audioUrlGetter = async function() {
@@ -227,7 +227,7 @@ class Track {
             // Get cover image
             console.debug('download album cover image');
             const meme = document.getElementById('settings-meme-mode').checked ? '1' : '0';
-            const imageUrl = `/get_album_cover?path=${encodedPath}&quality=${imageQuality}&meme=${meme}`;
+            const imageUrl = `/track/album_cover?path=${encodedPath}&quality=${imageQuality}&meme=${meme}`;
             const coverResponse = await fetch(imageUrl);
             checkResponseCode(coverResponse);
             const imageBlob = await coverResponse.blob();
@@ -237,7 +237,7 @@ class Track {
         const lyricsGetter = async function() {
             // Get lyrics
             console.debug('download lyrics');
-            const lyricsResponse = await fetch(`/get_lyrics?path=${encodedPath}`);
+            const lyricsResponse = await fetch(`/track/lyrics?path=${encodedPath}`);
             checkResponseCode(lyricsResponse);
             const lyricsJson = await lyricsResponse.json();
             return new Lyrics(lyricsJson.found, lyricsJson.source, lyricsJson.html);

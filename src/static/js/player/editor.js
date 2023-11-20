@@ -70,7 +70,7 @@ class Editor {
 
         // Make request to update metadata
         try {
-            await jsonPost('/update_metadata', payload);
+            await jsonPost('/track/update_metadata', payload);
         } catch (e) {
             alert('An error occurred while updating metadata.');
             document.getElementById('editor-writing').classList.add('hidden');

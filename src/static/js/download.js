@@ -18,7 +18,7 @@ function addToTotal(add) {
  * @param {IDBDatabase} db
  */
 async function updateTrackList(selectedPlaylist, db) {
-    const response = await fetch('/track_list');
+    const response = await fetch('/track/list');
     const json = await response.json();
 
     document.getElementById('table-body').replaceChildren();
@@ -75,7 +75,7 @@ async function downloadTracks(db) {
         const downloadCol = row.childNodes[0];
         downloadCol.textContent = '...';
         const path = row.dataset.path;
-        const audioUrl = '/get_track?type=webm_opus_high&path=' + encodeURIComponent(path);
+        const audioUrl = '/track/audio?type=webm_opus_high&path=' + encodeURIComponent(path);
         const response = await fetch(audioUrl);
         if (response.status != 200) {
             throw new Error("Error status " + response.status);

@@ -8,7 +8,7 @@ import db
 import jsonw
 from auth import AuthError, RequestTokenError
 
-log = logging.getLogger('app_auth')
+log = logging.getLogger('routes.auth')
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 

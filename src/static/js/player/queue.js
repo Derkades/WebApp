@@ -86,7 +86,7 @@ class Queue {
         console.debug('Choose track');
         const encToken = encodeURIComponent(await csrf.getToken());
         const encPlaylist = encodeURIComponent(playlist);
-        const chooseResponse = await fetch(`/choose_track?playlist_dir=${encPlaylist}&${getTagFilter()}&csrf=${encToken}`);
+        const chooseResponse = await fetch(`/track/choose?playlist_dir=${encPlaylist}&${getTagFilter()}&csrf=${encToken}`);
         checkResponseCode(chooseResponse);
         const path = (await chooseResponse.json()).path;
 

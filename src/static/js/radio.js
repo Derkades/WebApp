@@ -60,7 +60,7 @@ async function replaceAudioElem() {
     const audioElem = document.createElement('audio');
     console.log('replace children');
     const sourceElem = document.createElement('source');
-    sourceElem.src = '/get_track?path=' + encodeURIComponent(state.currentTrack.path) + '&type=webm_opus_high';
+    sourceElem.src = '/track/audio?path=' + encodeURIComponent(state.currentTrack.path) + '&type=webm_opus_high';
     audioElem.appendChild(sourceElem);
     audioElem.controls = true;
     audioElem.play();

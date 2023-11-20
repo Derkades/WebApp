@@ -171,7 +171,7 @@
 
             {# <td class="button-col">
                 {% if file['type'] != 'dir' %}
-                    <form method="GET" action="/get_track" class="inline-block">
+                    <form method="GET" action="/track/audio" class="inline-block">
                         <input type="hidden" name="type" value="mp3_with_metadata">
                         <input type="hidden" name="path" value="{{ file['path'] }}">
                         {{ icon_button('earbuds', title=gettext('Download transcoded MP3 with metadata')) }}

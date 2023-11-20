@@ -125,16 +125,16 @@ class OfflineSync:
         Download audio, album cover and lyrics for a track and store in the 'content' database table.
         """
         log.info('Downloading audio data')
-        response = self.request_get('/get_track?type=webm_opus_high&path=' + urlencode(path))
+        response = self.request_get('/track/audio?type=webm_opus_high&path=' + urlencode(path))
         assert response.status_code == 200
         music_data = response.content
 
         log.info('Downloading album cover')
-        response = self.request_get('/get_album_cover?quality=high&path=' + urlencode(path))
+        response = self.request_get('/track/album_cover?quality=high&path=' + urlencode(path))
         assert response.status_code == 200
         cover_data = response.content
         log.info('Downloading lyrics')
-        response = self.request_get('/get_lyrics?path=' + urlencode(path))
+        response = self.request_get('/track/lyrics?path=' + urlencode(path))
         assert response.status_code == 200
         lyrics_json = response.text
 
@@ -213,7 +213,7 @@ class OfflineSync:
         Download added or modified tracks from the server, and delete local tracks that were deleted on the server
         """
         log.info('Downloading track list')
-        playlists = self.request_get('/track_list').json()['playlists']
+        playlists = self.request_get('/track/list').json()['playlists']
         never_play = set(self.request_get('/never_play_json').json()['tracks'])
 
         all_track_paths: set[str] = set()
