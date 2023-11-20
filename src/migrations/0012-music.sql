@@ -1,4 +1,4 @@
--- Rename never_play to dislikes, migrate to strict mode
+-- Rename never_play to dislikes
 
 PRAGMA foreign_keys=OFF;
 

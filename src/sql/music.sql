@@ -115,6 +115,6 @@ CREATE TABLE dislikes (
     user INTEGER NOT NULL REFERENCES user(id) ON DELETE CASCADE,
     track TEXT NOT NULL REFERENCES track(path) ON DELETE CASCADE,
     UNIQUE(user, track)
-) STRICT;
+);
 
 COMMIT;
