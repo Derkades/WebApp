@@ -508,7 +508,7 @@ class Playlist:
         params: list[str | int] = [self.name]
 
         if user is not None:
-            query += ' AND path NOT IN (SELECT track FROM dislikes WHERE user = ?)'
+            query += ' AND NOT EXISTS (SELECT 1 FROM dislikes WHERE user=? AND track=path)'
             params.append(user.user_id)
 
         track_tags_query = 'SELECT tag FROM track_tag WHERE track = track.path'
@@ -618,8 +618,8 @@ def user_playlist(conn: Connection, name: str, user_id: int) -> UserPlaylist:
     """
     row = conn.execute('''
                        SELECT (SELECT COUNT(*) FROM track WHERE playlist=path),
-                              EXISTS(SELECT * FROM user_playlist_write WHERE playlist=path AND user=:user) AS write,
-                              EXISTS(SELECT * FROM user_playlist_favorite WHERE playlist=path AND user=:user) AS favorite
+                              EXISTS(SELECT 1 FROM user_playlist_write WHERE playlist=path AND user=:user) AS write,
+                              EXISTS(SELECT 1 FROM user_playlist_favorite WHERE playlist=path AND user=:user) AS favorite
                        FROM playlist
                        WHERE path=:playlist
                        ORDER BY favorite DESC, write DESC, path ASC
@@ -653,8 +653,8 @@ def user_playlists(conn: Connection, user_id: int, all_writable=False) -> list[U
     rows = conn.execute('''
                         SELECT path,
                                (SELECT COUNT(*) FROM track WHERE playlist=playlist.path),
-                               EXISTS(SELECT * FROM user_playlist_write WHERE playlist=path AND user=:user) AS write,
-                               EXISTS(SELECT * FROM user_playlist_favorite WHERE playlist=path AND user=:user) AS favorite
+                               EXISTS(SELECT 1 FROM user_playlist_write WHERE playlist=path AND user=:user) AS write,
+                               EXISTS(SELECT 1 FROM user_playlist_favorite WHERE playlist=path AND user=:user) AS favorite
                         FROM playlist
                         ORDER BY favorite DESC, write DESC, path ASC
                         ''', {'user': user_id})
