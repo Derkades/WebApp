@@ -3,18 +3,16 @@ Main application file, containing all Flask routes
 """
 import logging
 import shutil
-import time
 from pathlib import Path
 
 import jinja2
-from flask import Flask, Response, abort, redirect, render_template, request
+from flask import Flask, Response, redirect, render_template, request
 from flask_babel import Babel, _
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import auth
 import charts
 import db
-import downloader
 import jsonw
 import language
 import lastfm
@@ -22,7 +20,7 @@ import music
 import packer
 import scanner
 import settings
-from auth import AuthError, PrivacyOption, RequestTokenError
+from auth import AuthError, RequestTokenError
 from charts import StatsPeriod
 from music import Track
 from routes import account as app_account
@@ -105,40 +103,6 @@ def route_info():
     return render_template('info.jinja2')
 
 
-@app.route('/ytdl', methods=['POST'])
-def route_ytdl():
-    """
-    Use yt-dlp to download the provided URL to a playlist directory
-    """
-    with db.connect(read_only=True) as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
-
-        directory = request.json['directory']
-        url = request.json['url']
-
-        playlist = music.playlist(conn, directory)
-        if not playlist.has_write_permission(user):
-            return abort(403, 'No write permission for this playlist')
-
-        log.info('ytdl %s %s', directory, url)
-
-    # Release database connection during download
-
-    def generate():
-        status_code = yield from downloader.download(playlist.path, url)
-        if status_code == 0:
-            yield 'Scanning playlists...\n'
-            with db.connect() as conn:
-                playlist2 = music.playlist(conn, directory)
-                scanner.scan_tracks(conn, playlist2.name)
-            yield 'Done!'
-        else:
-            yield f'Failed with status code {status_code}'
-
-    return Response(generate(), content_type='text/plain')
-
-
 @app.route('/lastfm_callback')
 def route_lastfm_callback():
     # After allowing access, last.fm sends the user to this page with an
@@ -176,131 +140,6 @@ def route_lastfm_disconnect():
     return redirect('/account')
 
 
-@app.route('/now_playing', methods=['POST'])
-def route_now_playing():
-    """
-    Send info about currently playing track. Sent frequently by the music player.
-    POST body should contain a json object with:
-     - csrf (str): CSRF token
-     - track (str): Track relpath
-     - paused (bool): Whether track is paused
-     - progress (int): Track position, as a percentage
-    """
-    if settings.offline_mode:
-        log.info('Ignoring now playing in offline mode')
-        return Response(None, 200)
-
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
-
-        if user.privacy != PrivacyOption.NONE:
-            log.info('Ignoring, user has enabled private mode')
-            return Response('ok', 200, content_type='text/plain')
-
-        player_id = request.json['player_id']
-        assert isinstance(player_id, str)
-        relpath = request.json['track']
-        assert isinstance(relpath, str)
-        paused = request.json['paused']
-        assert isinstance(paused, bool)
-        progress = request.json['progress']
-        assert isinstance(progress, int)
-
-        user_key = lastfm.get_user_key(user)
-
-        if user_key:
-            result = conn.execute('''
-                                  SELECT timestamp FROM now_playing
-                                  WHERE user = ? AND track = ?
-                                  ''', (user.user_id, relpath)).fetchone()
-            previous_update = None if result is None else result[0]
-
-        conn.execute('''
-                     INSERT INTO now_playing (player_id, user, timestamp, track, paused, progress)
-                     VALUES (:player_id, :user_id, :timestamp, :relpath, :paused, :progress)
-                     ON CONFLICT(player_id) DO UPDATE
-                         SET timestamp=:timestamp, track=:relpath, paused=:paused, progress=:progress
-                     ''',
-                     {'player_id': player_id,
-                      'user_id': user.user_id,
-                      'timestamp': int(time.time()),
-                      'relpath': relpath,
-                      'paused': paused,
-                      'progress': progress})
-
-        if not user_key:
-            # Skip last.fm now playing, account is not linked
-            return Response(None, 200, content_type='text/plain')
-
-        # If now playing has already been sent for this track, only send an update to
-        # last.fm if it was more than 5 minutes ago.
-        if previous_update is not None and int(time.time()) - previous_update < 5*60:
-            # Skip last.fm now playing, already sent recently
-            return Response(None, 200, content_type='text/plain')
-
-        track = Track.by_relpath(conn, relpath)
-        meta = track.metadata()
-
-    # Request to last.fm takes a while, so close database connection first
-
-    log.info('Sending now playing to last.fm: %s', track.relpath)
-    lastfm.update_now_playing(user_key, meta)
-    return Response(None, 200, content_type='text/plain')
-
-
-@app.route('/history_played', methods=['POST'])
-def route_history_played():
-    if settings.offline_mode:
-        with db.offline() as conn:
-            track = request.json['track']
-            timestamp = request.json['timestamp']
-            conn.execute('INSERT INTO history VALUES (?, ?)',
-                         (timestamp, track))
-        return Response(None, 200)
-
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
-
-        if user.privacy == PrivacyOption.HIDDEN:
-            log.info('Ignoring because privacy==hidden')
-            return Response('ok', 200)
-
-        track = request.json['track']
-        playlist = track[:track.index('/')]
-        timestamp = request.json['timestamp']
-        private = user.privacy == PrivacyOption.AGGREGATE
-
-        conn.execute('''
-                     INSERT INTO history (timestamp, user, track, playlist, private)
-                     VALUES (?, ?, ?, ?, ?)
-                     ''',
-                     (timestamp, user.user_id, track, playlist, private))
-
-        if private or not request.json['lastfmEligible']:
-            # No need to scrobble, nothing more to do
-            return Response('ok', 200, content_type='text/plain')
-
-        lastfm_key = lastfm.get_user_key(user)
-
-        if not lastfm_key:
-            # User has not linked their account, no need to scrobble
-            return Response('ok', 200, content_type='text/plain')
-
-        track = Track.by_relpath(conn, request.json['track'])
-        meta = track.metadata()
-        if meta is None:
-            log.warning('Track is missing from database. Probably deleted by a rescan after the track was queued.')
-            return Response('ok', 200, content_type='text/plain')
-
-    # Scrobble request takes a while, so close database connection first
-    log.info('Scrobbling to last.fm: %s', track.relpath)
-    lastfm.scrobble(lastfm_key, meta, timestamp)
-
-    return Response('ok', 200, content_type='text/plain')
-
-
 @app.route('/stats')
 def route_stats():
     with db.connect(read_only=True) as conn:
@@ -328,19 +167,6 @@ def route_download_offline():
 
     return render_template('download_offline.jinja2',
                            playlists=playlists)
-
-
-@app.route('/never_play_json')
-def route_never_play_json():
-    """
-    Return "never play" track paths in json format, for offline mode sync
-    """
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        rows = conn.execute('SELECT track FROM never_play WHERE user=?',
-                            (user.user_id,)).fetchall()
-
-    return {'tracks': [row[0] for row in rows]}
 
 
 @app.route('/player_copy_track', methods=['POST'])

@@ -49,3 +49,16 @@ def route_dislikes():
     return render_template('dislikes.jinja2',
                            csrf_token=csrf_token,
                            tracks=tracks)
+
+
+@bp.route('/json')
+def route_json():
+    """
+    Return disliked track paths in json format, for offline mode sync
+    """
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
+        rows = conn.execute('SELECT track FROM never_play WHERE user=?',
+                            (user.user_id,)).fetchall()
+
+    return {'tracks': [row[0] for row in rows]}

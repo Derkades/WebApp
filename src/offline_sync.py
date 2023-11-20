@@ -214,7 +214,7 @@ class OfflineSync:
         """
         log.info('Downloading track list')
         playlists = self.request_get('/track/list').json()['playlists']
-        never_play = set(self.request_get('/never_play_json').json()['tracks'])
+        dislikes = set(self.request_get('/dislikes/json').json()['tracks'])
 
         all_track_paths: set[str] = set()
 
@@ -226,7 +226,7 @@ class OfflineSync:
                                   (playlist['name'],))
 
             for track in playlist['tracks']:
-                if track['path'] in never_play:
+                if track['path'] in dislikes:
                     continue
 
                 all_track_paths.add(track['path'])
@@ -264,7 +264,7 @@ class OfflineSync:
             else:
                 log.warning('Duration unknown, assuming not eligible for scrobbling')
                 lastfm = False
-            response = self.request_post('/history_played',
+            response = self.request_post('/activity/played',
                               {'csrf': csrf_token,
                                'track': track,
                                'timestamp': timestamp,

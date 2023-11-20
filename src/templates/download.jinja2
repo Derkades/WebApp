@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return result
             }
 
-            const response = await jsonPost('/ytdl', {directory: downloadPlaylist.value, url: downloadUrl.value});
+            const response = await jsonPost('/download/ytdl', {directory: downloadPlaylist.value, url: downloadUrl.value});
             const reader = await response.body.getReader();
             await reader.read().then(function process(result) {
                 if (result.done) {

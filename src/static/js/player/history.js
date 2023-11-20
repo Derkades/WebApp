@@ -70,16 +70,16 @@ class History {
             paused: audioElem.paused,
             progress: Math.round((audioElem.currentTime / this.currentlyPlayingTrack.duration) * 100),
         };
-        await jsonPost('/now_playing', data);
+        await jsonPost('/activity/now_playing', data);
     }
 
     async scrobble() {
         const data = {
             track: this.currentlyPlayingTrack.path,
             timestamp: this.startTimestamp,
-            lastfmEligible: this.currentlyPlayingTrack.duration > 30, // last.fm requires track to be at least 30 seconds
+            lastfmEligible: this.currentlyPlayingTrack.duration > 30, // last.fm requires track length to be at least 30 seconds
         }
-        await jsonPost('/history_played', data);
+        await jsonPost('/activity/played', data);
     }
 }
 

@@ -1,9 +1,10 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, Response, render_template, request
 
 import auth
 import db
 import downloader
 import music
+import scanner
 
 bp = Blueprint('download', __name__, url_prefix='/download')
 
@@ -32,3 +33,38 @@ def route_download():
                            csrf_token=csrf_token,
                            primary_playlist=user.primary_playlist,
                            playlists=playlists)
+
+
+
+@bp.route('/ytdl', methods=['POST'])
+def route_ytdl():
+    """
+    Use yt-dlp to download the provided URL to a playlist directory
+    """
+    with db.connect(read_only=True) as conn:
+        user = auth.verify_auth_cookie(conn)
+        user.verify_csrf(request.json['csrf'])
+
+        directory = request.json['directory']
+        url = request.json['url']
+
+        playlist = music.playlist(conn, directory)
+        if not playlist.has_write_permission(user):
+            return abort(403, 'No write permission for this playlist')
+
+        log.info('ytdl %s %s', directory, url)
+
+    # Release database connection during download
+
+    def generate():
+        status_code = yield from downloader.download(playlist.path, url)
+        if status_code == 0:
+            yield 'Scanning playlists...\n'
+            with db.connect() as conn:
+                playlist2 = music.playlist(conn, directory)
+                scanner.scan_tracks(conn, playlist2.name)
+            yield 'Done!'
+        else:
+            yield f'Failed with status code {status_code}'
+
+    return Response(generate(), content_type='text/plain')
