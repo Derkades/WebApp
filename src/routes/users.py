@@ -61,7 +61,7 @@ def route_edit():
                 conn.execute('UPDATE user SET username=? WHERE username=?',
                              (new_username, username))
 
-            return redirect('/users')
+            return redirect('/users', code=303)
 
 
 @bp.route('/new', methods=['POST'])
@@ -80,4 +80,4 @@ def route_new():
         conn.execute('INSERT INTO user (username, password) VALUES (?, ?)',
                      (username, hashed_password))
 
-    return redirect('/users')
+    return redirect('/users', code=303)

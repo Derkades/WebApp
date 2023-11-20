@@ -134,7 +134,7 @@ def route_lastfm_disconnect():
         user.verify_csrf(request.form['csrf'])
         conn.execute('DELETE FROM user_lastfm WHERE user=?',
                      (user.user_id,))
-    return redirect('/account')
+    return redirect('/account', code=303)
 
 
 @app.route('/stats')

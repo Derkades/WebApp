@@ -47,7 +47,7 @@ def route_favorite():
             conn.execute('DELETE FROM user_playlist_favorite WHERE user=? AND playlist=?',
                          (user.user_id, playlist))
 
-    return redirect('/playlists')
+    return redirect('/playlists', code=303)
 
 
 @bp.route('/set_primary', methods=['POST'])
@@ -60,7 +60,7 @@ def route_set_primary():
         conn.execute('UPDATE user SET primary_playlist=? WHERE id=?',
                      (playlist, user.user_id))
 
-    return redirect('/playlists')
+    return redirect('/playlists', code=303)
 
 
 @bp.route('/create', methods=['POST'])
@@ -89,7 +89,7 @@ def route_create():
         conn.execute('INSERT INTO user_playlist_write VALUES (user, playlist)',
                      (user.user_id, dir_name))
 
-        return redirect('/playlists')
+        return redirect('/playlists', code=303)
 
 
 @bp.route('/share', methods=['GET', 'POST'])
@@ -123,4 +123,4 @@ def route_share():
         conn.execute('INSERT INTO user_playlist_write VALUES(?, ?) ON CONFLICT DO NOTHING',
                      (target_user_id, playlist_relpath))
 
-        return redirect('/playlists')
+        return redirect('/playlists', code=303)

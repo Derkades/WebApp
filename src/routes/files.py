@@ -98,7 +98,7 @@ def route_upload():
     with db.connect() as conn:
         scanner.scan_tracks(conn, playlist.name)
 
-    return redirect('/files?path=' + urlencode(music.to_relpath(upload_dir)))
+    return redirect('/files?path=' + urlencode(music.to_relpath(upload_dir)), code=303)
 
 
 @bp.route('/rename', methods=['GET', 'POST'])
@@ -135,7 +135,7 @@ def route_rename():
             if request.is_json:
                 return Response(None, 200)
             else:
-                return redirect('/files?path=' + urlencode(music.to_relpath(path.parent)))
+                return redirect('/files?path=' + urlencode(music.to_relpath(path.parent)), code=303)
         else:
             path = music.from_relpath(request.args['path'])
             back_url = request.args['back_url']
@@ -164,7 +164,7 @@ def route_mkdir():
     dirname = request.form['dirname']
     util.check_filename(dirname)
     Path(path, dirname).mkdir()
-    return redirect('/files?path=' + urlencode(music.to_relpath(path)))
+    return redirect('/files?path=' + urlencode(music.to_relpath(path)), code=303)
 
 
 @bp.route('/download')

@@ -28,7 +28,7 @@ def route_remove():
         conn.execute('DELETE FROM dislikes WHERE user=? AND track=?',
                      (user.user_id, request.form['track']))
 
-    return redirect('/dislikes')
+    return redirect('/dislikes', code=303)
 
 
 @bp.route('/')

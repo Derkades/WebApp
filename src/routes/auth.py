@@ -17,7 +17,7 @@ def handle_auth_error(err: AuthError):
     Display permission denied error page with reason, or redirect to login page
     """
     if err.redirect:
-        return redirect('/auth/login')
+        return redirect('/auth/login', code=303)
 
     return Response(render_template('403.jinja2', reason=err.reason.message), 403)
 
@@ -40,7 +40,7 @@ def route_login():
         try:
             auth.verify_auth_cookie(conn)
             # User is already logged in
-            return redirect('/')
+            return redirect('/', code=303)
         except AuthError:
             pass
 
@@ -65,7 +65,7 @@ def route_login():
         if request.is_json:
             return {'token': token}
 
-        response = redirect('/')
+        response = redirect('/', code=303)
         response.set_cookie('token', token, max_age=3600*24*30, samesite='Strict')
         return response
 

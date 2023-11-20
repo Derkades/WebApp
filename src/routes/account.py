@@ -50,7 +50,7 @@ def route_change__password():
             return _('Repeated new passwords do not match.')
 
         user.update_password(request.form['new_password'])
-        return redirect('/')
+        return redirect('/', code=303)
 
 
 @bp.route('/change_nickname', methods=['POST'])
@@ -65,7 +65,7 @@ def route_change_nickname():
         conn.execute('UPDATE user SET nickname=? WHERE id=?',
                      (request.form['nickname'], user.user_id))
 
-    return redirect('/account')
+    return redirect('/account', code=303)
 
 
 @bp.route('/change_language', methods=['POST'])
@@ -84,7 +84,7 @@ def route_change_language():
             conn.execute('UPDATE user SET language=?',
                          (lang_code,))
 
-    return redirect('/account')
+    return redirect('/account', code=303)
 
 
 @bp.route('/change_privacy_setting', methods=['POST'])
@@ -101,4 +101,4 @@ def route_change_privacy_setting():
         else:
             conn.execute('UPDATE user SET privacy = ?', (privacy,))
 
-    return redirect('/account')
+    return redirect('/account', code=303)
