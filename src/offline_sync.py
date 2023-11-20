@@ -75,7 +75,7 @@ class OfflineSync:
         if row:
             self.token, = row
             try:
-                response = self.request_get('/get_csrf', raise_for_status=False)
+                response = self.request_get('/auth/get_csrf', raise_for_status=False)
                 if response.status_code == 403:
                     log.info('Got 403 response, authentication token is invalid, please log in again.')
                     self.login_prompt()
@@ -100,7 +100,7 @@ class OfflineSync:
         password = input('Enter password: ')
 
         try:
-            response = self.request_post('/login',
+            response = self.request_post('/auth/login',
                                          {'username': username,
                                           'password': password})
         except RequestException:
@@ -252,7 +252,7 @@ class OfflineSync:
         """
         Send local playback history to server
         """
-        csrf_token = self.request_get('/get_csrf').json()['token']
+        csrf_token = self.request_get('/auth/get_csrf').json()['token']
 
         rows = self.db_offline.execute('SELECT rowid, timestamp, track FROM history ORDER BY timestamp ASC')
         for rowid, timestamp, track in rows:

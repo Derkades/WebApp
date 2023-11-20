@@ -30,7 +30,7 @@ class CSRF {
     }
 
     async update() {
-        const response = await fetch('/get_csrf');
+        const response = await fetch('/auth/get_csrf');
         checkResponseCode(response);
         const json = await response.json();
         this.csrfToken = json.token;

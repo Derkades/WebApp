@@ -262,7 +262,7 @@ def log_in(conn: Connection, username: str, password: str) -> Optional[str]:
 
     user_id, hashed_password = result
 
-    if not bcrypt.checkpw(password.encode(), hashed_password.encode()):
+    if not util.verify_password(password, hashed_password):
         log.warning('Failed login for user %s', username)
         return None
 
