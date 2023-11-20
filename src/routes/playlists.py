@@ -12,7 +12,7 @@ import util
 bp = Blueprint('playlists', __name__, url_prefix='/playlists')
 
 
-@bp.route('/')
+@bp.route('')
 def route_playlists():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn, redirect_to_login=True)

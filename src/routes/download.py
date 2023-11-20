@@ -21,7 +21,7 @@ def route_search():
     return {'results': results}
 
 
-@bp.route('/')
+@bp.route('')
 def route_download():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)

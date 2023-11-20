@@ -15,7 +15,7 @@ from music import Playlist, Track
 bp = Blueprint('files', __name__, url_prefix='/files')
 
 
-@bp.route('/')
+@bp.route('')
 def route_files():
     """
     File manager

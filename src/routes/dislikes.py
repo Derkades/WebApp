@@ -31,7 +31,7 @@ def route_remove():
     return redirect('/dislikes', code=303)
 
 
-@bp.route('/')
+@bp.route('')
 def route_dislikes():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn, redirect_to_login=True)

@@ -8,7 +8,7 @@ import lastfm
 bp = Blueprint('account', __name__, url_prefix='/account')
 
 
-@bp.route('/')
+@bp.route('')
 def route_account():
     """
     Account information page

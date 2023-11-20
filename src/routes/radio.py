@@ -38,7 +38,7 @@ def route_next():
     return radio_track_response(track)
 
 
-@bp.route('/')
+@bp.route('')
 def route_radio_home():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn, redirect_to_login=True)

@@ -7,7 +7,7 @@ import util
 bp = Blueprint('users', __name__, url_prefix='/users')
 
 
-@bp.route('/')
+@bp.route('')
 def route_users():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn, require_admin=True, redirect_to_login=True)
