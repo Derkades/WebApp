@@ -9,7 +9,7 @@ const state = {
 }
 
 async function update() {
-    const currentResponse = await fetch('/radio_current');
+    const currentResponse = await fetch('/radio/current');
     const currentJson = await currentResponse.json();
 
     if (state.currentTrack === null || state.currentTrack.path != currentJson.path) {
@@ -51,7 +51,7 @@ async function update() {
 };
 
 async function updateNext() {
-    const nextResponse = await fetch('/radio_next');
+    const nextResponse = await fetch('/radio/next');
     const nextJson = await nextResponse.json();
     document.getElementById('next').textContent = nextJson.path;
 };

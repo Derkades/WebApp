@@ -220,9 +220,9 @@ class Track:
         square = not meme
         return image.thumbnail(get_img_function, cache_key, img_format, img_quality, square)
 
-    def _get_ffmpeg_metadata_options(self):
+    def _get_ffmpeg_metadata_options(self) -> list[str]:
         meta = self.metadata()
-        metadata_options = []
+        metadata_options: list[str] = []
         if meta.album is not None:
             metadata_options.extend(('-metadata', 'album=' + meta.album))
         if meta.artists is not None:

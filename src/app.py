@@ -19,6 +19,7 @@ import app_activity
 import app_download
 import app_files
 import app_playlists
+import app_radio
 import app_users
 import auth
 import charts
@@ -31,14 +32,12 @@ import lastfm
 import metadata
 import music
 import packer
-import radio
 import scanner
 import settings
 from auth import AuthError, PrivacyOption, RequestTokenError
 from charts import StatsPeriod
 from image import ImageFormat, ImageQuality
 from music import AudioType, Track
-from radio import RadioTrack
 
 app = Flask(__name__, template_folder='templates')
 app.register_blueprint(app_account.bp)
@@ -46,6 +45,7 @@ app.register_blueprint(app_activity.bp)
 app.register_blueprint(app_download.bp)
 app.register_blueprint(app_files.bp)
 app.register_blueprint(app_playlists.bp)
+app.register_blueprint(app_radio.bp)
 app.register_blueprint(app_users.bp)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=settings.proxies_x_forwarded_for)
 app.jinja_env.undefined = jinja2.StrictUndefined
@@ -426,6 +426,7 @@ def route_update_metadata():
         user.verify_csrf(payload['csrf'])
 
         track = Track.by_relpath(conn, payload['path'])
+        assert track is not None
 
         playlist = music.playlist(conn, track.playlist)
         if not playlist.has_write_permission(user):
@@ -439,45 +440,6 @@ def route_update_metadata():
                              date=payload['metadata']['year'])
 
     return Response(None, 200)
-
-
-def radio_track_response(track: RadioTrack):
-    return {
-        'path': track.track.relpath,
-        'start_time': track.start_time,
-        'duration': track.duration,
-    }
-
-
-@app.route('/radio_current')
-def route_radio_current():
-    """
-    Endpoint that returns information about the current radio track
-    """
-    with db.connect() as conn:
-        auth.verify_auth_cookie(conn)
-        track = radio.get_current_track(conn)
-    return radio_track_response(track)
-
-
-@app.route('/radio_next')
-def route_radio_next():
-    """
-    Endpoint that returns information about the next radio track
-    """
-    with db.connect() as conn:
-        auth.verify_auth_cookie(conn)
-        track = radio.get_next_track(conn)
-    return radio_track_response(track)
-
-
-@app.route('/radio')
-def route_radio_home():
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        csrf_token=user.get_csrf()
-    return render_template('radio.jinja2',
-                           csrf=csrf_token)
 
 
 @app.route('/lastfm_callback')
