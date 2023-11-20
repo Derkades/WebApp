@@ -184,8 +184,8 @@ document.addEventListener('DOMContentLoaded', () => {
         switchAlbumCover();
     });
 
-    // Never play button
-    document.getElementById('button-never-play').addEventListener('click', () => {
+    // Dislike button
+    document.getElementById('button-dislike').addEventListener('click', () => {
         const data = {track: queue.currentTrack.trackPath};
         jsonPost('/dislikes/add', data);
         queue.next();

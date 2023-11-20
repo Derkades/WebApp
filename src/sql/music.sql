@@ -111,10 +111,10 @@ CREATE TABLE scanner_log (
     track TEXT NOT NULL  -- Intentionally not a foreign key, log may contain deleted tracks
 );
 
-CREATE TABLE never_play (
+CREATE TABLE dislikes (
     user INTEGER NOT NULL REFERENCES user(id) ON DELETE CASCADE,
     track TEXT NOT NULL REFERENCES track(path) ON DELETE CASCADE,
     UNIQUE(user, track)
-);
+) STRICT;
 
 COMMIT;

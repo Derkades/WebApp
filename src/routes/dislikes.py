@@ -14,7 +14,7 @@ def route_add():
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
         track = request.json['track']
-        conn.execute('INSERT OR IGNORE INTO never_play (user, track) VALUES (?, ?)',
+        conn.execute('INSERT OR IGNORE INTO dislikes (user, track) VALUES (?, ?)',
                      (user.user_id, track))
     return Response(None, 200)
 
@@ -25,7 +25,7 @@ def route_remove():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.form['csrf'])
-        conn.execute('DELETE FROM never_play WHERE user=? AND track=?',
+        conn.execute('DELETE FROM dislikes WHERE user=? AND track=?',
                      (user.user_id, request.form['track']))
 
     return redirect('/dislikes')
@@ -38,7 +38,7 @@ def route_dislikes():
         csrf_token = user.get_csrf()
         rows = conn.execute('''
                             SELECT playlist, track
-                            FROM never_play JOIN track on never_play.track = track.path
+                            FROM dislikes JOIN track on dislikes.track = track.path
                             WHERE user=?
                             ''', (user.user_id,)).fetchall()
         tracks = [{'path': path,
@@ -58,7 +58,7 @@ def route_json():
     """
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
-        rows = conn.execute('SELECT track FROM never_play WHERE user=?',
+        rows = conn.execute('SELECT track FROM dislikes WHERE user=?',
                             (user.user_id,)).fetchall()
 
     return {'tracks': [row[0] for row in rows]}

@@ -508,7 +508,7 @@ class Playlist:
         params: list[str | int] = [self.name]
 
         if user is not None:
-            query += ' AND path NOT IN (SELECT track FROM never_play WHERE user = ?)'
+            query += ' AND path NOT IN (SELECT track FROM dislikes WHERE user = ?)'
             params.append(user.user_id)
 
         track_tags_query = 'SELECT tag FROM track_tag WHERE track = track.path'
