@@ -14,15 +14,6 @@ from flask import Flask, Response, abort, redirect, render_template, request
 from flask_babel import Babel, _
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-import app_account
-import app_activity
-import app_auth
-import app_dislikes
-import app_download
-import app_files
-import app_playlists
-import app_radio
-import app_users
 import auth
 import charts
 import db
@@ -39,6 +30,15 @@ from auth import AuthError, PrivacyOption, RequestTokenError
 from charts import StatsPeriod
 from image import ImageFormat, ImageQuality
 from music import AudioType, Track
+from routes import account as app_account
+from routes import activity as app_activity
+from routes import auth as app_auth
+from routes import dislikes as app_dislikes
+from routes import download as app_download
+from routes import files as app_files
+from routes import playlists as app_playlists
+from routes import radio as app_radio
+from routes import users as app_users
 
 app = Flask(__name__, template_folder='templates')
 app.register_blueprint(app_account.bp)
