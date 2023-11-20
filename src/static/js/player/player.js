@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Never play button
     document.getElementById('button-never-play').addEventListener('click', () => {
         const data = {track: queue.currentTrack.trackPath};
-        jsonPost('/dislikes_add', data);
+        jsonPost('/dislikes/add', data);
         queue.next();
     });
 

@@ -17,6 +17,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 import app_account
 import app_activity
 import app_auth
+import app_dislikes
 import app_download
 import app_files
 import app_playlists
@@ -30,7 +31,6 @@ import genius
 import jsonw
 import language
 import lastfm
-import metadata
 import music
 import packer
 import scanner
@@ -46,6 +46,7 @@ app.register_blueprint(app_activity.bp)
 app.register_blueprint(app_auth.bp)
 app.register_error_handler(AuthError, app_auth.handle_auth_error)
 app.register_error_handler(RequestTokenError, app_auth.handle_token_error)
+app.register_blueprint(app_dislikes.bp)
 app.register_blueprint(app_download.bp)
 app.register_blueprint(app_files.bp)
 app.register_blueprint(app_playlists.bp)
@@ -561,48 +562,6 @@ def route_download_offline():
 
     return render_template('download_offline.jinja2',
                            playlists=playlists)
-
-
-@app.route('/dislikes_add', methods=['POST'])
-def route_add_dislikes_add():
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
-        track = request.json['track']
-        conn.execute('INSERT OR IGNORE INTO never_play (user, track) VALUES (?, ?)',
-                     (user.user_id, track))
-    return Response(None, 200)
-
-
-@app.route('/dislikes')
-def route_dislikes():
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        csrf_token = user.get_csrf()
-        rows = conn.execute('''
-                            SELECT playlist, track
-                            FROM never_play JOIN track on never_play.track = track.path
-                            WHERE user=?
-                            ''', (user.user_id,)).fetchall()
-        tracks = [{'path': path,
-                   'playlist': playlist,
-                   'title': metadata.cached(conn, path).display_title()}
-                  for playlist, path in rows]
-
-    return render_template('dislikes.jinja2',
-                           csrf_token=csrf_token,
-                           tracks=tracks)
-
-
-@app.route('/dislikes_remove', methods=['POST'])
-def route_dislikes_remove():
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
-        conn.execute('DELETE FROM never_play WHERE user=? AND track=?',
-                     (user.user_id, request.form['track']))
-
-    return redirect('/dislikes')
 
 
 @app.route('/never_play_json')
