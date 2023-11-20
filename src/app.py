@@ -74,13 +74,10 @@ def route_player():
     """
     with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn, redirect_to_login=True)
-        row = conn.execute('SELECT primary_playlist FROM user WHERE id=?',
-                           (user.user_id,)).fetchone()
-        primary_playlist = row[0] if row else None
 
     return render_template('player.jinja2',
                            mobile=is_mobile(),
-                           primary_playlist=primary_playlist,
+                           primary_playlist=user.primary_playlist,
                            offline_mode=settings.offline_mode)
 
 
