@@ -41,7 +41,7 @@ def route_next():
 @bp.route('/')
 def route_radio_home():
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
+        user = auth.verify_auth_cookie(conn, redirect_to_login=True)
         csrf_token=user.get_csrf()
     return render_template('radio.jinja2',
                            csrf=csrf_token)

@@ -14,7 +14,7 @@ import settings
 from image import ImageFormat, ImageQuality
 from music import AudioType, Track
 
-log = logging.getLogger('routes.track')
+log = logging.getLogger('app.routes.track')
 bp = Blueprint('track', __name__, url_prefix='/track')
 
 

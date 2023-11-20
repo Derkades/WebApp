@@ -15,7 +15,7 @@ bp = Blueprint('playlists', __name__, url_prefix='/playlists')
 @bp.route('/')
 def route_playlists():
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
+        user = auth.verify_auth_cookie(conn, redirect_to_login=True)
         csrf_token = user.get_csrf()
         user_playlists = music.user_playlists(conn, user.user_id)
         primary_playlist, = conn.execute('SELECT primary_playlist FROM user WHERE id=?',

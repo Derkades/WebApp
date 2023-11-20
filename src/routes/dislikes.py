@@ -34,7 +34,7 @@ def route_remove():
 @bp.route('/')
 def route_dislikes():
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
+        user = auth.verify_auth_cookie(conn, redirect_to_login=True)
         csrf_token = user.get_csrf()
         rows = conn.execute('''
                             SELECT playlist, track

@@ -325,7 +325,7 @@ def verify_auth_cookie(conn: Connection, require_admin=False, redirect_to_login=
         conn: Read-only database connection
         require_admin: Whether logging in as a non-admin account should be treated as an authentication failure
         redirect_to_login: Whether the user should sent a redirect if authentication failed, instead
-                           of showing a 403 page
+                           of showing a 403 page. Should be set to True for pages, and to False for API endpoints.
     """
     if settings.offline_mode:
         return OFFLINE_DUMMY_USER

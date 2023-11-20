@@ -13,7 +13,7 @@ import settings
 from auth import PrivacyOption
 from music import Track
 
-log = logging.getLogger('routes.activity')
+log = logging.getLogger('app.routes.activity')
 bp = Blueprint('activity', __name__, url_prefix='/activity')
 
 
@@ -42,7 +42,7 @@ def get_file_changes_list(conn: Connection, limit: int) -> list[dict[str, str]]:
 @bp.route('/files')
 def route_files():
     with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
+        auth.verify_auth_cookie(conn, redirect_to_login=True)
         changes = get_file_changes_list(conn, 2000)
 
     return render_template('activity_files.jinja2',
@@ -52,7 +52,7 @@ def route_files():
 @bp.route('/')
 def route_activity():
     with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
+        auth.verify_auth_cookie(conn, redirect_to_login=True)
 
     return render_template('activity.jinja2')
 
@@ -117,7 +117,7 @@ def route_data():
 @bp.route('/all')
 def route_all():
     with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
+        auth.verify_auth_cookie(conn, redirect_to_login=True)
 
         result = conn.execute('''
                               SELECT history.timestamp, user.username, user.nickname, history.playlist, history.track, track.path IS NOT NULL
