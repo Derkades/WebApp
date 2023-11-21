@@ -3,8 +3,8 @@ set -e
 python -m app.db
 
 # scan and cleanup can be run in background after startup
-# manage scan
-# manage cleanup
+manage scan &
+manage cleanup &
 
 if [ "$MUSIC_ENV" = "dev" ]
 then
