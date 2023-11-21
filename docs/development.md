@@ -40,6 +40,10 @@ sudo dnf install python3-flask python3-flask-babel python3-requests python3-beau
 
 () In .gitignore
 
+## Import sorting
+
+Use `isort app` to sort imports.
+
 ## Preparing for offline development
 
 ### Docker images

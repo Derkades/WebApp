@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -e
 source termux/settings
-cd src
-python db.py
-python manage.py sync
+python -m app.db
+python -m app.manage sync

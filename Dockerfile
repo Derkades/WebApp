@@ -9,11 +9,11 @@ RUN PYTHONDONTWRITEBYTECODE=1 pip install --no-cache-dir -r /requirements.txt
 
 COPY ./docker/entrypoint.sh /entrypoint.sh
 COPY ./docker/manage /usr/local/bin
-COPY ./src /app
+COPY ./app /app
 
-WORKDIR /app
+# WORKDIR /app
 
-RUN PYTHONDONTWRITEBYTECODE=1 pybabel compile -d translations
+RUN PYTHONDONTWRITEBYTECODE=1 pybabel compile -d app/translations
 
 ENV PYTHONUNBUFFERED 1
 ENV MUSIC_MUSIC_DIR /music

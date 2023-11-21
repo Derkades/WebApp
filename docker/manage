@@ -1,2 +1,2 @@
 #!/bin/bash
-python3 manage.py $@
+python3 -m app.manage $@

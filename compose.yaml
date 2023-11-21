@@ -13,7 +13,7 @@ services:
         target: /data
       # To get new files without re-building, during development
       - type: bind
-        source: ./src
+        source: ./app
         target: /app
       - type: tmpfs
         target: /tmp

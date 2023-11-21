@@ -1,5 +1,5 @@
 #!/bin/bash
 set -e
-cd src
+cd app
 pybabel extract -F babel.cfg -k lazy_gettext -o messages.pot .
 pybabel update -i messages.pot -d translations

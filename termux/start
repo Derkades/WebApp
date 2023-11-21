@@ -4,7 +4,6 @@ set -e
 # Intended for running music player in Termux environment
 source termux/settings
 mkdir -p data
-cd src
-pybabel compile -d translations
-python db.py
-exec python -m gunicorn -b 127.0.0.1:8080 app:app
+pybabel compile -d app/translations
+python -m app.db
+exec python -m gunicorn -b 127.0.0.1:8080 -c app/gunicorn.conf.py app.__main__:app

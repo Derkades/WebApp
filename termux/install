@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+# Install python
+pkg install -y python python-pip
+
 # Bcrypt extension must be installed from the Termux repositories
 pkg install -y python-bcrypt
 

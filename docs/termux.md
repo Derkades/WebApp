@@ -6,9 +6,9 @@ Install the F-Droid client from [f-droid.org](https://f-droid.org/F-Droid.apk).
 
 Install "Termux" from F-Droid. Open Termux. You will be presented with a Linux terminal environment.
 
-Install Python and Git:
+Install Git:
 ```
-pkg install git python python-pip
+pkg install git
 ```
 
 Clone repository:
@@ -16,11 +16,13 @@ Clone repository:
 git clone https://github.com/DanielKoomen/WebApp
 ```
 
-Install requirements:
+Run installation script:
 ```
 cd WebApp
 termux/install
 ```
+
+This will install Python, some dependencies and the required Python extensions.
 
 ## Sync music
 ```
