@@ -187,12 +187,18 @@ def charts_history(conn: Connection, period: StatsPeriod):
     user_ids: list[int] = []
     usernames: list[str] = []
     for user_id, username, nickname in conn.execute('''
-                                                    SELECT id, username, nickname
-                                                    FROM user
-                                                    WHERE id IN (SELECT DISTINCT user FROM history WHERE timestamp > ?)
+                                                    SELECT DISTINCT user, username, nickname
+                                                    FROM history
+                                                    JOIN user ON user.id = user
+                                                    WHERE timestamp > ?
                                                     ''', (after_timestamp,)):
         user_ids.append(user_id)
-        usernames.append(nickname if nickname else username)
+        if nickname:
+            usernames.append(nickname)
+        elif username:
+            usernames.append(username)
+        else:
+            usernames.append('[deleted user]')
 
     time_of_day: dict[int, list[int]] = {}
     day_of_week: dict[int, list[int]] = {}
