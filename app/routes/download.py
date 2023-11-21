@@ -1,7 +1,6 @@
 from flask import Blueprint, Response, render_template, request
 
-import music
-from app import auth, db, downloader, scanner
+from app import auth, db, downloader, music, scanner
 
 bp = Blueprint('download', __name__, url_prefix='/download')
 
