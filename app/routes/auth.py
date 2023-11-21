@@ -25,7 +25,7 @@ def handle_token_error(_err: RequestTokenError):
     Return bad request
     """
     log.warning('Invalid CSRF token')
-    return abort(400, 'Invalid CSRF token')
+    abort(400, 'Invalid CSRF token')
 
 
 @bp.route('/login', methods=['GET', 'POST'])
@@ -57,8 +57,8 @@ def route_login():
         if token is None:
             if request.is_json:
                 return Response(None, 403)
-            else:
-                return render_template('login.jinja2', invalid_password=True)
+
+            return render_template('login.jinja2', invalid_password=True)
 
         if request.is_json:
             return {'token': token}

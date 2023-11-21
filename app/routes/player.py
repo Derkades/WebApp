@@ -1,6 +1,7 @@
 import shutil
 
 from flask import Blueprint, Response, render_template, request
+from flask_babel import _
 
 from app import auth, db, music, scanner, settings, util
 from app.music import Track

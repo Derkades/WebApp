@@ -322,7 +322,7 @@ class Track:
             # https://trac.ffmpeg.org/wiki/Encode/MP3
             cover = self.get_cover_thumbnail(False, ImageFormat.JPEG, ImageQuality.HIGH)
             # Write cover to temp file so ffmpeg can read it
-            cover_temp_file = tempfile.NamedTemporaryFile('wb')
+            cover_temp_file = tempfile.NamedTemporaryFile('wb')  # pylint: disable=consider-using-with
             cover_temp_file.write(cover)
 
             input_options = ['-i', cover_temp_file.name,  # Add album cover

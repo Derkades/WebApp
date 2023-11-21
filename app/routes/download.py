@@ -1,24 +1,16 @@
-from flask import Blueprint, Response, render_template, request
+import logging
+
+from flask import Blueprint, Response, abort, render_template, request
 
 from app import auth, db, downloader, music, scanner
 
+log = logging.getLogger('app')
 bp = Blueprint('download', __name__, url_prefix='/download')
-
-
-@bp.route('/search', methods=['POST'])
-def route_search():
-    with db.connect(read_only=True) as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
-
-        query = request.json['query']
-        results = downloader.search(query)
-
-    return {'results': results}
 
 
 @bp.route('')
 def route_download():
+    """Download page"""
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         csrf_token = user.get_csrf()
@@ -30,6 +22,18 @@ def route_download():
                            primary_playlist=user.primary_playlist,
                            playlists=playlists)
 
+
+@bp.route('/search', methods=['POST'])
+def route_search():
+    """Search using yt-dlp"""
+    with db.connect(read_only=True) as conn:
+        user = auth.verify_auth_cookie(conn)
+        user.verify_csrf(request.json['csrf'])
+
+        query = request.json['query']
+        results = downloader.search(query)
+
+    return {'results': results}
 
 
 @bp.route('/ytdl', methods=['POST'])
@@ -46,7 +50,7 @@ def route_ytdl():
 
         playlist = music.playlist(conn, directory)
         if not playlist.has_write_permission(user):
-            return abort(403, 'No write permission for this playlist')
+            abort(403, 'No write permission for this playlist')
 
         log.info('ytdl %s %s', directory, url)
 

@@ -52,7 +52,7 @@ def route_audio():
         track = Track.by_relpath(conn, request.args['path'])
 
     if track is None:
-        return abort(404, 'Track does not exist')
+        abort(404, 'Track does not exist')
 
     parsed_mtime = datetime.fromtimestamp(track.mtime, timezone.utc)
     if request.if_modified_since and parsed_mtime <= request.if_modified_since:
@@ -152,9 +152,7 @@ def route_lyrics():
 
 @bp.route('/list')
 def route_list():
-    """
-    Return list of playlists and tracks.
-    """
+    """Return list of playlists and tracks"""
     with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn)
 
@@ -208,7 +206,8 @@ def route_list():
                 }
                 playlist_json['tracks'].append(track_json)
 
-                artist_rows = conn.execute('SELECT artist FROM track_artist WHERE track=?', (relpath,)).fetchall()
+                artist_rows = conn.execute('SELECT artist FROM track_artist WHERE track=?',
+                                           (relpath,)).fetchall()
                 if artist_rows:
                     track_json['artists'] = music.sort_artists([row[0] for row in artist_rows], album_artist)
 

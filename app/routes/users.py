@@ -7,6 +7,7 @@ bp = Blueprint('users', __name__, url_prefix='/users')
 
 @bp.route('')
 def route_users():
+    """User list page"""
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn, require_admin=True, redirect_to_login=True)
         new_csrf_token = user.get_csrf()
@@ -31,6 +32,7 @@ def route_users():
 
 @bp.route('/edit', methods=['GET', 'POST'])
 def route_edit():
+    """Change username or password"""
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn, require_admin=True)
 
@@ -41,29 +43,30 @@ def route_edit():
             return render_template('users_edit.jinja2',
                                    csrf_token=csrf_token,
                                    username=username)
-        else:
-            user.verify_csrf(request.form['csrf'])
-            username = request.form['username']
-            new_username = request.form['new_username']
-            new_password = request.form['new_password']
 
-            if new_password != '':
-                hashed_password = util.hash_password(new_password)
-                conn.execute('UPDATE user SET password=? WHERE username=?',
-                             (hashed_password, username))
-                conn.execute('''
-                             DELETE FROM session WHERE user = (SELECT id FROM user WHERE username=?)
-                             ''', (username,))
+        user.verify_csrf(request.form['csrf'])
+        username = request.form['username']
+        new_username = request.form['new_username']
+        new_password = request.form['new_password']
 
-            if new_username != username:
-                conn.execute('UPDATE user SET username=? WHERE username=?',
-                             (new_username, username))
+        if new_password != '':
+            hashed_password = util.hash_password(new_password)
+            conn.execute('UPDATE user SET password=? WHERE username=?',
+                            (hashed_password, username))
+            conn.execute('''
+                            DELETE FROM session WHERE user = (SELECT id FROM user WHERE username=?)
+                            ''', (username,))
 
-            return redirect('/users', code=303)
+        if new_username != username:
+            conn.execute('UPDATE user SET username=? WHERE username=?',
+                            (new_username, username))
+
+        return redirect('/users', code=303)
 
 
 @bp.route('/new', methods=['POST'])
 def route_new():
+    """Create new user"""
     form = request.form
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn, require_admin=True)

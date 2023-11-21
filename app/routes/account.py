@@ -1,4 +1,5 @@
 from flask import Blueprint, Response, redirect, render_template, request
+from flask_babel import gettext as _
 
 from app import auth, db, language, lastfm
 

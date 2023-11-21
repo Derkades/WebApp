@@ -81,11 +81,11 @@ def route_upload():
 
         playlist = Playlist.from_path(conn, upload_dir)
         if not playlist.has_write_permission(user):
-            return abort(403, 'No write permission for this playlist')
+            abort(403, 'No write permission for this playlist')
 
     for uploaded_file in request.files.getlist('upload'):
         if uploaded_file.filename is None or uploaded_file.filename == '':
-            return abort(402, 'Blank file name. Did you select a file?')
+            abort(402, 'Blank file name. Did you select a file?')
 
         util.check_filename(uploaded_file.filename)
         uploaded_file.save(Path(upload_dir, uploaded_file.filename))
@@ -121,7 +121,7 @@ def route_rename():
 
             playlist = Playlist.from_path(conn, path)
             if not playlist.has_write_permission(user):
-                return Response(None, 403)
+                abort(403, 'No write permission for this playlist')
 
             path.rename(Path(path.parent, new_name))
 
@@ -129,8 +129,8 @@ def route_rename():
 
             if request.is_json:
                 return Response(None, 200)
-            else:
-                return redirect('/files?path=' + urlencode(music.to_relpath(path.parent)), code=303)
+
+            return redirect('/files?path=' + urlencode(music.to_relpath(path.parent)), code=303)
         else:
             path = music.from_relpath(request.args['path'])
             back_url = request.args['back_url']
@@ -154,7 +154,7 @@ def route_mkdir():
 
     playlist = Playlist.from_path(conn, path)
     if not playlist.has_write_permission(user):
-        return abort(403, 'No write permission for this playlist')
+        abort(403, 'No write permission for this playlist')
 
     dirname = request.form['dirname']
     util.check_filename(dirname)

@@ -74,7 +74,7 @@ def route_create():
         path = Path(settings.music_dir, dir_name)
 
         if path.exists():
-            return abort(400, 'Playlist path already exists')
+            abort(400, 'Playlist path already exists')
 
         path.mkdir()
 
@@ -113,7 +113,7 @@ def route_share():
         playlist = music.user_playlist(conn, playlist_relpath, user.user_id)
 
         if not playlist.write and not user.admin:
-            return abort(403, 'Cannot share playlist if you do not have write permission')
+            abort(403, 'Cannot share playlist if you do not have write permission')
 
         conn.execute('INSERT INTO user_playlist_write VALUES(?, ?) ON CONFLICT DO NOTHING',
                      (target_user_id, playlist_relpath))

@@ -105,10 +105,10 @@ def image_search(bing_query: str) -> Optional[bytes]:
             cache.store(cache_key, best_image)
             log.info('Found image, %.2fMiB', len(best_image)/1024/1024)
             return best_image
-        else:
-            cache.store(cache_key, b'magic_no_results')
-            log.info('No image found')
-            return None
+
+        cache.store(cache_key, b'magic_no_results')
+        log.info('No image found')
+        return None
 
     except Exception:
         log.info('Error during bing search. This is probably a bug.')

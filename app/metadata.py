@@ -164,13 +164,13 @@ class Metadata:
         Generate title from 'artist', 'title' and 'date' metadata
         Returns: Generated title, or None if the track lacks the required metadata
         """
-        if self.artists and self.title:
-            title = ', '.join(self.artists) + ' - ' + self.title
-            if self.year:
-                title += ' [' + str(self.year) + ']'
-            return title
-        else:
+        if not self.artists or not self.title:
             return None
+
+        title = ', '.join(self.artists) + ' - ' + self.title
+        if self.year:
+            title += ' [' + str(self.year) + ']'
+        return title
 
     def filename_title(self) -> str:
         """

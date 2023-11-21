@@ -221,8 +221,8 @@ class AuthErrorReason(Enum):
             return _('Your current session is invalid, please log in again.')
         elif self is AuthErrorReason.ADMIN_REQUIRED:
             return _('Your are not an administrator, but this page requires administrative privileges')
-        else:
-            return ValueError()
+
+        return ValueError()
 
 
 @dataclass

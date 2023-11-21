@@ -29,7 +29,8 @@ def _make_request(method: str, api_method: str, **extra_params) -> dict[Any, Any
     # last.fm API requires alphabetically sorted parameters for signature
     items = sorted(params.items())
     query_string = '&'.join(f'{urlencode(k)}={urlencode(v)}' for k, v in items)
-    sig = b''.join(f'{k}{v}'.encode() for k, v in items if k != 'format') + settings.lastfm_api_secret.encode()
+    secret = settings.lastfm_api_secret.encode()
+    sig = b''.join(f'{k}{v}'.encode() for k, v in items if k != 'format') + secret
     sig_digest = hashlib.md5(sig).hexdigest()
     query_string += f'&api_sig={sig_digest}'
     if method == 'post':
