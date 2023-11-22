@@ -11,5 +11,5 @@
         "--enable-incomplete-feature=Unpack",
     ],
     "mypy-type-checker.reportingScope": "workspace",
-    "mypy-type-checker.cwd": "${workspaceFolder}/src"
+    "mypy-type-checker.cwd": "${workspaceFolder}/app"
 }
