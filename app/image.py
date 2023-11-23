@@ -115,7 +115,7 @@ def thumbnail(input_img: Path | bytes | Callable,
             log.warning('Error during thumbnail generation: %s', ex)
 
     # Return fallback thumbnail if input_bytes was None or an Exception was raised
-    fallback_path = Path('static', 'img', 'raphson.png')
+    fallback_path = Path('app', 'static', 'img', 'raphson.png')
     if input_img == fallback_path:  # or was this already the fallback cover?
         raise RuntimeError('Error during fallback cover generation')
     return thumbnail(fallback_path, 'raphson', img_format, img_quality, square)
