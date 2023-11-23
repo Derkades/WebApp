@@ -35,7 +35,6 @@ MUSIC_EXTENSIONS = [
     '.m4a',
     '.wav',
     '.opus',
-    '.aac',
 ]
 
 
