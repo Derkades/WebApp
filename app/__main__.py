@@ -19,6 +19,7 @@ from app.routes import auth as app_auth
 from app.routes import dislikes as app_dislikes
 from app.routes import download as app_download
 from app.routes import files as app_files
+from app.routes import player as app_player
 from app.routes import playlists as app_playlists
 from app.routes import radio as app_radio
 from app.routes import track as app_track
@@ -35,6 +36,7 @@ app.register_error_handler(RequestTokenError, app_auth.handle_token_error)
 app.register_blueprint(app_dislikes.bp)
 app.register_blueprint(app_download.bp)
 app.register_blueprint(app_files.bp)
+app.register_blueprint(app_player.bp)
 app.register_blueprint(app_playlists.bp)
 app.register_blueprint(app_radio.bp)
 app.register_blueprint(app_track.bp)
@@ -44,7 +46,7 @@ app.jinja_env.undefined = jinja2.StrictUndefined
 app.jinja_env.auto_reload = settings.dev
 babel = Babel(app, locale_selector=language.get_locale)
 log = logging.getLogger('app')
-static_dir = Path('static')
+static_dir = Path('app', 'static')
 
 
 @app.route('/')

@@ -9,7 +9,7 @@ from app.music import Track
 bp = Blueprint('player', __name__, url_prefix='/player')
 
 
-@bp.route('/')
+@bp.route('')
 def route_player():
     """
     Main player page. Serves player.jinja2 template file.
