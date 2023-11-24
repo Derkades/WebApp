@@ -15,5 +15,5 @@ then
     exec python3 -m app
     # exec flask --app app run
 else
-    exec gunicorn -b 0.0.0.0:8080 app:app
+    exec gunicorn -b 0.0.0.0:8080 -c app/gunicorn.conf.py app.__main__:app
 fi
