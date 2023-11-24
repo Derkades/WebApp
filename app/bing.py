@@ -88,6 +88,7 @@ def image_search(bing_query: str) -> Optional[bytes]:
                 m_attr = result['m']
             except KeyError:
                 log.info('Skipping result without "m" attribute: %s', result)
+                continue
 
             image_urls.append(json.loads(m_attr)['murl'])
 
