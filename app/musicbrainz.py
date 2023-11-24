@@ -6,7 +6,7 @@ from typing import Any
 
 import requests
 
-from app import cache, image, settings
+from app import settings
 
 log = logging.getLogger('app.musicbrainz')
 
@@ -82,25 +82,14 @@ def _pick_release(release_group: str) -> str | None:
     return with_artwork[0]['id']
 
 
-def get_cover(artist: str, album: str, disable_cache=False) -> bytes | None:
+def get_cover(artist: str, album: str) -> bytes | None:
     """
     Get album cover for the given artist and album
     Returns: Image bytes, or None of no album cover was found.
     """
-    cache_key = 'musicbrainz' + artist + album
-    cached_data = cache.retrieve(cache_key)
-
-    if cached_data is not None and not disable_cache:
-        if cached_data == b'magic_no_cover':
-            log.info('Returning no cover, from cache')
-            return None
-        log.info('Returning cover from cache')
-        return cached_data
-
     try:
         release_group = _search_release_group(artist, album)
         if release_group is None:
-            cache.store(cache_key, b'magic_no_cover')
             return None
 
         release = _pick_release(release_group)
@@ -113,14 +102,8 @@ def get_cover(artist: str, album: str, disable_cache=False) -> bytes | None:
 
         if image_bytes is None:
             log.info('Release has no front cover art image image')
-            cache.store(cache_key, b'magic_no_cover')
             return None
 
-        if not image.check_valid(image_bytes):
-            log.warning('Returned image seems to be corrupt')
-            return None
-
-        cache.store(cache_key, image_bytes)
         return image_bytes
     except Exception as ex:
         log.info('Error retrieving album art from musicbrainz: %s', ex)
@@ -130,9 +113,9 @@ def get_cover(artist: str, album: str, disable_cache=False) -> bytes | None:
 
 # For testing
 if __name__ == '__main__':
-    import logconfig
+    from app import logconfig
     logconfig.apply()
 
-    cover = get_cover('Dire Straits', 'Brothers In Arms', disable_cache=True)
-    # cover = get_cover('Elle Exxe', 'Lately', disable_cache=True) # release exists, but has no cover
+    cover = get_cover('Dire Straits', 'Brothers In Arms')
+    # cover = get_cover('Elle Exxe', 'Lately') # release exists, but has no cover
     Path('cover.jpg').write_bytes(cover)

@@ -3,7 +3,7 @@ FROM python:3.12-slim as base
 FROM base as ffmpeg
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends wget bzip2 g++ make nasm pkg-config libopus-dev libwebp-dev && \
+    apt-get install -y --no-install-recommends wget bzip2 g++ make nasm pkg-config libopus-dev libwebp-dev zlib1g-dev&& \
     rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /build && \
@@ -22,6 +22,8 @@ RUN cd /build/ffmpeg && \
         # External libraries
         --enable-libopus \
         --enable-libwebp \
+        # Required for PNG
+        --enable-zlib \
         # Disable components
         --disable-autodetect \
         --disable-ffplay \
@@ -45,16 +47,15 @@ RUN cd /build/ffmpeg && \
         --enable-decoder=pcm_s16le \
         --enable-decoder=mjpeg  \
         --enable-decoder=webp \
+        --enable-decoder=png \
         # Encoders
         --disable-encoders \
         --enable-encoder=libopus \
         --enable-encoder=aac \
-        # --enable-encoder=mjpeg \
-        --enable-encoder=webp \
+        --enable-encoder=libwebp \
         # Demuxers
         --disable-demuxers \
         --enable-demuxer=aac \
-        --enable-demuxer=apng \
         --enable-demuxer=flac \
         --enable-demuxer=mjpeg \
         --enable-demuxer=matroska \
@@ -63,10 +64,12 @@ RUN cd /build/ffmpeg && \
         --enable-demuxer=pcm_s16le \
         --enable-demuxer=wav \
         --enable-demuxer=webm \
+        --enable-demuxer=image_png_pipe \
+        --enable-demuxer=image_jpeg_pipe \
+        --enable-demuxer=image_webp_pipe \
         # Muxers
         --disable-muxers \
         --enable-muxer=aac \
-        --enable-muxer=apng \
         --enable-muxer=flac \
         --enable-muxer=mjpeg \
         --enable-muxer=matroska \
@@ -74,6 +77,7 @@ RUN cd /build/ffmpeg && \
         --enable-muxer=ogg \
         --enable-muxer=wav \
         --enable-muxer=webm \
+        --enable-muxer=webp \
         # Parsers
         --disable-parsers \
         --enable-parser=aac \
@@ -86,6 +90,8 @@ RUN cd /build/ffmpeg && \
         --disable-filters \
         --enable-filter=loudnorm \
         --enable-filter=aresample \
+        --enable-filter=scale \
+        --enable-filter=crop \
         # Hardware accelerators
         --disable-hwaccels \
         && \
@@ -94,7 +100,7 @@ RUN cd /build/ffmpeg && \
 FROM base
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends libopus0 libwebp7 && \
+    apt-get install -y --no-install-recommends libopus0 libwebp7 zlib1g && \
     rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /

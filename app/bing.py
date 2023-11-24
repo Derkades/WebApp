@@ -9,7 +9,7 @@ from typing import Optional
 import requests
 from bs4 import BeautifulSoup
 
-from app import cache, image, settings
+from app import settings
 
 log = logging.getLogger("app.bing")
 
@@ -34,10 +34,6 @@ def _download(image_url: str) -> bytes | None:
 
     img_bytes = resp.content
 
-    if not image.check_valid(img_bytes):
-        log.warning('Could not download %s, image is corrupt', image_url)
-        return None
-
     log.info('Downloaded image: %s', image_url)
 
     return img_bytes
@@ -54,17 +50,6 @@ def image_search(bing_query: str) -> Optional[bytes]:
         bing_query: Search query
     Returns: Image data bytes
     """
-
-    cache_key = 'bing' + bing_query
-
-    cache_data = cache.retrieve(cache_key)
-    if cache_data:
-        if cache_data == b'magic_no_results':
-            log.info('Returning no result, from cache: %s', bing_query)
-            return None
-        log.info('Returning bing result from cache: %s', bing_query)
-        return cache_data
-
     log.info('Searching bing: %s', bing_query)
     try:
         r = requests.get('https://www.bing.com/images/search',
@@ -103,11 +88,9 @@ def image_search(bing_query: str) -> Optional[bytes]:
 
         if downloads:
             best_image = sorted(downloads, key=_sort_key_len)[-1]
-            cache.store(cache_key, best_image)
             log.info('Found image, %.2fMiB', len(best_image)/1024/1024)
             return best_image
 
-        cache.store(cache_key, b'magic_no_results')
         log.info('No image found')
         return None
 

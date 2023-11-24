@@ -113,7 +113,7 @@ function getNowPlayingCardHtml(info) {
     cardBody.style.display = 'flex';
     card.append(cardBody);
 
-    const imageThumb = '/track/album_cover?quality=tiny&path=' + encodeURIComponent(info.path);
+    const imageThumb = '/track/album_cover?quality=low&path=' + encodeURIComponent(info.path);
     const imageFull = '/track/album_cover?quality=high&path=' + encodeURIComponent(info.path);
 
     const imgOuter = document.createElement('a');

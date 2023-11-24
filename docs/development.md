@@ -18,9 +18,9 @@ pip3 install -r requirements.txt
 pip3 install -r requirements-dev.txt
 ```
 
-Fedora packages, if you prefer (missing some types packages):
+Fedora packages, if you prefer:
 ```
-sudo dnf install python3-flask python3-flask-babel python3-requests python3-beautifulsoup4 python3-pillow python3-bcrypt yt-dlp babel poedit pylint python3-mypy python3-types-requests python3-types-beautifulsoup4
+sudo dnf install python3-flask python3-flask-babel python3-requests python3-beautifulsoup4 python3-bcrypt yt-dlp babel poedit pylint python3-mypy python3-types-requests python3-types-beautifulsoup4
 ```
 
 ## Code structure

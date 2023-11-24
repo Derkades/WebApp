@@ -97,6 +97,6 @@ def get_image(query: str) -> Optional[bytes]:
 
     image_bytes = r.content
 
-    if not image.check_valid(image_bytes):
-        return None
+    # if not image.check_valid(image_bytes):
+        # return None
     return image_bytes
