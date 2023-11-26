@@ -48,7 +48,5 @@ function getTagFilter() {
         }
     }
 
-    const encodedMode = encodeURIComponent(mode);
-    const encodedTags = encodeURIComponent(tags.join(';'));
-    return `tag_mode=${encodedMode}&tags=${encodedTags}`;
+    return {tag_mode: mode, tags: tags.join(';')};
 }

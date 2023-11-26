@@ -11,7 +11,7 @@ def route_account():
     """
     Account information page
     """
-    with db.connect() as conn:
+    with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn)
         csrf_token = user.get_csrf()
         sessions = user.sessions()

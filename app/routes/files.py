@@ -15,7 +15,7 @@ def route_files():
     """
     File manager
     """
-    with db.connect() as conn:
+    with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn, redirect_to_login=True)
         csrf_token = user.get_csrf()
 
@@ -73,7 +73,7 @@ def route_upload():
     """
     Form target to upload file, called from file manager
     """
-    with db.connect() as conn:
+    with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.form['csrf'])
 
@@ -83,9 +83,12 @@ def route_upload():
         if not playlist.has_write_permission(user):
             abort(403, 'No write permission for this playlist')
 
+    if len(request.files.getlist('upload')) == 0:
+        abort(400, 'No files provided.')
+
     for uploaded_file in request.files.getlist('upload'):
         if uploaded_file.filename is None or uploaded_file.filename == '':
-            abort(402, 'Blank file name. Did you select a file?')
+            abort(400, 'Blank file name. Did you select a file?')
 
         util.check_filename(uploaded_file.filename)
         uploaded_file.save(Path(upload_dir, uploaded_file.filename))
@@ -101,7 +104,7 @@ def route_rename():
     """
     Page and form target to rename file
     """
-    with db.connect() as conn:
+    with db.connect(read_only=request.method == 'GET') as conn:
         user = auth.verify_auth_cookie(conn)
 
         if request.method == 'POST':

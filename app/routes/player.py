@@ -16,11 +16,13 @@ def route_player():
     """
     with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn, redirect_to_login=True)
+        csrf_token = user.get_csrf()
 
     return render_template('player.jinja2',
                            mobile=util.is_mobile(),
                            primary_playlist=user.primary_playlist,
-                           offline_mode=settings.offline_mode)
+                           offline_mode=settings.offline_mode,
+                           csrf_token=csrf_token)
 
 
 @bp.route('/copy_track', methods=['POST'])

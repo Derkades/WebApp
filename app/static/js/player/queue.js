@@ -84,10 +84,7 @@ class Queue {
      */
     static async downloadRandomAndAddToQueue(playlist) {
         console.debug('Choose track');
-        const encToken = encodeURIComponent(await csrf.getToken());
-        const encPlaylist = encodeURIComponent(playlist);
-        const chooseResponse = await fetch(`/track/choose?playlist_dir=${encPlaylist}&${getTagFilter()}&csrf=${encToken}`);
-        checkResponseCode(chooseResponse);
+        const chooseResponse = await jsonPost('/track/choose', {'playlist_dir': playlist, ...getTagFilter()});
         const path = (await chooseResponse.json()).path;
 
         console.info('Chosen track', path);
@@ -175,7 +172,7 @@ class Queue {
         for (let row of items) {
             row.draggable = true; // Make draggable
 
-            // The .hint and is purely cosmetic, they may be styled using css
+            // The .hint class is purely cosmetic, it may be styled using css
 
             row.ondragstart = () => {
                 current = row;

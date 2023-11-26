@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from enum import Enum, unique
 from sqlite3 import Connection, OperationalError
 from typing import Optional
+import hashlib
+import hmac
 
 import flask_babel
 from flask import request
@@ -139,6 +141,7 @@ class StandardUser(User):
     primary_playlist: Optional[str]
     language: Optional[str]
     privacy: PrivacyOption
+    session: Session
 
     def sessions(self) -> list[Session]:
         results = self.conn.execute("""
@@ -148,17 +151,11 @@ class StandardUser(User):
         return [Session(*row) for row in results]
 
     def get_csrf(self) -> str:
-        token = _generate_token()
-        now = int(time.time())
-        self.conn.execute('INSERT INTO csrf (user, token, creation_date) VALUES (?, ?, ?)',
-                          (self.user_id, token, now))
-        return token
+        token = hashlib.sha3_256(self.session.token.encode()).digest()
+        return base64.urlsafe_b64encode(token).decode()
 
     def verify_csrf(self, token: str) -> None:
-        min_timestamp = int(time.time()) - settings.csrf_validity_seconds
-        result = self.conn.execute('SELECT token FROM csrf WHERE user=? AND token=? AND creation_date > ?',
-                                   (self.user_id, token, min_timestamp)).fetchone()
-        if result is None:
+        if not hmac.compare_digest(token, self.get_csrf()):
             raise RequestTokenError()
 
     def verify_password(self, password: str) -> bool:
@@ -289,7 +286,9 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
     Returns: User object if session token is valid, or None if invalid
     """
     result = conn.execute("""
-                          SELECT session.rowid, user.id, user.username, user.nickname, user.admin, user.primary_playlist, user.language, user.privacy
+                          SELECT session.rowid, session.token, session.creation_date, session.user_agent,
+                                 session.remote_address, session.last_use, user.id, user.username, user.nickname,
+                                 user.admin, user.primary_playlist, user.language, user.privacy
                           FROM user
                               INNER JOIN session ON user.id = session.user
                           WHERE session.token=?
@@ -298,7 +297,11 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
         log.warning('Invalid auth token: %s', token)
         return None
 
-    session_rowid, user_id, username, nickname, admin, primary_playlist, lang_code, privacy_str = result
+    (session_rowid, session_token, session_creation_date, session_user_agent, session_remote_address,
+     session_last_use, user_id, username, nickname, admin, primary_playlist, lang_code, privacy_str) = result
+
+    session = Session(session_rowid,  session_token, session_creation_date, session_user_agent,
+                      session_remote_address, session_last_use)
 
     try:
         remote_addr = request.remote_addr
@@ -314,7 +317,8 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
         if ex.sqlite_errorname != 'SQLITE_READONLY':
             raise ex
 
-    return StandardUser(conn, user_id, username, nickname, admin == 1, primary_playlist, lang_code, PrivacyOption(privacy_str))
+    return StandardUser(conn, user_id, username, nickname, admin == 1, primary_playlist, lang_code,
+                        PrivacyOption(privacy_str), session)
 
 
 def verify_auth_cookie(conn: Connection, require_admin=False, redirect_to_login=False) -> User:
@@ -342,18 +346,6 @@ def verify_auth_cookie(conn: Connection, require_admin=False, redirect_to_login=
         raise AuthError(AuthErrorReason.ADMIN_REQUIRED, redirect_to_login)
 
     return user
-
-
-def prune_old_csrf_tokens(conn: Connection) -> int:
-    """
-    Prune old CSRF tokens
-    Args:
-        conn: Read-write database connection
-    Returns: Number of deleted tokens
-    """
-    delete_before = int(time.time()) - settings.csrf_validity_seconds
-    return conn.execute('DELETE FROM csrf WHERE creation_date < ?',
-                        (delete_before,)).rowcount
 
 
 def prune_old_session_tokens(conn: Connection) -> int:

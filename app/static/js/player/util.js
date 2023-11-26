@@ -14,7 +14,7 @@ function checkResponseCode(response) {
  * @returns {Promise<Response>}
  */
 async function jsonPost(url, postDataObject, checkError = true) {
-    postDataObject.csrf = await csrf.getToken();
+    postDataObject.csrf = getCsrfToken();
     const options = {
         method: 'POST',
         body: JSON.stringify(postDataObject),
@@ -34,4 +34,8 @@ function uuidv4() {
     return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
       (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     );
+}
+
+function getCsrfToken() {
+    return document.getElementById('csrf-token').value;
 }

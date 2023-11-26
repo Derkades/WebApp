@@ -78,13 +78,6 @@ CREATE TABLE session (
     last_use INTEGER NOT NULL -- Seconds since UNIX epoch
 );
 
-CREATE TABLE csrf (
-    user INTEGER NOT NULL REFERENCES user(id) ON DELETE CASCADE,
-    token TEXT NOT NULL UNIQUE,
-    creation_date INTEGER NOT NULL, -- Seconds since UNIX epoch
-    UNIQUE(user, token)
-) STRICT;
-
 CREATE TABLE history (
     id INTEGER NOT NULL UNIQUE PRIMARY KEY AUTOINCREMENT,
     timestamp INTEGER NOT NULL, -- Seconds since UNIX epoch

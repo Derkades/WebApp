@@ -8,7 +8,7 @@ bp = Blueprint('users', __name__, url_prefix='/users')
 @bp.route('')
 def route_users():
     """User list page"""
-    with db.connect() as conn:
+    with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn, require_admin=True, redirect_to_login=True)
         new_csrf_token = user.get_csrf()
 
@@ -33,7 +33,7 @@ def route_users():
 @bp.route('/edit', methods=['GET', 'POST'])
 def route_edit():
     """Change username or password"""
-    with db.connect() as conn:
+    with db.connect(read_only=request.method == 'GET') as conn:
         user = auth.verify_auth_cookie(conn, require_admin=True)
 
         if request.method == 'GET':

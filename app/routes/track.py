@@ -13,21 +13,21 @@ log = logging.getLogger('app.routes.track')
 bp = Blueprint('track', __name__, url_prefix='/track')
 
 
-@bp.route('/choose', methods=['GET'])
+@bp.route('/choose', methods=['POST'])
 def route_track():
     """
     Choose random track from the provided playlist directory.
     """
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.args['csrf'])
+        user.verify_csrf(request.json['csrf'])
 
-        dir_name = request.args['playlist_dir']
+        dir_name = request.json['playlist_dir']
         playlist = music.playlist(conn, dir_name)
         if 'tag_mode' in request.args:
-            tag_mode = request.args['tag_mode']
+            tag_mode = request.json['tag_mode']
             assert tag_mode in {'allow', 'deny'}
-            tags = request.args['tags'].split(';')
+            tags = request.json['tags'].split(';')
             chosen_track = playlist.choose_track(user, tag_mode=tag_mode, tags=tags)
         else:
             chosen_track = playlist.choose_track(user)

@@ -31,7 +31,7 @@ def route_remove():
 
 @bp.route('')
 def route_dislikes():
-    with db.connect() as conn:
+    with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn, redirect_to_login=True)
         csrf_token = user.get_csrf()
         rows = conn.execute('''
