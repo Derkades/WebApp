@@ -83,7 +83,7 @@ ALBUM_ARTIST_IGNORE = {
 
 
 METADATA_ADVERTISEMENT_KEYWORDS = [
-    'http://electronicfresh.com'
+    'electronicfresh.com',
 ]
 
 
