@@ -5,9 +5,10 @@ import logging
 from pathlib import Path
 
 import jinja2
-from flask import Flask, Response, redirect, render_template, request
+from flask import Flask, Response, redirect, render_template, request, abort
 from flask_babel import Babel
 from werkzeug.middleware.proxy_fix import ProxyFix
+from werkzeug.exceptions import HTTPException
 
 from app import (charts, db, jsonw, language, lastfm, logconfig, music, packer,
                  settings)
@@ -47,6 +48,16 @@ app.jinja_env.auto_reload = settings.dev
 babel = Babel(app, locale_selector=language.get_locale)
 log = logging.getLogger('app')
 static_dir = Path('app', 'static')
+
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    # pass through HTTP errors
+    if isinstance(e, HTTPException):
+        return e
+
+    log.exception('Unhandled exception')
+    return Response('Sorry! Canot continue due to unhandled exception. The error has been logged.', 500, content_type='text/plain')
 
 
 @app.route('/')

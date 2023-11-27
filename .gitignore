@@ -2,9 +2,7 @@ __pycache__/
 /downloads/
 /music/
 /cache/
+/data/
 /*.webp
 messages.pot
 *.mo
-*.db
-*.db-shm
-*.db-wal
