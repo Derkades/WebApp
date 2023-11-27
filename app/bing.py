@@ -4,7 +4,7 @@ import sys
 import traceback
 from multiprocessing.pool import ThreadPool
 from pathlib import Path
-from typing import Optional
+from typing import Iterator
 
 import requests
 from bs4 import BeautifulSoup
@@ -43,7 +43,7 @@ def _sort_key_len(download: bytes) -> int:
     return len(download)
 
 
-def image_search(bing_query: str) -> Optional[bytes]:
+def image_search(bing_query: str) -> Iterator[bytes]:
     """
     Perform image search using Bing
     Parameters:
@@ -86,18 +86,11 @@ def image_search(bing_query: str) -> Optional[bytes]:
         # Remove failed downloads
         downloads = [d for d in maybe_downloads if d is not None]
 
-        if downloads:
-            best_image = sorted(downloads, key=_sort_key_len)[-1]
-            log.info('Found image, %.2fMiB', len(best_image)/1024/1024)
-            return best_image
-
-        log.info('No image found')
-        return None
-
+        yield from sorted(downloads, key=_sort_key_len)
     except Exception:
         log.info('Error during bing search. This is probably a bug.')
         traceback.print_exc()
-        return None
+        yield
 
 
 if __name__ == '__main__':

@@ -113,7 +113,7 @@ def route_album_cover() -> Response:
         else:
             raise ValueError('invalid quality')
 
-        image_bytes = track.get_cover_thumbnail(meme, quality)
+        image_bytes = track.get_cover(meme, quality)
 
     return Response(image_bytes, content_type='image/webp')
 
