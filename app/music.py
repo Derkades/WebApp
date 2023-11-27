@@ -354,7 +354,7 @@ class Track:
 
         with tempfile.NamedTemporaryFile() as temp_output:
             command = ['ffmpeg',
-                    '-y',  # overwrite existing file
+                    '-y',  # overwriting file is required, because the created temp file already exists
                     '-hide_banner',
                     '-nostats',
                     '-loglevel', settings.ffmpeg_loglevel,
@@ -378,29 +378,25 @@ class Track:
         """
         Write metadata to file
         """
-        with tempfile.NamedTemporaryFile() as temp_file:
+        original_extension = '.' + self.path.name.split('.')[-1]
+        with tempfile.NamedTemporaryFile(suffix=original_extension) as temp_file:
             command = [
                 'ffmpeg',
-                '-y',
+                '-y',  # overwriting file is required, because the created temp file already exists
                 '-hide_banner',
+                '-nostats',
+                '-loglevel', settings.ffmpeg_loglevel,
                 '-i', self.path.absolute().as_posix(),
                 '-codec', 'copy',
             ]
-            if self.path.name.endswith('ogg'):
+
+            if original_extension == '.ogg':
                 meta_flag = '-metadata:s' # Set stream metadata
             else:
                 meta_flag = '-metadata' # Set container metadata
+
             for key, value in meta_dict.items():
                 command.extend((meta_flag, key + '=' + ('' if value is None else value)))
-
-            extension = self.path.name.split('.')[-1]
-            if extension == 'm4a':
-                ffmpeg_format = 'ipod'
-            elif extension == 'mka':
-                ffmpeg_format = 'matroska'
-            else:
-                ffmpeg_format = extension
-            command.extend(('-f', ffmpeg_format))
 
             command.append(temp_file.name)
 
