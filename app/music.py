@@ -204,23 +204,20 @@ class Track:
         log.info('Cover thumbnail not cached, need to download album cover image')
 
         for cover_bytes in self._get_possible_covers(meme):
-            temp_dir = Path(tempfile.mkdtemp())
+            with tempfile.TemporaryDirectory(prefix='music-cover') as temp_dir:
+                input_path = Path(temp_dir, 'input')
+                input_path.write_bytes(cover_bytes)
 
-            input_path = Path(temp_dir, 'input')
-            input_path.write_bytes(cover_bytes)
+                try:
+                    log.info('Generating thumbnails')
 
-            try:
-                log.info('Generating thumbnails')
-
-                for quality in ImageQuality:
-                    output_path = Path(temp_dir, 'output-' + quality.value)
-                    image.webp_thumbnail(input_path, output_path, img_quality, square=not meme)
-                    cache.store(general_cache_key + quality.value, output_path.read_bytes())
-
-                shutil.rmtree(temp_dir)
-            except CalledProcessError:
-                log.warning('Failed to generate thumbnail, image is probably corrupt. Trying another image.')
-                continue
+                    for quality in ImageQuality:
+                        output_path = Path(temp_dir, 'output-' + quality.value)
+                        image.webp_thumbnail(input_path, output_path, img_quality, square=not meme)
+                        cache.store(general_cache_key + quality.value, output_path.read_bytes())
+                except CalledProcessError:
+                    log.warning('Failed to generate thumbnail, image is probably corrupt. Trying another image.')
+                    continue
 
             cache_data = cache.retrieve(quality_cache_key)
 
