@@ -367,6 +367,7 @@ class Track:
             command = ['ffmpeg',
                     '-y',  # overwrite existing file
                     '-hide_banner',
+                    '-nostats',
                     '-loglevel', settings.ffmpeg_loglevel,
                     '-i', self.path.absolute().as_posix(),
                     *input_options,

@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 
+from app import settings
+
 log = logging.getLogger('app.image')
 
 
@@ -38,6 +40,8 @@ def webp_thumbnail(input_path: Path, output_path: Path, img_quality: ImageQualit
 
     subprocess.run(['ffmpeg',
                     '-hide_banner',
+                    '-nostats',
+                    '-loglevel', settings.ffmpeg_loglevel,
                     '-i', input_path.as_posix(),
                     '-pix_fmt', 'yuv420p',
                     '-filter', thumb_filter,

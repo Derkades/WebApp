@@ -1,4 +1,6 @@
 import base64
+import hashlib
+import hmac
 import logging
 import os
 import time
@@ -7,8 +9,6 @@ from dataclasses import dataclass
 from enum import Enum, unique
 from sqlite3 import Connection, OperationalError
 from typing import Optional
-import hashlib
-import hmac
 
 import flask_babel
 from flask import request
