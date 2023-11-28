@@ -605,7 +605,6 @@ def playlist(conn: Connection, name: str) -> Playlist:
                         SELECT (SELECT COUNT(*) FROM track WHERE playlist=playlist.path)
                         FROM playlist
                         WHERE path=?
-                        ORDER BY path ASC
                         ''', (name,)).fetchone()
     track_count, = row
     return Playlist(conn, name, from_relpath(name), track_count)
@@ -640,7 +639,6 @@ def playlists(conn: Connection) -> list[Playlist]:
     rows = conn.execute('''
                         SELECT path, (SELECT COUNT(*) FROM track WHERE playlist=playlist.path)
                         FROM playlist
-                        ORDER BY path ASC
                         ''')
     return [Playlist(conn, name, from_relpath(name), track_count)
             for name, track_count in rows]
