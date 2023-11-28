@@ -151,7 +151,8 @@ class Queue {
     };
 
     removeFromQueue(index) {
-        const track = this.queuedTracks[index];
+        const track = this.queuedTracks.splice(index, 1)[0];
+        track.revokeObjects();
         const removalBehaviour = document.getElementById('settings-queue-removal-behaviour').value;
         if (removalBehaviour === 'same') {
             // Add playlist to override array. Next time a track is picked, when playlistOverrides contains elements,
@@ -160,7 +161,6 @@ class Queue {
         } else if (removalBehaviour !== 'roundrobin') {
             console.warn('unexpected removal behaviour: ' + removalBehaviour);
         }
-        this.queuedTracks.splice(index, 1);
         this.fill();
     };
 
@@ -238,9 +238,7 @@ class Queue {
             // If history exceeded maximum length, remove first (oldest) element
             if (this.previousTracks.length > state.maxHistorySize) {
                 const removedTrack = this.previousTracks.shift();
-                console.info('Revoke objects', removedTrack.trackPath)
-                URL.revokeObjectURL(removedTrack.audioBlobUrl);
-                URL.revokeObjectURL(removedTrack.imageBlobUrl);
+                removedTrack.revokeObjects();
             }
         }
 
@@ -298,6 +296,12 @@ class QueuedTrack {
         } else {
             return null;
         }
+    }
+
+    revokeObjects() {
+        console.debug('Revoke objects', this.trackPath);
+        URL.revokeObjectURL(this.audioBlobUrl);
+        URL.revokeObjectURL(this.imageBlobUrl);
     }
 };
 
