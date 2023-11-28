@@ -82,6 +82,10 @@ body.light input::placeholder {
         padding-left: 1rem;
         padding-right: 2rem;
     }
+
+    #lyrics-scroll {
+        max-height: 80vh;
+    }
 }
 
 @media screen and (max-width: 899px) {
@@ -123,7 +127,6 @@ body.light input::placeholder {
 }
 
 #lyrics-scroll {
-    max-height: 80vh;
     overflow-y: auto;
     /* text-shadow: .05rem .05rem .5rem black; */
 }
