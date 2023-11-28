@@ -67,7 +67,7 @@ class Browse {
             return;
         }
 
-        const start = performance.now();
+        console.time('update-browse');
 
         const current = this.#history[this.#history.length - 1];
         this.setHeader(current.title);
@@ -96,19 +96,17 @@ class Browse {
             }
         }
 
-        if (!hasFilter) {
+        let content;
+        if (hasFilter) {
+            const tracks = Object.values(state.tracks).filter(filter);
+            content = this.generateTrackList(tracks);
+        } else {
             // No selected playlist, or filter. For performance reasons, don't display entire track list.
-            this.setContent(null);
-            return;
+            content = null;
         }
+        this.setContent(content);
 
-        const tracks = Object.values(state.tracks).filter(filter);
-        const table = this.generateTrackList(tracks);
-
-        const end = performance.now();
-        console.debug(`Updating browse table took ${end - start} ms`);
-
-        this.setContent(table);
+        console.timeEnd('update-browse');
     }
 
     /**
