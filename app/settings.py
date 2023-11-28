@@ -29,3 +29,6 @@ dev: bool = getenv('MUSIC_ENV', 'prod') == 'dev'
 proxies_x_forwarded_for: int = int(getenv('MUSIC_PROXIES_X_FORWARDED_FOR', '0'))
 offline_mode: bool = _boolenv('MUSIC_OFFLINE_MODE')
 short_log_format: bool = _boolenv('MUSIC_SHORT_LOG_FORMAT')
+
+if offline_mode:
+    music_dir = '/fake_directory'
