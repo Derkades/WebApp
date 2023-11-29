@@ -3,6 +3,7 @@ import sys
 import traceback
 from sqlite3 import Connection
 from urllib.parse import quote as urlencode
+from multiprocessing.pool import ThreadPool
 
 import requests
 from requests import Response
@@ -119,23 +120,26 @@ class OfflineSync:
         self.db_offline.commit()
         log.info('Logged in successfully')
 
-    def _download_track_content(self, path: str):
+    def _download_track_content(self, path: str) -> None:
         """
         Download audio, album cover and lyrics for a track and store in the 'content' database table.
         """
-        log.info('Downloading audio data')
-        response = self.request_get('/track/audio?type=webm_opus_high&path=' + urlencode(path))
-        assert response.status_code == 200
-        music_data = response.content
+        def download_audio() -> bytes:
+            return self.request_get('/track/audio?type=webm_opus_high&path=' + urlencode(path)).content
 
-        log.info('Downloading album cover')
-        response = self.request_get('/track/album_cover?quality=high&path=' + urlencode(path))
-        assert response.status_code == 200
-        cover_data = response.content
-        log.info('Downloading lyrics')
-        response = self.request_get('/track/lyrics?path=' + urlencode(path))
-        assert response.status_code == 200
-        lyrics_json = response.text
+        def download_cover() -> bytes:
+            return self.request_get('/track/album_cover?quality=high&path=' + urlencode(path)).content
+
+        def download_lyrics() -> str:
+            return self.request_get('/track/lyrics?path=' + urlencode(path)).text
+
+        with ThreadPool(3) as pool:
+            result_audio = pool.apply_async(download_audio)
+            result_cover = pool.apply_async(download_cover)
+            result_lyrics = pool.apply_async(download_lyrics)
+            audio = result_audio.get()
+            cover = result_cover.get()
+            lyrics = result_lyrics.get()
 
         self.db_offline.execute(
             """
@@ -145,14 +149,12 @@ class OfflineSync:
                 music_data = :music_data, cover_data = :cover_data, lyrics_json = :lyrics_json
             """,
             {'path': path,
-             'music_data': music_data,
-             'cover_data': cover_data,
-             'lyrics_json': lyrics_json})
+             'music_data': audio,
+             'cover_data': cover,
+             'lyrics_json': lyrics})
 
-    def _update_track(self, track):
+    def _update_track(self, track) -> None:
         self._download_track_content(track['path'])
-
-        log.info('Updating metadata')
 
         self.db_music.execute('UPDATE track SET duration=?, title=?, album=?, album_artist=?, year=?, mtime=? WHERE path=?',
                               (track['duration'], track['title'], track['album'], track['album_artist'], track['year'],
@@ -164,10 +166,8 @@ class OfflineSync:
             insert = [(track['path'], artist) for artist in track['artists']]
             self.db_music.executemany('INSERT INTO track_artist (track, artist) VALUES (?, ?)', insert)
 
-    def _insert_track(self, playlist, track):
+    def _insert_track(self, playlist, track) -> None:
         self._download_track_content(track['path'])
-
-        log.info('Storing metadata')
 
         self.db_music.execute(
             """
@@ -273,7 +273,7 @@ class OfflineSync:
             self.db_offline.commit()
 
 
-def do_sync():
+def do_sync() -> None:
     if not settings.offline_mode:
         log.warning('Refusing to sync, music player is not in offline mode')
         return
