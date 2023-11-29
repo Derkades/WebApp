@@ -17,29 +17,25 @@ RUN cd /build/ffmpeg && \
         --prefix="/build/ffmpeg" \
         --extra-cflags="-I/build/ffmpeg/include" \
         --extra-ldflags="-L/build/ffmpeg/lib" \
-        --extra-libs="-lpthread -lm" \
+        --extra-libs="-lm" \
         --ld="g++" \
         # External libraries
         --enable-libopus \
         --enable-libwebp \
         # Required for PNG
         --enable-zlib \
-        # Disable components
+        # Configuration options
         --disable-autodetect \
+        # Program options
         --disable-ffplay \
+        # Documentation options
         --disable-doc \
+        # Component options
+        --disable-avdevice \
         --disable-network \
-        # Input devices
-        --disable-indevs \
-        # Output devices
-        --disable-outdevs \
-        # Bitstream filters
-        --disable-bsfs \
-        # Protocols
-        --disable-protocols \
+        # Individual component options
+        --disable-everything \
         --enable-protocol=file \
-        # Decoders
-        --disable-decoders \
         --enable-decoder=libopus \
         --enable-decoder=mp3 \
         --enable-decoder=aac \
@@ -48,13 +44,9 @@ RUN cd /build/ffmpeg && \
         --enable-decoder=mjpeg  \
         --enable-decoder=webp \
         --enable-decoder=png \
-        # Encoders
-        --disable-encoders \
         --enable-encoder=libopus \
         --enable-encoder=aac \
         --enable-encoder=libwebp \
-        # Demuxers
-        --disable-demuxers \
         --enable-demuxer=aac \
         --enable-demuxer=flac \
         --enable-demuxer=mjpeg \
@@ -67,8 +59,6 @@ RUN cd /build/ffmpeg && \
         --enable-demuxer=image_png_pipe \
         --enable-demuxer=image_jpeg_pipe \
         --enable-demuxer=image_webp_pipe \
-        # Muxers
-        --disable-muxers \
         --enable-muxer=aac \
         --enable-muxer=flac \
         --enable-muxer=mjpeg \
@@ -78,22 +68,10 @@ RUN cd /build/ffmpeg && \
         --enable-muxer=wav \
         --enable-muxer=webm \
         --enable-muxer=webp \
-        # Parsers
-        --disable-parsers \
-        --enable-parser=aac \
-        --enable-parser=flac \
-        --enable-parser=mjpeg \
-        --enable-parser=opus \
-        --enable-parser=png \
-        --enable-parser=webp \
-        # Filters
-        --disable-filters \
         --enable-filter=loudnorm \
         --enable-filter=aresample \
         --enable-filter=scale \
         --enable-filter=crop \
-        # Hardware accelerators
-        --disable-hwaccels \
         && \
     make -j8
 
