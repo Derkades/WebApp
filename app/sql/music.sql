@@ -76,7 +76,7 @@ CREATE TABLE session (
     user_agent TEXT NULL,
     remote_address TEXT NULL,
     last_use INTEGER NOT NULL -- Seconds since UNIX epoch
-);
+) STRICT;
 
 CREATE TABLE history (
     id INTEGER NOT NULL UNIQUE PRIMARY KEY AUTOINCREMENT,
