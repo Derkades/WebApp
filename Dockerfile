@@ -59,6 +59,7 @@ RUN cd /build/ffmpeg && \
         --enable-demuxer=image_png_pipe \
         --enable-demuxer=image_jpeg_pipe \
         --enable-demuxer=image_webp_pipe \
+        --enable-demuxer=mov \
         --enable-muxer=aac \
         --enable-muxer=flac \
         --enable-muxer=mjpeg \
@@ -68,6 +69,7 @@ RUN cd /build/ffmpeg && \
         --enable-muxer=wav \
         --enable-muxer=webm \
         --enable-muxer=webp \
+        --enable-muxer=ipod \
         --enable-filter=loudnorm \
         --enable-filter=aresample \
         --enable-filter=scale \
