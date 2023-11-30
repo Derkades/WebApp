@@ -1,3 +1,5 @@
+-- Migrate session to strict mode
+
 PRAGMA foreign_keys=OFF;
 
 BEGIN;

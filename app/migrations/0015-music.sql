@@ -1,3 +1,5 @@
+-- Migrate scanner_log to strict mode
+
 PRAGMA foreign_keys=OFF;
 
 BEGIN;
