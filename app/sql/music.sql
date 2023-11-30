@@ -102,7 +102,7 @@ CREATE TABLE scanner_log (
     action TEXT NOT NULL, -- Literal string 'insert', 'delete', or 'update'
     playlist TEXT NOT NULL, -- Intentionally not a foreign key, log may contain deleted playlists. Can be derived from track path, but stored for fast and easy lookup
     track TEXT NOT NULL  -- Intentionally not a foreign key, log may contain deleted tracks
-);
+) STRICT;
 
 CREATE TABLE dislikes (
     user INTEGER NOT NULL REFERENCES user(id) ON DELETE CASCADE,
