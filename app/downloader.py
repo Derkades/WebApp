@@ -58,7 +58,7 @@ def download(download_to: Path, url: str) -> Generator[str, None, int]:
         'noplaylist': True,
         'postprocessors': [
             {
-                'key': 'FFmpegVideoConvertor',
+                'key': 'FFmpegVideoRemuxer',
                 'preferedformat': 'webm>ogg/mp3>mp3/mka'
             }
         ],
