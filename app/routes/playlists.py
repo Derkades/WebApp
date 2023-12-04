@@ -81,7 +81,7 @@ def route_create():
         scanner.scan(conn)  # This creates a row for the playlist in the playlist table
 
         # New playlist should be writable for user who created it
-        conn.execute('INSERT INTO user_playlist_write VALUES (user, playlist)',
+        conn.execute('INSERT INTO user_playlist_write VALUES (?, ?)',
                      (user.user_id, dir_name))
 
         return redirect('/playlists', code=303)
