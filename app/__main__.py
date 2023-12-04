@@ -57,7 +57,7 @@ def handle_exception(e):
         return e
 
     log.exception('Unhandled exception')
-    return Response('Sorry! Canot continue due to unhandled exception. The error has been logged.', 500, content_type='text/plain')
+    return Response('Sorry! Cannot continue due to unhandled exception. The error has been logged.', 500, content_type='text/plain')
 
 
 @app.route('/')
