@@ -54,7 +54,8 @@ def download(download_to: Path, url: str) -> Generator[str, None, int]:
 
     yt_opts = {
         'format': 'bestaudio',
-        'paths': {'temp': '/tmp'},
+        'cachedir': '/tmp/yt-dlp-cache',
+        'paths': {'temp': '/tmp/yt-dlp-temp'},
         'noplaylist': True,
         'postprocessors': [
             {
@@ -98,7 +99,7 @@ class SearchResult:
 
 
 def search(search_query: str, search_type: str = 'ytsearch') -> list[SearchResult]:
-    with YoutubeDL({'default_search': search_type}) as ytdl:
+    with YoutubeDL({'cachedir': '/tmp/yt-dlp-cache', 'default_search': search_type}) as ytdl:
         info = ytdl.extract_info(search_query, download=False)
         results = [SearchResult(entry['original_url'],
                                 entry['title'],
