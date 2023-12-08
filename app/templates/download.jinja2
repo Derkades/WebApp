@@ -125,6 +125,9 @@ document.addEventListener('DOMContentLoaded', () => {
         downloadButton.classList.add('hidden');
         downloadLoading.classList.remove('hidden');
 
+        downloadLog.style.backgroundColor = '';
+        downloadLog.textContent = '';
+
         (async function(){
             const decoder = new TextDecoder();
 
