@@ -40,6 +40,7 @@ RUN cd /build/ffmpeg && \
         --enable-decoder=mp3 \
         --enable-decoder=aac \
         --enable-decoder=flac \
+        --enable-decoder=vorbis \
         --enable-decoder=pcm_s16le \
         --enable-decoder=mjpeg  \
         --enable-decoder=webp \
