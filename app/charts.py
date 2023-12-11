@@ -103,7 +103,7 @@ def chart_last_chosen(conn: Connection):
     """
     Last chosen chart
     """
-    result = conn.execute('SELECT last_played FROM track')
+    result = conn.execute('SELECT last_chosen FROM track')
     counts = [0, 0, 0, 0, 0]
     current = int(time.time())
     for (timestamp,) in result:

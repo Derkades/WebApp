@@ -229,13 +229,18 @@ def route_played():
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
 
+        track = request.json['track']
+        timestamp = int(request.json['timestamp'])
+
+        # In offline mode, tracks are chosen without last_chosen being updated. Update it now.
+        conn.execute('UPDATE track SET last_chosen=MAX(last_chosen, ?) WHERE path=?',
+                     (timestamp, track))
+
         if user.privacy == PrivacyOption.HIDDEN:
             log.info('Ignoring because privacy==hidden')
             return Response('ok', 200)
 
-        track = request.json['track']
         playlist = track[:track.index('/')]
-        timestamp = request.json['timestamp']
         private = user.privacy == PrivacyOption.AGGREGATE
 
         conn.execute('''

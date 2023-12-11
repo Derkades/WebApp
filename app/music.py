@@ -433,8 +433,8 @@ class PlaylistStats:
     has_year_count: int
     has_artist_count: int
     has_tag_count: int
-    most_recent_play: int
-    least_recent_play: int
+    most_recent_choice: int
+    least_recent_choice: int
     most_recent_mtime: int
 
     def __init__(self, conn: Connection, relpath: str):
@@ -453,16 +453,16 @@ class PlaylistStats:
          self.has_album_count,
          self.has_album_artist_count,
          self.has_year_count,
-         self.most_recent_play,
-         self.least_recent_play,
+         self.most_recent_choice,
+         self.least_recent_choice,
          self.most_recent_mtime
          ) = conn.execute('''
                           SELECT SUM(title IS NOT NULL),
                                  SUM(album IS NOT NULL),
                                  SUM(album_artist IS NOT NULL),
                                  SUM(year IS NOT NULL),
-                                 MAX(last_played),
-                                 MIN(last_played),
+                                 MAX(last_chosen),
+                                 MIN(last_chosen),
                                  MAX(mtime)
                           FROM track WHERE playlist=?
                           ''', (relpath,)).fetchone()
@@ -505,7 +505,7 @@ class Playlist:
         random_choices = max(3, min(10, self.track_count // 6))
 
         query = """
-                SELECT track.path, last_played
+                SELECT track.path, last_chosen
                 FROM track
                 WHERE track.playlist=?
                 """
@@ -529,18 +529,18 @@ class Playlist:
         query += f' LIMIT {random_choices}'
 
         # From randomly ordered tracks, choose one that was last played longest ago
-        query = 'SELECT * FROM (' + query + ') ORDER BY last_played ASC LIMIT 1'
+        query = 'SELECT * FROM (' + query + ') ORDER BY last_chosen ASC LIMIT 1'
 
-        track, last_played = self.conn.execute(query, params).fetchone()
+        track, last_chosen = self.conn.execute(query, params).fetchone()
 
         current_timestamp = int(datetime.now().timestamp())
-        if last_played == 0:
+        if last_chosen == 0:
             log.info('Chosen track: %s (never played)', track)
         else:
-            hours_ago = (current_timestamp - last_played) / 3600
+            hours_ago = (current_timestamp - last_chosen) / 3600
             log.info('Chosen track: %s (last played %.2f hours ago)', track, hours_ago)
 
-        self.conn.execute('UPDATE track SET last_played = ? WHERE path=?', (current_timestamp, track))
+        self.conn.execute('UPDATE track SET last_chosen = ? WHERE path=?', (current_timestamp, track))
 
         track = Track.by_relpath(self.conn, track)
         if track is None:

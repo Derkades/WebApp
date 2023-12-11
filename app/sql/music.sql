@@ -14,7 +14,7 @@ CREATE TABLE track (
     track_number INTEGER NULL,
     year INTEGER NULL,
     mtime INTEGER NOT NULL,
-    last_played INTEGER NOT NULL DEFAULT 0
+    last_chosen INTEGER NOT NULL DEFAULT 0
 ) STRICT;
 
 CREATE INDEX idx_track_playlist ON track(playlist);
