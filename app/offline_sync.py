@@ -1,15 +1,16 @@
 import logging
+import random
 import sys
 import traceback
+from multiprocessing.pool import ThreadPool
 from sqlite3 import Connection
 from urllib.parse import quote as urlencode
-from multiprocessing.pool import ThreadPool
 
 import requests
 from requests import Response
 from requests.exceptions import RequestException
 
-from app import db, settings
+from app import db, logconfig, settings
 
 log = logging.getLogger('app.offline')
 
@@ -207,7 +208,7 @@ class OfflineSync:
             self.db_music.execute('DELETE FROM playlist WHERE path=?',
                                   (name,))
 
-    def sync_tracks(self) -> None:
+    def sync_tracks(self, force_resync: float) -> None:
         """
         Download added or modified tracks from the server, and delete local tracks that were deleted on the server
         """
@@ -236,6 +237,9 @@ class OfflineSync:
                     mtime, = row
                     if mtime != track['mtime']:
                         log.info('Out of date: %s', track['path'])
+                        self._update_track(track)
+                    elif force_resync > 0 and random.random() < force_resync:
+                        log.info('Force resync: %s', track['path'])
                         self._update_track(track)
                 else:
                     log.info('Missing: %s', track['path'])
@@ -273,7 +277,7 @@ class OfflineSync:
             self.db_offline.commit()
 
 
-def do_sync() -> None:
+def do_sync(force_resync: float) -> None:
     if not settings.offline_mode:
         log.warning('Refusing to sync, music player is not in offline mode')
         return
@@ -283,11 +287,10 @@ def do_sync() -> None:
         log.info('Sync history')
         sync.sync_history()
         log.info('Sync tracks')
-        sync.sync_tracks()
+        sync.sync_tracks(force_resync)
         log.info('Done! Please wait for program to exit.')
 
 
 if __name__ == '__main__':
-    import logconfig
     logconfig.apply()
     log.error('This script can no longer be executed directly, please use the manage command. See offline.md for more info.')

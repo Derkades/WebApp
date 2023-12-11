@@ -143,11 +143,11 @@ def handle_vacuum(_args: Any) -> None:
         conn.execute('VACUUM')
 
 
-def handle_sync(_args: Any) -> None:
+def handle_sync(args: Any) -> None:
     """
     Handle command for offline mode sync
     """
-    offline_sync.do_sync()
+    offline_sync.do_sync(args.force_resync)
 
 
 if __name__ == '__main__':
@@ -196,6 +196,8 @@ if __name__ == '__main__':
 
     cmd_sync = subparsers.add_parser('sync',
                                      help='sync tracks from main server (offline mode)')
+    cmd_sync.add_argument('--force-resync', type=float, default=0.0,
+                          help='Ratio of randomly selected tracks to redownload even if up to date')
     cmd_sync.set_defaults(func=handle_sync)
 
     parsed_args = parser.parse_args()
