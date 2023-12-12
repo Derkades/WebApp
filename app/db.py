@@ -11,6 +11,7 @@ log = logging.getLogger('app.db')
 
 
 MIGRATION_DIR = Path('app', 'migrations')
+INIT_SQL_DIR = Path('app', 'sql')
 DATABASE_NAMES = ['cache', 'music', 'offline', 'meta']
 
 
@@ -59,7 +60,7 @@ def create_databases() -> None:
     for db_name in DATABASE_NAMES:
         log.info('Creating database: %s', db_name)
         with _connect(db_name, False) as conn:
-            conn.executescript(Path('sql', f'{db_name}.sql').read_text(encoding='utf-8'))
+            conn.executescript(Path(INIT_SQL_DIR, f'{db_name}.sql')).read_text(encoding='utf-8'))
 
     with _connect('meta', False) as conn:
         migrations = get_migrations()
