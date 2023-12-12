@@ -183,7 +183,7 @@ class Track:
             yield from bing.image_search(query)
 
         log.info('No suitable cover found, returning fallback image')
-        yield Path('app', 'static', 'raphson.png').read_bytes()
+        yield Path('app', 'static', 'img', 'raphson.png').read_bytes()
 
 
     def get_cover(self, meme: bool, img_quality: ImageQuality) -> Optional[bytes]:
