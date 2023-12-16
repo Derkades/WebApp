@@ -65,6 +65,7 @@ RUN cd /build/ffmpeg && \
         --enable-muxer=flac \
         --enable-muxer=mjpeg \
         --enable-muxer=matroska \
+        --enable-muxer=matroska_audio \
         --enable-muxer=mp3 \
         --enable-muxer=ogg \
         --enable-muxer=wav \
