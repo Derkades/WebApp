@@ -239,3 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     queue.next();
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('audio').addEventListener('ended', () => queue.next());
+});
