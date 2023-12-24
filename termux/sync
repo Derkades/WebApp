@@ -2,4 +2,4 @@
 set -e
 source termux/settings
 python -m app.db
-python -m app.manage sync
+python -m app.manage sync $@
