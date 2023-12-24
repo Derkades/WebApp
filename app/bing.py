@@ -90,7 +90,7 @@ def image_search(bing_query: str) -> Iterator[bytes]:
     except Exception:
         log.info('Error during bing search. This is probably a bug.')
         traceback.print_exc()
-        yield
+        yield from []
 
 
 if __name__ == '__main__':
