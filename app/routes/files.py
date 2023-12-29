@@ -56,7 +56,11 @@ def route_files():
                 file_info['artist'] = ', '.join(meta.artists) if meta.artists else ''
                 file_info['title'] = meta.title if meta.title else ''
 
-    children = sorted(children, key=lambda x: x['name'])
+    # Sort directories first, and ignore case for file name
+    def sort_name(obj):
+        return ('a' if obj['type'] == 'dir' else 'b') + obj['name'].lower()
+
+    children = sorted(children, key=sort_name)
 
     return render_template('files.jinja2',
                            base_path=music.to_relpath(browse_path),
