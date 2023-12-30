@@ -14,9 +14,13 @@ async function jsonPost(url, postDataObject) {
     return response;
 }
 
-async function searchFormAction() {
-    const searchType = document.getElementById('search-type');
+async function performSearch() {
     const searchQuery = document.getElementById('search-query');
+
+    if (searchQuery.value == '') {
+        return;
+    }
+
     const searchButton = document.getElementById('search-button');
     const searchLoading = document.getElementById('search-loading');
     const searchTable = document.getElementById('search-table');
@@ -54,6 +58,11 @@ async function searchFormAction() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('search-form').onsubmit = () => {
+        performSearch();
+        return false;
+    };
+
     const downloadUrl = document.getElementById('download-url');
     const downloadPlaylist = document.getElementById('download-playlist');
     const downloadButton = document.getElementById('download-button');

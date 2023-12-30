@@ -10,13 +10,8 @@
 
 <h2>{% trans %}Search{% endtrans %}</h2>
 
-<form action="javascript:searchFormAction();">
+<form action="" id="search-form">
     <input id="csrf-token" type="hidden" value="{{ csrf_token }}">
-
-    {# <label for="search-type">{% trans %}Service{% endtrans %}</label><br>
-    <select id="search-type">
-        <option name="youtube">YouTube</option>
-    </select><br> #}
 
     <input id="search-query" type="text" placeholder="{% trans %}Search query{% endtrans %}">
 
