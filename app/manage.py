@@ -147,6 +147,15 @@ def handle_sync(args: Any) -> None:
     """
     Handle command for offline mode sync
     """
+    if args.playlists is not None:
+        if args.playlists == 'reset':
+            offline_sync.change_playlists([])
+            return
+
+        playlists = args.playlists.split(',')
+        offline_sync.change_playlists(playlists)
+        return
+
     offline_sync.do_sync(args.force_resync)
 
 
@@ -198,6 +207,8 @@ if __name__ == '__main__':
                                      help='sync tracks from main server (offline mode)')
     cmd_sync.add_argument('--force-resync', type=float, default=0.0,
                           help='Ratio of randomly selected tracks to redownload even if up to date')
+    cmd_sync.add_argument('--playlists', type=str,
+                          help='Change playlists to sync. Specify playlists as comma separated list without spaces. Enter \'favorite\' to sync favorite playlists (default).')
     cmd_sync.set_defaults(func=handle_sync)
 
     parsed_args = parser.parse_args()

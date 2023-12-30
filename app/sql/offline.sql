@@ -14,3 +14,7 @@ CREATE TABLE settings (
     key TEXT NOT NULL UNIQUE PRIMARY KEY,
     value TEXT NOT NULL
 );
+
+CREATE TABLE playlists (
+    name TEXT NOT NULL UNIQUE
+) STRICT;

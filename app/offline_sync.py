@@ -86,7 +86,7 @@ class OfflineSync:
                     log.info('Authentication token is valid')
             except RequestException:
                 traceback.print_exc()
-                log.info('Error testing authentication token')
+                log.info('Error testing authentication token. Do you have a working internet connection?')
                 sys.exit(1)
         else:
             log.info('No authentication token stored, please log in')
@@ -214,12 +214,22 @@ class OfflineSync:
         """
         log.info('Downloading track list')
         playlists = self.request_get('/track/list').json()['playlists']
+        log.info('Fetching disliked tracks')
         dislikes = set(self.request_get('/dislikes/json').json()['tracks'])
+
+        result = self.db_offline.execute('SELECT name FROM playlists')
+        enabled_playlists = [row[0] for row in result]
+
+        if len(enabled_playlists) == 0:
+            log.info('No playlists selected, syncing favorite playlists.')
+            enabled_playlists = [playlist['name'] for playlist in playlists if playlist['favorite']]
+
+        log.info('Syncing playlists: %s', ','.join(enabled_playlists))
 
         all_track_paths: set[str] = set()
 
         for playlist in playlists:
-            if not playlist['favorite']:
+            if playlist['name'] not in enabled_playlists:
                 continue
 
             self.db_music.execute('INSERT INTO playlist VALUES (?) ON CONFLICT (path) DO NOTHING',
@@ -290,6 +300,19 @@ def do_sync(force_resync: float) -> None:
         sync.sync_tracks(force_resync)
         log.info('Done! Please wait for program to exit.')
 
+
+def change_playlists(playlists: list[str]) -> None:
+    if len(playlists) == 0:
+        log.info('Resetting enabled playlists')
+    else:
+        log.info('Changing playlists: %s', ','.join(playlists))
+
+    with db.offline() as conn:
+        conn.execute('BEGIN')
+        conn.execute('DELETE FROM playlists')
+        conn.executemany('INSERT INTO playlists VALUES (?)',
+                         [(playlist,) for playlist in playlists])
+        conn.execute('COMMIT')
 
 if __name__ == '__main__':
     logconfig.apply()
