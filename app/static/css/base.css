@@ -15,11 +15,10 @@
 }
 
 body {
-    height: 100vh;
-    width: 100vw;
     margin: 0;
     background-color: black;
     color: white;
+    height: 100vh;
 }
 
 body.colorful {
@@ -216,26 +215,17 @@ body.light button > .icon {
 }
 
 main {
-    /* background-color: #1A1A1A; */
     background-color: rgba(0, 0, 0, 0.5);
     padding: 1rem;
-    min-height: calc(100vh - 2rem);
-    width: calc(100vw - 2rem);
-
-}
-
-@media screen and (min-width: 50rem) {
-    main {
-        width: calc(100vw - 4rem);
-        min-height: calc(100vh - 4rem);
-        margin: 1rem;
-        border-radius: var(--border-radius-amount);
-    }
+    width: 100%;
+    max-width: 100rem;
+    box-sizing: border-box; /* include padding in max-width */
 }
 
 @media screen and (min-width: 100rem) {
     main {
-        width: calc(100rem - 4rem);
+        margin: 1rem;
+        border-radius: var(--border-radius-amount);
     }
 }
 
@@ -340,6 +330,8 @@ kbd {
 }
 
 .flex-content-center {
+    width: 100%;
+    min-height: 100%;
     display: flex;
     justify-content: center;
 }

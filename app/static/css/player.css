@@ -24,8 +24,8 @@ body.light input::placeholder {
     top: 0;
     left: 0;
 
-    height: 100vh;
-    width: 100vw;
+    height: 100%;
+    width: 100%;
 
     z-index: -1;
 
@@ -63,7 +63,7 @@ body.light input::placeholder {
         position: absolute;
         top: 0;
         width: calc(50vw - 3rem);
-        height: calc(100vh);
+        height: 100%;
     }
 
     .lyrics-outer {
@@ -186,8 +186,8 @@ body.light .dialog-header {
     position: fixed;
     top: 0;
     left: 0;
-    height: 100vh;
-    width: 100vw;
+    height: 100%;
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -196,10 +196,10 @@ body.light .dialog-header {
 }
 
 .full-page-overlay .dialog {
-    min-width: min(60rem, calc(100vw - 1rem));
-    max-width: calc(100vw - 1rem);
-    min-height: min(45rem, calc(100vh - 1rem));
-    max-height: calc(100vh - 3rem); /* no idea why 3rem is needed here */
+    min-width: min(60rem, 100%);
+    max-width: calc(100%);
+    min-height: min(45rem, 100%);
+    max-height: 100%;
     margin: .5rem;
     /* prevent children from overflowing parent */
     display: flex;
@@ -387,7 +387,7 @@ body.light #loading-overlay {
     bottom: 0;
     z-index: -1;
     height: 20vh;
-    width: 100vw;
+    width: 100%;
     pointer-events: none;
 }
 
