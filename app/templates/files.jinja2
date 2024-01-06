@@ -24,11 +24,11 @@
     {% if write_permission %}
         <table>
             <tbody>
-                <form method="POST" action="/files/upload" enctype="multipart/form-data">
-                    <input type="hidden" name="csrf" value="{{ csrf_token }}">
-                    <input type="hidden" name="dir" value="{{ base_path }}">
-                    <tr>
+                <tr>
+                    <form method="POST" action="/files/upload" enctype="multipart/form-data">
                         <td>
+                            <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                            <input type="hidden" name="dir" value="{{ base_path }}">
                             {% trans %}Upload files{% endtrans %}
                         </td>
                         <td>
@@ -37,23 +37,23 @@
                         <td>
                             <input type="submit" value="{% trans %}Upload{% endtrans %}">
                         </td>
-                    </tr>
-                </form>
-                <form method="POST" action="/files/mkdir">
-                    <input type="hidden" name="csrf" value="{{ csrf_token }}">
-                    <input type="hidden" name="path" value="{{ base_path }}">
-                    <tr>
+                    </form>
+                </tr>
+                <tr>
+                    <form method="POST" action="/files/mkdir">
                         <td>
                             {% trans %}Create directory{% endtrans %}
                         </td>
                         <td>
+                            <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                            <input type="hidden" name="path" value="{{ base_path }}">
                             <input type="text" name="dirname" placeholder="{% trans %}Directory name{% endtrans %}">
                         </td>
                         <td>
                             <input type="submit" value="{% trans %}Create{% endtrans %}">
                         </td>
-                    </tr>
-                </form>
+                    </form>
+                </tr>
             </tbody>
 
         </table>
