@@ -64,7 +64,7 @@ def route_audio():
         media_type = 'audio/webm'
     elif type_str == 'webm_opus_low':
         audio_type = AudioType.WEBM_OPUS_LOW
-        media_type = 'audio_webm'
+        media_type = 'audio/webm'
     elif type_str == 'mp4_aac':
         audio_type = AudioType.MP4_AAC
         media_type = 'audio/mp4'

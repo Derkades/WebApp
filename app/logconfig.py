@@ -2,7 +2,6 @@ from typing import Any
 
 from app import settings
 
-
 FORMATTER = 'short' if settings.short_log_format else 'default'
 
 LOGCONFIG_DICT: dict[str, Any] = {

@@ -10,8 +10,8 @@ from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from sqlite3 import Connection
-from typing import TYPE_CHECKING, Iterator, Literal, Optional
 from subprocess import CalledProcessError
+from typing import TYPE_CHECKING, Iterator, Literal, Optional
 
 from app import (bing, cache, image, metadata, musicbrainz, reddit, scanner,
                  settings)

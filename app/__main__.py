@@ -5,10 +5,10 @@ import logging
 from pathlib import Path
 
 import jinja2
-from flask import Flask, Response, redirect, render_template, request, abort
+from flask import Flask, Response, abort, redirect, render_template, request
 from flask_babel import Babel
-from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.exceptions import HTTPException
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from app import (charts, db, jsonw, language, lastfm, logconfig, music, packer,
                  settings)
@@ -20,6 +20,7 @@ from app.routes import auth as app_auth
 from app.routes import dislikes as app_dislikes
 from app.routes import download as app_download
 from app.routes import files as app_files
+from app.routes import news as app_news
 from app.routes import player as app_player
 from app.routes import playlists as app_playlists
 from app.routes import radio as app_radio
@@ -37,6 +38,7 @@ app.register_error_handler(RequestTokenError, app_auth.handle_token_error)
 app.register_blueprint(app_dislikes.bp)
 app.register_blueprint(app_download.bp)
 app.register_blueprint(app_files.bp)
+app.register_blueprint(app_news.bp)
 app.register_blueprint(app_player.bp)
 app.register_blueprint(app_playlists.bp)
 app.register_blueprint(app_radio.bp)

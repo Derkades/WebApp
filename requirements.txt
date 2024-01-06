@@ -6,3 +6,4 @@ beautifulsoup4~=4.0
 lxml~=4.0
 bcrypt~=4.0
 yt-dlp
+feedparser~=6.0
