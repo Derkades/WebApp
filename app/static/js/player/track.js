@@ -1,6 +1,4 @@
 class Track {
-    /** @type {object} */
-    trackData;
     /** @type {string} */
     path;
     /** @type {string} */
@@ -29,7 +27,6 @@ class Track {
     searchString;
 
     constructor(playlistName, trackData) {
-        this.trackData = trackData;
         this.path = trackData.path;
         this.playlistName = playlistName;
         this.duration = trackData.duration;
