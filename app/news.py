@@ -1,11 +1,15 @@
 import subprocess
 import tempfile
 from abc import ABC, abstractmethod
+import logging
 
 import feedparser
 import requests
 
 from app import cache, settings
+
+
+log = logging.getLogger('app.news')
 
 
 class NewsProvider(ABC):
@@ -18,9 +22,13 @@ class NewsProvider(ABC):
 
 class Nu(NewsProvider):
     def get_audio(self) -> bytes:
+        log.info('Downloading onmy.fm RSS feed')
         feed = feedparser.parse('https://omny.fm/shows/nu-nl-nieuws/playlists/podcast.rss')
+        log.info('Downloading first news fragment')
         r = requests.get(feed.entries[0].links[0].href, timeout=10)
         audio_bytes = r.content
+
+        log.info('Transcoding news fragment')
 
         with tempfile.NamedTemporaryFile() as temp_input, tempfile.NamedTemporaryFile() as temp_output:
             temp_input.write(audio_bytes)
@@ -33,8 +41,6 @@ class Nu(NewsProvider):
                                             check=True,
                                             capture_output=True).stdout)
 
-            print("duration", duration)
-
             command = ['ffmpeg',
                        '-y',  # overwriting file is required, because the created temp file already exists
                        '-hide_banner',
@@ -45,7 +51,7 @@ class Nu(NewsProvider):
                        '-t', str(duration - 4.9),
                        '-f', 'webm',
                        '-c:a', 'libopus',
-                       '-b:a', '128k',
+                       '-b:a', '64k',
                        '-vbr', 'on',
                        temp_output.name]
 

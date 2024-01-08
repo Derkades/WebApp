@@ -1,3 +1,13 @@
+const SETTING_ELEMENTS = [
+    'settings-queue-size',
+    'settings-audio-type',
+    'settings-volume',
+    'settings-queue-removal-behaviour',
+    'settings-download-mode',
+    'settings-meme-mode',
+    'settings-news',
+];
+
 function syncInputWithStorage(elemId) {
     const elem = document.getElementById(elemId);
     const isCheckbox = elem.matches('input[type="checkbox"]');
@@ -24,16 +34,7 @@ function syncInputWithStorage(elemId) {
 }
 
 function syncInputsWithStorage() {
-    [
-        'settings-queue-size',
-        'settings-audio-type',
-        'settings-volume',
-        'settings-queue-removal-behaviour',
-        'settings-download-mode',
-        // 'settings-theme',
-        'settings-meme-mode',
-        // 'settings-language',
-    ].forEach(syncInputWithStorage);
+    SETTING_ELEMENTS.forEach(syncInputWithStorage);
 
     onVolumeChange();
 }

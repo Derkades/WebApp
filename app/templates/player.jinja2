@@ -161,6 +161,18 @@
                     <input id="settings-meme-mode" type="checkbox"><br>
                 {% endif %}
 
+                {% if offline_mode %}
+                    <select id="settings-news" class="hidden">
+                        <option value="disabled" selected></option>
+                    </select>
+                {% else %}
+                    <label for="settings-news">{% trans %}Hourly news bulletin{% endtrans %}</label><br>
+                    <select id="settings-news">
+                        <option value="disabled" selected>{% trans %}Disabled{% endtrans %}</option>
+                        <option value="nu.nl">nu.nl</option>
+                    </select>
+                {% endif %}
+
                 <p>{% trans %}The local music cache is updated every 5 minutes. If you've modified files, you may want to force an update.{% endtrans %}</p>
                 <button id="scan-button">{% trans %}Force update track list cache{% endtrans %}</button>
                 <div id="scan-spinner" class="raphson-spinner hidden"></div>

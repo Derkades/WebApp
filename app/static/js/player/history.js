@@ -22,11 +22,11 @@ class History {
     #onNewTrack() {
         const track = queue.currentTrack.track();
         if (track === null) {
-            console.warn('history | missing track info');
+            console.warn('history: missing track info');
             this.currentlyPlayingTrack = false;
             return;
         }
-        console.debug('history | track changed');
+        console.debug('history: track changed');
         this.currentlyPlayingTrack = track;
         this.hasScrobbled = false;
         this.playingCounter = 0;
@@ -37,30 +37,31 @@ class History {
 
     async update() {
         if (this.currentlyPlayingTrack === null) {
-            console.debug('history | no current track');
+            console.debug('history: no current track');
             return;
         }
 
         const audioElem = getAudioElement();
 
         if (audioElem.paused) {
-            console.debug('history | audio element paused');
+            console.debug('history: audio element paused');
             return;
         }
 
         this.playingCounter++;
 
-        console.debug('history | playing, counter:', this.playingCounter, '/', this.requiredPlayingCounter);
+        console.debug('history: playing, counter:', this.playingCounter, '/', this.requiredPlayingCounter);
 
         if (!this.hasScrobbled && this.playingCounter > this.requiredPlayingCounter) {
-            console.info('history | played');
+            console.info('history: played');
             this.hasScrobbled = true;
             await this.scrobble();
         }
     }
 
     async updateNowPlaying() {
-        if (this.currentlyPlayingTrack == null) {
+        if (this.currentlyPlayingTrack == null || this.currentlyPlayingTrack.path == null) {
+            console.debug('history: no track playing or not an actual track');
             return;
         }
         const audioElem = getAudioElement();

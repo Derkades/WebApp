@@ -265,7 +265,9 @@ class Queue {
 };
 
 class QueuedTrack {
-    /** @type {string} */
+    /** @type {string | null}
+     * Track path, or null if queued audio does not correspond to a track
+     */
     trackPath;
     /** @type {string} */
     audioBlobUrl;
@@ -281,17 +283,17 @@ class QueuedTrack {
      * @param {string} lyrics
      */
     constructor(track, audioBlobUrl, imageBlobUrl, lyrics) {
-        this.trackPath = track.path;
+        this.trackPath = track != null ? track.path : null;
         this.audioBlobUrl = audioBlobUrl;
         this.imageBlobUrl = imageBlobUrl;
         this.lyrics = lyrics;
     };
 
     /**
-     * @returns {Track | null} Track info, or null if the track has since been deleted
+     * @returns {Track | null} Track info, or null if the track has since been deleted or is a virtual track
      */
     track() {
-        if (this.trackPath in state.tracks) {
+        if (this.trackPath != null && this.trackPath in state.tracks) {
             return state.tracks[this.trackPath];
         } else {
             return null;
