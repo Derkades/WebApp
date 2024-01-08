@@ -163,8 +163,7 @@ class Track:
                 title = title[title.index('-')+1:]
 
             if random.random() > 0.5:
-                image_bytes = reddit.get_image(title)
-                if image_bytes:
+                if image_bytes := reddit.get_image(title):
                     yield image_bytes
 
             yield from bing.image_search(title + ' meme')
@@ -183,7 +182,7 @@ class Track:
             yield from bing.image_search(query)
 
         log.info('No suitable cover found, returning fallback image')
-        yield Path('app', 'static', 'img', 'raphson.png').read_bytes()
+        yield settings.raphson_png.read_bytes()
 
 
     def get_cover(self, meme: bool, img_quality: ImageQuality) -> Optional[bytes]:

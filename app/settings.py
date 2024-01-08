@@ -1,6 +1,7 @@
 # pylint: disable=invalid-name
 
 from os import getenv
+from pathlib import Path
 
 
 def split_by_semicolon(inp: str) -> list[str]:
@@ -13,6 +14,8 @@ def _boolenv(name: str) -> bool:
 
 
 csrf_validity_seconds = 3600
+static_dir = Path('app', 'static')
+raphson_png = Path(static_dir, 'img', 'raphson.png')
 
 user_agent = 'Super-fancy-music-player/2.0 (https://github.com/DanielKoomen/WebApp/)'
 user_agent_offline_sync = 'Super fancy music player (offline sync) (https://github.com/DanielKoomen/WebApp/)'

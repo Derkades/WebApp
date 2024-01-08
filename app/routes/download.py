@@ -4,7 +4,7 @@ from flask import Blueprint, Response, abort, render_template, request
 
 from app import auth, db, downloader, music, scanner
 
-log = logging.getLogger('app')
+log = logging.getLogger('app.routes.download')
 bp = Blueprint('download', __name__, url_prefix='/download')
 
 

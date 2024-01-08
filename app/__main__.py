@@ -49,7 +49,6 @@ app.jinja_env.undefined = jinja2.StrictUndefined
 app.jinja_env.auto_reload = settings.dev
 babel = Babel(app, locale_selector=language.get_locale)
 log = logging.getLogger('app')
-static_dir = Path('app', 'static')
 
 
 @app.errorhandler(Exception)
@@ -79,7 +78,7 @@ def route_player_js():
     """
     Concatenated javascript file for music player. Only used during development.
     """
-    return Response(packer.pack(Path(static_dir, 'js', 'player')),
+    return Response(packer.pack(Path(settings.static_dir, 'js', 'player')),
                     content_type='application/javascript')
 
 
