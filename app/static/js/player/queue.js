@@ -51,15 +51,15 @@ class Queue {
 
         if (state.playlistOverrides.length > 0) {
             playlist = state.playlistOverrides.pop();
-            console.debug('queue override', playlist);
+            console.debug('queue: override', playlist);
         } else {
             playlist = getNextPlaylist(state.lastChosenPlaylist);
-            console.debug(`queue round robin: ${state.lastChosenPlaylist} -> ${playlist}`);
+            console.debug(`queue: round robin: ${state.lastChosenPlaylist} -> ${playlist}`);
             state.lastChosenPlaylist = playlist;
         }
 
         if (playlist === null) {
-            console.debug('queue no playlists selected, trying again later');
+            console.debug('queue: no playlists selected, trying again later');
             document.getElementById('no-playlists-selected').classList.remove('hidden');
             setTimeout(() => this.fill(), 500);
             return;
@@ -72,7 +72,7 @@ class Queue {
             this.#fillBusy = false;
             this.fill();
         }, error => {
-            console.warn('queue | error');
+            console.warn('queue: error');
             console.warn(error);
             this.#fillBusy = false;
             setTimeout(() => this.fill(), 5000);
@@ -83,11 +83,11 @@ class Queue {
      * @param {string} playlist Playlist directory name
      */
     static async downloadRandomAndAddToQueue(playlist) {
-        console.debug('Choose track');
+        console.debug('queue: choose track');
         const chooseResponse = await jsonPost('/track/choose', {'playlist_dir': playlist, ...getTagFilter()});
         const path = (await chooseResponse.json()).path;
 
-        console.info('Chosen track', path);
+        console.info('queue: chosen track: ', path);
 
         // Find track info for this file
         const track = state.tracks[path];
@@ -159,7 +159,7 @@ class Queue {
             // one element is popped and used instead of choosing a random playlist.
             state.playlistOverrides.push(track.playlistName);
         } else if (removalBehaviour !== 'roundrobin') {
-            console.warn('unexpected removal behaviour: ' + removalBehaviour);
+            console.warn('queue: unexpected removal behaviour: ' + removalBehaviour);
         }
         this.fill();
     };
@@ -227,7 +227,7 @@ class Queue {
 
     next() {
         if (this.queuedTracks.length === 0) {
-            console.log('Queue is empty, try to play next track again later');
+            console.debug('queue: is empty, try to play next track again later');
             setTimeout(() => this.next(), 1000);
             return;
         }
@@ -301,7 +301,7 @@ class QueuedTrack {
     }
 
     revokeObjects() {
-        console.debug('Revoke objects', this.trackPath);
+        console.debug('queue: revoke objects:', this.trackPath);
         URL.revokeObjectURL(this.audioBlobUrl);
         URL.revokeObjectURL(this.imageBlobUrl);
     }

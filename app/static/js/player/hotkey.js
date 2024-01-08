@@ -5,7 +5,7 @@ function handleKey(key) {
     // But do still allow escape key
     if (document.activeElement.tagName === 'INPUT' &&
             key !== 'Escape') {
-        console.debug('Ignoring keypress', key);
+        console.debug('hotkey: ignoring keypress:', key);
         return;
     }
 
@@ -56,7 +56,7 @@ function handleKey(key) {
     } else if (key === 'l') {
         toggleLyrics();
     } else {
-        console.debug('Unhandled keypress', key);
+        console.debug('hotkey: unhandled keypress:', key);
     }
 }
 

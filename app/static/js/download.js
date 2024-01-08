@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const reader = await response.body.getReader();
             await reader.read().then(function process(result) {
                 if (result.done) {
-                    console.log("stream done");
+                    console.debug("stream done");
                     return reader.closed;
                 }
                 return reader.read().then(handleResponse).then(process)

@@ -27,7 +27,7 @@ class Dialogs {
             // Change z-index of all open dialogs
             let i = 1;
             for (const openDialog of newOpenDialogs) {
-                console.log(openDialog);
+                console.debug('dialog: is open: ', openDialog);
                 document.getElementById(openDialog).style.zIndex = this.baseIndex + i++;
             }
 

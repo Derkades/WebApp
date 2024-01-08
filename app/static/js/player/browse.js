@@ -201,7 +201,7 @@ class Browse {
                 try {
                     await track.downloadAndAddToQueue(top);
                 } catch (ex) {
-                    console.error('Error adding track to queue', ex)
+                    console.error('browse: error adding track to queue', ex)
                 }
 
                 for (const button of [addTopButton, addBottomButton]) {

@@ -121,7 +121,7 @@ async function updateNowPlaying() {
         return;
     }
     const json = await response.json();
-    console.debug('Fetched data', json);
+    console.debug('fetched data:', json);
 
     const cards = json.now_playing.map(getNowPlayingCardHtml);
     if (cards.length > 0) {

@@ -4,6 +4,7 @@ eventBus.subscribe(MusicEvent.PLAYBACK_CHANGE, () => {
     navigator.mediaSession.playbackState = audioElem.paused ? 'paused' : 'playing';
 
     if (audioElem == null || !isFinite(audioElem.currentTime) || !isFinite(audioElem.playbackRate) || !isFinite(audioElem.duration)) {
+        console.warn('mediasession: skip update, invalid value');
         return;
     }
 
@@ -17,7 +18,7 @@ eventBus.subscribe(MusicEvent.PLAYBACK_CHANGE, () => {
 eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {
     const track = queue.currentTrack.track();
     if (track === null) {
-        console.warn('Not updating mediaSession, track info is null');
+        console.warn('mediasession: skip update, track info is null');
         return;
     }
 

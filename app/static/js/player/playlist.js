@@ -100,7 +100,7 @@ function createPlaylistCheckbox(playlist, index, defaultChecked) {
 }
 
 function updatePlaylistCheckboxHtml() {
-    console.debug('Updating playlist checkboxes');
+    console.debug('playlist: update playlist checkboxes');
 
     let index = 1;
     const mainDiv = document.createElement('div');
@@ -123,7 +123,7 @@ function updatePlaylistCheckboxHtml() {
 eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, updatePlaylistCheckboxHtml);
 
 function createPlaylistDropdowns() {
-    console.debug('Updating playlist dropdowns');
+    console.debug('playlist: updating dropdowns');
 
     for (const select of document.getElementsByClassName('playlist-select')) {
         const previouslySelectedValue = select.value;
@@ -162,11 +162,11 @@ eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, createPlaylistDropdowns);
 function loadPlaylistState() {
     const playlistsString = localStorage.getItem('playlists');
     if (!playlistsString) {
-        console.info('No playlists state saved');
+        console.info('playlist: no state saved');
         return;
     }
     const playlists = JSON.parse(playlistsString);
-    console.debug('Restoring playlists state', playlists);
+    console.debug('playlist: restoring state', playlists);
     for (const playlist of Object.values(state.playlists)) {
         const checkbox = document.getElementById('checkbox-' + playlist.name);
         if (checkbox) {
@@ -183,6 +183,6 @@ function savePlaylistState() {
             checkedPlaylists.push(playlist.name);
         }
     }
-    console.debug('Saving playlists checkbox state', checkedPlaylists);
+    console.debug('playlist: saving checkbox state', checkedPlaylists);
     localStorage.setItem('playlists', JSON.stringify(checkedPlaylists));
 }

@@ -5,7 +5,7 @@ function applyTheme() {
     } else if (select.value === 'light' || select.value === 'browser') {
         document.getElementsByTagName('body')[0].classList.add('light');
     } else {
-        console.warn('unexpected theme setting: ' + select.value)
+        console.warn('theme: unexpected setting: ' + select.value)
     }
 }
 

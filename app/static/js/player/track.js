@@ -160,12 +160,12 @@ class Track {
     };
 
     static async updateLocalTrackList() {
-        console.info('Updating local track list');
+        console.info('track: update local track list');
         const response = await fetch('/track/list');
         const lastModified = response.headers.get('Last-Modified')
 
         if (lastModified == state.trackListLastModified) {
-            console.info('Track list is unchanged');
+            console.info('track: track list is unchanged');
             return;
         }
         state.trackListLastModified = lastModified;
@@ -208,10 +208,10 @@ class Track {
         if (document.getElementById('settings-download-mode').value === 'download') {
             audioUrlGetter = async function() {
                 // Get track audio
-                console.debug('download audio');
                 const trackResponse = await fetch(audioUrl);
                 checkResponseCode(trackResponse);
                 const audioBlob = await trackResponse.blob();
+                console.debug('track: downloaded audio');
                 return URL.createObjectURL(audioBlob);
             };
         } else {
@@ -222,21 +222,21 @@ class Track {
 
         const imageBlobUrlGetter = async function() {
             // Get cover image
-            console.debug('download album cover image');
             const meme = document.getElementById('settings-meme-mode').checked ? '1' : '0';
             const imageUrl = `/track/album_cover?path=${encodedPath}&quality=${imageQuality}&meme=${meme}`;
             const coverResponse = await fetch(imageUrl);
             checkResponseCode(coverResponse);
             const imageBlob = await coverResponse.blob();
+            console.debug('track: downloaded album cover image');
             return URL.createObjectURL(imageBlob);
         };
 
         const lyricsGetter = async function() {
             // Get lyrics
-            console.debug('download lyrics');
             const lyricsResponse = await fetch(`/track/lyrics?path=${encodedPath}`);
             checkResponseCode(lyricsResponse);
             const lyricsJson = await lyricsResponse.json();
+            console.debug('track: downloaded lyrics');
             return new Lyrics(lyricsJson.found, lyricsJson.source, lyricsJson.html);
         };
 
