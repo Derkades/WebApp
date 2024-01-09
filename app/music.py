@@ -501,8 +501,6 @@ class Playlist:
             tags: List of tags
         Returns: Track object
         """
-        random_choices = max(3, min(10, self.track_count // 6))
-
         query = """
                 SELECT track.path, last_chosen
                 FROM track
@@ -525,7 +523,7 @@ class Playlist:
             params.extend(tags)
 
         query += ' ORDER BY RANDOM()'
-        query += f' LIMIT {random_choices}'
+        query += f' LIMIT 10'
 
         # From randomly ordered tracks, choose one that was last played longest ago
         query = 'SELECT * FROM (' + query + ') ORDER BY last_chosen ASC LIMIT 1'
