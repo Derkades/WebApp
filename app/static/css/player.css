@@ -23,21 +23,14 @@ body.light input::placeholder {
     position: fixed;
     top: 0;
     left: 0;
-
-    height: 100%;
-    width: 100%;
-
+    width: 120%;
+    height: 120%;
+    margin: -5%;
     z-index: -1;
-
-    /* blur heeft witte randen, vergroot de achtergrond om dit te verbergen */
-    /* scale: 1.2; */
-}
-
-.bg-image-blurred {
+    filter: blur(2rem);
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
-    filter: blur(3rem);
 }
 
 #album-covers, #lyrics-box {
