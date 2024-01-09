@@ -120,11 +120,7 @@ class Queue {
 
             // Track title HTML
             const tdTrack = document.createElement('td');
-            if (track !== null) {
-                tdTrack.appendChild(track.displayHtml(true));
-            } else {
-                tdTrack.textContent = '[track info unavailable]';
-            }
+            tdTrack.appendChild(track != null ? track.displayHtml() : trackInfoUnavailableSpan());
 
             // Add columns to <tr> row and add the row to the table
             const row = document.createElement('tr');
