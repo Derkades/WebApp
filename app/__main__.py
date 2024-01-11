@@ -170,6 +170,14 @@ def route_pwa():
     return '<meta http-equiv="refresh" content="0;URL=\'/player\'">'
 
 
+@app.route('/csp_reports', methods=['POST'])
+def route_csp_reports():
+    # TODO Add rate limit
+    assert request.content_type == 'application/csp-report'
+    log.warning('Received Content-Security-Policy report: %s', jsonw.from_json(request.data))
+    return Response(None, 200)
+
+
 @app.route('/health_check')
 def route_health_check():
     return Response('ok', content_type='text/plain')
