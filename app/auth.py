@@ -2,13 +2,13 @@ import base64
 import hashlib
 import hmac
 import logging
+import secrets
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum, unique
 from sqlite3 import Connection, OperationalError
 from typing import Optional
-import secrets
 
 import flask_babel
 from flask import request
@@ -146,7 +146,7 @@ class StandardUser(User):
 
     def sessions(self) -> list[Session]:
         results = self.conn.execute("""
-                                    SELECT rowid, token, creation_date, user_agent, remote_address, last_use
+                                    SELECT rowid, token, csrf_token, creation_date, user_agent, remote_address, last_use
                                     FROM session WHERE user=?
                                     """, (self.user_id,)).fetchall()
         return [Session(*row) for row in results]
