@@ -48,6 +48,7 @@ RUN cd /build/ffmpeg && \
         --enable-encoder=libopus \
         --enable-encoder=aac \
         --enable-encoder=libwebp \
+        --enable-encoder=pcm_s16le \
         --enable-demuxer=aac \
         --enable-demuxer=flac \
         --enable-demuxer=mjpeg \
@@ -72,6 +73,7 @@ RUN cd /build/ffmpeg && \
         --enable-muxer=webm \
         --enable-muxer=webp \
         --enable-muxer=ipod \
+        --enable-muxer=null \
         --enable-filter=loudnorm \
         --enable-filter=aresample \
         --enable-filter=scale \

@@ -8,13 +8,14 @@ import tempfile
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
+from json.decoder import JSONDecodeError
 from pathlib import Path
 from sqlite3 import Connection
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, Iterator, Literal, Optional
 
-from app import (bing, cache, image, metadata, musicbrainz, reddit, scanner,
-                 settings)
+from app import (bing, cache, image, jsonw, metadata, musicbrainz, reddit,
+                 scanner, settings)
 from app.auth import User
 from app.image import ImageQuality
 
@@ -244,55 +245,67 @@ class Track:
         metadata_options.extend(('-metadata', 'genre=' + metadata.join_meta_list(meta.tags)))
         return metadata_options
 
-    def get_loudnorm_filter(self) -> str:
+    def get_loudnorm_filter(self, target_loudness=-16) -> str:
         """Get ffmpeg loudnorm filter string"""
-        return 'loudnorm=I=-16'
+        cache_key = 'loud' + self.relpath + str(self.mtime)
+        cached_data = cache.retrieve(cache_key)
+        if cached_data is not None:
+            log.info('Returning cached loudness data')
+            return cached_data.decode()
 
-        # cache_key = 'loud' + self.relpath + str(self.mtime)
-        # cached_data = cache.retrieve(cache_key)
-        # if cached_data is not None:
-        #     log.info('Returning cached loudness data')
-        #     return cached_data.decode()
+        # First phase of 2-phase loudness normalization
+        # http://k.ylo.ph/2016/04/04/loudnorm.html
+        log.info('Measuring loudness: %s', self.relpath)
+        meas_command = ['ffmpeg',
+                        '-hide_banner',
+                        '-nostats',
+                        '-i', self.path.absolute().as_posix(),
+                        '-map', '0:a',
+                        '-af', 'loudnorm=print_format=json',
+                        '-f', 'null',
+                        '/dev/null']
+        # Annoyingly, loudnorm outputs to stderr instead of stdout.
+        # Disabling logging also hides the loudnorm output...
+        meas_result = subprocess.run(meas_command, shell=False, capture_output=True, check=False)
 
-        # # First phase of 2-phase loudness normalization
-        # # http://k.ylo.ph/2016/04/04/loudnorm.html
-        # log.info('Measuring loudness...')
-        # meas_command = ['ffmpeg',
-        #                 '-hide_banner',
-        #                 '-i', self.path.absolute().as_posix(),
-        #                 '-map', '0:a',
-        #                 '-af', 'loudnorm=print_format=json',
-        #                 '-f', 'null',
-        #                 '-']
-        # # Annoyingly, loudnorm outputs to stderr instead of stdout.
-        # # Disabling logging also hides the loudnorm output...
-        # meas_result = subprocess.run(meas_command, shell=False, capture_output=True, check=False)
+        if meas_result.returncode != 0:
+            log.warning('FFmpeg exited with exit code %s', meas_result.returncode)
+            log.warning('--- stdout ---\n%s', meas_result.stdout.decode())
+            log.warning('--- stderr ---\n%s', meas_result.stderr.decode())
+            raise RuntimeError()
 
-        # if meas_result.returncode != 0:
-        #     log.warning('FFmpeg exited with exit code %s', meas_result.returncode)
-        #     log.warning('--- stdout ---\n%s', meas_result.stdout.decode())
-        #     log.warning('--- stderr ---\n%s', meas_result.stderr.decode())
-        #     raise RuntimeError()
+        # Manually find the start of loudnorm info json
+        meas_out = meas_result.stderr.decode()
 
-        # # Manually find the start of loudnorm info json
-        # meas_out = meas_result.stderr.decode()
+        start = meas_out.rindex('Parsed_loudnorm_0') + 37
+        end = start + meas_out[start:].index('}') + 1
+        json_text = meas_out[start:end]
+        try:
+            meas_json = jsonw.from_json(json_text)
+        except JSONDecodeError as ex:
+            log.error('Invalid json: %s', json_text)
+            log.error('Original output: %s', meas_out)
+            raise ex
 
-        # meas_json = json.loads(meas_out[meas_out.rindex('Parsed_loudnorm_0')+37:])
+        log.info('Measured integrated loudness: %s', meas_json['input_i'])
 
-        # log.info('Measured integrated loudness: %s', meas_json['input_i'])
+        if float(meas_json['input_i']) > 0:
+            log.warning('Measured positive loudness. This should be impossible, but can happen with input files containing out of range values. Need to use single-pass loudnorm filter instead.')
+            loudnorm = 'loudnorm=I={target_loudness}'
+            cache_duration = cache.MONTH
+        else:
+            loudnorm = \
+                f'loudnorm=I={target_loudness}:' \
+                f"measured_I={meas_json['input_i']}:" \
+                f"measured_TP={meas_json['input_tp']}:" \
+                f"measured_LRA={meas_json['input_lra']}:" \
+                f"measured_thresh={meas_json['input_thresh']}:" \
+                f"offset={meas_json['target_offset']}:" \
+                'linear=true'
+            cache_duration = cache.YEAR
 
-        # loudnorm = \
-        #     'loudnorm=I=-16:' \
-        #     f"measured_I={meas_json['input_i']}:" \
-        #     f"measured_TP={meas_json['input_tp']}:" \
-        #     f"measured_LRA={meas_json['input_lra']}:" \
-        #     f"measured_thresh={meas_json['input_thresh']}:" \
-        #     f"offset={meas_json['target_offset']}:" \
-        #     'linear=true'
-
-        # cache.store(cache_key, loudnorm.encode(), cache.YEAR)
-        # return loudnorm
-
+        cache.store(cache_key, loudnorm.encode(), cache_duration)
+        return loudnorm
 
     def transcoded_audio(self,
                          audio_type: AudioType) -> bytes:
@@ -309,6 +322,8 @@ class Track:
             return cached_data
 
         loudnorm = self.get_loudnorm_filter()
+
+        log.info('Transcoding audio: %s', self.relpath)
 
         input_options = ['-map', '0:a', # only keep audio
                          '-map_metadata', '-1']  # discard metadata
