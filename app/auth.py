@@ -2,13 +2,13 @@ import base64
 import hashlib
 import hmac
 import logging
-import os
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum, unique
 from sqlite3 import Connection, OperationalError
 from typing import Optional
+import secrets
 
 import flask_babel
 from flask import request
@@ -23,6 +23,7 @@ log = logging.getLogger('app.auth')
 class Session:
     rowid: int
     token: str
+    csrf_token: Optional[str]
     creation_timestamp: int
     user_agent: Optional[str]
     remote_address: Optional[str]
@@ -151,6 +152,11 @@ class StandardUser(User):
         return [Session(*row) for row in results]
 
     def get_csrf(self) -> str:
+        if self.session.csrf_token:
+            return self.session.csrf_token
+
+        # Legacy session without CSRF token in database. Cannot save to database, because
+        # connection may be read-only. Generate predictable CSRF token based on session token.
         token = hashlib.sha3_256(self.session.token.encode()).digest()
         return base64.urlsafe_b64encode(token).decode()
 
@@ -232,10 +238,6 @@ class RequestTokenError(Exception):
     pass
 
 
-def _generate_token() -> str:
-    return base64.b64encode(os.urandom(16)).decode()
-
-
 def log_in(conn: Connection, username: str, password: str) -> Optional[str]:
     """
     Log in using username and password.
@@ -262,15 +264,16 @@ def log_in(conn: Connection, username: str, password: str) -> Optional[str]:
         log.warning('Failed login for user %s', username)
         return None
 
-    token = _generate_token()
+    token = secrets.token_urlsafe()
+    csrf_token = secrets.token_urlsafe()
     remote_addr = request.remote_addr
     user_agent = request.headers['User-Agent'] if 'User-Agent' in request.headers else None
 
     conn.execute("""
-                 INSERT INTO session (user, token, creation_date, user_agent, remote_address, last_use)
-                 VALUES (?, ?, unixepoch(), ?, ?, unixepoch())
+                 INSERT INTO session (user, token, csrf_token, creation_date, user_agent, remote_address, last_use)
+                 VALUES (?, ?, ?, unixepoch(), ?, ?, unixepoch())
                  """,
-                 (user_id, token, user_agent, remote_addr))
+                 (user_id, token, csrf_token, user_agent, remote_addr))
 
     log.info('Successful login for user %s', username)
 
@@ -286,7 +289,7 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
     Returns: User object if session token is valid, or None if invalid
     """
     result = conn.execute("""
-                          SELECT session.rowid, session.token, session.creation_date, session.user_agent,
+                          SELECT session.rowid, session.token, session.csrf_token, session.creation_date, session.user_agent,
                                  session.remote_address, session.last_use, user.id, user.username, user.nickname,
                                  user.admin, user.primary_playlist, user.language, user.privacy
                           FROM user
@@ -297,10 +300,10 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
         log.warning('Invalid auth token: %s', token)
         return None
 
-    (session_rowid, session_token, session_creation_date, session_user_agent, session_remote_address,
+    (session_rowid, session_token, session_csrf_token, session_creation_date, session_user_agent, session_remote_address,
      session_last_use, user_id, username, nickname, admin, primary_playlist, lang_code, privacy_str) = result
 
-    session = Session(session_rowid,  session_token, session_creation_date, session_user_agent,
+    session = Session(session_rowid, session_token, session_csrf_token, session_creation_date, session_user_agent,
                       session_remote_address, session_last_use)
 
     try:
