@@ -1,13 +1,12 @@
+import logging
 import subprocess
 import tempfile
 from abc import ABC, abstractmethod
-import logging
 
 import feedparser
 import requests
 
 from app import cache, settings
-
 
 log = logging.getLogger('app.news')
 
