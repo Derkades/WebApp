@@ -106,6 +106,71 @@ def sort_artists(artists: Optional[list[str]], album_artist: Optional[str]) -> O
     return artists
 
 
+def _get_possible_covers(artist: Optional[str], album: str, meme: bool) -> Iterator[bytes]:
+    if meme:
+        if random.random() > 0.5:
+            if image_bytes := reddit.get_image(album):
+                yield image_bytes
+
+        yield from bing.image_search(album + ' meme')
+
+    # Try MusicBrainz first
+    if artist:
+        if image_bytes := musicbrainz.get_cover(artist, album):
+            yield image_bytes
+
+    search_queries = []
+    if artist:
+        search_queries.append(artist + ' - ' + album)
+    search_queries.append(album + 'album cover art')
+
+    # Otherwise try bing
+    for query in search_queries:
+        yield from bing.image_search(query)
+
+    log.info('No suitable cover found, returning fallback image')
+    yield settings.raphson_png.read_bytes()
+
+
+def get_cover(artist: Optional[str], album: str, meme: bool, img_quality: ImageQuality) -> bytes:
+    """
+    Find album cover using MusicBrainz or Bing.
+    Parameters:
+        meta: Track metadata
+    Returns: Album cover image bytes, or None if MusicBrainz nor bing found an image.
+    """
+    cache_key =  'cover' + artist + album + str(meme)  # quality is appended later
+
+    cache_data = cache.retrieve(cache_key + img_quality.value)
+    if cache_data is not None:
+        log.info('Returning cover thumbnail from cache')
+        return cache_data
+
+    log.info('Cover thumbnail not cached, need to download album cover image')
+
+    for cover_bytes in _get_possible_covers(artist, album, meme):
+        with tempfile.TemporaryDirectory(prefix='music-cover') as temp_dir:
+            input_path = Path(temp_dir, 'input')
+            input_path.write_bytes(cover_bytes)
+
+            try:
+                log.info('Generating thumbnails')
+
+                for quality in ImageQuality:
+                    output_path = Path(temp_dir, 'output-' + quality.value)
+                    image.webp_thumbnail(input_path, output_path, img_quality, square=not meme)
+                    image_bytes = output_path.read_bytes()
+                    cache.store(cache_key + quality.value, image_bytes)
+
+                    if quality == img_quality:
+                        return_data = image_bytes
+            except CalledProcessError:
+                log.warning('Failed to generate thumbnail, image is probably corrupt. Trying another image.')
+                continue
+
+        return return_data
+
+
 class AudioType(Enum):
     """
     Opus audio in WebM container, for music player streaming.
@@ -155,76 +220,30 @@ class Track:
         """
         return metadata.cached(self.conn, self.relpath)
 
-    def _get_possible_covers(self, meme: bool) -> Iterator[bytes]:
-        meta = self.metadata()
-
-        if meme:
-            title = meta.title if meta.title else meta.display_title()
-            if '-' in title:
-                title = title[title.index('-')+1:]
-
-            if random.random() > 0.5:
-                if image_bytes := reddit.get_image(title):
-                    yield image_bytes
-
-            yield from bing.image_search(title + ' meme')
-
-        # Try MusicBrainz first
-        if (meta.title or meta.album) and (meta.album_artist or meta.artists):
-            album = meta.album if meta.album and not metadata.ignore_album(meta.album) else meta.title
-            artist = meta.album_artist if meta.album_artist else ' '.join(meta.artists)  # mypy: disable=arg-type
-            if image_bytes := musicbrainz.get_cover(artist, album):
-                yield image_bytes
-        else:
-            log.info('Skip MusicBrainz search, not enough metadata')
-
-        # Otherwise try bing
-        for query in meta.album_search_queries():
-            yield from bing.image_search(query)
-
-        log.info('No suitable cover found, returning fallback image')
-        yield settings.raphson_png.read_bytes()
-
-
-    def get_cover(self, meme: bool, img_quality: ImageQuality) -> Optional[bytes]:
+    def get_cover(self, meme: bool, img_quality: ImageQuality) -> bytes:
         """
         Find album cover using MusicBrainz or Bing.
         Parameters:
             meta: Track metadata
         Returns: Album cover image bytes, or None if MusicBrainz nor bing found an image.
         """
-        general_cache_key =  'cover' + self.relpath + str(self.mtime) + str(meme)
-        quality_cache_key = general_cache_key + img_quality.value
+        meta = self.metadata()
 
-        cache_data = cache.retrieve(quality_cache_key)
-        if cache_data is not None:
-            log.info('Returning cover thumbnail from cache: %s', quality_cache_key)
-            return cache_data
+        if meta.album and not metadata.ignore_album(meta.album):
+            album = meta.album
+        elif meta.title:
+            album = meta.title
+        else:
+            album = self.relpath.split('/')[-1]
 
-        log.info('Cover thumbnail not cached, need to download album cover image')
+        if meta.album_artist and not metadata.ignore_album_artist(meta.album_artist):
+            artist = meta.album_artist
+        elif meta.artists:
+            artist = ' '.join(meta.artists)
+        else:
+            artist = None
 
-        for cover_bytes in self._get_possible_covers(meme):
-            with tempfile.TemporaryDirectory(prefix='music-cover') as temp_dir:
-                input_path = Path(temp_dir, 'input')
-                input_path.write_bytes(cover_bytes)
-
-                try:
-                    log.info('Generating thumbnails')
-
-                    for quality in ImageQuality:
-                        output_path = Path(temp_dir, 'output-' + quality.value)
-                        image.webp_thumbnail(input_path, output_path, img_quality, square=not meme)
-                        cache.store(general_cache_key + quality.value, output_path.read_bytes())
-                except CalledProcessError:
-                    log.warning('Failed to generate thumbnail, image is probably corrupt. Trying another image.')
-                    continue
-
-            cache_data = cache.retrieve(quality_cache_key)
-
-            if cache_data is None:
-                raise ValueError('Should have just been added to cache')
-
-            return cache_data
+        return get_cover(artist, album, meme, img_quality)
 
 
     def _get_ffmpeg_metadata_options(self) -> list[str]:

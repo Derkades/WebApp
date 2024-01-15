@@ -12,11 +12,11 @@ from app import db, jsonw
 log = logging.getLogger('app.cache')
 
 HOUR = 60*60
-DAY = 24*60*60
-WEEK = 7*24*60*60
-MONTH = 30*24*60*60
-DEFAULT = 90*24*60*60
-YEAR = 365*24*60*60
+DAY = 24*HOUR
+WEEK = 7*DAY
+MONTH = 30*DAY
+DEFAULT = 3*MONTH
+YEAR = 365*DAY
 
 
 def store(key: str,

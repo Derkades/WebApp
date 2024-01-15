@@ -211,31 +211,6 @@ class Metadata:
             return title
         return self.filename_title()
 
-    def album_search_queries(self) -> Iterator[str]:
-        """
-        Generate possible search queries to find album art using a search engine
-        """
-        if self.album_artist and not ignore_album_artist(self.album_artist):
-            artist = self.album_artist
-        elif self.artists is not None and len(self.artists) > 0:
-            artist = ' '.join(self.artists)
-        else:
-            artist = None
-
-        if artist and self.album and not ignore_album(self.album):
-            yield artist + ' - ' + self.album + ' album cover art'
-            yield artist + ' - ' + self.album
-
-        if artist and self.title:
-            yield artist + ' - ' + self.title + ' album cover art'
-            yield artist + ' - ' + self.title
-
-        if self.title:
-            yield self.title + ' album cover art'
-            yield self.title
-
-        yield self._filename_title_search()
-
     def lyrics_search_query(self) -> str:
         """
         Generate a search query to find lyrics
