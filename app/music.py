@@ -236,7 +236,7 @@ class Track:
         else:
             album = self.relpath.split('/')[-1]
 
-        if meta.album_artist and not metadata.ignore_album_artist(meta.album_artist):
+        if meta.album_artist:
             artist = meta.album_artist
         elif meta.artists:
             artist = ' '.join(meta.artists)
