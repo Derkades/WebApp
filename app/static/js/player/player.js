@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Delete track button
-    const deleteButton = document.getElementById('button-delete-track');
+    const deleteButton = document.getElementById('button-delete');
     deleteButton.addEventListener('click', () => {
         if (queue.currentTrack === null) {
             return;

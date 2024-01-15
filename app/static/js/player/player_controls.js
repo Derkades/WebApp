@@ -57,6 +57,11 @@ document.addEventListener('DOMContentLoaded', () => {
     seekBar.addEventListener('wheel', event => {
         seekRelative(event.deltaY < 0 ? 3 : -3);
     }, {passive: true});
+
+    // Hide buttons initially
+    document.getElementById('button-edit').classList.add('hidden');
+    document.getElementById('button-delete').classList.add('hidden');
+    document.getElementById('button-dislike').classList.add('hidden');
 });
 
 // Update seek bar
@@ -97,11 +102,16 @@ eventBus.subscribe(MusicEvent.PLAYBACK_CHANGE, () => {
 eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {
     const track = queue.currentTrack.track();
 
-    if (track !== null && track.playlist().write) {
-        document.getElementById('button-edit').classList.remove('hidden');
-        document.getElementById('button-delete-track').classList.remove('hidden');
+    if (track !== null) {
+        document.getElementById('button-dislike').classList.remove('hidden'); // Not available for virtual news tracks
+        if (track.playlist().write) {
+            // Only available with write access
+            document.getElementById('button-edit').classList.remove('hidden');
+            document.getElementById('button-delete').classList.remove('hidden');
+        }
     } else {
         document.getElementById('button-edit').classList.add('hidden');
-        document.getElementById('button-delete-track').classList.add('hidden');
+        document.getElementById('button-delete').classList.add('hidden');
+        document.getElementById('button-dislike').classList.add('hidden');
     }
 });
