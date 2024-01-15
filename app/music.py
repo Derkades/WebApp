@@ -139,14 +139,14 @@ def get_cover(artist: Optional[str], album: str, meme: bool, img_quality: ImageQ
         meta: Track metadata
     Returns: Album cover image bytes, or None if MusicBrainz nor bing found an image.
     """
-    cache_key =  'cover' + artist + album + str(meme)  # quality is appended later
+    cache_key =  f'cover{artist}{album}{meme}'  # quality is appended later
 
     cache_data = cache.retrieve(cache_key + img_quality.value)
     if cache_data is not None:
-        log.info('Returning cover thumbnail from cache')
+        log.info('Returning cover thumbnail from cache: %s - %s', artist, album)
         return cache_data
 
-    log.info('Cover thumbnail not cached, need to download album cover image')
+    log.info('Cover thumbnail not cached, need to download album cover image: %s - %s', artist, album)
 
     for cover_bytes in _get_possible_covers(artist, album, meme):
         with tempfile.TemporaryDirectory(prefix='music-cover') as temp_dir:
