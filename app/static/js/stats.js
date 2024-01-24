@@ -87,6 +87,9 @@ async function loadCharts(buttonName, button) {
         chartsContainer.append(chartElem);
         const args = {el: chartElem, data: chart['data'], options: chart['options']};
         args.options.theme = theme;
+        // Disable Google tracking: https://github.com/nhn/tui.chart/tree/main/apps/chart#collect-statistics-on-the-use-of-open-source
+        // This was caught by our strict Content-Security-Policy :)
+        args.options.usageStatistics = false;
         switch (chart['type']) {
             case 'bar':
                 toastui.Chart.barChart(args);
