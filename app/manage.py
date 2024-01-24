@@ -148,7 +148,7 @@ def handle_sync(args: Any) -> None:
     Handle command for offline mode sync
     """
     if args.playlists is not None:
-        if args.playlists == 'reset':
+        if args.playlists == 'favorite':
             offline_sync.change_playlists([])
             return
 
