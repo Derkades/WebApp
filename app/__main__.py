@@ -183,6 +183,15 @@ def route_health_check():
     return Response('ok', content_type='text/plain')
 
 
+@app.route('/security.txt')
+@app.route('/.well-known/security.txt')
+def security_txt():
+    content = """Contact: mailto:robin@rslot.nl
+Expires: 2026-12-31T23:59:59.000Z
+Preferred-Languages: en, nl
+"""
+    return Response(content, content_type='text/plain')
+
 if __name__ == '__main__':
     logconfig.apply()
     app.run(host='0.0.0.0', port=8080, debug=True)
