@@ -69,7 +69,7 @@ def _pick_release(release_group: str) -> str | None:
     releases = result['releases']
     with_artwork = [r for r in releases if r['cover-art-archive']['front']]
     if not with_artwork:
-        log.warning('No releases with artwork available')
+        log.info('No releases with artwork available')
         return None
 
     # Try to find digital release, it usually has the highest quality cover
