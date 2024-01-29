@@ -19,7 +19,7 @@
     <input id="multiple" type="checkbox"><br> #}
 
     <input type="submit" id="search-button" value="{% trans %}Search{% endtrans %}">
-    <div id="search-loading" class="icon spinning hidden" style="background-image: url('/static/icon/loading.svg')"></div>
+    <div id="search-loading" class="icon icon-loading spinning hidden"></div>
 </form>
 
 <table class="table hidden" id="search-table">
@@ -46,10 +46,10 @@
 </select><br>
 
 <button id="download-button">{% trans %}Download{% endtrans %}</button>
-<div id="download-loading" class="icon spinning hidden" style="background-image: url('/static/icon/loading.svg')"></div>
+<div id="download-loading" class="icon icon-loading spinning hidden"></div>
 <br>
 
-<div id="download-log" class="logbox fill-width" style="height: 20rem;"></div><br>
+<div id="download-log" class="logbox fill-width"></div><br>
 
 <script src="/static/js/base.js"></script>
 <script src="/static/js/download.js"></script>

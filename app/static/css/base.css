@@ -119,6 +119,7 @@ input:disabled {
 .logbox {
     white-space: pre-wrap; /* Render \n as <br> */
     overflow: auto;
+    height: 20rem;
 }
 
 input[type=checkbox] {
@@ -187,6 +188,44 @@ body.light input {
     display: inline-block;
     filter: invert(1);
 }
+
+.icon-account-cog { background-image: url('/static/icon/account-cog.svg'); }
+.icon-account-multiple { background-image: url('/static/icon/account-multiple.svg'); }
+.icon-account-star { background-image: url('/static/icon/account-star.svg'); }
+.icon-application-import { background-image: url('/static/icon/application-import.svg'); }
+.icon-arrow-left { background-image: url('/static/icon/arrow-left.svg'); }
+.icon-chart-bar { background-image: url('/static/icon/chart-bar.svg'); }
+/* check-bold used directly in CSS */
+.icon-close { background-image: url('/static/icon/close.svg'); }
+.icon-cog { background-image: url('/static/icon/cog.svg'); }
+.icon-content-duplicate { background-image: url('/static/icon/content-duplicate.svg'); }
+.icon-content-save { background-image: url('/static/icon/content-save.svg'); }
+.icon-delete-restore { background-image: url('/static/icon/delete-restore.svg'); }
+.icon-delete { background-image: url('/static/icon/delete.svg'); }
+.icon-download { background-image: url('/static/icon/download.svg'); }
+.icon-earbuds { background-image: url('/static/icon/earbuds.svg'); }
+.icon-file-edit { background-image: url('/static/icon/file-edit.svg'); }
+.icon-file-question { background-image: url('/static/icon/file-question.svg'); }
+.icon-folder { background-image: url('/static/icon/folder.svg'); }
+.icon-help-circle { background-image: url('/static/icon/help-circle.svg'); }
+.icon-history { background-image: url('/static/icon/history.svg'); }
+.icon-home { background-image: url('/static/icon/home.svg'); }
+.icon-loading { background-image: url('/static/icon/loading.svg'); }
+.icon-music { background-image: url('/static/icon/music.svg'); }
+.icon-pause { background-image: url('/static/icon/pause.svg'); }
+.icon-pencil { background-image: url('/static/icon/pencil.svg'); }
+.icon-play { background-image: url('/static/icon/play.svg'); }
+.icon-playlist-music { background-image: url('/static/icon/playlist-music.svg'); }
+/* playlist-plus used directly in JS */
+.icon-radio { background-image: url('/static/icon/radio.svg'); }
+.icon-rename-box { background-image: url('/static/icon/rename-box.svg'); }
+.icon-skip-next { background-image: url('/static/icon/skip-next.svg'); }
+.icon-skip-previous { background-image: url('/static/icon/skip-previous.svg'); }
+.icon-star { background-image: url('/static/icon/star.svg'); }
+.icon-tag-multiple { background-image: url('/static/icon/tag-multiple.svg'); }
+.icon-text-search { background-image: url('/static/icon/text-search.svg'); }
+.icon-thumb-down { background-image: url('/static/icon/thumb-down.svg'); }
+/* volume icons used directly in JS */
 
 body.light .icon {
     filter: none;

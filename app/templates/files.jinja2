@@ -109,7 +109,7 @@
             <td class="collapse-col"></td>
             {% elif file['type'] == 'music' %}
             <td class="icon-col">
-                <div class="icon" style="background-image: url('/static/icon/music.svg')"></div>
+                <div class="icon icon-music"></div>
             </td>
             <td>
                 {{ file.name }}
@@ -118,7 +118,7 @@
             <td class="collapse-col">{{ file['title'] }}</td>
             {% else %}
             <td class="icon-col">
-                <div class="icon" style="background-image: url('/static/icon/file-question.svg')"></div>
+                <div class="icon icon-file-question"></div>
             </td>
             <td>
                 {{ file.name }}

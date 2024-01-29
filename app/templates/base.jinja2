@@ -1,5 +1,5 @@
 {% macro icon(icon_name) %}
-    <div class="icon" style="background-image: url('/static/icon/{{ icon_name }}.svg')"></div>
+    <div class="icon icon-{{icon_name}}"></div>
 {% endmacro %}
 
 {% macro icon_button(icon_name, id = None, title = None) %}
