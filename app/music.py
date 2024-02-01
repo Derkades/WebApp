@@ -44,7 +44,7 @@ def to_relpath(path: Path) -> str:
     """
     Returns: Relative path as string, excluding base music directory
     """
-    relpath = path.absolute().as_posix()[len(Path(settings.music_dir).absolute().as_posix())+1:]
+    relpath = path.resolve().as_posix()[len(settings.music_dir.resolve().as_posix())+1:]
     return relpath if len(relpath) > 0 else '.'
 
 
@@ -55,7 +55,7 @@ def from_relpath(relpath: str) -> Path:
     """
     if relpath.startswith('/'):
         raise ValueError('Relative path must not start with /')
-    path = Path(settings.music_dir, relpath).absolute()
+    path = Path(settings.music_dir, relpath).resolve()
     if not path.is_relative_to(Path(settings.music_dir)):
         raise ValueError('Must not go outside of music base directory')
     return path
@@ -278,7 +278,7 @@ class Track:
         meas_command = ['ffmpeg',
                         '-hide_banner',
                         '-nostats',
-                        '-i', self.path.absolute().as_posix(),
+                        '-i', self.path.resolve().as_posix(),
                         '-map', '0:a',
                         '-af', 'loudnorm=print_format=json',
                         '-f', 'null',
@@ -391,7 +391,7 @@ class Track:
                     '-hide_banner',
                     '-nostats',
                     '-loglevel', settings.ffmpeg_loglevel,
-                    '-i', self.path.absolute().as_posix(),
+                    '-i', self.path.resolve().as_posix(),
                     *input_options,
                     *audio_options,
                     '-t', str(settings.track_limit_seconds),
@@ -419,7 +419,7 @@ class Track:
                 '-hide_banner',
                 '-nostats',
                 '-loglevel', settings.ffmpeg_loglevel,
-                '-i', self.path.absolute().as_posix(),
+                '-i', self.path.resolve().as_posix(),
                 '-codec', 'copy',
             ]
 

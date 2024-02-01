@@ -236,7 +236,7 @@ def probe(path: Path) -> Metadata | None:
         '-show_streams',
         '-show_format',
         '-print_format', 'json',
-        path.absolute().as_posix(),
+        path.resolve().as_posix(),
     ]
 
     try:
@@ -292,7 +292,7 @@ def probe(path: Path) -> Metadata | None:
             try:
                 year = int(value[:4])
             except ValueError:
-                log.warning("Invalid year '%s' in file '%s'", value, path.absolute().as_posix())
+                log.warning("Invalid year '%s' in file '%s'", value, path.resolve().as_posix())
 
         if name == 'album_artist':
             album_artist = value
@@ -301,7 +301,7 @@ def probe(path: Path) -> Metadata | None:
             try:
                 track_number = int(value.split('/')[0])
             except ValueError:
-                log.warning("Invalid track number '%s' in file '%s'", value, path.absolute().as_posix())
+                log.warning("Invalid track number '%s' in file '%s'", value, path.resolve().as_posix())
 
         if name == 'genre':
             tags = split_meta_list(value)

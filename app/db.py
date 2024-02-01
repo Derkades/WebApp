@@ -2,7 +2,6 @@ import logging
 import sqlite3
 import sys
 from dataclasses import dataclass
-from pathlib import Path
 from sqlite3 import Connection
 
 from app import settings
@@ -10,13 +9,11 @@ from app import settings
 log = logging.getLogger('app.db')
 
 
-MIGRATION_DIR = Path('app', 'migrations')
-INIT_SQL_DIR = Path('app', 'sql')
 DATABASE_NAMES = ['cache', 'music', 'offline', 'meta']
 
 
 def _connect(db_name: str, read_only: bool) -> Connection:
-    db_path = Path(settings.data_path, db_name + '.db').absolute().as_posix()
+    db_path = (settings.data_dir / (db_name + '.db')).resolve().as_posix()
     db_uri = f'file:{db_path}' + ('?mode=ro' if read_only else '')
     conn = sqlite3.connect(db_uri, uri=True, timeout=10.0)
     conn.execute('PRAGMA foreign_keys = ON')
@@ -54,13 +51,13 @@ def create_databases() -> None:
     """
     Initialize SQLite databases using SQL scripts
     """
-    if Path(settings.data_path, 'meta.db').exists():
+    if (settings.data_dir / 'meta.db').exists():
         return
 
     for db_name in DATABASE_NAMES:
         log.info('Creating database: %s', db_name)
         with _connect(db_name, False) as conn:
-            conn.executescript(Path(INIT_SQL_DIR, f'{db_name}.sql').read_text(encoding='utf-8'))
+            conn.executescript((settings.init_sql_dir / f'{db_name}.sql').read_text(encoding='utf-8'))
 
     with _connect('meta', False) as conn:
         migrations = get_migrations()
@@ -83,11 +80,11 @@ class Migration:
     def run(self) -> None:
         """Execute migration file"""
         with _connect(self.db_name, False) as conn:
-            conn.executescript(Path(MIGRATION_DIR, self.file_name).read_text(encoding='utf-8'))
+            conn.executescript((settings.migration_sql_dir / self.file_name).read_text(encoding='utf-8'))
 
 
 def get_migrations() -> list[Migration]:
-    migration_file_names = [path.name for path in MIGRATION_DIR.iterdir()
+    migration_file_names = [path.name for path in settings.migration_sql_dir.iterdir()
                             if path.name.endswith('.sql')]
 
     migrations: list[Migration] = []

@@ -71,7 +71,7 @@ def route_create():
 
         util.check_filename(dir_name)
 
-        path = Path(settings.music_dir, dir_name)
+        path = settings.music_dir / dir_name
 
         if path.exists():
             abort(400, 'Playlist path already exists')

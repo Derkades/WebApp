@@ -15,7 +15,7 @@ def scan_playlists(conn: Connection) -> set[str]:
     where necessary.
     """
     paths_db = {row[0] for row in conn.execute('SELECT path FROM playlist').fetchall()}
-    paths_disk = {p.name for p in Path(settings.music_dir).iterdir() if p.is_dir() and not music.is_trashed(p)}
+    paths_disk = {p.name for p in settings.music_dir.iterdir() if p.is_dir() and not music.is_trashed(p)}
 
     add_to_db = []
 

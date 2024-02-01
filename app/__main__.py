@@ -78,7 +78,7 @@ def route_player_js():
     """
     Concatenated javascript file for music player. Only used during development.
     """
-    return Response(packer.pack(Path(settings.static_dir, 'js', 'player')),
+    return Response(packer.pack(settings.static_dir / 'js' / 'player'),
                     content_type='application/javascript')
 
 

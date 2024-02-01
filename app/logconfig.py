@@ -28,7 +28,7 @@ LOGCONFIG_DICT: dict[str, Any] = {
         },
         'errors': {
             'class': 'logging.FileHandler',
-            'filename': settings.data_path + '/errors.log',
+            'filename': settings.data_dir / 'errors.log',
             'level': 'WARNING',
             'formatter': 'detailed',
         }

@@ -26,7 +26,7 @@ def route_files():
 
         show_trashed = 'trash' in request.args
 
-        if browse_path.resolve() == Path(settings.music_dir).resolve():
+        if browse_path.resolve() == settings.music_dir.resolve():
             parent_path = None
             write_permission = user.admin
         else:
