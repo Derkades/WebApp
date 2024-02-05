@@ -3,7 +3,7 @@ flask~=3.0
 flask-babel~=4.0
 requests~=2.0
 beautifulsoup4~=4.0
-lxml~=4.0
+lxml~=5.0
 bcrypt~=4.0
 yt-dlp
 feedparser~=6.0
