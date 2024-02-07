@@ -1,5 +1,6 @@
 import logging
 import subprocess
+import sys
 import tempfile
 from abc import ABC, abstractmethod
 
@@ -12,36 +13,33 @@ log = logging.getLogger('app.news')
 
 
 class NewsProvider(ABC):
+    def __init__(self, end_trim: float):
+        self.end_trim = end_trim
+
     @abstractmethod
-    def get_audio(self) -> bytes:
-        """
-        Get news bulletin audio bytes
-        """
+    def get_audio_url(self) -> str:
+        pass
 
-
-class Nu(NewsProvider):
-    def get_news_url(self) -> str:
-        cached = cache.retrieve('nu.nl url', return_expired=False)
-        if cached is not None:
-            log.info('Returning RSS latest audio URL from cache')
-            return cached.decode()
-
-        log.info('Downloading onmy.fm RSS feed')
-        feed = feedparser.parse('https://omny.fm/shows/nu-nl-nieuws/playlists/podcast.rss')
-        url: str = feed.entries[0].links[0].href
-        cache.store('nu.nl url', url.encode(), duration=60*15)
-        return url
+    def _get_duration(self, audio_file_path) -> float:
+        result = subprocess.run(['ffprobe', audio_file_path,
+                                 '-show_entries', 'format=duration',
+                                 '-of', 'csv=p=0'],
+                                shell=False,
+                                check=True,
+                                capture_output=True)
+        return float(result.stdout)
 
     def get_audio(self) -> bytes:
-        url = self.get_news_url()
+        audio_url = self.get_audio_url()
 
-        cached = cache.retrieve(url)
-        if cached is not None:
-            log.info('Returning audio from cache')
-            return cached
+        cached_audio = cache.retrieve('news_audio' + audio_url)
+        if cached_audio:
+            log.info('Returning cached audio')
+            return cached_audio
 
-        log.info('Downloading audio')
-        response = requests.get(url, timeout=10)
+        log.info('Downloading audio: %s', audio_url)
+        response = requests.get(audio_url, timeout=10)
+        response.raise_for_status()
         audio_bytes = response.content
 
         with tempfile.NamedTemporaryFile() as temp_input, tempfile.NamedTemporaryFile() as temp_output:
@@ -49,13 +47,7 @@ class Nu(NewsProvider):
 
             log.info('Transcoding news fragment')
 
-            duration = float(subprocess.run(['ffprobe',
-                                             temp_input.name,
-                                             '-show_entries', 'format=duration',
-                                             '-of', 'csv=p=0'],
-                                            shell=False,
-                                            check=True,
-                                            capture_output=True).stdout)
+            duration = self._get_duration(temp_input.name)
 
             command = ['ffmpeg',
                        '-y',  # overwriting file is required, because the created temp file already exists
@@ -64,25 +56,70 @@ class Nu(NewsProvider):
                        '-loglevel', settings.ffmpeg_loglevel,
                        '-i', temp_input.name,
                        '-map', '0:a',
-                       '-t', str(duration - 4.9),
+                       '-t', str(duration - self.end_trim),
                        '-f', 'webm',
                        '-c:a', 'libopus',
                        '-b:a', '64k',
                        '-vbr', 'on',
+                       '-filter:a', 'loudnorm',
                        temp_output.name]
 
             subprocess.run(command, shell=False, check=True)
             audio_bytes = temp_output.read()
 
-        cache.store(url, audio_bytes, duration=cache.DAY)
+        cache.store('news_audio' + audio_url, audio_bytes, cache.DAY)
 
         return audio_bytes
 
+class RSSNewsProvider(NewsProvider):
+    def __init__(self, end_trim: float, feed_url: str):
+        super().__init__(end_trim)
+        self.feed_url = feed_url
 
-NEWS_PROVIDERS = {
-    'nu.nl': Nu()
+    def _get_feed(self):
+        log.info('Downloading RSS feed: %s', self.feed_url)
+        return feedparser.parse(self.feed_url)
+
+    def _get_latest_url_from_feed(self):
+        feed = self._get_feed()
+        return feed.entries[0].links[0].href
+
+    def get_audio_url(self) -> str:
+        cached_url = cache.retrieve('latest audio' + self.feed_url, return_expired=False)
+        if cached_url:
+            log.info('Returning latest audio URL from cache')
+            return cached_url.decode()
+
+        url = self._get_latest_url_from_feed()
+        cache.store('latest audio' + self.feed_url, url.encode(), 15*60)
+        return url
+
+class Nu(RSSNewsProvider):
+    def __init__(self):
+        super().__init__(4.9, 'https://omny.fm/shows/nu-nl-nieuws/playlists/podcast.rss')
+
+
+class NPR(RSSNewsProvider):
+    def __init__(self):
+        super().__init__(0, 'https://feeds.npr.org/500005/podcast.xml')
+
+
+NEWS_PROVIDERS: dict[str, NewsProvider] = {
+    'nu.nl': Nu(),
+    'npr': NPR(),
 }
 
 
 def get_audio(provider: str):
     return NEWS_PROVIDERS[provider].get_audio()
+
+
+def main():
+    audio_bytes = get_audio(sys.argv[1])
+    (settings.app_dir / 'news.webm').write_bytes(audio_bytes)
+
+
+if __name__ == '__main__':
+    from app import logconfig
+    logconfig.apply()
+    main()

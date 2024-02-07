@@ -166,10 +166,11 @@
                         <option value="disabled" selected></option>
                     </select>
                 {% else %}
-                    <label for="settings-news">{% trans %}Hourly news bulletin{% endtrans %}</label><br>
+                    <label for="settings-news">{% trans %}Hourly news{% endtrans %}</label><br>
                     <select id="settings-news">
                         <option value="disabled" selected>{% trans %}Disabled{% endtrans %}</option>
-                        <option value="nu.nl">nu.nl</option>
+                        <option value="nu.nl">NU.nl Nieuwsbulletin</option>
+                        <option value="npr">NPR News Now</option>
                     </select>
                 {% endif %}
 
