@@ -21,7 +21,7 @@ def _boolenv(name: str) -> bool:
 
 
 csrf_validity_seconds = 3600
-app_dir = Path('app')
+app_dir = Path(__file__).parent.resolve()
 static_dir = app_dir / 'static'
 migration_sql_dir = app_dir / 'migrations'
 init_sql_dir = app_dir / 'sql'
