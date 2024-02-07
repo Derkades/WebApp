@@ -36,9 +36,9 @@
 <form method="POST" action="/account/change_privacy_setting">
     <input type="hidden" value="{{ csrf_token }}" name="csrf_token">
     <select name="privacy">
-        <option value="none" {% if user.privacy.name == 'NONE' %}selected{% endif %}>{% trans %}None - Show up in statistics and now playing{% endtrans %}</option>
-        <option value="aggregate" {% if user.privacy.name == 'AGGREGATE' %}selected{% endif %}>{% trans %}Aggregate - Don't show in now playing, only in long term statistics{% endtrans %}</option>
-        <option value="hidden" {% if user.privacy.name == 'HIDDEN' %}selected{% endif %}>{% trans %}Hiddden - Don't record played tracks at all{% endtrans %}</option>
+        <option value="none" {% if user.privacy.name == 'NONE' %}selected{% endif %}>{% trans %}Show up in statistics and now playing{% endtrans %}</option>
+        <option value="aggregate" {% if user.privacy.name == 'AGGREGATE' %}selected{% endif %}>{% trans %}Don't show in now playing, only in long term statistics{% endtrans %}</option>
+        <option value="hidden" {% if user.privacy.name == 'HIDDEN' %}selected{% endif %}>{% trans %}Don't record played tracks at all{% endtrans %}</option>
     </select><br>
     <input type="submit" value="{% trans %}Change privacy setting{% endtrans %}">
 </form>
