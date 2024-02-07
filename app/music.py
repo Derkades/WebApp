@@ -264,9 +264,9 @@ class Track:
         metadata_options.extend(('-metadata', 'genre=' + metadata.join_meta_list(meta.tags)))
         return metadata_options
 
-    def get_loudnorm_filter(self, target_loudness=-16) -> str:
+    def get_loudnorm_filter(self) -> str:
         """Get ffmpeg loudnorm filter string"""
-        cache_key = 'loud' + self.relpath + str(self.mtime)
+        cache_key = 'loud2' + self.relpath + str(self.mtime)
         cached_data = cache.retrieve(cache_key)
         if cached_data is not None:
             log.info('Returning cached loudness data')
@@ -310,20 +310,19 @@ class Track:
 
         if float(meas_json['input_i']) > 0:
             log.warning('Measured positive loudness. This should be impossible, but can happen with input files containing out of range values. Need to use single-pass loudnorm filter instead.')
-            loudnorm = 'loudnorm=I={target_loudness}'
-            cache_duration = cache.MONTH
+            log.warning('Track: %s', self.path.resolve().as_posix())
+            loudnorm = 'loudnorm'
         else:
             loudnorm = \
-                f'loudnorm=I={target_loudness}:' \
+                f'loudnorm=' \
                 f"measured_I={meas_json['input_i']}:" \
                 f"measured_TP={meas_json['input_tp']}:" \
                 f"measured_LRA={meas_json['input_lra']}:" \
                 f"measured_thresh={meas_json['input_thresh']}:" \
                 f"offset={meas_json['target_offset']}:" \
                 'linear=true'
-            cache_duration = cache.YEAR
 
-        cache.store(cache_key, loudnorm.encode(), cache_duration)
+        cache.store(cache_key, loudnorm.encode())
         return loudnorm
 
     def transcoded_audio(self,
@@ -332,7 +331,7 @@ class Track:
         Normalize and compress audio using ffmpeg
         Returns: Compressed audio bytes
         """
-        cache_key = 'audio5' + str(audio_type) + self.relpath + str(self.mtime)
+        cache_key = 'audio7' + str(audio_type) + self.relpath + str(self.mtime)
 
         cached_data = cache.retrieve(cache_key)
 
@@ -404,7 +403,7 @@ class Track:
         # if audio_type == AudioType.MP3_WITH_METADATA:
         #     cover_temp_file.close()
 
-        cache.store(cache_key, audio_data, cache.YEAR)
+        cache.store(cache_key, audio_data)
         return audio_data
 
     def write_metadata(self, **meta_dict: str):

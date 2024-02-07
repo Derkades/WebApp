@@ -15,8 +15,7 @@ HOUR = 60*60
 DAY = 24*HOUR
 WEEK = 7*DAY
 MONTH = 30*DAY
-DEFAULT = 3*MONTH
-YEAR = 365*DAY
+DEFAULT = 4*MONTH
 
 
 def store(key: str,
