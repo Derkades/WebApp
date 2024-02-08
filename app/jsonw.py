@@ -10,13 +10,9 @@ def to_json(obj: Any) -> str:
     return json.dumps(obj, allow_nan=False, separators=(',', ':'))
 
 
-def json_response(obj: Any, last_modified: Optional[datetime] = None) -> Response:
+def json_response(obj: Any) -> Response:
     """Convert object to json, and return as Flask response"""
-    response = Response(to_json(obj), content_type='application/json')
-    if last_modified:
-        response.last_modified = last_modified
-        response.cache_control.no_cache = True  # always revalidate cache
-    return response
+    return Response(to_json(obj), content_type='application/json')
 
 
 def from_json(json_str: str) -> Any:

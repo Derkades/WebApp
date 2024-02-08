@@ -5,7 +5,7 @@ from typing import Any
 
 from flask import Blueprint, Response, abort, request
 
-from app import auth, db, genius, jsonw, music, settings
+from app import auth, db, genius, jsonw, music, settings, cache
 from app.image import ImageQuality
 from app.music import AudioType, Track
 
@@ -147,7 +147,6 @@ def route_lyrics():
     }
 
 
-
 @bp.route('/list')
 def route_list():
     """Return list of playlists and tracks"""
@@ -165,54 +164,64 @@ def route_list():
             last_modified = datetime.now(timezone.utc)
 
         if request.if_modified_since and last_modified <= request.if_modified_since:
-            log.info('Last modified before If-Modified-Since header')
+            log.info('Returning 304 not modified for track list')
             return Response(None, 304)  # Not Modified
 
-        user_playlists = music.user_playlists(conn, user.user_id, all_writable=user.admin)
+        json_bytes = cache.retrieve('track_list' + str(last_modified))
+        if json_bytes:
+            log.info('Returning track list from cache')
+        else:
+            user_playlists = music.user_playlists(conn, user.user_id, all_writable=user.admin)
 
-        playlist_response: list[dict[str, Any]] = []
+            playlist_response: list[dict[str, Any]] = []
 
-        for playlist in user_playlists:
-            if playlist.track_count == 0:
-                continue
+            for playlist in user_playlists:
+                if playlist.track_count == 0:
+                    continue
 
-            playlist_json = {
-                'name': playlist.name,
-                'favorite': playlist.favorite,
-                'write': playlist.write,
-                'tracks': [],
-            }
-            playlist_response.append(playlist_json)
-
-            track_rows = conn.execute('''
-                                      SELECT path, mtime, duration, title, album, album_artist, year
-                                      FROM track
-                                      WHERE playlist=?
-                                      ''', (playlist.name,)).fetchall()
-
-            for relpath, mtime, duration, title, album, album_artist, year in track_rows:
-                track_json = {
-                    'path': relpath,
-                    'mtime': mtime,
-                    'duration': duration,
-                    'title': title,
-                    'album': album,
-                    'album_artist': album_artist,
-                    'year': year,
-                    'artists': None,
-                    'tags': [],
+                playlist_json = {
+                    'name': playlist.name,
+                    'favorite': playlist.favorite,
+                    'write': playlist.write,
+                    'tracks': [],
                 }
-                playlist_json['tracks'].append(track_json)
+                playlist_response.append(playlist_json)
 
-                artist_rows = conn.execute('SELECT artist FROM track_artist WHERE track=?',
-                                           (relpath,)).fetchall()
-                if artist_rows:
-                    track_json['artists'] = music.sort_artists([row[0] for row in artist_rows], album_artist)
+                track_rows = conn.execute('''
+                                            SELECT path, mtime, duration, title, album, album_artist, year
+                                            FROM track
+                                            WHERE playlist=?
+                                            ''', (playlist.name,)).fetchall()
 
-                tag_rows = conn.execute('SELECT tag FROM track_tag WHERE track=?', (relpath,))
-                track_json['tags'] = [tag for tag, in tag_rows]
+                for relpath, mtime, duration, title, album, album_artist, year in track_rows:
+                    track_json = {
+                        'path': relpath,
+                        'mtime': mtime,
+                        'duration': duration,
+                        'title': title,
+                        'album': album,
+                        'album_artist': album_artist,
+                        'year': year,
+                        'artists': None,
+                        'tags': [],
+                    }
+                    playlist_json['tracks'].append(track_json)
 
-    return jsonw.json_response({'playlists': playlist_response}, last_modified=last_modified)
+                    artist_rows = conn.execute('SELECT artist FROM track_artist WHERE track=?',
+                                                (relpath,)).fetchall()
+                    if artist_rows:
+                        track_json['artists'] = music.sort_artists([row[0] for row in artist_rows], album_artist)
+
+                    tag_rows = conn.execute('SELECT tag FROM track_tag WHERE track=?', (relpath,))
+                    track_json['tags'] = [tag for tag, in tag_rows]
+
+            json_bytes = jsonw.to_json({'playlists': playlist_response}).encode()
+            cache.store('track_list' + str(last_modified), json_bytes, cache.DAY)
+
+    response = Response(json_bytes, mimetype='application/json')
+    response.last_modified = last_modified
+    response.cache_control.no_cache = True  # always revalidate cache
+    return response
 
 
 @bp.route('/update_metadata', methods=['POST'])
