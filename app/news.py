@@ -13,7 +13,8 @@ log = logging.getLogger('app.news')
 
 
 class NewsProvider(ABC):
-    def __init__(self, end_trim: float):
+    def __init__(self, start_trim: float, end_trim: float):
+        self.start_trim = start_trim
         self.end_trim = end_trim
 
     @abstractmethod
@@ -54,9 +55,10 @@ class NewsProvider(ABC):
                        '-hide_banner',
                        '-nostats',
                        '-loglevel', settings.ffmpeg_loglevel,
+                       '-ss', str(self.start_trim),
                        '-i', temp_input.name,
                        '-map', '0:a',
-                       '-t', str(duration - self.end_trim),
+                       '-t', str(duration - self.start_trim - self.end_trim),
                        '-f', 'webm',
                        '-c:a', 'libopus',
                        '-b:a', '64k',
@@ -72,8 +74,8 @@ class NewsProvider(ABC):
         return audio_bytes
 
 class RSSNewsProvider(NewsProvider):
-    def __init__(self, end_trim: float, feed_url: str):
-        super().__init__(end_trim)
+    def __init__(self, start_trim: float, end_trim: float, feed_url: str):
+        super().__init__(start_trim, end_trim)
         self.feed_url = feed_url
 
     def _get_feed(self):
@@ -96,12 +98,12 @@ class RSSNewsProvider(NewsProvider):
 
 class Nu(RSSNewsProvider):
     def __init__(self):
-        super().__init__(4.9, 'https://omny.fm/shows/nu-nl-nieuws/playlists/podcast.rss')
+        super().__init__(0, 4.9, 'https://omny.fm/shows/nu-nl-nieuws/playlists/podcast.rss')
 
 
 class NPR(RSSNewsProvider):
     def __init__(self):
-        super().__init__(0, 'https://feeds.npr.org/500005/podcast.xml')
+        super().__init__(0, 0, 'https://feeds.npr.org/500005/podcast.xml')
 
 
 NEWS_PROVIDERS: dict[str, NewsProvider] = {
