@@ -39,7 +39,9 @@ class NewsProvider(ABC):
             return cached_audio
 
         log.info('Downloading audio: %s', audio_url)
-        response = requests.get(audio_url, timeout=10)
+        response = requests.get(audio_url,
+                                headers={'User-Agent': settings.webscraping_user_agent},
+                                timeout=10)
         response.raise_for_status()
         audio_bytes = response.content
 
@@ -84,7 +86,7 @@ class RSSNewsProvider(NewsProvider):
 
     def _get_latest_url_from_feed(self):
         feed = self._get_feed()
-        return feed.entries[0].links[0].href
+        return feed.entries[0].enclosures[0].href
 
     def get_audio_url(self) -> str:
         cached_url = cache.retrieve('latest audio' + self.feed_url, return_expired=False)
@@ -106,9 +108,14 @@ class NPR(RSSNewsProvider):
         super().__init__(0, 0, 'https://feeds.npr.org/500005/podcast.xml')
 
 
+class BBCNews(RSSNewsProvider):
+    def __init__(self):
+        super().__init__(0, 0, 'https://podcast.voice.api.bbci.co.uk/rss/audio/p002vsmz?api_key=JqAy8fGqi8lpxLsr3WaGxyG31AZ5URMr')
+
 NEWS_PROVIDERS: dict[str, NewsProvider] = {
     'nu.nl': Nu(),
     'npr': NPR(),
+    'bbc': BBCNews(),
 }
 
 
