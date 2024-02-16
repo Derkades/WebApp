@@ -21,11 +21,13 @@
 
     <p>{% trans %}Browsers with PWA support:{% endtrans %}</p>
     <ul>
-        <li>{% trans %}Firefox on Android{% endtrans %}</li>
+        <li>{% trans %}Firefox and Chromium-based browsers on Android. Chromium-based browsers are recommended because Firefox does not provide media player controls.{% endtrans %}</li>
         <li>{% trans %}Chromium-based browers for Linux, Windows, or macOS (Chrome, Edge, Opera, Brave, ...){% endtrans %}</li>
-        <li>{% trans %}Chromium-based browsers on Android (recommended, better MediaSession support){% endtrans %}</li>
-        <li>{% trans %}Safari on iOS (other browsers are not allowed to install PWAs){% endtrans %}</li>
     </ul>
+
+    <p>{% trans %}iOS supports PWAs, but they are restricted to Safari only. New DMA laws by the European Union required
+    Apple to allow all browsers to provide the same functionality. But instead of allowing other browsers to install PWAs, they have
+    disabled support for PWAs completely for EU users because of <a href="https://developer.apple.com/support/dma-and-apps-in-the-eu">"privacy concerns"</a>.{% endtrans %}</p>
 </div>
 
 <div id="yes-support" class="hidden">

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-02-07 20:10+0100\n"
-"PO-Revision-Date: 2024-02-07 20:10+0100\n"
+"POT-Creation-Date: 2024-02-16 09:20+0100\n"
+"PO-Revision-Date: 2024-02-16 09:20+0100\n"
 "Last-Translator: \n"
 "Language: nl\n"
 "Language-Team: nl <LL@li.org>\n"
@@ -384,17 +384,17 @@ msgid "Music downloader"
 msgstr "Muziekdownloader"
 
 #: templates/download.jinja2:11 templates/download.jinja2:21
-#: templates/player.jinja2:214
+#: templates/player.jinja2:215
 msgid "Search"
 msgstr "Zoeken"
 
-#: templates/download.jinja2:16 templates/player.jinja2:216
+#: templates/download.jinja2:16 templates/player.jinja2:217
 msgid "Search query"
 msgstr "Zoekopdracht"
 
 #: templates/download.jinja2:28 templates/download_offline.jinja2:26
 #: templates/download_offline.jinja2:41 templates/files.jinja2:88
-#: templates/player.jinja2:245 templates/playlists.jinja2:125
+#: templates/player.jinja2:246 templates/playlists.jinja2:125
 msgid "Title"
 msgstr "Titel"
 
@@ -507,7 +507,7 @@ msgstr "Type"
 msgid "File name"
 msgstr "Bestandsnaam"
 
-#: templates/files.jinja2:87 templates/player.jinja2:226
+#: templates/files.jinja2:87 templates/player.jinja2:227
 #: templates/playlists.jinja2:122
 msgid "Artists"
 msgstr "Artiesten"
@@ -697,8 +697,13 @@ msgid "Browsers with PWA support:"
 msgstr "Browsers met PWA ondersteuning:"
 
 #: templates/install.jinja2:24
-msgid "Firefox on Android"
-msgstr "Firefox op Android"
+msgid ""
+"Firefox and Chromium-based browsers on Android. Chromium-based browsers "
+"are recommended because Firefox does not provide media player controls."
+msgstr ""
+"Firefox en Chromium-gebaseerde browsers op Android. Chromium-gebaseerde "
+"browsers zijn aangeraden vanwege hun ondersteuning voor "
+"mediaspelerbesturing."
 
 #: templates/install.jinja2:25
 msgid ""
@@ -708,21 +713,25 @@ msgstr ""
 "Op Chromium gebaseerde browsers op Linux, Windows of macOS (Chrome, Edge,"
 " Opera, Brave, ...)"
 
-#: templates/install.jinja2:26
+#: templates/install.jinja2:28
 msgid ""
-"Chromium-based browsers on Android (recommended, better MediaSession "
-"support)"
+"iOS supports PWAs, but they are restricted to Safari only. New DMA laws "
+"by the European Union required\n"
+"    Apple to allow all browsers to provide the same functionality. But "
+"instead of allowing other browsers to install PWAs, they have\n"
+"    disabled support for PWAs completely for EU users because of <a "
+"href=\"https://developer.apple.com/support/dma-and-apps-in-the-"
+"eu\">\"privacy concerns\"</a>."
 msgstr ""
-"Op Chromium gebaseerde browsers op Android (aangeraden vanwege betere "
-"MediaSession ondersteuning)"
+"iOS ondersteunt PWAs, maar die ondersteuning is beperkt tot Safari. "
+"Nieuwe DMA wetgeving binnen de Europese Unie heeft Apple verlicht om voor"
+" alle browsers dezelfde functionaliteit mogelijk te maken. Maar in plaats"
+" van het voor alle browsers mogelijk te maken om PWAs te installeren, "
+"hebben ze juist PWA ondersteuning volledig weggehaald voor alle "
+"gebruikers in de EU wegens <a href=\"https://developer.apple.com/support"
+"/dma-and-apps-in-the-eu\">\"privacy redenen\"</a>."
 
-#: templates/install.jinja2:27
-msgid "Safari on iOS (other browsers are not allowed to install PWAs)"
-msgstr ""
-"Safari op iOS (andere browsers op iOS zijn niet toegestaan PWAs te "
-"installeren)"
-
-#: templates/install.jinja2:32
+#: templates/install.jinja2:34
 msgid ""
 "Click the install button below to install the music player as an "
 "application:"
@@ -900,7 +909,7 @@ msgstr "Nieuws op het hele uur"
 msgid "Disabled"
 msgstr "Uitgeschakeld"
 
-#: templates/player.jinja2:177
+#: templates/player.jinja2:178
 msgid ""
 "The local music cache is updated every 5 minutes. If you've modified "
 "files, you may want to force an update."
@@ -908,15 +917,15 @@ msgstr ""
 "De lokale muziekcache wordt elke 5 minuten bijgewerkt. Als je bestanden "
 "hebt gewijzigd, kun je een update forceren."
 
-#: templates/player.jinja2:178
+#: templates/player.jinja2:179
 msgid "Force update track list cache"
 msgstr "Forceer update van cache"
 
-#: templates/player.jinja2:186
+#: templates/player.jinja2:187
 msgid "Tags"
 msgstr "Tags"
 
-#: templates/player.jinja2:189
+#: templates/player.jinja2:190
 msgid ""
 "Only choose tracks with enabled tags (tracks without tags are never "
 "chosen)"
@@ -924,7 +933,7 @@ msgstr ""
 "Kies alleen nummers met geselecteerde tags (nummers zonder tags worden "
 "nooit gekozen)"
 
-#: templates/player.jinja2:190
+#: templates/player.jinja2:191
 msgid ""
 "Don't choose tracks with disabled tags (tracks with enabled tags or no "
 "tags are chosen)"
@@ -932,101 +941,101 @@ msgstr ""
 "Kies geen nummers met niet-geselecteerde tags (kies nummers zonder tags "
 "of met geselecteerde tags)"
 
-#: templates/player.jinja2:191
+#: templates/player.jinja2:192
 msgid "Tag mode"
 msgstr "Tagmodus"
 
-#: templates/player.jinja2:202
+#: templates/player.jinja2:203
 msgid "All"
 msgstr "Alles"
 
-#: templates/player.jinja2:205
+#: templates/player.jinja2:206
 msgid "Please select a playlist."
 msgstr "Selecteer een afspeellijst."
 
-#: templates/player.jinja2:219
+#: templates/player.jinja2:220
 msgid "Please enter a search query."
 msgstr "Gelieve een zoekopdracht in te voeren."
 
-#: templates/player.jinja2:223 templates/playlists.jinja2:121
+#: templates/player.jinja2:224 templates/playlists.jinja2:121
 msgid "Tracks"
 msgstr "Nummers"
 
-#: templates/player.jinja2:229
+#: templates/player.jinja2:230
 msgid "Albums"
 msgstr "Albums"
 
-#: templates/player.jinja2:238
+#: templates/player.jinja2:239
 msgid "Metadata editor"
 msgstr "Metadata wijzigen"
 
-#: templates/player.jinja2:241
+#: templates/player.jinja2:242
 msgid "Editing metadata for: "
 msgstr "Metadata bewerken: "
 
-#: templates/player.jinja2:249 templates/playlists.jinja2:126
+#: templates/player.jinja2:250 templates/playlists.jinja2:126
 msgid "Album"
 msgstr "Album"
 
-#: templates/player.jinja2:253
+#: templates/player.jinja2:254
 msgid "Artists (delimit multiple using <kbd>;</kbd>)"
 msgstr "Artiesten (scheid meerdere met <kbd>;</kbd>)"
 
-#: templates/player.jinja2:257 templates/playlists.jinja2:127
+#: templates/player.jinja2:258 templates/playlists.jinja2:127
 msgid "Album artist"
 msgstr "Albumartiest"
 
-#: templates/player.jinja2:261
+#: templates/player.jinja2:262
 msgid "Tags (delimit multiple using <kbd>;</kbd>)"
 msgstr "Tags (scheid meerdere met <kbd>;</kbd>)"
 
-#: templates/player.jinja2:265
+#: templates/player.jinja2:266
 msgid "Year (4 characters)"
 msgstr "Jaar (4 tekens)"
 
-#: templates/player.jinja2:271
+#: templates/player.jinja2:272
 msgid "Writing metadata..."
 msgstr "Metadata schrijven..."
 
-#: templates/player.jinja2:272
+#: templates/player.jinja2:273
 msgid "Reloading tracks..."
 msgstr "Nummers herladen..."
 
-#: templates/player.jinja2:280
+#: templates/player.jinja2:281
 msgid "Copy track"
 msgstr "Kopieer nummer"
 
-#: templates/player.jinja2:282
+#: templates/player.jinja2:283
 msgid "Select playlist to copy track to:"
 msgstr "Selecteer afspeellijst waarnaar dit nummer gekopieerd moet worden:"
 
-#: templates/player.jinja2:285
+#: templates/player.jinja2:286
 msgid "Copy"
 msgstr "Kopiëren"
 
-#: templates/player.jinja2:297
+#: templates/player.jinja2:298
 msgid "Loading..."
 msgstr "Laden..."
 
-#: templates/player.jinja2:299
+#: templates/player.jinja2:300
 msgid "If this is taking longer than expected, please check the browser console."
 msgstr ""
 "Als dit langer duurt van verwacht, gelieve in de browser console te "
 "kijken."
 
-#: templates/player.jinja2:318
+#: templates/player.jinja2:319
 msgid "Artist: "
 msgstr "Artiest: "
 
-#: templates/player.jinja2:319
+#: templates/player.jinja2:320
 msgid "Album: "
 msgstr "Album: "
 
-#: templates/player.jinja2:320
+#: templates/player.jinja2:321
 msgid "Tag: "
 msgstr "Tag: "
 
-#: templates/player.jinja2:321
+#: templates/player.jinja2:322
 msgid "All tracks"
 msgstr "Alle nummers"
 
@@ -1232,4 +1241,21 @@ msgstr "Nieuw wachtwoord (laat leeg om niet te veranderen)"
 #: templates/users_edit.jinja2:18
 msgid "Submit"
 msgstr "Versturen"
+
+#~ msgid "Firefox on Android"
+#~ msgstr "Firefox op Android"
+
+#~ msgid ""
+#~ "Chromium-based browsers on Android "
+#~ "(recommended, better MediaSession support)"
+#~ msgstr ""
+#~ "Op Chromium gebaseerde browsers op "
+#~ "Android (aangeraden vanwege betere "
+#~ "MediaSession ondersteuning)"
+
+#~ msgid "Safari on iOS (other browsers are not allowed to install PWAs)"
+#~ msgstr ""
+#~ "Safari op iOS (andere browsers op "
+#~ "iOS zijn niet toegestaan PWAs te "
+#~ "installeren)"
 
