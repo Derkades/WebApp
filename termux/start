@@ -5,5 +5,4 @@ set -e
 source termux/settings
 mkdir -p data
 pybabel compile -d app/translations
-python -m app.db
-exec python -m gunicorn -b 127.0.0.1:8080 -c app/gunicorn.conf.py app.__main__:app
+python mp.py start

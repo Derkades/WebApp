@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from sqlite3 import Connection
 
-from app import metadata, music, settings
+from app import metadata, music, settings, db
 
 log = logging.getLogger('app.scanner')
 
@@ -146,7 +146,7 @@ def scan_tracks(conn: Connection, playlist_name: str) -> None:
                          ''', (int(time.time()), playlist_name, relpath))
 
 
-def scan(conn: Connection) -> None:
+def scan() -> None:
     """
     Main function for scanning music directory structure
     """
@@ -154,9 +154,10 @@ def scan(conn: Connection) -> None:
         log.info('Skip scanner in offline mode')
         return
 
-    start_time_ns = time.time_ns()
-    playlists = scan_playlists(conn)
-    for playlist in playlists:
-        scan_tracks(conn, playlist)
-    duration_ms = (time.time_ns() - start_time_ns) // 1000000
-    log.info('Took %sms', duration_ms)
+    with db.connect() as conn:
+        start_time_ns = time.time_ns()
+        playlists = scan_playlists(conn)
+        for playlist in playlists:
+            scan_tracks(conn, playlist)
+        duration_ms = (time.time_ns() - start_time_ns) // 1000000
+        log.info('Took %sms', duration_ms)

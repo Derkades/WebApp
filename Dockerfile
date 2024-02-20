@@ -1,6 +1,6 @@
 FROM python:3.12-slim as base
 
-FROM base as ffmpeg
+FROM base as ffmpeg-build
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends wget bzip2 g++ make nasm pkg-config libopus-dev libwebp-dev zlib1g-dev&& \
@@ -82,26 +82,78 @@ RUN cd /build/ffmpeg && \
         && \
     make -j8
 
-FROM base
+###############################################################################
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends libopus0 libwebp7 zlib1g && \
-    rm -rf /var/lib/apt/lists/*
+FROM base AS base-pip
 
 COPY requirements.txt /
 RUN PYTHONDONTWRITEBYTECODE=1 pip install --no-cache-dir -r /requirements.txt
 
-COPY --from=ffmpeg /build/ffmpeg/ffmpeg  /usr/local/bin \
-                   /build/ffmpeg/ffprobe /usr/local/bin
+###############################################################################
 
-# Ensure ffmpeg works
-RUN ffmpeg --help > /dev/null
+FROM base-pip AS dev
 
-COPY ./docker/entrypoint.sh /entrypoint.sh
-COPY ./docker/manage /usr/local/bin
-COPY ./app /app
+# FFmpeg
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libopus0 libwebp7 zlib1g && \
+    rm -rf /var/lib/apt/lists/*
+COPY --from=ffmpeg-build /build/ffmpeg/ffmpeg  /usr/local/bin \
+                         /build/ffmpeg/ffprobe /usr/local/bin
+
+COPY ./docker/entrypoint-dev.sh /entrypoint.sh
+COPY ./docker/manage-dev.sh /usr/local/bin/manage
+
+COPY ./app ./app
+COPY mp.py .
+
+ENV PYTHONUNBUFFERED 1
+ENV MUSIC_MUSIC_DIR /music
+ENV MUSIC_DATA_PATH /data
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+###############################################################################
+
+FROM base-pip AS pyinstaller
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends binutils && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN PYTHONDONTWRITEBYTECODE=1 pip install --no-cache-dir pyinstaller
+
+RUN mkdir /build
+WORKDIR /build
+
+COPY ./app ./app
+COPY mp.py .
 
 RUN PYTHONDONTWRITEBYTECODE=1 pybabel compile -d app/translations
+
+RUN pyinstaller mp.py \
+        --hidden-import=gunicorn.glogging \
+        --hidden-import=gunicorn.workers.gthread \
+        --add-data=app/migrations:./app/migrations \
+        --add-data=app/sql:./app/sql \
+        --add-data=app/static:./app/static \
+        --add-data=app/templates:./app/templates \
+        --add-data=app/translations:./app/translations
+
+###############################################################################
+
+FROM debian:bookworm-slim as prod
+
+# FFmpeg
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libopus0 libwebp7 zlib1g && \
+    rm -rf /var/lib/apt/lists/*
+COPY --from=ffmpeg-build /build/ffmpeg/ffmpeg  /usr/local/bin \
+                         /build/ffmpeg/ffprobe /usr/local/bin
+
+COPY ./docker/entrypoint-prod.sh /entrypoint.sh
+COPY ./docker/manage-prod.sh /usr/local/bin/manage
+
+COPY --from=pyinstaller /build/dist/mp /mp
 
 ENV PYTHONUNBUFFERED 1
 ENV MUSIC_MUSIC_DIR /music

@@ -3,7 +3,9 @@ services:
   music:
     ports:
       - 127.0.0.1:8080:8080
-    build: .
+    build:
+      context: .
+      target: dev
     volumes:
       - type: bind
         source: ./music
@@ -24,4 +26,3 @@ services:
     cap_drop: ['all']
     environment:
       TZ: Europe/Amsterdam
-      MUSIC_ENV: dev

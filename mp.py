@@ -1,14 +1,54 @@
-"""
-Management command
-"""
-import logging
-# pylint: disable=import-outside-toplevel
-from argparse import ArgumentParser
 from typing import Any
+from argparse import ArgumentParser
+from app import logconfig, scanner, offline_sync, db, util, main, cleanup
+import logging
 
-from app import cleanup, db, logconfig, offline_sync, scanner, util
+from gunicorn.app.base import BaseApplication
 
-log = logging.getLogger('app.manage')
+
+class GApp(BaseApplication):
+    def __init__(self):
+        super().__init__()
+
+    def init(self, parser, opts, args):
+        pass
+
+    def load(self):
+        return main.app
+
+    def load_config(self):
+        self.cfg.set('bind', '0.0.0.0:8080')
+        self.cfg.set('worker_class', 'gthread')
+        self.cfg.set('workers', 1)
+        self.cfg.set('threads', 8)
+        self.cfg.set('access_log_format', "%(h)s %(b)s %(M)sms %(m)s %(U)s?%(q)s")
+        self.cfg.set('logconfig_dict', logconfig.LOGCONFIG_DICT)
+        self.cfg.set('preload_app', True)
+        self.cfg.set('timeout', 60)
+
+
+log = logging.getLogger('cli')
+
+
+def handle_start(args: Any) -> None:
+    """
+    Handle command to start server
+    """
+    if args.dev:
+        log.info('Starting Flask web server in debug mode')
+        main.app.jinja_env.auto_reload = True  # Auto reload templates during development
+        main.app.run(host=args.host, port=args.port, debug=True)
+        return
+
+    db.migrate()
+    scanner.scan()
+    cleanup.cleanup()
+
+    main.app.jinja_env.auto_reload = False  # templates don't change in production
+
+    log.info('Starting gunicorn web server')
+    gapp = GApp()
+    gapp.run()
 
 
 def handle_useradd(args: Any) -> None:
@@ -113,8 +153,7 @@ def handle_scan(_args: Any) -> None:
     """
     Handle command to scan playlists
     """
-    with db.connect() as conn:
-        scanner.scan(conn)
+    scanner.scan()
 
 
 def handle_cleanup(_args: Any) -> None:
@@ -122,6 +161,13 @@ def handle_cleanup(_args: Any) -> None:
     Handle command to clean up old entries from databases
     """
     cleanup.cleanup()
+
+
+def handle_migrate(_args: Any) -> None:
+    """
+    Handle command for database migration
+    """
+    db.migrate()
 
 
 def handle_vacuum(_args: Any) -> None:
@@ -165,6 +211,12 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     subparsers = parser.add_subparsers(required=True)
 
+    cmd_start = subparsers.add_parser('start', help='start app in debug mode')
+    cmd_start.add_argument('--host', default='0.0.0.0', type=str)
+    cmd_start.add_argument('--port', default=8080, type=int)
+    cmd_start.add_argument('--dev', action='store_true')
+    cmd_start.set_defaults(func=handle_start)
+
     cmd_useradd = subparsers.add_parser('useradd', help='create new user')
     cmd_useradd.add_argument('username')
     cmd_useradd.add_argument('--admin', action='store_true',
@@ -198,6 +250,10 @@ if __name__ == '__main__':
     cmd_cleanup = subparsers.add_parser('cleanup',
                                         help='clean old or unused data from the database')
     cmd_cleanup.set_defaults(func=handle_cleanup)
+
+    cmd_migrate = subparsers.add_parser('migrate',
+                                       help='run database migrations')
+    cmd_migrate.set_defaults(func=handle_migrate)
 
     cmd_vacuum = subparsers.add_parser('vacuum',
                                        help='issue vacuum command to clean up sqlite databases')

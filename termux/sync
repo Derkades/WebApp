@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 set -e
 source termux/settings
-python -m app.db
-python -m app.manage sync $@
+python mp.py migrate
+python mp.py sync $@

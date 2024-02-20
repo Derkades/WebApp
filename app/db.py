@@ -132,4 +132,5 @@ def migrate() -> None:
 if __name__ == '__main__':
     from app import logconfig
     logconfig.apply()
+    log.warning('Running database module directly is deprecated, please use manage command.')
     migrate()

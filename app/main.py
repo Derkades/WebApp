@@ -2,15 +2,14 @@
 Main application file, containing all Flask routes
 """
 import logging
-from pathlib import Path
 
 import jinja2
-from flask import Flask, Response, abort, redirect, render_template, request
+from flask import Flask, Response, redirect, render_template, request
 from flask_babel import Babel
 from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from app import (charts, db, jsonw, language, lastfm, logconfig, music, packer,
+from app import (charts, db, jsonw, language, lastfm, music, packer,
                  settings)
 from app.auth import AuthError, RequestTokenError
 from app.charts import StatsPeriod
@@ -46,9 +45,9 @@ app.register_blueprint(app_track.bp)
 app.register_blueprint(app_users.bp)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=settings.proxies_x_forwarded_for)
 app.jinja_env.undefined = jinja2.StrictUndefined
-app.jinja_env.auto_reload = settings.dev
+# app.jinja_env.auto_reload = False
 babel = Babel(app, locale_selector=language.get_locale)
-log = logging.getLogger('app')
+log = logging.getLogger('main')
 
 
 @app.errorhandler(Exception)
@@ -191,7 +190,3 @@ Expires: 2026-12-31T23:59:59.000Z
 Preferred-Languages: en, nl
 """
     return Response(content, content_type='text/plain')
-
-if __name__ == '__main__':
-    logconfig.apply()
-    app.run(host='0.0.0.0', port=8080, debug=True)
