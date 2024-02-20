@@ -69,11 +69,11 @@ def retrieve(key: str,
 
 def cleanup() -> None:
     with db.cache() as conn:
-        # The number of deleted rows and vacuumed pages is limited to prevent this
-        # function from blocking for too long.
-        count = conn.execute('DELETE FROM cache2 WHERE expire_time < ? LIMIT 250',
+        count = conn.execute('DELETE FROM cache2 WHERE expire_time < ?',
                             (int(time.time()),)).rowcount
-        conn.execute('PRAGMA incremental_vacuum(65536)') # max 65536 pages = 256MiB
+        # The number of vacuumed pages is limited to prevent this function
+        # from blocking for too long. Max 65536 pages = 256MiB
+        conn.execute('PRAGMA incremental_vacuum(65536)')
         log.info('Deleted %s entries from cache', count)
 
 
