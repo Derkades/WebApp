@@ -49,6 +49,7 @@ RUN cd /build/ffmpeg && \
         --enable-encoder=aac \
         --enable-encoder=libwebp \
         --enable-encoder=pcm_s16le \
+        --enable-decoder=alac \
         --enable-demuxer=aac \
         --enable-demuxer=flac \
         --enable-demuxer=mjpeg \
