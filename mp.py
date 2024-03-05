@@ -1,9 +1,10 @@
-from typing import Any
-from argparse import ArgumentParser
-from app import logconfig, scanner, offline_sync, db, util, main, cleanup
 import logging
+from argparse import ArgumentParser
+from typing import Any
 
 from gunicorn.app.base import BaseApplication
+
+from app import cleanup, db, logconfig, main, offline_sync, scanner, util
 
 
 class GApp(BaseApplication):

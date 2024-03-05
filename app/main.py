@@ -9,10 +9,8 @@ from flask_babel import Babel
 from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from app import (charts, db, jsonw, language, lastfm, music, packer,
-                 settings)
+from app import db, jsonw, language, lastfm, music, packer, settings
 from app.auth import AuthError, RequestTokenError
-from app.charts import StatsPeriod
 from app.routes import account as app_account
 from app.routes import activity as app_activity
 from app.routes import auth as app_auth
@@ -23,6 +21,7 @@ from app.routes import news as app_news
 from app.routes import player as app_player
 from app.routes import playlists as app_playlists
 from app.routes import radio as app_radio
+from app.routes import stats as app_stats
 from app.routes import track as app_track
 from app.routes import users as app_users
 
@@ -41,6 +40,7 @@ app.register_blueprint(app_news.bp)
 app.register_blueprint(app_player.bp)
 app.register_blueprint(app_playlists.bp)
 app.register_blueprint(app_radio.bp)
+app.register_blueprint(app_stats.bp)
 app.register_blueprint(app_track.bp)
 app.register_blueprint(app_users.bp)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=settings.proxies_x_forwarded_for)
@@ -126,25 +126,6 @@ def route_lastfm_disconnect():
         conn.execute('DELETE FROM user_lastfm WHERE user=?',
                      (user.user_id,))
     return redirect('/account', code=303)
-
-
-@app.route('/stats')
-def route_stats():
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
-
-    return render_template('stats.jinja2')
-
-
-@app.route('/stats_data')
-def route_stats_data():
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
-
-        period = StatsPeriod.from_str(request.args['period'])
-
-    data = charts.get_data(period)
-    return jsonw.json_response(data)
 
 
 @app.route('/download_offline')

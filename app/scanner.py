@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from sqlite3 import Connection
 
-from app import metadata, music, settings, db
+from app import db, metadata, music, settings
 
 log = logging.getLogger('app.scanner')
 

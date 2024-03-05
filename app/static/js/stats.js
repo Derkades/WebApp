@@ -73,7 +73,7 @@ async function loadCharts(buttonName, button) {
     spinner.classList.remove('hidden');
 
     // Download data
-    const response = await fetch('/stats_data?period=' + encodeURIComponent(button.id));
+    const response = await fetch('/stats/data?period=' + encodeURIComponent(button.id));
     const data = await response.json();
 
     spinner.classList.add('hidden');
