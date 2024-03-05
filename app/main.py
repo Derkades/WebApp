@@ -8,6 +8,8 @@ from flask import Flask, Response, redirect, render_template, request
 from flask_babel import Babel
 from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.proxy_fix import ProxyFix
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+import prometheus_client
 
 from app import db, jsonw, language, lastfm, music, packer, settings
 from app.auth import AuthError, RequestTokenError
@@ -43,6 +45,9 @@ app.register_blueprint(app_radio.bp)
 app.register_blueprint(app_stats.bp)
 app.register_blueprint(app_track.bp)
 app.register_blueprint(app_users.bp)
+app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
+    '/metrics': prometheus_client.make_wsgi_app()
+})
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=settings.proxies_x_forwarded_for)
 app.jinja_env.undefined = jinja2.StrictUndefined
 # app.jinja_env.auto_reload = False
