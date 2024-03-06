@@ -33,7 +33,7 @@ class Search {
         const allTracks = Object.values(state.tracks);
 
         {
-            const tracks = fuzzysort.go(query, allTracks, {keys: ['searchString'], threshold: -1000, limit: 25}).map(e => e.obj);
+            const tracks = fuzzysort.go(query, allTracks, {keys: ['searchString'], threshold: -10000, limit: 25}).map(e => e.obj);
             this.#searchResultTracks.replaceChildren(browse.generateTrackList(tracks));
         }
 
