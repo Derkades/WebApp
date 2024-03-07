@@ -22,10 +22,9 @@ function handleKey(key) {
     } else if (key === 'p' || key === ' ') {
         const audioElem = getAudioElement();
         if (audioElem.paused) {
-            audioElem.play().then(() => eventBus.publish(MusicEvent.PLAYBACK_CHANGE));
+            audioElem.play();
         } else {
             audioElem.pause();
-            eventBus.publish(MusicEvent.PLAYBACK_CHANGE);
         }
     } else if (key === 'ArrowLeft') {
         queue.previous();

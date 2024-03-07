@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Try to skip to beginning of current track first
         if (audioElem.currentTime > 15 || queue.previousTracks.length == 0) {
             audioElem.currentTime = 0;
-            eventBus.publish(MusicEvent.PLAYBACK_CHANGE)
             return;
         }
 
@@ -18,11 +17,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Play pause
     document.getElementById('button-play').addEventListener('click', () => {
-        audioElem.play().then(() => eventBus.publish(MusicEvent.PLAYBACK_CHANGE));
+        audioElem.play();
     });
     document.getElementById('button-pause').addEventListener('click', () => {
         audioElem.pause();
-        eventBus.publish(MusicEvent.PLAYBACK_CHANGE)
     });
 
     // Seek bar
@@ -31,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const onMove = event => {
         const audioElem = getAudioElement();
         audioElem.currentTime = ((event.clientX - seekBar.offsetLeft) / seekBar.offsetWidth) * audioElem.duration;
-        eventBus.publish(MusicEvent.PLAYBACK_CHANGE)
         event.preventDefault(); // Prevent accidental text selection
     };
 
@@ -65,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Update seek bar
-eventBus.subscribe(MusicEvent.PLAYBACK_CHANGE, () => {
+function updateSeekBar() {
     const audioElem = getAudioElement();
 
     var barCurrent;
@@ -85,10 +82,10 @@ eventBus.subscribe(MusicEvent.PLAYBACK_CHANGE, () => {
     document.getElementById('progress-time-current').innerText = barCurrent;
     document.getElementById('progress-time-duration').innerText = barDuration;
     document.getElementById('progress-bar').style.width = barWidth
-});
+}
 
 // Update play/pause buttons
-eventBus.subscribe(MusicEvent.PLAYBACK_CHANGE, () => {
+function updatePlayPauseButtons() {
     if (getAudioElement().paused) {
         document.getElementById('button-pause').classList.add('hidden');
         document.getElementById('button-play').classList.remove('hidden');
@@ -96,7 +93,7 @@ eventBus.subscribe(MusicEvent.PLAYBACK_CHANGE, () => {
         document.getElementById('button-pause').classList.remove('hidden');
         document.getElementById('button-play').classList.add('hidden');
     }
-});
+}
 
 // Only show metadata edit and track delete buttons if playlist is writable
 eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {
@@ -115,3 +112,11 @@ eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {
         document.getElementById('button-dislike').classList.add('hidden');
     }
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    getAudioElement().addEventListener('durationchange', updateSeekBar);
+    getAudioElement().addEventListener('timeupdate', updateSeekBar);
+    getAudioElement().addEventListener('pause', updatePlayPauseButtons);
+    getAudioElement().addEventListener('play', updatePlayPauseButtons);
+    updatePlayPauseButtons();
+})

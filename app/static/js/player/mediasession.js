@@ -1,4 +1,4 @@
-eventBus.subscribe(MusicEvent.PLAYBACK_CHANGE, () => {
+function updateMediaSessionPosition() {
     const audioElem = getAudioElement();
 
     navigator.mediaSession.playbackState = audioElem.paused ? 'paused' : 'playing';
@@ -13,7 +13,7 @@ eventBus.subscribe(MusicEvent.PLAYBACK_CHANGE, () => {
         playbackRate: audioElem.playbackRate,
         position: audioElem.currentTime,
     });
-});
+}
 
 eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {
     const track = queue.currentTrack.track();
@@ -45,17 +45,18 @@ eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {
 document.addEventListener('DOMContentLoaded', () => {
     const audioElem = getAudioElement();
 
+    audioElem.addEventListener('timeupdate', updateMediaSessionPosition);
+    audioElem.addEventListener('durationchange', updateMediaSessionPosition);
+
     // Media session events
     navigator.mediaSession.setActionHandler('play', () => {
-        audioElem.play().then(() => eventBus.publish(MusicEvent.PLAYBACK_CHANGE));
+        audioElem.play();
     });
     navigator.mediaSession.setActionHandler('pause', () => {
         audioElem.pause();
-        eventBus.publish(MusicEvent.PLAYBACK_CHANGE)
     });
     navigator.mediaSession.setActionHandler('seekto', callback => {
         audioElem.currentTime = callback.seekTime;
-        eventBus.publish(MusicEvent.PLAYBACK_CHANGE)
     });
     navigator.mediaSession.setActionHandler('previoustrack', () => queue.previous());
     navigator.mediaSession.setActionHandler('nexttrack', () => queue.next());

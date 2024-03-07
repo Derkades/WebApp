@@ -18,7 +18,6 @@ function seekAbsolute(position) {
     }
 
     getAudioElement().currentTime = position;
-    eventBus.publish(MusicEvent.PLAYBACK_CHANGE);
 }
 
 /**
