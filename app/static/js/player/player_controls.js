@@ -63,6 +63,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Update seek bar
 function updateSeekBar() {
+    // Save resources updating seek bar if it's not visible
+    if (document.visibilityState != 'visible') {
+        return;
+    }
+
     const audioElem = getAudioElement();
 
     var barCurrent;
