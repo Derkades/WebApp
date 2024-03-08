@@ -1,3 +1,5 @@
+const NOW_PLAYING_TIMER_INTERVAL_SECONDS = 5;
+
 class History {
     /** @type {string} */
     playerId;
@@ -48,7 +50,7 @@ class History {
             return;
         }
 
-        this.playingCounter++;
+        this.playingCounter += NOW_PLAYING_TIMER_INTERVAL_SECONDS;
 
         console.debug('history: playing, counter:', this.playingCounter, '/', this.requiredPlayingCounter);
 
@@ -87,8 +89,8 @@ class History {
 const history = new History();
 
 document.addEventListener('DOMContentLoaded', () => {
-    setInterval(() => history.update(), 1_000);
+    setInterval(() => history.update(), NOW_PLAYING_TIMER_INTERVAL_SECONDS * 1000);
 
-    // If you modify the interval, also modify route_history() in app.py
-    setInterval(() => history.updateNowPlaying(), 10_000);
+    // If you modify the interval, also modify route_data() in routes/activity.py
+    setInterval(() => history.updateNowPlaying(), 15_000);
 });
