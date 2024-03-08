@@ -124,4 +124,10 @@ document.addEventListener('DOMContentLoaded', () => {
     getAudioElement().addEventListener('pause', updatePlayPauseButtons);
     getAudioElement().addEventListener('play', updatePlayPauseButtons);
     updatePlayPauseButtons();
-})
+    // Seek bar is not updated when page is not visible. Immediately update it when the page does become visibile.
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState == 'visible') {
+            updateSeekBar();
+        }
+    });
+});
