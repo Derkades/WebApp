@@ -6,7 +6,7 @@ from app.charts import StatsPeriod
 bp = Blueprint('stats', __name__, url_prefix='/stats')
 
 
-@bp.route('/')
+@bp.route('')
 def route_stats():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
