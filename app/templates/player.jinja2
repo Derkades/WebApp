@@ -154,6 +154,14 @@
                     <option value="stream">{% trans %}Stream audio (experimental){% endtrans %}</option>
                 </select><br>
 
+                <label for="settings-audio-gain">{% trans %}Audio gain (reduces audio quality){% endtrans %}</label><br>
+                <select id="settings-audio-gain">
+                    <option value="1" selected>1</option>
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                </select><br>
+
                 {% if offline_mode %}
                     <input id="settings-meme-mode" type="hidden">
                 {% else %}

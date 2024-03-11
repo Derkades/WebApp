@@ -24,6 +24,8 @@ function onVolumeChange() {
     audioElem.volume = getTransformedVolume(volume);
 }
 
+eventBus.subscribe(MusicEvent.SETTINGS_LOADED, onVolumeChange);
+
 document.addEventListener('DOMContentLoaded', () => {
     // Respond to volume button changes
     document.getElementById('settings-volume').addEventListener('input', () => onVolumeChange());
@@ -34,4 +36,4 @@ document.addEventListener('DOMContentLoaded', () => {
         volume.value = parseInt(volume.value) + (event.deltaY < 0 ? 2 : -2);
         onVolumeChange();
     }, {passive: true});
-})
+});

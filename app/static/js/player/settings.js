@@ -4,6 +4,7 @@ const SETTING_ELEMENTS = [
     'settings-volume',
     'settings-queue-removal-behaviour',
     'settings-download-mode',
+    'settings-audio-gain',
     'settings-meme-mode',
     'settings-news',
 ];
@@ -35,8 +36,7 @@ function syncInputWithStorage(elemId) {
 
 function syncInputsWithStorage() {
     SETTING_ELEMENTS.forEach(syncInputWithStorage);
-
-    onVolumeChange();
+    eventBus.publish(MusicEvent.SETTINGS_LOADED);
 }
 
 document.addEventListener('DOMContentLoaded', () => {

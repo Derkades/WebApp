@@ -1,6 +1,7 @@
 const MusicEvent = {
     TRACK_LIST_CHANGE: 'track_list_change', // Local playlist and track list state has been updated. All dependent HTML should be updated.
     TRACK_CHANGE: 'track_change', // Track that is playing changed (skipped to next or previous track)
+    SETTINGS_LOADED: 'settings_loaded',
 }
 
 class EventBus {
