@@ -65,7 +65,7 @@ class NewsProvider(ABC):
                        '-c:a', 'libopus',
                        '-b:a', '64k',
                        '-vbr', 'on',
-                       '-filter:a', 'loudnorm',
+                       '-filter:a', 'loudnorm=I=-16',
                        temp_output.name]
 
             subprocess.run(command, shell=False, check=True)
