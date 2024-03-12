@@ -225,9 +225,9 @@ def _fallback_data_dir(name: str) -> str:
     xdg_data_home = _strenv('XDG_DATA_HOME')
     home = _strenv('HOME')
     if xdg_data_home:
-        return xdg_data_home + '/music-player/' + name
+        return xdg_data_home + '/raphson-music-player/' + name
     if home:
-        return home + '/.local/share/music-player/' + name
+        return home + '/.local/share/raphson-music-player/' + name
     return None
 
 
