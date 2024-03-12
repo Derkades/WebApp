@@ -1,32 +1,38 @@
-import logging
-from argparse import ArgumentParser
-from typing import Any
+# pylint: disable=import-outside-toplevel
 
-from app import logconfig
+import logging
+import os
+from argparse import ArgumentParser
+from pathlib import Path
+from typing import Any, Optional
+
+from app import logconfig, settings
 
 log = logging.getLogger('cli')
 
 
-def handle_start(args: Any) -> None:
+def handle_start(args: Any, logconfig_dict: dict) -> None:
     """
     Handle command to start server
     """
-    from app import cleanup, db, gunicorn_app, main, scanner
+    from app import cleanup, db, gunicorn_app
+    from app import main as app_main
+    from app import scanner
+
+    if os.getenv('WERKZEUG_RUN_MAIN') != 'true':  # skip if reloading
+        db.migrate()
+        scanner.scan()
+        cleanup.cleanup()
 
     if args.dev:
         log.info('Starting Flask web server in debug mode')
-        main.app.jinja_env.auto_reload = True  # Auto reload templates during development
-        main.app.run(host=args.host, port=args.port, debug=True)
+        app = app_main.get_app(args.proxy_count, True)
+        app.run(host=args.host, port=args.port, debug=True)
         return
 
-    db.migrate()
-    scanner.scan()
-    cleanup.cleanup()
-
-    main.app.jinja_env.auto_reload = False  # templates don't change in production
-
     log.info('Starting gunicorn web server')
-    gapp = gunicorn_app.GunicornApp()
+    bind = f'[{args.host}]:{args.port}'
+    gapp = gunicorn_app.GunicornApp(bind, args.proxy_count, logconfig_dict)
     gapp.run()
 
 
@@ -202,16 +208,56 @@ def handle_sync(args: Any) -> None:
     offline_sync.do_sync(args.force_resync)
 
 
-if __name__ == '__main__':
-    logconfig.apply()
+def _strenv(name: str, default: str = None):
+    return os.getenv('MUSIC_' + name, default)
 
+
+def _intenv(name: str, default: int):
+    return int(_strenv(name, str(default)))
+
+
+def _boolenv(name: str) -> bool:
+    val = _strenv(name, '')
+    return val == '1' or bool(val)
+
+
+def _fallback_data_dir(name: str) -> str:
+    xdg_data_home = _strenv('XDG_DATA_HOME')
+    home = _strenv('HOME')
+    if xdg_data_home:
+        return xdg_data_home + '/music-player/' + name
+    if home:
+        return home + '/.local/share/music-player/' + name
+    return None
+
+
+def split_by_semicolon(inp: Optional[str]) -> list[str]:
+    if not inp:
+        return []
+    return [s.strip() for s in inp.split(';') if s.strip() != '']
+
+
+def main():
     parser = ArgumentParser()
+    parser.add_argument('--log-level', default=_strenv('LOG_LEVEL', 'INFO'))
+    parser.add_argument('--short-log-format', action='store_true', default=_boolenv('SHORT_LOG_FORMAT'))
+    parser.add_argument('--data-dir', default=_strenv('DATA_DIR', _strenv('DATA_PATH', _fallback_data_dir('data'))))
+    parser.add_argument('--music-dir', default=_strenv('MUSIC_DIR', _fallback_data_dir('music')))
+    # error level by default to hide unfixable "deprecated pixel format used" warning
+    parser.add_argument('--ffmpeg-log-level', default=_strenv('FFMPEG_LOG_LEVEL', 'error'))
+    parser.add_argument('--track-max-duration-seconds', type=int, default=_intenv('TRACK_MAX_DURATION_SECONDS', 1200))
+    parser.add_argument('--radio-playlists', type=int, default=_strenv('RADIO_PLAYLISTS'))
+    parser.add_argument('--lastfm-api-key', type=int, default=_strenv('LASTFM_API_KEY'))
+    parser.add_argument('--lastfm-api-secret', type=int, default=_strenv('LASTFM_API_SECRET'))
+    parser.add_argument('--offline', action='store_true', default=_boolenv('OFFLINE_MODE'))
+
     subparsers = parser.add_subparsers(required=True)
 
     cmd_start = subparsers.add_parser('start', help='start app in debug mode')
-    cmd_start.add_argument('--host', default='0.0.0.0', type=str)
+    cmd_start.add_argument('--host', default='127.0.0.1', type=str)
     cmd_start.add_argument('--port', default=8080, type=int)
     cmd_start.add_argument('--dev', action='store_true')
+    cmd_start.add_argument('--proxy-count', type=int, default=_intenv('PROXY_COUNT', _intenv('PROXIES_X_FORWARDED_FOR', 0)))
     cmd_start.set_defaults(func=handle_start)
 
     cmd_useradd = subparsers.add_parser('useradd', help='create new user')
@@ -264,5 +310,32 @@ if __name__ == '__main__':
                           help='Change playlists to sync. Specify playlists as comma separated list without spaces. Enter \'favorite\' to sync favorite playlists (default).')
     cmd_sync.set_defaults(func=handle_sync)
 
-    parsed_args = parser.parse_args()
-    parsed_args.func(parsed_args)
+    args = parser.parse_args()
+
+    settings.data_dir = Path(args.data_dir).absolute()
+    assert settings.data_dir.exists(), 'data dir does not exist: ' + settings.data_dir.as_posix()
+    settings.ffmpeg_log_level = args.ffmpeg_log_level
+    settings.track_max_duration_seconds = args.track_max_duration_seconds
+    settings.radio_playlists = split_by_semicolon(args.radio_playlists)
+    settings.lastfm_api_key = args.lastfm_api_key
+    settings.lastfm_api_secret = args.lastfm_api_secret
+    settings.offline_mode = args.offline
+
+    if settings.offline_mode:
+        settings.music_dir = Path('/dev/null')
+    else:
+        assert args.music_dir, 'music dir must be set when not running in offline mode'
+        settings.music_dir = Path(args.music_dir).absolute()
+        assert settings.music_dir.exists(), 'music dir does not exist: ' + settings.music_dir.as_posix()
+
+    logconfig_dict = logconfig.get_config_dict(args.short_log_format, Path(args.data_dir, 'errors.log'), args.log_level)
+    logconfig.apply(logconfig_dict)
+
+    if args.func == handle_start:
+        handle_start(args, logconfig_dict)
+    else:
+        args.func(args)
+
+
+if __name__ == '__main__':
+    main()

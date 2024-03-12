@@ -56,7 +56,7 @@ class NewsProvider(ABC):
                        '-y',  # overwriting file is required, because the created temp file already exists
                        '-hide_banner',
                        '-nostats',
-                       '-loglevel', settings.ffmpeg_loglevel,
+                       '-loglevel', settings.ffmpeg_log_level,
                        '-ss', str(self.start_trim),
                        '-i', temp_input.name,
                        '-map', '0:a',
@@ -130,5 +130,5 @@ def main():
 
 if __name__ == '__main__':
     from app import logconfig
-    logconfig.apply()
+    logconfig.apply_debug()
     main()

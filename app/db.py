@@ -128,9 +128,3 @@ def migrate() -> None:
         migration.run()
         with _connect('meta', False) as conn:
             conn.execute('UPDATE db_version SET version=?', (migration.to_version,))
-
-if __name__ == '__main__':
-    from app import logconfig
-    logconfig.apply()
-    log.warning('Running database module directly is deprecated, please use manage command.')
-    migrate()

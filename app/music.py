@@ -56,8 +56,8 @@ def from_relpath(relpath: str) -> Path:
     if relpath.startswith('/'):
         raise ValueError('Relative path must not start with /')
     path = Path(settings.music_dir, relpath).resolve()
-    if not path.is_relative_to(Path(settings.music_dir)):
-        raise ValueError('Must not go outside of music base directory')
+    if not path.is_relative_to(settings.music_dir):
+        raise ValueError('Path ' + path.as_posix() + ' is not inside music base directory ' + settings.music_dir.as_posix())
     return path
 
 
@@ -389,11 +389,11 @@ class Track:
                     '-y',  # overwriting file is required, because the created temp file already exists
                     '-hide_banner',
                     '-nostats',
-                    '-loglevel', settings.ffmpeg_loglevel,
+                    '-loglevel', settings.ffmpeg_log_level,
                     '-i', self.path.resolve().as_posix(),
                     *input_options,
                     *audio_options,
-                    '-t', str(settings.track_limit_seconds),
+                    '-t', str(settings.track_max_duration_seconds),
                     '-ac', '2',
                     '-filter:a', loudnorm,
                     temp_output.name]
@@ -417,7 +417,7 @@ class Track:
                 '-y',  # overwriting file is required, because the created temp file already exists
                 '-hide_banner',
                 '-nostats',
-                '-loglevel', settings.ffmpeg_loglevel,
+                '-loglevel', settings.ffmpeg_log_level,
                 '-i', self.path.resolve().as_posix(),
                 '-codec', 'copy',
             ]

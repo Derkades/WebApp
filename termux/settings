@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-export MUSIC_OFFLINE_MODE=1
-export MUSIC_DATA_PATH=./data
-export MUSIC_SHORT_LOG_FORMAT=1

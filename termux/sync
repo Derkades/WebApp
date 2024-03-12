@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
 set -e
-source termux/settings
 python mp.py migrate
-python mp.py sync $@
+python mp.py --offline --data-dir=./data --short-log-format sync $@

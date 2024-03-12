@@ -30,7 +30,7 @@ def route_account():
                             sessions=sessions,
                             lastfm_enabled=lastfm.is_configured(),
                             lastfm_name=lastfm_name,
-                            lastfm_connect_url=lastfm.CONNECT_URL)
+                            lastfm_connect_url=lastfm.get_connect_url())
 
 
 @bp.route('/change_password', methods=['POST'])

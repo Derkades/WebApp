@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-set -e
 # Start music player in offline mode
 # Intended for running music player in Termux environment
-source termux/settings
+set -e
 mkdir -p data
 pybabel compile -d app/translations
-python mp.py start
+python mp.py --offline --data-dir=./data --short-log-format start $@

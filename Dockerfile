@@ -111,6 +111,7 @@ ENV MUSIC_MUSIC_DIR /music
 ENV MUSIC_DATA_PATH /data
 
 ENTRYPOINT ["/entrypoint.sh"]
+CMD ["start", "--host", "0.0.0.0", "--dev"]
 
 ###############################################################################
 
@@ -120,7 +121,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends binutils && \
     rm -rf /var/lib/apt/lists/*
 
-RUN PYTHONDONTWRITEBYTECODE=1 pip install --no-cache-dir pyinstaller
+RUN pip install --no-cache-dir pyinstaller
 
 RUN mkdir /build
 WORKDIR /build
@@ -128,7 +129,7 @@ WORKDIR /build
 COPY ./app ./app
 COPY mp.py .
 
-RUN PYTHONDONTWRITEBYTECODE=1 pybabel compile -d app/translations
+RUN pybabel compile -d app/translations
 
 RUN pyinstaller mp.py \
         --hidden-import=gunicorn.glogging \
@@ -157,6 +158,7 @@ COPY --from=pyinstaller /build/dist/mp /mp
 
 ENV PYTHONUNBUFFERED 1
 ENV MUSIC_MUSIC_DIR /music
-ENV MUSIC_DATA_PATH /data
+ENV MUSIC_DATA_DIR /data
 
 ENTRYPOINT ["/entrypoint.sh"]
+CMD ["start", "--host", "0.0.0.0", "--dev"]

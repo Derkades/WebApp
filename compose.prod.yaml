@@ -21,7 +21,7 @@ services:
     cap_drop: ['all']
     environment:
       TZ: Europe/Amsterdam
-      MUSIC_PROXIES_X_FORWARDED_FOR: 1
+      MUSIC_PROXY_COUNT: 1
 
   music-nginx:
     # image: ghcr.io/danielkoomen/webapp:nginx
