@@ -7,7 +7,7 @@ class News {
     constructor() {
         document.addEventListener('DOMContentLoaded', () => {
             this.#newsSetting = document.getElementById('settings-news');
-            setInterval(() => this.check(), 60000);
+            setInterval(() => this.check(), 3*60_000);
         });
     }
 
