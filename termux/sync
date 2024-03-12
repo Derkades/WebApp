@@ -1,4 +1,3 @@
 #!/usr/bin/env bash
 set -e
-python mp.py migrate
 python mp.py --offline --data-dir=./data --short-log-format sync $@
