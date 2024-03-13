@@ -12,7 +12,10 @@ from app.metadata import Metadata
 log = logging.getLogger('app.radio')
 
 
-def get_connect_url() -> str:
+def get_connect_url() -> str | None:
+    if not settings.lastfm_api_key:
+        return None
+
     return 'https://www.last.fm/api/auth/?api_key=' + settings.lastfm_api_key
 
 
