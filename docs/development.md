@@ -9,7 +9,7 @@ docker compose up --build
 
 Before doing so, you will need to create a music and data directory. You may need to change `user` in the `compose.yaml` file if your user is not using the default id of 1000.
 
-## Installing dependencies locally
+## Development without Docker
 
 Installing python and dependencies locally may be useful, for example to get linting and suggestions in your IDE.
 
@@ -23,26 +23,30 @@ Fedora packages, if you prefer:
 sudo dnf install python3-flask python3-flask-babel python3-requests python3-beautifulsoup4 python3-bcrypt yt-dlp babel poedit pylint python3-mypy python3-types-requests python3-types-beautifulsoup4
 ```
 
+Start the web server in development mode, which supports live reloading:
+```
+python3 mp.py start --dev
+```
+
 ## Code structure
 
   * (`data/`): default database directory.
-  * (`dev/`): temp files during development.
   * `docker/`: additional files used to build containers.
   * `docs/`: documentation in markdown format.
   * (`music/`): default music directory.
-  * `src/migrations/`: sql files used to update the database.
-  * `src/sql/`: sql files used to initialize the database.
-  * `src/static/`: static files that are served as-is by the frontend, under the `/static` URL.
-  * `src/js/player/*.js`: concatenated and saved to `src/js/player.js`. This happens when the docker image is built. During development, this file is generated on the fly.
-  * `src/templates/`: jinja2 template files for web pages.
-  * `src/translations/`: translation files. Do not edit manually, see translations section.
-  * `src/`: Python code. Main entrypoint is `app.py`
-
-() In .gitignore
+  * `app/migrations/`: sql files used to update the database.
+  * `app/routes`: files containing flask blueprints and routes
+  * `app/sql/`: sql files used to initialize the database, also useful as a database layout reference.
+  * `app/static/`: static files that are served as-is by the frontend, under the `/static` URL.
+  * `app/js/player/*.js`: concatenated to `src/js/player.js` on-the-fly, or manually during building for better performance.
+  * `app/templates/`: jinja2 template files for web pages.
+  * `app/translations/`: translation files. Do not edit manually, see translations section.
+  * `app/`: contains program source code
+  * `mp.py`: main entrypoint
 
 ## Import sorting
 
-Use `isort app` to sort imports.
+Use `isort .` to sort imports.
 
 ## Preparing for offline development
 
