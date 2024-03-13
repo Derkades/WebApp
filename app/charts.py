@@ -266,6 +266,18 @@ def charts_history(conn: Connection, period: StatsPeriod):
     return charts
 
 
+def chart_unique_artists(conn: Connection):
+    rows = conn.execute('''
+                        SELECT playlist, COUNT(artist), COUNT(DISTINCT artist)
+                        FROM track
+                            INNER JOIN track_artist ON track.path = track_artist.track
+                        GROUP BY playlist
+                        ''')
+    ratio_rows = [(playlist, artists / tracks) for playlist, tracks, artists in rows]
+    ratio_rows = sorted(ratio_rows, key=lambda x: x[1])
+    return chart('bar', _('Ratio of unique artists compared to total artists'), *data_from_rows(_('Ratio'), ratio_rows))
+
+
 def get_data(period: StatsPeriod):
     """
     Generate charts as json data for stats.jinja2
@@ -274,6 +286,7 @@ def get_data(period: StatsPeriod):
         data = [*charts_history(conn, period),
                 *charts_playlists(conn),
                 chart_track_year(conn),
-                chart_last_chosen(conn)]
+                chart_last_chosen(conn),
+                chart_unique_artists(conn)]
 
     return data
