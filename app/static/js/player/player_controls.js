@@ -55,11 +55,19 @@ document.addEventListener('DOMContentLoaded', () => {
         seekRelative(event.deltaY < 0 ? 3 : -3);
     }, {passive: true});
 
-    // Hide buttons initially
+    hideButtons();
+});
+
+function hideButtons() {
+    if (!document.getElementById('button-dislike')) {
+        // if dislike button does not exist, we are running in offline mode and other buttons also don't exist
+        return;
+    }
+
     document.getElementById('button-edit').classList.add('hidden');
     document.getElementById('button-delete').classList.add('hidden');
     document.getElementById('button-dislike').classList.add('hidden');
-});
+}
 
 // Update seek bar
 function updateSeekBar() {
@@ -102,6 +110,11 @@ function updatePlayPauseButtons() {
 
 // Only show metadata edit and track delete buttons if playlist is writable
 eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {
+    if (!document.getElementById('button-dislike')) {
+        // if dislike button does not exist, we are running in offline mode and other buttons also don't exist
+        return;
+    }
+
     const track = queue.currentTrack.track();
 
     // Show dislike button if track is real (e.g. not a virtual news track)
