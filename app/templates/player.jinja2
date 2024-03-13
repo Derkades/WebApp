@@ -127,7 +127,7 @@
                 </select><br> #}
 
                 <label for="settings-queue-size">{% trans %}Minimum queue size{% endtrans %}</label><br>
-                <input type="number" value="5" size="3" id="settings-queue-size"><br>
+                <input type="number" value="5" size="3" min="0" max="100" id="settings-queue-size"><br>
 
                 {% if offline_mode %}
                     <select id="settings-audio-type" disabled class="hidden">
