@@ -104,17 +104,22 @@ function updatePlayPauseButtons() {
 eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {
     const track = queue.currentTrack.track();
 
-    if (track !== null) {
-        document.getElementById('button-dislike').classList.remove('hidden'); // Not available for virtual news tracks
-        if (track.playlist().write) {
-            // Only available with write access
-            document.getElementById('button-edit').classList.remove('hidden');
-            document.getElementById('button-delete').classList.remove('hidden');
-        }
+    // Show dislike button if track is real (e.g. not a virtual news track)
+    const showDislike = track !== null;
+    const showEditDelete = track !== null && track.playlist().write;
+
+    if (showDislike) {
+        document.getElementById('button-dislike').classList.remove('hidden');
+    } else {
+        document.getElementById('button-dislike').classList.add('hidden');
+    }
+
+    if (showEditDelete) {
+        document.getElementById('button-edit').classList.remove('hidden');
+        document.getElementById('button-delete').classList.remove('hidden');
     } else {
         document.getElementById('button-edit').classList.add('hidden');
         document.getElementById('button-delete').classList.add('hidden');
-        document.getElementById('button-dislike').classList.add('hidden');
     }
 });
 
