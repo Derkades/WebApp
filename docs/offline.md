@@ -11,13 +11,17 @@ TODO: insert picture of music player tablet in Tyrone
 
 ## Installation
 
-To install the music player in offline mode, follow the [standard installation instructions](./installation.md) with one change; add the environment variable `MUSIC_OFFLINE_MODE: 1`.
+To install the music player in offline mode, follow the [standard installation instructions](./installation.md) with one change; add the command line flag `--offline` or environment variable `MUSIC_OFFLINE_MODE: 1`.
 
 ## Synchronization
 
 To synchronize history and music, run:
 ```
-docker compose exec music manage sync
+python3 mp.py sync
+```
+or, if using docker:
+```
+docker compose run music sync
 ```
 
 It is safe to abort synchronization using Ctrl+C. When restarted, it will resume where it left off.

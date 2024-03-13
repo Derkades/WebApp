@@ -221,35 +221,49 @@ def _boolenv(name: str) -> bool:
     return val == '1' or bool(val)
 
 
-def _fallback_data_dir(name: str) -> str:
-    xdg_data_home = _strenv('XDG_DATA_HOME')
-    home = _strenv('HOME')
-    if xdg_data_home:
-        return xdg_data_home + '/raphson-music-player/' + name
-    if home:
-        return home + '/.local/share/raphson-music-player/' + name
-    return None
-
-
-def split_by_semicolon(inp: Optional[str]) -> list[str]:
+def split_by_comma(inp: Optional[str]) -> list[str]:
     if not inp:
         return []
-    return [s.strip() for s in inp.split(';') if s.strip() != '']
+    return [s.strip() for s in inp.split(',') if s.strip() != '']
 
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument('--log-level', default=_strenv('LOG_LEVEL', 'INFO'))
-    parser.add_argument('--short-log-format', action='store_true', default=_boolenv('SHORT_LOG_FORMAT'))
-    parser.add_argument('--data-dir', default=_strenv('DATA_DIR', _strenv('DATA_PATH', _fallback_data_dir('data'))))
-    parser.add_argument('--music-dir', default=_strenv('MUSIC_DIR', _fallback_data_dir('music')))
+    parser.add_argument('--log-level',
+                        default=_strenv('LOG_LEVEL', 'INFO'),
+                        choices=('DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'),
+                        help='set log level for Python loggers')
+    parser.add_argument('--short-log-format',
+                        action='store_true',
+                        default=_boolenv('SHORT_LOG_FORMAT'),
+                        help='use short log format')
+    parser.add_argument('--data-dir',
+                        default=_strenv('DATA_DIR', _strenv('DATA_PATH', './data')),
+                        help='path to directory where program data is stored')
+    parser.add_argument('--music-dir',
+                        default=_strenv('MUSIC_DIR', './music'),
+                        help='path to directory where music files are stored')
     # error level by default to hide unfixable "deprecated pixel format used" warning
-    parser.add_argument('--ffmpeg-log-level', default=_strenv('FFMPEG_LOG_LEVEL', 'error'))
-    parser.add_argument('--track-max-duration-seconds', type=int, default=_intenv('TRACK_MAX_DURATION_SECONDS', 1200))
-    parser.add_argument('--radio-playlists', type=int, default=_strenv('RADIO_PLAYLISTS'))
-    parser.add_argument('--lastfm-api-key', type=int, default=_strenv('LASTFM_API_KEY'))
-    parser.add_argument('--lastfm-api-secret', type=int, default=_strenv('LASTFM_API_SECRET'))
-    parser.add_argument('--offline', action='store_true', default=_boolenv('OFFLINE_MODE'))
+    parser.add_argument('--ffmpeg-log-level', default=_strenv('FFMPEG_LOG_LEVEL', 'error'),
+                        choices=('quiet', 'fatal', 'error', 'warning', 'info', 'verbose', 'debug'),
+                        help='log level for ffmpeg')
+    parser.add_argument('--track-max-duration-seconds',
+                        type=int,
+                        default=_intenv('TRACK_MAX_DURATION_SECONDS', 1200))
+    parser.add_argument('--radio-playlists',
+                        type=int,
+                        default=_strenv('RADIO_PLAYLISTS'),
+                        help='comma-separated list of playlists to use for radio')
+    parser.add_argument('--lastfm-api-key',
+                        type=int,
+                        default=_strenv('LASTFM_API_KEY'))
+    parser.add_argument('--lastfm-api-secret',
+                        type=int,
+                        default=_strenv('LASTFM_API_SECRET'))
+    parser.add_argument('--offline',
+                        action='store_true',
+                        default=_boolenv('OFFLINE_MODE'),
+                        help='run in offline mode, using music synced from a primary music server')
 
     subparsers = parser.add_subparsers(required=True)
 
@@ -316,7 +330,7 @@ def main():
     assert settings.data_dir.exists(), 'data dir does not exist: ' + settings.data_dir.as_posix()
     settings.ffmpeg_log_level = args.ffmpeg_log_level
     settings.track_max_duration_seconds = args.track_max_duration_seconds
-    settings.radio_playlists = split_by_semicolon(args.radio_playlists)
+    settings.radio_playlists = split_by_comma(args.radio_playlists)
     settings.lastfm_api_key = args.lastfm_api_key
     settings.lastfm_api_secret = args.lastfm_api_secret
     settings.offline_mode = args.offline

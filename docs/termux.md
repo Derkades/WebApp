@@ -43,5 +43,5 @@ Visit http://localhost:8080 in a web browser. Use Ctrl+C to stop the web server.
 ## Updating
 1. Enter the correct directory.
 2. Run `git pull` to download new source code.
-3. Check the [migrations](./migrations.md) wiki page to see if there were any new database migrations since your previous update.
+3.  If your previous update was before 2023-10-28, use the [migrations](./migrations.md) wiki page to update your database.
 4. Run `termux/install` to ensure dependencies are up-to-date.
