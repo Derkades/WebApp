@@ -21,7 +21,7 @@
 {% endblock styles %}
 
 {% block body %}
-<body class="theater">
+<body>
     <div id="bg-image-1" class="bg-image"></div>
     <div id="bg-image-2" class="bg-image"></div>
     <div class="dither"></div>
@@ -168,6 +168,9 @@
                     <label for="settings-meme-mode">{% trans %}Album cover art memes{% endtrans %}</label><br>
                     <input id="settings-meme-mode" type="checkbox"><br>
                 {% endif %}
+
+                <label for="settings-theater">{% trans %}Theater mode: hide controls when not interacting with page{% endtrans %}</label><br>
+                <input id="settings-theater" type="checkbox"><br>
 
                 {% if offline_mode %}
                     <select id="settings-news" class="hidden">

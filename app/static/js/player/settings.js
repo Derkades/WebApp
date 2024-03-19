@@ -7,6 +7,7 @@ const SETTING_ELEMENTS = [
     'settings-audio-gain',
     'settings-meme-mode',
     'settings-news',
+    'settings-theater',
 ];
 
 function syncInputWithStorage(elemId) {
