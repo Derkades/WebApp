@@ -251,14 +251,11 @@ def main():
                         type=int,
                         default=_intenv('TRACK_MAX_DURATION_SECONDS', 1200))
     parser.add_argument('--radio-playlists',
-                        type=int,
                         default=_strenv('RADIO_PLAYLISTS'),
                         help='comma-separated list of playlists to use for radio')
     parser.add_argument('--lastfm-api-key',
-                        type=int,
                         default=_strenv('LASTFM_API_KEY'))
     parser.add_argument('--lastfm-api-secret',
-                        type=int,
                         default=_strenv('LASTFM_API_SECRET'))
     parser.add_argument('--offline',
                         action='store_true',
