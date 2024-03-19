@@ -78,8 +78,8 @@
 
             <div class="box-rounded box-solid box-queue">
                 <div class="flex-space-between">
-                    <h3>{% trans %}Queue{% endtrans %} (<span id="current-queue-size">0</span>)</h3>
-                    <div>
+                    <h3>{% trans %}Queue{% endtrans %} <span class="secondary" id="current-queue-size">0</span></h3>
+                    <div id="queue-buttons">
                         {{ icon_button('tag-multiple', 'open-dialog-tags', title=gettext('Open tag selection')) }}
                         {{ icon_button('playlist-music', 'browse-all', title=gettext('Browse all tracks')) }}
                         {{ icon_button('text-search', 'open-dialog-search', title=gettext('Search in tracks')) }}

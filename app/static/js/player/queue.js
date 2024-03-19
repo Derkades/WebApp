@@ -132,7 +132,7 @@ class Queue {
             i++;
         }
 
-        document.getElementById('current-queue-size').textContent = this.queuedTracks.length + ' - ' + durationToString(totalQueueDuration);
+        document.getElementById('current-queue-size').textContent = this.queuedTracks.length + ' / ' + durationToString(totalQueueDuration);
 
         // If the queue is still loading (size smaller than target size), add a loading spinner
         const minQueueSize = parseInt(document.getElementById('settings-queue-size').value);
