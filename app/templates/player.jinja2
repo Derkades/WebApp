@@ -21,7 +21,7 @@
 {% endblock styles %}
 
 {% block body %}
-<body>
+<body class="theater">
     <div id="bg-image-1" class="bg-image"></div>
     <div id="bg-image-2" class="bg-image"></div>
     <div class="dither"></div>
@@ -30,10 +30,8 @@
 
         <div>
 
-            <div class="box-rounded box-solid">
-                <div id="playlist-checkboxes">
-                    {% trans %}Loading&mldr;{% endtrans %}
-                </div>
+            <div class="box-rounded box-solid" id="playlist-checkboxes">
+                {% trans %}Loading&mldr;{% endtrans %}
             </div>
 
             <div class="box-rounded box-solid">
@@ -52,28 +50,30 @@
                     </div>
                 </div>
 
-                {{ icon_button('home', 'button-home', title=gettext('Open home page in a new tab')) }}
-                {{ icon_button('skip-previous', 'button-prev', title=gettext('Go to beginning of current track, or previous track')) }}
-                {{ icon_button('play', 'button-play', title=gettext('Play')) }}
-                {{ icon_button('pause', 'button-pause', title=gettext('Pause')) }}
-                {{ icon_button('skip-next', 'button-next', title=gettext('Skip to next track')) }}
-                {# {{ icon_button('microphone', 'button-lyrics', title=gettext('Show lyrics instead of album cover')) }}
-                {{ icon_button('album', 'button-album', title=gettext('Show album cover instead of lyrics')) }} #}
-                {% if not offline_mode %}
-                    {{ icon_button('thumb-down', 'button-dislike', title=gettext('Never play again')) }}
-                    {{ icon_button('pencil', 'button-edit', title=gettext('Open metadata editor')) }}
-                    {{ icon_button('delete', 'button-delete', title=gettext('Delete currently playing track from playlist')) }}
-                    {{ icon_button('content-duplicate', 'button-copy', title=gettext('Copy track to your primary playlist')) }}
-                {% endif %}
+                <div id="playback-controls">
+                    {{ icon_button('home', 'button-home', title=gettext('Open home page in a new tab')) }}
+                    {{ icon_button('skip-previous', 'button-prev', title=gettext('Go to beginning of current track, or previous track')) }}
+                    {{ icon_button('play', 'button-play', title=gettext('Play')) }}
+                    {{ icon_button('pause', 'button-pause', title=gettext('Pause')) }}
+                    {{ icon_button('skip-next', 'button-next', title=gettext('Skip to next track')) }}
+                    {# {{ icon_button('microphone', 'button-lyrics', title=gettext('Show lyrics instead of album cover')) }}
+                    {{ icon_button('album', 'button-album', title=gettext('Show album cover instead of lyrics')) }} #}
+                    {% if not offline_mode %}
+                        {{ icon_button('thumb-down', 'button-dislike', title=gettext('Never play again')) }}
+                        {{ icon_button('pencil', 'button-edit', title=gettext('Open metadata editor')) }}
+                        {{ icon_button('delete', 'button-delete', title=gettext('Delete currently playing track from playlist')) }}
+                        {{ icon_button('content-duplicate', 'button-copy', title=gettext('Copy track to your primary playlist')) }}
+                    {% endif %}
 
-                <div id="delete-spinner" class="raphson-spinner hidden"></div>
+                    <div id="delete-spinner" class="raphson-spinner hidden"></div>
 
-                {% if mobile %}
-                    {# 'data-restore=false' ensures volume is not overwritten from cookie #}
-                    <input type="hidden" value="100" id="settings-volume" data-restore="false">
-                {% else %}
-                    <input type="range" min="0" max="100" value="60" id="settings-volume">
-                {% endif %}
+                    {% if mobile %}
+                        {# 'data-restore=false' ensures volume is not overwritten from cookie #}
+                        <input type="hidden" value="100" id="settings-volume" data-restore="false">
+                    {% else %}
+                        <input type="range" min="0" max="100" value="60" id="settings-volume">
+                    {% endif %}
+                </div>
             </div>
 
             <div class="box-rounded box-solid box-queue">

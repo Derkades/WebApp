@@ -418,3 +418,19 @@ input[type=range].input-volume-low::-webkit-slider-thumb {
 input[type=range].input-volume-low::-moz-range-thumb {
     background: url('/static/icon/volume-low.svg') no-repeat center, rgba(255, 255, 255, 0.8);
 }
+
+/* ---------- Theater mode ---------- */
+
+.theater #playlist-checkboxes,
+.theater #playback-controls,
+.theater #queue-buttons {
+    display: none;
+}
+
+.theater #current-track {
+    font-size: 1.2em;
+}
+
+.theater .box-queue .scroll {
+    height: 40vh;
+}

@@ -54,6 +54,8 @@ function handleKey(key) {
         dialogs.closeTop();
     } else if (key === 'l') {
         toggleLyrics();
+    } else if (key == 't') {
+        document.getElementsByTagName('body')[0].classList.toggle('theater');
     } else {
         console.debug('hotkey: unhandled keypress:', key);
     }
