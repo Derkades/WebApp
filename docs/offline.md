@@ -7,7 +7,7 @@ The music player has an 'offline mode'. In this mode, the application:
 - Does not use a local music library, but synchronizes from a main music server.
 - Keeps a local history, which it submits to the main music server when an internet connection is available.
 
-TODO: insert picture of music player tablet in Tyrone
+![Music player in dashboard](tyrone_music.jpg)
 
 ## Installation
 
