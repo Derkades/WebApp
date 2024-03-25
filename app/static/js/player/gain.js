@@ -5,6 +5,9 @@ class Gain {
         document.addEventListener('DOMContentLoaded', () => {
             // Can only create AudioContext once media is playing
             getAudioElement().addEventListener('play', () => {
+                if (this.#gainNode) {
+                    return;
+                }
                 console.debug('gain: create audio context');
                 const audioContext = new AudioContext();
                 const source = audioContext.createMediaElementSource(getAudioElement());
