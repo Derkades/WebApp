@@ -16,13 +16,10 @@ def _connect(db_name: str, read_only: bool) -> Connection:
     db_path = (settings.data_dir / (db_name + '.db')).resolve().as_posix()
     db_uri = f'file:{db_path}' + ('?mode=ro' if read_only else '')
     conn = sqlite3.connect(db_uri, uri=True, timeout=10.0)
+    conn.execute('PRAGMA auto_vacuum = INCREMENTAL')
     conn.execute('PRAGMA foreign_keys = ON')
     if not read_only:  # pragma sometimes throws error when executed in read-only mode
         conn.execute('PRAGMA journal_mode = WAL')
-    if db_name == 'cache':
-        conn.execute('PRAGMA auto_vacuum = INCREMENTAL')
-    elif db_name == 'offline':
-        conn.execute('PRAGMA auto_vacuum = FULL')
     return conn
 
 

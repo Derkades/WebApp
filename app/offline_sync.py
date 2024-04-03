@@ -298,7 +298,8 @@ def do_sync(force_resync: float) -> None:
         sync.sync_history()
         log.info('Sync tracks')
         sync.sync_tracks(force_resync)
-        log.info('Done! Please wait for program to exit.')
+        log.info('Cleaning up')
+        db_offline.execute('PRAGMA incremental_vacuum')
 
 
 def change_playlists(playlists: list[str]) -> None:
