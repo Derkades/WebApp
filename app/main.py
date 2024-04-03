@@ -8,8 +8,8 @@ from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+from app import prometheus  # pylint: disable=unused-import
 from app import language
-from app import prometheus # pylint: ignore=unused-import
 from app.auth import AuthError, RequestTokenError
 from app.routes import account as app_account
 from app.routes import activity as app_activity
@@ -40,12 +40,12 @@ def _handle_exception(e):
 
 def get_app(proxy_count: int, template_reload: bool):
     app = Flask(__name__, template_folder='templates')
-    app.register_blueprint(app_account.bp)
-    app.register_blueprint(app_activity.bp)
-    app.register_blueprint(app_auth.bp)
     app.register_error_handler(Exception, _handle_exception)
     app.register_error_handler(AuthError, app_auth.handle_auth_error)
     app.register_error_handler(RequestTokenError, app_auth.handle_token_error)
+    app.register_blueprint(app_account.bp)
+    app.register_blueprint(app_activity.bp)
+    app.register_blueprint(app_auth.bp)
     app.register_blueprint(app_dislikes.bp)
     app.register_blueprint(app_download.bp)
     app.register_blueprint(app_files.bp)
