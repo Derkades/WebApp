@@ -9,6 +9,7 @@ from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from app import language
+from app import prometheus # pylint: ignore=unused-import
 from app.auth import AuthError, RequestTokenError
 from app.routes import account as app_account
 from app.routes import activity as app_activity
