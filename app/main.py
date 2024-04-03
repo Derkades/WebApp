@@ -1,12 +1,12 @@
 import logging
 
 import jinja2
+import prometheus_client
 from flask import Flask, Response
 from flask_babel import Babel
 from werkzeug.exceptions import HTTPException
-from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
-import prometheus_client
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from app import language
 from app.auth import AuthError, RequestTokenError
@@ -25,29 +25,6 @@ from app.routes import stats as app_stats
 from app.routes import track as app_track
 from app.routes import users as app_users
 
-app = Flask(__name__, template_folder='templates')
-app.register_blueprint(app_account.bp)
-app.register_blueprint(app_activity.bp)
-app.register_blueprint(app_auth.bp)
-app.register_error_handler(AuthError, app_auth.handle_auth_error)
-app.register_error_handler(RequestTokenError, app_auth.handle_token_error)
-app.register_blueprint(app_dislikes.bp)
-app.register_blueprint(app_download.bp)
-app.register_blueprint(app_files.bp)
-app.register_blueprint(app_news.bp)
-app.register_blueprint(app_player.bp)
-app.register_blueprint(app_playlists.bp)
-app.register_blueprint(app_radio.bp)
-app.register_blueprint(app_stats.bp)
-app.register_blueprint(app_track.bp)
-app.register_blueprint(app_users.bp)
-app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
-    '/metrics': prometheus_client.make_wsgi_app()
-})
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=settings.proxies_x_forwarded_for)
-app.jinja_env.undefined = jinja2.StrictUndefined
-# app.jinja_env.auto_reload = False
-babel = Babel(app, locale_selector=language.get_locale)
 log = logging.getLogger('app.main')
 
 
@@ -79,6 +56,7 @@ def get_app(proxy_count: int, template_reload: bool):
     app.register_blueprint(app_stats.bp)
     app.register_blueprint(app_track.bp)
     app.register_blueprint(app_users.bp)
+    app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {'/metrics': prometheus_client.make_wsgi_app()})
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=proxy_count)
     app.jinja_env.auto_reload = template_reload
     app.jinja_env.undefined = jinja2.StrictUndefined
