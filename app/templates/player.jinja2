@@ -30,10 +30,8 @@
 
         <div>
 
-            <div class="box-rounded box-solid">
-                <div id="playlist-checkboxes">
-                    {% trans %}Loading&mldr;{% endtrans %}
-                </div>
+            <div class="box-rounded box-solid" id="playlist-checkboxes">
+                {% trans %}Loading&mldr;{% endtrans %}
             </div>
 
             <div class="box-rounded box-solid">
@@ -52,34 +50,36 @@
                     </div>
                 </div>
 
-                {{ icon_button('home', 'button-home', title=gettext('Open home page in a new tab')) }}
-                {{ icon_button('skip-previous', 'button-prev', title=gettext('Go to beginning of current track, or previous track')) }}
-                {{ icon_button('play', 'button-play', title=gettext('Play')) }}
-                {{ icon_button('pause', 'button-pause', title=gettext('Pause')) }}
-                {{ icon_button('skip-next', 'button-next', title=gettext('Skip to next track')) }}
-                {# {{ icon_button('microphone', 'button-lyrics', title=gettext('Show lyrics instead of album cover')) }}
-                {{ icon_button('album', 'button-album', title=gettext('Show album cover instead of lyrics')) }} #}
-                {{ icon_button('pencil', 'button-edit', title=gettext('Open metadata editor')) }}
-                {{ icon_button('thumb-down', 'button-dislike', title=gettext('Never play again')) }}
-                {{ icon_button('delete', 'button-delete', title=gettext('Delete currently playing track from playlist')) }}
-                {% if not offline_mode %}
-                    {{ icon_button('content-duplicate', 'button-copy', title=gettext('Copy track to your primary playlist')) }}
-                {% endif %}
+                <div id="playback-controls">
+                    {{ icon_button('home', 'button-home', title=gettext('Open home page in a new tab')) }}
+                    {{ icon_button('skip-previous', 'button-prev', title=gettext('Go to beginning of current track, or previous track')) }}
+                    {{ icon_button('play', 'button-play', title=gettext('Play')) }}
+                    {{ icon_button('pause', 'button-pause', title=gettext('Pause')) }}
+                    {{ icon_button('skip-next', 'button-next', title=gettext('Skip to next track')) }}
+                    {# {{ icon_button('microphone', 'button-lyrics', title=gettext('Show lyrics instead of album cover')) }}
+                    {{ icon_button('album', 'button-album', title=gettext('Show album cover instead of lyrics')) }} #}
+                    {% if not offline_mode %}
+                        {{ icon_button('thumb-down', 'button-dislike', title=gettext('Never play again')) }}
+                        {{ icon_button('pencil', 'button-edit', title=gettext('Open metadata editor')) }}
+                        {{ icon_button('delete', 'button-delete', title=gettext('Delete currently playing track from playlist')) }}
+                        {{ icon_button('content-duplicate', 'button-copy', title=gettext('Copy track to your primary playlist')) }}
+                    {% endif %}
 
-                <div id="delete-spinner" class="raphson-spinner hidden"></div>
+                    <div id="delete-spinner" class="raphson-spinner hidden"></div>
 
-                {% if mobile %}
-                    {# 'data-restore=false' ensures volume is not overwritten from cookie #}
-                    <input type="hidden" value="100" id="settings-volume" data-restore="false">
-                {% else %}
-                    <input type="range" min="0" max="100" value="60" id="settings-volume">
-                {% endif %}
+                    {% if mobile %}
+                        {# 'data-restore=false' ensures volume is not overwritten from cookie #}
+                        <input type="hidden" value="100" id="settings-volume" data-restore="false">
+                    {% else %}
+                        <input type="range" min="0" max="100" value="60" id="settings-volume">
+                    {% endif %}
+                </div>
             </div>
 
             <div class="box-rounded box-solid box-queue">
                 <div class="flex-space-between">
-                    <h3>{% trans %}Queue{% endtrans %} (<span id="current-queue-size">0</span>)</h3>
-                    <div>
+                    <h3>{% trans %}Queue{% endtrans %} <span class="secondary" id="current-queue-size">0</span></h3>
+                    <div id="queue-buttons">
                         {{ icon_button('tag-multiple', 'open-dialog-tags', title=gettext('Open tag selection')) }}
                         {{ icon_button('playlist-music', 'browse-all', title=gettext('Browse all tracks')) }}
                         {{ icon_button('text-search', 'open-dialog-search', title=gettext('Search in tracks')) }}
@@ -127,7 +127,7 @@
                 </select><br> #}
 
                 <label for="settings-queue-size">{% trans %}Minimum queue size{% endtrans %}</label><br>
-                <input type="number" value="5" size="3" id="settings-queue-size"><br>
+                <input type="number" value="5" size="3" min="0" max="100" id="settings-queue-size"><br>
 
                 {% if offline_mode %}
                     <select id="settings-audio-type" disabled class="hidden">
@@ -154,12 +154,23 @@
                     <option value="stream">{% trans %}Stream audio (experimental){% endtrans %}</option>
                 </select><br>
 
+                <label for="settings-audio-gain">{% trans %}Audio gain (reduces audio quality){% endtrans %}</label><br>
+                <select id="settings-audio-gain">
+                    <option value="1" selected>1</option>
+                    <option value="2">2</option>
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                </select><br>
+
                 {% if offline_mode %}
                     <input id="settings-meme-mode" type="hidden">
                 {% else %}
                     <label for="settings-meme-mode">{% trans %}Album cover art memes{% endtrans %}</label><br>
                     <input id="settings-meme-mode" type="checkbox"><br>
                 {% endif %}
+
+                <label for="settings-theater">{% trans %}Theater mode: hide controls when not interacting with page{% endtrans %}</label><br>
+                <input id="settings-theater" type="checkbox"><br>
 
                 {% if offline_mode %}
                     <select id="settings-news" class="hidden">

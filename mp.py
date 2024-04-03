@@ -1,54 +1,38 @@
+# pylint: disable=import-outside-toplevel
+
 import logging
+import os
 from argparse import ArgumentParser
-from typing import Any
+from pathlib import Path
+from typing import Any, Optional
 
-from gunicorn.app.base import BaseApplication
-
-from app import cleanup, db, logconfig, main, offline_sync, scanner, util
-
-
-class GApp(BaseApplication):
-    def __init__(self):
-        super().__init__()
-
-    def init(self, parser, opts, args):
-        pass
-
-    def load(self):
-        return main.app
-
-    def load_config(self):
-        self.cfg.set('bind', '0.0.0.0:8080')
-        self.cfg.set('worker_class', 'gthread')
-        self.cfg.set('workers', 1)
-        self.cfg.set('threads', 8)
-        self.cfg.set('access_log_format', "%(h)s %(b)s %(M)sms %(m)s %(U)s?%(q)s")
-        self.cfg.set('logconfig_dict', logconfig.LOGCONFIG_DICT)
-        self.cfg.set('preload_app', True)
-        self.cfg.set('timeout', 60)
-
+from app import logconfig, settings
 
 log = logging.getLogger('cli')
 
 
-def handle_start(args: Any) -> None:
+def handle_start(args: Any, logconfig_dict: dict) -> None:
     """
     Handle command to start server
     """
+    from app import cleanup, db, gunicorn_app
+    from app import main as app_main
+    from app import scanner
+
+    if os.getenv('WERKZEUG_RUN_MAIN') != 'true':  # skip if reloading
+        db.migrate()
+        scanner.scan()
+        cleanup.cleanup()
+
     if args.dev:
         log.info('Starting Flask web server in debug mode')
-        main.app.jinja_env.auto_reload = True  # Auto reload templates during development
-        main.app.run(host=args.host, port=args.port, debug=True)
+        app = app_main.get_app(args.proxy_count, True)
+        app.run(host=args.host, port=args.port, debug=True)
         return
 
-    db.migrate()
-    scanner.scan()
-    cleanup.cleanup()
-
-    main.app.jinja_env.auto_reload = False  # templates don't change in production
-
     log.info('Starting gunicorn web server')
-    gapp = GApp()
+    bind = f'[{args.host}]:{args.port}'
+    gapp = gunicorn_app.GunicornApp(bind, args.proxy_count, logconfig_dict)
     gapp.run()
 
 
@@ -56,6 +40,8 @@ def handle_useradd(args: Any) -> None:
     """
     Handle command to add user
     """
+    from app import db, util
+
     username = args.username
     is_admin = int(args.admin)
     password = input('Enter password:')
@@ -73,6 +59,8 @@ def handle_userdel(args: Any) -> None:
     """
     Handle command to delete user
     """
+    from app import db
+
     with db.connect() as conn:
         deleted = conn.execute('DELETE FROM user WHERE username=?',
                                (args.username,)).rowcount
@@ -86,6 +74,8 @@ def handle_userlist(_args: Any) -> None:
     """
     Handle command to list users
     """
+    from app import db
+
     with db.connect() as conn:
         result = conn.execute('SELECT username, admin FROM user')
         if result.rowcount == 0:
@@ -105,6 +95,8 @@ def handle_passwd(args: Any) -> None:
     """
     Handle command to change a user's password
     """
+    from app import db, util
+
     with db.connect() as conn:
         result = conn.execute('SELECT id FROM user WHERE username=?',
                               (args.username,)).fetchone()
@@ -126,6 +118,8 @@ def handle_playlist(args: Any) -> None:
     """
     Handle command to give a user write access to a playlist
     """
+    from app import db
+
     with db.connect() as conn:
         result = conn.execute('SELECT id FROM user WHERE username=?',
                               (args.username,)).fetchone()
@@ -154,6 +148,8 @@ def handle_scan(_args: Any) -> None:
     """
     Handle command to scan playlists
     """
+    from app import scanner
+
     scanner.scan()
 
 
@@ -161,6 +157,8 @@ def handle_cleanup(_args: Any) -> None:
     """
     Handle command to clean up old entries from databases
     """
+    from app import cleanup
+
     cleanup.cleanup()
 
 
@@ -168,6 +166,7 @@ def handle_migrate(_args: Any) -> None:
     """
     Handle command for database migration
     """
+    from app import db
     db.migrate()
 
 
@@ -175,6 +174,7 @@ def handle_vacuum(_args: Any) -> None:
     """
     Handle command for database vacuuming
     """
+    from app import db
     log.info('Going to vacuum databases. This will take a long time if you have large databases. Do not abort.')
 
     log.info('Vacuuming music.db')
@@ -194,6 +194,8 @@ def handle_sync(args: Any) -> None:
     """
     Handle command for offline mode sync
     """
+    from app import offline_sync
+
     if args.playlists is not None:
         if args.playlists == 'favorite':
             offline_sync.change_playlists([])
@@ -206,16 +208,67 @@ def handle_sync(args: Any) -> None:
     offline_sync.do_sync(args.force_resync)
 
 
-if __name__ == '__main__':
-    logconfig.apply()
+def _strenv(name: str, default: str = None):
+    return os.getenv('MUSIC_' + name, default)
 
+
+def _intenv(name: str, default: int):
+    return int(_strenv(name, str(default)))
+
+
+def _boolenv(name: str) -> bool:
+    val = _strenv(name, '')
+    return val == '1' or bool(val)
+
+
+def split_by_comma(inp: Optional[str]) -> list[str]:
+    if not inp:
+        return []
+    return [s.strip() for s in inp.split(',') if s.strip() != '']
+
+
+def main():
     parser = ArgumentParser()
+    parser.add_argument('--log-level',
+                        default=_strenv('LOG_LEVEL', 'INFO'),
+                        choices=('DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'),
+                        help='set log level for Python loggers')
+    parser.add_argument('--short-log-format',
+                        action='store_true',
+                        default=_boolenv('SHORT_LOG_FORMAT'),
+                        help='use short log format')
+    parser.add_argument('--data-dir',
+                        default=_strenv('DATA_DIR', _strenv('DATA_PATH', './data')),
+                        help='path to directory where program data is stored')
+    parser.add_argument('--music-dir',
+                        default=_strenv('MUSIC_DIR', './music'),
+                        help='path to directory where music files are stored')
+    # error level by default to hide unfixable "deprecated pixel format used" warning
+    parser.add_argument('--ffmpeg-log-level', default=_strenv('FFMPEG_LOG_LEVEL', 'error'),
+                        choices=('quiet', 'fatal', 'error', 'warning', 'info', 'verbose', 'debug'),
+                        help='log level for ffmpeg')
+    parser.add_argument('--track-max-duration-seconds',
+                        type=int,
+                        default=_intenv('TRACK_MAX_DURATION_SECONDS', 1200))
+    parser.add_argument('--radio-playlists',
+                        default=_strenv('RADIO_PLAYLISTS'),
+                        help='comma-separated list of playlists to use for radio')
+    parser.add_argument('--lastfm-api-key',
+                        default=_strenv('LASTFM_API_KEY'))
+    parser.add_argument('--lastfm-api-secret',
+                        default=_strenv('LASTFM_API_SECRET'))
+    parser.add_argument('--offline',
+                        action='store_true',
+                        default=_boolenv('OFFLINE_MODE'),
+                        help='run in offline mode, using music synced from a primary music server')
+
     subparsers = parser.add_subparsers(required=True)
 
     cmd_start = subparsers.add_parser('start', help='start app in debug mode')
-    cmd_start.add_argument('--host', default='0.0.0.0', type=str)
+    cmd_start.add_argument('--host', default='127.0.0.1', type=str)
     cmd_start.add_argument('--port', default=8080, type=int)
     cmd_start.add_argument('--dev', action='store_true')
+    cmd_start.add_argument('--proxy-count', type=int, default=_intenv('PROXY_COUNT', _intenv('PROXIES_X_FORWARDED_FOR', 0)))
     cmd_start.set_defaults(func=handle_start)
 
     cmd_useradd = subparsers.add_parser('useradd', help='create new user')
@@ -268,5 +321,32 @@ if __name__ == '__main__':
                           help='Change playlists to sync. Specify playlists as comma separated list without spaces. Enter \'favorite\' to sync favorite playlists (default).')
     cmd_sync.set_defaults(func=handle_sync)
 
-    parsed_args = parser.parse_args()
-    parsed_args.func(parsed_args)
+    args = parser.parse_args()
+
+    settings.data_dir = Path(args.data_dir).absolute()
+    assert settings.data_dir.exists(), 'data dir does not exist: ' + settings.data_dir.as_posix()
+    settings.ffmpeg_log_level = args.ffmpeg_log_level
+    settings.track_max_duration_seconds = args.track_max_duration_seconds
+    settings.radio_playlists = split_by_comma(args.radio_playlists)
+    settings.lastfm_api_key = args.lastfm_api_key
+    settings.lastfm_api_secret = args.lastfm_api_secret
+    settings.offline_mode = args.offline
+
+    if settings.offline_mode:
+        settings.music_dir = Path('/dev/null')
+    else:
+        assert args.music_dir, 'music dir must be set when not running in offline mode'
+        settings.music_dir = Path(args.music_dir).absolute()
+        assert settings.music_dir.exists(), 'music dir does not exist: ' + settings.music_dir.as_posix()
+
+    logconfig_dict = logconfig.get_config_dict(args.short_log_format, Path(args.data_dir, 'errors.log'), args.log_level)
+    logconfig.apply(logconfig_dict)
+
+    if args.func == handle_start:
+        handle_start(args, logconfig_dict)
+    else:
+        args.func(args)
+
+
+if __name__ == '__main__':
+    main()

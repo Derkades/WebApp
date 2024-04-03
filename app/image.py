@@ -41,7 +41,7 @@ def webp_thumbnail(input_path: Path, output_path: Path, img_quality: ImageQualit
     subprocess.run(['ffmpeg',
                     '-hide_banner',
                     '-nostats',
-                    '-loglevel', settings.ffmpeg_loglevel,
+                    '-loglevel', settings.ffmpeg_log_level,
                     '-i', input_path.as_posix(),
                     '-pix_fmt', 'yuv420p',
                     '-filter', thumb_filter,

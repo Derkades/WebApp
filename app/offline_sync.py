@@ -10,7 +10,7 @@ import requests
 from requests import Response
 from requests.exceptions import RequestException
 
-from app import db, logconfig, settings
+from app import db, settings
 
 log = logging.getLogger('app.offline')
 
@@ -313,7 +313,3 @@ def change_playlists(playlists: list[str]) -> None:
         conn.executemany('INSERT INTO playlists VALUES (?)',
                          [(playlist,) for playlist in playlists])
         conn.execute('COMMIT')
-
-if __name__ == '__main__':
-    logconfig.apply()
-    log.error('This script can no longer be executed directly, please use the manage command. See offline.md for more info.')

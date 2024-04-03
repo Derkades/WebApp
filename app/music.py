@@ -56,8 +56,8 @@ def from_relpath(relpath: str) -> Path:
     if relpath.startswith('/'):
         raise ValueError('Relative path must not start with /')
     path = Path(settings.music_dir, relpath).resolve()
-    if not path.is_relative_to(Path(settings.music_dir)):
-        raise ValueError('Must not go outside of music base directory')
+    if not path.is_relative_to(settings.music_dir):
+        raise ValueError('Path ' + path.as_posix() + ' is not inside music base directory ' + settings.music_dir.as_posix())
     return path
 
 
@@ -266,7 +266,7 @@ class Track:
 
     def get_loudnorm_filter(self) -> str:
         """Get ffmpeg loudnorm filter string"""
-        cache_key = 'loud2' + self.relpath + str(self.mtime)
+        cache_key = 'loud3' + self.relpath + str(self.mtime)
         cached_data = cache.retrieve(cache_key)
         if cached_data is not None:
             log.info('Returning cached loudness data')
@@ -311,10 +311,10 @@ class Track:
         if float(meas_json['input_i']) > 0:
             log.warning('Measured positive loudness. This should be impossible, but can happen with input files containing out of range values. Need to use single-pass loudnorm filter instead.')
             log.warning('Track: %s', self.path.resolve().as_posix())
-            loudnorm = 'loudnorm'
+            loudnorm = 'loudnorm=I=-16'
         else:
             loudnorm = \
-                f'loudnorm=' \
+                f'loudnorm=I=-16:' \
                 f"measured_I={meas_json['input_i']}:" \
                 f"measured_TP={meas_json['input_tp']}:" \
                 f"measured_LRA={meas_json['input_lra']}:" \
@@ -331,7 +331,7 @@ class Track:
         Normalize and compress audio using ffmpeg
         Returns: Compressed audio bytes
         """
-        cache_key = 'audio7' + str(audio_type) + self.relpath + str(self.mtime)
+        cache_key = 'audio9' + str(audio_type) + self.relpath + str(self.mtime)
 
         cached_data = cache.retrieve(cache_key)
 
@@ -389,11 +389,11 @@ class Track:
                     '-y',  # overwriting file is required, because the created temp file already exists
                     '-hide_banner',
                     '-nostats',
-                    '-loglevel', settings.ffmpeg_loglevel,
+                    '-loglevel', settings.ffmpeg_log_level,
                     '-i', self.path.resolve().as_posix(),
                     *input_options,
                     *audio_options,
-                    '-t', str(settings.track_limit_seconds),
+                    '-t', str(settings.track_max_duration_seconds),
                     '-ac', '2',
                     '-filter:a', loudnorm,
                     temp_output.name]
@@ -417,7 +417,7 @@ class Track:
                 '-y',  # overwriting file is required, because the created temp file already exists
                 '-hide_banner',
                 '-nostats',
-                '-loglevel', settings.ffmpeg_loglevel,
+                '-loglevel', settings.ffmpeg_log_level,
                 '-i', self.path.resolve().as_posix(),
                 '-codec', 'copy',
             ]

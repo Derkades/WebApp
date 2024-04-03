@@ -98,6 +98,11 @@ class Editor {
 const editor = new Editor();
 
 document.addEventListener('DOMContentLoaded', () => {
+    if (!document.getElementById('button-edit')) {
+        console.warn('edit button not present')
+        return;
+    }
+
     // Editor open button
     document.getElementById('button-edit').addEventListener('click', () => {
         if (queue.currentTrack === null) {

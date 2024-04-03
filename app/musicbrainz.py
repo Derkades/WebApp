@@ -114,7 +114,7 @@ def get_cover(artist: str, album: str) -> bytes | None:
 # For testing
 if __name__ == '__main__':
     from app import logconfig
-    logconfig.apply()
+    logconfig.apply_debug()
 
     cover = get_cover('Dire Straits', 'Brothers In Arms')
     # cover = get_cover('Elle Exxe', 'Lately') # release exists, but has no cover

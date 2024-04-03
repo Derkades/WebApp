@@ -9,9 +9,14 @@ from app import metadata, settings
 from app.auth import StandardUser
 from app.metadata import Metadata
 
-CONNECT_URL = 'https://www.last.fm/api/auth/?api_key=' + settings.lastfm_api_key
-
 log = logging.getLogger('app.radio')
+
+
+def get_connect_url() -> str | None:
+    if not settings.lastfm_api_key:
+        return None
+
+    return 'https://www.last.fm/api/auth/?api_key=' + settings.lastfm_api_key
 
 
 def is_configured() -> bool:

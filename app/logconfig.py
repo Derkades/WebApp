@@ -1,59 +1,65 @@
-from typing import Any
+from pathlib import Path
 
-from app import settings
 
-FORMATTER = 'short' if settings.short_log_format else 'default'
+def get_config_dict(short_log_format: bool, error_log_path: Path | None, log_level: str) -> dict:
+    config = {
+        'version': 1,
+        'formatters': {
+            'detailed': {
+                'format': '%(asctime)s [%(process)d:%(thread)d] [%(levelname)s] [%(module)s:%(lineno)s] %(name)s: %(message)s',
+                'datefmt': '%Y-%m-%d %H:%M:%S %Z',
+            },
+            'default': {
+                'format': '%(asctime)s %(levelname)s %(name)s: %(message)s',
+                'datefmt': '%Y-%m-%d %H:%M:%S %Z',
+            },
+            'short': {
+                'format': '%(asctime)s %(levelname)s %(name)s: %(message)s',
+                'datefmt': '%H:%M:%S',
+            }
+        },
+        'handlers': {
+            'stdout': {
+                'class': 'logging.StreamHandler',
+                'stream': 'ext://sys.stdout',
+                'formatter': 'short' if short_log_format else 'default',
+            },
+        },
+        'loggers': {
+            'gunicorn.error': {
+                'level': log_level,
+                'handlers': ['stdout', 'errors'],
+            },
+            'gunicorn.access': {
+                'level': log_level,
+                'handlers': ['stdout', 'errors'],
+            },
+        },
+        'root': {
+            'level': log_level,
+            'handlers': ['stdout', 'errors'],
+        },
+        'disable_existing_loggers': False,
+    }
 
-LOGCONFIG_DICT: dict[str, Any] = {
-    'version': 1,
-    'formatters': {
-        'detailed': {
-            'format': '%(asctime)s [%(process)d:%(thread)d] [%(levelname)s] [%(module)s:%(lineno)s] %(name)s: %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S %Z',
-        },
-        'default': {
-            'format': '%(asctime)s %(levelname)s %(name)s: %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S %Z',
-        },
-        'short': {
-            'format': '%(asctime)s %(levelname)s %(name)s: %(message)s',
-            'datefmt': '%H:%M:%S',
-        }
-    },
-    'handlers': {
-        'stdout': {
-            'class': 'logging.StreamHandler',
-            'stream': 'ext://sys.stdout',
-            'formatter': FORMATTER,
-        },
-        'errors': {
+    if error_log_path:
+        config['handlers']['errors'] = {
             'class': 'logging.FileHandler',
-            'filename': settings.data_dir / 'errors.log',
+            'filename': error_log_path.absolute().as_posix(),
             'level': 'WARNING',
             'formatter': 'detailed',
         }
-    },
-    'loggers': {
-        'gunicorn.error': {
-            'level': settings.log_level,
-            'handlers': ['stdout', 'errors'],
-        },
-        'gunicorn.access': {
-            'level': settings.log_level,
-            'handlers': ['stdout', 'errors'],
-        },
-    },
-    'root': {
-        'level': settings.log_level,
-        'handlers': ['stdout', 'errors'],
-    },
-    'disable_existing_loggers': False,
-}
+
+    return config
 
 
-def apply() -> None:
+def apply(logconfig_dict: dict) -> None:
     """
     Apply dictionary config
     """
     import logging.config  # pylint: disable=import-outside-toplevel
-    logging.config.dictConfig(LOGCONFIG_DICT)
+    logging.config.dictConfig(logconfig_dict)
+
+
+def apply_debug() -> None:
+    apply(get_config_dict(False, None, 'DEBUG'))

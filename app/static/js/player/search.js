@@ -6,6 +6,8 @@ class Search {
     #searchResultAlbums = document.getElementById('search-result-albums');
     /** @type {HTMLInputElement} */
     #queryInput =  document.getElementById('search-query');
+    /** @type {number} */
+    #searchTimeoutId = null;
 
     constructor() {
         eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, () => {
@@ -22,9 +24,21 @@ class Search {
         this.#searchResultEmpty.classList.remove('hidden');
     }
 
-    #performSearch() {
+    #performSearch(searchNow = false) {
+        // Only start searching after user has finished typing for better performance
+        if (!searchNow) {
+            // Reset timer when new change is received
+            if (this.#searchTimeoutId != null) {
+                clearTimeout(this.#searchTimeoutId);
+            }
+            // Perform actual search in 200 ms
+            this.#searchTimeoutId = setTimeout(() => this.#performSearch(true), 200);
+            return;
+        }
+
         const query = this.#queryInput.value;
 
+        // Don't display any results for short queries
         if (query.length < 3) {
             this.clearSearch();
             return;
@@ -33,7 +47,7 @@ class Search {
         const allTracks = Object.values(state.tracks);
 
         {
-            const tracks = fuzzysort.go(query, allTracks, {keys: ['searchString'], threshold: -1000, limit: 25}).map(e => e.obj);
+            const tracks = fuzzysort.go(query, allTracks, {keys: ['searchString'], threshold: -10000, limit: 50}).map(e => e.obj);
             this.#searchResultTracks.replaceChildren(browse.generateTrackList(tracks));
         }
 

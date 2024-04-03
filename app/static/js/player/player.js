@@ -18,7 +18,6 @@ function seekAbsolute(position) {
     }
 
     getAudioElement().currentTime = position;
-    eventBus.publish(MusicEvent.PLAYBACK_CHANGE);
 }
 
 /**
@@ -184,31 +183,34 @@ document.addEventListener('DOMContentLoaded', () => {
         switchAlbumCover();
     });
 
-    // Dislike button
-    document.getElementById('button-dislike').addEventListener('click', () => {
-        const data = {track: queue.currentTrack.trackPath};
-        jsonPost('/dislikes/add', data);
-        queue.next();
-    });
-
-    // Delete track button
-    const deleteButton = document.getElementById('button-delete');
-    deleteButton.addEventListener('click', () => {
-        if (queue.currentTrack === null) {
-            return;
-        }
-        const deleteSpinner = document.getElementById('delete-spinner');
-        deleteSpinner.classList.remove('hidden');
-        const path = queue.currentTrack.trackPath;
-        const oldName = path.split('/').pop();
-        const newName = '.trash.' + oldName;
-        (async function() {
-            await jsonPost('/files/rename', {path: path, new_name: newName});
-            await Track.updateLocalTrackList();
+    const dislikeButton = document.getElementById('button-dislike')
+    if (dislikeButton) { // Missing in offline mode
+        dislikeButton.addEventListener('click', () => {
+            const data = {track: queue.currentTrack.trackPath};
+            jsonPost('/dislikes/add', data);
             queue.next();
-            deleteSpinner.classList.add('hidden');
-        })();
-    });
+        });
+    }
+
+    const deleteButton = document.getElementById('button-delete');
+    if (deleteButton) { // Missing in offline mode
+        deleteButton.addEventListener('click', () => {
+            if (queue.currentTrack === null) {
+                return;
+            }
+            const deleteSpinner = document.getElementById('delete-spinner');
+            deleteSpinner.classList.remove('hidden');
+            const path = queue.currentTrack.trackPath;
+            const oldName = path.split('/').pop();
+            const newName = '.trash.' + oldName;
+            (async function() {
+                await jsonPost('/files/rename', {path: path, new_name: newName});
+                await Track.updateLocalTrackList();
+                queue.next();
+                deleteSpinner.classList.add('hidden');
+            })();
+        });
+    }
 
     // Copy track to other playlist
     const copyOpenButton = document.getElementById('button-copy');
