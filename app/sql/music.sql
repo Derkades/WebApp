@@ -88,6 +88,9 @@ CREATE TABLE history (
     private INTEGER NOT NULL -- 1 if entry must be hidden from history, only to be included in aggregated data
 ) STRICT;
 
+CREATE INDEX idx_history_private ON history(private);
+CREATE INDEX idx_history_timestamp ON history(timestamp);
+
 CREATE TABLE now_playing (
     player_id TEXT NOT NULL UNIQUE PRIMARY KEY, -- UUID with dashes
     user INTEGER NOT NULL,
