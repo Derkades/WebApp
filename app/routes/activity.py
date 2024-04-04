@@ -86,7 +86,7 @@ def route_data():
                               FROM history
                                   LEFT JOIN user ON history.user = user.id
                               WHERE history.private = 0
-                              ORDER BY history.id DESC
+                              ORDER BY history.timestamp DESC
                               LIMIT 10
                               ''')
         history = []
