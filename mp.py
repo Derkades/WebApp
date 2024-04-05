@@ -342,6 +342,8 @@ def main():
     logconfig_dict = logconfig.get_config_dict(args.short_log_format, Path(args.data_dir, 'errors.log'), args.log_level)
     logconfig.apply(logconfig_dict)
 
+    log.info('music=%s data=%s', settings.music_dir.as_posix(), settings.data_dir.as_posix())
+
     if args.func == handle_start:
         handle_start(args, logconfig_dict)
     else:

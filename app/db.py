@@ -2,6 +2,7 @@ import logging
 import sqlite3
 import sys
 from dataclasses import dataclass
+from pathlib import Path
 from sqlite3 import Connection
 
 from app import settings
@@ -12,9 +13,14 @@ log = logging.getLogger('app.db')
 DATABASE_NAMES = ['cache', 'music', 'offline', 'meta']
 
 
+def db_path(db_name: str) -> Path:
+    return settings.data_dir / (db_name + '.db')
+
+
 def _connect(db_name: str, read_only: bool) -> Connection:
-    db_path = (settings.data_dir / (db_name + '.db')).resolve().as_posix()
-    db_uri = f'file:{db_path}' + ('?mode=ro' if read_only else '')
+    db_uri = f'file:{db_path(db_name)}'
+    if read_only:
+        db_uri += '?mode=ro'
     conn = sqlite3.connect(db_uri, uri=True, timeout=10.0)
     conn.execute('PRAGMA auto_vacuum = INCREMENTAL')
     conn.execute('PRAGMA foreign_keys = ON')
