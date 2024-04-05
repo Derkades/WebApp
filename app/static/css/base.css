@@ -217,6 +217,7 @@ body.light input {
 .icon-play { background-image: url('/static/icon/play.svg'); }
 .icon-playlist-music { background-image: url('/static/icon/playlist-music.svg'); }
 /* playlist-plus used directly in JS */
+.icon-playlist-remove { background-image: url('/static/icon/playlist-remove.svg'); }
 .icon-radio { background-image: url('/static/icon/radio.svg'); }
 .icon-rename-box { background-image: url('/static/icon/rename-box.svg'); }
 .icon-skip-next { background-image: url('/static/icon/skip-next.svg'); }

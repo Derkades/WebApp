@@ -17,6 +17,11 @@ class Queue {
         eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, () => {
             this.updateHtml();
         });
+
+        document.getElementById('queue-clear').addEventListener('click', () => {
+            this.queuedTracks = [];
+            this.fill();
+        });
     };
 
     /**
