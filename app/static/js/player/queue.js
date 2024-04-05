@@ -19,8 +19,9 @@ class Queue {
         });
 
         document.getElementById('queue-clear').addEventListener('click', () => {
-            this.queuedTracks = [];
+            const removedTracks = this.queuedTracks.splice(0, this.queuedTracks.length);
             this.fill();
+            removedTracks.forEach(track => track.revokeObjects());
         });
     };
 
