@@ -1,14 +1,16 @@
 import logging
 
 import jinja2
-import prometheus_client
+try:
+    import prometheus_client
+except ImportError:
+    prometheus_client = None
 from flask import Flask, Response
 from flask_babel import Babel
 from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from app import prometheus  # pylint: disable=unused-import
 from app import language
 from app.auth import AuthError, RequestTokenError
 from app.routes import account as app_account
@@ -57,7 +59,11 @@ def get_app(proxy_count: int, template_reload: bool):
     app.register_blueprint(app_stats.bp)
     app.register_blueprint(app_track.bp)
     app.register_blueprint(app_users.bp)
-    app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {'/metrics': prometheus_client.make_wsgi_app()})
+    if prometheus_client:
+        from app import prometheus  # pylint: disable=unused-import
+        app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {'/metrics': prometheus_client.make_wsgi_app()})
+    else:
+        log.warning('prometheus_client is not available, continuing without /metrics endpoint')
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=proxy_count)
     app.jinja_env.auto_reload = template_reload
     app.jinja_env.undefined = jinja2.StrictUndefined
