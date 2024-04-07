@@ -18,23 +18,23 @@ Music is crucial when working on projects. However, when you're with a group, wh
 - Easy file management
     - Built-in web file browser to download, upload, rename and delete files
     - Built-in music downloader using `yt-dlp`
-- Fast and minimal
-    - Written in pure HTML, CSS and JavaScript with minimal third party libraries. The frontend is fast, even on an old laptop or cheap single board computer.
-    - Queued songs are stored as blobs in the browser's storage. Temporary internet connection issues are no problem.
-    - Python dependencies are kept to a minimum, and we ship a custom build of FFmpeg for minimal storage usage
 - Responsive and mobile compatible
     - Touch-friendly interface
     - Audio files and images are compressed on-the-fly, with various quality options to save data.
     - Also keyboard-friendly interface; hotkeys are available for common actions, allowing you to skip a track while wearing welding gloves.
-- Freedom!
-    - Meant to run on your own server, using your own music files.
-    - Web interface makes no requests to the internet, so clients can't be tracked
-- Statistics!
+- Statistics
     - See what other's are playing now or in the past
     - Statistics page with graphs based on historical data
     - Last.fm scrobbling (each user can connect their own last.fm account)
-- Fun!
+- Fun
     - Enable 'Album cover meme mode' to replace album covers by (sometimes) funny memes related to the song title.
+- News
+    - Optionally, play back news from various sources on the hour to keep up-to-date.
+- Minimal: fast and secure
+    - Written in pure HTML, CSS and JavaScript with minimal third party libraries. The frontend should be fast, even on an old laptop or cheap single board computer.
+    - Queued songs are stored as blobs in the browser's storage. Temporary network connection issues are no problem.
+    - Python dependencies are kept to a minimum, and we ship a custom build of FFmpeg for minimal storage usage.
+    - Very strict Content-Security-Policy allows no communication from clients to the internet.
 
 ## Screenshots
 
