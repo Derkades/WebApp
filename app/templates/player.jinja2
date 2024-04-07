@@ -73,6 +73,11 @@
                     {% else %}
                         <input type="range" min="0" max="100" value="60" id="settings-volume">
                     {% endif %}
+
+                    {# Load volume icons, otherwise they will only load when changing volume which means there is briefly no icon #}
+                    {% for icon in ['low', 'medium', 'high'] %}
+                        <img class="hidden" height="1" width="1" src="/static/icon/volume-{{ icon }}.svg">
+                    {% endfor %}
                 </div>
             </div>
 
