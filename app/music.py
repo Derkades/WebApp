@@ -555,11 +555,10 @@ class Playlist:
             query += ' AND (' + ' AND '.join(len(tags) * [f'? NOT IN ({track_tags_query})']) + ')'
             params.extend(tags)
 
-        query += ' ORDER BY RANDOM()'
-        query += f' LIMIT 5'
+        query += f' ORDER BY last_chosen ASC LIMIT {self.track_count // 4 + 1}'
 
-        # From randomly ordered tracks, choose one that was last played longest ago
-        query = 'SELECT * FROM (' + query + ') ORDER BY last_chosen ASC LIMIT 1'
+        # From selected least recently played tracks, choose a random one
+        query = 'SELECT * FROM (' + query + ') ORDER BY RANDOM() LIMIT 1'
 
         track, last_chosen = self.conn.execute(query, params).fetchone()
 
