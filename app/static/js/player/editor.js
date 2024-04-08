@@ -1,4 +1,5 @@
 class Editor {
+    /** @type {string} */
     #currentlyEditingPath;
 
     constructor() {

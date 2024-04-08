@@ -1,8 +1,13 @@
 class Search {
+    /** @type {HTMLDivElement} */
     #searchResultEmpty = document.getElementById('search-result-empty');
+    /** @type {HTMLDivElement} */
     #searchResultParent = document.getElementById('search-result-parent');
+    /** @type {HTMLDivElement} */
     #searchResultTracks = document.getElementById('search-result-tracks');
+    /** @type {HTMLDivElement} */
     #searchResultArtists = document.getElementById('search-result-artists');
+    /** @type {HTMLDivElement} */
     #searchResultAlbums = document.getElementById('search-result-albums');
     /** @type {HTMLInputElement} */
     #queryInput =  document.getElementById('search-query');

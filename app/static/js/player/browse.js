@@ -1,4 +1,5 @@
 class Browse {
+    /** @type {Array<object>} */
     #history;
     constructor() {
         this.#history = [];
