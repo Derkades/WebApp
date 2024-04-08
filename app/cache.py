@@ -34,7 +34,7 @@ def store(key: str,
 
         expire_time = int(time.time()) + duration
         conn.execute("""
-                     INSERT OR REPLACE INTO cache2 (key, data, expire_time)
+                     INSERT OR REPLACE INTO cache (key, data, expire_time)
                      VALUES (?, ?, ?)
                      """, (key, data, expire_time))
 
@@ -49,7 +49,7 @@ def retrieve(key: str,
                         up yet. Should be set to False for short lived cache objects.
     """
     with db.cache(read_only=True) as conn:
-        row = conn.execute('SELECT data, expire_time FROM cache2 WHERE key=?',
+        row = conn.execute('SELECT data, expire_time FROM cache WHERE key=?',
                            (key,)).fetchone()
 
         if row is None:
@@ -69,7 +69,7 @@ def retrieve(key: str,
 
 def cleanup() -> None:
     with db.cache() as conn:
-        count = conn.execute('DELETE FROM cache2 WHERE expire_time < ?',
+        count = conn.execute('DELETE FROM cache WHERE expire_time < ?',
                             (int(time.time()),)).rowcount
         # The number of vacuumed pages is limited to prevent this function
         # from blocking for too long. Max 65536 pages = 256MiB
