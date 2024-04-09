@@ -18,30 +18,22 @@ class Visualiser {
     /** @type {boolean} */
     #needRedraw;
 
+    constructor() {
+    }
+
     start() {
         this.#canvas = document.getElementById('visualiser');
-
-        const audioContext = new AudioContext();
-        const audioSource = audioContext.createMediaElementSource(getAudioElement());
-        const analyser = audioContext.createAnalyser();
-        analyser.fftSize = this.fftSize;
-        audioSource.connect(analyser);
-        audioSource.connect(audioContext.destination);
-        this.#analyser = analyser;
-        this.#dataArray = new Uint8Array(analyser.frequencyBinCount);
+        this.#analyser = audioContextManager.analyser;
+        this.#analyser.fftSize = this.fftSize;
+        this.#dataArray = new Uint8Array(this.#analyser.frequencyBinCount);
         this.#draw();
 
         setInterval(() => this.#update(), 1000/45);
-        setInterval(() => this.#resize(), 1000);
     }
 
     #update() {
         this.#analyser.getByteFrequencyData(this.#dataArray);
         this.#needRedraw = true;
-    }
-
-    #resize() {
-
     }
 
     #draw() {
