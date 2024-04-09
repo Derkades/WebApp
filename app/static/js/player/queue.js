@@ -1,4 +1,10 @@
 class Queue {
+    /** @type {number} */
+    maxHistorySize = 3;
+    /** @type {string} */
+    previousPlaylist;
+    /** @type {Array<string>} */
+    playlistOverrides = [];
     /** @type {boolean} */
     #fillBusy;
     /** @type {QueuedTrack | null} */
@@ -23,6 +29,8 @@ class Queue {
             this.fill();
             removedTracks.forEach(track => track.revokeObjects());
         });
+
+        document.addEventListener('DOMContentLoaded', () => this.fill());
     };
 
     /**
@@ -55,13 +63,13 @@ class Queue {
 
         let playlist;
 
-        if (state.playlistOverrides.length > 0) {
-            playlist = state.playlistOverrides.pop();
+        if (this.playlistOverrides.length > 0) {
+            playlist = this.playlistOverrides.pop();
             console.debug('queue: override', playlist);
         } else {
-            playlist = getNextPlaylist(state.lastChosenPlaylist);
-            console.debug(`queue: round robin: ${state.lastChosenPlaylist} -> ${playlist}`);
-            state.lastChosenPlaylist = playlist;
+            playlist = getNextPlaylist(this.previousPlaylist);
+            console.debug(`queue: round robin: ${this.previousPlaylist} -> ${playlist}`);
+            this.previousPlaylist = playlist;
         }
 
         if (playlist === null) {
@@ -96,7 +104,7 @@ class Queue {
         console.info('queue: chosen track: ', path);
 
         // Find track info for this file
-        const track = state.tracks[path];
+        const track = music.tracks[path];
 
         if (track === undefined) {
             throw Error('Track does not exist in local list: ' + path);
@@ -159,7 +167,7 @@ class Queue {
         if (removalBehaviour === 'same') {
             // Add playlist to override array. Next time a track is picked, when playlistOverrides contains elements,
             // one element is popped and used instead of choosing a random playlist.
-            state.playlistOverrides.push(track.playlistName);
+            this.playlistOverrides.push(track.playlistName);
         } else if (removalBehaviour !== 'roundrobin') {
             console.warn('queue: unexpected removal behaviour: ' + removalBehaviour);
         }
@@ -238,7 +246,7 @@ class Queue {
         if (this.currentTrack !== null) {
             this.previousTracks.push(this.currentTrack);
             // If history exceeded maximum length, remove first (oldest) element
-            if (this.previousTracks.length > state.maxHistorySize) {
+            if (this.previousTracks.length > this.maxHistorySize) {
                 const removedTrack = this.previousTracks.shift();
                 removedTrack.revokeObjects();
             }
@@ -295,8 +303,8 @@ class QueuedTrack {
      * @returns {Track | null} Track info, or null if the track has since been deleted or is a virtual track
      */
     track() {
-        if (this.trackPath != null && this.trackPath in state.tracks) {
-            return state.tracks[this.trackPath];
+        if (this.trackPath != null && this.trackPath in music.tracks) {
+            return music.tracks[this.trackPath];
         } else {
             return null;
         }

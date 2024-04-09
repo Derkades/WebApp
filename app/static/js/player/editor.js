@@ -85,7 +85,7 @@ class Editor {
         document.getElementById('editor-reloading').classList.remove('hidden');
 
         // Need to update local track list now, so metadata editor reflects changes
-        await Track.updateLocalTrackList();
+        await music.updateTrackList();
 
         // Close dialog, and restore save button
         dialogs.close('dialog-editor');

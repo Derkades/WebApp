@@ -49,7 +49,7 @@ class Search {
             return;
         }
 
-        const allTracks = Object.values(state.tracks);
+        const allTracks = Object.values(music.tracks);
 
         {
             const tracks = fuzzysort.go(query, allTracks, {keys: ['searchString'], threshold: -10000, limit: 50}).map(e => e.obj);

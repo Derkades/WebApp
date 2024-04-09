@@ -107,7 +107,7 @@ function updatePlaylistCheckboxHtml() {
     const otherDiv = document.createElement('div');
     otherDiv.classList.add('other-checkboxes');
 
-    for (const playlist of Object.values(state.playlists)) {
+    for (const playlist of Object.values(music.playlists)) {
         if (playlist.favorite) {
             mainDiv.appendChild(createPlaylistCheckbox(playlist, index++, true));
         } else {
@@ -141,7 +141,7 @@ function createPlaylistDropdowns() {
         const primaryPlaylist = document.getElementById('primary-playlist').textContent;
         const onlyWritable = select.classList.contains('playlist-select-writable');
 
-        for (const playlist of Object.values(state.playlists)) {
+        for (const playlist of Object.values(music.playlists)) {
             const option = document.createElement('option');
             option.value = playlist.name;
             option.textContent = playlist.name;
@@ -167,7 +167,7 @@ function loadPlaylistState() {
     }
     const playlists = JSON.parse(playlistsString);
     console.debug('playlist: restoring state', playlists);
-    for (const playlist of Object.values(state.playlists)) {
+    for (const playlist of Object.values(music.playlists)) {
         const checkbox = document.getElementById('checkbox-' + playlist.name);
         if (checkbox) {
             checkbox.checked = playlists.indexOf(playlist.name) !== -1;
@@ -177,7 +177,7 @@ function loadPlaylistState() {
 
 function savePlaylistState() {
     const checkedPlaylists = [];
-    for (const playlist of Object.values(state.playlists)) {
+    for (const playlist of Object.values(music.playlists)) {
         const checkbox = document.getElementById('checkbox-' + playlist.name);
         if (checkbox && checkbox.checked) {
             checkedPlaylists.push(playlist.name);

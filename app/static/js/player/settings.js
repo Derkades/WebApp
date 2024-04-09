@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const button = document.getElementById('scan-button');
         spinner.classList.remove('hidden');
         button.classList.add('hidden');
-        await Track.updateLocalTrackList();
+        await music.updateTrackList();
         spinner.classList.add('hidden');
         button.classList.remove('hidden');
     })());

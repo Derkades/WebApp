@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     const audioElem = getAudioElement();
 
+    // Home
+    document.getElementById('button-home').addEventListener('click', () => window.open('/', '_blank'));
+
     // Skip to previous
     document.getElementById('button-prev').addEventListener('click', () => {
         // Try to skip to beginning of current track first

@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const newName = '.trash.' + oldName;
             (async function() {
                 await jsonPost('/files/rename', {path: path, new_name: newName});
-                await Track.updateLocalTrackList();
+                await music.updateTrackList();
                 queue.next();
                 deleteSpinner.classList.add('hidden');
             })();

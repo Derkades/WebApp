@@ -1,7 +1,7 @@
 function updateTagCheckboxes() {
     const tagsSet = new Set();
 
-    for (const track of Object.values(state.tracks)) {
+    for (const track of Object.values(music.tracks)) {
         for (const tag of track.tags) {
             tagsSet.add(tag);
         }

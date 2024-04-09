@@ -99,7 +99,7 @@ class Browse {
 
         let content;
         if (hasFilter) {
-            const tracks = Object.values(state.tracks).filter(filter);
+            const tracks = Object.values(music.tracks).filter(filter);
             content = this.generateTrackList(tracks);
         } else {
             // No selected playlist, or filter. For performance reasons, don't display entire track list.

@@ -61,7 +61,7 @@ class Track {
      * @returns {Playlist}
      */
     playlist() {
-        return state.playlists[this.playlistName];
+        return music.playlists[this.playlistName];
     };
 
     /**
@@ -159,31 +159,6 @@ class Track {
         return text;
     };
 
-    static async updateLocalTrackList() {
-        console.info('track: update local track list');
-        const response = await fetch('/track/list');
-        const lastModified = response.headers.get('Last-Modified')
-
-        if (lastModified == state.trackListLastModified) {
-            console.info('track: track list is unchanged');
-            return;
-        }
-        state.trackListLastModified = lastModified;
-
-        const json = await response.json();
-
-        state.playlists = {};
-        state.tracks = {};
-        for (const playlistObj of json.playlists) {
-            state.playlists[playlistObj.name] = new Playlist(playlistObj);;
-            for (const trackObj of playlistObj.tracks) {
-                state.tracks[trackObj.path] = new Track(playlistObj.name, trackObj);
-            }
-        }
-
-        eventBus.publish(MusicEvent.TRACK_LIST_CHANGE);
-    };
-
     /**
      * Download track data, and add to queue
      * @param {boolean} top
@@ -250,18 +225,6 @@ class Track {
         queue.add(queuedTrack, top);
     };
 };
-
-function initTrackList() {
-    Track.updateLocalTrackList().catch(err => {
-        console.warn('Error retrieving initial track list', err);
-        setTimeout(initTrackList, 1000);
-    });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    initTrackList();
-    setInterval(Track.updateLocalTrackList, 2*60*1000);
-});
 
 class Lyrics {
     /** @type {boolean} */
