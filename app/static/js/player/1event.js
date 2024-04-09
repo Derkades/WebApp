@@ -22,7 +22,11 @@ class EventBus {
 
     publish(name) {
         for (const callable of this.listeners[name]) {
-            callable();
+            try {
+                callable();
+            } catch (error) {
+                console.error('error in event listener', error);
+            }
         }
     }
 
