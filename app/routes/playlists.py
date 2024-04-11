@@ -78,13 +78,15 @@ def route_create():
 
         path.mkdir()
 
-        scanner.scan(conn)  # This creates a row for the playlist in the playlist table
+    # Database connection must be closed because scanner creates its own connection
+    scanner.scan()  # This creates a row for the playlist in the playlist table
 
+    with db.connect() as conn:
         # New playlist should be writable for user who created it
         conn.execute('INSERT INTO user_playlist_write VALUES (?, ?)',
                      (user.user_id, dir_name))
 
-        return redirect('/playlists', code=303)
+    return redirect('/playlists', code=303)
 
 
 @bp.route('/share', methods=['GET', 'POST'])
