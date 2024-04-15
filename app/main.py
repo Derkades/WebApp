@@ -1,6 +1,7 @@
 import logging
 
 import jinja2
+
 try:
     import prometheus_client
 except ImportError:

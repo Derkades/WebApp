@@ -2,7 +2,7 @@ import logging
 
 from flask import Blueprint, Response, redirect, render_template, request
 
-from app import auth, db, music, packer, settings
+from app import auth, db, jsonw, lastfm, music, packer, settings
 
 bp = Blueprint('root', __name__, url_prefix='/')
 log = logging.getLogger('routes.root')
