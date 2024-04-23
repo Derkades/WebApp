@@ -136,6 +136,12 @@ def route_lyrics():
         track = Track.by_relpath(conn, request.args['path'])
         meta = track.metadata()
 
+    if meta.lyrics:
+        log.info('using lyrics from metadata')
+        return {'found': True,
+                'source': None,
+                'html': meta.lyrics.replace('\n', '<br>')}
+
     lyrics = genius.get_lyrics(meta.lyrics_search_query())
     if lyrics is None:
         return {'found': False}
@@ -145,7 +151,6 @@ def route_lyrics():
         'source': lyrics.source_url,
         'html': lyrics.lyrics_html,
     }
-
 
 
 @bp.route('/list')

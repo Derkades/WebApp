@@ -56,7 +56,8 @@ def query_params(relpath: str, path: Path) -> QueryParams | None:
                                           'album': meta.album,
                                           'album_artist': meta.album_artist,
                                           'track_number': meta.track_number,
-                                          'year': meta.year}
+                                          'year': meta.year,
+                                          'lyrics': meta.lyrics}
     if meta.artists is None:
         artist_data = []
     else:
@@ -106,6 +107,7 @@ def scan_tracks(conn: Connection, playlist_name: str) -> None:
                              album_artist=:album_artist,
                              track_number=:track_number,
                              year=:year,
+                             lyrics=:lyrics,
                              mtime=:mtime
                          WHERE path=:path
                         ''',
@@ -131,8 +133,8 @@ def scan_tracks(conn: Connection, playlist_name: str) -> None:
                 log.warning('Skipping due to metadata error')
                 continue
             conn.execute('''
-                         INSERT INTO track (path, playlist, duration, title, album, album_artist, track_number, year, mtime)
-                         VALUES (:path, :playlist, :duration, :title, :album, :album_artist, :track_number, :year, :mtime)
+                         INSERT INTO track (path, playlist, duration, title, album, album_artist, track_number, year, lyrics, mtime)
+                         VALUES (:path, :playlist, :duration, :title, :album, :album_artist, :track_number, :year, :lyrics, :mtime)
                          ''',
                          {**params.main_data,
                           'playlist': playlist_name,

@@ -149,7 +149,6 @@ def has_advertisement(metadata_str: str) -> bool:
 
 @dataclass
 class Metadata:
-
     relpath: str
     duration: int
     artists: Optional[list[str]]
@@ -159,6 +158,7 @@ class Metadata:
     album_artist: Optional[str]
     track_number: Optional[int]
     tags: list[str]
+    lyrics: Optional[str]
 
     def _meta_title(self) -> Optional[str]:
         """
@@ -260,6 +260,7 @@ def probe(path: Path) -> Metadata | None:
     album_artist = None
     track_number = None
     tags = []
+    lyrics = None
 
     meta_tags = []
 
@@ -306,6 +307,9 @@ def probe(path: Path) -> Metadata | None:
         if name == 'genre':
             tags = split_meta_list(value)
 
+        if name == 'lyrics':
+            lyrics = value
+
     artists = music.sort_artists(artists, album_artist)
 
     return Metadata(music.to_relpath(path),
@@ -316,7 +320,8 @@ def probe(path: Path) -> Metadata | None:
                     year,
                     album_artist,
                     track_number,
-                    tags)
+                    tags,
+                    lyrics)
 
 
 def cached(conn: Connection, relpath: str) -> Metadata:
@@ -324,11 +329,11 @@ def cached(conn: Connection, relpath: str) -> Metadata:
     Create Metadata object from database contents
     Returns: Metadata, or None if the track is not known
     """
-    query = 'SELECT duration, title, album, album_artist, track_number, year FROM track WHERE path=?'
+    query = 'SELECT duration, title, album, album_artist, track_number, year, lyrics FROM track WHERE path=?'
     row = conn.execute(query, (relpath,)).fetchone()
     if row is None:
         raise ValueError('Missing track from database: ' + relpath)
-    duration, title, album, album_artist, track_number, year = row
+    duration, title, album, album_artist, track_number, year, lyrics = row
 
     rows = conn.execute('SELECT artist FROM track_artist WHERE track=?', (relpath,)).fetchall()
     if len(rows) == 0:
@@ -339,4 +344,4 @@ def cached(conn: Connection, relpath: str) -> Metadata:
     rows = conn.execute('SELECT tag FROM track_tag WHERE track=?', (relpath,)).fetchall()
     tags = [row[0] for row in rows]
 
-    return Metadata(relpath, duration, artists, album, title, year, album_artist, track_number, tags)
+    return Metadata(relpath, duration, artists, album, title, year, album_artist, track_number, tags, lyrics)

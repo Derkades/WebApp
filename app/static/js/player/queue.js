@@ -283,7 +283,7 @@ class QueuedTrack {
     audioBlobUrl;
     /** @type {string} */
     imageBlobUrl;
-    /** @type {string} */
+    /** @type {Lyrics | null} */
     lyrics;
 
     /**

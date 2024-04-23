@@ -212,7 +212,7 @@ class Track {
             checkResponseCode(lyricsResponse);
             const lyricsJson = await lyricsResponse.json();
             console.debug('track: downloaded lyrics');
-            return new Lyrics(lyricsJson.found, lyricsJson.source, lyricsJson.html);
+            return lyricsJson.found ? new Lyrics(lyricsJson.source, lyricsJson.html) : null;
         };
 
         // Resolve all, download in parallel
@@ -227,14 +227,11 @@ class Track {
 };
 
 class Lyrics {
-    /** @type {boolean} */
-    found;
     /** @type {string | null} */
     source;
-    /** @type {string | null} */
+    /** @type {string} */
     html;
-    constructor(found, source = null, html = null) {
-        this.found = found;
+    constructor(source, html) {
         this.source = source;
         this.html = html;
     };

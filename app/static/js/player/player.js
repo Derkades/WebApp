@@ -73,19 +73,24 @@ function replaceLyrics() {
     const notFoundElem = document.getElementById('lyrics-not-found');
     const textElem = document.getElementById('lyrics-text');
     const sourceElem = document.getElementById('lyrics-source');
-    if (queuedTrack.lyrics.found) {
+
+    if (queuedTrack.lyrics && queuedTrack.lyrics.source) {
+        sourceElem.classList.remove('hidden');
+        sourceElem.href = queuedTrack.lyrics.source;
+    } else {
+        sourceElem.classList.add('hidden');
+    }
+
+    if (queuedTrack.lyrics) {
         notFoundElem.classList.add('hidden');
         textElem.classList.remove('hidden');
-        sourceElem.classList.remove('hidden');
-
-        sourceElem.href = queuedTrack.lyrics.source;
         textElem.innerHTML = queuedTrack.lyrics.html + '<br>';
+
+        document.getElementById('lyrics-scroll').scrollTo({top: 0, behavior: 'smooth'});
     } else {
         notFoundElem.classList.remove('hidden');
         textElem.classList.add('hidden');
-        sourceElem.classList.add('hidden');
     }
-    document.getElementById('lyrics-scroll').scrollTo({top: 0, behavior: 'smooth'});
 }
 
 function trackInfoUnavailableSpan() {
