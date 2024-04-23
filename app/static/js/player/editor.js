@@ -76,7 +76,6 @@ class Editor {
             alert('An error occurred while updating metadata.');
             document.getElementById('editor-writing').classList.add('hidden');
             document.getElementById('editor-save').classList.remove('hidden');
-            this.#currentlyEditingPath = null;
             return;
         }
 
