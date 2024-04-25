@@ -4,7 +4,6 @@
     --elem-background-color: rgba(50, 50, 50, 0.5);
     --elem-background-color-true: rgba(255, 255, 255, 0.8);
     --box-background-color: rgba(20, 20, 20, 0.4);
-    --box-background-color-light: rgba(200, 200, 200, 0.7);
 }
 
 @font-face {
@@ -26,13 +25,7 @@ body.colorful {
     background-size: cover;
 }
 
-body.light {
-    background-color: white;
-    color: black;
-}
-
-body,
-input, select, textarea, button {
+body, input, select, textarea, button {
     font-family: 'Quicksand', Verdana, sans-serif;
 }
 
