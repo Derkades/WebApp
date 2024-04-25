@@ -1,3 +1,4 @@
+/* Less margin for "Queue" header */
 .sidebar-left h3 {
     margin: .5rem 0;
 }
@@ -34,7 +35,7 @@ input::placeholder {
 }
 
 #album-covers {
-    aspect-ratio: 1 / 1; /* deze is heel nieuw, bestaat sinds 2021! */
+    aspect-ratio: 1 / 1;
     position: relative;
 }
 
@@ -53,11 +54,6 @@ input::placeholder {
         top: 0;
         width: calc(50vw - 3rem);
         height: 100%;
-    }
-
-    .lyrics-outer {
-        padding: 1rem;
-        width: 100%;
     }
 
     .sidebar-left {
@@ -103,6 +99,7 @@ input::placeholder {
     width: 100%;
 }
 
+/* Space between playlists, controls, queue */
 .sidebar-left > div > .box-solid {
     margin: 1rem 0;
 }
@@ -114,16 +111,6 @@ input::placeholder {
 
 .box-queue .scroll {
     height: 30vh;
-}
-
-.lyrics-outer {
-    padding: 1rem;
-    width: 100%;
-}
-
-#lyrics-scroll {
-    overflow-y: auto;
-    /* text-shadow: .05rem .05rem .5rem black; */
 }
 
 .box-rounded {
@@ -204,7 +191,7 @@ input::placeholder {
     margin: .5rem 0;
     position: relative; /* required for positioning of child */
     background-color: var(--elem-background-color);
-    cursor: col-resize;
+    cursor: ew-resize;
     /* Hide part of inner progress bar (corners) that goes outside of outer element) */
     overflow: hidden;
 }
