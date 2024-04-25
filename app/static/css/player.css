@@ -85,6 +85,12 @@ input::placeholder {
     .sidebar-right {
         padding-bottom: 1rem;
     }
+
+    .full-page-overlay .dialog {
+        height: 100%;
+        width: 100%;
+        border-radius: 0;
+    }
 }
 
 .sidebar {
