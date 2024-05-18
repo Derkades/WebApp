@@ -307,7 +307,11 @@ def probe(path: Path) -> Metadata | None:
         if name == 'genre':
             tags = split_meta_list(value)
 
-        if name == 'lyrics':
+        if name in {'lyrics', 'lyrics-en', 'lyrics-eng', 'lyrics-english'}:
+            lyrics = value
+
+        # Allow other languages, but only if no other lyrics are available
+        if name.startswith('lyrics') and lyrics is None:
             lyrics = value
 
     artists = music.sort_artists(artists, album_artist)
