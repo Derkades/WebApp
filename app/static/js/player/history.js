@@ -76,13 +76,24 @@ class History {
         await jsonPost('/activity/now_playing', data);
     }
 
-    async scrobble() {
+    async scrobble(retries = 10) {
+        if (retries == 0) {
+            log.warn('history: retries exhausted')
+            return;
+        }
+
         const data = {
             track: this.currentlyPlayingTrack.path,
             timestamp: this.startTimestamp,
             lastfmEligible: this.currentlyPlayingTrack.duration > 30, // last.fm requires track length to be at least 30 seconds
         }
-        await jsonPost('/activity/played', data);
+
+        try {
+            await jsonPost('/activity/played', data);
+        } catch (error) {
+            console.warn('history: error submitting played track, trying again in a minute', error);
+            setTimeout(() => this.scrobble(retries - 1), 60_000);
+        }
     }
 }
 
