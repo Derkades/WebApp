@@ -1,14 +1,11 @@
 class MediaSessionUpdater {
-    /** @type {number} */
-    lastPositionUpdate = 0;
     constructor() {
         document.addEventListener('DOMContentLoaded', () => {
             const audioElem = getAudioElement();
 
-            audioElem.addEventListener('timeupdate', () => this.updatePosition());
-            audioElem.addEventListener('durationchange', () => this.updatePosition());
-
-            eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => this.updateMetadata());
+            eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {
+                this.updateMetadata();
+            });
 
             // Media session events
             navigator.mediaSession.setActionHandler('play', () => {
@@ -25,30 +22,26 @@ class MediaSessionUpdater {
         });
     }
 
-    updatePosition() {
-        const now = Date.now();
-        if (now - this.lastPositionUpdate < 1000) {
-            console.debug('mediasession: skip update');
-            return;
-        }
-        this.lastPositionUpdate = now;
-
+    updateState() {
         const audioElem = getAudioElement();
-
         navigator.mediaSession.playbackState = audioElem.paused ? 'paused' : 'playing';
+    }
+
+    updatePosition() {
+        const audioElem = getAudioElement();
 
         if (audioElem == null || !isFinite(audioElem.currentTime) || !isFinite(audioElem.playbackRate) || !isFinite(audioElem.duration)) {
             console.debug('mediasession: skip update, invalid value');
             return;
         }
 
-        console.debug('mediasession: do update');
-
-        navigator.mediaSession.setPositionState({
+        const positionState = {
             duration: audioElem.duration,
             playbackRate: audioElem.playbackRate,
             position: audioElem.currentTime,
-        });
+        }
+        console.debug('mediasession: do update', positionState);
+        navigator.mediaSession.setPositionState(positionState);
     }
 
     updateMetadata() {
@@ -75,6 +68,7 @@ class MediaSessionUpdater {
             metaObj.title = track.displayText();
         }
 
+        console.debug('mediasession: set metadata', metaObj);
         navigator.mediaSession.metadata = new MediaMetadata(metaObj);
     }
 }
