@@ -5,8 +5,8 @@ from typing import Any
 
 from flask import Blueprint, Response, abort, request
 
-from app import auth, db, genius, jsonw, music, settings
-from app.image import ImageQuality
+from app import auth, db, genius, image, jsonw, music, settings
+from app.image import ImageFormat
 from app.music import AudioType, Track
 
 log = logging.getLogger('app.routes.track')
@@ -107,13 +107,13 @@ def route_album_cover() -> Response:
 
         quality_str = request.args['quality']
         if quality_str == 'high':
-            quality = ImageQuality.HIGH
+            quality = image.QUALITY_HIGH
         elif quality_str == 'low':
-            quality = ImageQuality.LOW
+            quality = image.QUALITY_LOW
         else:
             raise ValueError('invalid quality')
 
-        image_bytes = track.get_cover(meme, quality)
+        image_bytes = track.get_cover(meme, quality, ImageFormat.WEBP)
 
     return Response(image_bytes, content_type='image/webp')
 

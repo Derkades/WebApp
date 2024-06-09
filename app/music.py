@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Iterator, Literal, Optional
 from app import (bing, cache, image, jsonw, metadata, musicbrainz, reddit,
                  scanner, settings)
 from app.auth import User
-from app.image import ImageQuality
+from app.image import ImageFormat, ImageQuality
 
 if TYPE_CHECKING:
     from metadata import Metadata
@@ -132,7 +132,7 @@ def _get_possible_covers(artist: Optional[str], album: str, meme: bool) -> Itera
     yield settings.raphson_png.read_bytes()
 
 
-def get_cover(artist: Optional[str], album: str, meme: bool, img_quality: ImageQuality) -> bytes:
+def get_cover(artist: Optional[str], album: str, meme: bool, img_quality: ImageQuality, img_format: ImageFormat) -> bytes:
     """
     Find album cover using MusicBrainz or Bing.
     Parameters:
@@ -141,9 +141,9 @@ def get_cover(artist: Optional[str], album: str, meme: bool, img_quality: ImageQ
     """
     cache_key =  f'cover{artist}{album}{meme}'  # quality is appended later
 
-    cache_data = cache.retrieve(cache_key + img_quality.value)
+    cache_data = cache.retrieve(cache_key + img_quality.name + img_format.name)
     if cache_data is not None:
-        log.info('Returning cover thumbnail from cache: %s - %s', artist, album)
+        log.info('Returning %s quality %s cover thumbnail from cache: %s - %s', img_quality.name, img_format, artist, album)
         return cache_data
 
     log.info('Cover thumbnail not cached, need to download album cover image: %s - %s', artist, album)
@@ -155,15 +155,15 @@ def get_cover(artist: Optional[str], album: str, meme: bool, img_quality: ImageQ
 
             try:
                 log.info('Generating thumbnails')
+                for img_format2 in ImageFormat:
+                    for quality in (image.QUALITY_HIGH, image.QUALITY_LOW):
+                        output_path = Path(temp_dir, 'output' + quality.name + img_format2.name)
+                        image.thumbnail(input_path, output_path, img_format2, img_quality, square=not meme)
+                        image_bytes = output_path.read_bytes()
+                        cache.store(cache_key + quality.name + img_format2.name, image_bytes)
 
-                for quality in ImageQuality:
-                    output_path = Path(temp_dir, 'output-' + quality.value)
-                    image.webp_thumbnail(input_path, output_path, img_quality, square=not meme)
-                    image_bytes = output_path.read_bytes()
-                    cache.store(cache_key + quality.value, image_bytes)
-
-                    if quality == img_quality:
-                        return_data = image_bytes
+                        if quality == img_quality and img_format2 == img_format:
+                            return_data = image_bytes
             except CalledProcessError:
                 log.warning('Failed to generate thumbnail, image is probably corrupt. Trying another image.')
                 continue
@@ -220,7 +220,7 @@ class Track:
         """
         return metadata.cached(self.conn, self.relpath)
 
-    def get_cover(self, meme: bool, img_quality: ImageQuality) -> bytes:
+    def get_cover(self, meme: bool, img_quality: ImageQuality, img_format: ImageFormat) -> bytes:
         """
         Find album cover using MusicBrainz or Bing.
         Parameters:
@@ -243,7 +243,7 @@ class Track:
         else:
             artist = None
 
-        return get_cover(artist, album, meme, img_quality)
+        return get_cover(artist, album, meme, img_quality, img_format)
 
 
     def _get_ffmpeg_metadata_options(self) -> list[str]:
@@ -363,26 +363,27 @@ class Track:
                              # +faststart to allow playback without downloading entire file
                              '-movflags', '+faststart',
                              '-vn']  # remove video track (and album covers)
-        # elif audio_type == AudioType.MP3_WITH_METADATA:
-        #     # https://trac.ffmpeg.org/wiki/Encode/MP3
-        #     cover = self.get_cover_thumbnail(False, ImageFormat.JPEG, ImageQuality.HIGH)
-        #     # Write cover to temp file so ffmpeg can read it
-        #     cover_temp_file = tempfile.NamedTemporaryFile('wb')  # pylint: disable=consider-using-with
-        #     cover_temp_file.write(cover)
+        elif audio_type == AudioType.MP3_WITH_METADATA:
+            # https://trac.ffmpeg.org/wiki/Encode/MP3
+            cover = self.get_cover(False, image.QUALITY_HIGH, img_format=ImageFormat.JPEG)
+            # Write cover to temp file so ffmpeg can read it
+            # cover_temp_file = tempfile.NamedTemporaryFile('wb')  # pylint: disable=consider-using-with
+            cover_temp_file = open('/tmp/test', 'wb')
+            cover_temp_file.write(cover)
 
-        #     input_options = ['-i', cover_temp_file.name,  # Add album cover
-        #                      '-map', '0:a', # include audio stream from first input
-        #                      '-map', '1:0', # include first stream from second input
-        #                      '-id3v2_version', '3',
-        #                      '-map_metadata', '-1',  # discard original metadata
-        #                      '-metadata:s:v', 'title=Album cover',
-        #                      '-metadata:s:v', 'comment=Cover (front)',
-        #                      *self._get_ffmpeg_metadata_options()]  # set new metadata
+            input_options = ['-i', cover_temp_file.name,  # Add album cover
+                             '-map', '0:a', # include audio stream from first input
+                             '-map', '1:0', # include first stream from second input
+                             '-id3v2_version', '3',
+                             '-map_metadata', '-1',  # discard original metadata
+                             '-metadata:s:v', 'title=Album cover',
+                             '-metadata:s:v', 'comment=Cover (front)',
+                             *self._get_ffmpeg_metadata_options()]  # set new metadata
 
-        #     audio_options = ['-f', 'mp3',
-        #                      '-c:a', 'libmp3lame',
-        #                      '-c:v', 'copy',  # Leave cover as JPEG, don't re-encode as PNG
-        #                      '-q:a', '5']  # VBR 128kbps
+            audio_options = ['-f', 'mp3',
+                             '-c:a', 'libmp3lame',
+                             '-c:v', 'copy',  # Leave cover as JPEG, don't re-encode as PNG
+                             '-q:a', '2']  # VBR 190kbps
 
         with tempfile.NamedTemporaryFile() as temp_output:
             command = ['ffmpeg',
@@ -400,8 +401,8 @@ class Track:
             subprocess.run(command, shell=False, check=True)
             audio_data = temp_output.read()
 
-        # if audio_type == AudioType.MP3_WITH_METADATA:
-        #     cover_temp_file.close()
+        if audio_type == AudioType.MP3_WITH_METADATA:
+            cover_temp_file.close()
 
         cache.store(cache_key, audio_data)
         return audio_data
