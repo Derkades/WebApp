@@ -14,6 +14,7 @@ raphson_png = static_dir / 'img' / 'raphson.png'
 user_agent = 'Super-fancy-music-player/2.0 (https://github.com/DanielKoomen/WebApp/)'
 user_agent_offline_sync = 'Super fancy music player (offline sync) (https://github.com/DanielKoomen/WebApp/)'
 webscraping_user_agent = getenv('MUSIC_WEBSCRAPING_USER_AGENT', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/114.0')  # https://useragents.me
+loudnorm_filter = 'loudnorm=I=-16'
 
 # User configurable settings
 music_dir: Path = None

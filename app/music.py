@@ -311,10 +311,10 @@ class Track:
         if float(meas_json['input_i']) > 0:
             log.warning('Measured positive loudness. This should be impossible, but can happen with input files containing out of range values. Need to use single-pass loudnorm filter instead.')
             log.warning('Track: %s', self.path.resolve().as_posix())
-            loudnorm = 'loudnorm=I=-16'
+            loudnorm = settings.loudnorm_filter
         else:
             loudnorm = \
-                f'loudnorm=I=-16:' \
+                f'{settings.loudnorm_filter}:' \
                 f"measured_I={meas_json['input_i']}:" \
                 f"measured_TP={meas_json['input_tp']}:" \
                 f"measured_LRA={meas_json['input_lra']}:" \
