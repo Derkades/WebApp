@@ -38,7 +38,7 @@ def thumbnail(input_path: Path, output_path: Path, img_format: ImageFormat, img_
     if img_format == ImageFormat.WEBP:
         format_options = ['-pix_fmt', 'yuv420p', '-f', 'webp']
     elif img_format == ImageFormat.JPEG:
-        format_options = ['-update', 'true', '-pix_fmt', 'yuvj420p', '-f', 'mjpeg']
+        format_options = ['-pix_fmt', 'yuvj420p', '-f', 'mjpeg']
     else:
         raise ValueError()
 
