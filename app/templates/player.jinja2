@@ -184,12 +184,7 @@
                     </select>
                 {% else %}
                     <label for="settings-news">{% trans %}Hourly news{% endtrans %}</label><br>
-                    <select id="settings-news">
-                        <option value="disabled" selected>{% trans %}Disabled{% endtrans %}</option>
-                        <option value="nu.nl">NU.nl Nieuwsbulletin</option>
-                        <option value="npr">NPR News Now</option>
-                        <option value="bbc">BBC News</option>
-                    </select>
+                    <input id="settings-news" type="checkbox"><br>
                 {% endif %}
 
                 <p>{% trans %}The local music cache is updated every 5 minutes. If you've modified files, you may want to force an update.{% endtrans %}</p>

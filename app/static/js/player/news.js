@@ -7,7 +7,7 @@ class News {
     constructor() {
         document.addEventListener('DOMContentLoaded', () => {
             this.#newsSetting = document.getElementById('settings-news');
-            setInterval(() => this.check(), 3*60_000);
+            setInterval(() => this.check(), 60_000);
         });
     }
 
@@ -19,7 +19,7 @@ class News {
         }
 
         const minutes = new Date().getMinutes();
-        const isNewsTime = minutes < 7 || minutes > 57;
+        const isNewsTime = minutes >= 6 && minutes < 8;
         if (!isNewsTime) {
             console.debug('news: not news time');
             this.#hasQueuedNews = false;
@@ -36,12 +36,12 @@ class News {
             return;
         }
 
-        console.debug('news: queueing news from provider: ', provider);
-        this.queue(provider).then(() => this.#hasQueuedNews = true);
+        console.debug('news: queueing news');
+        this.queue().then(() => this.#hasQueuedNews = true);
     }
 
-    async queue(provider) {
-        const audioResponse = await fetch('/news/audio?provider=' + encodeURIComponent(provider));
+    async queue() {
+        const audioResponse = await fetch('/news/audio');
         checkResponseCode(audioResponse);
         const audioBlob = URL.createObjectURL(await audioResponse.blob());
 

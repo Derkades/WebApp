@@ -25,3 +25,4 @@ radio_playlists: list[str] = []
 lastfm_api_key: Optional[str] = None
 lastfm_api_secret: Optional[str] = None
 offline_mode: bool = None
+news_server: str = None

@@ -15,7 +15,7 @@ def audio():
     with tempfile.NamedTemporaryFile() as temp_input, tempfile.NamedTemporaryFile() as temp_output:
 
         # Download wave audio to temp file
-        with requests.get('http://127.0.0.1:43473/news.wav', timeout=10, stream=True) as response:
+        with requests.get(settings.news_server + '/news.wav', timeout=10, stream=True) as response:
             # News is only kept in temporary storage, if the news service has just
             # started it won't have news cached yet.
             if response.status_code == 503:

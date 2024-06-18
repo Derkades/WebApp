@@ -261,6 +261,9 @@ def main():
                         action='store_true',
                         default=_boolenv('OFFLINE_MODE'),
                         help='run in offline mode, using music synced from a primary music server')
+    parser.add_argument('--news-server',
+                        help='news server url: https://github.com/Derkades/news-scraper',
+                        default=_strenv('NEWS_SERVER', 'http://127.0.0.1:43473'))
 
     subparsers = parser.add_subparsers(required=True)
 
@@ -331,6 +334,7 @@ def main():
     settings.lastfm_api_key = args.lastfm_api_key
     settings.lastfm_api_secret = args.lastfm_api_secret
     settings.offline_mode = args.offline
+    settings.news_server = args.news_server
 
     if settings.offline_mode:
         settings.music_dir = Path('/dev/null')
