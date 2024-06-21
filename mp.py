@@ -208,6 +208,14 @@ def handle_sync(args: Any) -> None:
     offline_sync.do_sync(args.force_resync)
 
 
+def handle_cover(args: Any) -> None:
+    from app import music
+    from app.image import ImageFormat, QUALITY_HIGH
+
+    cover_bytes = music.get_cover(args.artist, args.title, args.meme, QUALITY_HIGH, ImageFormat.JPEG)
+    Path('cover.jpg').write_bytes(cover_bytes)
+
+
 def _strenv(name: str, default: str = None):
     return os.getenv('MUSIC_' + name, default)
 
@@ -323,6 +331,13 @@ def main():
     cmd_sync.add_argument('--playlists', type=str,
                           help='Change playlists to sync. Specify playlists as comma separated list without spaces. Enter \'favorite\' to sync favorite playlists (default).')
     cmd_sync.set_defaults(func=handle_sync)
+
+    cmd_cover = subparsers.add_parser('debug-cover',
+                                      help='Download cover image')
+    cmd_cover.add_argument('artist')
+    cmd_cover.add_argument('title')
+    cmd_cover.add_argument('--meme', action='store_true')
+    cmd_cover.set_defaults(func=handle_cover)
 
     args = parser.parse_args()
 
