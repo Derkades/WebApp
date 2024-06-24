@@ -210,9 +210,8 @@ def handle_sync(args: Any) -> None:
 
 def handle_cover(args: Any) -> None:
     from app import music
-    from app.image import ImageFormat, QUALITY_HIGH
 
-    cover_bytes = music.get_cover(args.artist, args.title, args.meme, QUALITY_HIGH, ImageFormat.JPEG)
+    cover_bytes = next(music._get_possible_covers(args.artist, args.title, args.meme))
     Path('cover.jpg').write_bytes(cover_bytes)
 
 

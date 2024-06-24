@@ -43,17 +43,17 @@ def _search_release_group(artist: str, title: str) -> str | None:
     """
     Search for a release group id using the provided search query
     """
-    for query in (f'artist:{lucene_escape(artist)} AND releasegroup:{lucene_escape(title)} AND primarytype:Album',
-                  f'artist:{lucene_escape(artist)} AND releasegroup:{lucene_escape(title)}'):
-        log.info('Performing MB search for query: %s', query)
-        result = _mb_get('release-group',
-                         {'query': query,
-                            'limit': '1',
-                            'primarytype': 'Album'})
-        groups = result['release-groups']
-        if groups:
-            log.info('Found release group: %s', groups[0]['id'])
-            return groups[0]['id']
+    query = f'artist:"{lucene_escape(artist)}" AND releasegroup:"{lucene_escape(title)}"'
+    log.info('Performing MB search for query: %s', query)
+    result = _mb_get('release-group',
+                        {'query': query,
+                        'limit': '1',
+                        'primarytype': 'Album'})
+    groups = result['release-groups']
+    if groups:
+        print(groups)
+        log.info('Found release group: %s', groups[0]['id'])
+        return groups[0]['id']
 
     log.info('No release group found')
     return None
@@ -109,13 +109,3 @@ def get_cover(artist: str, album: str) -> bytes | None:
         log.info('Error retrieving album art from musicbrainz: %s', ex)
         traceback.print_exc()
         return None
-
-
-# For testing
-if __name__ == '__main__':
-    from app import logconfig
-    logconfig.apply_debug()
-
-    cover = get_cover('Dire Straits', 'Brothers In Arms')
-    # cover = get_cover('Elle Exxe', 'Lately') # release exists, but has no cover
-    Path('cover.jpg').write_bytes(cover)
