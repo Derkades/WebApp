@@ -29,7 +29,7 @@ Music is crucial when working on projects. However, when you're with a group, wh
 - Fun
     - Enable 'Album cover meme mode' to replace album covers by (sometimes) funny memes related to the song title.
 - News
-    - Optionally, play back news from various sources on the hour to keep up-to-date.
+    - Optionally, insert news from [news scraper](https://github.com/Derkades/news-scraper) on the hour to keep up-to-date.
 - Minimal: fast and secure
     - Written in pure HTML, CSS and JavaScript with minimal third party libraries. The frontend should be fast, even on an old laptop or cheap single board computer.
     - Queued songs are stored as blobs in the browser's storage. Temporary network connection issues are no problem.
