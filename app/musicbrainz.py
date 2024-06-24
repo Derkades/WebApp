@@ -48,12 +48,12 @@ def _search_release_group(artist: str, title: str) -> str | None:
     result = _mb_get('release-group',
                         {'query': query,
                         'limit': '1',
-                        'primarytype': 'Album'})
+                        'primarytype': 'Album'}) # preference for albums, but this is not a strict filter
     groups = result['release-groups']
     if groups:
-        print(groups)
-        log.info('Found release group: %s', groups[0]['id'])
-        return groups[0]['id']
+        group = groups[0]
+        log.info('Found release group: %s: %s (%s)', group['id'], group['title'], group['primary-type'])
+        return group['id']
 
     log.info('No release group found')
     return None
