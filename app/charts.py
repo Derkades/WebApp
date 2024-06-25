@@ -275,7 +275,7 @@ def chart_unique_artists(conn: Connection):
                         ''')
     ratio_rows = [(playlist, artists / tracks) for playlist, tracks, artists in rows]
     ratio_rows = sorted(ratio_rows, key=lambda x: x[1])
-    return chart('bar', _('Ratio of unique artists compared to total artists'), *data_from_rows(_('Ratio'), ratio_rows))
+    return chart('bar', _('Artist diversity'), *data_from_rows(_('Ratio'), ratio_rows))
 
 
 def get_data(period: StatsPeriod):
