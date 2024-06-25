@@ -1,0 +1,29 @@
+{% extends "base_static.jinja2" %}
+
+{% block title %}
+    {% trans %}Share{% endtrans %}
+{% endblock title %}
+
+{% block content %}
+
+{{ page_heading(gettext('Share')) }}
+
+<p>
+    {% trans %}{{ shared_by }} has shared the track: {{ track }}{% endtrans %}
+</p>
+
+<p>
+    <a href="/share/{{code}}/download/original">{% trans %}Download original file{% endtrans %}</a>
+</p>
+
+<p>
+    <a href="/share/{{code}}/download/mp3">{% trans %}Download mp3{% endtrans %}</a><br>
+</p>
+
+<audio controls preload="metadata">
+    <source src="/share/{{code}}/audio" type="audio/webm">
+</audio>
+<br>
+<img src="/share/{{ code }}/cover" width="200">
+
+{% endblock content %}

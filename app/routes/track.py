@@ -80,7 +80,7 @@ def route_audio():
     response.cache_control.no_cache = True  # always revalidate cache
     response.accept_ranges = 'bytes'  # Workaround for Chromium bug https://stackoverflow.com/a/65804889
     if audio_type == AudioType.MP3_WITH_METADATA:
-        mp3_name = re.sub(r'[^\x00-\x7f]',r'', track.metadata().display_title())
+        mp3_name = track.metadata().filename_name()
         response.headers['Content-Disposition'] = f'attachment; filename="{mp3_name}"'
     return response
 

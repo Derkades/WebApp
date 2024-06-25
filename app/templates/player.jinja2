@@ -51,7 +51,7 @@
                 </div>
 
                 <div id="playback-controls">
-                    {{ icon_button('home', 'button-home', title=gettext('Open home page in a new tab')) }}
+                {{ icon_button('home', 'button-home', title=gettext('Open home page in a new tab')) }}
                     {{ icon_button('skip-previous', 'button-prev', title=gettext('Go to beginning of current track, or previous track')) }}
                     {{ icon_button('play', 'button-play', title=gettext('Play')) }}
                     {{ icon_button('pause', 'button-pause', title=gettext('Pause')) }}
@@ -63,6 +63,7 @@
                         {{ icon_button('pencil', 'button-edit', title=gettext('Open metadata editor')) }}
                         {{ icon_button('delete', 'button-delete', title=gettext('Delete currently playing track from playlist')) }}
                         {{ icon_button('content-duplicate', 'button-copy', title=gettext('Copy track to your primary playlist')) }}
+                        {{ icon_button('share', 'button-share', title=gettext('Copy track to your primary playlist')) }}
                     {% endif %}
 
                     <div id="delete-spinner" class="raphson-spinner hidden"></div>

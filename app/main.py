@@ -25,6 +25,7 @@ from app.routes import player as app_player
 from app.routes import playlists as app_playlists
 from app.routes import radio as app_radio
 from app.routes import root as app_root
+from app.routes import share as app_share
 from app.routes import stats as app_stats
 from app.routes import track as app_track
 from app.routes import users as app_users
@@ -57,6 +58,7 @@ def get_app(proxy_count: int, template_reload: bool):
     app.register_blueprint(app_playlists.bp)
     app.register_blueprint(app_radio.bp)
     app.register_blueprint(app_root.bp)
+    app.register_blueprint(app_share.bp)
     app.register_blueprint(app_stats.bp)
     app.register_blueprint(app_track.bp)
     app.register_blueprint(app_users.bp)

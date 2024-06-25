@@ -213,6 +213,7 @@ body.light input {
 .icon-playlist-remove { background-image: url('/static/icon/playlist-remove.svg'); }
 .icon-radio { background-image: url('/static/icon/radio.svg'); }
 .icon-rename-box { background-image: url('/static/icon/rename-box.svg'); }
+.icon-share { background-image: url('/static/icon/share.svg'); }
 .icon-skip-next { background-image: url('/static/icon/skip-next.svg'); }
 .icon-skip-previous { background-image: url('/static/icon/skip-previous.svg'); }
 .icon-star { background-image: url('/static/icon/star.svg'); }

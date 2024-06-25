@@ -211,6 +211,12 @@ class Metadata:
             return title
         return self.filename_title()
 
+    def download_name(self) -> str:
+        """
+        Name for a downloaded file. display_title() with some characters removed.
+        """
+        return re.sub(r'[^\x00-\x7f]', r'', self.display_title())
+
     def lyrics_search_query(self) -> str:
         """
         Generate a search query to find lyrics
