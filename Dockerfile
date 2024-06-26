@@ -3,7 +3,7 @@ FROM python:3.12-slim AS base
 FROM base AS ffmpeg-build
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends wget bzip2 g++ make nasm pkg-config libopus-dev libwebp-dev zlib1g-dev
+    apt-get install -y --no-install-recommends wget bzip2 g++ make nasm pkg-config libopus-dev libwebp-dev zlib1g-dev libmp3lame-dev
 
 RUN mkdir /build && \
     cd /build && \
@@ -21,6 +21,7 @@ RUN cd /build/ffmpeg && \
         # External libraries
         --enable-libopus \
         --enable-libwebp \
+        --enable-libmp3lame \
         # Required for PNG
         --enable-zlib \
         # Configuration options
@@ -49,6 +50,7 @@ RUN cd /build/ffmpeg && \
         --enable-encoder=libwebp \
         --enable-encoder=pcm_s16le \
         --enable-encoder=mjpeg \
+        --enable-encoder=libmp3lame \
         --enable-decoder=alac \
         --enable-demuxer=aac \
         --enable-demuxer=flac \
@@ -85,7 +87,8 @@ RUN cd /build/ffmpeg && \
 # For later layer to copy
 RUN mkdir /ffmpeg-libs && \
     cp -a /usr/lib/x86_64-linux-gnu/libopus.so* /ffmpeg-libs && \
-    cp -a /usr/lib/x86_64-linux-gnu/libwebp.so* /ffmpeg-libs
+    cp -a /usr/lib/x86_64-linux-gnu/libwebp.so* /ffmpeg-libs && \
+    cp -a /usr/lib/x86_64-linux-gnu/libmp3lame.so* /ffmpeg-libs
 
 ###############################################################################
 
