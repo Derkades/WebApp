@@ -71,7 +71,7 @@ def download(code, format):
         elif format == 'mp3':
             audio_bytes = track.transcoded_audio(AudioType.MP3_WITH_METADATA)
             response = Response(audio_bytes, content_type='audio/mp3')
-            download_name = track.metadata().download_name()
+            download_name = track.metadata().download_name() + '.mp3'
             response.headers['Content-Disposition'] = f'attachment; filename="{download_name}"'
         else:
             abort(400, 'Invalid format')
