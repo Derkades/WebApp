@@ -1,6 +1,6 @@
-FROM python:3.12-slim as base
+FROM python:3.12-slim AS base
 
-FROM base as ffmpeg-build
+FROM base AS ffmpeg-build
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends wget bzip2 g++ make nasm pkg-config libopus-dev libwebp-dev zlib1g-dev
@@ -100,9 +100,9 @@ COPY --from=ffmpeg-build /ffmpeg-libs /usr/lib/x86_64-linux-gnu
 
 COPY ./docker/manage.sh /usr/local/bin/manage
 
-ENV PYTHONUNBUFFERED 1
-ENV MUSIC_MUSIC_DIR /music
-ENV MUSIC_DATA_PATH /data
+ENV PYTHONUNBUFFERED=1
+ENV MUSIC_MUSIC_DIR=/music
+ENV MUSIC_DATA_PATH=/data
 
 WORKDIR "/mp"
 
