@@ -113,6 +113,8 @@ FROM common AS prod
 COPY ./app /mp/app
 COPY mp.py /mp
 
+RUN PYTHONDONTWRITEBYTECODE=1 pybabel compile -d /mp/app/translations
+
 ENTRYPOINT ["python3", "mp.py"]
 CMD ["start", "--host", "0.0.0.0"]
 
