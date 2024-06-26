@@ -24,8 +24,10 @@ def _connect(db_name: str, read_only: bool) -> Connection:
     conn = sqlite3.connect(db_uri, uri=True, timeout=10.0)
     conn.execute('PRAGMA auto_vacuum = INCREMENTAL')
     conn.execute('PRAGMA foreign_keys = ON')
+    conn.execute('PRAGMA temp_store = MEMORY')
     if not read_only:  # pragma sometimes throws error when executed in read-only mode
         conn.execute('PRAGMA journal_mode = WAL')
+        conn.execute('PRAGMA synchronous = NORMAL')
     return conn
 
 
