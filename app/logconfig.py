@@ -6,15 +6,15 @@ def get_config_dict(short_log_format: bool, error_log_path: Path | None, log_lev
         'version': 1,
         'formatters': {
             'detailed': {
-                'format': '%(asctime)s [%(process)d:%(thread)d] [%(levelname)s] [%(module)s:%(lineno)s] %(message)s',
+                'format': '%(asctime)s [%(process)d:%(thread)d] [%(levelname)s] [%(name)s:%(module)s:%(lineno)s] %(message)s',
                 'datefmt': '%Y-%m-%d %H:%M:%S %Z',
             },
             'default': {
-                'format': '%(asctime)s %(levelname)s %(module)s: %(message)s',
+                'format': '%(asctime)s %(levelname)s %(name)s: %(message)s',
                 'datefmt': '%Y-%m-%d %H:%M:%S %Z',
             },
             'short': {
-                'format': '%(asctime)s %(levelname)s %(module)s: %(message)s',
+                'format': '%(asctime)s %(levelname)s %(name)s: %(message)s',
                 'datefmt': '%H:%M:%S',
             }
         },
@@ -26,7 +26,7 @@ def get_config_dict(short_log_format: bool, error_log_path: Path | None, log_lev
             },
         },
         'loggers': {
-            'gunicorn.stderr': {
+            'gunicorn.error': {
                 'level': log_level,
                 'handlers': ['stdout', 'errors'],
             },
