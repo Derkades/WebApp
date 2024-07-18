@@ -6,5 +6,4 @@ beautifulsoup4~=4.0
 lxml~=5.0
 bcrypt~=4.0
 yt-dlp
-feedparser~=6.0
 prometheus-client~=0.20.0
