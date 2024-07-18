@@ -4,7 +4,6 @@ import hmac
 import logging
 import os
 
-import bcrypt
 from flask import request
 
 from app import jsonw
@@ -40,6 +39,7 @@ def verify_password(password: str, hashed_password: str) -> bool:
     if hashed_password.startswith('$2b'):
         # Legacy bcrypt password
         log.warning('Logged in using legacy bcrypt password')
+        import bcrypt # only import bcrypt when actually required
         return bcrypt.checkpw(password.encode(), hashed_password.encode())
 
     hash_json = jsonw.from_json(hashed_password)
