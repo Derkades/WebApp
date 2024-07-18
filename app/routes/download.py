@@ -2,7 +2,7 @@ import logging
 
 from flask import Blueprint, Response, abort, render_template, request
 
-from app import auth, db, downloader, music, scanner
+from app import auth, db, music, scanner
 
 log = logging.getLogger('app.routes.download')
 bp = Blueprint('download', __name__, url_prefix='/download')
@@ -26,6 +26,8 @@ def route_download():
 @bp.route('/search', methods=['POST'])
 def route_search():
     """Search using yt-dlp"""
+    from app import downloader
+
     with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
@@ -41,6 +43,8 @@ def route_ytdl():
     """
     Use yt-dlp to download the provided URL to a playlist directory
     """
+    from app import downloader
+
     with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])

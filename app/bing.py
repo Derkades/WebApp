@@ -14,6 +14,11 @@ from app import settings
 log = logging.getLogger("app.bing")
 
 
+if settings.offline_mode:
+    # Module must not be imported to ensure no data is ever downloaded in offline mode.
+    raise RuntimeError('Cannot use bing in offline mode')
+
+
 def _download(image_url: str) -> bytes | None:
     """
     Download image by URL

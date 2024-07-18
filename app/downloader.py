@@ -8,7 +8,14 @@ from typing import Generator
 
 from yt_dlp import DownloadError, YoutubeDL
 
+from app import settings
+
 log = logging.getLogger('app.downloader')
+
+
+if settings.offline_mode:
+    # Module must not be imported to ensure no data is ever downloaded in offline mode.
+    raise RuntimeError('Cannot use downloader in offline mode')
 
 
 @dataclass

@@ -13,6 +13,11 @@ from app import cache, settings
 log = logging.getLogger('app.genius')
 
 
+if settings.offline_mode:
+    # Module must not be imported to ensure no data is ever downloaded in offline mode.
+    raise RuntimeError('Cannot use genius in offline mode')
+
+
 @dataclass
 class Lyrics:
     source_url: str | None

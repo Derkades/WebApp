@@ -14,7 +14,7 @@ from sqlite3 import Connection
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, Iterator, Literal, Optional
 
-from app import (bing, cache, image, jsonw, metadata, musicbrainz, reddit,
+from app import (cache, image, jsonw, metadata, musicbrainz, reddit,
                  scanner, settings)
 from app.auth import User
 from app.image import ImageFormat, ImageQuality
@@ -107,6 +107,8 @@ def sort_artists(artists: Optional[list[str]], album_artist: Optional[str]) -> O
 
 
 def _get_possible_covers(artist: Optional[str], album: str, meme: bool) -> Iterator[bytes]:
+    from app import bing
+
     if meme:
         if random.random() > 0.5:
             if image_bytes := reddit.get_image(album):

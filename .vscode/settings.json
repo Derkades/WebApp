@@ -1,7 +1,7 @@
 {
     "pylint.args": [
         "--max-line-length=120",
-        "--disable=missing-class-docstring,missing-module-docstring,broad-except"
+        "--disable=missing-class-docstring,missing-module-docstring,broad-except,import-outside-toplevel"
     ],
     "mypy-type-checker.preferDaemon": true,
     "mypy-type-checker.args": [

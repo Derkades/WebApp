@@ -1,11 +1,10 @@
 import logging
-import re
 from datetime import datetime, timezone
 from typing import Any
 
 from flask import Blueprint, Response, abort, request
 
-from app import auth, db, genius, image, jsonw, music, settings
+from app import auth, db, image, jsonw, music, settings
 from app.image import ImageFormat
 from app.music import AudioType, Track
 
@@ -80,7 +79,7 @@ def route_audio():
     response.cache_control.no_cache = True  # always revalidate cache
     response.accept_ranges = 'bytes'  # Workaround for Chromium bug https://stackoverflow.com/a/65804889
     if audio_type == AudioType.MP3_WITH_METADATA:
-        mp3_name = track.metadata().filename_name()
+        mp3_name = track.metadata().filename_title()
         response.headers['Content-Disposition'] = f'attachment; filename="{mp3_name}"'
     return response
 
@@ -141,6 +140,8 @@ def route_lyrics():
         return {'found': True,
                 'source': None,
                 'html': meta.lyrics.replace('\n', '<br>')}
+
+    from app import genius
 
     lyrics = genius.get_lyrics(meta.lyrics_search_query())
     if lyrics is None:
