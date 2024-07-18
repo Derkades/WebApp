@@ -4,21 +4,8 @@ set -e
 # Install python
 pkg install -y python python-pip
 
-# Bcrypt extension must be installed from the Termux repositories
-pkg install -y python-bcrypt
-
-# Install dependencies for lxml
-pkg install -y libxml2 libxslt
-
-# libexpat is also required, I don't know by what
-pkg install -y libexpat
-
-# Temporary workaround for lxml installation issue
-# https://github.com/termux/termux-packages/issues/18579
-export CFLAGS="-Wno-error=incompatible-function-pointer-types"
-
-# Other Python extensions can be installed directly from PyPi
-pip install -r requirements.txt
+# Install Python extensions from PyPi
+pip install --user --upgrade -r requirements-offline.txt
 
 # Create data directory
 mkdir data

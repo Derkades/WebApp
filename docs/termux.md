@@ -22,7 +22,7 @@ cd WebApp
 termux/install
 ```
 
-This will install Python, some dependencies and the required Python extensions.
+This will install Python and the required Python extensions.
 
 ## Sync music
 ```
@@ -41,7 +41,10 @@ termux/start
 Visit http://localhost:8080 in a web browser. Use Ctrl+C to stop the web server.
 
 ## Updating
+
+Updates may introduce bugs. It is advisable that you do not update at a time where you need the music player to work.
+
 1. Enter the correct directory.
 2. Run `git pull` to download new source code.
-3.  If your previous update was before 2023-10-28, use the [migrations](./migrations.md) wiki page to update your database.
-4. Run `termux/install` to ensure dependencies are up-to-date.
+3. If your previous update was before 2023-10-28, use the [migrations](./migrations.md) wiki page to update your database.
+4. Run `termux/install` to update Python dependencies.
