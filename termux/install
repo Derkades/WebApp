@@ -8,4 +8,4 @@ pkg install -y python python-pip
 pip install --user --upgrade -r requirements-offline.txt
 
 # Create data directory
-mkdir data
+mkdir -p data
