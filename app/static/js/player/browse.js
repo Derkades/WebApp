@@ -168,12 +168,9 @@ class Browse {
         const hcolPlaylist = document.createElement('th');
         const hcolDuration = document.createElement('th');
         const hcolTitle = document.createElement('th');
-        const hcolAddTop = document.createElement('th');
-        const hcolAddBottom = document.createElement('th');
+        const hcolAdd = document.createElement('th');
         const hcolEdit = document.createElement('th')
-        headerRow.replaceChildren(hcolPlaylist, hcolDuration, hcolTitle, hcolAddTop, hcolAddBottom, hcolEdit);
-
-
+        headerRow.replaceChildren(hcolPlaylist, hcolDuration, hcolTitle, hcolAdd, hcolEdit);
 
         for (const track of tracks) {
             const colPlaylist = document.createElement('td');
@@ -185,35 +182,24 @@ class Browse {
             const colTitle = document.createElement('td');
             colTitle.replaceChildren(track.displayHtml());
 
-            const colAddTop = document.createElement('td');
-            const addTopButton = createIconButton('playlist-plus.svg', ['vflip']);
-            colAddTop.replaceChildren(addTopButton);
+            const colAdd = document.createElement('td');
+            const addButton = createIconButton('playlist-plus.svg');
+            colAdd.replaceChildren(addButton);
+            addButton.addEventListener('click', async function() {
+                replaceIconButton(addButton, 'loading.svg');
+                addButton.firstChild.classList.add('spinning');
+                addButton.disabled = true;
 
-            const colAddBottom = document.createElement('td');
-            const addBottomButton = createIconButton('playlist-plus.svg');
-            colAddBottom.replaceChildren(addBottomButton);
-
-            const addButtonFunction = async function(top) {
-                for (const button of [addTopButton, addBottomButton]) {
-                    replaceIconButton(button, 'loading.svg');
-                    button.firstChild.classList.add('spinning');
-                    button.disabled = true;
-                }
                 try {
-                    await track.downloadAndAddToQueue(top);
+                    await track.downloadAndAddToQueue(true);
                 } catch (ex) {
                     console.error('browse: error adding track to queue', ex)
                 }
 
-                for (const button of [addTopButton, addBottomButton]) {
-                    replaceIconButton(button, 'playlist-plus.svg')
-                    button.firstChild.classList.remove('spinning');
-                    button.disabled = false;
-                }
-            }
-
-            addTopButton.onclick = () => addButtonFunction(true);
-            addBottomButton.onclick = () => addButtonFunction(false);
+                replaceIconButton(addButton, 'playlist-plus.svg')
+                addButton.firstChild.classList.remove('spinning');
+                addButton.disabled = false;
+            });
 
             const colEdit = document.createElement('td');
             if (track.playlist().write) {
@@ -223,7 +209,7 @@ class Browse {
             }
 
             const dataRow = document.createElement('tr');
-            dataRow.replaceChildren(colPlaylist, colDuration, colTitle, colAddTop, colAddBottom, colEdit);
+            dataRow.replaceChildren(colPlaylist, colDuration, colTitle, colAdd, colEdit);
             table.appendChild(dataRow);
         }
         return table;

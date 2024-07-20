@@ -12,26 +12,58 @@ class Queue {
     /** @type {Array<QueuedTrack>} */
     previousTracks;
     /** @type {Array<QueuedTrack>} */
-    queuedTracks;
+    manualQueuedTracks;
+    /** @type {Array<QueuedTrack>} */
+    autoQueuedTracks;
 
     constructor() {
         this.#fillBusy = false;
         this.currentTrack = null;
         this.previousTracks = [];
-        this.queuedTracks = [];
+        this.manualQueuedTracks = []
+        this.autoQueuedTracks = [];
 
         eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, () => {
             this.updateHtml();
         });
 
         document.getElementById('queue-clear').addEventListener('click', () => {
-            const removedTracks = this.queuedTracks.splice(0, this.queuedTracks.length);
+            this.#combinedQueue().forEach(track => track.revokeObjects());
+            this.manualQueuedTracks = [];
+            this.autoQueuedTracks = [];
             this.fill();
-            removedTracks.forEach(track => track.revokeObjects());
         });
 
         document.addEventListener('DOMContentLoaded', () => this.fill());
     };
+
+    /**
+     * @returns {Array<QueuedTrack}
+     */
+    #combinedQueue() {
+        return [...this.manualQueuedTracks, ...this.autoQueuedTracks];
+    }
+
+    /**
+     * @returns {Number}
+     */
+    #combinedQueueLength() {
+        return this.manualQueuedTracks.length + this.autoQueuedTracks.length;
+    }
+
+    /**
+     * @param {Number} start
+     * @param {Number} deleteCount
+     * @param  {...QueuedTrack} insertTracks
+     * @returns {Array<QueuedTrack>}
+     */
+    #combinedQueueSplice(start, deleteCount, ...insertTracks) {
+        if (start < this.manualQueuedTracks.length) {
+            return this.manualQueuedTracks.splice(start, deleteCount, ...insertTracks);
+        } else {
+            return this.autoQueuedTracks.splice(start - this.manualQueuedTracks.length, deleteCount, ...insertTracks);
+        }
+    }
 
     /**
      * @returns {QueuedTrack | null}
@@ -57,7 +89,7 @@ class Queue {
             minQueueSize = 1;
         }
 
-        if (this.queuedTracks.length >= minQueueSize) {
+        if (this.autoQueuedTracks.length >= minQueueSize) {
             return;
         }
 
@@ -110,7 +142,7 @@ class Queue {
             throw Error('Track does not exist in local list: ' + path);
         }
 
-        await track.downloadAndAddToQueue();
+        await track.downloadAndAddToQueue(false);
     };
 
     updateHtml() {
@@ -119,7 +151,7 @@ class Queue {
         const rows = [];
         let i = 0;
         let totalQueueDuration = 0;
-        for (const queuedTrack of this.queuedTracks) {
+        for (const queuedTrack of this.#combinedQueue()) {
             const track = queuedTrack.track();
 
             if (track !== null) {
@@ -146,7 +178,8 @@ class Queue {
             i++;
         }
 
-        document.getElementById('current-queue-size').textContent = this.queuedTracks.length + ' / ' + durationToString(totalQueueDuration);
+        document.getElementById('current-queue-size').textContent =
+                this.#combinedQueueLength() + ' / ' + durationToString(totalQueueDuration);
 
         // If the queue is still loading (size smaller than target size), add a loading spinner
         const minQueueSize = parseInt(document.getElementById('settings-queue-size').value);
@@ -161,7 +194,7 @@ class Queue {
     };
 
     removeFromQueue(index) {
-        const track = this.queuedTracks.splice(index, 1)[0];
+        const track = this.#combinedQueueSplice(index, 1)[0];
         track.revokeObjects();
         const removalBehaviour = document.getElementById('settings-queue-removal-behaviour').value;
         if (removalBehaviour === 'same') {
@@ -212,9 +245,9 @@ class Queue {
                 const currentPos = current.dataset.queuePos;
                 const targetPos = row.dataset.queuePos;
                 // Remove current (being dragged) track from queue
-                const track = this.queuedTracks.splice(currentPos, 1)[0];
+                const track = this.#combinedQueueSplice(currentPos, 1)[0];
                 // Add it to the place it was dropped
-                this.queuedTracks.splice(targetPos, 0, track);
+                this.#combinedQueueSplice(targetPos, 0, track);
                 // Now re-render the table
                 this.updateHtml();
             };
@@ -227,7 +260,7 @@ class Queue {
         }
 
         // Move current track to beginning of queue
-        this.queuedTracks.unshift(this.currentTrack);
+        this.manualQueuedTracks.unshift(this.currentTrack);
         // Replace current track with last track in history
         this.currentTrack = this.previousTracks.pop();
 
@@ -236,7 +269,7 @@ class Queue {
     };
 
     next() {
-        if (this.queuedTracks.length === 0) {
+        if (this.#combinedQueueLength() === 0) {
             console.debug('queue: is empty, try to play next track again later');
             setTimeout(() => this.next(), 1000);
             return;
@@ -253,7 +286,11 @@ class Queue {
         }
 
         // Replace current track with first item from queue
-        this.currentTrack = this.queuedTracks.shift();
+        if (this.manualQueuedTracks.length) {
+            this.currentTrack = this.manualQueuedTracks.shift();
+        } else {
+            this.currentTrack = this.autoQueuedTracks.shift();
+        }
 
         eventBus.publish(MusicEvent.TRACK_CHANGE);
         this.fill();
@@ -262,13 +299,15 @@ class Queue {
     /**
      * Add track to queue
      * @param {QueuedTrack} queuedTrack
-     * @param {boolean} top True to add track to the top of the queue, false to add to the bottom
+     * @param {boolean} manual True to add track to the manual queue instead of auto queue (manual queue is played first)
+     * @param {boolean} top True to add track to top of queue
      */
-    add(queuedTrack, top) {
+    add(queuedTrack, manual, top = false) {
+        const queue = (manual ? this.manualQueuedTracks : this.autoQueuedTracks)
         if (top) {
-            this.queuedTracks.unshift(queuedTrack);
+            queue.unshift(queuedTrack);
         } else {
-            this.queuedTracks.push(queuedTrack);
+            queue.push(queuedTrack);
         }
         this.updateHtml();
     };

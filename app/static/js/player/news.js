@@ -50,7 +50,7 @@ class News {
         const imageBlob = URL.createObjectURL(await imageResponse.blob());
 
         const queuedTrack = new QueuedTrack(null, audioBlob, imageBlob, "News");
-        queue.add(queuedTrack, true)
+        queue.add(queuedTrack, true, true)
     }
 }
 

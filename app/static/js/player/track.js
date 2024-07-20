@@ -161,9 +161,9 @@ class Track {
 
     /**
      * Download track data, and add to queue
-     * @param {boolean} top
+     * @param {boolean} manual
      */
-    async downloadAndAddToQueue(top = false) {
+    async downloadAndAddToQueue(manual) {
         const audioType = document.getElementById('settings-audio-type').value;
 
         if (audioType.startsWith('webm') &&
@@ -222,7 +222,7 @@ class Track {
         const queuedTrack = new QueuedTrack(this, audioUrl2, imageBlobUrl, lyrics);
 
         // Add track to queue and update HTML
-        queue.add(queuedTrack, top);
+        queue.add(queuedTrack, manual);
     };
 };
 

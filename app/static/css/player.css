@@ -336,10 +336,6 @@ h4 > .icon {
     width: 2rem;
 }
 
-.vflip {
-    transform: scaleY(-1);
-}
-
 #visualiser {
     position: absolute;
     bottom: 0;
