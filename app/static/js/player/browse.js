@@ -6,7 +6,7 @@ class Browse {
 
         eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, () => {
             if (dialogs.isOpen('dialog-browse')) {
-                this.updateFilter();
+                this.updateContent();
             }
         });
     };
@@ -45,13 +45,13 @@ class Browse {
      * @param {TrackFilter} filter
      */
     browse(title, filter) {
-        this.open();
         this.setHeader(title);
         this.#history.push({
             title: title,
             filter: filter,
         });
-        this.updateFilter();
+        this.updateContent();
+        this.open();
     };
 
     back() {
@@ -59,16 +59,16 @@ class Browse {
             return;
         }
         this.#history.pop();
-        this.updateFilter();
+        this.updateContent();
     };
 
-    updateFilter() {
+    updateContent() {
+        console.time('browse: updateContent');
+
         if (this.#history.length === 0) {
-            console.warn('Requested browse list update, but there are no entries in history');
+            console.warn('browse: requested content update, but there are no entries in history');
             return;
         }
-
-        console.time('update-browse');
 
         const current = this.#history[this.#history.length - 1];
         this.setHeader(current.title);
@@ -105,9 +105,10 @@ class Browse {
             // No selected playlist, or filter. For performance reasons, don't display entire track list.
             content = null;
         }
+
         this.setContent(content);
 
-        console.timeEnd('update-browse');
+        console.timeEnd('browse: updateContent');
     }
 
     /**
@@ -172,23 +173,24 @@ class Browse {
         const hcolEdit = document.createElement('th')
         headerRow.replaceChildren(hcolPlaylist, hcolDuration, hcolTitle, hcolAdd, hcolEdit);
 
+        const addButton = createIconButton('playlist-plus.svg');
+        const editButton = createIconButton('pencil.svg');
+
         for (const track of tracks) {
             const colPlaylist = document.createElement('td');
             colPlaylist.textContent = track.playlistName;
 
             const colDuration = document.createElement('td');
-            colDuration.append(durationToString(track.duration));
+            colDuration.textContent = durationToString(track.duration);
 
             const colTitle = document.createElement('td');
-            colTitle.replaceChildren(track.displayHtml());
+            colTitle.appendChild(track.displayHtml());
 
-            const colAdd = document.createElement('td');
-            const addButton = createIconButton('playlist-plus.svg');
-            colAdd.replaceChildren(addButton);
-            addButton.addEventListener('click', async function() {
-                replaceIconButton(addButton, 'loading.svg');
-                addButton.firstChild.classList.add('spinning');
-                addButton.disabled = true;
+            const addButton2 = addButton.cloneNode(true);
+            addButton2.addEventListener('click', async function() {
+                replaceIconButton(addButton2, 'loading.svg');
+                addButton2.firstChild.classList.add('spinning');
+                addButton2.disabled = true;
 
                 try {
                     await track.downloadAndAddToQueue(true);
@@ -196,20 +198,22 @@ class Browse {
                     console.error('browse: error adding track to queue', ex)
                 }
 
-                replaceIconButton(addButton, 'playlist-plus.svg')
-                addButton.firstChild.classList.remove('spinning');
-                addButton.disabled = false;
+                replaceIconButton(addButton2, 'playlist-plus.svg')
+                addButton2.firstChild.classList.remove('spinning');
+                addButton2.disabled = false;
             });
+            const colAdd = document.createElement('td');
+            colAdd.appendChild(addButton2);
 
             const colEdit = document.createElement('td');
             if (track.playlist().write) {
-                const editButton = createIconButton('pencil.svg');
-                editButton.onclick = () => editor.open(track);
-                colEdit.replaceChildren(editButton);
+                const editButton2 = editButton.cloneNode(true);
+                editButton2.addEventListener('click', () => editor.open(track));
+                colEdit.appendChild(editButton2);
             }
 
             const dataRow = document.createElement('tr');
-            dataRow.replaceChildren(colPlaylist, colDuration, colTitle, colAdd, colEdit);
+            dataRow.append(colPlaylist, colDuration, colTitle, colAdd, colEdit);
             table.appendChild(dataRow);
         }
         return table;
@@ -220,7 +224,7 @@ const browse = new Browse();
 
 document.addEventListener('DOMContentLoaded', () => {
     // Playlist dropdown
-    document.getElementById('browse-filter-playlist').addEventListener('input', () => browse.updateFilter());
+    document.getElementById('browse-filter-playlist').addEventListener('input', () => browse.updateContent());
 
     // Button to open browse dialog
     document.getElementById('browse-all').addEventListener('click', () => browse.browseAll());
