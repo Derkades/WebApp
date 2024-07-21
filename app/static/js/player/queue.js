@@ -187,10 +187,11 @@ class Queue {
             rows.push(document.getElementById('template-queue-spinner').content.cloneNode(true));
         }
 
+        // Add events to <tr> elements
+        queue.#dragDropTable(rows);
+
         const outerDiv = document.getElementById('queue-table');
         outerDiv.replaceChildren(...rows);
-        // Add events to <tr> elements
-        queue.dragDropTable();
     };
 
     removeFromQueue(index) {
@@ -208,29 +209,32 @@ class Queue {
     };
 
     // Based on https://code-boxx.com/drag-drop-sortable-list-javascript/
-    dragDropTable() {
-        let items = document.getElementById('queue-table').getElementsByTagName("tr");
+    /**
+     * @param {Array<HTMLTableRowElement>} rows
+     */
+    #dragDropTable(rows) {
         let current = null; // Element that is being dragged
 
-        for (let row of items) {
+        for (let row of rows) {
             row.draggable = true; // Make draggable
 
             // The .hint class is purely cosmetic, it may be styled using css
+            // Currently disabled because no CSS is applied
 
-            row.ondragstart = () => {
-                current = row;
-                for (let it of items) {
-                    if (it != current) {
-                        it.classList.add('hint');
-                    }
-                }
-            };
+            // row.ondragstart = () => {
+            //     current = row;
+            //     for (let row2 of rows) {
+            //         if (row2 != current) {
+            //             row2.classList.add('hint');
+            //         }
+            //     }
+            // };
 
-            row.ondragend = () => {
-                for (let it of items) {
-                    it.classList.remove("hint");
-                }
-            };
+            // row.ondragend = () => {
+            //     for (let row2 of rows) {
+            //         row2.classList.remove("hint");
+            //     }
+            // };
 
             row.ondragover = event => event.preventDefault();
 
