@@ -229,25 +229,28 @@ def route_played():
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
 
-        track = request.json['track']
+        track = Track.by_relpath(conn, request.json['track'])
+        if track is None:
+            log.warning('skipping track that does not exist: %s', request.json['track'])
+            return Response('ok', 200, content_type='text/plain')
+
         timestamp = int(request.json['timestamp'])
 
         # In offline mode, tracks are chosen without last_chosen being updated. Update it now.
         conn.execute('UPDATE track SET last_chosen=MAX(last_chosen, ?) WHERE path=?',
-                     (timestamp, track))
+                     (timestamp, track.relpath))
 
         if user.privacy == PrivacyOption.HIDDEN:
             log.info('Ignoring because privacy==hidden')
             return Response('ok', 200)
 
-        playlist = track[:track.index('/')]
         private = user.privacy == PrivacyOption.AGGREGATE
 
         conn.execute('''
                      INSERT INTO history (timestamp, user, track, playlist, private)
                      VALUES (?, ?, ?, ?, ?)
                      ''',
-                     (timestamp, user.user_id, track, playlist, private))
+                     (timestamp, user.user_id, track.relpath, track.playlist, private))
 
         if private or not request.json['lastfmEligible']:
             # No need to scrobble, nothing more to do
@@ -259,11 +262,7 @@ def route_played():
             # User has not linked their account, no need to scrobble
             return Response('ok', 200, content_type='text/plain')
 
-        track = Track.by_relpath(conn, request.json['track'])
         meta = track.metadata()
-        if meta is None:
-            log.warning('Track is missing from database. Probably deleted by a rescan after the track was queued.')
-            return Response('ok', 200, content_type='text/plain')
 
     # Scrobble request takes a while, so close database connection first
     log.info('Scrobbling to last.fm: %s', track.relpath)
