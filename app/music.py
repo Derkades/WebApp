@@ -14,8 +14,8 @@ from sqlite3 import Connection
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, Iterator, Literal, Optional
 
-from app import (cache, image, jsonw, metadata, musicbrainz, reddit,
-                 scanner, settings)
+from app import (cache, image, jsonw, metadata, musicbrainz, reddit, scanner,
+                 settings)
 from app.auth import User
 from app.image import ImageFormat, ImageQuality
 

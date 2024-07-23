@@ -1,13 +1,14 @@
-from flask import Blueprint, render_template, request, abort, redirect, Response, send_file
-
-from app.music import Track
-from base64 import b32encode, b64encode
 import os
-from app import db, auth, jsonw
-from app.image import QUALITY_HIGH, ImageFormat
-from app.music import AudioType
-from app.auth import User
 import time
+from base64 import b32encode, b64encode
+
+from flask import (Blueprint, Response, abort, redirect, render_template,
+                   request, send_file)
+
+from app import auth, db, jsonw
+from app.auth import User
+from app.image import QUALITY_HIGH, ImageFormat
+from app.music import AudioType, Track
 
 bp = Blueprint('share', __name__, url_prefix='/share')
 
