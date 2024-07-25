@@ -221,14 +221,14 @@ class Queue {
             // The .hint class is purely cosmetic, it may be styled using css
             // Currently disabled because no CSS is applied
 
-            // row.ondragstart = () => {
-            //     current = row;
-            //     for (let row2 of rows) {
-            //         if (row2 != current) {
-            //             row2.classList.add('hint');
-            //         }
-            //     }
-            // };
+            row.ondragstart = () => {
+                current = row;
+                // for (let row2 of rows) {
+                //     if (row2 != current) {
+                //         row2.classList.add('hint');
+                //     }
+                // }
+            };
 
             // row.ondragend = () => {
             //     for (let row2 of rows) {
