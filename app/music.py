@@ -82,7 +82,7 @@ def is_music_file(path: Path) -> bool:
     return False
 
 
-def list_tracks_recursively(path: Path) -> Iterator[Path]:
+def list_tracks_recursively(path: Path, trashed: bool = False) -> Iterator[Path]:
     """
     Scan directory for tracks, recursively
     Args:
@@ -91,7 +91,7 @@ def list_tracks_recursively(path: Path) -> Iterator[Path]:
     """
     for ext in MUSIC_EXTENSIONS:
         for track_path in path.glob('**/*' + ext):
-            if not is_trashed(track_path):
+            if is_trashed(track_path) == trashed:
                 yield track_path
 
 

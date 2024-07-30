@@ -1,9 +1,18 @@
 import logging
 import time
 
-from app import auth, cache, db
+from app import auth, cache, db, music, settings
 
 log = logging.getLogger('app.cleanup')
+
+
+def delete_old_trashed_files():
+    count = 0
+    for path in music.list_tracks_recursively(settings.music_dir, trashed=True):
+        if path.stat().st_ctime < time.time() - 60*60*24*30:
+            log.info('Permanently deleting: %s', path.absolute().as_posix())
+            count += 1
+    return count
 
 
 def cleanup() -> None:
@@ -14,5 +23,8 @@ def cleanup() -> None:
         count = conn.execute('DELETE FROM now_playing WHERE timestamp < ?',
                              (time.time() - 300,)).rowcount
         log.info('Deleted %s now playing entries', count)
+
+        count = delete_old_trashed_files()
+        log.info('Deleted %s trashed files', count)
 
     cache.cleanup()
