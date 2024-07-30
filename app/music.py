@@ -57,7 +57,7 @@ def from_relpath(relpath: str) -> Path:
         raise ValueError('Relative path must not start with /')
     path = Path(settings.music_dir, relpath).resolve()
     if not path.is_relative_to(settings.music_dir):
-        raise ValueError('Path ' + path.as_posix() + ' is not inside music base directory ' + settings.music_dir.as_posix())
+        raise ValueError(f'Path {path.as_posix()} is not inside music base directory {settings.music_dir.as_posix()}')
     return path
 
 
@@ -134,7 +134,8 @@ def _get_possible_covers(artist: Optional[str], album: str, meme: bool) -> Itera
     yield settings.raphson_png.read_bytes()
 
 
-def get_cover(artist: Optional[str], album: str, meme: bool, img_quality: ImageQuality, img_format: ImageFormat) -> bytes:
+def get_cover(artist: Optional[str], album: str, meme: bool,
+              img_quality: ImageQuality, img_format: ImageFormat) -> bytes:
     """
     Find album cover using MusicBrainz or Bing.
     Parameters:
@@ -145,7 +146,8 @@ def get_cover(artist: Optional[str], album: str, meme: bool, img_quality: ImageQ
 
     cache_data = cache.retrieve(cache_key + img_quality.name + img_format.name)
     if cache_data is not None:
-        log.info('Returning %s quality %s cover thumbnail from cache: %s - %s', img_quality.name, img_format, artist, album)
+        log.info('Returning %s quality %s cover thumbnail from cache: %s - %s',
+                 img_quality.name, img_format, artist, album)
         return cache_data
 
     log.info('Cover thumbnail not cached, need to download album cover image: %s - %s', artist, album)
@@ -311,7 +313,9 @@ class Track:
         log.info('Measured integrated loudness: %s', meas_json['input_i'])
 
         if float(meas_json['input_i']) > 0:
-            log.warning('Measured positive loudness. This should be impossible, but can happen with input files containing out of range values. Need to use single-pass loudnorm filter instead.')
+            log.warning('Measured positive loudness. This should be impossible, but can happen '
+                        'with input files containing out of range values. Need to use '
+                        'single-pass loudnorm filter instead.')
             log.warning('Track: %s', self.path.resolve().as_posix())
             loudnorm = settings.loudnorm_filter
         else:

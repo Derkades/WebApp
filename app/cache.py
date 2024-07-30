@@ -68,6 +68,9 @@ def retrieve(key: str,
 
 
 def cleanup() -> None:
+    """
+    Remove any cache entries that are beyond their expire time.
+    """
     with db.cache() as conn:
         count = conn.execute('DELETE FROM cache WHERE expire_time < ?',
                             (int(time.time()),)).rowcount

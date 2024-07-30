@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from flask import Blueprint, abort, redirect, render_template, request
 
 from app import auth, db, music, scanner, settings, util
@@ -9,6 +7,9 @@ bp = Blueprint('playlists', __name__, url_prefix='/playlists')
 
 @bp.route('')
 def route_playlists():
+    """
+    Playlist management page
+    """
     with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn, redirect_to_login=True)
         csrf_token = user.get_csrf()
@@ -30,6 +31,9 @@ def route_playlists():
 
 @bp.route('/favorite', methods=['POST'])
 def route_favorite():
+    """
+    Form target to mark a playlist as favorite.
+    """
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.form['csrf'])
@@ -47,6 +51,9 @@ def route_favorite():
 
 @bp.route('/set_primary', methods=['POST'])
 def route_set_primary():
+    """
+    Form target to configure a primary playlist.
+    """
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.form['csrf'])
@@ -91,6 +98,10 @@ def route_create():
 
 @bp.route('/share', methods=['GET', 'POST'])
 def route_share():
+    """
+    GET: Page to select a username to share the provided playlist with
+    POST: Form target to submit the selected username
+    """
     if request.method == 'GET':
         with db.connect(read_only=True) as conn:
             auth.verify_auth_cookie(conn)

@@ -1,12 +1,11 @@
 import os
 import time
-from base64 import b32encode, b64encode
+from base64 import b32encode
 
-from flask import (Blueprint, Response, abort, redirect, render_template,
-                   request, send_file)
+from flask import (Blueprint, Response, abort, render_template, request,
+                   send_file)
 
 from app import auth, db, jsonw
-from app.auth import User
 from app.image import QUALITY_HIGH, ImageFormat
 from app.music import AudioType, Track
 
@@ -14,10 +13,16 @@ bp = Blueprint('share', __name__, url_prefix='/share')
 
 
 def gen_share_code() -> str:
+    """
+    Generate new random share code
+    """
     return b32encode(os.urandom(8)).decode().lower().rstrip('=')
 
 
 def track_by_code(conn, code: str) -> Track:
+    """
+    Find track using a provided share code
+    """
     row = conn.execute('SELECT track FROM shares WHERE share_code=?',
                            (code,)).fetchone()
     if row is None:
@@ -28,6 +33,9 @@ def track_by_code(conn, code: str) -> Track:
 
 @bp.route('/create', methods=["POST"])
 def create():
+    """
+    Endpoint to create a share link, called from web music player.
+    """
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
 
@@ -45,6 +53,9 @@ def create():
 
 @bp.route('/<code>/cover')
 def cover(code):
+    """
+    Route providing a WEBP album cover image
+    """
     with db.connect(read_only=True) as conn:
         track = track_by_code(conn, code)
         cover_bytes = track.get_cover(meme=False, img_quality=QUALITY_HIGH, img_format=ImageFormat.WEBP)
@@ -54,6 +65,9 @@ def cover(code):
 
 @bp.route('/<code>/audio')
 def audio(code):
+    """
+    Route to stream opus audio.
+    """
     with db.connect(read_only=True) as conn:
         track = track_by_code(conn, code)
         audio_bytes = track.transcoded_audio(AudioType.WEBM_OPUS_HIGH)
@@ -62,14 +76,17 @@ def audio(code):
 
 
 @bp.route('/<code>/download/<format>')
-def download(code, format):
+def download(code, file_format):
+    """
+    Route to download an audio file.
+    """
     with db.connect(read_only=True) as conn:
         track = track_by_code(conn, code)
 
-        if format == 'original':
+        if file_format == 'original':
             response = send_file(track.path)
             response.headers['Content-Disposition'] = f'attachment; filename="{track.path.name}"'
-        elif format == 'mp3':
+        elif file_format == 'mp3':
             audio_bytes = track.transcoded_audio(AudioType.MP3_WITH_METADATA)
             response = Response(audio_bytes, content_type='audio/mp3')
             download_name = track.metadata().download_name() + '.mp3'
@@ -82,6 +99,9 @@ def download(code, format):
 
 @bp.route('/<code>')
 def show(code):
+    """
+    Web page displaying a shared track.
+    """
     with db.connect(read_only=True) as conn:
         track = track_by_code(conn, code)
 

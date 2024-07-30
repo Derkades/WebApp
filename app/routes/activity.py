@@ -15,6 +15,10 @@ bp = Blueprint('activity', __name__, url_prefix='/activity')
 
 
 def get_file_changes_list(conn: Connection, limit: int) -> list[dict[str, str]]:
+    """
+    Helper function to get a list of file changes as a dictionary list. Used by route_data to
+    provide a JSON API and by route_all to provide a static page with more history.
+    """
     result = conn.execute(f'''
                               SELECT timestamp, action, playlist, track
                               FROM scanner_log
@@ -36,18 +40,12 @@ def get_file_changes_list(conn: Connection, limit: int) -> list[dict[str, str]]:
              for timestamp, action, playlist, track in result]
 
 
-@bp.route('/files')
-def route_files():
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn, redirect_to_login=True)
-        changes = get_file_changes_list(conn, 2000)
-
-    return render_template('activity_files.jinja2',
-                           changes=changes)
-
-
 @bp.route('')
 def route_activity():
+    """
+    Main activity page, showing currently playing tracks and history of
+    played tracks and modified files.
+    """
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn, redirect_to_login=True)
 
@@ -56,6 +54,9 @@ def route_activity():
 
 @bp.route('/data')
 def route_data():
+    """
+    Endpoint providing data for main activity page in JSON format.
+    """
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
 
@@ -111,8 +112,24 @@ def route_data():
             'file_changes': file_changes}
 
 
+@bp.route('/files')
+def route_files():
+    """
+    Page with long static list of changed files history, similar to route_all()
+    """
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn, redirect_to_login=True)
+        changes = get_file_changes_list(conn, 2000)
+
+    return render_template('activity_files.jinja2',
+                           changes=changes)
+
+
 @bp.route('/all')
 def route_all():
+    """
+    Page with long static list of playback history, similar to route_files()
+    """
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn, redirect_to_login=True)
 
@@ -217,6 +234,16 @@ def route_now_playing():
 
 @bp.route('/played', methods=['POST'])
 def route_played():
+    """
+    Route to submit an entry to played tracks history, optionally also
+    scrobbling to last.fm. Used by web music player and also by offline
+    sync to submit many previously played tracks.
+    POST body:
+     - track: relpath
+     - timestamp: time at which track met played conditions (roughly)
+     - lastfmEligible: bool, True if track should be scrobbled to last.fm (ignored in offline mode)
+     - csrf: csrf token (ignored in offline mode)
+    """
     if settings.offline_mode:
         with db.offline() as conn:
             track = request.json['track']

@@ -6,7 +6,10 @@ from app import auth, cache, db, music, settings
 log = logging.getLogger('app.cleanup')
 
 
-def delete_old_trashed_files():
+def delete_old_trashed_files() -> int:
+    """
+    Delete trashed files after 30 days.
+    """
     count = 0
     for path in music.list_tracks_recursively(settings.music_dir, trashed=True):
         if path.stat().st_ctime < time.time() - 60*60*24*30:
@@ -16,6 +19,9 @@ def delete_old_trashed_files():
 
 
 def cleanup() -> None:
+    """
+    Main function called by cleanup command. Invokes other cleanup functions
+    """
     with db.connect() as conn:
         count = auth.prune_old_session_tokens(conn)
         log.info('Deleted %s session tokens', count)
