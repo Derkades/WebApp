@@ -22,6 +22,8 @@ def cleanup() -> None:
     """
     Main function called by cleanup command. Invokes other cleanup functions
     """
+    start_time = time.time()
+
     with db.connect() as conn:
         count = auth.prune_old_session_tokens(conn)
         log.info('Deleted %s session tokens', count)
@@ -34,3 +36,8 @@ def cleanup() -> None:
         log.info('Deleted %s trashed files', count)
 
     cache.cleanup()
+
+    end_time = time.time()
+
+    if end_time - start_time > 10:
+        log.warning('Cache cleanup took quite long. Consider calling the cleanup command more often. Many music player functions are not available while cleanup is running.')
