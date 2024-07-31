@@ -14,6 +14,7 @@ def delete_old_trashed_files() -> int:
     for path in music.list_tracks_recursively(settings.music_dir, trashed=True):
         if path.stat().st_ctime < time.time() - 60*60*24*30:
             log.info('Permanently deleting: %s', path.absolute().as_posix())
+            path.unlink()
             count += 1
     return count
 
