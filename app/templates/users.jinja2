@@ -25,6 +25,7 @@
         <tr>
             <th class="icon-col">{% trans %}Username{% endtrans %}</th>
             <th>{% trans %}Admin{% endtrans %}</th>
+            <th>{% trans %}Last used{% endtrans %}</th>
             <th>{% trans %}Primary playlist{% endtrans %}</th>
             <th>{% trans %}Writable playlists{% endtrans %}</th>
         </tr>
@@ -42,6 +43,9 @@
                         {% trans%}No{% endtrans %}
                     {% endif %}
                 </td>
+                <td class="format-timestamp">
+                    {{ user.last_use }}
+                </td>
                 <td>
                     {{ user.primary_playlist }}
                 </td>
@@ -58,5 +62,7 @@
         {% endfor %}
     </tbody>
 </table>
+
+<script src="/static/js/base.js"></script>
 
 {% endblock content %}

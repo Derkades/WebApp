@@ -12,12 +12,16 @@ def route_users():
         user = auth.verify_auth_cookie(conn, require_admin=True, redirect_to_login=True)
         new_csrf_token = user.get_csrf()
 
-        result = conn.execute('SELECT id, username, admin, primary_playlist FROM user')
+        result = conn.execute('''
+                              SELECT id, username, admin, primary_playlist, MAX(last_use)
+                              FROM user JOIN session ON user.id = session.user
+                              ''')
         users = [{'id': user_id,
                   'username': username,
                   'admin': admin,
-                  'primary_playlist': primary_playlist}
-                 for user_id, username, admin, primary_playlist in result]
+                  'primary_playlist': primary_playlist,
+                  'last_use': last_use}
+                 for user_id, username, admin, primary_playlist, last_use in result]
 
         for user_dict in users:
             result = conn.execute('SELECT playlist FROM user_playlist_write WHERE user=?',
