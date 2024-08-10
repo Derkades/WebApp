@@ -354,7 +354,7 @@ def main():
         settings.music_dir = Path('/dev/null')
     else:
         assert args.music_dir, 'music dir must be set when not running in offline mode'
-        settings.music_dir = Path(args.music_dir).absolute()
+        settings.music_dir = Path(args.music_dir).resolve()
         assert settings.music_dir.exists(), 'music dir does not exist: ' + settings.music_dir.as_posix()
 
     logconfig_dict = logconfig.get_config_dict(args.short_log_format, Path(args.data_dir, 'errors.log'), args.log_level)
