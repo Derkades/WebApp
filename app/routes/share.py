@@ -110,10 +110,13 @@ def show(code):
                                   FROM shares JOIN user ON shares.user = user.id
                                   WHERE share_code=?
                                   ''', (code,)).fetchone()
+        meta = track.metadata()
 
-        track_display = track.metadata().display_title()
+        from app import genius
+        lyrics = genius.get_lyrics(meta.lyrics_search_query())
 
     return render_template('share.jinja2',
                            code=code,
                            shared_by=shared_by,
-                           track=track_display)
+                           track=meta.display_title(),
+                           lyrics=lyrics.lyrics_html if lyrics else None)

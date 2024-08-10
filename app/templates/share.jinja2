@@ -4,6 +4,10 @@
     {% trans %}Share{% endtrans %}
 {% endblock title %}
 
+{% block styles %}
+    <link rel="stylesheet" href="/static/css/share.css">
+{% endblock styles %}
+
 {% block content %}
 
 {{ page_heading(gettext('Share')) }}
@@ -24,6 +28,17 @@
     <source src="/share/{{code}}/audio" type="audio/webm">
 </audio>
 <br>
-<img src="/share/{{ code }}/cover" width="200">
+
+<div class="half">
+    <img src="/share/{{ code }}/cover">
+</div>
+
+<div class="half">
+    {% if lyrics %}
+    {{ lyrics }}
+    {% else %}
+    <i>">{% trans %}No lyrics found{% endtrans %}</i>
+    {% endif %}
+</div>
 
 {% endblock content %}

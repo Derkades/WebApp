@@ -1,0 +1,17 @@
+img {
+    width: 800px;
+    max-width: 100%;
+}
+
+.half {
+    width: 50%;
+    float: left;
+    padding: .5rem;
+    box-sizing: border-box;
+}
+
+@media screen and (max-width: 800px) {
+    .half {
+        width: 100%;
+    }
+}
