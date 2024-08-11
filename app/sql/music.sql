@@ -73,7 +73,7 @@ CREATE TABLE user_lastfm (
 CREATE TABLE session (
     user INTEGER NOT NULL REFERENCES user(id) ON DELETE CASCADE,
     token TEXT NOT NULL UNIQUE,
-    csrf_token TEXT NULL, -- For new sesions never null, only legacy sessions have NULL csrf_token (January 2024). In the future, migrate table to NOT NULL and remove legacy code, discarding any old sessions with NULL token.
+    csrf_token TEXT NOT NULL,
     creation_date INTEGER NOT NULL, -- Seconds since UNIX epoch
     user_agent TEXT NULL,
     remote_address TEXT NULL,

@@ -1,5 +1,3 @@
-import base64
-import hashlib
 import hmac
 import logging
 import secrets
@@ -23,7 +21,7 @@ log = logging.getLogger('app.auth')
 class Session:
     rowid: int
     token: str
-    csrf_token: Optional[str]
+    csrf_token: str
     creation_timestamp: int
     user_agent: Optional[str]
     remote_address: Optional[str]
@@ -152,13 +150,7 @@ class StandardUser(User):
         return [Session(*row) for row in results]
 
     def get_csrf(self) -> str:
-        if self.session.csrf_token:
-            return self.session.csrf_token
-
-        # Legacy session without CSRF token in database. Cannot save to database, because
-        # connection may be read-only. Generate predictable CSRF token based on session token.
-        token = hashlib.sha3_256(self.session.token.encode()).digest()
-        return base64.urlsafe_b64encode(token).decode()
+        return self.session.csrf_token
 
     def verify_csrf(self, token: str) -> None:
         if not hmac.compare_digest(token, self.get_csrf()):
