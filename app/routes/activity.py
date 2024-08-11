@@ -170,7 +170,6 @@ def route_now_playing():
      - progress (int): Track position, as a percentage
     """
     if settings.offline_mode:
-        log.info('Ignoring now playing in offline mode')
         return Response(None, 200)
 
     with db.connect() as conn:
