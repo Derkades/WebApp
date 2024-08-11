@@ -138,7 +138,7 @@ def route_all():
                               FROM history
                                   LEFT JOIN user ON history.user = user.id
                                   LEFT JOIN track ON history.track = track.path
-                              ORDER BY history.id DESC
+                              ORDER BY history.timestamp DESC
                               LIMIT 1000
                               ''')
         history = []
