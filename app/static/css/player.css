@@ -100,7 +100,7 @@ input::placeholder {
 }
 
 /* Space between playlists, controls, queue */
-.sidebar-left > div > .box-solid {
+.sidebar-left > div > .box {
     margin: 1rem 0;
 }
 
@@ -111,16 +111,6 @@ input::placeholder {
 
 .box-queue .scroll {
     height: 30vh;
-}
-
-.box-rounded {
-    border-radius: var(--border-radius-amount);
-    box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
-}
-
-.box-solid {
-    background-color: var(--box-background-color);
-    padding: 1rem;
 }
 
 .dialog {

@@ -29,6 +29,8 @@ body, input, select, textarea, button {
     font-family: 'Quicksand', Verdana, sans-serif;
 }
 
+/* Standard element styling */
+
 td, th {
     text-align: left;
 }
@@ -53,14 +55,15 @@ a:hover {
 
 .secondary {
     color: #ccc;
-}
-
-body.light .secondary {
-    color: #303030;
-}
-
-.secondary {
     font-size: .8em;
+}
+
+kbd {
+    background-color: #222;
+    color: white;
+    padding: .2rem .4rem .1rem .4rem;
+    border-bottom: .2rem solid gray;
+    border-radius: .2rem;
 }
 
 button:hover,
@@ -319,13 +322,7 @@ main {
     font-size: 1.5rem;
 }
 
-kbd {
-    background-color: #222;
-    color: white;
-    padding: .2rem .4rem .1rem .4rem;
-    border-bottom: .2rem solid gray;
-    border-radius: .2rem;
-}
+/* Tables */
 
 .table {
     width: 100%;
@@ -352,6 +349,25 @@ kbd {
 .table .button-col {
     width: 2.75rem;
     height: 2.75rem;
+}
+
+/* Boxes */
+
+.box {
+    border-radius: var(--border-radius-amount);
+    box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
+    background-color: var(--box-background-color);
+    overflow: hidden;
+}
+
+.boxes {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.padding {
+    padding: 1rem;
 }
 
 .flex-content-center {

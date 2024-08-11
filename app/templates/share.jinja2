@@ -29,16 +29,17 @@
 </audio>
 <br>
 
-<div class="half">
-    <img src="/share/{{ code }}/cover">
-</div>
-
-<div class="half">
-    {% if lyrics %}
-    {{ lyrics }}
-    {% else %}
-    <i>">{% trans %}No lyrics found{% endtrans %}</i>
-    {% endif %}
+<div class="boxes">
+    <div class="box">
+        <img src="/share/{{ code }}/cover">
+    </div>
+    <div class="box padding">
+        {% if lyrics %}
+        {{ lyrics }}
+        {% else %}
+        <i>">{% trans %}No lyrics found{% endtrans %}</i>
+        {% endif %}
+    </div>
 </div>
 
 {% endblock content %}

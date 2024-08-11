@@ -30,11 +30,11 @@
 
         <div>
 
-            <div class="box-rounded box-solid" id="playlist-checkboxes">
+            <div class="box padding" id="playlist-checkboxes">
                 {% trans %}Loading&mldr;{% endtrans %}
             </div>
 
-            <div class="box-rounded box-solid">
+            <div class="box padding">
                 <p>
                     <span id="current-track">{% trans %}Waiting for music in queue&mldr;{% endtrans %}</span>
                 </p>
@@ -84,7 +84,7 @@
                 </div>
             </div>
 
-            <div class="box-rounded box-solid box-queue">
+            <div class="box padding box-queue">
                 <div class="flex-space-between">
                     <h3>{% trans %}Queue{% endtrans %} <span class="secondary" id="current-queue-size">0</span></h3>
                     <div id="queue-buttons">
@@ -107,13 +107,13 @@
 
     <div class="sidebar sidebar-right" id="sidebar-album-covers">
         <div id="album-covers">
-            <div id="album-cover-1" class="box-rounded"></div>
-            <div id="album-cover-2" class="box-rounded"></div>
+            <div id="album-cover-1" class="box"></div>
+            <div id="album-cover-2" class="box"></div>
         </div>
     </div>
 
     <div class="sidebar sidebar-right hidden" id="sidebar-lyrics">
-        <div id="lyrics-box" class="box-rounded box-solid">
+        <div id="lyrics-box" class="box padding">
             <div id="lyrics-scroll" class="scroll">
                 <i id="lyrics-not-found" class="hidden">{% trans %}No lyrics found{% endtrans %}</i>
                 <span id="lyrics-text"></span>
@@ -345,7 +345,7 @@
     </template>
 
     <template id="template-td-cover">
-        <td class="box-rounded">
+        <td class="box">
             <div class="delete-overlay">
                 {{ icon('delete') }}
             </div>
