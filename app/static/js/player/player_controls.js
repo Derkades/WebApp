@@ -2,7 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioElem = getAudioElement();
 
     // Home
-    document.getElementById('button-home').addEventListener('click', () => window.open('/', '_blank'));
+    const homeButton = document.getElementById('button-home');
+    if (homeButton) {
+        homeButton.addEventListener('click', () => window.open('/', '_blank'));
+    }
 
     // Skip to previous
     document.getElementById('button-prev').addEventListener('click', () => {

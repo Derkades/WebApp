@@ -51,7 +51,9 @@
                 </div>
 
                 <div id="playback-controls">
-                {{ icon_button('home', 'button-home', title=gettext('Open home page in a new tab')) }}
+                    {% if not offline_mode %}
+                        {{ icon_button('home', 'button-home', title=gettext('Open home page in a new tab')) }}
+                    {% endif %}
                     {{ icon_button('skip-previous', 'button-prev', title=gettext('Go to beginning of current track, or previous track')) }}
                     {{ icon_button('play', 'button-play', title=gettext('Play')) }}
                     {{ icon_button('pause', 'button-pause', title=gettext('Pause')) }}
