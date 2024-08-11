@@ -1,15 +1,49 @@
-/* Less margin for "Queue" header */
-.sidebar-left h3 {
-    margin: .5rem 0;
+/* SIDEBARS */
+
+.sidebars {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
 }
 
-input[type=range] {
-    cursor: ew-resize;
+.sidebar {
+    display: flex;
+    flex-basis: 50%;
+    flex-grow: 1;
+    margin: var(--gap);
 }
 
-input::placeholder {
-    color: #ccc;
+.sidebar .boxes {
+    align-content: safe center;
 }
+
+@media screen and (min-width: 901px) {
+    .sidebar:first-child {
+        margin-right: 0;
+    }
+}
+
+@media screen and (max-width: 900px) {
+    .sidebars {
+        flex-wrap: wrap;
+    }
+
+    .sidebar {
+        margin: calc(var(--gap) / 2);
+    }
+
+    #right-scroll {
+        max-height: 100%;
+    }
+
+    /* flexbox ignores body padding and overflows due to gap? */
+    #lyrics-box {
+        margin-bottom: calc(var(--gap) / 2);
+    }
+}
+
+/* ALBUM COVERS */
 
 #bg-image-2, #album-cover-2 {
     background-color: #222;
@@ -34,12 +68,11 @@ input::placeholder {
     cursor: pointer;
 }
 
-#album-covers {
-    aspect-ratio: 1 / 1;
+.album-cover-box {
     position: relative;
 }
 
-#album-covers > div {
+.album-cover {
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -48,90 +81,14 @@ input::placeholder {
     position: absolute;
 }
 
-@media screen and (min-width: 900px) {
-    .sidebar {
-        position: absolute;
-        top: 0;
-        width: calc(50vw - 3rem);
-        height: 100%;
-    }
-
-    .sidebar-left {
-        left: 0;
-        padding-left: 2rem;
-        padding-right: 1rem;
-    }
-
-    .sidebar-right {
-        right: 0;
-        padding-left: 1rem;
-        padding-right: 2rem;
-    }
-
-    #lyrics-scroll {
-        max-height: 80vh;
-    }
-}
-
-@media screen and (max-width: 899px) {
-    .sidebar {
-        padding: 0 1rem;
-    }
-
-    .sidebar-right {
-        padding-bottom: 1rem;
-    }
-
-    .full-page-overlay .dialog {
-        height: 100%;
-        width: 100%;
-        border-radius: 0;
-    }
-}
-
-.sidebar {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.sidebar > div {
-    width: 100%;
-}
+/* PLAYLISTS */
 
 .other-checkboxes {
     max-height: 20vh;
     overflow-y: auto;
 }
 
-.box-queue .scroll {
-    height: 30vh;
-}
-
-.dialog {
-    box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
-    border-radius: var(--border-radius-amount);
-    background-color: var(--box-background-color);
-    overflow: hidden; /* prevent header from overlapping rounded corners */
-}
-
-.dialog-header {
-    background-color: var(--box-background-color);
-    padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.dialog-header > * {
-    display: inline;
-    margin: 0;
-}
-
-.dialog-body {
-    padding: .5rem 1rem;
-    overflow-y: auto;
-}
+/* POPUP WINDOWS */
 
 .full-page-overlay {
     position: fixed;
@@ -146,17 +103,41 @@ input::placeholder {
     transition: opacity .2s, visibility .2s;
 }
 
-.full-page-overlay .dialog {
+.dialog {
+    box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
+    border-radius: var(--border-radius-amount);
+    background-color: var(--box-background-color);
+    overflow: hidden; /* prevent header from overlapping rounded corners */
+
     min-width: min(60rem, 100%);
     max-width: calc(100%);
     min-height: min(45rem, 100%);
     max-height: 100%;
-    margin: .5rem;
+    margin: var(--gap);
+
     /* prevent children from overflowing parent */
     display: flex;
     flex-direction: column;
-    pointer-events: initial; /* Re-enable click events for the actual box */
+
     transition: scale .2s;
+}
+
+.dialog-header {
+    background-color: var(--box-background-color);
+    padding: var(--gap);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dialog-header > * {
+    display: inline;
+    margin: 0;
+}
+
+.dialog-body {
+    padding: .5rem var(--gap);
+    overflow-y: auto;
 }
 
 .full-page-overlay.overlay-hidden {
@@ -167,6 +148,18 @@ input::placeholder {
 .full-page-overlay.overlay-hidden .dialog {
     scale: .95;
 }
+
+@media screen and (max-width: 900px) {
+    .dialog {
+        margin: 0;
+        box-shadow: none;
+        border-radius: 0;
+        height: 100%;
+        width: 100%;
+    }
+}
+
+/* PLAYBACK CONTROLS SEEK BAR */
 
 #outer-progress-bar {
     border-radius: var(--border-radius-amount);
@@ -199,6 +192,16 @@ input::placeholder {
     margin: 0 .25rem;
     font-size: 1.1rem;
     mix-blend-mode: difference;
+}
+
+/* QUEUE */
+
+.box-queue .scroll {
+    height: 30vh;
+}
+
+.box-queue h3 {
+    margin: .5rem 0;
 }
 
 #queue-table {
@@ -258,13 +261,15 @@ input::placeholder {
     opacity: 1.0;
 }
 
+/* LOADING */
+
 .raphson-spinner {
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
     animation: rotate 1.25s linear infinite;
     display: inline-block;
-    margin-left: 1rem;
+    margin-left: var(--gap);
     background-image: url('/static/img/raphson_small.webp');
     height: 2rem;
     width: 2rem;
@@ -307,10 +312,6 @@ h4 > .icon {
     max-height: 40rem;
 }
 
-#settings-volume {
-    width: 7rem;
-}
-
 .track-list-table {
     width: 100%;
 }
@@ -339,6 +340,12 @@ h4 > .icon {
     cursor: pointer;
 }
 
+/* VOLUME SLIDER */
+
+#settings-volume {
+    width: 7rem;
+}
+
 /* For some reason, ::-webkit-slider-thumb and ::-moz-range-thumb cannot be in the same selector (comma separated), or Chrome loses styling */
 
 input[type=range].input-volume-high::-webkit-slider-thumb {
@@ -365,11 +372,12 @@ input[type=range].input-volume-low::-moz-range-thumb {
     background: url('/static/icon/volume-low.svg') no-repeat center, rgba(255, 255, 255, 0.8);
 }
 
-/* ---------- Theater mode ---------- */
+/* THEATER MODE */
 
 .theater #playlist-checkboxes,
 .theater #playback-controls,
-.theater #queue-buttons {
+.theater #queue-buttons,
+.theater .box-queue h3 {
     display: none;
 }
 

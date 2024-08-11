@@ -1,10 +1,15 @@
+/* VARIABLES */
+
 :root {
     --border-radius-amount: .5rem;
+    --gap: 1rem;
     --elem-border-color: rgba(255, 255, 255, 0.3);
     --elem-background-color: rgba(50, 50, 50, 0.5);
     --elem-background-color-true: rgba(255, 255, 255, 0.8);
     --box-background-color: rgba(20, 20, 20, 0.4);
 }
+
+/* FONT */
 
 @font-face {
     font-family: 'Quicksand';
@@ -12,6 +17,12 @@
     font-weight: 400;
     src: url('/static/font/quicksand-v30-latin-regular.woff2') format('woff2');
 }
+
+body, input, select, textarea, button {
+    font-family: 'Quicksand', Verdana, sans-serif;
+}
+
+/* BODY */
 
 body {
     margin: 0;
@@ -25,11 +36,22 @@ body.colorful {
     background-size: cover;
 }
 
-body, input, select, textarea, button {
-    font-family: 'Quicksand', Verdana, sans-serif;
+main {
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 1rem;
+    width: 100%;
+    max-width: 100rem;
+    box-sizing: border-box; /* include padding in max-width */
 }
 
-/* Standard element styling */
+@media screen and (min-width: 100rem) {
+    main {
+        margin: 1rem;
+        border-radius: var(--border-radius-amount);
+    }
+}
+
+/* BASIC ELEMENTS */
 
 td, th {
     text-align: left;
@@ -42,10 +64,6 @@ p {
 a {
     color: lightblue;
     text-decoration: none;
-}
-
-body.light a {
-    color: darkblue;
 }
 
 a:hover {
@@ -65,6 +83,8 @@ kbd {
     border-bottom: .2rem solid gray;
     border-radius: .2rem;
 }
+
+/* CONTROLS */
 
 button:hover,
 input[type=submit]:hover {
@@ -165,15 +185,15 @@ input[type=range]:focus {
     outline: none;
 }
 
-body.light input {
-    filter: invert();
+input[type=range] {
+    cursor: ew-resize;
 }
 
-.fill-width {
-    width: calc(100%);
-    box-sizing: border-box;
-    float: left;
+input::placeholder {
+    color: #ccc;
 }
+
+/* ICONS */
 
 .icon {
     height: 1.9rem;
@@ -225,57 +245,25 @@ body.light input {
 .icon-thumb-down { background-image: url('/static/icon/thumb-down.svg'); }
 /* volume icons used directly in JS */
 
-body.light .icon {
-    filter: none;
-}
-
-body.light button > .icon {
-    filter: invert();
-}
-
 .icon-button {
     padding-bottom: 0;
     margin: 0;
 }
 
+/* POSITIONING UTLIITIES */
+
 .inline-block {
     display: inline-block;
 }
 
-main {
-    background-color: rgba(0, 0, 0, 0.5);
-    padding: 1rem;
-    width: 100%;
-    max-width: 100rem;
-    box-sizing: border-box; /* include padding in max-width */
-}
-
-@media screen and (min-width: 100rem) {
-    main {
-        margin: 1rem;
-        border-radius: var(--border-radius-amount);
-    }
+.fill-width {
+    width: calc(100%);
+    box-sizing: border-box;
+    float: left;
 }
 
 .hidden {
     display: none !important;
-}
-
-.fancy {
-    font-family: monospace;
-    color: red;
-    animation: sleutelframes 1s ease-in-out infinite;
-    position: relative;
-    font-size: 1.5em;
-}
-
-@keyframes sleutelframes {
-    0%, 100% {
-        bottom: -.4em;
-    }
-    50% {
-        bottom: .4em;
-    }
 }
 
 .homepage-select {
@@ -365,6 +353,11 @@ main {
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
+    width: 100%;
+}
+
+.square {
+    aspect-ratio: 1/1;
 }
 
 .padding {

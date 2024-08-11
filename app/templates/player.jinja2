@@ -26,99 +26,95 @@
     <div id="bg-image-2" class="bg-image"></div>
     <div class="dither"></div>
 
-    <div class="sidebar sidebar-left">
+    <div class="sidebars">
+        <div class="sidebar">
+            <div class="boxes">
+                <div class="box padding" id="playlist-checkboxes">
+                    {% trans %}Loading&mldr;{% endtrans %}
+                </div>
 
-        <div class="boxes">
+                <div class="box padding">
+                    <p>
+                        <span id="current-track">{% trans %}Waiting for music in queue&mldr;{% endtrans %}</span>
+                    </p>
+                    <p class="seconday hidden">
+                        {% trans %}Previously: {% endtrans %} <span id="previous-track">-</span>
+                    </p>
 
-            <div class="box padding" id="playlist-checkboxes">
-                {% trans %}Loading&mldr;{% endtrans %}
-            </div>
+                    <div id="outer-progress-bar">
+                        <div id="progress-bar"></div>
+                        <div class="flex-space-between">
+                            <span id="progress-time-current" class="progress-time">--:--</span>
+                            <span id="progress-time-duration" class="progress-time">--:--</span>
+                        </div>
+                    </div>
 
-            <div class="box padding">
-                <p>
-                    <span id="current-track">{% trans %}Waiting for music in queue&mldr;{% endtrans %}</span>
-                </p>
-                <p class="seconday hidden">
-                    {% trans %}Previously: {% endtrans %} <span id="previous-track">-</span>
-                </p>
+                    <div id="playback-controls">
+                        {% if not offline_mode %}
+                            {{ icon_button('home', 'button-home', title=gettext('Open home page in a new tab')) }}
+                        {% endif %}
+                        {{ icon_button('skip-previous', 'button-prev', title=gettext('Go to beginning of current track, or previous track')) }}
+                        {{ icon_button('play', 'button-play', title=gettext('Play')) }}
+                        {{ icon_button('pause', 'button-pause', title=gettext('Pause')) }}
+                        {{ icon_button('skip-next', 'button-next', title=gettext('Skip to next track')) }}
+                        {# {{ icon_button('microphone', 'button-lyrics', title=gettext('Show lyrics instead of album cover')) }}
+                        {{ icon_button('album', 'button-album', title=gettext('Show album cover instead of lyrics')) }} #}
+                        {% if not offline_mode %}
+                            {{ icon_button('thumb-down', 'button-dislike', title=gettext('Never play again')) }}
+                            {{ icon_button('pencil', 'button-edit', title=gettext('Open metadata editor')) }}
+                            {{ icon_button('delete', 'button-delete', title=gettext('Delete currently playing track from playlist')) }}
+                            {{ icon_button('content-duplicate', 'button-copy', title=gettext('Copy track to a different playlist')) }}
+                            {{ icon_button('share', 'button-share', title=gettext('Open share link')) }}
+                        {% endif %}
 
-                <div id="outer-progress-bar">
-                    <div id="progress-bar"></div>
+                        <div id="delete-spinner" class="raphson-spinner hidden"></div>
+
+                        {% if mobile %}
+                            {# 'data-restore=false' ensures volume is not overwritten from cookie #}
+                            <input type="hidden" value="100" id="settings-volume" data-restore="false">
+                        {% else %}
+                            <input type="range" min="0" max="100" value="60" id="settings-volume">
+                        {% endif %}
+
+                        {# Load volume icons, otherwise they will only load when changing volume which means there is briefly no icon #}
+                        {% for icon in ['low', 'medium', 'high'] %}
+                            <img class="hidden" height="1" width="1" src="/static/icon/volume-{{ icon }}.svg">
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="box padding box-queue">
                     <div class="flex-space-between">
-                        <span id="progress-time-current" class="progress-time">--:--</span>
-                        <span id="progress-time-duration" class="progress-time">--:--</span>
+                        <h3>{% trans %}Queue{% endtrans %} <span class="secondary" id="current-queue-size">0</span></h3>
+                        <div id="queue-buttons">
+                            {{ icon_button('playlist-remove', 'queue-clear', title=gettext('Clear queue')) }}
+                            {{ icon_button('tag-multiple', 'open-dialog-tags', title=gettext('Open tag selection')) }}
+                            {{ icon_button('playlist-music', 'browse-all', title=gettext('Browse all tracks')) }}
+                            {{ icon_button('text-search', 'open-dialog-search', title=gettext('Search in tracks')) }}
+                            {{ icon_button('cog', 'open-dialog-settings', title=gettext('Open settings')) }}
+                        </div>
+                    </div>
+                    <div class="scroll">
+                        <span id="no-playlists-selected" class="hidden">{% trans %}No playlists are selected{% endtrans %}</span>
+                        <table id="queue-table"></table>
                     </div>
                 </div>
-
-                <div id="playback-controls">
-                    {% if not offline_mode %}
-                        {{ icon_button('home', 'button-home', title=gettext('Open home page in a new tab')) }}
-                    {% endif %}
-                    {{ icon_button('skip-previous', 'button-prev', title=gettext('Go to beginning of current track, or previous track')) }}
-                    {{ icon_button('play', 'button-play', title=gettext('Play')) }}
-                    {{ icon_button('pause', 'button-pause', title=gettext('Pause')) }}
-                    {{ icon_button('skip-next', 'button-next', title=gettext('Skip to next track')) }}
-                    {# {{ icon_button('microphone', 'button-lyrics', title=gettext('Show lyrics instead of album cover')) }}
-                    {{ icon_button('album', 'button-album', title=gettext('Show album cover instead of lyrics')) }} #}
-                    {% if not offline_mode %}
-                        {{ icon_button('thumb-down', 'button-dislike', title=gettext('Never play again')) }}
-                        {{ icon_button('pencil', 'button-edit', title=gettext('Open metadata editor')) }}
-                        {{ icon_button('delete', 'button-delete', title=gettext('Delete currently playing track from playlist')) }}
-                        {{ icon_button('content-duplicate', 'button-copy', title=gettext('Copy track to a different playlist')) }}
-                        {{ icon_button('share', 'button-share', title=gettext('Open share link')) }}
-                    {% endif %}
-
-                    <div id="delete-spinner" class="raphson-spinner hidden"></div>
-
-                    {% if mobile %}
-                        {# 'data-restore=false' ensures volume is not overwritten from cookie #}
-                        <input type="hidden" value="100" id="settings-volume" data-restore="false">
-                    {% else %}
-                        <input type="range" min="0" max="100" value="60" id="settings-volume">
-                    {% endif %}
-
-                    {# Load volume icons, otherwise they will only load when changing volume which means there is briefly no icon #}
-                    {% for icon in ['low', 'medium', 'high'] %}
-                        <img class="hidden" height="1" width="1" src="/static/icon/volume-{{ icon }}.svg">
-                    {% endfor %}
-                </div>
             </div>
+        </div>
 
-            <div class="box padding box-queue">
-                <div class="flex-space-between">
-                    <h3>{% trans %}Queue{% endtrans %} <span class="secondary" id="current-queue-size">0</span></h3>
-                    <div id="queue-buttons">
-                        {{ icon_button('playlist-remove', 'queue-clear', title=gettext('Clear queue')) }}
-                        {{ icon_button('tag-multiple', 'open-dialog-tags', title=gettext('Open tag selection')) }}
-                        {{ icon_button('playlist-music', 'browse-all', title=gettext('Browse all tracks')) }}
-                        {{ icon_button('text-search', 'open-dialog-search', title=gettext('Search in tracks')) }}
-                        {{ icon_button('cog', 'open-dialog-settings', title=gettext('Open settings')) }}
+        <div class="sidebar">
+            <div class="boxes scroll" id="right-scroll">
+                <div class="box square album-cover-box">
+                    <div id="album-cover-1" class="album-cover"></div>
+                    <div id="album-cover-2" class="album-cover"></div>
+                </div>
+                <div class="box padding" id="lyrics-box">
+                    <div id="lyrics-scroll" class="scroll">
+                        <i id="lyrics-not-found" class="hidden">{% trans %}No lyrics found{% endtrans %}</i>
+                        <span id="lyrics-text"></span>
+                        <a id="lyrics-source" class="secondary hidden" href="#" target="_blank"><br>{% trans %}Source{% endtrans %}</a>
                     </div>
                 </div>
-                <div class="scroll">
-                    <span id="no-playlists-selected" class="hidden">{% trans %}No playlists are selected{% endtrans %}</span>
-                    <table id="queue-table"></table>
-                </div>
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="sidebar sidebar-right" id="sidebar-album-covers">
-        <div id="album-covers">
-            <div id="album-cover-1" class="box"></div>
-            <div id="album-cover-2" class="box"></div>
-        </div>
-    </div>
-
-    <div class="sidebar sidebar-right hidden" id="sidebar-lyrics">
-        <div id="lyrics-box" class="box padding">
-            <div id="lyrics-scroll" class="scroll">
-                <i id="lyrics-not-found" class="hidden">{% trans %}No lyrics found{% endtrans %}</i>
-                <span id="lyrics-text"></span>
-                <br>
-                <a id="lyrics-source" class="secondary hidden" href="#" target="_blank">{% trans %}Source{% endtrans %}</a>
             </div>
         </div>
     </div>
@@ -127,14 +123,6 @@
         <div class="dialog">
             {{ dialog_header('dialog-settings', gettext('Settings')) }}
             <div class="dialog-body">
-                {# <label for="settings-theme">{% trans %}Theme{% endtrans %}</label><br>
-
-                <select id="settings-theme">
-                    <option value="dark" selected>{% trans %}Dark{% endtrans%}</option>
-                    <option value="light">{% trans %}Light{% endtrans%}</option>
-                    <option value="browser">{% trans %}Use system preference{% endtrans%}</option>
-                </select><br> #}
-
                 <label for="settings-queue-size">{% trans %}Minimum queue size{% endtrans %}</label><br>
                 <input type="number" value="5" size="3" min="0" max="100" id="settings-queue-size"><br>
 

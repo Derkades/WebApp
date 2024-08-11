@@ -85,8 +85,6 @@ function replaceLyrics() {
         notFoundElem.classList.add('hidden');
         textElem.classList.remove('hidden');
         textElem.innerHTML = queuedTrack.lyrics.html + '<br>';
-
-        document.getElementById('lyrics-scroll').scrollTo({top: 0, behavior: 'smooth'});
     } else {
         notFoundElem.classList.remove('hidden');
         textElem.classList.add('hidden');
@@ -133,6 +131,8 @@ function replaceAllTrackHtml() {
     replaceAlbumImages();
     replaceLyrics();
     replaceTrackDisplayTitle();
+
+    document.getElementById('right-scroll').scrollTo({top: 0, behavior: 'smooth'});
 }
 
 eventBus.subscribe(MusicEvent.TRACK_CHANGE, replaceAllTrackHtml);
@@ -140,45 +140,7 @@ eventBus.subscribe(MusicEvent.TRACK_CHANGE, replaceAllTrackHtml);
 // Update track title, metadata may have changed
 eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, replaceTrackDisplayTitle);
 
-function toggleLyrics() {
-    if (document.getElementById('sidebar-lyrics').classList.contains('hidden')) {
-        switchLyrics();
-    } else {
-        switchAlbumCover();
-    }
-}
-
-/**
- * Display lyrics, hide album art
- */
-function switchLyrics() {
-    // document.getElementById('button-album').classList.remove('hidden');
-    // document.getElementById('button-lyrics').classList.add('hidden');
-    document.getElementById('sidebar-lyrics').classList.remove('hidden');
-    document.getElementById('sidebar-album-covers').classList.add('hidden');
-}
-
-/**
- * Display album art, hide lyrics
- */
-function switchAlbumCover() {
-    // document.getElementById('button-album').classList.add('hidden');
-    // document.getElementById('button-lyrics').classList.remove('hidden');
-    document.getElementById('sidebar-lyrics').classList.add('hidden');
-    document.getElementById('sidebar-album-covers').classList.remove('hidden');
-}
-
 document.addEventListener('DOMContentLoaded', () => {
-    // Lyrics / album cover switch buttons
-    // document.getElementById('button-lyrics').addEventListener('click', switchLyrics);
-    // document.getElementById('button-album').addEventListener('click', switchAlbumCover);
-    // document.getElementById('button-album').classList.add('hidden');
-
-    // Switch between album cover and lyrics by clicking in lyrics/cover
-    document.getElementById('album-covers').addEventListener('click', event => {
-        event.preventDefault();
-        switchLyrics();
-    });
     document.getElementById('lyrics-box').addEventListener('click', event => {
         if (event.target.nodeName === 'A') {
             // Allow clicking 'source' link
