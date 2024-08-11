@@ -358,6 +358,7 @@ main {
     box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
     background-color: var(--box-background-color);
     overflow: hidden;
+    width: 100%;
 }
 
 .boxes {

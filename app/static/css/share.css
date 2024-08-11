@@ -1,4 +1,7 @@
-img {
-    width: 100%;
+.cover-img {
     max-width: 40rem;
+}
+
+.lyrics {
+    width: auto;
 }

@@ -99,11 +99,6 @@ input::placeholder {
     width: 100%;
 }
 
-/* Space between playlists, controls, queue */
-.sidebar-left > div > .box {
-    margin: 1rem 0;
-}
-
 .other-checkboxes {
     max-height: 20vh;
     overflow-y: auto;
