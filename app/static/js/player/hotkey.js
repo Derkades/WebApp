@@ -53,7 +53,13 @@ function handleKey(key) {
     } else if (key === 'Escape') {
         dialogs.closeTop();
     } else if (key === 'l') {
-        toggleLyrics();
+        const container = document.getElementById('right-scroll');
+        const topAtBottom = container.scrollHeight - container.clientHeight;
+        if (container.scrollTop > topAtBottom / 2) {
+            container.scrollTo({top: 0, behavior: 'smooth'});
+        } else {
+            container.scrollTo({top: topAtBottom, behavior: 'smooth'});
+        }
     } else {
         console.debug('hotkey: unhandled keypress:', key);
     }
