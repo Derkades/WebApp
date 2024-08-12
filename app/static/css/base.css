@@ -2,7 +2,8 @@
 
 :root {
     --border-radius-amount: .5rem;
-    --gap: 1rem;
+    --gap: 1rem; /* used for space between large elements like images, boxes, and large buttons */
+    --smallgap: .2rem; /* used for space between small elements like buttons */
     --elem-border-color: rgba(255, 255, 255, 0.3);
     --elem-background-color: rgba(50, 50, 50, 0.5);
     --elem-background-color-true: rgba(255, 255, 255, 0.8);
@@ -87,22 +88,26 @@ kbd {
 /* CONTROLS */
 
 button:hover,
+.button:hover,
 input[type=submit]:hover {
     transition: transform .05s, background-color .1s;
 }
 
 button:hover,
+.button:hover,
 input[type=submit]:hover {
     background-color: rgba(150, 150, 150, 0.7);
 }
 
 button:active,
+.button:active,
 input[type=submit]:active {
     transform: translate(1px, 1px);
 }
 
 select,
 button,
+.button,
 input[type=submit],
 input[type=checkbox] {
     cursor: pointer;
@@ -110,6 +115,7 @@ input[type=checkbox] {
 
 select,
 button,
+.button,
 input[type=text],
 input[type=number],
 input[type=submit],
@@ -250,6 +256,14 @@ input::placeholder {
     margin: 0;
 }
 
+.icon-text-button {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    font-size: 1.2em;
+    margin-right: var(--smallgap);
+}
+
 /* POSITIONING UTLIITIES */
 
 .inline-block {
@@ -264,50 +278,6 @@ input::placeholder {
 
 .hidden {
     display: none !important;
-}
-
-.homepage-select {
-    text-decoration: none;
-    color: white;
-    display: block;
-    width: 100%;
-}
-
-.homepage-select:hover {
-    text-decoration: none;
-    color: white;
-}
-
-.homepage-select > div {
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.7);
-    display: flex;
-    padding: .5rem;
-    margin: .5rem;
-    border-radius: var(--border-radius-amount);
-    box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
-    transition: transform .1s, background-color .1s;
-}
-
-@media screen and (min-width: 30rem) {
-    .homepage-select {
-        width: 23rem;
-    }
-}
-
-.homepage-select > div:hover {
-    background-color: rgba(255, 255, 255, 0.3);
-    transform: translate(-1px, -1px);
-}
-
-.homepage-select > div:active {
-    background-color: rgba(255, 255, 255, 0.3);
-    transform: translate(1px, 1px);
-}
-
-.homepage-select > div > span {
-    margin-left: .5rem;
-    font-size: 1.5rem;
 }
 
 /* Tables */

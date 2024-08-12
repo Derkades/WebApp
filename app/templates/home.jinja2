@@ -5,13 +5,15 @@
 {% endblock title %}
 
 {% macro nav(link, icon_name, title) %}
-    <a href="{{ link }}" class="homepage-select">
-        <div>
-            {{ icon(icon_name) }}
-            <span>{{ title }}</span>
-        </div>
+    <a href="{{ link }}" class="button icon-text-button">
+        {{ icon(icon_name) }}
+        <div>{{ title }}</div>
     </a>
 {% endmacro %}
+
+{% block styles %}
+    <link rel="stylesheet" href="/static/css/home.css">
+{% endblock styles %}
 
 {% block content %}
 

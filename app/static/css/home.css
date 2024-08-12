@@ -1,0 +1,28 @@
+.icon-text-button {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    padding: calc(var(--gap) / 2);
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 1.5rem;
+    gap: var(--smallgap);
+    box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
+    transition: background-color .05s;
+}
+
+.icon-text-button:hover {
+    text-decoration: none;
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.icon-text-button:active {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+
+@media screen and (min-width: 30rem) {
+    .icon-text-button {
+        width: 23rem;
+    }
+}
