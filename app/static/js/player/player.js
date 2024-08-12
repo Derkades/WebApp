@@ -141,15 +141,6 @@ eventBus.subscribe(MusicEvent.TRACK_CHANGE, replaceAllTrackHtml);
 eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, replaceTrackDisplayTitle);
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('lyrics-box').addEventListener('click', event => {
-        if (event.target.nodeName === 'A') {
-            // Allow clicking 'source' link
-            return;
-        }
-        event.preventDefault();
-        switchAlbumCover();
-    });
-
     const dislikeButton = document.getElementById('button-dislike')
     if (dislikeButton) { // Missing in offline mode
         dislikeButton.addEventListener('click', () => {
