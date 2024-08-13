@@ -249,25 +249,6 @@ class Track:
 
         return get_cover(artist, album, meme, img_quality, img_format)
 
-
-    def _get_ffmpeg_metadata_options(self) -> list[str]:
-        meta = self.metadata()
-        metadata_options: list[str] = []
-        if meta.album is not None:
-            metadata_options.extend(('-metadata', 'album=' + meta.album))
-        if meta.artists is not None:
-            metadata_options.extend(('-metadata', 'artist=' + metadata.join_meta_list(meta.artists)))
-        if meta.title is not None:
-            metadata_options.extend(('-metadata', 'title=' + meta.title))
-        if meta.year is not None:
-            metadata_options.extend(('-metadata', 'date=' + str(meta.year)))
-        if meta.album_artist is not None:
-            metadata_options.extend(('-metadata', 'album_artist=' + meta.album_artist))
-        if meta.track_number is not None:
-            metadata_options.extend(('-metadata', 'track=' + str(meta.track_number)))
-        metadata_options.extend(('-metadata', 'genre=' + metadata.join_meta_list(meta.tags)))
-        return metadata_options
-
     def get_loudnorm_filter(self) -> str:
         """Get ffmpeg loudnorm filter string"""
         cache_key = 'loud3' + self.relpath + str(self.mtime)
@@ -376,6 +357,7 @@ class Track:
             # cover_temp_file = tempfile.NamedTemporaryFile('wb')  # pylint: disable=consider-using-with
             cover_temp_file = open('/tmp/test', 'wb')
             cover_temp_file.write(cover)
+            meta = self.metadata()
 
             input_options = ['-i', cover_temp_file.name,  # Add album cover
                              '-map', '0:a', # include audio stream from first input
@@ -384,7 +366,7 @@ class Track:
                              '-map_metadata', '-1',  # discard original metadata
                              '-metadata:s:v', 'title=Album cover',
                              '-metadata:s:v', 'comment=Cover (front)',
-                             *self._get_ffmpeg_metadata_options()]  # set new metadata
+                             *meta.get_ffmpeg_options()]  # set new metadata
 
             audio_options = ['-f', 'mp3',
                              '-c:a', 'libmp3lame',
@@ -413,11 +395,13 @@ class Track:
         cache.store(cache_key, audio_data)
         return audio_data
 
-    def write_metadata(self, **meta_dict: str):
+    def write_metadata(self, meta: Metadata):
         """
         Write metadata to file
         """
         original_extension = '.' + self.path.name.split('.')[-1]
+        # ogg format seems to require setting metadata in stream instead of container
+        metadata_flag = '-metadata:s' if self.path.name.endswith('.ogg') else '-metadata'
         with tempfile.NamedTemporaryFile(suffix=original_extension) as temp_file:
             command = [
                 'ffmpeg',
@@ -427,23 +411,13 @@ class Track:
                 '-loglevel', settings.ffmpeg_log_level,
                 '-i', self.path.resolve().as_posix(),
                 '-codec', 'copy',
+                *meta.get_ffmpeg_options(metadata_flag),
+                temp_file.name,
             ]
-
-            if original_extension == '.ogg':
-                meta_flag = '-metadata:s' # Set stream metadata
-            else:
-                meta_flag = '-metadata' # Set container metadata
-
-            for key, value in meta_dict.items():
-                command.extend((meta_flag, key + '=' + ('' if value is None else value)))
-
-            command.append(temp_file.name)
 
             log.info('Writing metadata: %s', str(command))
             subprocess.run(command, shell=False, check=True, capture_output=False)
             shutil.copy(temp_file.name, self.path)
-
-            scanner.scan_tracks(self.conn, self.playlist)
 
 
     @staticmethod

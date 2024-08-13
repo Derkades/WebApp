@@ -5,7 +5,7 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from sqlite3 import Connection
-from typing import Iterator, Optional
+from typing import Optional
 
 from app import music
 
@@ -228,6 +228,26 @@ class Metadata:
             return ' '.join(self.artists) + ' - ' + self.title
 
         return self._filename_title_search()
+
+    def get_ffmpeg_options(self, option='-metadata') -> list[str]:
+        metadata_options: list[str] = []
+        if self.album:
+            metadata_options.extend((option, 'album=' + self.album))
+        if self.artists is not None:
+            metadata_options.extend((option, 'artist=' + join_meta_list(self.artists)))
+        if self.title is not None:
+            metadata_options.extend((option, 'title=' + self.title))
+        if self.year is not None:
+            metadata_options.extend((option, 'date=' + str(self.year)))
+        if self.album_artist is not None:
+            metadata_options.extend((option, 'album_artist=' + self.album_artist))
+        if self.track_number is not None:
+            metadata_options.extend((option, 'track=' + str(self.track_number)))
+        if self.lyrics is not None:
+            metadata_options.extend((option, 'lyrics=' + str(self.track_number)))
+        if self.tags:
+            metadata_options.extend((option, 'genre=' + join_meta_list(self.tags)))
+        return metadata_options
 
 
 def probe(path: Path) -> Metadata | None:

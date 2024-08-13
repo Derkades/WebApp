@@ -4,7 +4,7 @@ from typing import Any
 
 from flask import Blueprint, Response, abort, request
 
-from app import auth, db, image, jsonw, music, settings
+from app import auth, db, image, jsonw, music, settings, scanner
 from app.image import ImageFormat
 from app.music import AudioType, Track
 
@@ -227,7 +227,7 @@ def route_update_metadata():
     Endpoint to update track metadata
     """
     payload = request.json
-    with db.connect() as conn:
+    with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(payload['csrf'])
 
@@ -238,11 +238,17 @@ def route_update_metadata():
         if not playlist.has_write_permission(user):
             return Response('No write permission for this playlist', 403, content_type='text/plain')
 
-        track.write_metadata(title=payload['metadata']['title'],
-                             album=payload['metadata']['album'],
-                             artist='; '.join(payload['metadata']['artists']),
-                             album_artist=payload['metadata']['album_artist'],
-                             genre='; '.join(payload['metadata']['tags']),
-                             date=payload['metadata']['year'])
+        meta = track.metadata()
+
+    meta.title = payload['metadata']['title']
+    meta.album = payload['metadata']['album']
+    meta.artists = payload['metadata']['artists']
+    meta.album_artist = payload['metadata']['album_artist']
+    meta.tags = payload['metadata']['tags']
+    meta.year = payload['metadata']['year']
+    track.write_metadata(meta)
+
+    with db.connect() as conn:
+        scanner.scan_tracks(conn, track.playlist)
 
     return Response(None, 200)
