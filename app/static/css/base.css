@@ -291,7 +291,9 @@ input::placeholder {
 }
 
 .table thead tr {
-    background: rgba(0, 0, 0, 0.2);
+    background: black;
+    position: sticky;
+    top: 0;
 }
 
 .table td,
