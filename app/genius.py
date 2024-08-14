@@ -47,10 +47,8 @@ def _html_tree_to_lyrics(elements: list[PageElement], level: int = 0) -> str:
     lyrics_str = ''
     for element in elements:
         if isinstance(element, NavigableString):
-            # print(level, '\tstr\t', str(element))
             lyrics_str += html.escape(str(element))
         elif isinstance(element, Tag):
-            # print(level, '\ttag\t', element.name, '\t', str(element))
             if element.name == 'br':
                 lyrics_str += '<br>'
             else:
