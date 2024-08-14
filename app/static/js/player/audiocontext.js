@@ -1,4 +1,5 @@
 class AudioContextManager {
+    fftSize = 2**13;
     /** @type {AudioContext} */
     #audioContext;
     /** @type {GainNode} */
@@ -16,7 +17,8 @@ class AudioContextManager {
                 console.debug('autocontext: create');
                 this.#audioContext = new AudioContext();
                 const source = this.#audioContext.createMediaElementSource(getAudioElement());
-                this.analyser = this.#audioContext.createAnalyser();
+                this.analyser = this.#audioContext.createAnalyser(); // used by visualiser
+                this.analyser.fftSize = this.fftSize;
                 this.gain = this.#audioContext.createGain();
                 source.connect(this.analyser);
                 source.connect(this.gain);

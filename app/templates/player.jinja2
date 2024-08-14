@@ -107,6 +107,7 @@
                 <div class="box square album-cover-box">
                     <div id="album-cover-1" class="album-cover"></div>
                     <div id="album-cover-2" class="album-cover"></div>
+                     <canvas id="visualiser"></canvas>
                 </div>
                 <div class="box padding" id="lyrics-box">
                     <div id="lyrics-scroll" class="scroll">
@@ -304,8 +305,6 @@
     </div>
 
     <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
-
-    <canvas id="visualiser"></canvas>
 
     <audio class="hidden" autoplay id="audio"></audio>
 

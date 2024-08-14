@@ -1,7 +1,7 @@
 // https://blog.logrocket.com/audio-visualizer-from-scratch-javascript/
 class Visualiser {
     // Settings
-    fftSize = 2**14;
+    barWidth = 10;
     bassFreq = 50;
     minFreq = 50;
     maxFreq = 14000;
@@ -9,65 +9,58 @@ class Visualiser {
     bassScaleAmount = 0.1;
     bassScaleEnabled = false;
 
-    /** @type {AnalyserNode} */
-    #analyser;
     /** @type {Uint8Array} */
     #dataArray;
     /** @type {HTMLCanvasElement} */
     #canvas;
-    /** @type {boolean} */
-    #needRedraw;
 
     constructor() {
+        this.#canvas = document.getElementById('visualiser');
+        this.#dataArray = new Uint8Array(audioContextManager.fftSize);
     }
 
     start() {
-        this.#canvas = document.getElementById('visualiser');
-        this.#analyser = audioContextManager.analyser;
-        this.#analyser.fftSize = this.fftSize;
-        this.#dataArray = new Uint8Array(this.#analyser.frequencyBinCount);
         this.#draw();
-
-        setInterval(() => this.#update(), 1000/45);
-    }
-
-    #update() {
-        this.#analyser.getByteFrequencyData(this.#dataArray);
-        this.#needRedraw = true;
     }
 
     #draw() {
-        if (this.#needRedraw) {
-            this.#needRedraw = false;
+        if (!audioContextManager.analyser || document.visibilityState == "hidden") {
+            setTimeout(() => this.#draw(), 100);
+            return;
+        }
 
-            this.#canvas.height = this.#canvas.clientHeight;
-            this.#canvas.width = this.#canvas.clientWidth;
+        const height = this.#canvas.clientHeight;
+        const width = this.#canvas.clientWidth;
 
-            const height = this.#canvas.clientHeight;
-            const width = this.#canvas.clientWidth;
+        this.#canvas.height = height;
+        this.#canvas.width = width;
 
-            const draw = this.#canvas.getContext('2d');
+        const draw = this.#canvas.getContext('2d');
 
-            draw.clearRect(0, 0, height, width);
-            draw.fillStyle = "white";
+        draw.clearRect(0, 0, height, width);
+        draw.fillStyle = "white";
 
-            const barWidth = 2;
+        if (getAudioElement().paused) {
+            setTimeout(() => this.#draw(), 100);
+            return;
+        }
 
-            const minBin = this.minFreq / 48000 * this.fftSize;
-            const maxBin = this.maxFreq / 48000 * this.fftSize;
-            const multiplyX = (maxBin - minBin);
+        audioContextManager.analyser.getByteFrequencyData(this.#dataArray);
 
-            for (let x = 0; x < width; x+= barWidth) {
-                const i = Math.floor((x / width)**this.xToFreqExp * multiplyX + minBin);
-                const barHeight = this.#dataArray[i];
-                draw.fillRect(x, this.#canvas.height - barHeight, barWidth, barHeight);
-            }
+        const minBin = this.minFreq / 48000 * audioContextManager.fftSize;
+        const maxBin = this.maxFreq / 48000 * audioContextManager.fftSize;
+        const multiplyX = (maxBin - minBin);
 
-            if (this.bassScaleEnabled) {
-                const bassIndex = Math.floor(this.bassFreq / 48000 * this.fftSize);
-                const bassAmount = this.#dataArray[bassIndex] / 256;
-                document.getElementsByTagName('body')[0].style.scale = 1 + bassAmount * this.bassScaleAmount;
-            }
+        for (let x = 0; x < width; x += this.barWidth) {
+            const i = Math.floor((x / width)**this.xToFreqExp * multiplyX + minBin);
+            const barHeight = this.#dataArray[i] * height / 256;
+            draw.fillRect(x, height - barHeight, this.barWidth, barHeight);
+        }
+
+        if (this.bassScaleEnabled) {
+            const bassIndex = Math.floor(this.bassFreq / 48000 * audioContextManager.fftSize);
+            const bassAmount = this.#dataArray[bassIndex] / 256;
+            document.getElementsByTagName('body')[0].style.scale = 1 + bassAmount * this.bassScaleAmount;
         }
 
         requestAnimationFrame(() => this.#draw());
