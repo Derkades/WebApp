@@ -1,0 +1,37 @@
+{% extends "base_static.jinja2" %}
+
+{% block title %}
+    {% trans %}Guessing game{% endtrans %}
+{% endblock title %}
+
+{% block styles %}
+    <link rel="stylesheet" href="/static/css/games_guess.css">
+{% endblock styles %}
+
+{% block content %}
+
+{{ page_heading(gettext('Guessing game'), back_url='/') }}
+
+<div class="boxes">
+    <div id="instructions" class="box">
+        <span id="loading-text">Loading</span>
+        <span id="start-text" class="hidden">Click to start</span>
+        <span id="reveal-text" class="hidden">Click to reveal</span>
+        <span id="next-text" class="hidden">Click for next track</span>
+    </div>
+
+    <div id="cover-container" class="box">
+        <div id="cover"></div>
+    </div>
+
+    <div id="details" class="box">
+
+    </div>
+</div>
+
+<audio id="audio"></audio>
+
+<script src="/static/js/base.js"></script>
+<script src="/static/js/games_guess.js"></script>
+
+{% endblock content %}

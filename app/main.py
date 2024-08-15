@@ -20,6 +20,7 @@ from app.routes import auth as app_auth
 from app.routes import dislikes as app_dislikes
 from app.routes import download as app_download
 from app.routes import files as app_files
+from app.routes import games as app_games
 from app.routes import news as app_news
 from app.routes import player as app_player
 from app.routes import playlists as app_playlists
@@ -39,7 +40,7 @@ def _handle_exception(e):
         return e
 
     log.exception('Unhandled exception')
-    return Response('Sorry! Cannot continue due to unhandled exception. The error has been logged.', 500, content_type='text/plain')
+    return Response('Sorry! Cannot continue due to an unhandled exception. The error has been logged. Please contact the server administrator.', 500, content_type='text/plain')
 
 
 def get_app(proxy_count: int, template_reload: bool):
@@ -53,6 +54,7 @@ def get_app(proxy_count: int, template_reload: bool):
     app.register_blueprint(app_dislikes.bp)
     app.register_blueprint(app_download.bp)
     app.register_blueprint(app_files.bp)
+    app.register_blueprint(app_games.bp)
     app.register_blueprint(app_news.bp)
     app.register_blueprint(app_player.bp)
     app.register_blueprint(app_playlists.bp)

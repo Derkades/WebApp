@@ -1,0 +1,33 @@
+.boxes {
+    justify-content: center;
+}
+
+#cover-container {
+    max-width: 70vh;
+    aspect-ratio: 1/1;
+    position: relative;
+}
+
+#cover-container > div {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+}
+
+#cover {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+#instructions, #details {
+    font-size: 2rem;
+    text-shadow: 2px 2px 5px black;
+    text-align: center;
+    background: none;
+    box-shadow: none;
+}
+
+.blurred {
+    filter: blur(50px);
+}

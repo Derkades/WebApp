@@ -39,6 +39,9 @@
     {{ nav('/dislikes', 'thumb-down', _('Dislikes')) }}
 {% endif %}
 
+<h2>{% trans %}Games{% endtrans %}</h2>
+{{ nav('/games/guess', 'music', _('Guess')) }}
+
 <h2>{% trans %}Help{% endtrans %}</h2>
 {{ nav('/info', 'help-circle', _('Manual')) }}
 {{ nav('/install', 'application-import', _('Install as PWA')) }}
