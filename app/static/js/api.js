@@ -1,5 +1,44 @@
 // Common JavaScript interface to API, to be used by the music player and other pages.
 
+class Music {
+    /** @type {Object.<string, Playlist>} */
+    playlists;
+    /** @type {Object.<string, Track> | null} */
+    tracks;
+    /** @type {number} */
+    tracksLastModified;
+
+    constructor() {
+
+    }
+
+    async updateTrackList() {
+        console.info('api: update track list');
+        const response = await fetch('/track/list');
+        const lastModified = response.headers.get('Last-Modified')
+
+        if (lastModified == this.tracksLastModified) {
+            console.info('api: track list is unchanged');
+            // No need to do potentially expensive transformation to Track objects
+            return;
+        }
+        this.tracksLastModified = lastModified;
+
+        const json = await response.json();
+
+        this.playlists = {};
+        this.tracks = {};
+        for (const playlistObj of json.playlists) {
+            this.playlists[playlistObj.name] = new Playlist(playlistObj);;
+            for (const trackObj of playlistObj.tracks) {
+                this.tracks[trackObj.path] = new Track(playlistObj.name, trackObj);
+            }
+        }
+
+        eventBus.publish(MusicEvent.TRACK_LIST_CHANGE);
+    };
+}
+
 class Track {
     /** @type {string} */
     path;
