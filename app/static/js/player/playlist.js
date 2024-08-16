@@ -1,24 +1,3 @@
-class Playlist {
-    /** @type {string} */
-    name;
-    /** @type {number} */
-    trackCount;
-    /** @type {boolean} */
-    favorite;
-    /** @type {boolean} */
-    write;
-
-    /**
-     * @param {Object.<string, string|boolean|number} objectFromApi
-     */
-    constructor(objectFromApi) {
-        this.name = objectFromApi.name;
-        this.trackCount = objectFromApi.tracks.length;
-        this.favorite = objectFromApi.favorite;
-        this.write = objectFromApi.write;
-    }
-}
-
 function getActivePlaylists() {
     const active = [];
 

@@ -10,5 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn('music: error retrieving initial track list', err);
             setTimeout(() => this.initTrackList(), 1000);
         });
-    setInterval(() => this.updateTrackList(), 2*60*1000);
+
+    setInterval(async function() {
+        await this.updateTrackList()
+        eventBus.publish(MusicEvent.TRACK_LIST_CHANGE);
+    }, 2*60*1000);
 });

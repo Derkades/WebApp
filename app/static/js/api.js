@@ -12,7 +12,7 @@ class Music {
 
     }
 
-    async updateTrackList() {
+    async updateTrackList(trackFilter = null) {
         console.info('api: update track list');
         const response = await fetch('/track/list');
         const lastModified = response.headers.get('Last-Modified')
@@ -31,12 +31,33 @@ class Music {
         for (const playlistObj of json.playlists) {
             this.playlists[playlistObj.name] = new Playlist(playlistObj);;
             for (const trackObj of playlistObj.tracks) {
-                this.tracks[trackObj.path] = new Track(playlistObj.name, trackObj);
+                if (!trackFilter || trackFilter(trackObj)) {
+                    this.tracks[trackObj.path] = new Track(playlistObj.name, trackObj);
+                }
             }
         }
-
-        eventBus.publish(MusicEvent.TRACK_LIST_CHANGE);
     };
+}
+
+class Playlist {
+    /** @type {string} */
+    name;
+    /** @type {number} */
+    trackCount;
+    /** @type {boolean} */
+    favorite;
+    /** @type {boolean} */
+    write;
+
+    /**
+     * @param {Object.<string, string|boolean|number} objectFromApi
+     */
+    constructor(objectFromApi) {
+        this.name = objectFromApi.name;
+        this.trackCount = objectFromApi.tracks.length;
+        this.favorite = objectFromApi.favorite;
+        this.write = objectFromApi.write;
+    }
 }
 
 class Track {
@@ -196,6 +217,7 @@ class Track {
     /**
      * @param {string} audioType
      * @param {boolean} stream
+     * @param {boolean} memeCover
      * @returns {Promise<DownloadedTrack>}
      */
     async download(audioType, stream, memeCover) {
@@ -210,7 +232,7 @@ class Track {
                 const trackResponse = await fetch(audioUrl);
                 checkResponseCode(trackResponse);
                 const audioBlob = await trackResponse.blob();
-                console.debug('track: downloaded audio');
+                console.debug('track: downloaded audio', audioUrl);
                 return URL.createObjectURL(audioBlob);
             }());
         }
@@ -221,16 +243,17 @@ class Track {
                 const coverResponse = await fetch(imageUrl);
                 checkResponseCode(coverResponse);
                 const imageBlob = await coverResponse.blob();
-                console.debug('track: downloaded album cover image');
+                console.debug('track: downloaded image', imageUrl);
                 return URL.createObjectURL(imageBlob);
             }());
         }
 
         promises.push(async function() {
-            const lyricsResponse = await fetch(`/track/lyrics?path=${encodedPath}`);
+            const lyricsUrl = `/track/lyrics?path=${encodedPath}`;
+            const lyricsResponse = await fetch(lyricsUrl);
             checkResponseCode(lyricsResponse);
             const lyricsJson = await lyricsResponse.json();
-            console.debug('track: downloaded lyrics');
+            console.debug('track: downloaded lyrics', lyricsUrl);
             return lyricsJson.found ? new Lyrics(lyricsJson.source, lyricsJson.html) : null;
         }());
 

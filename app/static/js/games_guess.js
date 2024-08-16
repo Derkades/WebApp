@@ -1,48 +1,17 @@
-// TODO use api.js
+const music = new Music();
 
-class CachedTrack {
-    track;
-    audioBlobUrl;
-    imageBlobUrl;
-    constructor(track, audioBlobUrl, imageBlobUrl) {
-        this.track = track;
-        this.audioBlobUrl = audioBlobUrl;
-        this.imageBlobUrl = imageBlobUrl;
-    }
-}
-
-const tracks = [];
-const cachedTracks = [];
-
-async function downloadRandomTrack() {
-    const track = choice(tracks);
-    console.info('downloading:', track.path);
-    const encodedPath = encodeURIComponent(track.path);
-
-    const imageResponse = await fetch(`/track/album_cover?path=${encodedPath}&quality=high`);
-    const imageBlob = await imageResponse.blob();
-
-    const audioResponse = await fetch(`/track/audio?path=${encodedPath}&type=webm_opus_high`);
-    const audioBlob = await audioResponse.blob();
-    console.info('done downloading:', track.path);
-    return new CachedTrack(track, URL.createObjectURL(audioBlob), URL.createObjectURL(imageBlob));
-}
+/** @type {Array<DownloadedTrack>} */
+const downloadedTracks = [];
 
 async function fillCachedTracks() {
-    if (cachedTracks.length > 3) {
+    if (downloadedTracks.length > 3) {
         return;
     }
 
-    const cachedTrack = await downloadRandomTrack();
-    for (const cachedTrack2 of cachedTracks) {
-        if (cachedTrack.track.path == cachedTrack2.track.path) {
-            console.warn('track is already in queue, skipping');
-            return;
-        }
-    }
-    cachedTracks.push(cachedTrack);
-
-    fillCachedTracks();
+    /** @type {Track} */
+    const track = choice(Object.values(music.tracks));
+    const downloadedTrack = await track.download('webm_opus_high', false, false);
+    downloadedTracks.push(downloadedTrack);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -76,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const details = document.getElementById('details');
 
     /**
-     * @type {CachedTrack}
+     * @type {DownloadedTrack}
      */
     let currentTrack = null;
     let state = 'start'; // one of: start, playing, reveal
@@ -89,16 +58,16 @@ document.addEventListener('DOMContentLoaded', () => {
         audio.pause();
         details.textContent = '';
 
-        if (cachedTracks.length == 0) {
+        if (downloadedTracks.length == 0) {
             console.debug('cachedTracks still empty')
             setTimeout(start, 100);
             return;
         }
 
-        currentTrack = cachedTracks.shift();
+        currentTrack = downloadedTracks.shift();
 
-        cover.style.backgroundImage = `url("${currentTrack.imageBlobUrl}")`;
-        audio.src = currentTrack.audioBlobUrl;
+        cover.style.backgroundImage = `url("${currentTrack.imageUrl}")`;
+        audio.src = currentTrack.audioUrl;
         cover.classList.add('blurred');
         startText.classList.remove('hidden');
         nextText.classList.add('hidden');
@@ -134,23 +103,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function init() {
+    (async function() {
         // Download track list
-        const listResponse = await fetch('/track/list');
-        const listJson = await listResponse.json();
-        for (const playlist of listJson.playlists) {
-            for (const track of playlist.tracks) {
-                if (track.title && track.album && track.artists) {
-                    tracks.push(track);
-                }
-            }
+        function trackFilter(trackObj) {
+            return trackObj.title && trackObj.album && trackObj.artists.length > 0;
         }
-        fillCachedTracks();
-        setInterval(fillCachedTracks, 10000);
+        await music.updateTrackList(trackFilter);
+        setInterval(fillCachedTracks, 2000);
+        await fillCachedTracks();
         start();
-    }
-
-    init();
+    })();
 
     function onClick() {
         if (state == "start") {
