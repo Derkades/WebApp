@@ -45,9 +45,10 @@ class MediaSessionUpdater {
     }
 
     updateMetadata() {
-        const track = queue.currentTrack.track();
+        const track = queue.currentTrack.track;
         if (track === null) {
-            console.warn('mediasession: skip update, track info is null');
+            console.warn('mediasession: track info is null');
+            navigator.mediaSession.metadata = null;
             return;
         }
 
@@ -55,7 +56,7 @@ class MediaSessionUpdater {
             // For some unknown reason this does not work everywhere. For example, it works on Chromium
             // mobile and desktop, but not the KDE media player widget with Firefox or Chromium.
             // Firefox mobile doesn't seem to support the MediaSession API at all.
-            artwork: [{src: queue.currentTrack.imageBlobUrl}],
+            artwork: [{src: queue.currentTrack.imageUrl}],
         }
 
         if (track.title && track.artists) {

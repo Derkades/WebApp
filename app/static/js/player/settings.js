@@ -40,6 +40,22 @@ function syncInputsWithStorage() {
     eventBus.publish(MusicEvent.SETTINGS_LOADED);
 }
 
+function getTrackDownloadParams() {
+    let audioType = document.getElementById('settings-audio-type').value;
+
+    if (audioType.startsWith('webm') &&
+            getAudioElement().canPlayType("audio/webm;codecs=opus") != "probably" &&
+            getAudioElement().canPlayType("video/mp4;codecs=mp4a.40.2") == "probably") {
+        alert("WEBM/OPUS audio not supported by your browser, audio quality has been set to MP4/AAC");
+        document.getElementById('settings-audio-type').value = "mp4_aac";
+        audioType = "mp4_aac";
+    }
+
+    const stream = document.getElementById('settings-download-mode').value == 'stream';
+    const memeCover = document.getElementById('settings-meme-mode').checked;
+    return [audioType, stream, memeCover];
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     syncInputsWithStorage();
 

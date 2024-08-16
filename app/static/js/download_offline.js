@@ -1,3 +1,5 @@
+// Unmaintained, not up to date with many changes throughout the codebase
+
 function round(number) {
     return Math.round((number + Number.EPSILON) * 100) / 100;
 }

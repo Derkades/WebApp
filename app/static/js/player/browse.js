@@ -193,7 +193,8 @@ class Browse {
                 addButton2.disabled = true;
 
                 try {
-                    await track.downloadAndAddToQueue(true);
+                    const downloadedTrack = await track.download(...getTrackDownloadParams());
+                    queue.add(downloadedTrack, true);
                 } catch (ex) {
                     console.error('browse: error adding track to queue', ex)
                 }
@@ -206,7 +207,8 @@ class Browse {
             colAdd.appendChild(addButton2);
 
             const colEdit = document.createElement('td');
-            if (track.playlist().write) {
+
+            if (music.playlists[track.playlistName].write) {
                 const editButton2 = editButton.cloneNode(true);
                 editButton2.addEventListener('click', () => editor.open(track));
                 colEdit.appendChild(editButton2);

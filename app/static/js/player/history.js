@@ -22,7 +22,7 @@ class History {
     }
 
     #onNewTrack() {
-        const track = queue.currentTrack.track();
+        const track = queue.currentTrack.track;
         if (track === null) {
             console.warn('history: missing track info');
             this.currentlyPlayingTrack = false;

@@ -28,9 +28,8 @@ function getAudioElement() {
 }
 
 async function replaceAudioSource() {
-    const sourceUrl = queue.currentTrack.audioBlobUrl;
     const audio = getAudioElement();
-    audio.src = sourceUrl;
+    audio.src = queue.currentTrack.audioUrl;
     // Ensure audio volume matches slider
     onVolumeChange();
     try {
@@ -41,7 +40,7 @@ async function replaceAudioSource() {
 }
 
 function replaceAlbumImages() {
-    const imageUrl = queue.currentTrack.imageBlobUrl;
+    const imageUrl = queue.currentTrack.imageUrl;
 
     const cssUrl = `url("${imageUrl}")`;
 
@@ -100,7 +99,7 @@ function trackInfoUnavailableSpan() {
 
 function replaceTrackDisplayTitle() {
     if (queue.currentTrack !== null) {
-        const track = queue.currentTrack.track();
+        const track = queue.currentTrack.track;
         if (track !== null) {
             document.getElementById('current-track').replaceChildren(track.displayHtml(true));
             document.title = track.displayText(true);
@@ -115,7 +114,7 @@ function replaceTrackDisplayTitle() {
 
     const previous = queue.getPreviousTrack();
     if (previous !== null) {
-        const previousTrack = previous.track();
+        const previousTrack = previous.track;
         if (previousTrack !== null) {
             document.getElementById('previous-track').replaceChildren(previousTrack.displayHtml(true));
         } else {
@@ -143,30 +142,24 @@ eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, replaceTrackDisplayTitle);
 document.addEventListener('DOMContentLoaded', () => {
     const dislikeButton = document.getElementById('button-dislike')
     if (dislikeButton) { // Missing in offline mode
-        dislikeButton.addEventListener('click', () => {
-            const data = {track: queue.currentTrack.trackPath};
-            jsonPost('/dislikes/add', data);
+        dislikeButton.addEventListener('click', async function() {
+            await queue.currentTrack.track.dislike();
             queue.next();
         });
     }
 
     const deleteButton = document.getElementById('button-delete');
     if (deleteButton) { // Missing in offline mode
-        deleteButton.addEventListener('click', () => {
+        deleteButton.addEventListener('click', async function() {
             if (queue.currentTrack === null) {
                 return;
             }
             const deleteSpinner = document.getElementById('delete-spinner');
             deleteSpinner.classList.remove('hidden');
-            const path = queue.currentTrack.trackPath;
-            const oldName = path.split('/').pop();
-            const newName = '.trash.' + oldName;
-            (async function() {
-                await jsonPost('/files/rename', {path: path, new_name: newName});
-                await music.updateTrackList();
-                queue.next();
-                deleteSpinner.classList.add('hidden');
-            })();
+            await queue.currentTrack.track.delete();
+            await music.updateTrackList();
+            queue.next();
+            deleteSpinner.classList.add('hidden');
         });
     }
 
@@ -182,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         copyButton.addEventListener('click', async function() {
             copyButton.disabled = true;
-            const response = await jsonPost('/player/copy_track', {playlist: copyPlaylist.value, track: queue.currentTrack.trackPath}, false);
+            const response = await jsonPost('/player/copy_track', {playlist: copyPlaylist.value, track: queue.currentTrack.track.path}, false);
             console.debug('player: copy_track:', response.status);
             if (response.status == 200) {
                 const text = await response.text();

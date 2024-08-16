@@ -7,13 +7,13 @@ class Queue {
     playlistOverrides = [];
     /** @type {boolean} */
     #fillBusy;
-    /** @type {QueuedTrack | null} */
+    /** @type {DownloadedTrack | null} */
     currentTrack;
-    /** @type {Array<QueuedTrack>} */
+    /** @type {Array<DownloadedTrack>} */
     previousTracks;
-    /** @type {Array<QueuedTrack>} */
+    /** @type {Array<DownloadedTrack>} */
     manualQueuedTracks;
-    /** @type {Array<QueuedTrack>} */
+    /** @type {Array<DownloadedTrack>} */
     autoQueuedTracks;
 
     constructor() {
@@ -38,7 +38,7 @@ class Queue {
     };
 
     /**
-     * @returns {Array<QueuedTrack}
+     * @returns {Array<DownloadedTrack}
      */
     #combinedQueue() {
         return [...this.manualQueuedTracks, ...this.autoQueuedTracks];
@@ -54,8 +54,8 @@ class Queue {
     /**
      * @param {Number} start
      * @param {Number} deleteCount
-     * @param  {...QueuedTrack} insertTracks
-     * @returns {Array<QueuedTrack>}
+     * @param  {...DownloadedTrack} insertTracks
+     * @returns {Array<DownloadedTrack>}
      */
     #combinedQueueSplice(start, deleteCount, ...insertTracks) {
         if (start < this.manualQueuedTracks.length) {
@@ -66,7 +66,7 @@ class Queue {
     }
 
     /**
-     * @returns {QueuedTrack | null}
+     * @returns {DownloadedTrack | null}
      */
     getPreviousTrack() {
         if (this.previousTracks.length > 0) {
@@ -114,7 +114,7 @@ class Queue {
 
         this.#fillBusy = true;
 
-        Queue.downloadRandomAndAddToQueue(playlist).then(() => {
+        queue.addRandomTrackFromPlaylist(playlist).then(() => {
             this.#fillBusy = false;
             this.fill();
         }, error => {
@@ -128,7 +128,8 @@ class Queue {
     /**
      * @param {string} playlist Playlist directory name
      */
-    static async downloadRandomAndAddToQueue(playlist) {
+    async addRandomTrackFromPlaylist(playlist) {
+        // TODO use upcoming method in api.js Playlist.chooseRandom
         console.debug('queue: choose track');
         const chooseResponse = await jsonPost('/track/choose', {'playlist_dir': playlist, ...getTagFilter()});
         const path = (await chooseResponse.json()).path;
@@ -142,7 +143,8 @@ class Queue {
             throw Error('Track does not exist in local list: ' + path);
         }
 
-        await track.downloadAndAddToQueue(false);
+        const downloadedTrack = await track.download(...getTrackDownloadParams());
+        this.add(downloadedTrack, false);
     };
 
     updateHtml() {
@@ -152,15 +154,15 @@ class Queue {
         let i = 0;
         let totalQueueDuration = 0;
         for (const queuedTrack of this.#combinedQueue()) {
-            const track = queuedTrack.track();
+            const track = queuedTrack.track;
 
-            if (track !== null) {
+            if (track != null) {
                 totalQueueDuration += track.duration;
             }
 
             // Trash can that appears when hovering - click to remove track
             const tdCover = document.getElementById('template-td-cover').content.cloneNode(true).firstElementChild;
-            tdCover.style.backgroundImage = `url("${queuedTrack.imageBlobUrl}")`;
+            tdCover.style.backgroundImage = `url("${queuedTrack.imageUrl}")`;
             const rememberI = i;
             tdCover.onclick = () => queue.removeFromQueue(rememberI);
 
@@ -302,62 +304,19 @@ class Queue {
 
     /**
      * Add track to queue
-     * @param {QueuedTrack} queuedTrack
+     * @param {DownloadedTrack} downloadedTrack
      * @param {boolean} manual True to add track to the manual queue instead of auto queue (manual queue is played first)
      * @param {boolean} top True to add track to top of queue
      */
-    add(queuedTrack, manual, top = false) {
+    add(downloadedTrack, manual, top = false) {
         const queue = (manual ? this.manualQueuedTracks : this.autoQueuedTracks)
         if (top) {
-            queue.unshift(queuedTrack);
+            queue.unshift(downloadedTrack);
         } else {
-            queue.push(queuedTrack);
+            queue.push(downloadedTrack);
         }
         this.updateHtml();
     };
-};
-
-class QueuedTrack {
-    /** @type {string | null}
-     * Track path, or null if queued audio does not correspond to a track
-     */
-    trackPath;
-    /** @type {string} */
-    audioBlobUrl;
-    /** @type {string} */
-    imageBlobUrl;
-    /** @type {Lyrics | null} */
-    lyrics;
-
-    /**
-     * @param {Track} track
-     * @param {string} audioBlobUrl
-     * @param {string} imageBlobUrl
-     * @param {string} lyrics
-     */
-    constructor(track, audioBlobUrl, imageBlobUrl, lyrics) {
-        this.trackPath = track != null ? track.path : null;
-        this.audioBlobUrl = audioBlobUrl;
-        this.imageBlobUrl = imageBlobUrl;
-        this.lyrics = lyrics;
-    };
-
-    /**
-     * @returns {Track | null} Track info, or null if the track has since been deleted or is a virtual track
-     */
-    track() {
-        if (this.trackPath != null && this.trackPath in music.tracks) {
-            return music.tracks[this.trackPath];
-        } else {
-            return null;
-        }
-    }
-
-    revokeObjects() {
-        console.debug('queue: revoke objects:', this.trackPath);
-        URL.revokeObjectURL(this.audioBlobUrl);
-        URL.revokeObjectURL(this.imageBlobUrl);
-    }
 };
 
 const queue = new Queue();

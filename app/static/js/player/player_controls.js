@@ -121,11 +121,11 @@ eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {
         return;
     }
 
-    const track = queue.currentTrack.track();
+    const track = queue.currentTrack.track;
 
     // Show dislike button if track is real (e.g. not a virtual news track)
     const showDislike = track !== null;
-    const showEditDelete = track !== null && track.playlist().write;
+    const showEditDelete = track !== null && music.playlists[track.playlistName].write;
 
     if (showDislike) {
         document.getElementById('button-dislike').classList.remove('hidden');

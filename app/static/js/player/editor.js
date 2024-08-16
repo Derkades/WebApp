@@ -109,12 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('No current track in queue');
             return;
         }
-        const track = queue.currentTrack.track();
-        if (track === null) {
-            alert('Missing track info, has the track been deleted?');
-            return;
-        }
-        editor.open(track);
+        editor.open(queue.currentTrack.track);
     });
 
     // Save button

@@ -1,3 +1,5 @@
+// Common JavaScript interface to API, to be used by the music player and other pages.
+
 class Track {
     /** @type {string} */
     path;
@@ -55,13 +57,6 @@ class Track {
         if (this.albumArtist) {
             this.searchString += this.albumArtist;
         }
-    };
-
-    /**
-     * @returns {Playlist}
-     */
-    playlist() {
-        return music.playlists[this.playlistName];
     };
 
     /**
@@ -160,71 +155,98 @@ class Track {
     };
 
     /**
-     * Download track data, and add to queue
-     * @param {boolean} manual
+     * @param {string} audioType
+     * @param {boolean} stream
+     * @returns {Promise<DownloadedTrack>}
      */
-    async downloadAndAddToQueue(manual) {
-        const audioType = document.getElementById('settings-audio-type').value;
-
-        if (audioType.startsWith('webm') &&
-                getAudioElement().canPlayType("audio/webm;codecs=opus") != "probably" &&
-                getAudioElement().canPlayType("video/mp4;codecs=mp4a.40.2") == "probably") {
-            audioType = "mp4_aac";
-            alert("WEBM/OPUS audio not supported by your browser, audio quality has been set to MP4/AAC");
-            document.getElementById('settings-audio-type').value = "mp4_aac";
-            audioType = "mp4_aac";
-        }
-
+    async download(audioType, stream, memeCover) {
         const imageQuality = audioType == 'webm_opus_low' ? 'low' : 'high';
         const encodedPath = encodeURIComponent(this.path);
 
+        const promises = [];
+
         const audioUrl = `/track/audio?path=${encodedPath}&type=${audioType}`;
-        let audioUrlGetter;
-        if (document.getElementById('settings-download-mode').value === 'download') {
-            audioUrlGetter = async function() {
-                // Get track audio
+        if (!stream) {
+            promises.push(async function() {
                 const trackResponse = await fetch(audioUrl);
                 checkResponseCode(trackResponse);
                 const audioBlob = await trackResponse.blob();
                 console.debug('track: downloaded audio');
                 return URL.createObjectURL(audioBlob);
-            };
-        } else {
-            audioUrlGetter = async function() {
-                return audioUrl;
-            }
+            }());
         }
 
-        const imageBlobUrlGetter = async function() {
-            // Get cover image
-            const meme = document.getElementById('settings-meme-mode').checked ? '1' : '0';
-            const imageUrl = `/track/album_cover?path=${encodedPath}&quality=${imageQuality}&meme=${meme}`;
-            const coverResponse = await fetch(imageUrl);
-            checkResponseCode(coverResponse);
-            const imageBlob = await coverResponse.blob();
-            console.debug('track: downloaded album cover image');
-            return URL.createObjectURL(imageBlob);
-        };
+        const imageUrl = `/track/album_cover?path=${encodedPath}&quality=${imageQuality}&meme=${memeCover ? 1 : 0}`;
+        if (!stream) {
+            promises.push(async function() {
+                const coverResponse = await fetch(imageUrl);
+                checkResponseCode(coverResponse);
+                const imageBlob = await coverResponse.blob();
+                console.debug('track: downloaded album cover image');
+                return URL.createObjectURL(imageBlob);
+            }());
+        }
 
-        const lyricsGetter = async function() {
-            // Get lyrics
+        promises.push(async function() {
             const lyricsResponse = await fetch(`/track/lyrics?path=${encodedPath}`);
             checkResponseCode(lyricsResponse);
             const lyricsJson = await lyricsResponse.json();
             console.debug('track: downloaded lyrics');
             return lyricsJson.found ? new Lyrics(lyricsJson.source, lyricsJson.html) : null;
-        };
+        }());
 
-        // Resolve all, download in parallel
-        const promises = Promise.all([audioUrlGetter(), imageBlobUrlGetter(), lyricsGetter()]);
-        const [audioUrl2, imageBlobUrl, lyrics] = await promises;
+        // Download in parallel
+        if (stream) {
+            return new DownloadedTrack(this, audioUrl, imageUrl, await promises[0]);
+        } else {
+            return new DownloadedTrack(this, ...(await Promise.all(promises)));
+        }
+    }
 
-        const queuedTrack = new QueuedTrack(this, audioUrl2, imageBlobUrl, lyrics);
+    async delete() {
+        const oldName = this.path.split('/').pop();
+        const newName = '.trash.' + oldName;
+        await jsonPost('/files/rename', {path: this.path, new_name: newName});
+    }
 
-        // Add track to queue and update HTML
-        queue.add(queuedTrack, manual);
-    };
-};
+    async dislike() {
+        jsonPost('/dislikes/add', {track: this.path});
+    }
+
+    // TODO static method for getting track object for a single track by relpath. Will require a new API endpoint.
+}
+
+class DownloadedTrack {
+    /**
+     * @type {Track|null} Null for virtual tracks, like news
+     */
+    track;
+    /**
+     * @type {string}
+     */
+    audioUrl;
+    /**
+     * @type {string}
+     */
+    imageUrl;
+    /**
+     * @type {lyrics}
+     */
+    lyrics;
+
+    constructor(track, audioUrl, imageUrl, lyrics) {
+        this.track = track;
+        this.audioUrl = audioUrl;
+        this.imageUrl = imageUrl;
+        this.lyrics = lyrics;
+    }
+
+    revokeObjects() {
+        console.debug('queue: revoke objects:', this.track.path);
+        URL.revokeObjectURL(this.audioUrl);
+        URL.revokeObjectURL(this.imageUrl);
+    }
+}
 
 class Lyrics {
     /** @type {string | null} */

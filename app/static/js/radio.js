@@ -1,3 +1,4 @@
+// TODO use api.js
 
 const updateInterval = 2000;
 setInterval(update, updateInterval);
