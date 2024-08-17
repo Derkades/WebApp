@@ -29,7 +29,7 @@ class Search {
         this.#searchResultEmpty.classList.remove('hidden');
     }
 
-    #performSearch(searchNow = false) {
+    async #performSearch(searchNow = false) {
         // Only start searching after user has finished typing for better performance
         if (!searchNow) {
             // Reset timer when new change is received
@@ -49,7 +49,7 @@ class Search {
             return;
         }
 
-        const allTracks = Object.values(music.tracks);
+        const allTracks = await music.tracks();
 
         {
             const tracks = fuzzysort.go(query, allTracks, {keys: ['searchString'], threshold: -10000, limit: 50}).map(e => e.obj);

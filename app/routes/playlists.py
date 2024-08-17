@@ -1,6 +1,7 @@
+from typing import Any
 from flask import Blueprint, abort, redirect, render_template, request
 
-from app import auth, db, music, scanner, settings, util
+from app import auth, db, music, scanner, settings, util, jsonw
 
 bp = Blueprint('playlists', __name__, url_prefix='/playlists')
 
@@ -132,3 +133,20 @@ def route_share():
                      (target_user_id, playlist_relpath))
 
         return redirect('/playlists', code=303)
+
+
+@bp.route('/list')
+def route_list():
+    with db.connect(read_only=True) as conn:
+        user = auth.verify_auth_cookie(conn)
+
+        user_playlists = music.user_playlists(conn, user.user_id, all_writable=user.admin)
+        json = [{'name': playlist.name,
+                 'track_count': playlist.track_count,
+                 'favorite': playlist.favorite,
+                 'write': playlist.write}
+                for playlist in user_playlists
+                if playlist.track_count > 0]
+        response = jsonw.json_response(json)
+        response.cache_control.max_age = 60;
+        return response

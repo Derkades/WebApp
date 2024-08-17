@@ -115,7 +115,7 @@ function updatePlayPauseButtons() {
 }
 
 // Only show metadata edit and track delete buttons if playlist is writable
-eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {
+eventBus.subscribe(MusicEvent.TRACK_CHANGE, async function() {
     if (!document.getElementById('button-dislike')) {
         // if dislike button does not exist, we are running in offline mode and other buttons also don't exist
         return;
@@ -125,7 +125,7 @@ eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {
 
     // Show dislike button if track is real (e.g. not a virtual news track)
     const showDislike = track !== null;
-    const showEditDelete = track !== null && music.playlists[track.playlistName].write;
+    const showEditDelete = track !== null && (await music.playlist(track.playlistName)).write;
 
     if (showDislike) {
         document.getElementById('button-dislike').classList.remove('hidden');

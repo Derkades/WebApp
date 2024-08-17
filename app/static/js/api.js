@@ -1,15 +1,96 @@
 // Common JavaScript interface to API, to be used by the music player and other pages.
 
+// TODO: update old references to playlists, tracks, tracksLastModified
+// TODO: how to properly to abstract class / interface in JS?
 class Music {
+    /**
+     * @returns {Array<Playlist>}
+     */
+    async playlists() {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * @param {string} name
+     * @returns {Playlist|null}
+     */
+    async playlist(name) {
+        throw new Error("not implemented");
+
+    }
+
+    /**
+     * @returns {Array<Track>}
+     */
+    async tracks() {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * @param {string} trackPath
+     * @returns {Track|null}
+     */
+    async track(path) {
+        throw new Error("not implemented");
+
+    }
+}
+
+class OnDemandMusic extends Music {
+    async playlists() {
+        const response = await fetch('/playlists/list');
+        const json = await response.json();
+        const playlists = [];
+        for (const playlistObj of json) {
+            playlists.push(new Playlist(playlistObj));
+        }
+        return playlists;
+    }
+
+    async playlist(name) {
+        const response = await fetch('/playlists/list');
+        const json = await response.json();
+        for (const playlistObj of json) {
+            if (playlistObj.name == name) {
+                return new Playlist(playlistObj);
+            }
+        }
+        return null;
+    }
+
+    async tracks() {
+        throw new Error("not supported")
+    }
+
+    async track(path) {
+        const response = await fetch('/track/info?path=' + encodeURIComponent(path));
+        const json = await response.json();
+        return new Track(json.playlist, json);
+    }
+}
+
+class LocalMusic extends Music {
     /** @type {Object.<string, Playlist>} */
-    playlists;
+    #playlists;
     /** @type {Object.<string, Track> | null} */
-    tracks;
+    #tracks;
     /** @type {number} */
-    tracksLastModified;
+    #tracksLastModified;
 
-    constructor() {
+    async playlists() {
+        return Object.values(this.#playlists);
+    }
 
+    async playlist(name) {
+        return this.#playlists[name];
+    }
+
+    async tracks() {
+        return Object.values(this.#tracks);
+    }
+
+    async track(path) {
+        return this.#tracks[path];
     }
 
     async updateTrackList(trackFilter = null) {
@@ -26,13 +107,13 @@ class Music {
 
         const json = await response.json();
 
-        this.playlists = {};
-        this.tracks = {};
+        this.#playlists = {};
+        this.#tracks = {};
         for (const playlistObj of json.playlists) {
-            this.playlists[playlistObj.name] = new Playlist(playlistObj);;
+            this.#playlists[playlistObj.name] = new Playlist(playlistObj);;
             for (const trackObj of playlistObj.tracks) {
                 if (!trackFilter || trackFilter(trackObj)) {
-                    this.tracks[trackObj.path] = new Track(playlistObj.name, trackObj);
+                    this.#tracks[trackObj.path] = new Track(playlistObj.name, trackObj);
                 }
             }
         }
@@ -54,9 +135,16 @@ class Playlist {
      */
     constructor(objectFromApi) {
         this.name = objectFromApi.name;
-        this.trackCount = objectFromApi.tracks.length;
+        this.trackCount = objectFromApi.track_count;
         this.favorite = objectFromApi.favorite;
         this.write = objectFromApi.write;
+    }
+
+    async chooseRandomTrack(tagFilter) {
+        const chooseResponse = await jsonPost('/track/choose', {'playlist_dir': this.name, ...tagFilter});
+        const trackData = await chooseResponse.json();
+        console.info('api: chosen track: ', trackData.path);
+        return new Track(this.name, trackData);
     }
 }
 
@@ -274,8 +362,6 @@ class Track {
     async dislike() {
         jsonPost('/dislikes/add', {track: this.path});
     }
-
-    // TODO static method for getting track object for a single track by relpath. Will require a new API endpoint.
 }
 
 class DownloadedTrack {
@@ -320,3 +406,24 @@ class Lyrics {
         this.html = html;
     };
 };
+
+/**
+ * @param {string} url
+ * @param {object} postDataObject
+ * @returns {Promise<Response>}
+ */
+async function jsonPost(url, postDataObject, checkError = true) {
+    postDataObject.csrf = getCsrfToken();
+    const options = {
+        method: 'POST',
+        body: JSON.stringify(postDataObject),
+        headers: new Headers({
+            'Content-Type': 'application/json'
+        }),
+    };
+    const response = await fetch(new Request(url, options));
+    if (checkError) {
+        checkResponseCode(response);
+    }
+    return response;
+}

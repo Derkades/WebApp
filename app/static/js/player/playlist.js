@@ -78,7 +78,7 @@ function createPlaylistCheckbox(playlist, index, defaultChecked) {
     return span;
 }
 
-function updatePlaylistCheckboxHtml() {
+async function updatePlaylistCheckboxHtml() {
     console.debug('playlist: update playlist checkboxes');
 
     let index = 1;
@@ -86,7 +86,7 @@ function updatePlaylistCheckboxHtml() {
     const otherDiv = document.createElement('div');
     otherDiv.classList.add('other-checkboxes');
 
-    for (const playlist of Object.values(music.playlists)) {
+    for (const playlist of await music.playlists()) {
         if (playlist.favorite) {
             mainDiv.appendChild(createPlaylistCheckbox(playlist, index++, true));
         } else {
@@ -101,7 +101,7 @@ function updatePlaylistCheckboxHtml() {
 }
 eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, updatePlaylistCheckboxHtml);
 
-function createPlaylistDropdowns() {
+async function createPlaylistDropdowns() {
     console.debug('playlist: updating dropdowns');
 
     for (const select of document.getElementsByClassName('playlist-select')) {
@@ -120,7 +120,7 @@ function createPlaylistDropdowns() {
         const primaryPlaylist = document.getElementById('primary-playlist').textContent;
         const onlyWritable = select.classList.contains('playlist-select-writable');
 
-        for (const playlist of Object.values(music.playlists)) {
+        for (const playlist of await music.playlists()) {
             const option = document.createElement('option');
             option.value = playlist.name;
             option.textContent = playlist.name;
@@ -138,7 +138,7 @@ function createPlaylistDropdowns() {
 }
 eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, createPlaylistDropdowns);
 
-function loadPlaylistState() {
+async function loadPlaylistState() {
     const playlistsString = localStorage.getItem('playlists');
     if (!playlistsString) {
         console.info('playlist: no state saved');
@@ -146,7 +146,7 @@ function loadPlaylistState() {
     }
     const playlists = JSON.parse(playlistsString);
     console.debug('playlist: restoring state', playlists);
-    for (const playlist of Object.values(music.playlists)) {
+    for (const playlist of await music.playlists()) {
         const checkbox = document.getElementById('checkbox-' + playlist.name);
         if (checkbox) {
             checkbox.checked = playlists.indexOf(playlist.name) !== -1;
@@ -154,9 +154,9 @@ function loadPlaylistState() {
     }
 }
 
-function savePlaylistState() {
+async function savePlaylistState() {
     const checkedPlaylists = [];
-    for (const playlist of Object.values(music.playlists)) {
+    for (const playlist of await music.playlists()) {
         const checkbox = document.getElementById('checkbox-' + playlist.name);
         if (checkbox && checkbox.checked) {
             checkedPlaylists.push(playlist.name);

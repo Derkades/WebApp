@@ -1,10 +1,11 @@
-const music = new Music();
+const music = new LocalMusic();
 
 document.addEventListener('DOMContentLoaded', () => {
     music.updateTrackList()
         .then(() => {
             // Hide loading overlay when track list has finished loading
             document.getElementById('loading-overlay').classList.add('overlay-hidden')
+            eventBus.publish(MusicEvent.TRACK_LIST_CHANGE);
         })
         .catch(err => {
             console.warn('music: error retrieving initial track list', err);

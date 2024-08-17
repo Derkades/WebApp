@@ -1,4 +1,4 @@
-const music = new Music();
+const music = new OnDemandMusic();
 
 /** @type {Array<DownloadedTrack>} */
 const downloadedTracks = [];
@@ -8,8 +8,12 @@ async function fillCachedTracks() {
         return;
     }
 
+    /** @type {Playlist} */
+    const playlist = choice(await music.playlists());
+
+    // TODO use Playlist.chooseRandomTrack
     /** @type {Track} */
-    const track = choice(Object.values(music.tracks));
+    const track = await playlist.chooseRandomTrack({}); // TODO only choose tracks with valid metadata (artist, album, title)
     const downloadedTrack = await track.download('webm_opus_high', false, false);
     downloadedTracks.push(downloadedTrack);
 }
@@ -104,11 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     (async function() {
-        // Download track list
-        function trackFilter(trackObj) {
-            return trackObj.title && trackObj.album && trackObj.artists.length > 0;
-        }
-        await music.updateTrackList(trackFilter);
         setInterval(fillCachedTracks, 2000);
         await fillCachedTracks();
         start();

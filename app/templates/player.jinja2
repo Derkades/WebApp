@@ -304,17 +304,14 @@
         </div>
     </div>
 
-    <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
-
-    <audio class="hidden" autoplay id="audio"></audio>
-
-    <div class="vignette"></div>
+    <audio autoplay id="audio"></audio>
 
     <script src="/static/lib/fuzzysort-2.0.4.js"></script>
     <script src="/static/js/base.js"></script>
     <script src="/static/js/api.js"></script>
     <script src="/static/js/player.js"></script>
 
+    <div class="hidden" id="csrf-token">{{ csrf_token }}</div>
     <div class="hidden" id="primary-playlist">{{ primary_playlist }}</div>
     <div class="hidden" id="trans-artist">{% trans %}Artist: {% endtrans %}</div>
     <div class="hidden" id="trans-album">{% trans %}Album: {% endtrans %}</div>

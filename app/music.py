@@ -14,8 +14,7 @@ from sqlite3 import Connection
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, Iterator, Literal, Optional
 
-from app import (cache, image, jsonw, metadata, musicbrainz, reddit, scanner,
-                 settings)
+from app import cache, image, jsonw, metadata, musicbrainz, reddit, settings
 from app.auth import User
 from app.image import ImageFormat, ImageQuality
 
@@ -93,17 +92,6 @@ def list_tracks_recursively(path: Path, trashed: bool = False) -> Iterator[Path]
         for track_path in path.glob('**/*' + ext):
             if is_trashed(track_path) == trashed:
                 yield track_path
-
-
-def sort_artists(artists: Optional[list[str]], album_artist: Optional[str]) -> Optional[list[str]]:
-    """
-    Move album artist to start of artist list
-    """
-    if artists and album_artist and album_artist in artists:
-        artists.remove(album_artist)
-        return [album_artist] + artists
-
-    return artists
 
 
 def _get_possible_covers(artist: Optional[str], album: str, meme: bool) -> Iterator[bytes]:

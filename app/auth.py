@@ -107,7 +107,7 @@ class User(ABC):
     @abstractmethod
     def get_csrf(self) -> str:
         """
-        Generate CSRF token and store it for later validation
+        Get CSRF token for current session
         """
 
     @abstractmethod

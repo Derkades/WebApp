@@ -62,7 +62,7 @@ class Browse {
         this.updateContent();
     };
 
-    updateContent() {
+    async updateContent() {
         console.time('browse: updateContent');
 
         if (this.#history.length === 0) {
@@ -99,7 +99,7 @@ class Browse {
 
         let content;
         if (hasFilter) {
-            const tracks = Object.values(music.tracks).filter(filter);
+            const tracks = (await music.tracks()).filter(filter);
             content = this.generateTrackList(tracks);
         } else {
             // No selected playlist, or filter. For performance reasons, don't display entire track list.
@@ -208,7 +208,7 @@ class Browse {
 
             const colEdit = document.createElement('td');
 
-            if (music.playlists[track.playlistName].write) {
+            if (music.playlist(track.playlistName).write) {
                 const editButton2 = editButton.cloneNode(true);
                 editButton2.addEventListener('click', () => editor.open(track));
                 colEdit.appendChild(editButton2);

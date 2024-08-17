@@ -4,12 +4,29 @@ from typing import Any
 
 from flask import Blueprint, Response, abort, request
 
-from app import auth, db, image, jsonw, music, settings, scanner
+from app import auth, db, image, jsonw, music, scanner, settings
 from app.image import ImageFormat
+from app.metadata import sort_artists
 from app.music import AudioType, Track
 
 log = logging.getLogger('app.routes.track')
 bp = Blueprint('track', __name__, url_prefix='/track')
+
+
+def track_info_dict(track: Track):
+    meta = track.metadata()
+    return {
+        'playlist': track.playlist,
+        'path': track.relpath,
+        'mtime': track.mtime,
+        'duration': meta.duration,
+        'title': meta.title,
+        'album': meta.album,
+        'album_artist': meta.album_artist,
+        'year': meta.year,
+        'artists': meta.artists,
+        'tags': meta.tags,
+    }
 
 
 @bp.route('/choose', methods=['POST'])
@@ -31,7 +48,15 @@ def route_track():
         else:
             chosen_track = playlist.choose_track(user)
 
-    return {'path': chosen_track.relpath}
+        return track_info_dict(chosen_track)
+
+
+@bp.route('/info')
+def route_info():
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn)
+        track = Track.by_relpath(conn, request.args['path'])
+        return track_info_dict(track)
 
 
 @bp.route('/audio')
@@ -184,6 +209,7 @@ def route_list():
 
             playlist_json = {
                 'name': playlist.name,
+                'track_count': playlist.track_count,
                 'favorite': playlist.favorite,
                 'write': playlist.write,
                 'tracks': [],
@@ -213,7 +239,7 @@ def route_list():
                 artist_rows = conn.execute('SELECT artist FROM track_artist WHERE track=?',
                                            (relpath,)).fetchall()
                 if artist_rows:
-                    track_json['artists'] = music.sort_artists([row[0] for row in artist_rows], album_artist)
+                    track_json['artists'] = sort_artists([row[0] for row in artist_rows], album_artist)
 
                 tag_rows = conn.execute('SELECT tag FROM track_tag WHERE track=?', (relpath,))
                 track_json['tags'] = [tag for tag, in tag_rows]

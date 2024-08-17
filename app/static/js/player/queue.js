@@ -126,23 +126,12 @@ class Queue {
     };
 
     /**
-     * @param {string} playlist Playlist directory name
+     * @param {string} playlistName Playlist directory name
      */
-    async addRandomTrackFromPlaylist(playlist) {
-        // TODO use upcoming method in api.js Playlist.chooseRandom
-        console.debug('queue: choose track');
-        const chooseResponse = await jsonPost('/track/choose', {'playlist_dir': playlist, ...getTagFilter()});
-        const path = (await chooseResponse.json()).path;
-
-        console.info('queue: chosen track: ', path);
-
-        // Find track info for this file
-        const track = music.tracks[path];
-
-        if (track === undefined) {
-            throw Error('Track does not exist in local list: ' + path);
-        }
-
+    async addRandomTrackFromPlaylist(playlistName) {
+        // TODO directly pass playlist object to this function
+        const playlist = await music.playlist(playlistName);
+        const track = await playlist.chooseRandomTrack(getTagFilter());
         const downloadedTrack = await track.download(...getTrackDownloadParams());
         this.add(downloadedTrack, false);
     };

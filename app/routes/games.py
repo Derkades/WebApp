@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template
-from app import db, auth
+
+from app import auth, db
 
 bp = Blueprint('games', __name__, url_prefix='/games')
 
@@ -7,5 +8,6 @@ bp = Blueprint('games', __name__, url_prefix='/games')
 @bp.route('/guess')
 def route_guess():
     with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
-    return render_template('games_guess.jinja2')
+        user = auth.verify_auth_cookie(conn)
+    return render_template('games_guess.jinja2',
+                           csrf_token=user.get_csrf())

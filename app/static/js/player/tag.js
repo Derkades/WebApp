@@ -1,7 +1,7 @@
-function updateTagCheckboxes() {
+async function updateTagCheckboxes() {
     const tagsSet = new Set();
 
-    for (const track of Object.values(music.tracks)) {
+    for (const track of await music.tracks()) {
         for (const tag of track.tags) {
             tagsSet.add(tag);
         }

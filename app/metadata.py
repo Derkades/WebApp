@@ -147,6 +147,17 @@ def has_advertisement(metadata_str: str) -> bool:
     return False
 
 
+def sort_artists(artists: Optional[list[str]], album_artist: Optional[str]) -> Optional[list[str]]:
+    """
+    Move album artist to start of artist list
+    """
+    if artists and album_artist and album_artist in artists:
+        artists.remove(album_artist)
+        return [album_artist] + artists
+
+    return artists
+
+
 @dataclass
 class Metadata:
     relpath: str
@@ -340,7 +351,7 @@ def probe(path: Path) -> Metadata | None:
         if name.startswith('lyrics') and lyrics is None:
             lyrics = value
 
-    artists = music.sort_artists(artists, album_artist)
+    artists = sort_artists(artists, album_artist)
 
     return Metadata(music.to_relpath(path),
                     duration,
