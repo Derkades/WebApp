@@ -80,6 +80,8 @@ CREATE TABLE session (
     last_use INTEGER NOT NULL -- Seconds since UNIX epoch
 ) STRICT;
 
+CREATE INDEX idx_session_user ON session(user);
+
 CREATE TABLE history (
     id INTEGER NOT NULL UNIQUE PRIMARY KEY AUTOINCREMENT,
     timestamp INTEGER NOT NULL, -- Seconds since UNIX epoch
@@ -101,6 +103,8 @@ CREATE TABLE now_playing (
     paused INTEGER NOT NULL
 ) STRICT;
 
+CREATE INDEX idx_now_playing_timestamp ON now_playing(timestamp);
+
 CREATE TABLE scanner_log (
     id INTEGER NOT NULL UNIQUE PRIMARY KEY AUTOINCREMENT,
     timestamp INTEGER NOT NULL, -- Seconds since UNIX epoch
@@ -108,6 +112,8 @@ CREATE TABLE scanner_log (
     playlist TEXT NOT NULL, -- Intentionally not a foreign key, log may contain deleted playlists. Can be derived from track path, but stored for fast and easy lookup
     track TEXT NOT NULL  -- Intentionally not a foreign key, log may contain deleted tracks
 ) STRICT;
+
+CREATE INDEX idx_scanner_log_timestamp ON scanner_log(timestamp);
 
 CREATE TABLE dislikes (
     user INTEGER NOT NULL REFERENCES user(id) ON DELETE CASCADE,
