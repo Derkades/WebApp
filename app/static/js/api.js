@@ -217,7 +217,7 @@ class Track {
      * @param {boolean} showPlaylist
      * @returns {string}
      */
-    displayText(showPlaylist = false) {
+    displayText(showPlaylist = false, showAlbum = false) {
         let text = '';
 
         if (showPlaylist) {
@@ -225,11 +225,23 @@ class Track {
         }
 
         if (this.artists !== null && this.title !== null) {
+            // TODO show album artist first
             text += this.artists.join(', ');
             text += ' - ';
             text += this.title;
         } else {
             text += this.path.substring(this.path.indexOf('/') + 1);
+        }
+
+        if (this.album && showAlbum) {
+            text += ` (${this.album}`;
+            if (this.year) {
+                text += `, ${this.year})`;
+            } else {
+                text += ')';
+            }
+        } else if (this.year) {
+            text += ` (${this.year})`;
         }
 
         return text;

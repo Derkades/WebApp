@@ -92,17 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cover.classList.remove('blurred');
         revealText.classList.add('hidden');
         nextText.classList.remove('hidden');
-        details.textContent = `${currentTrack.track.artists.join(',')} - ${currentTrack.track.title}`;
-        if (currentTrack.track.album && currentTrack.track.album != currentTrack.track.title) {
-            details.textContent += ` (${currentTrack.track.album}`;
-            if (currentTrack.track.year) {
-                details.textContent += `, ${currentTrack.track.year})`;
-            } else {
-                details.textContent += ')';
-            }
-        } else if (currentTrack.track.year) {
-            details.textContent += ` (${currentTrack.track.year})`;
-        }
+        details.textContent = currentTrack.track.displayText(true, true);
     }
 
     (async function() {
