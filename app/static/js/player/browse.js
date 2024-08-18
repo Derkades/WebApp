@@ -69,7 +69,6 @@ class Browse {
      */
     browseArtist(artistName) {
         const title = document.getElementById('trans-artist').textContent + artistName;
-        artistName = artistName.toUpperCase();
         this.browse(title, {'artist': artistName});
     };
 
@@ -79,9 +78,7 @@ class Browse {
      */
     browseAlbum(albumName, albumArtistName) {
         const title = document.getElementById('trans-album').textContent + (albumArtistName === null ? '' : albumArtistName + ' - ') + albumName;
-        albumName = albumName.toUpperCase();
         if (albumArtistName) {
-            albumArtistName = albumArtistName.toUpperCase();
             this.browse(title, {'album_artist': albumArtistName, 'album': albumName});
         } else {
             this.browse(title, {'album': albumName});
