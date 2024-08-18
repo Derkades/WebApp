@@ -1,4 +1,4 @@
-const music = new OnDemandMusic();
+const music = new Music();
 
 /** @type {Array<DownloadedTrack>} */
 const downloadedTracks = [];
@@ -11,8 +11,6 @@ async function fillCachedTracks() {
     /** @type {Playlist} */
     const playlist = choice(await music.playlists());
 
-    // TODO use Playlist.chooseRandomTrack
-    /** @type {Track} */
     const track = await playlist.chooseRandomTrack({}); // TODO only choose tracks with valid metadata (artist, album, title)
     const downloadedTrack = await track.download('webm_opus_high', false, false);
     downloadedTracks.push(downloadedTrack);
