@@ -54,7 +54,7 @@ class Browse {
         this.setHeader(current.title);
 
         if (Object.keys(current.filter).length > 0) {
-            const tracks = await music.filteredTracks(current.filter);
+            const tracks = await music.filter(current.filter);
             const table = this.generateTrackList(tracks);
             document.getElementById('browse-no-content').classList.add('hidden');
             document.getElementById('browse-content').replaceChildren(table);

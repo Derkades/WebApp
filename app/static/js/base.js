@@ -93,3 +93,15 @@ function uuidv4() {
 function getCsrfToken() {
     return document.getElementById('csrf-token').textContent;
 }
+
+function dedup(array) {
+    const array2 = [];
+    const set = new Set();
+    for (const elem of array) {
+        if (!set.has(elem)) {
+            set.add(elem);
+            array2.push(elem);
+        }
+    }
+    return array2;
+}

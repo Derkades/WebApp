@@ -15,9 +15,7 @@ class Search {
     #searchTimeoutId = null;
 
     constructor() {
-        eventBus.subscribe(MusicEvent.METADATA_CHANGE, () => {
-            this.#performSearch();
-        });
+        eventBus.subscribe(MusicEvent.METADATA_CHANGE, () => this.#performSearch());
         this.#queryInput.addEventListener('input', () => this.#performSearch());
     }
 
@@ -30,7 +28,7 @@ class Search {
     }
 
     async #performSearch(searchNow = false) {
-        // Only start searching after user has finished typing for better performance
+        // Only start searching after user has finished typing for better performance and fewer network requests
         if (!searchNow) {
             // Reset timer when new change is received
             if (this.#searchTimeoutId != null) {
@@ -49,19 +47,12 @@ class Search {
             return;
         }
 
-        const allTracks = await music.tracks();
+        const tracks = await music.search(query);
+        this.#searchResultTracks.replaceChildren(browse.generateTrackList(tracks));
 
         {
-            const tracks = fuzzysort.go(query, allTracks, {keys: ['searchString'], threshold: -10000, limit: 50}).map(e => e.obj);
-            this.#searchResultTracks.replaceChildren(browse.generateTrackList(tracks));
-        }
-
-        {
-            const results = fuzzysort.go(query, allTracks, {key: 'searchString', limit: 5});
-            const tracks = results.map(e => e.obj);
-
             const table = document.createElement('table');
-            const listedArtists = new Set();
+            const listedArtists = new Set(); // to prevent duplicates, but is not actually used to preserve ordering
             for (const track of tracks) {
                 if (track.artists == null) {
                     continue;
@@ -88,7 +79,6 @@ class Search {
         }
 
         {
-            const tracks = fuzzysort.go(query, allTracks, {keys: ['searchString'], limit: 5}).map(e => e.obj);
             const newChildren = [];
             const listedAlbums = new Set();
             for (const track of tracks) {

@@ -179,6 +179,7 @@ def route_lyrics():
     }
 
 
+# TODO phase out
 @bp.route('/list')
 def route_list():
     """Return list of playlists and tracks"""
@@ -274,6 +275,18 @@ def route_filter():
         result = conn.execute(query, params)
         tracks = [Track.by_relpath(conn, row[0]) for row in result]
         return {'tracks': [track_info_dict(track) for track in tracks]}
+
+
+@bp.route('/search')
+def route_search():
+    query = request.args['query']
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn)
+        result = conn.execute('SELECT path FROM track_fts WHERE track_fts MATCH ? ORDER BY rank LIMIT 20', (query,))
+        tracks = [Track.by_relpath(conn, row[0]) for row in result]
+        return {'tracks': [track_info_dict(track) for track in tracks]}
+
+
 @bp.route('/tags')
 def route_tags():
     with db.connect(read_only=True) as conn:
@@ -283,6 +296,7 @@ def route_tags():
         tags = [row[0] for row in result]
 
     return tags
+
 
 @bp.route('/update_metadata', methods=['POST'])
 def route_update_metadata():

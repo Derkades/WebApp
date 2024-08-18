@@ -30,6 +30,7 @@ async function updateTagCheckboxes() {
 }
 
 eventBus.subscribe(MusicEvent.METADATA_CHANGE, updateTagCheckboxes);
+document.addEventListener('DOMContentLoaded', updateTagCheckboxes);
 
 function getTagFilter() {
     const mode = document.getElementById('tag-mode').value;

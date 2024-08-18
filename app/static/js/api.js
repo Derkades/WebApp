@@ -1,6 +1,9 @@
 // Common JavaScript interface to API, to be used by the music player and other pages.
 
 class Music {
+    /**
+     * @returns {Promise<Array<Playlist>>}
+     */
     async playlists() {
         const response = await fetch('/playlists/list');
         checkResponseCode(response);
@@ -12,6 +15,10 @@ class Music {
         return playlists;
     }
 
+    /**
+     * @param {string} name
+     * @returns {Promise<Playlist>}
+     */
     async playlist(name) {
         const response = await fetch('/playlists/list');
         checkResponseCode(response);
@@ -24,7 +31,23 @@ class Music {
         return null;
     }
 
-    async filteredTracks(filters) {
+    /**
+     * @param {object} json
+     * @returns {Promise<Array<Track>>}
+     */
+    #tracksFromJson(json) {
+        const tracks = [];
+        for (const trackObj of json) {
+            tracks.push(new Track(trackObj));
+        }
+        return tracks;
+    }
+
+    /**
+     * @param {object} filters with key = playlist, artist, album_artist, album, etc.
+     * @returns {Promise<Array<Track>>}
+     */
+    async filter(filters) {
         const encodedFilters = [];
         for (const filter in filters) {
             encodedFilters.push(filter + '=' + encodeURIComponent(filters[filter]));
@@ -32,13 +55,24 @@ class Music {
         const response = await fetch('/track/filter?' + encodedFilters.join('&'));
         checkResponseCode(response);
         const json = await response.json();
-        const tracks = [];
-        for (const trackObj of json.tracks) {
-            tracks.push(new Track(trackObj));
-        }
-        return tracks;
+        return this.#tracksFromJson(json.tracks);
     }
 
+    /**
+     * @param {string} query FTS5 search query
+     * @returns {Promise<Array<Track>>}
+     */
+    async search(query) {
+        const response = await fetch('/track/search?query=' + encodeURIComponent(query));
+        checkResponseCode(response);
+        const json = await response.json();
+        return this.#tracksFromJson(json.tracks);
+    }
+
+    /**
+     * @param {string} path
+     * @returns {Promise<Track>}
+     */
     async track(path) {
         const response = await fetch('/track/info?path=' + encodeURIComponent(path));
         checkResponseCode(response);
@@ -46,6 +80,9 @@ class Music {
         return new Track(json.playlist, json);
     }
 
+    /**
+     * @returns {Promise<Array<string>>}
+     */
     async tags() {
         const response = await fetch('/track/tags');
         checkResponseCode(response);
