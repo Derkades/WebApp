@@ -59,15 +59,9 @@ function getTrackDownloadParams() {
 document.addEventListener('DOMContentLoaded', () => {
     syncInputsWithStorage();
 
-    document.getElementById('scan-button').addEventListener('click', () => (async function() {
-        const spinner = document.getElementById('scan-spinner');
-        const button = document.getElementById('scan-button');
-        spinner.classList.remove('hidden');
-        button.classList.add('hidden');
-        await music.updateTrackList();
-        spinner.classList.add('hidden');
-        button.classList.remove('hidden');
-    })());
+    document.getElementById('update-metadata-button').addEventListener('click', () => {
+        eventBus.publish(MusicEvent.METADATA_CHANGE);
+    });
 
     document.getElementById('settings-queue-size').addEventListener('input', () => queue.fill());
 });

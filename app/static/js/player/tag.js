@@ -29,7 +29,7 @@ async function updateTagCheckboxes() {
     document.getElementById('tag-checkboxes').replaceChildren(...newChildren);
 }
 
-eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, updateTagCheckboxes);
+eventBus.subscribe(MusicEvent.METADATA_CHANGE, updateTagCheckboxes);
 
 function getTagFilter() {
     const mode = document.getElementById('tag-mode').value;

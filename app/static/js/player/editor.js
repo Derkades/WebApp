@@ -79,16 +79,12 @@ class Editor {
             return;
         }
 
-        // Different loading text
-        document.getElementById('editor-writing').classList.add('hidden');
-        document.getElementById('editor-reloading').classList.remove('hidden');
-
-        // Need to update local track list now, so metadata editor reflects changes
-        await music.updateTrackList();
+        // Need to HTML now, so metadata editor reflects changes
+        eventBus.publish(MusicEvent.METADATA_CHANGE);
 
         // Close dialog, and restore save button
         dialogs.close('dialog-editor');
-        document.getElementById('editor-reloading').classList.add('hidden');
+        document.getElementById('editor-writing').classList.add('hidden');
         document.getElementById('editor-save').classList.remove('hidden');
         this.#currentlyEditingPath = null;
     };

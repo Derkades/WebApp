@@ -4,7 +4,7 @@ class Browse {
     constructor() {
         this.#history = [];
 
-        eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, () => {
+        eventBus.subscribe(MusicEvent.METADATA_CHANGE, () => {
             if (dialogs.isOpen('dialog-browse')) {
                 this.updateContent();
             }

@@ -137,7 +137,7 @@ function replaceAllTrackHtml() {
 eventBus.subscribe(MusicEvent.TRACK_CHANGE, replaceAllTrackHtml);
 
 // Update track title, metadata may have changed
-eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, replaceTrackDisplayTitle);
+eventBus.subscribe(MusicEvent.METADATA_CHANGE, replaceTrackDisplayTitle);
 
 document.addEventListener('DOMContentLoaded', () => {
     const dislikeButton = document.getElementById('button-dislike')

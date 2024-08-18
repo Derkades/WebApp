@@ -15,7 +15,7 @@ class Search {
     #searchTimeoutId = null;
 
     constructor() {
-        eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, () => {
+        eventBus.subscribe(MusicEvent.METADATA_CHANGE, () => {
             this.#performSearch();
         });
         this.#queryInput.addEventListener('input', () => this.#performSearch());

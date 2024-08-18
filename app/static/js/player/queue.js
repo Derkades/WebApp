@@ -23,7 +23,7 @@ class Queue {
         this.manualQueuedTracks = []
         this.autoQueuedTracks = [];
 
-        eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, () => {
+        eventBus.subscribe(MusicEvent.METADATA_CHANGE, () => {
             this.updateHtml();
         });
 

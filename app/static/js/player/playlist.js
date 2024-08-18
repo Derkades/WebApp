@@ -99,9 +99,9 @@ async function updatePlaylistCheckboxHtml() {
 
     loadPlaylistState();
 }
-eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, updatePlaylistCheckboxHtml);
+eventBus.subscribe(MusicEvent.METADATA_CHANGE, updatePlaylistCheckboxHtml);
 
-async function createPlaylistDropdowns() {
+async function updatePlaylistDropdowns() {
     console.debug('playlist: updating dropdowns');
 
     const playlists = await music.playlists();
@@ -138,7 +138,7 @@ async function createPlaylistDropdowns() {
         }
     }
 }
-eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, createPlaylistDropdowns);
+eventBus.subscribe(MusicEvent.METADATA_CHANGE, updatePlaylistDropdowns);
 
 async function loadPlaylistState() {
     const playlistsString = localStorage.getItem('playlists');
@@ -167,3 +167,8 @@ async function savePlaylistState() {
     console.debug('playlist: saving checkbox state', checkedPlaylists);
     localStorage.setItem('playlists', JSON.stringify(checkedPlaylists));
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    updatePlaylistCheckboxHtml();
+    updatePlaylistDropdowns();
+})
