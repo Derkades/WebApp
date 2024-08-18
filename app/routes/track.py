@@ -280,6 +280,7 @@ def route_filter():
 @bp.route('/search')
 def route_search():
     query = request.args['query']
+    # TODO ensure valid FTS syntax, perhaps remove non-alphanumeric characters?
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
         result = conn.execute('SELECT path FROM track_fts WHERE track_fts MATCH ? ORDER BY rank LIMIT 20', (query,))

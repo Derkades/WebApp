@@ -53,6 +53,12 @@ class Browse {
         const current = this.#history[this.#history.length - 1];
         this.setHeader(current.title);
 
+        if (current.filter.playlist) {
+            document.getElementById('browse-filter-playlist').value = current.filter.playlist;
+        } else {
+            document.getElementById('browse-filter-playlist').value = 'all';
+        }
+
         if (Object.keys(current.filter).length > 0) {
             const tracks = await music.filter(current.filter);
             const table = this.generateTrackList(tracks);
@@ -68,8 +74,7 @@ class Browse {
      * @param {string} artistName
      */
     browseArtist(artistName) {
-        const title = document.getElementById('trans-artist').textContent + artistName;
-        this.browse(title, {'artist': artistName});
+        this.browse(document.getElementById('trans-artist').textContent + artistName, {'artist': artistName});
     };
 
     /**
@@ -89,32 +94,19 @@ class Browse {
      * @param {string} tagName
      */
     browseTag(tagName) {
-        const tagText = document.getElementById('trans-tag').textContent;
-        this.browse(tagText + tagName, {'tag': tagName})
+        this.browse(document.getElementById('trans-tag').textContent + tagName, {'tag': tagName})
     };
 
     /**
      * @param {string} playlistName
      */
-    browsePlaylist(playlistName) {
-        document.getElementById('browse-filter-playlist').value = playlistName;
-        // this triggers an event which calls setPlaylistFilter()
-        // const allText = document.getElementById('trans-all-tracks').textContent;
-        // this.browse(allText, {'playlist': playlistName});
+    browsePlaylist(playlist) {
+        this.browse(document.getElementById('trans-playlist').textContent + playlist, {'playlist': playlist})
     };
 
-    browseAll() {
-        const allText = document.getElementById('trans-all-tracks').textContent;
-        this.browse(allText, {});
+    browseButton() {
+        this.browse(document.getElementById('trans-browse').textContent, {});
     };
-
-    setPlaylistFilter(playlist) {
-        if (this.#history.current) {
-            this.#history.current.playlist = playlist;
-        } else {
-            this.browse(document.getElementById('trans-all-tracks').textContent, {'playlist': playlist})
-        }
-    }
 
     /**
      * also used by search.js
@@ -186,18 +178,18 @@ const browse = new Browse();
 
 document.addEventListener('DOMContentLoaded', () => {
     // Playlist dropdown
-    document.getElementById('browse-filter-playlist').addEventListener('input', event => {
+    document.getElementById('browse-filter-playlist').addEventListener('change', event => {
         console.debug('browse: filter-playlist input trigger');
-        if (event.target.value == 'all') {
-            browse.setPlaylistFilter(undefined);
+        const playlist = event.target.value;
+        if (playlist == 'all') {
+            browse.browse(document.getElementById('trans-browse').textContent, {});
         } else {
-            browse.setPlaylistFilter(event.target.value);
+            browse.browse(document.getElementById('trans-playlist').textContent + playlist, {'playlist': playlist});
         }
-        browse.updateContent()
     });
 
     // Button to open browse dialog
-    document.getElementById('browse-all').addEventListener('click', () => browse.browseAll());
+    document.getElementById('browse-all').addEventListener('click', () => browse.browseButton());
 
     // Back button in top left corner of browse window
     document.getElementById('browse-back').addEventListener('click', () => browse.back());
