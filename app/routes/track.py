@@ -261,6 +261,14 @@ def route_filter():
             query += ' AND EXISTS(SELECT artist FROM track_artist WHERE track = path AND artist = ?)'
             params.append(request.args['artist'])
 
+        if 'album_artist' in request.args:
+            query += ' AND album_artist = ?'
+            params.append(request.args['album_artist'])
+
+        if 'album' in request.args:
+            query += ' AND album = ?'
+            params.append(request.args['album'])
+
         log.info('call to filter: %s %s', query, params)
 
         result = conn.execute(query, params)
