@@ -247,6 +247,35 @@ def route_list():
     return jsonw.json_response({'playlists': playlist_response}, last_modified=last_modified)
 
 
+@bp.route('/filter')
+def route_filter():
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn)
+        query = 'SELECT path FROM track WHERE true'
+        params = []
+        if 'playlist' in request.args:
+            query += ' AND playlist = ?'
+            params.append(request.args['playlist'])
+
+        if 'artist' in request.args:
+            query += ' AND EXISTS(SELECT artist FROM track_artist WHERE track = path AND artist = ?)'
+            params.append(request.args['artist'])
+
+        log.info('call to filter: %s %s', query, params)
+
+        result = conn.execute(query, params)
+        tracks = [Track.by_relpath(conn, row[0]) for row in result]
+        return {'tracks': [track_info_dict(track) for track in tracks]}
+@bp.route('/tags')
+def route_tags():
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn)
+        # TODO make case insensitive, or is it already?
+        result = conn.execute('SELECT DISTINCT tag FROM track_tag ORDER BY tag');
+        tags = [row[0] for row in result]
+
+    return tags
+
 @bp.route('/update_metadata', methods=['POST'])
 def route_update_metadata():
     """

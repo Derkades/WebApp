@@ -18,31 +18,13 @@ class Browse {
         document.getElementById('dialog-browse').getElementsByTagName('h2')[0].textContent = textContent;
     };
 
-    /**
-     * @param {HTMLTableElement} table
-     */
-    setContent(table) {
-        if (table === null) {
-            document.getElementById('browse-no-content').classList.remove('hidden');
-            document.getElementById('browse-content').replaceChildren();
-        } else {
-            document.getElementById('browse-no-content').classList.add('hidden');
-            document.getElementById('browse-content').replaceChildren(table);
-        }
-    };
-
     open() {
         dialogs.open('dialog-browse');
     };
 
     /**
-     * @callback TrackFilter
-     * @param {Track} track
-     * @returns {boolean}
-     */
-    /**
      * @param {string} title
-     * @param {TrackFilter} filter
+     * @param {object} filter
      */
     browse(title, filter) {
         this.setHeader(title);
@@ -63,8 +45,6 @@ class Browse {
     };
 
     async updateContent() {
-        console.time('browse: updateContent');
-
         if (this.#history.length === 0) {
             console.warn('browse: requested content update, but there are no entries in history');
             return;
@@ -73,42 +53,15 @@ class Browse {
         const current = this.#history[this.#history.length - 1];
         this.setHeader(current.title);
 
-        // Playlist filter (or 'all')
-        const playlist = document.getElementById('browse-filter-playlist').value;
-
-        let hasFilter = true;
-        let filter;
-        if (playlist === 'all') {
-            if (current.filter === null) {
-                // Show all tracks
-                filter = () => true;
-                hasFilter = false;
-            } else {
-                // Apply filter to tracks in all playlist
-                filter = current.filter;
-            }
+        if (Object.keys(current.filter).length > 0) {
+            const tracks = await music.filteredTracks(current.filter);
+            const table = this.generateTrackList(tracks);
+            document.getElementById('browse-no-content').classList.add('hidden');
+            document.getElementById('browse-content').replaceChildren(table);
         } else {
-            if (current.filter === null) {
-                // Show tracks in specific playlist
-                filter = track => track.playlistName === playlist;
-            } else {
-                // Apply filter to tracks in specific playlists
-                filter = track => current.filter(track) && track.playlistName === playlist;
-            }
+            document.getElementById('browse-no-content').classList.remove('hidden');
+            document.getElementById('browse-content').replaceChildren();
         }
-
-        let content;
-        if (hasFilter) {
-            const tracks = (await music.tracks()).filter(filter);
-            content = this.generateTrackList(tracks);
-        } else {
-            // No selected playlist, or filter. For performance reasons, don't display entire track list.
-            content = null;
-        }
-
-        this.setContent(content);
-
-        console.timeEnd('browse: updateContent');
     }
 
     /**
@@ -117,7 +70,7 @@ class Browse {
     browseArtist(artistName) {
         const title = document.getElementById('trans-artist').textContent + artistName;
         artistName = artistName.toUpperCase();
-        this.browse(title, track => track.artists !== null && track.artistsUppercase.indexOf(artistName) !== -1);
+        this.browse(title, {'artist': artistName});
     };
 
     /**
@@ -129,9 +82,9 @@ class Browse {
         albumName = albumName.toUpperCase();
         if (albumArtistName) {
             albumArtistName = albumArtistName.toUpperCase();
-            this.browse(title, track => track.albumUppercase === albumName && track.albumArtistUppercase === albumArtistName);
+            this.browse(title, {'album_artist': albumArtistName, 'album': albumName});
         } else {
-            this.browse(title, track => track.albumUppercase === albumName);
+            this.browse(title, {'album': albumName});
         }
     };
 
@@ -140,7 +93,7 @@ class Browse {
      */
     browseTag(tagName) {
         const tagText = document.getElementById('trans-tag').textContent;
-        this.browse(tagText + tagName, track => track.tags.indexOf(tagName) !== -1)
+        this.browse(tagText + tagName, {'tag': tagName})
     };
 
     /**
@@ -148,13 +101,23 @@ class Browse {
      */
     browsePlaylist(playlistName) {
         document.getElementById('browse-filter-playlist').value = playlistName;
-        this.browseAll();
+        // this triggers an event which calls setPlaylistFilter()
+        // const allText = document.getElementById('trans-all-tracks').textContent;
+        // this.browse(allText, {'playlist': playlistName});
     };
 
     browseAll() {
         const allText = document.getElementById('trans-all-tracks').textContent;
-        this.browse(allText, null);
+        this.browse(allText, {});
     };
+
+    setPlaylistFilter(playlist) {
+        if (this.#history.current) {
+            this.#history.current.playlist = playlist;
+        } else {
+            this.browse(document.getElementById('trans-all-tracks').textContent, {'playlist': playlist})
+        }
+    }
 
     /**
      * also used by search.js
@@ -226,7 +189,15 @@ const browse = new Browse();
 
 document.addEventListener('DOMContentLoaded', () => {
     // Playlist dropdown
-    document.getElementById('browse-filter-playlist').addEventListener('input', () => browse.updateContent());
+    document.getElementById('browse-filter-playlist').addEventListener('input', event => {
+        console.debug('browse: filter-playlist input trigger');
+        if (event.target.value == 'all') {
+            browse.setPlaylistFilter(undefined);
+        } else {
+            browse.setPlaylistFilter(event.target.value);
+        }
+        browse.updateContent()
+    });
 
     // Button to open browse dialog
     document.getElementById('browse-all').addEventListener('click', () => browse.browseAll());

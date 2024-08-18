@@ -1,44 +1,9 @@
 // Common JavaScript interface to API, to be used by the music player and other pages.
 
-// TODO: update old references to playlists, tracks, tracksLastModified
-// TODO: how to properly to abstract class / interface in JS?
 class Music {
-    /**
-     * @returns {Array<Playlist>}
-     */
-    async playlists() {
-        throw new Error("not implemented");
-    }
-
-    /**
-     * @param {string} name
-     * @returns {Playlist|null}
-     */
-    async playlist(name) {
-        throw new Error("not implemented");
-
-    }
-
-    /**
-     * @returns {Array<Track>}
-     */
-    async tracks() {
-        throw new Error("not implemented");
-    }
-
-    /**
-     * @param {string} trackPath
-     * @returns {Track|null}
-     */
-    async track(path) {
-        throw new Error("not implemented");
-
-    }
-}
-
-class OnDemandMusic extends Music {
     async playlists() {
         const response = await fetch('/playlists/list');
+        checkResponseCode(response);
         const json = await response.json();
         const playlists = [];
         for (const playlistObj of json) {
@@ -49,6 +14,7 @@ class OnDemandMusic extends Music {
 
     async playlist(name) {
         const response = await fetch('/playlists/list');
+        checkResponseCode(response);
         const json = await response.json();
         for (const playlistObj of json) {
             if (playlistObj.name == name) {
@@ -58,66 +24,33 @@ class OnDemandMusic extends Music {
         return null;
     }
 
-    async tracks() {
-        throw new Error("not supported")
+    async filteredTracks(filters) {
+        const encodedFilters = [];
+        for (const filter in filters) {
+            encodedFilters.push(filter + '=' + encodeURIComponent(filters[filter]));
+        }
+        const response = await fetch('/track/filter?' + encodedFilters.join('&'));
+        checkResponseCode(response);
+        const json = await response.json();
+        const tracks = [];
+        for (const trackObj of json.tracks) {
+            tracks.push(new Track(trackObj));
+        }
+        return tracks;
     }
 
     async track(path) {
         const response = await fetch('/track/info?path=' + encodeURIComponent(path));
+        checkResponseCode(response);
         const json = await response.json();
         return new Track(json.playlist, json);
     }
-}
 
-class LocalMusic extends Music {
-    /** @type {Object.<string, Playlist>} */
-    #playlists;
-    /** @type {Object.<string, Track> | null} */
-    #tracks;
-    /** @type {number} */
-    #tracksLastModified;
-
-    async playlists() {
-        return Object.values(this.#playlists);
+    async tags() {
+        const response = await fetch('/track/tags');
+        checkResponseCode(response);
+        return await response.json();
     }
-
-    async playlist(name) {
-        return this.#playlists[name];
-    }
-
-    async tracks() {
-        return Object.values(this.#tracks);
-    }
-
-    async track(path) {
-        return this.#tracks[path];
-    }
-
-    async updateTrackList(trackFilter = null) {
-        console.info('api: update track list');
-        const response = await fetch('/track/list');
-        const lastModified = response.headers.get('Last-Modified')
-
-        if (lastModified == this.tracksLastModified) {
-            console.info('api: track list is unchanged');
-            // No need to do potentially expensive transformation to Track objects
-            return;
-        }
-        this.tracksLastModified = lastModified;
-
-        const json = await response.json();
-
-        this.#playlists = {};
-        this.#tracks = {};
-        for (const playlistObj of json.playlists) {
-            this.#playlists[playlistObj.name] = new Playlist(playlistObj);;
-            for (const trackObj of playlistObj.tracks) {
-                if (!trackFilter || trackFilter(trackObj)) {
-                    this.#tracks[trackObj.path] = new Track(playlistObj.name, trackObj);
-                }
-            }
-        }
-    };
 }
 
 class Playlist {
@@ -143,8 +76,8 @@ class Playlist {
     async chooseRandomTrack(tagFilter) {
         const chooseResponse = await jsonPost('/track/choose', {'playlist_dir': this.name, ...tagFilter});
         const trackData = await chooseResponse.json();
-        console.info('api: chosen track: ', trackData.path);
-        return new Track(this.name, trackData);
+        console.info('api: chosen track', trackData.path);
+        return new Track(trackData);
     }
 }
 
@@ -176,9 +109,9 @@ class Track {
     /** @type {string} */
     searchString;
 
-    constructor(playlistName, trackData) {
+    constructor(trackData) {
         this.path = trackData.path;
-        this.playlistName = playlistName;
+        this.playlistName = trackData.playlist;
         this.duration = trackData.duration;
         this.tags = trackData.tags;
         this.title = trackData.title;

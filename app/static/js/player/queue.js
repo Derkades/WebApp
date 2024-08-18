@@ -77,7 +77,7 @@ class Queue {
     };
 
     fill() {
-        this.updateHtml();
+        this.updateHtml(); // TODO only update HTML if queue has actually changed
 
         if (this.#fillBusy) {
             return;
@@ -107,7 +107,7 @@ class Queue {
         if (playlist === null) {
             console.debug('queue: no playlists selected, trying again later');
             document.getElementById('no-playlists-selected').classList.remove('hidden');
-            setTimeout(() => this.fill(), 500);
+            setTimeout(() => this.fill(), 1000);
             return;
         }
         document.getElementById('no-playlists-selected').classList.add('hidden');

@@ -104,6 +104,8 @@ eventBus.subscribe(MusicEvent.TRACK_LIST_CHANGE, updatePlaylistCheckboxHtml);
 async function createPlaylistDropdowns() {
     console.debug('playlist: updating dropdowns');
 
+    const playlists = await music.playlists();
+
     for (const select of document.getElementsByClassName('playlist-select')) {
         const previouslySelectedValue = select.value;
 
@@ -120,7 +122,7 @@ async function createPlaylistDropdowns() {
         const primaryPlaylist = document.getElementById('primary-playlist').textContent;
         const onlyWritable = select.classList.contains('playlist-select-writable');
 
-        for (const playlist of await music.playlists()) {
+        for (const playlist of playlists) {
             const option = document.createElement('option');
             option.value = playlist.name;
             option.textContent = playlist.name;

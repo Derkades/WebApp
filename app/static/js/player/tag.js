@@ -1,13 +1,5 @@
 async function updateTagCheckboxes() {
-    const tagsSet = new Set();
-
-    for (const track of await music.tracks()) {
-        for (const tag of track.tags) {
-            tagsSet.add(tag);
-        }
-    }
-
-    const tags = [...tagsSet].sort();
+    const tags = await music.tags();
 
     const newChildren = [];
 
