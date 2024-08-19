@@ -1,7 +1,8 @@
 from typing import Any
+
 from flask import Blueprint, abort, redirect, render_template, request
 
-from app import auth, db, music, scanner, settings, util, jsonw
+from app import auth, db, jsonw, music, scanner, settings, util
 
 bp = Blueprint('playlists', __name__, url_prefix='/playlists')
 

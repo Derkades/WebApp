@@ -58,7 +58,7 @@ function createIconButton(iconName) {
     button.classList.add('icon-button');
     const icon = document.createElement('div');
     icon.classList.add('icon');
-    icon.style.backgroundImage = `url("/static/icon/${iconName}")`;
+    icon.classList.add('icon-' + iconName);
     button.appendChild(icon);
     return button;
 }

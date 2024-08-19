@@ -35,7 +35,7 @@
 
                 <div class="box padding">
                     <p>
-                        <span id="current-track">{% trans %}Waiting for music in queue&mldr;{% endtrans %}</span>
+                        <span id="current-track"></span>
                     </p>
                     <p class="seconday hidden">
                         {% trans %}Previously: {% endtrans %} <span id="previous-track">-</span>
@@ -75,11 +75,6 @@
                         {% else %}
                             <input type="range" min="0" max="100" value="60" id="settings-volume">
                         {% endif %}
-
-                        {# Load volume icons, otherwise they will only load when changing volume which means there is briefly no icon #}
-                        {% for icon in ['low', 'medium', 'high'] %}
-                            <img class="hidden" height="1" width="1" src="/static/icon/volume-{{ icon }}.svg">
-                        {% endfor %}
                     </div>
                 </div>
 

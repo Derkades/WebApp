@@ -125,8 +125,8 @@ class Browse {
         const hcolEdit = document.createElement('th')
         headerRow.replaceChildren(hcolPlaylist, hcolDuration, hcolTitle, hcolAdd, hcolEdit);
 
-        const addButton = createIconButton('playlist-plus.svg');
-        const editButton = createIconButton('pencil.svg');
+        const addButton = createIconButton('playlist-plus');
+        const editButton = createIconButton('pencil');
 
         for (const track of tracks) {
             const colPlaylist = document.createElement('td');
