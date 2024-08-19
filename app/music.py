@@ -408,6 +408,22 @@ class Track:
             shutil.copy(temp_file.name, self.path)
 
 
+    def info_dict(self):
+        meta = self.metadata()
+        return {
+            'playlist': self.playlist,
+            'path': self.relpath,
+            'mtime': self.mtime,
+            'duration': meta.duration,
+            'title': meta.title,
+            'album': meta.album,
+            'album_artist': meta.album_artist,
+            'year': meta.year,
+            'artists': meta.artists,
+            'tags': meta.tags,
+        }
+
+
     @staticmethod
     def by_relpath(conn: Connection, relpath: str) -> 'Track' | None:
         """

@@ -13,22 +13,6 @@ log = logging.getLogger('app.routes.track')
 bp = Blueprint('track', __name__, url_prefix='/track')
 
 
-def track_info_dict(track: Track):
-    meta = track.metadata()
-    return {
-        'playlist': track.playlist,
-        'path': track.relpath,
-        'mtime': track.mtime,
-        'duration': meta.duration,
-        'title': meta.title,
-        'album': meta.album,
-        'album_artist': meta.album_artist,
-        'year': meta.year,
-        'artists': meta.artists,
-        'tags': meta.tags,
-    }
-
-
 @bp.route('/choose', methods=['POST'])
 def route_track():
     """
@@ -48,7 +32,7 @@ def route_track():
         else:
             chosen_track = playlist.choose_track(user)
 
-        return track_info_dict(chosen_track)
+        return chosen_track.info_dict()
 
 
 @bp.route('/info')
@@ -56,7 +40,7 @@ def route_info():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
         track = Track.by_relpath(conn, request.args['path'])
-        return track_info_dict(track)
+        return track.info_dict()
 
 
 @bp.route('/audio')
@@ -274,7 +258,7 @@ def route_filter():
 
         result = conn.execute(query, params)
         tracks = [Track.by_relpath(conn, row[0]) for row in result]
-        return {'tracks': [track_info_dict(track) for track in tracks]}
+        return {'tracks': [track.info_dict() for track in tracks]}
 
 
 @bp.route('/search')
@@ -285,7 +269,7 @@ def route_search():
         auth.verify_auth_cookie(conn)
         result = conn.execute('SELECT path FROM track_fts WHERE track_fts MATCH ? ORDER BY rank LIMIT 20', (query,))
         tracks = [Track.by_relpath(conn, row[0]) for row in result]
-        return {'tracks': [track_info_dict(track) for track in tracks]}
+        return {'tracks': [track.info_dict() for track in tracks]}
 
 
 @bp.route('/tags')
