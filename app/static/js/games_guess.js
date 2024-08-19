@@ -1,5 +1,3 @@
-const music = new Music();
-
 /** @type {Array<DownloadedTrack>} */
 const downloadedTracks = [];
 

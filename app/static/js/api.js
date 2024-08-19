@@ -1,5 +1,7 @@
 // Common JavaScript interface to API, to be used by the music player and other pages.
 
+const music = new Music();
+
 class Music {
     /**
      * @returns {Promise<Array<Playlist>>}
