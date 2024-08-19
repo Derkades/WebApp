@@ -1,7 +1,7 @@
 /* VARIABLES */
 
 :root {
-    --border-radius-amount: .5rem;
+    --border-radius: .5rem;
     --gap: 1rem; /* used for space between large elements like images, boxes, and large buttons */
     --smallgap: .2rem; /* used for space between small elements like buttons */
     --elem-border-color: rgba(255, 255, 255, 0.3);
@@ -48,7 +48,7 @@ main {
 @media screen and (min-width: 100rem) {
     main {
         margin: 1rem;
-        border-radius: var(--border-radius-amount);
+        border-radius: var(--border-radius);
     }
 }
 
@@ -125,7 +125,7 @@ input[type=range],
 .logbox {
     padding: .25rem;
     background-color: var(--elem-background-color);
-    border-radius: var(--border-radius-amount);
+    border-radius: var(--border-radius);
     color: white;
     margin-bottom: .3rem;
     border: 1px solid var(--elem-border-color);
@@ -179,7 +179,7 @@ input[type=range]::-webkit-slider-thumb {
     margin: 0;
     margin-top: -1px;
     padding: 0;
-    border-radius: var(--border-radius-amount);
+    border-radius: var(--border-radius);
 }
 
 input[type=range]::-webkit-slider-runnable-track {
@@ -285,7 +285,7 @@ input::placeholder {
     width: 100%;
     border-spacing: 0;
     background: rgba(0, 0, 0, 0.5);
-    border-radius: var(--border-radius-amount);
+    border-radius: var(--border-radius);
     overflow: hidden; /* prevent top row from overlapping rounded corners */
 }
 
@@ -313,7 +313,7 @@ input::placeholder {
 /* Boxes */
 
 .box {
-    border-radius: var(--border-radius-amount);
+    border-radius: var(--border-radius);
     box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
     background-color: var(--box-background-color);
     overflow: hidden;

@@ -105,7 +105,7 @@
 
 .dialog {
     box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
-    border-radius: var(--border-radius-amount);
+    border-radius: var(--border-radius);
     background-color: var(--box-background-color);
     overflow: hidden; /* prevent header from overlapping rounded corners */
 
@@ -162,7 +162,7 @@
 /* PLAYBACK CONTROLS SEEK BAR */
 
 #outer-progress-bar {
-    border-radius: var(--border-radius-amount);
+    border-radius: var(--border-radius);
     height: 1.5rem;
     border: 1px solid var(--elem-border-color);
     width: 100%;
@@ -335,7 +335,7 @@ h4 > .icon {
     margin: .5rem;
     height: 8rem;
     width: 8rem;
-    border-radius: var(--border-radius-amount);
+    border-radius: var(--border-radius);
     cursor: pointer;
 }
 

@@ -6,7 +6,7 @@
 
 .card {
     background: rgba(0, 0, 0, 0.5);
-    border-radius: var(--border-radius-amount);
+    border-radius: var(--border-radius);
     overflow: hidden; /* prevent header from overlapping rounded corners */
     flex: 1; /* grow to fill container width */
     min-width: min(100%, 25rem);

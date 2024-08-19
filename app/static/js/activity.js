@@ -20,7 +20,7 @@ function getNowPlayingCardHtml(info) {
     imgOuter.style.display = 'block';
     imgOuter.style.height = '8rem';
     imgOuter.style.width = '8rem';
-    imgOuter.style.borderRadius = 'var(--border-radius-amount)';
+    imgOuter.style.borderRadius = 'var(--border-radius)';
     imgOuter.style.background = `url("${imageThumb}") no-repeat center`;
     imgOuter.style.backgroundSize = 'cover';
 

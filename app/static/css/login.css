@@ -14,3 +14,17 @@
         bottom: .4em;
     }
 }
+
+main {
+    width: fit-content;
+    height: fit-content;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--gap);
+}
+
+.flex-content-center {
+    align-items: center;
+}
