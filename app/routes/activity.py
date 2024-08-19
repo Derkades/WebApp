@@ -61,7 +61,7 @@ def route_data():
         auth.verify_auth_cookie(conn)
 
         result = conn.execute('''
-                              SELECT user.username, user.nickname, track.playlist, track, paused, progress
+                              SELECT user.username, user.nickname, track, paused, progress
                               FROM now_playing
                                 JOIN user ON now_playing.user = user.id
                                 JOIN track ON now_playing.track = track.path
@@ -69,41 +69,25 @@ def route_data():
                               ''',
                               (int(time.time()) - 20,))  # based on JS update interval
 
-        now_playing = []
-        for username, nickname, playlist_name, relpath, paused, progress in result:
-            track = Track.by_relpath(conn, relpath)
-            meta = track.metadata()
-            now_playing.append({'path': relpath,
-                             'username': nickname if nickname else username,
-                             'playlist': playlist_name,
-                             'title': meta.title,
-                             'artists': meta.artists,
-                             'fallback_title': meta.display_title(),
-                             'paused': paused,
-                             'progress': progress})
+        now_playing = [{'username': nickname if nickname else username,
+                        'paused': paused,
+                        'progress': progress,
+                        **Track.by_relpath(conn, relpath).info_dict()}
+                       for username, nickname, relpath, paused, progress in result]
 
         result = conn.execute('''
-                              SELECT history.timestamp, user.username, user.nickname, history.playlist, history.track
+                              SELECT history.timestamp, user.username, user.nickname, history.track
                               FROM history
                                   LEFT JOIN user ON history.user = user.id
                               WHERE history.private = 0
                               ORDER BY history.timestamp DESC
                               LIMIT 10
                               ''')
-        history = []
-        for timestamp, username, nickname, playlist, relpath in result:
-            time_ago = format_timedelta(timestamp - int(time.time()), add_direction=True)
-            track = Track.by_relpath(conn, relpath)
-            if track:
-                meta = track.metadata()
-                title = meta.display_title()
-            else:
-                title = relpath
 
-            history.append({'time_ago': time_ago,
-                            'username': nickname if nickname else username,
-                            'playlist': playlist,
-                            'title': title})
+        history = [{'time_ago': format_timedelta(timestamp - int(time.time()), add_direction=True),
+                    'username': nickname if nickname else username,
+                    **Track.by_relpath(conn, relpath).info_dict()}
+                   for timestamp, username, nickname, relpath in result]
 
         file_changes = get_file_changes_list(conn, 10)
 
@@ -144,9 +128,7 @@ def route_all():
         history = []
         for timestamp, username, nickname, playlist, relpath, track_exists in result:
             if track_exists:
-                track = Track.by_relpath(conn, relpath)
-                meta = track.metadata()
-                title = meta.display_title()
+                title = Track.by_relpath(conn, relpath).metadata().display_title()
             else:
                 title = relpath
 
