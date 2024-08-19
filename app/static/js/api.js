@@ -1,7 +1,5 @@
 // Common JavaScript interface to API, to be used by the music player and other pages.
 
-const music = new Music();
-
 class Music {
     /**
      * @returns {Promise<Array<Playlist>>}
@@ -91,6 +89,8 @@ class Music {
         return await response.json();
     }
 }
+
+const music = new Music();
 
 class Playlist {
     /** @type {string} */
@@ -289,52 +289,67 @@ class Track {
     /**
      * @param {string} audioType
      * @param {boolean} stream
+     * @returns {Promise<string>} URL
+     */
+    async getAudio(audioType, stream) {
+        const audioUrl = `/track/audio?path=${encodeURIComponent(this.path)}&type=${audioType}`;
+        if (stream) {
+            return audioUrl;
+        } else {
+            const trackResponse = await fetch(audioUrl);
+            checkResponseCode(trackResponse);
+            const audioBlob = await trackResponse.blob();
+            console.debug('track: downloaded audio', audioUrl);
+            return URL.createObjectURL(audioBlob);
+        }
+    }
+
+    /**
+     *
+     * @param {string} imageQuality 'low' or 'high'
+     * @param {boolean} stream
+     * @param {boolean} memeCover
+     * @returns {Promise<string>} URL
+     */
+    async getCover(imageQuality, stream, memeCover) {
+        const imageUrl = `/track/album_cover?path=${encodeURIComponent(this.path)}&quality=${imageQuality}&meme=${memeCover ? 1 : 0}`;
+        if (stream) {
+            return imageUrl;
+        } else {
+            const coverResponse = await fetch(imageUrl);
+            checkResponseCode(coverResponse);
+            const imageBlob = await coverResponse.blob();
+            console.debug('track: downloaded image', imageUrl);
+            return URL.createObjectURL(imageBlob);
+        }
+    }
+
+    /**
+     * @returns {Promise<Lyrics|null>}
+     */
+    async getLyrics() {
+        const lyricsUrl = `/track/lyrics?path=${encodeURIComponent(this.path)}`;
+        const lyricsResponse = await fetch(lyricsUrl);
+        checkResponseCode(lyricsResponse);
+        const lyricsJson = await lyricsResponse.json();
+        console.debug('track: downloaded lyrics', lyricsUrl);
+        return lyricsJson.found ? new Lyrics(lyricsJson.source, lyricsJson.html) : null;
+    }
+
+    /**
+     * @param {string} audioType
+     * @param {boolean} stream
      * @param {boolean} memeCover
      * @returns {Promise<DownloadedTrack>}
      */
     async download(audioType, stream, memeCover) {
-        const imageQuality = audioType == 'webm_opus_low' ? 'low' : 'high';
-        const encodedPath = encodeURIComponent(this.path);
-
-        const promises = [];
-
-        const audioUrl = `/track/audio?path=${encodedPath}&type=${audioType}`;
-        if (!stream) {
-            promises.push(async function() {
-                const trackResponse = await fetch(audioUrl);
-                checkResponseCode(trackResponse);
-                const audioBlob = await trackResponse.blob();
-                console.debug('track: downloaded audio', audioUrl);
-                return URL.createObjectURL(audioBlob);
-            }());
-        }
-
-        const imageUrl = `/track/album_cover?path=${encodedPath}&quality=${imageQuality}&meme=${memeCover ? 1 : 0}`;
-        if (!stream) {
-            promises.push(async function() {
-                const coverResponse = await fetch(imageUrl);
-                checkResponseCode(coverResponse);
-                const imageBlob = await coverResponse.blob();
-                console.debug('track: downloaded image', imageUrl);
-                return URL.createObjectURL(imageBlob);
-            }());
-        }
-
-        promises.push(async function() {
-            const lyricsUrl = `/track/lyrics?path=${encodedPath}`;
-            const lyricsResponse = await fetch(lyricsUrl);
-            checkResponseCode(lyricsResponse);
-            const lyricsJson = await lyricsResponse.json();
-            console.debug('track: downloaded lyrics', lyricsUrl);
-            return lyricsJson.found ? new Lyrics(lyricsJson.source, lyricsJson.html) : null;
-        }());
-
-        // Download in parallel
-        if (stream) {
-            return new DownloadedTrack(this, audioUrl, imageUrl, await promises[0]);
-        } else {
-            return new DownloadedTrack(this, ...(await Promise.all(promises)));
-        }
+        // Download audio, cover, lyrics in parallel
+        const promises = [
+            this.getAudio(audioType, stream),
+            this.getCover(audioType == 'webm_opus_low' ? 'low' : 'high', stream, memeCover),
+            this.getLyrics(),
+        ];
+        return new DownloadedTrack(this, ...(await Promise.all(promises)));
     }
 
     async delete() {
