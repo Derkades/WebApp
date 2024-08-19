@@ -27,11 +27,13 @@ function getNowPlayingCardHtml(info) {
     const imgInner = document.createElement('div');
     imgInner.style.width = '100%';
     imgInner.style.height = '100%';
+    imgInner.style.filter = 'invert(1)';
+    imgInner.style.mixBlendMode = 'difference';
 
     if (info.paused) {
-        imgInner.style.background = `url("/static/icon/pause.svg") no-repeat center`;
-        imgInner.style.backgroundSize = 'cover';
-        imgInner.style.filter = 'invert(1)';
+        imgInner.classList.add('icon-pause');
+    } else {
+        imgInner.classList.remove('icon-pause');
     }
 
     imgOuter.append(imgInner);
