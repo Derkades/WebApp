@@ -9,35 +9,25 @@ function getNowPlayingCardHtml(info) {
 
     const cardBody = document.createElement('div');
     cardBody.classList.add('card-body');
-    cardBody.style.display = 'flex';
     card.append(cardBody);
 
-    const imageThumb = '/track/album_cover?quality=low&path=' + encodeURIComponent(info.path);
-    const imageFull = '/track/album_cover?quality=high&path=' + encodeURIComponent(info.path);
+    const coverThumbUrl = '/track/album_cover?quality=low&path=' + encodeURIComponent(info.path);
+    const coverFullUrl = '/track/album_cover?quality=high&path=' + encodeURIComponent(info.path);
 
-    const imgOuter = document.createElement('a');
-    imgOuter.href = imageFull;
-    imgOuter.style.display = 'block';
-    imgOuter.style.height = '8rem';
-    imgOuter.style.width = '8rem';
-    imgOuter.style.borderRadius = 'var(--border-radius)';
-    imgOuter.style.background = `url("${imageThumb}") no-repeat center`;
-    imgOuter.style.backgroundSize = 'cover';
+    const coverImg = document.createElement('a');
+    coverImg.classList.add('cover-img')
+    coverImg.href = coverFullUrl;
+    coverImg.style.backgroundImage = `url("${coverThumbUrl}")`;
 
     const imgInner = document.createElement('div');
-    imgInner.style.width = '100%';
-    imgInner.style.height = '100%';
-    imgInner.style.filter = 'invert(1)';
-    imgInner.style.mixBlendMode = 'difference';
+    imgInner.classList.add('cover-img-overlay');
 
     if (info.paused) {
         imgInner.classList.add('icon-pause');
-    } else {
-        imgInner.classList.remove('icon-pause');
     }
 
-    imgOuter.append(imgInner);
-    cardBody.append(imgOuter);
+    coverImg.append(imgInner);
+    cardBody.append(coverImg);
 
     const infoDiv = document.createElement('div');
     infoDiv.style.marginLeft = '.5rem';
@@ -54,7 +44,7 @@ function getNowPlayingCardHtml(info) {
     } else {
         const fallbackDiv = document.createElement('div');
         fallbackDiv.style.fontSize = '1.1em';
-        fallbackDiv.textContent = info.fallback_title;
+        fallbackDiv.textContent = info.display;
         infoDiv.append(fallbackDiv);
     }
 
@@ -72,40 +62,22 @@ function getNowPlayingCardHtml(info) {
     return card;
 }
 
-function getHistoryRowHtml(info) {
-    const colTime = document.createElement('td');
-    colTime.textContent = info.time_ago;
-
-    const colUsername = document.createElement('td');
-    colUsername.textContent = info.username;
-
-    const colPlaylist = document.createElement('td');
-    colPlaylist.textContent = info.playlist;
-
-    const colTitle = document.createElement('td');
-    colTitle.textContent = info.title;
-
+function createTableRow(contents) {
     const row = document.createElement('tr');
-    row.append(colTime, colUsername, colPlaylist, colTitle);
+    for (const content of contents) {
+        const col = document.createElement('td');
+        col.textContent = content;
+        row.append(col);
+    }
     return row;
 }
 
+function getHistoryRowHtml(info) {
+    return createTableRow([info.time_ago, info.username, info.playlist, info.display]);
+}
+
 function getFileChangeRowHtml(info) {
-    const colTime = document.createElement('td');
-    colTime.textContent = info.time_ago;
-
-    const colAction = document.createElement('td');
-    colAction.textContent = info.action;
-
-    const colPlaylist = document.createElement('td');
-    colPlaylist.textContent = info.playlist;
-
-    const colTrack = document.createElement('td');
-    colTrack.textContent = info.track;
-
-    const row = document.createElement('tr');
-    row.append(colTime, colAction, colPlaylist, colTrack);
-    return row;
+    return createTableRow([info.time_ago, info.action, info.playlist, info.track]);
 }
 
 const nowPlayingDiv = document.getElementById('now-playing');
@@ -140,8 +112,8 @@ async function updateNowPlaying() {
 document.addEventListener('DOMContentLoaded', () => {
     updateNowPlaying();
     setInterval(updateNowPlaying, 5_000);
-    addEventListener("visibilitychange", event => {
-        if (!document.hidden) {
+    addEventListener("visibilitychange", () => {
+        if (!document.visibilityState != "hidden") {
             updateNowPlaying();
         }
     });

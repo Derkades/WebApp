@@ -421,6 +421,7 @@ class Track:
             'year': meta.year,
             'artists': meta.artists,
             'tags': meta.tags,
+            'display': meta.display_title(),
         }
 
 
