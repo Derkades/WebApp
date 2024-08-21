@@ -59,9 +59,5 @@ function getTrackDownloadParams() {
 document.addEventListener('DOMContentLoaded', () => {
     syncInputsWithStorage();
 
-    document.getElementById('update-metadata-button').addEventListener('click', () => {
-        eventBus.publish(MusicEvent.METADATA_CHANGE);
-    });
-
     document.getElementById('settings-queue-size').addEventListener('input', () => queue.fill());
 });
