@@ -361,6 +361,23 @@ class Track {
     async dislike() {
         jsonPost('/dislikes/add', {track: this.path});
     }
+
+    /**
+     * Updates track metadata by sending current metadata of this object to the server.
+     */
+    async saveMetadata() {
+        const payload = {
+            path: this.path,
+            title: this.title,
+            album: this.album,
+            artists: this.artists,
+            album_artist: this.albumArtist,
+            tags: this.tags,
+            year: this.year,
+        };
+
+        await jsonPost('/track/update_metadata', payload);
+    }
 }
 
 class DownloadedTrack {

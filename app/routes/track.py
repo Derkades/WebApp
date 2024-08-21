@@ -302,12 +302,12 @@ def route_update_metadata():
 
         meta = track.metadata()
 
-    meta.title = payload['metadata']['title']
-    meta.album = payload['metadata']['album']
-    meta.artists = payload['metadata']['artists']
-    meta.album_artist = payload['metadata']['album_artist']
-    meta.tags = payload['metadata']['tags']
-    meta.year = payload['metadata']['year']
+    meta.title = payload['title']
+    meta.album = payload['album']
+    meta.artists = payload['artists']
+    meta.album_artist = payload['album_artist']
+    meta.tags = payload['tags']
+    meta.year = payload['year']
     track.write_metadata(meta)
 
     with db.connect() as conn:

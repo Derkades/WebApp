@@ -1,9 +1,9 @@
 class Editor {
-    /** @type {string} */
-    #currentlyEditingPath;
+    /** @type {Track} */
+    #track;
 
     constructor() {
-        this.#currentlyEditingPath = null;
+        this.#track = null;
     };
 
     /**
@@ -14,7 +14,7 @@ class Editor {
         if (track == null) {
             throw new Error('Track is null');
         }
-        this.#currentlyEditingPath = track.path;
+        this.#track = track;
 
         // Set content of HTML input fields
         document.getElementById('editor-html-title').textContent = track.path;
@@ -48,22 +48,42 @@ class Editor {
         }
     };
 
+    setValue(id, value) {
+        if (value instanceof Array) {
+            value = value.join('; ');
+        }
+        document.getElementById(id).value = value;
+    }
+
+    /**
+     * Copy content from track object variables to HTML input fields
+     */
+    trackToHtml() {
+        this.setValue('editor-title', this.#track.title);
+        this.setValue('editor-album', this.#track.album);
+        this.setValue('editor-artists', this.#track.artists);
+        this.setValue('editor-album-artist', this.#track.albumArtist);
+        this.setValue('editor-tags', this.#track.tags);
+        this.setValue('editor-year', this.#track.year);
+    }
+
+    /**
+     * Copy content from input fields to track object
+     */
+    htmlToTrack() {
+        this.#track.title = this.getValue('editor-title');
+        this.#track.album = this.getValue('editor-album');
+        this.#track.artists = this.getValue('editor-artists', true);
+        this.#track.albumArtist = this.getValue('editor-album-artist');
+        this.#track.tags = this.getValue('editor-tags', true);
+        this.#track.year = this.getValue('editor-year');
+    }
+
     /**
      * Save metadata and close metadata editor window
      */
     async save() {
-        // POST body for request
-        const payload = {
-            path: this.#currentlyEditingPath,
-            metadata: {
-                title: this.getValue('editor-title'),
-                album: this.getValue('editor-album'),
-                artists: this.getValue('editor-artists', true),
-                album_artist: this.getValue('editor-album-artist'),
-                tags: this.getValue('editor-tags', true),
-                year: this.getValue('editor-year'),
-            },
-        };
+        this.htmlToTrack();
 
         // Loading text
         document.getElementById('editor-save').classList.add("hidden");
@@ -71,7 +91,7 @@ class Editor {
 
         // Make request to update metadata
         try {
-            await jsonPost('/track/update_metadata', payload);
+            this.#track.saveMetadata();
         } catch (e) {
             alert('An error occurred while updating metadata.');
             document.getElementById('editor-writing').classList.add('hidden');
@@ -79,14 +99,14 @@ class Editor {
             return;
         }
 
-        // Need to HTML now, so metadata editor reflects changes
-        eventBus.publish(MusicEvent.METADATA_CHANGE);
-
         // Close dialog, and restore save button
         dialogs.close('dialog-editor');
         document.getElementById('editor-writing').classList.add('hidden');
         document.getElementById('editor-save').classList.remove('hidden');
-        this.#currentlyEditingPath = null;
+        this.#track = null;
+
+        // Music player should update all track-related HTML with new metadata
+        eventBus.publish(MusicEvent.METADATA_CHANGE);
     };
 
 };
