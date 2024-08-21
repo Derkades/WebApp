@@ -19,6 +19,9 @@ CREATE TABLE track (
 ) STRICT;
 
 CREATE INDEX idx_track_playlist ON track(playlist);
+CREATE INDEX idx_track_album ON track(album);
+CREATE INDEX idx_track_album_artist ON track(album_artist);
+CREATE INDEX idx_track_last_chosen ON track(last_chosen);
 
 CREATE TABLE track_artist (
     track TEXT NOT NULL REFERENCES track(path) ON DELETE CASCADE,
