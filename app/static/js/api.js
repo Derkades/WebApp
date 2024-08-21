@@ -1,4 +1,5 @@
 // Common JavaScript interface to API, to be used by the music player and other pages.
+// Scripts using this API must implement a getCsrfToken() function that returns a usable CSRF token as a string.
 
 class Music {
     /**
@@ -133,20 +134,12 @@ class Track {
     title;
     /** @type {Array<string> | null} */
     artists;
-    /** @type {Array<string> | null} */
-    artistsUppercase; // for browse.js
     /** @type {string | null} */
     album;
     /** @type {string | null} */
-    albumUppercase;
-    /** @type {string | null} */
     albumArtist;
-    /** @type {string | null} */
-    albumArtistUppercase; // for browse.js
     /** @type {number | null} */
     year;
-    /** @type {string} */
-    searchString;
 
     constructor(trackData) {
         this.path = trackData.path;
@@ -155,28 +148,9 @@ class Track {
         this.tags = trackData.tags;
         this.title = trackData.title;
         this.artists = trackData.artists;
-        if (this.artists) {
-            this.artistsUppercase = this.artists.map(s => s.toUpperCase());
-        }
         this.album = trackData.album;
-        if (this.album) this.albumUppercase = this.album.toUpperCase()
         this.albumArtist = trackData.album_artist;
-        if (this.albumArtist) this.albumArtistUppercase = this.albumArtist.toUpperCase();
         this.year = trackData.year;
-
-        this.searchString = this.path;
-        if (this.title) {
-            this.searchString += this.title;
-        }
-        if (this.artists) {
-            this.searchString += this.artists.join(' ');
-        }
-        if (this.album) {
-            this.searchString += this.album;
-        }
-        if (this.albumArtist) {
-            this.searchString += this.albumArtist;
-        }
     };
 
     /**
