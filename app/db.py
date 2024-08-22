@@ -21,7 +21,7 @@ def _connect(db_name: str, read_only: bool) -> Connection:
     db_uri = f'file:{db_path(db_name)}'
     if read_only:
         db_uri += '?mode=ro'
-    conn = sqlite3.connect(db_uri, uri=True, timeout=10.0)
+    conn = sqlite3.connect(db_uri, uri=True, timeout=30.0)
     conn.execute('PRAGMA auto_vacuum = INCREMENTAL')
     conn.execute('PRAGMA foreign_keys = ON')
     conn.execute('PRAGMA temp_store = MEMORY')
