@@ -254,8 +254,11 @@ def route_filter():
             query += ' AND album = ?'
             params.append(request.args['album'])
 
-        log.info('call to filter: %s %s', query, params)
+        if 'has_metadata' in request.args and request.args['has_metadata'] == '1':
+            # Has at least metadata for: title, album, album artist, artists
+            query += ' AND title NOT NULL AND album NOT NULL AND album_artist NOT NULL AND EXISTS(SELECT artist FROM track_artist WHERE track = path)'
 
+        query += ' LIMIT 5000'
         result = conn.execute(query, params)
         tracks = [Track.by_relpath(conn, row[0]) for row in result]
         return {'tracks': [track.info_dict() for track in tracks]}
