@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: robin@rslot.nl\n"
-"POT-Creation-Date: 2024-08-21 22:55+0200\n"
-"PO-Revision-Date: 2024-08-21 22:53+0200\n"
+"POT-Creation-Date: 2024-08-22 13:31+0200\n"
+"PO-Revision-Date: 2024-08-22 13:30+0200\n"
 "Last-Translator: \n"
 "Language: nl\n"
 "Language-Team: nl <robin@rslot.nl>\n"
@@ -289,35 +289,35 @@ msgstr "Wachtwoord"
 msgid "Current password"
 msgstr "Huidig wachtwoord"
 
-#: templates/account.jinja2:68
+#: templates/account.jinja2:69
 msgid "New password"
 msgstr "Nieuw wachtwoord"
 
-#: templates/account.jinja2:70
+#: templates/account.jinja2:72
 msgid "Repeat new password"
 msgstr "Herhaal nieuw wachtwoord"
 
-#: templates/account.jinja2:72
-msgid "Change password"
-msgstr "Wachtwoord"
-
 #: templates/account.jinja2:75
+msgid "Change password"
+msgstr "Verander wachtwoord"
+
+#: templates/account.jinja2:78
 msgid "Sessions"
 msgstr "Sessies"
 
-#: templates/account.jinja2:79
+#: templates/account.jinja2:82
 msgid "Login date"
 msgstr "Inlogdatum"
 
-#: templates/account.jinja2:80 templates/users.jinja2:28
+#: templates/account.jinja2:83 templates/users.jinja2:28
 msgid "Last used"
 msgstr "Laatst gebruikt"
 
-#: templates/account.jinja2:81
+#: templates/account.jinja2:84
 msgid "Device"
 msgstr "Apparaat"
 
-#: templates/account.jinja2:82
+#: templates/account.jinja2:85
 msgid "IP address"
 msgstr "IP-adres"
 
