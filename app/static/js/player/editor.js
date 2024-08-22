@@ -15,15 +15,7 @@ class Editor {
             throw new Error('Track is null');
         }
         this.#track = track;
-
-        // Set content of HTML input fields
-        document.getElementById('editor-html-title').textContent = track.path;
-        document.getElementById('editor-title').value = track.title;
-        document.getElementById('editor-album').value = track.album;
-        document.getElementById('editor-artists').value = track.artists !== null ? track.artists.join('; ') : '';
-        document.getElementById('editor-album-artist').value = track.albumArtist;
-        document.getElementById('editor-tags').value = track.tags.join('; ');
-        document.getElementById('editor-year').value = track.year;
+        this.trackToHtml();
 
         // Make editor dialog window visisble, and bring it to the top
         dialogs.open('dialog-editor');
@@ -59,6 +51,7 @@ class Editor {
      * Copy content from track object variables to HTML input fields
      */
     trackToHtml() {
+        this.setValue('editor-path', this.#track.path);
         this.setValue('editor-title', this.#track.title);
         this.setValue('editor-album', this.#track.album);
         this.setValue('editor-artists', this.#track.artists);

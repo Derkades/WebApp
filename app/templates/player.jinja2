@@ -232,35 +232,27 @@
     <div id="dialog-editor" class="full-page-overlay dialog-overlay overlay-hidden">
         <div class="dialog">
             {{ dialog_header('dialog-editor', gettext('Metadata editor')) }}
-            <div class="dialog-body" id="editor-content">
-                <p>
-                    {% trans %}Editing metadata for: {% endtrans %}<span id="editor-html-title"></span>
-                </p>
-                <br>
-                <div>
-                    <label for="editor-title">{% trans %}Title{% endtrans %}</label><br>
-                    <input type="text" id="editor-title" value="" size="50">
-                </div>
-                <div>
-                    <label for="editor-album">{% trans %}Album{% endtrans %}</label><br>
-                    <input type="text" id="editor-album" value="" size="50">
-                </div>
-                <div>
-                    <label for="editor-artists">{% trans %}Artists (delimit multiple using <kbd>;</kbd>){% endtrans %}</label><br>
-                    <input type="text" id="editor-artists" value="" size="50">
-                </div>
-                <div>
-                    <label for="editor-album-artist">{% trans %}Album artist{% endtrans %}</label><br>
-                    <input type="text" id="editor-album-artist" value="" size="50">
-                </div>
-                <div>
-                    <label for="editor-album-tags">{% trans %}Tags (delimit multiple using <kbd>;</kbd>){% endtrans %}</label><br>
-                    <input type="text" id="editor-tags" value="" size="50">
-                </div>
-                <div>
-                    <label for="editor-year">{% trans %}Year (4 characters){% endtrans %}</label><br>
-                    <input type="text" id="editor-year" value="" size="50">
-                </div>
+            <div class="dialog-body form" id="editor-content">
+                <label for="editor-path">{% trans %}File path{% endtrans %}</label>
+                <input type="text" id="editor-path" value="" readonly>
+
+                <label for="editor-title">{% trans %}Title{% endtrans %}</label>
+                <input type="text" id="editor-title" value="">
+
+                <label for="editor-album">{% trans %}Album{% endtrans %}</label>
+                <input type="text" id="editor-album" value="">
+
+                <label for="editor-artists">{% trans %}Artists (delimit multiple using <kbd>;</kbd>){% endtrans %}</label>
+                <input type="text" id="editor-artists" value="">
+
+                <label for="editor-album-artist">{% trans %}Album artist{% endtrans %}</label>
+                <input type="text" id="editor-album-artist" value="">
+
+                <label for="editor-album-tags">{% trans %}Tags (delimit multiple using <kbd>;</kbd>){% endtrans %}</label>
+                <input type="text" id="editor-tags" value="">
+
+                <label for="editor-year">{% trans %}Year (4 characters){% endtrans %}</label>
+                <input type="text" id="editor-year" value="">
 
                 {{ icon_button('content-save', 'editor-save') }}
 

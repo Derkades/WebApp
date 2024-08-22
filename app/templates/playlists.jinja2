@@ -129,7 +129,6 @@
             <th>{% trans %}Artist{% endtrans %}</th>
             <th>{% trans %}Tag{% endtrans %}</th>
             <th>{% trans %}Most recent choice{% endtrans %}</th>
-            {# <th>{% trans %}Least recent play{% endtrans %}</th> #}
             <th>{% trans %}Most recent modification{% endtrans %}</th>
         </tr>
     </thead>
@@ -149,7 +148,6 @@
                     <td>{{ playlist['stats'].has_artist_count }}</td>
                     <td>{{ playlist['stats'].has_tag_count }}</td>
                     <td class="format-timestamp">{{ playlist['stats'].most_recent_choice }}</td>
-                    {# <td class="format-timestamp">{{ playlist['stats'].least_recent_choice }}</td> #}
                     <td class="format-timestamp">{{ playlist['stats'].most_recent_mtime }}</td>
                 </tr>
             {% endif %}

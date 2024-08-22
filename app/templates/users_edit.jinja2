@@ -8,13 +8,16 @@
 
 {{ page_heading(gettext('Editing user: %(username)s', username=username), back_url='/users') }}
 
-<form action="/users/edit" method="POST">
+<form action="/users/edit" method="POST" class="form">
     <input type="hidden" name="csrf" value="{{ csrf_token }}">
-    <input type="hidden" name="username" value="{{ username }}"><br>
-    {% trans %}New username{% endtrans %}<br>
-    <input type="text" name="new_username" value="{{ username }}"><br>
-    {% trans %}New password (blank to leave unchanged){% endtrans %}<br>
-    <input type="password" name="new_password" value=""><br>
+    <input type="hidden" name="username" value="{{ username }}">
+
+    <label for="new-username">{% trans %}New username{% endtrans %}</label>
+    <input type="text" name="new_username" id="new-username" value="{{ username }}">
+
+    <label for="new-password">{% trans %}New password (blank to leave unchanged){% endtrans %}</label>
+    <input type="password" name="new_password" id="new-password" value="">
+
     <input type="submit" value="{% trans %}Submit{% endtrans %}">
 </form>
 
