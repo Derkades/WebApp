@@ -118,60 +118,60 @@
     <div id="dialog-settings" class="full-page-overlay dialog-overlay overlay-hidden">
         <div class="dialog">
             {{ dialog_header('dialog-settings', gettext('Settings')) }}
-            <div class="dialog-body">
-                <label for="settings-queue-size">{% trans %}Minimum queue size{% endtrans %}</label><br>
-                <input type="number" value="5" size="3" min="0" max="100" id="settings-queue-size"><br>
+            <div class="dialog-body form">
+                <label for="settings-queue-size">{% trans %}Minimum queue size{% endtrans %}</label>
+                <input type="number" value="5" size="3" min="0" max="100" id="settings-queue-size">
 
                 {% if offline_mode %}
                     <select id="settings-audio-type" disabled class="hidden">
                         <option value="webm_opus_high" selected>hidden</option>
                     </select>
                 {% else %}
-                    <label for="settings-audio-type">{% trans %}Audio and image quality{% endtrans %}</label><br>
+                    <label for="settings-audio-type">{% trans %}Audio and image quality{% endtrans %}</label>
                     <select id="settings-audio-type">
                         <option value="webm_opus_high" selected>{% trans %}Very high quality (128k Opus){% endtrans %}</option>
                         <option value="webm_opus_low">{% trans %}Low quality (48k Opus){% endtrans %}</option>
                         <option value="mp4_aac">{% trans %}iOS/Safari (VBR 128kbps AAC){% endtrans %}</option>
-                    </select><br>
+                    </select>
                 {% endif %}
 
-                <label for="settings-queue-removal-behaviour">{% trans %}Queue removal behaviour{% endtrans %}</label><br>
+                <label for="settings-queue-removal-behaviour">{% trans %}Queue removal behaviour{% endtrans %}</label>
                 <select id="settings-queue-removal-behaviour">
                     <option value="roundrobin" selected>{% trans %}New track from next round-robin playlist{% endtrans %}</option>
                     <option value="same">{% trans %}New track from same playlist{% endtrans %}</option>
-                </select><br>
+                </select>
 
-                <label for="settings-download-mode">{% trans %}Audio download mode{% endtrans %}</label><br>
+                <label for="settings-download-mode">{% trans %}Audio download mode{% endtrans %}</label>
                 <select id="settings-download-mode">
                     <option value="download" selected>{% trans %}Download full track when queued{% endtrans %}</option>
                     <option value="stream">{% trans %}Stream audio (experimental){% endtrans %}</option>
-                </select><br>
+                </select>
 
-                <label for="settings-audio-gain">{% trans %}Audio gain (reduces audio quality){% endtrans %}</label><br>
+                <label for="settings-audio-gain">{% trans %}Audio gain (reduces audio quality){% endtrans %}</label>
                 <select id="settings-audio-gain">
                     <option value="1" selected>1</option>
                     <option value="2">2</option>
                     <option value="5">5</option>
                     <option value="10">10</option>
-                </select><br>
+                </select>
 
                 {% if offline_mode %}
                     <input id="settings-meme-mode" type="hidden">
                 {% else %}
-                    <label for="settings-meme-mode">{% trans %}Album cover art memes{% endtrans %}</label><br>
-                    <input id="settings-meme-mode" type="checkbox"><br>
+                    <label for="settings-meme-mode">{% trans %}Album cover art memes{% endtrans %}</label>
+                    <input id="settings-meme-mode" type="checkbox">
                 {% endif %}
 
-                <label for="settings-theater">{% trans %}Theater mode: hide controls when not interacting with page{% endtrans %}</label><br>
-                <input id="settings-theater" type="checkbox"><br>
+                <label for="settings-theater">{% trans %}Theater mode{% endtrans %}</label>
+                <input id="settings-theater" type="checkbox">
 
                 {% if offline_mode %}
                     <select id="settings-news" class="hidden">
                         <option value="disabled" selected></option>
                     </select>
                 {% else %}
-                    <label for="settings-news">{% trans %}Hourly news{% endtrans %}</label><br>
-                    <input id="settings-news" type="checkbox"><br>
+                    <label for="settings-news">{% trans %}Hourly news{% endtrans %}</label>
+                    <input id="settings-news" type="checkbox">
                 {% endif %}
             </div>
         </div>

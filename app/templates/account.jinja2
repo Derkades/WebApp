@@ -9,16 +9,18 @@
 {{ page_heading(gettext("Account settings for '%(username)s'", username=user.username)) }}
 
 <h2>{% trans %}Nickname{% endtrans %}</h2>
-<form method="POST" action="/account/change_nickname">
+<form method="POST" action="/account/change_nickname" class="form">
     <input type="hidden" value="{{ csrf_token }}" name="csrf_token">
-    <input type="text" value="{{ user.nickname if user.nickname }}" name="nickname"><br>
+    <label for="nickname">{% trans %}Nickname{% endtrans %}</label>
+    <input type="text" value="{{ user.nickname if user.nickname }}" name="nickname" id="nickname">
     <input type="submit" value="{% trans %}Change nickname{% endtrans %}">
 </form>
 
 <h2>{% trans %}Language{% endtrans %}</h2>
-<form method="POST" action="/account/change_language">
+<form method="POST" action="/account/change_language" class="form">
     <input type="hidden" value="{{ csrf_token }}" name="csrf_token">
-    <select name="language">
+    <label for="language-select">{% trans %}Language{% endtrans %}</label>
+    <select name="language" id="language">
         <option value="" {% if not user.language %}selected{% endif %}>{% trans %}System language{% endtrans %}</option>
         {% for lang_code, lang_display in languages %}
             {% if lang_code == user.language %}
@@ -27,19 +29,20 @@
                 <option value="{{ lang_code }}">{{ lang_display }}</option>
             {% endif %}
         {% endfor %}
-    </select><br>
+    </select>
     <input type="submit" value="{% trans %}Change language{% endtrans %}">
 </form>
 
 <h2>{% trans %}Privacy{% endtrans %}</h2>
 
-<form method="POST" action="/account/change_privacy_setting">
+<form method="POST" action="/account/change_privacy_setting" class="form">
     <input type="hidden" value="{{ csrf_token }}" name="csrf_token">
-    <select name="privacy">
-        <option value="none" {% if user.privacy.name == 'NONE' %}selected{% endif %}>{% trans %}Show up in statistics and now playing{% endtrans %}</option>
-        <option value="aggregate" {% if user.privacy.name == 'AGGREGATE' %}selected{% endif %}>{% trans %}Don't show in now playing, only in long term statistics{% endtrans %}</option>
-        <option value="hidden" {% if user.privacy.name == 'HIDDEN' %}selected{% endif %}>{% trans %}Don't record played tracks at all{% endtrans %}</option>
-    </select><br>
+    <label for="privacy-select">{% trans %}Recording of listening activity{% endtrans %}</label>
+    <select name="privacy" id="privacy-select">
+        <option value="none" {% if user.privacy.name == 'NONE' %}selected{% endif %}>{% trans %}Activity and statistics{% endtrans %}</option>
+        <option value="aggregate" {% if user.privacy.name == 'AGGREGATE' %}selected{% endif %}>{% trans %}Not in activity, only in statistics{% endtrans %}</option>
+        <option value="hidden" {% if user.privacy.name == 'HIDDEN' %}selected{% endif %}>{% trans %}No data recording{% endtrans %}</option>
+    </select>
     <input type="submit" value="{% trans %}Change privacy setting{% endtrans %}">
 </form>
 
@@ -56,19 +59,22 @@
             <a href="{{ lastfm_connect_url }}">{% trans %}Connect your last.fm account{% endtrans %}</a>
         {% endif %}
     {% else %}
-        {% trans %}Last.fm integration is not available, because no API key is configured{% endtrans %}
+        {% trans %}Last.fm integration is not available, because no API key is configured by the server administrator.{% endtrans %}
     {% endif %}
 </p>
 
 <h2>{% trans %}Password{% endtrans %}</h2>
-<form method="POST" action="/account/change_password">
+<form method="POST" action="/account/change_password" class="form">
     <input type="hidden" value="{{ csrf_token }}" name="csrf_token">
-    {% trans %}Current password{% endtrans %}<br>
-    <input type="password" value="" name="current_password"><br>
-    {% trans %}New password{% endtrans %}<br>
-    <input type="password" value="" name="new_password"><br>
-    {% trans %}Repeat new password{% endtrans %}<br>
-    <input type="password" value="" name="repeat_new_password"><br>
+    <label for="current-password">{% trans %}Current password{% endtrans %}</label>
+    <input type="password" value="" name="current_password" id="current-password">
+
+    <label for="new-password">{% trans %}New password{% endtrans %}</label>
+    <input type="password" value="" name="new_password" id="new-password">
+
+    <label for="repeat-new-password">{% trans %}Repeat new password{% endtrans %}</label>
+    <input type="password" value="" name="repeat_new_password" id="repeat-new-password">
+
     <input type="submit" value="{% trans %}Change password{% endtrans %}">
 </form>
 
