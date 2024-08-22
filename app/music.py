@@ -511,6 +511,7 @@ class Playlist:
 
     def choose_track(self,
                      user: Optional[User],
+                     require_metadata: bool = False,
                      tag_mode: Optional[Literal['allow', 'deny']] = None,
                      tags: Optional[list[str]] = None) -> Track:
         """
@@ -541,11 +542,16 @@ class Playlist:
             query += ' AND (' + ' AND '.join(len(tags) * [f'? NOT IN ({track_tags_query})']) + ')'
             params.extend(tags)
 
+        if require_metadata:
+            # Has at least metadata for: title, album, album artist, artists
+            query += ' AND title NOT NULL AND album NOT NULL AND album_artist NOT NULL AND EXISTS(SELECT artist FROM track_artist WHERE track = path)'
+
         query += f' ORDER BY last_chosen ASC LIMIT {self.track_count // 4 + 1}'
 
         # From selected least recently played tracks, choose a random one
         query = 'SELECT * FROM (' + query + ') ORDER BY RANDOM() LIMIT 1'
 
+        # TODO handle case where no rows are available
         track, last_chosen = self.conn.execute(query, params).fetchone()
 
         current_timestamp = int(datetime.now().timestamp())

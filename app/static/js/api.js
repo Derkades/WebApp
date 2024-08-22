@@ -113,8 +113,8 @@ class Playlist {
         this.write = objectFromApi.write;
     }
 
-    async chooseRandomTrack(tagFilter) {
-        const chooseResponse = await jsonPost('/track/choose', {'playlist_dir': this.name, ...tagFilter});
+    async chooseRandomTrack(requireMetadata, tagFilter) {
+        const chooseResponse = await jsonPost('/track/choose', {'playlist': this.name, 'require_metadata': requireMetadata, ...tagFilter});
         const trackData = await chooseResponse.json();
         console.info('api: chosen track', trackData.path);
         return new Track(trackData);

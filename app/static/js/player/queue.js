@@ -131,7 +131,7 @@ class Queue {
     async addRandomTrackFromPlaylist(playlistName) {
         // TODO directly pass playlist object to this function
         const playlist = await music.playlist(playlistName);
-        const track = await playlist.chooseRandomTrack(getTagFilter());
+        const track = await playlist.chooseRandomTrack(false, getTagFilter());
         const downloadedTrack = await track.download(...getTrackDownloadParams());
         this.add(downloadedTrack, false);
     };

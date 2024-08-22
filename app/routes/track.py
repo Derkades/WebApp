@@ -22,15 +22,16 @@ def route_track():
         user = auth.verify_auth_cookie(conn)
         user.verify_csrf(request.json['csrf'])
 
-        dir_name = request.json['playlist_dir']
+        dir_name = request.json['playlist']
         playlist = music.playlist(conn, dir_name)
-        if 'tag_mode' in request.args:
+        require_metadata = request.json['require_metadata'] if 'require_metadata' in request.json else False
+        if 'tag_mode' in request.args: # TODO move tags from args to json body
             tag_mode = request.json['tag_mode']
             assert tag_mode in {'allow', 'deny'}
             tags = request.json['tags'].split(';')
-            chosen_track = playlist.choose_track(user, tag_mode=tag_mode, tags=tags)
+            chosen_track = playlist.choose_track(user, require_metadata=require_metadata, tag_mode=tag_mode, tags=tags)
         else:
-            chosen_track = playlist.choose_track(user)
+            chosen_track = playlist.choose_track(user, require_metadata=require_metadata)
 
         return chosen_track.info_dict()
 
