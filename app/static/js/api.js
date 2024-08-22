@@ -238,7 +238,6 @@ class Track {
         }
 
         if (this.artists !== null && this.title !== null) {
-            // TODO show album artist first
             text += this.artists.join(', ');
             text += ' - ';
             text += this.title;

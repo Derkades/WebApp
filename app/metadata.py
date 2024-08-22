@@ -351,11 +351,9 @@ def probe(path: Path) -> Metadata | None:
         if name.startswith('lyrics') and lyrics is None:
             lyrics = value
 
-    artists = sort_artists(artists, album_artist)
-
     return Metadata(music.to_relpath(path),
                     duration,
-                    artists,
+                    sort_artists(artists, album_artist),
                     album,
                     title,
                     year,
@@ -385,4 +383,4 @@ def cached(conn: Connection, relpath: str) -> Metadata:
     rows = conn.execute('SELECT tag FROM track_tag WHERE track=?', (relpath,)).fetchall()
     tags = [row[0] for row in rows]
 
-    return Metadata(relpath, duration, artists, album, title, year, album_artist, track_number, tags, lyrics)
+    return Metadata(relpath, duration, sort_artists(artists, album_artist), album, title, year, album_artist, track_number, tags, lyrics)
