@@ -31,30 +31,35 @@ async function performSearch() {
     searchButton.classList.add('hidden');
     searchLoading.classList.remove('hidden');
 
-    const response = await jsonPost('/download/search', {query: searchQuery.value});
-    const json = await response.json();
+    try {
+        const response = await jsonPost('/download/search', {query: searchQuery.value});
+        const json = await response.json();
 
-    for (const result of json.results) {
-        const tdTitle = document.createElement('td');
-        tdTitle.textContent = result.title;
-        const tdViews = document.createElement('td');
-        tdViews.textContent = formatLargeNumber(result.view_count);
-        const tdDuration = document.createElement('td');
-        tdDuration.textContent = result.duration_string;
-        const tdChannel = document.createElement('td');
-        tdChannel.textContent = result.channel_name + ' (' + formatLargeNumber(result.channel_subscribers) + ')';
+        for (const result of json.results) {
+            const tdTitle = document.createElement('td');
+            tdTitle.textContent = result.title;
+            const tdViews = document.createElement('td');
+            tdViews.textContent = formatLargeNumber(result.view_count);
+            const tdDuration = document.createElement('td');
+            tdDuration.textContent = result.duration_string;
+            const tdChannel = document.createElement('td');
+            tdChannel.textContent = result.channel_name + ' (' + formatLargeNumber(result.channel_subscribers) + ')';
 
-        const row = document.createElement('tr');
-        row.style.cursor = 'pointer';
-        row.append(tdTitle, tdViews, tdDuration, tdChannel);
-        searchResults.append(row);
+            const row = document.createElement('tr');
+            row.style.cursor = 'pointer';
+            row.append(tdTitle, tdViews, tdDuration, tdChannel);
+            searchResults.append(row);
 
-        row.addEventListener('click', () => downloadUrl.value = result.url);
+            row.addEventListener('click', () => downloadUrl.value = result.url);
+        }
+        searchTable.classList.remove('hidden');
+    } catch (exception) {
+        console.error(exception);
+        alert("Search error")
     }
 
     searchButton.classList.remove('hidden');
     searchLoading.classList.add('hidden');
-    searchTable.classList.remove('hidden');
 }
 
 document.addEventListener('DOMContentLoaded', () => {

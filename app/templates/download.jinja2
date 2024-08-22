@@ -10,13 +10,13 @@
 
 <h2>{% trans %}Search{% endtrans %}</h2>
 
-<form action="" id="search-form">
+<p>{% trans %}Enter a search query, then click search to populate a table with results. Click on one of the results to copy the URL for that video to the URL field below. Finally, click the download button below. Currently, a maximum of one result is displayed.{% endtrans %}</p>
+
+<form action="" id="search-form" class="form">
     <input id="csrf-token" type="hidden" value="{{ csrf_token }}">
 
-    <input id="search-query" type="text" placeholder="{% trans %}Search query{% endtrans %}">
-
-    {# <label for="search-multiple">{% trans %}Search multiple (slower){% endtrans %}</label>
-    <input id="multiple" type="checkbox"><br> #}
+    <label for="search-query">{% trans %}Search query{% endtrans %}</label>
+    <input id="search-query" type="text">
 
     <input type="submit" id="search-button" value="{% trans %}Search{% endtrans %}">
     <div id="search-loading" class="icon icon-loading spinning hidden"></div>
@@ -36,20 +36,22 @@
 
 <h2>{% trans %}Download{% endtrans %}</h2>
 
-<label for="url">{% trans %}Enter URL manually or use the search function above (click on a table row to copy the URL here).{% endtrans %}</label><br>
-<input id="download-url" type="text" class="fill-width"><br>
+<div class="form">
+    <label for="download-url">{% trans %}Video or track URL{% endtrans %}</label>
+    <input id="download-url" type="text" class="fill-width">
 
-<select id="download-playlist">
+    <label for="download-playlist">{% trans %}Playlist{% endtrans %}</label>
+    <select id="download-playlist">
     {% for playlist, write in playlists %}
         <option name="{{ playlist }}" {% if not write %}disabled{% endif %} {% if playlist == primary_playlist %}selected{% endif %}>{{ playlist }}</option>
     {% endfor %}
-</select><br>
+    </select>
 
-<button id="download-button">{% trans %}Download{% endtrans %}</button>
-<div id="download-loading" class="icon icon-loading spinning hidden"></div>
-<br>
+    <button id="download-button">{% trans %}Download{% endtrans %}</button>
+    <div id="download-loading" class="icon icon-loading spinning hidden"></div>
+</div>
 
-<div id="download-log" class="logbox fill-width"></div><br>
+<div id="download-log" class="logbox fill-width"></div>
 
 <script src="/static/js/base.js"></script>
 <script src="/static/js/download.js"></script>

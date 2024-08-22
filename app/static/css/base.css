@@ -207,9 +207,12 @@ input::placeholder {
     width: 100%;
     max-width: 60rem;
     box-sizing: border-box;
+    margin-top: var(--smallgap);
+    margin-bottom: var(--smallgap);
 }
 
-.form input[type=submit] {
+.form input[type=submit],
+.form button {
     grid-column: 1 / 3;
 }
 
