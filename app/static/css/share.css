@@ -1,7 +1,23 @@
-.cover-img {
+main {
     max-width: 40rem;
+}
+
+@media screen and (min-width: 40rem) {
+    main {
+        margin: 1rem;
+        border-radius: var(--border-radius);
+    }
+}
+
+.cover-img {
+    aspect-ratio: 1/1;
 }
 
 .lyrics {
     width: auto;
+}
+
+.box {
+    width: 100%;
+    box-sizing: border-box;
 }

@@ -32,15 +32,14 @@
     </a>
 </div>
 
-<div class="boxes">
-    <img class="box cover-img" src="/share/{{ code }}/cover">
-    <div class="box padding lyrics">
-        {% if lyrics %}
-        {{ lyrics }}
-        {% else %}
-        <i>">{% trans %}No lyrics found{% endtrans %}</i>
-        {% endif %}
-    </div>
+<img class="box cover-img" src="/share/{{ code }}/cover">
+
+<div class="box padding lyrics">
+    {% if lyrics %}
+    {{ lyrics }}
+    {% else %}
+    <i>">{% trans %}No lyrics found{% endtrans %}</i>
+    {% endif %}
 </div>
 
 {% endblock content %}
