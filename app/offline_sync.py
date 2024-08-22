@@ -208,55 +208,58 @@ class OfflineSync:
             self.db_music.execute('DELETE FROM playlist WHERE path=?',
                                   (name,))
 
+    def _sync_tracks_for_playlist(self,
+                                  playlist: str,
+                                  dislikes: set[str],
+                                  all_track_paths: set[str],
+                                  force_resync: float):
+        self.db_music.execute('INSERT INTO playlist VALUES (?) ON CONFLICT (path) DO NOTHING',
+                                  (playlist['name'],))
+
+        for track in playlist['tracks']:
+            if track['path'] in dislikes:
+                continue
+
+            all_track_paths.add(track['path'])
+
+            row = self.db_music.execute('SELECT mtime FROM track WHERE path=?',
+                                        (track['path'],)).fetchone()
+            if row:
+                mtime, = row
+                if mtime != track['mtime']:
+                    log.info('Out of date: %s', track['path'])
+                    self._update_track(track)
+                elif force_resync > 0 and random.random() < force_resync:
+                    log.info('Force resync: %s', track['path'])
+                    self._update_track(track)
+            else:
+                log.info('Missing: %s', track['path'])
+                self._insert_track(playlist, track)
+
+            self.db_offline.commit()
+            self.db_music.commit()
+
     def sync_tracks(self, force_resync: float) -> None:
         """
         Download added or modified tracks from the server, and delete local tracks that were deleted on the server
         """
-        log.info('Downloading track list')
-        playlists = self.request_get('/track/list').json()['playlists']
-        log.info('Fetching disliked tracks')
-        dislikes = set(self.request_get('/dislikes/json').json()['tracks'])
-
         result = self.db_offline.execute('SELECT name FROM playlists')
         enabled_playlists = [row[0] for row in result]
 
         if len(enabled_playlists) == 0:
-            log.info('No playlists selected, syncing favorite playlists.')
+            log.info('No playlists selected. Fetching favorite playlists...')
+            playlists = self.request_get('/playlists/list').json()
             enabled_playlists = [playlist['name'] for playlist in playlists if playlist['favorite']]
 
         log.info('Syncing playlists: %s', ','.join(enabled_playlists))
 
+        log.info('Fetching disliked tracks')
+        dislikes = set(self.request_get('/dislikes/json').json()['tracks'])
+
         all_track_paths: set[str] = set()
 
         for playlist in playlists:
-            if playlist['name'] not in enabled_playlists:
-                continue
-
-            self.db_music.execute('INSERT INTO playlist VALUES (?) ON CONFLICT (path) DO NOTHING',
-                                  (playlist['name'],))
-
-            for track in playlist['tracks']:
-                if track['path'] in dislikes:
-                    continue
-
-                all_track_paths.add(track['path'])
-
-                row = self.db_music.execute('SELECT mtime FROM track WHERE path=?',
-                                            (track['path'],)).fetchone()
-                if row:
-                    mtime, = row
-                    if mtime != track['mtime']:
-                        log.info('Out of date: %s', track['path'])
-                        self._update_track(track)
-                    elif force_resync > 0 and random.random() < force_resync:
-                        log.info('Force resync: %s', track['path'])
-                        self._update_track(track)
-                else:
-                    log.info('Missing: %s', track['path'])
-                    self._insert_track(playlist, track)
-
-                self.db_offline.commit()
-                self.db_music.commit()
+            self._sync_tracks_for_playlist(playlist, dislikes, all_track_paths, force_resync)
 
         self._prune_tracks(all_track_paths)
         self._prune_playlists()
