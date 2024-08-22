@@ -32,8 +32,8 @@ class Browse {
             title: title,
             filter: filter,
         });
-        this.updateContent();
         this.open();
+        this.updateContent();
     };
 
     back() {
@@ -49,6 +49,10 @@ class Browse {
             console.warn('browse: requested content update, but there are no entries in history');
             return;
         }
+
+        // Remove previous content, while new content is loading
+        // TODO loading animation?
+        document.getElementById('browse-content').replaceChildren();
 
         const current = this.#history[this.#history.length - 1];
         this.setHeader(current.title);
