@@ -34,8 +34,12 @@ function timestampToString(seconds) {
     }
 }
 
+function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
+}
+
 function choice(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
+    return arr[randInt(0, arr.length)];
 }
 
 function formatLargeNumber(number) {

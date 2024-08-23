@@ -1,0 +1,16 @@
+.boxes {
+    justify-content: center;
+}
+
+.box {
+    padding: var(--gap);
+}
+
+.choose {
+    cursor: pointer;
+}
+
+.cover-img {
+    max-width: 40rem;
+    transition: scale 0.2s;
+}

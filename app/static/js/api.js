@@ -153,6 +153,7 @@ class Track {
         this.year = trackData.year;
     };
 
+    // TODO uses player-specific code, does not belong in api.js
     /**
      * Get display HTML for this track
      * @param {boolean} showPlaylist
@@ -315,7 +316,7 @@ class Track {
      * @param {boolean} memeCover
      * @returns {Promise<DownloadedTrack>}
      */
-    async download(audioType, stream, memeCover) {
+    async download(audioType='webm_opus_high', stream=false, memeCover=false) {
         // Download audio, cover, lyrics in parallel
         const promises = [
             this.getAudio(audioType, stream),

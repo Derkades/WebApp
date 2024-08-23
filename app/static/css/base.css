@@ -409,6 +409,8 @@ input::placeholder {
     image-rendering: pixelated;
 }
 
+/* LOADING */
+
 @keyframes rotate {
     from {
         transform: rotate(0deg);
@@ -420,6 +422,27 @@ input::placeholder {
 
 .spinning {
     animation: rotate 1s linear infinite;
+}
+
+
+.raphson-spinner {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    animation: rotate 1.25s linear infinite;
+    display: inline-block;
+    margin-left: var(--gap);
+    background-image: url('/static/img/raphson_small.webp');
+    height: 2rem;
+    width: 2rem;
+}
+
+.cover-img {
+    display: block;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    aspect-ratio: 1/1;
 }
 
 /* Firefox scrollbars look good by default, style Chromium scrollbars so they look similar */

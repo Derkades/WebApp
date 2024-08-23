@@ -10,43 +10,27 @@ async function fillCachedTracks() {
     const playlist = choice(await music.playlists());
 
     const track = await playlist.chooseRandomTrack(true, {});
-    const downloadedTrack = await track.download('webm_opus_high', false, false);
+    const downloadedTrack = await track.download();
     downloadedTracks.push(downloadedTrack);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    /**
-     * @type {HTMLDivElement}
-     */
+    /** @type {HTMLDivElement} */
     const cover = document.getElementById('cover');
-    /**
-     * @type {HTMLAudioElement}
-     */
+    /** @type {HTMLAudioElement} */
     const audio = document.getElementById('audio');
-    /**
-     * @type {HTMLDivElement}
-     */
+    /** @type {HTMLDivElement} */
     const loadingText = document.getElementById('loading-text');
-    /**
-     * @type {HTMLDivElement}
-     */
+    /** @type {HTMLDivElement} */
     const startText = document.getElementById('start-text');
-    /**
-     * @type {HTMLDivElement}
-     */
+    /** @type {HTMLDivElement} */
     const revealText = document.getElementById('reveal-text');
-    /**
-     * @type {HTMLDivElement}
-     */
+    /** @type {HTMLDivElement} */
     const nextText = document.getElementById('next-text');
-    /**
-     * @type {HTMLDivElement}
-     */
+    /** @type {HTMLDivElement} */
     const details = document.getElementById('details');
 
-    /**
-     * @type {DownloadedTrack}
-     */
+    /** @type {DownloadedTrack} */
     let currentTrack = null;
     let state = 'start'; // one of: start, playing, reveal
 
