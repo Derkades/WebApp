@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: robin@rslot.nl\n"
-"POT-Creation-Date: 2024-08-22 13:31+0200\n"
-"PO-Revision-Date: 2024-08-22 13:30+0200\n"
+"POT-Creation-Date: 2024-08-23 21:02+0200\n"
+"PO-Revision-Date: 2024-08-23 21:02+0200\n"
 "Last-Translator: \n"
 "Language: nl\n"
 "Language-Team: nl <robin@rslot.nl>\n"
@@ -215,109 +215,113 @@ msgstr "Accountinstellingen"
 msgid "Account settings for '%(username)s'"
 msgstr "Accountinstellingen voor '%(username)s'"
 
-#: templates/account.jinja2:11
+#: templates/account.jinja2:11 templates/account.jinja2:14
 msgid "Nickname"
 msgstr "Bijnaam"
 
-#: templates/account.jinja2:15
+#: templates/account.jinja2:16
 msgid "Change nickname"
 msgstr "Verander bijnaam"
 
-#: templates/account.jinja2:18
+#: templates/account.jinja2:19 templates/account.jinja2:22
 msgid "Language"
 msgstr "Taal"
 
-#: templates/account.jinja2:22
+#: templates/account.jinja2:24
 msgid "System language"
 msgstr "Systeemvoorkeur"
 
-#: templates/account.jinja2:31
+#: templates/account.jinja2:33
 msgid "Change language"
 msgstr "Taal wijzigen"
 
-#: templates/account.jinja2:34
+#: templates/account.jinja2:36
 msgid "Privacy"
 msgstr "Privacy"
 
-#: templates/account.jinja2:39
-msgid "Show up in statistics and now playing"
-msgstr "Opgenomen worden in statistieken en activiteit"
-
 #: templates/account.jinja2:40
-msgid "Don't show in now playing, only in long term statistics"
-msgstr ""
-"Niet tonen in activiteit en geschiedenis, maar wel in statistieken op de "
-"lange termijn"
+msgid "Recording of listening activity"
+msgstr "Opname van luisteractiviteit"
 
-#: templates/account.jinja2:41
-msgid "Don't record played tracks at all"
-msgstr "Helemaal geen activiteit bijhouden"
+#: templates/account.jinja2:42
+msgid "Activity and statistics"
+msgstr "Activiteit en statistiek"
 
 #: templates/account.jinja2:43
+msgid "Not in activity, only in statistics"
+msgstr "Niet in activiteit, wel in statistiek"
+
+#: templates/account.jinja2:44
+msgid "No data recording"
+msgstr "Geen data opslaan"
+
+#: templates/account.jinja2:46
 msgid "Change privacy setting"
 msgstr "Verander privacyinstelling"
 
-#: templates/account.jinja2:46
+#: templates/account.jinja2:49
 msgid "Last.fm"
 msgstr "Last.fm"
 
-#: templates/account.jinja2:50
+#: templates/account.jinja2:53
 #, python-format
 msgid "Connected to last.fm account: %(name)s"
 msgstr "Verbonden met last.fm account: %(name)s"
 
-#: templates/account.jinja2:53
+#: templates/account.jinja2:56
 msgid "Disconnect last.fm account"
 msgstr "Last.fm account loskoppelen"
 
-#: templates/account.jinja2:56
+#: templates/account.jinja2:59
 msgid "Connect your last.fm account"
 msgstr "Verbind je last.fm account"
 
-#: templates/account.jinja2:59
-msgid "Last.fm integration is not available, because no API key is configured"
+#: templates/account.jinja2:62
+msgid ""
+"Last.fm integration is not available, because no API key is configured by"
+" the server administrator."
 msgstr ""
 "Koppeling met last.fm is niet beschikbaar, omdat er geen API key "
-"ingesteld is"
+"ingesteld is door de serverbeheerder."
 
-#: templates/account.jinja2:63 templates/login.jinja2:24
-#: templates/users.jinja2:18
+#: templates/account.jinja2:66 templates/login.jinja2:24
+#: templates/users.jinja2:20
 msgid "Password"
 msgstr "Wachtwoord"
 
-#: templates/account.jinja2:66
+#: templates/account.jinja2:69
 msgid "Current password"
 msgstr "Huidig wachtwoord"
 
-#: templates/account.jinja2:69
+#: templates/account.jinja2:72
 msgid "New password"
 msgstr "Nieuw wachtwoord"
 
-#: templates/account.jinja2:72
+#: templates/account.jinja2:75
 msgid "Repeat new password"
 msgstr "Herhaal nieuw wachtwoord"
 
-#: templates/account.jinja2:75
+#: templates/account.jinja2:78
 msgid "Change password"
 msgstr "Verander wachtwoord"
 
-#: templates/account.jinja2:78
+#: templates/account.jinja2:81
 msgid "Sessions"
 msgstr "Sessies"
 
-#: templates/account.jinja2:82
+#: templates/account.jinja2:85
 msgid "Login date"
 msgstr "Inlogdatum"
 
-#: templates/account.jinja2:83 templates/users.jinja2:28
+#: templates/account.jinja2:86 templates/users.jinja2:32
 msgid "Last used"
 msgstr "Laatst gebruikt"
 
-#: templates/account.jinja2:84
+#: templates/account.jinja2:87
 msgid "Device"
 msgstr "Apparaat"
 
-#: templates/account.jinja2:85
+#: templates/account.jinja2:88
 msgid "IP address"
 msgstr "IP-adres"
 
@@ -350,7 +354,7 @@ msgstr "Gebruiker"
 
 #: templates/activity.jinja2:33 templates/activity.jinja2:59
 #: templates/activity_all.jinja2:21 templates/activity_files.jinja2:21
-#: templates/dislikes.jinja2:14
+#: templates/dislikes.jinja2:14 templates/download.jinja2:43
 msgid "Playlist"
 msgstr "Afspeellijst"
 
@@ -396,13 +400,25 @@ msgstr "Muziekdownloader"
 msgid "Search"
 msgstr "Zoeken"
 
-#: templates/download.jinja2:16 templates/player.jinja2:212
+#: templates/download.jinja2:13
+msgid ""
+"Enter a search query, then click search to populate a table with results."
+" Click on one of the results to copy the URL for that video to the URL "
+"field below. Finally, click the download button below. Currently, a "
+"maximum of one result is displayed."
+msgstr ""
+"Voer een zoekopdracht in, klik daarna op zoeken om een tabel te vullen "
+"met zoekresultaten. Klik op een van deze resultaten om de URL voor die "
+"video te kopieren naar het veld hieronder. Als laatste, klik op de "
+"downloadknop. Op dit moment wordt er slechts 1 zoekresultaat getoond."
+
+#: templates/download.jinja2:18 templates/player.jinja2:212
 msgid "Search query"
 msgstr "Zoekopdracht"
 
 #: templates/download.jinja2:28 templates/download_offline.jinja2:26
 #: templates/download_offline.jinja2:41 templates/files.jinja2:88
-#: templates/player.jinja2:241 templates/playlists.jinja2:125
+#: templates/player.jinja2:239 templates/playlists.jinja2:125
 msgid "Title"
 msgstr "Titel"
 
@@ -418,18 +434,14 @@ msgstr "Lengte"
 msgid "Channel"
 msgstr "Kanaal"
 
-#: templates/download.jinja2:37 templates/download.jinja2:48
+#: templates/download.jinja2:37 templates/download.jinja2:50
 #: templates/download_offline.jinja2:4 templates/download_offline.jinja2:9
 msgid "Download"
 msgstr "Download"
 
-#: templates/download.jinja2:39
-msgid ""
-"Enter URL manually or use the search function above (click on a table row"
-" to copy the URL here)."
-msgstr ""
-"Vul handmatig een URL in, of gebruik de zoekfunctie hierboven (klik op "
-"een rij in de tabel om de URL hierheen te kopiëren)."
+#: templates/download.jinja2:40
+msgid "Video or track URL"
+msgstr "URL van video of nummer"
 
 #: templates/download_offline.jinja2:12
 msgid "Select a playlist"
@@ -489,7 +501,7 @@ msgid "Directory name"
 msgstr "Mapnaam"
 
 #: templates/files.jinja2:57 templates/playlists.jinja2:35
-#: templates/users.jinja2:20
+#: templates/users.jinja2:23
 msgid "Create"
 msgstr "Aanmaken"
 
@@ -540,6 +552,11 @@ msgstr "Download origineel bestand"
 #: templates/files_rename.jinja2:15
 msgid "Rename"
 msgstr "Bestandsnaam wijzigen"
+
+#: templates/games_chairs.jinja2:4 templates/games_chairs.jinja2:13
+#: templates/home.jinja2:44
+msgid "Musical chairs"
+msgstr "Stoelendans"
 
 #: templates/games_guess.jinja2:4 templates/games_guess.jinja2:13
 msgid "Guessing game"
@@ -594,32 +611,32 @@ msgstr "Spellen"
 msgid "Guess"
 msgstr "Raden"
 
-#: templates/home.jinja2:45
+#: templates/home.jinja2:46
 msgid "Help"
 msgstr "Hulp"
 
-#: templates/home.jinja2:46
+#: templates/home.jinja2:47
 msgid "Manual"
 msgstr "Handleiding"
 
-#: templates/home.jinja2:47 templates/install.jinja2:4
+#: templates/home.jinja2:48 templates/install.jinja2:4
 #: templates/install.jinja2:9
 msgid "Install as PWA"
 msgstr "Installeer als PWA"
 
-#: templates/home.jinja2:50
+#: templates/home.jinja2:51
 msgid "Experimental"
 msgstr "Experimenteel"
 
-#: templates/home.jinja2:51 templates/radio.jinja2:4 templates/radio.jinja2:9
+#: templates/home.jinja2:52 templates/radio.jinja2:4 templates/radio.jinja2:9
 msgid "Radio"
 msgstr "Radio"
 
-#: templates/home.jinja2:54
+#: templates/home.jinja2:55
 msgid "Administrative"
 msgstr "Administratief"
 
-#: templates/home.jinja2:55 templates/users.jinja2:4 templates/users.jinja2:9
+#: templates/home.jinja2:56 templates/users.jinja2:4 templates/users.jinja2:9
 msgid "User management"
 msgstr "Gebruikerbeheer"
 
@@ -769,8 +786,8 @@ msgstr "Terug naar accountpagina"
 msgid "Invalid username or password"
 msgstr "Ongeldige gebruikersnaam of wachtwoord"
 
-#: templates/login.jinja2:22 templates/users.jinja2:16
-#: templates/users.jinja2:26
+#: templates/login.jinja2:22 templates/users.jinja2:17
+#: templates/users.jinja2:30
 msgid "Username"
 msgstr "Gebruikersnaam"
 
@@ -911,8 +928,8 @@ msgid "Album cover art memes"
 msgstr "Albumhoes memes"
 
 #: templates/player.jinja2:165
-msgid "Theater mode: hide controls when not interacting with page"
-msgstr "Theatermodus: verberg knoppen als er geen gebruik van wordt gemaakt"
+msgid "Theater mode"
+msgstr "Theatermodus"
 
 #: templates/player.jinja2:173
 msgid "Hourly news"
@@ -966,63 +983,63 @@ msgstr "Albums"
 msgid "Metadata editor"
 msgstr "Metadata wijzigen"
 
-#: templates/player.jinja2:237
-msgid "Editing metadata for: "
-msgstr "Metadata bewerken: "
+#: templates/player.jinja2:236
+msgid "File path"
+msgstr "Bestandspad"
 
-#: templates/player.jinja2:245 templates/playlists.jinja2:126
+#: templates/player.jinja2:242 templates/playlists.jinja2:126
 msgid "Album"
 msgstr "Album"
 
-#: templates/player.jinja2:249
+#: templates/player.jinja2:245
 msgid "Artists (delimit multiple using <kbd>;</kbd>)"
 msgstr "Artiesten (scheid meerdere met <kbd>;</kbd>)"
 
-#: templates/player.jinja2:253 templates/playlists.jinja2:127
+#: templates/player.jinja2:248 templates/playlists.jinja2:127
 msgid "Album artist"
 msgstr "Albumartiest"
 
-#: templates/player.jinja2:257
+#: templates/player.jinja2:251
 msgid "Tags (delimit multiple using <kbd>;</kbd>)"
 msgstr "Tags (scheid meerdere met <kbd>;</kbd>)"
 
-#: templates/player.jinja2:261
+#: templates/player.jinja2:254
 msgid "Year (4 characters)"
 msgstr "Jaar (4 tekens)"
 
-#: templates/player.jinja2:267
+#: templates/player.jinja2:259
 msgid "Writing metadata..."
 msgstr "Metadata schrijven..."
 
-#: templates/player.jinja2:275
+#: templates/player.jinja2:267
 msgid "Copy track"
 msgstr "Kopieer nummer"
 
-#: templates/player.jinja2:277
+#: templates/player.jinja2:269
 msgid "Select playlist to copy track to:"
 msgstr "Selecteer afspeellijst waarnaar dit nummer gekopieerd moet worden:"
 
-#: templates/player.jinja2:280
+#: templates/player.jinja2:272
 msgid "Copy"
 msgstr "Kopiëren"
 
-#: templates/player.jinja2:294
+#: templates/player.jinja2:286
 msgid "Artist: "
 msgstr "Artiest: "
 
-#: templates/player.jinja2:295
+#: templates/player.jinja2:287
 msgid "Album: "
 msgstr "Album: "
 
-#: templates/player.jinja2:296
+#: templates/player.jinja2:288
 msgid "Tag: "
 msgstr "Tag: "
 
-#: templates/player.jinja2:297
+#: templates/player.jinja2:289
 msgid "Playlist: "
 msgstr "Afspeellijst: "
 
-#: templates/player.jinja2:298
+#: templates/player.jinja2:290
 msgid "Browse"
 msgstr "Bladeren"
 
@@ -1098,7 +1115,6 @@ msgid "Make favorite"
 msgstr "Maak favoriet"
 
 #: templates/playlists.jinja2:91 templates/playlists_share.jinja2:22
-#: templates/share.jinja2:4 templates/share.jinja2:13
 msgid "Share"
 msgstr "Delen"
 
@@ -1142,7 +1158,7 @@ msgstr "Label"
 msgid "Most recent choice"
 msgstr "Meest recente keuze"
 
-#: templates/playlists.jinja2:133
+#: templates/playlists.jinja2:132
 msgid "Most recent modification"
 msgstr "Laatste wijziging"
 
@@ -1155,16 +1171,16 @@ msgstr "Deel bewerkrechten"
 msgid "Give someone else write access to the playlist: '%(playlist)s'"
 msgstr "Geef iemand anders toegang tot de playlist: '%(playlist)s'"
 
-#: templates/share.jinja2:16
-#, python-format
-msgid "%(shared_by)s has shared the track: %(track)s"
-msgstr "%(shared_by)s heeft het nummer gedeeld: %(track)s"
+#: templates/share.jinja2:4
+#, fuzzy, python-format
+msgid "%(track)s"
+msgstr "Nummers"
 
-#: templates/share.jinja2:26
+#: templates/share.jinja2:24
 msgid "Original"
 msgstr "Origineel"
 
-#: templates/share.jinja2:31
+#: templates/share.jinja2:29
 msgid "MP3"
 msgstr "MP3"
 
@@ -1184,41 +1200,41 @@ msgstr "Week"
 msgid "Month"
 msgstr "Maand"
 
-#: templates/users.jinja2:12
+#: templates/users.jinja2:11
 msgid "To create admin users or to delete users, please use the CLI interface."
 msgstr ""
 "Gebruik gelieve de CLI om admingebruikers te maken of om gebruikers te "
 "verwijderen."
 
-#: templates/users.jinja2:13
+#: templates/users.jinja2:12
 msgid "Create new user"
 msgstr "Maak nieuwe gebruiker"
 
-#: templates/users.jinja2:23
+#: templates/users.jinja2:26
 msgid "Users"
 msgstr "Gebruikers"
 
-#: templates/users.jinja2:27
+#: templates/users.jinja2:31
 msgid "Admin"
 msgstr "Admin"
 
-#: templates/users.jinja2:29
+#: templates/users.jinja2:33
 msgid "Primary playlist"
 msgstr "Primaire afspeellijst"
 
-#: templates/users.jinja2:30
+#: templates/users.jinja2:34
 msgid "Writable playlists"
 msgstr "Schrijfbare afspeellijsten"
 
-#: templates/users.jinja2:41
+#: templates/users.jinja2:45
 msgid "Yes"
 msgstr "Ja"
 
-#: templates/users.jinja2:43
+#: templates/users.jinja2:47
 msgid "No"
 msgstr "Nee"
 
-#: templates/users.jinja2:58
+#: templates/users.jinja2:62
 msgid "Edit"
 msgstr "Bewerken"
 
@@ -1231,15 +1247,15 @@ msgstr "Bewerk gebruiker"
 msgid "Editing user: %(username)s"
 msgstr "Gebruiker bewerken: '%(username)s'"
 
-#: templates/users_edit.jinja2:14
+#: templates/users_edit.jinja2:15
 msgid "New username"
 msgstr "Nieuwe gebruikersnaam"
 
-#: templates/users_edit.jinja2:16
+#: templates/users_edit.jinja2:18
 msgid "New password (blank to leave unchanged)"
 msgstr "Nieuw wachtwoord (laat leeg om niet te veranderen)"
 
-#: templates/users_edit.jinja2:18
+#: templates/users_edit.jinja2:21
 msgid "Submit"
 msgstr "Versturen"
 
