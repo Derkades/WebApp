@@ -335,6 +335,7 @@ input::placeholder {
     background-color: var(--box-background-color);
     overflow: hidden;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .boxes {

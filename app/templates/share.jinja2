@@ -1,7 +1,7 @@
 {% extends "base_static.jinja2" %}
 
 {% block title %}
-    {% trans %}Share{% endtrans %}
+    {% trans %}track{% endtrans %}
 {% endblock title %}
 
 {% block styles %}
@@ -10,36 +10,37 @@
 
 {% block content %}
 
-{{ page_heading(gettext('Share')) }}
+{{ page_heading(track) }}
 
-<p>
-    {% trans %}{{ shared_by }} has shared the track: {{ track }}{% endtrans %}
-</p>
+<div class="boxes">
+    <div class="box padding" id="player">
+        <audio controls preload="metadata">
+            <source src="/share/{{code}}/audio" type="audio/webm">
+        </audio>
 
-<div>
-    <audio controls preload="metadata">
-        <source src="/share/{{code}}/audio" type="audio/webm">
-    </audio>
+        <div>
+            <a href="/share/{{code}}/download/original" class="button icon-text-button">
+                <span class="icon icon-download"></span>
+                <span>{% trans %}Original{% endtrans %}</span>
+            </a>
 
-    <a href="/share/{{code}}/download/original" class="button icon-text-button">
-        <span class="icon icon-download"></span>
-        <span>{% trans %}Original{% endtrans %}</span>
-    </a>
+            <a href="/share/{{code}}/download/mp3" class="button icon-text-button">
+                <span class="icon icon-download"></span>
+                <span>{% trans %}MP3{% endtrans %}</span>
+            </a>
+        </div>
 
-    <a href="/share/{{code}}/download/mp3" class="button icon-text-button">
-        <span class="icon icon-download"></span>
-        <span>{% trans %}MP3{% endtrans %}</span>
-    </a>
-</div>
+    </div>
 
-<img class="box cover-img" src="/share/{{ code }}/cover">
+    <img class="box cover-img" src="/share/{{ code }}/cover">
 
-<div class="box padding lyrics">
-    {% if lyrics %}
-    {{ lyrics }}
-    {% else %}
-    <i>">{% trans %}No lyrics found{% endtrans %}</i>
-    {% endif %}
+    <div class="box padding lyrics">
+        {% if lyrics %}
+        {{ lyrics }}
+        {% else %}
+        <i>">{% trans %}No lyrics found{% endtrans %}</i>
+        {% endif %}
+    </div>
 </div>
 
 {% endblock content %}
