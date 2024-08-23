@@ -75,7 +75,7 @@ def audio(code):
     return Response(audio_bytes, content_type='audio/webm')
 
 
-@bp.route('/<code>/download/<format>')
+@bp.route('/<code>/download/<file_format>')
 def download(code, file_format):
     """
     Route to download an audio file.
