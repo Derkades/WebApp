@@ -78,7 +78,15 @@ function createPlaylistCheckbox(playlist, index, defaultChecked) {
     return span;
 }
 
-async function updatePlaylistCheckboxHtml() {
+async function updatePlaylists() {
+    const playlists = await music.playlists();
+    updatePlaylistCheckboxHtml(playlists)
+    updatePlaylistDropdowns(playlists);
+}
+
+eventBus.subscribe(MusicEvent.METADATA_CHANGE, updatePlaylists);
+
+function updatePlaylistCheckboxHtml(playlists) {
     console.debug('playlist: update playlist checkboxes');
 
     let index = 1;
@@ -86,7 +94,7 @@ async function updatePlaylistCheckboxHtml() {
     const otherDiv = document.createElement('div');
     otherDiv.classList.add('other-checkboxes');
 
-    for (const playlist of await music.playlists()) {
+    for (const playlist of playlists) {
         if (playlist.favorite) {
             mainDiv.appendChild(createPlaylistCheckbox(playlist, index++, true));
         } else {
@@ -99,12 +107,9 @@ async function updatePlaylistCheckboxHtml() {
 
     loadPlaylistState();
 }
-eventBus.subscribe(MusicEvent.METADATA_CHANGE, updatePlaylistCheckboxHtml);
 
-async function updatePlaylistDropdowns() {
+function updatePlaylistDropdowns(playlists) {
     console.debug('playlist: updating dropdowns');
-
-    const playlists = await music.playlists();
 
     for (const select of document.getElementsByClassName('playlist-select')) {
         const previouslySelectedValue = select.value;
@@ -138,37 +143,34 @@ async function updatePlaylistDropdowns() {
         }
     }
 }
-eventBus.subscribe(MusicEvent.METADATA_CHANGE, updatePlaylistDropdowns);
 
-async function loadPlaylistState() {
+function loadPlaylistState() {
     const playlistsString = localStorage.getItem('playlists');
     if (!playlistsString) {
         console.info('playlist: no state saved');
         return;
     }
-    const playlists = JSON.parse(playlistsString);
-    console.debug('playlist: restoring state', playlists);
-    for (const playlist of await music.playlists()) {
-        const checkbox = document.getElementById('checkbox-' + playlist.name);
-        if (checkbox) {
-            checkbox.checked = playlists.indexOf(playlist.name) !== -1;
-        }
+    const savedPlaylists = JSON.parse(playlistsString);
+    console.debug('playlist: restoring state', savedPlaylists);
+    const checkboxes = document.getElementById('playlist-checkboxes').querySelectorAll('.playlist-checkbox');
+    for (const checkbox of checkboxes) {
+        checkbox.checked = 0;
+    }
+    for (const playlist of savedPlaylists) {
+        document.getElementById('checkbox-' + playlist).checked = 1;
     }
 }
 
 async function savePlaylistState() {
+    const checkboxes = document.getElementById('playlist-checkboxes').querySelectorAll('.playlist-checkbox');
     const checkedPlaylists = [];
-    for (const playlist of await music.playlists()) {
-        const checkbox = document.getElementById('checkbox-' + playlist.name);
-        if (checkbox && checkbox.checked) {
-            checkedPlaylists.push(playlist.name);
+    for (const checkbox of checkboxes) {
+        if (checkbox.checked) {
+            checkedPlaylists.push(checkbox.id.substring('checkbox-'.length));
         }
     }
     console.debug('playlist: saving checkbox state', checkedPlaylists);
     localStorage.setItem('playlists', JSON.stringify(checkedPlaylists));
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    updatePlaylistCheckboxHtml();
-    updatePlaylistDropdowns();
-})
+document.addEventListener('DOMContentLoaded', updatePlaylists);
