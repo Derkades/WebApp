@@ -8,9 +8,9 @@ CREATE TABLE track (
     path TEXT NOT NULL UNIQUE PRIMARY KEY,
     playlist TEXT NOT NULL REFERENCES playlist(path) ON DELETE CASCADE,
     duration INTEGER NOT NULL,
-    title TEXT NULL,
-    album TEXT NULL,
-    album_artist TEXT NULL,
+    title TEXT NULL COLLATE NOCASE,
+    album TEXT NULL COLLATE NOCASE,
+    album_artist TEXT NULL COLLATE NOCASE,
     track_number INTEGER NULL,
     year INTEGER NULL,
     mtime INTEGER NOT NULL,
@@ -25,7 +25,7 @@ CREATE INDEX idx_track_last_chosen ON track(last_chosen);
 
 CREATE TABLE track_artist (
     track TEXT NOT NULL REFERENCES track(path) ON DELETE CASCADE,
-    artist TEXT NOT NULL,
+    artist TEXT NOT NULL COLLATE NOCASE,
     UNIQUE (track, artist)
 ) STRICT;
 
@@ -33,7 +33,7 @@ CREATE INDEX idx_track_artist_track ON track_artist(track);
 
 CREATE TABLE track_tag (
     track TEXT NOT NULL REFERENCES track(path) ON DELETE CASCADE,
-    tag TEXT NOT NULL,
+    tag TEXT NOT NULL COLLATE NOCASE,
     UNIQUE (track, tag)
 ) STRICT;
 
