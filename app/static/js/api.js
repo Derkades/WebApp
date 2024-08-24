@@ -2,18 +2,24 @@
 // Scripts using this API must implement a getCsrfToken() function that returns a usable CSRF token as a string.
 
 class Music {
+    #playlists;
     /**
      * @returns {Promise<Array<Playlist>>}
      */
     async playlists() {
-        const response = await fetch('/playlists/list');
-        checkResponseCode(response);
-        const json = await response.json();
-        const playlists = [];
-        for (const playlistObj of json) {
-            playlists.push(new Playlist(playlistObj));
-        }
-        return playlists;
+        await navigator.locks.request("api_playlists", async lock => {
+            if (this.#playlists == undefined) {
+                const response = await fetch('/playlists/list');
+                checkResponseCode(response);
+                const json = await response.json();
+                this.#playlists = [];
+                for (const playlistObj of json) {
+                    this.#playlists.push(new Playlist(playlistObj));
+                }
+            }
+        });
+
+        return this.#playlists;
     }
 
     /**
@@ -21,12 +27,10 @@ class Music {
      * @returns {Promise<Playlist>}
      */
     async playlist(name) {
-        const response = await fetch('/playlists/list');
-        checkResponseCode(response);
-        const json = await response.json();
-        for (const playlistObj of json) {
-            if (playlistObj.name == name) {
-                return new Playlist(playlistObj);
+        const playlists = await this.playlists();
+        for (const playlist of playlists) {
+            if (playlist.name == name) {
+                return playlist;
             }
         }
         return null;
