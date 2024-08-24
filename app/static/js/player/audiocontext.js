@@ -28,7 +28,6 @@ class AudioContextManager {
                 source.connect(this.analyser);
                 source.connect(this.#gainNode);
                 this.#gainNode.connect(this.#audioContext.destination);
-                source.connect(this.#audioContext.destination);
             });
         });
     }
