@@ -1,19 +1,3 @@
-async function jsonPost(url, postDataObject) {
-    postDataObject.csrf = document.getElementById('csrf-token').value;
-    const options = {
-        method: 'POST',
-        body: JSON.stringify(postDataObject),
-        headers: new Headers({
-            'Content-Type': 'application/json'
-        }),
-    };
-    const response = await fetch(new Request(url, options));
-    if (!response.ok) {
-        throw 'Unexpected response code: ' + response.status;
-    }
-    return response;
-}
-
 async function performSearch() {
     const searchQuery = document.getElementById('search-query');
 
