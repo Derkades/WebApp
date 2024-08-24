@@ -1,39 +1,26 @@
 from flask import Blueprint, render_template
 
 from app import auth, db, radio
-from app.radio import RadioTrack
 
 bp = Blueprint('radio', __name__, url_prefix='/radio')
 
 
-def radio_track_response(track: RadioTrack):
-    return {
-        'path': track.track.relpath,
-        'start_time': track.start_time,
-        'duration': track.duration,
-    }
-
-
-@bp.route('/current')
-def route_radio_current():
+@bp.route('/info')
+def route_info():
     """
-    Endpoint that returns information about the current radio track
+    Endpoint that returns information about the current and next radio track
     """
     with db.connect() as conn:
         auth.verify_auth_cookie(conn)
-        track = radio.get_current_track(conn)
-    return radio_track_response(track)
+        current_track = radio.get_current_track(conn)
+        next_track = radio.get_next_track(conn)
 
-
-@bp.route('/next')
-def route_next():
-    """
-    Endpoint that returns information about the next radio track
-    """
-    with db.connect() as conn:
-        auth.verify_auth_cookie(conn)
-        track = radio.get_next_track(conn)
-    return radio_track_response(track)
+        return {
+            'current': current_track.track.info_dict(),
+            'current_time': current_track.start_time,
+            'next': next_track.track.info_dict(),
+            'next_time': next_track.start_time,
+        }
 
 
 @bp.route('')

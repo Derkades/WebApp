@@ -1,3 +1,5 @@
+"use strict";
+
 // Replace timestamp by formatted time string
 document.addEventListener('DOMContentLoaded', () => {
     for (const elem of document.getElementsByClassName('format-timestamp')) {

@@ -8,14 +8,18 @@
 
 {{ page_heading(gettext('Radio')) }}
 
-WARNING: Experimental<br>
+<audio id="audio"></audio>
 
-<div id="audio"></div><br>
+<button id="play">Click to play (or allow autoplay in your browser)</button><br>
+
+<img id="image" height="500" width="500"><br>
 
 Status: <span id="status"></span><br>
 Current: <span id="current"></span><br>
-Next: <span id="next"></span></span>
+Next: <span id="next"></span>
 
+<script src="/static/js/base.js"></script>
+<script src="/static/js/api.js"></script>
 <script src="/static/js/radio.js"></script>
 
 <span id="csrf" class="hidden">{{ csrf }}</span>

@@ -1,3 +1,5 @@
+"use strict";
+
 // Common JavaScript interface to API, to be used by the music player and other pages.
 // Scripts using this API must implement a getCsrfToken() function that returns a usable CSRF token as a string.
 
@@ -420,4 +422,17 @@ async function jsonPost(url, postDataObject, checkError = true) {
         checkResponseCode(response);
     }
     return response;
+}
+
+async function jsonGet(url, checkError = true) {
+    const options = {
+        headers: new Headers({
+            'Accept': 'application/json'
+        }),
+    };
+    const response = await fetch(new Request(url, options));
+    if (checkError) {
+        checkResponseCode(response);
+    }
+    return await response.json();
 }
