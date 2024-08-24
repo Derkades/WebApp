@@ -273,18 +273,10 @@ class OfflineSync:
         rows = self.db_offline.execute('SELECT rowid, timestamp, track FROM history ORDER BY timestamp ASC')
         for rowid, timestamp, track in rows:
             log.info('Played: %s', track)
-            duration_row = self.db_music.execute('SELECT duration FROM track WHERE path=?', (track,)).fetchone()
-            if duration_row:
-                duration, = duration_row
-                lastfm = duration > 30
-            else:
-                log.warning('Duration unknown, assuming not eligible for scrobbling')
-                lastfm = False
             response = self.request_post('/activity/played',
                               {'csrf': csrf_token,
                                'track': track,
-                               'timestamp': timestamp,
-                               'lastfmEligible': lastfm})
+                               'timestamp': timestamp})
             assert response.status_code == 200
             self.db_offline.execute('DELETE FROM history WHERE rowid=?', (rowid,))
             self.db_offline.commit()

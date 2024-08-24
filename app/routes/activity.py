@@ -222,7 +222,6 @@ def route_played():
     POST body:
      - track: relpath
      - timestamp: time at which track met played conditions (roughly)
-     - lastfmEligible: bool, True if track should be scrobbled to last.fm (ignored in offline mode)
      - csrf: csrf token (ignored in offline mode)
     """
     if settings.offline_mode:
@@ -260,7 +259,8 @@ def route_played():
                      ''',
                      (timestamp, user.user_id, track.relpath, track.playlist, private))
 
-        if private or not request.json['lastfmEligible']:
+        # last.fm requires track length to be at least 30 seconds
+        if private or track.metadata().duration < 30:
             # No need to scrobble, nothing more to do
             return Response('ok', 200, content_type='text/plain')
 

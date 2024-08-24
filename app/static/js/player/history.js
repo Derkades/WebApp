@@ -80,7 +80,6 @@ class History {
         const data = {
             track: this.currentlyPlayingTrack.path,
             timestamp: this.startTimestamp,
-            lastfmEligible: this.currentlyPlayingTrack.duration > 30, // last.fm requires track length to be at least 30 seconds
         }
         await jsonPost('/activity/played', data);
     }
