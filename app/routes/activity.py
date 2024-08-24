@@ -67,7 +67,7 @@ def route_data():
                                 JOIN track ON now_playing.track = track.path
                               WHERE now_playing.timestamp > ?
                               ''',
-                              (int(time.time()) - 20,))  # based on JS update interval
+                              (int(time.time()) - 70,))  # based on JS update interval
 
         now_playing = [{'username': nickname if nickname else username,
                         'paused': paused,

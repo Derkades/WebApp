@@ -1,4 +1,4 @@
-const NOW_PLAYING_TIMER_INTERVAL_SECONDS = 5;
+const PLAYED_TIMER_INTERVAL_SECONDS = 5;
 
 class History {
     /** @type {string} */
@@ -50,7 +50,7 @@ class History {
             return;
         }
 
-        this.playingCounter += NOW_PLAYING_TIMER_INTERVAL_SECONDS;
+        this.playingCounter += PLAYED_TIMER_INTERVAL_SECONDS;
 
         console.debug('history: playing, counter:', this.playingCounter, '/', this.requiredPlayingCounter);
 
@@ -87,10 +87,22 @@ class History {
 }
 
 const history = new History();
+let nowPlayingTimerId = null;
+
+function startNowPlayingTimer(interval) {
+    if (nowPlayingTimerId != null) {
+        clearInterval(nowPlayingTimerId);
+    }
+    nowPlayingTimerId = setInterval(() => history.updateNowPlaying(), interval);
+    history.updateNowPlaying(); // Also update immediately
+}
 
 document.addEventListener('DOMContentLoaded', () => {
-    setInterval(() => history.update(), NOW_PLAYING_TIMER_INTERVAL_SECONDS * 1000);
+    setInterval(() => history.update(), PLAYED_TIMER_INTERVAL_SECONDS * 1000);
 
-    // If you modify the interval, also modify route_data() in routes/activity.py
-    setInterval(() => history.updateNowPlaying(), 15_000);
+    // When paused, update immediately, then every minute
+    getAudioElement().addEventListener('pause', () => startNowPlayingTimer(60_000));
+    // When resumed, update immediately, then every minute
+    getAudioElement().addEventListener('play', () => startNowPlayingTimer(10_000));
+    // When modifying the interval, also modify route_data() in routes/activity.py
 });
