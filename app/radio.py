@@ -21,7 +21,7 @@ class RadioTrack:
 
 
 def _choose_track(conn: Connection, previous_playlist: Optional[str] = None) -> Track:
-    playlist_candidates = [p for p in settings.radio_playlists if p != previous_playlist]
+    playlist_candidates = [p for p in settings.radio_playlists if len(settings.radio_playlists) == 1 or p != previous_playlist]
     playlist_name = random.choice(playlist_candidates)
 
     playlist = music.playlist(conn, playlist_name)
