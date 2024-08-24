@@ -17,6 +17,25 @@
 
 {% block content %}
 
+<h2>Tijdelijke informatie</h2>
+<p>De music player heeft een grote update gekregen. Er zijn zichtbare veranderingen, maar het grootste is dat op de
+achtergrond alles is aangepast zodat de music player niet meer de volledige lijst van afspeellijsten, nummers, en
+metadata hoeft te downloaden bij het starten. Dat was nu nog niet zo langzaam, maar dat zou alleen maar erger worden.</p>
+<p>Omdat er zo veel aangepast is verwacht ik bugs ondanks het vele testen. Laat alsjeblieft weten als je iets vreemds tegenkomt!</p>
+</p>
+<p>Voor de rest, de belangrijkste wijzigingen:</p>
+<ul>
+    <li>Er is nu een visualiser, aan te zetten in instellingen (in de music player)</li>
+    <li>Lyrics staat nu onder de album cover</li>
+    <li>Zoeken gaat nu niet meer lokaal maar op de server. Misschien is het sneller, misschien langzamer. Misschien is het beter, misschien slechter.</li>
+    <li>Radio modus is behoorlijk verbeterd</li>
+    <li>Er is een muziekraadspel toegevoegd, waarbij een willekeurig nummer wordt afgespeeld en de titel, artiest of misschien zelfs afspeellijst geraden moet worden. Misschien leuk in een groep?</li>
+    <li>Er is een "stoelendans" spel toegevoegd, die alles regelt behalve het weghalen van stoelen.</li>
+    <li>Blijkbaar zat er lang (half jaar?) een bug in waardoor muziek iets verstoord afgespeeld werd bij hoge volumes. Als het je opviel dat de kwaliteit minder was op 100%, dan is dit waarom.</li>
+    <li>Layout van deelpagina is een stuk beter</li>
+    <li>Het laden van icoontjes gaat nu sneller</li>
+</ul>
+
 {% if offline_mode %}
     <h2>{% trans %}Music (offline mode){% endtrans %}</h2>
 {% else %}
