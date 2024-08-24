@@ -38,6 +38,7 @@ def create():
     """
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
+        user.verify_csrf(request.json['csrf'])
 
         track = Track.by_relpath(conn, request.json['track'])
         if track is None:
