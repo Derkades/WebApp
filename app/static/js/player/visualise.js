@@ -22,13 +22,13 @@ class Visualiser {
 
     stop() {
         console.info('visualiser: stopped');
-        this.#canvas.style.visibility = 'hidden';
+        this.#canvas.style.transform = 'translateY(100%)';
         this.#stopRequested = true;
     }
 
     start() {
         console.info('visualiser: started');
-        this.#canvas.style.visibility = 'visible';
+        this.#canvas.style.transform = null;
         this.#stopRequested = false;
         this.#draw();
     }

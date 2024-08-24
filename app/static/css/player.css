@@ -314,6 +314,7 @@ h4 > .icon {
     height: 20vh;
     width: 100%;
     mix-blend-mode: difference;
+    transition: transform .5s;
 }
 
 .search-result-album {
