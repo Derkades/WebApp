@@ -8,6 +8,7 @@ const SETTING_ELEMENTS = [
     'settings-meme-mode',
     'settings-news',
     'settings-theater',
+    'settings-visualiser',
 ];
 
 function syncInputWithStorage(elemId) {

@@ -13,17 +13,31 @@ class Visualiser {
     #dataArray;
     /** @type {HTMLCanvasElement} */
     #canvas;
+    #stopRequested = false;
 
     constructor() {
         this.#canvas = document.getElementById('visualiser');
         this.#dataArray = new Uint8Array(audioContextManager.fftSize);
     }
 
+    stop() {
+        console.info('visualiser: stopped');
+        this.#canvas.style.visibility = 'hidden';
+        this.#stopRequested = true;
+    }
+
     start() {
+        console.info('visualiser: started');
+        this.#canvas.style.visibility = 'visible';
+        this.#stopRequested = false;
         this.#draw();
     }
 
     #draw() {
+        if (this.#stopRequested) {
+            return;
+        }
+
         if (!audioContextManager.analyser || document.visibilityState == "hidden") {
             setTimeout(() => this.#draw(), 100);
             return;
@@ -70,6 +84,18 @@ class Visualiser {
 
 const visualiser = new Visualiser();
 
-document.addEventListener('DOMContentLoaded', () => {
-    // visualiser.start();
+eventBus.subscribe(MusicEvent.SETTINGS_LOADED, () => {
+    const checkbox = document.getElementById('settings-visualiser');
+
+    function updateVisualiserState() {
+        if (checkbox.checked && !getAudioElement().paused) {
+            visualiser.start();
+        } else {
+            visualiser.stop();
+        }
+    }
+
+    checkbox.addEventListener('change', updateVisualiserState);
+    getAudioElement().addEventListener('play', updateVisualiserState);
+    getAudioElement().addEventListener('pause', updateVisualiserState);
 });

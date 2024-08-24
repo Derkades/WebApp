@@ -1,3 +1,5 @@
+// File name starts with 1 so it is included at the start of the concatenated player.js script, after 0strict
+
 const MusicEvent = {
     METADATA_CHANGE: 'metadata_change', // Tracks or playlists have been changed, added, or removed. Any HTML with playlist/track info should be updated.
     TRACK_CHANGE: 'track_change', // Track that is playing changed (skipped to next or previous track)
