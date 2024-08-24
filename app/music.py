@@ -513,7 +513,7 @@ class Playlist:
                      user: Optional[User],
                      require_metadata: bool = False,
                      tag_mode: Optional[Literal['allow', 'deny']] = None,
-                     tags: Optional[list[str]] = None) -> Track:
+                     tags: Optional[list[str]] = None) -> Optional[Track]:
         """
         Randomly choose a track from this playlist directory
         Args:
@@ -551,9 +551,10 @@ class Playlist:
         # From selected least recently played tracks, choose a random one
         query = 'SELECT * FROM (' + query + ') ORDER BY RANDOM() LIMIT 1'
 
-        # TODO handle case where no rows are available
-        track, last_chosen = self.conn.execute(query, params).fetchone()
-
+        row = self.conn.execute(query, params).fetchone()
+        if row is None:
+            return None
+        track, last_chosen = row
         current_timestamp = int(datetime.now().timestamp())
         if last_chosen == 0:
             log.info('Chosen track: %s (never played)', track)

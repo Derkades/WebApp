@@ -33,6 +33,9 @@ def route_track():
         else:
             chosen_track = playlist.choose_track(user, require_metadata=require_metadata)
 
+        if chosen_track is None:
+            return Response('no track found', 404, content_type='text/plain')
+
         return chosen_track.info_dict()
 
 
