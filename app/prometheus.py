@@ -18,7 +18,7 @@ for db_name in db.DATABASE_NAMES:
 
 
 def active_players():
-    with db.connect() as conn:
+    with db.connect(read_only=True) as conn:
         return conn.execute('SELECT COUNT(*) FROM now_playing WHERE timestamp > ?',
                             (int(time.time()) - 30,)).fetchone()[0]
 
