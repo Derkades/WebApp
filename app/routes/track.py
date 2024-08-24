@@ -262,6 +262,10 @@ def route_filter():
             # Has at least metadata for: title, album, album artist, artists
             query += ' AND title NOT NULL AND album NOT NULL AND album_artist NOT NULL AND EXISTS(SELECT artist FROM track_artist WHERE track = path)'
 
+        if 'tag' in request.args:
+            query += ' AND EXISTS(SELECT tag FROM track_tag WHERE track = path AND tag = ?)'
+            params.append(request.args['tag'])
+
         query += ' LIMIT 5000'
         result = conn.execute(query, params)
         tracks = [Track.by_relpath(conn, row[0]) for row in result]
