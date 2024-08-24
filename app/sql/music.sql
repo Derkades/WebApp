@@ -42,7 +42,7 @@ CREATE INDEX idx_track_tag_track ON track_tag(track);
 CREATE TABLE radio_track (
     track TEXT NOT NULL REFERENCES track(path) ON DELETE CASCADE,
     start_time INTEGER NOT NULL
-);
+) STRICT;
 
 CREATE TABLE user (
     id INTEGER NOT NULL UNIQUE PRIMARY KEY AUTOINCREMENT,
