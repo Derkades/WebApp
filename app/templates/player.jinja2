@@ -181,10 +181,11 @@
         <div class="dialog">
             {{ dialog_header('dialog-tags', gettext('Tags')) }}
             <div class="dialog-body">
+                <label for="tag-mode">{% trans %}Tracks with selected tags{% endtrans %}</label>
                 <select id="tag-mode">
-                    <option value="allow">{% trans %}Only choose tracks with enabled tags (tracks without tags are never chosen){% endtrans %}</option>
-                    <option value="deny" selected>{% trans %}Don't choose tracks with disabled tags (tracks with enabled tags or no tags are chosen){% endtrans %}</option>
-                </select>{% trans %}Tag mode{% endtrans %}
+                    <option value="allow">{% trans %}may be chosen (untagged tracks are not chosen){% endtrans %}</option>
+                    <option value="deny" selected>{% trans %}may not be chosen (untagged tracks are chosen){% endtrans %}</option>
+                </select>
                 <div id="tag-checkboxes"></div>
             </div>
         </div>
