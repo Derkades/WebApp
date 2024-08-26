@@ -43,3 +43,24 @@ function getTagFilter() {
 
     return {tag_mode: mode, tags: tags.join(';')};
 }
+
+function areAllCheckboxesChecked() {
+    for (const checkbox of document.getElementsByClassName('tag-checkbox')) {
+        if (!checkbox.checked) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function setAllCheckboxesChecked(checked) {
+    for (const checkbox of document.getElementsByClassName('tag-checkbox')) {
+        checkbox.checked = checked;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('select-all').addEventListener('click', () => {
+        setAllCheckboxesChecked(!areAllCheckboxesChecked());
+    });
+});
