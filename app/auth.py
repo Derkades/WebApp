@@ -1,5 +1,8 @@
+import base64
+import hashlib
 import hmac
 import logging
+import os
 import secrets
 import time
 from abc import ABC, abstractmethod
@@ -12,9 +15,55 @@ import flask_babel
 from flask import request
 from flask_babel import _
 
-from app import settings, util
+from app import jsonw, settings, util
 
 log = logging.getLogger('app.auth')
+
+
+def hash_password(password: str) -> str:
+    # https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#scrypt
+    salt_bytes = os.urandom(32)
+    n = 2**14
+    r = 8
+    p = 5
+    hash_bytes = hashlib.scrypt(password.encode(), salt=salt_bytes, n=n, r=r, p=p)
+    hash_json = jsonw.to_json({'alg': 'scrypt',
+                               'n': n,
+                               'r': r,
+                               'p': p,
+                               'salt': base64.b64encode(salt_bytes).decode(),
+                               'hash': base64.b64encode(hash_bytes).decode()})
+    return hash_json
+
+
+def verify_password(conn: Connection, user_id: int, password: str) -> bool:
+    hashed_password, = conn.execute('SELECT password FROM user WHERE id = ?', (user_id,)).fetchone()
+
+    # Upgrade implemented 2024-08-26
+    # TODO In a year, remove upgrade code and do not allow users to log in with bcrypt hashed password
+    # The server administrator will have to give them a new password
+    if hashed_password.startswith('$2b'):
+        # Legacy bcrypt password
+        log.warning('Upgrading legacy bcrypt password')
+        import bcrypt  # only import bcrypt when actually required
+        if bcrypt.checkpw(password.encode(), hashed_password.encode()):
+            # Password is valid, update to modern hash
+            new_hash = hash_password(password)
+            conn.execute('UPDATE user SET password = ? WHERE id = ?',  (new_hash, user_id))
+            return True
+        else:
+            return False
+
+    hash_json = jsonw.from_json(hashed_password)
+    if hash_json['alg'] == 'scrypt':
+        hash_bytes = hashlib.scrypt(password.encode(),
+                                    salt=base64.b64decode(hash_json['salt']),
+                                    n=hash_json['n'],
+                                    r=hash_json['r'],
+                                    p=hash_json['p'])
+        return hmac.compare_digest(hash_bytes, base64.b64decode(hash_json['hash']))
+
+    raise ValueError('Unknown alg: ' + hash_json['alg'])
 
 
 @dataclass
@@ -111,13 +160,6 @@ class User(ABC):
         """
 
     @abstractmethod
-    def verify_password(self, password: str) -> bool:
-        """
-        Verify password matches user's existing password
-        Returns: True if password matches, False if not.
-        """
-
-    @abstractmethod
     def update_password(self, new_password: str) -> None:
         """
         Update user password and delete all existing sessions.
@@ -146,14 +188,8 @@ class StandardUser(User):
     def get_csrf(self) -> str:
         return self.session.csrf_token
 
-    def verify_password(self, password: str) -> bool:
-        result = self.conn.execute('SELECT password FROM user WHERE id=?',
-                                   (self.user_id,)).fetchone()
-        password_hash, = result
-        return util.verify_password(password, password_hash)
-
     def update_password(self, new_password: str) -> None:
-        password_hash = util.hash_password(new_password)
+        password_hash = hash_password(new_password)
         self.conn.execute('UPDATE user SET password=? WHERE id=?',
                           (password_hash, self.user_id))
         self.conn.execute('DELETE FROM session WHERE user=?',
@@ -175,9 +211,6 @@ class OfflineUser(User):
 
     def get_csrf(self) -> str:
         return 'fake_csrf_token'
-
-    def verify_password(self, _password: str) -> bool:
-        raise RuntimeError('Password login is not available in offline mode')
 
     def update_password(self, _new_password: str) -> None:
         raise RuntimeError('Cannot update password in offline mode')
@@ -241,7 +274,7 @@ def log_in(conn: Connection, username: str, password: str) -> Optional[str]:
 
     user_id, hashed_password = result
 
-    if not util.verify_password(password, hashed_password):
+    if not verify_password(conn, user_id, password):
         log.warning('Failed login for user %s', username)
         return None
 

@@ -4,8 +4,8 @@ from flask import Blueprint, Response, abort, request
 
 from app import auth, db, image, music, scanner, settings
 from app.image import ImageFormat
-from app.music import AudioType, Track
 from app.jsonw import json_response
+from app.music import AudioType, Track
 
 log = logging.getLogger('app.routes.track')
 bp = Blueprint('track', __name__, url_prefix='/track')

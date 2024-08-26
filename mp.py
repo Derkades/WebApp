@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 from typing import Any, Optional
 
-from app import logconfig, settings
+from app import auth, logconfig, settings
 
 log = logging.getLogger('cli')
 
@@ -46,7 +46,7 @@ def handle_useradd(args: Any) -> None:
     is_admin = int(args.admin)
     password = input('Enter password:')
 
-    hashed_password = util.hash_password(password)
+    hashed_password = auth.hash_password(password)
 
     with db.connect() as conn:
         conn.execute('INSERT INTO user (username, password, admin) VALUES (?, ?, ?)',
@@ -107,7 +107,7 @@ def handle_passwd(args: Any) -> None:
         user_id = result[0]
 
         password = input('Enter new password:')
-        hashed_password = util.hash_password(password)
+        hashed_password = auth.hash_password(password)
 
         conn.execute('UPDATE user SET password=? WHERE id=?', (hashed_password, user_id))
 

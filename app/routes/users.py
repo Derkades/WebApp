@@ -53,7 +53,7 @@ def route_edit():
         new_password = request.form['new_password']
 
         if new_password != '':
-            hashed_password = util.hash_password(new_password)
+            hashed_password = auth.hash_password(new_password)
             conn.execute('UPDATE user SET password=? WHERE username=?',
                             (hashed_password, username))
             conn.execute('''
@@ -76,7 +76,7 @@ def route_new():
     # Close database connection, password hashing takes a while
     username = request.form['username']
     password = request.form['password']
-    hashed_password = util.hash_password(password)
+    hashed_password = auth.hash_password(password)
 
     with db.connect() as conn:
         conn.execute('INSERT INTO user (username, password) VALUES (?, ?)',

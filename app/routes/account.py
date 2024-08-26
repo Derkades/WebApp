@@ -41,7 +41,7 @@ def route_change_password():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn, require_csrf=True)
 
-        if not user.verify_password(request.form['current_password']):
+        if not auth.verify_password(conn, user.user_id, request.form['current_password']):
             return _('Incorrect password.')
 
         if request.form['new_password'] != request.form['repeat_new_password']:

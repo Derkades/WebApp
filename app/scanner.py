@@ -1,9 +1,9 @@
 import logging
 import time
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from sqlite3 import Connection
-from datetime import datetime, timezone
 from typing import Optional
 
 from app import db, metadata, music, settings

@@ -1,7 +1,6 @@
 import logging
 
-from flask import (Blueprint, Response, redirect, render_template,
-                   request)
+from flask import Blueprint, Response, redirect, render_template, request
 
 from app import auth, db, jsonw
 from app.auth import AuthError

@@ -1,4 +1,5 @@
-from flask import Blueprint, abort, redirect, render_template, request, Response
+from flask import (Blueprint, Response, abort, redirect, render_template,
+                   request)
 
 from app import auth, db, jsonw, music, scanner, settings, util
 
