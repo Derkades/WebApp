@@ -65,8 +65,8 @@ def route_audio():
     if track is None:
         abort(404, 'Track does not exist')
 
-    parsed_mtime = datetime.fromtimestamp(track.mtime, timezone.utc)
-    if request.if_modified_since and parsed_mtime <= request.if_modified_since:
+    last_modified = track.mtime_dt
+    if request.if_modified_since and last_modified <= request.if_modified_since:
         return Response(None, 304)
 
     type_str = request.args['type']
@@ -87,7 +87,7 @@ def route_audio():
 
     audio = track.transcoded_audio(audio_type)
     response = Response(audio, content_type=media_type)
-    response.last_modified = parsed_mtime
+    response.last_modified = last_modified
     response.cache_control.no_cache = True  # always revalidate cache
     response.accept_ranges = 'bytes'  # Workaround for Chromium bug https://stackoverflow.com/a/65804889
     if audio_type == AudioType.MP3_WITH_METADATA:
@@ -116,6 +116,10 @@ def route_album_cover() -> Response:
         auth.verify_auth_cookie(conn)
         track = Track.by_relpath(conn, request.args['path'])
 
+        last_modified = track.mtime_dt
+        if request.if_modified_since and last_modified <= request.if_modified_since:
+            return Response(None, 304)
+
         quality_str = request.args['quality']
         if quality_str == 'high':
             quality = image.QUALITY_HIGH
@@ -126,7 +130,9 @@ def route_album_cover() -> Response:
 
         image_bytes = track.get_cover(meme, quality, ImageFormat.WEBP)
 
-    return Response(image_bytes, content_type='image/webp')
+    response = Response(image_bytes, content_type='image/webp')
+    response.last_modified = last_modified
+    return response
 
 
 @bp.route('/lyrics')

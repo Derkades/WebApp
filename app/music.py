@@ -6,7 +6,7 @@ import shutil
 import subprocess
 import tempfile
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from json.decoder import JSONDecodeError
 from pathlib import Path
@@ -205,6 +205,10 @@ class Track:
         Returns: Part of track path before first slash
         """
         return self.relpath[:self.relpath.index('/')]
+
+    @property
+    def mtime_dt(self) -> datetime:
+        return datetime.fromtimestamp(self.mtime, timezone.utc)
 
     def metadata(self) -> Metadata:
         """
