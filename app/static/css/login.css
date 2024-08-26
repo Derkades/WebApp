@@ -28,3 +28,7 @@ main {
 .flex-content-center {
     align-items: center;
 }
+
+.invalid-password {
+    color: red;
+}

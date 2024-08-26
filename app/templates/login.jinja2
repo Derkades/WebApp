@@ -12,13 +12,10 @@
 
 <div class="fancy">Super fancy music player 2.0</div>
 
-{% if invalid_password %}
-    <p>{% trans %}Invalid username or password{% endtrans %}</p>
-{% endif %}
-
-<br>
-
 <form method="POST">
+    {% if invalid_password %}
+        <p class="invalid-password">{% trans %}Invalid username or password{% endtrans %}</p>
+    {% endif %}
     <label for="username">{% trans %}Username{% endtrans %}</label><br>
     <input type="text" name="username" id="username" autofocus><br>
     <label for="password">{% trans %}Password{% endtrans %}</label><br>
