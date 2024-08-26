@@ -3,6 +3,8 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from sqlite3 import Connection
+from datetime import datetime, timezone
+from typing import Optional
 
 from app import db, metadata, music, settings
 
@@ -146,6 +148,20 @@ def scan_tracks(conn: Connection, playlist_name: str) -> None:
                          INSERT INTO scanner_log (timestamp, action, playlist, track)
                          VALUES (?, 'insert', ?, ?)
                          ''', (int(time.time()), playlist_name, relpath))
+
+
+def last_change(conn: Connection, playlist: Optional[str] = None):
+    if playlist:
+        query = 'SELECT timestamp FROM scanner_log WHERE playlist = ? ORDER BY id DESC LIMIT 1'
+        params = (playlist,)
+    else:
+        query = 'SELECT timestamp FROM scanner_log WHERE playlist = ? ORDER BY id DESC LIMIT 1'
+        params = ()
+    timestamp_row = conn.execute(query, params).fetchone()
+    if timestamp_row:
+        return datetime.fromtimestamp(timestamp_row[0], timezone.utc)
+
+    return datetime.fromtimestamp(0, timezone.utc)
 
 
 def scan() -> None:

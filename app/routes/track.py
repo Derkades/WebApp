@@ -6,6 +6,7 @@ from flask import Blueprint, Response, abort, request
 from app import auth, db, image, music, scanner, settings
 from app.image import ImageFormat
 from app.music import AudioType, Track
+from app.jsonw import json_response
 
 log = logging.getLogger('app.routes.track')
 bp = Blueprint('track', __name__, url_prefix='/track')
@@ -169,6 +170,12 @@ def route_lyrics():
 def route_filter():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
+
+        last_modified = scanner.last_change(conn, request.args['playlist'] if 'playlist' in request.args else None)
+
+        if request.if_modified_since and last_modified <= request.if_modified_since:
+            return Response(None, 304)  # Not Modified
+
         query = 'SELECT path FROM track WHERE true'
         params = []
         if 'playlist' in request.args:
@@ -198,7 +205,8 @@ def route_filter():
         query += ' LIMIT 5000'
         result = conn.execute(query, params)
         tracks = [Track.by_relpath(conn, row[0]) for row in result]
-        return {'tracks': [track.info_dict() for track in tracks]}
+
+        return json_response({'tracks': [track.info_dict() for track in tracks]}, last_modified=last_modified)
 
 
 @bp.route('/search')
