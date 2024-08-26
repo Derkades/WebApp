@@ -159,7 +159,7 @@ def route_track(playlist):
 
         playlist_obj = music.playlist(conn, playlist)
         require_metadata = request.json['require_metadata'] if 'require_metadata' in request.json else False
-        if 'tag_mode' in request.args: # TODO move tags from args to json body
+        if 'tag_mode' in request.json:
             tag_mode = request.json['tag_mode']
             assert tag_mode in {'allow', 'deny'}
             tags = request.json['tags'].split(';')
