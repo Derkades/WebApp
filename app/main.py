@@ -13,7 +13,7 @@ from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from app import language
-from app.auth import AuthError, RequestTokenError
+from app.auth import AuthError
 from app.routes import account as app_account
 from app.routes import activity as app_activity
 from app.routes import auth as app_auth
@@ -47,7 +47,6 @@ def get_app(proxy_count: int, template_reload: bool):
     app = Flask(__name__, template_folder='templates')
     app.register_error_handler(Exception, _handle_exception)
     app.register_error_handler(AuthError, app_auth.handle_auth_error)
-    app.register_error_handler(RequestTokenError, app_auth.handle_token_error)
     app.register_blueprint(app_account.bp)
     app.register_blueprint(app_activity.bp)
     app.register_blueprint(app_auth.bp)

@@ -29,8 +29,7 @@ def route_search():
     from app import downloader
 
     with db.connect(read_only=True) as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
+        auth.verify_auth_cookie(conn, require_csrf=True)
 
         query = request.json['query']
         results = downloader.search(query)
@@ -46,8 +45,7 @@ def route_ytdl():
     from app import downloader
 
     with db.connect(read_only=True) as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
 
         directory = request.json['directory']
         url = request.json['url']

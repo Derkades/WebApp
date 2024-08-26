@@ -111,12 +111,6 @@ class User(ABC):
         """
 
     @abstractmethod
-    def verify_csrf(self, token: str) -> None:
-        """
-        Verify request token, raising RequestTokenException if not valid
-        """
-
-    @abstractmethod
     def verify_password(self, password: str) -> bool:
         """
         Verify password matches user's existing password
@@ -152,10 +146,6 @@ class StandardUser(User):
     def get_csrf(self) -> str:
         return self.session.csrf_token
 
-    def verify_csrf(self, token: str) -> None:
-        if not hmac.compare_digest(token, self.get_csrf()):
-            raise RequestTokenError()
-
     def verify_password(self, password: str) -> bool:
         result = self.conn.execute('SELECT password FROM user WHERE id=?',
                                    (self.user_id,)).fetchone()
@@ -186,9 +176,6 @@ class OfflineUser(User):
     def get_csrf(self) -> str:
         return 'fake_csrf_token'
 
-    def verify_csrf(self, token: str) -> None:
-        pass
-
     def verify_password(self, _password: str) -> bool:
         raise RuntimeError('Password login is not available in offline mode')
 
@@ -204,6 +191,8 @@ class AuthErrorReason(Enum):
     NO_TOKEN = 1
     INVALID_TOKEN = 2
     ADMIN_REQUIRED = 3
+    MISSING_CSRF = 4
+    INVALID_CSRF = 5
 
     @property
     def message(self):
@@ -216,6 +205,10 @@ class AuthErrorReason(Enum):
             return _('Your current session is invalid, please log in again.')
         elif self is AuthErrorReason.ADMIN_REQUIRED:
             return _('Your are not an administrator, but this page requires administrative privileges')
+        elif self is AuthErrorReason.MISSING_CSRF:
+            return _('Missing CSRF token from request.')
+        elif self is AuthErrorReason.INVALID_TOKEN:
+            return _('Invalid CSRF token in request. Please refresh the page and try again.')
 
         return ValueError()
 
@@ -224,10 +217,6 @@ class AuthErrorReason(Enum):
 class AuthError(Exception):
     reason: AuthErrorReason
     redirect: bool
-
-
-class RequestTokenError(Exception):
-    pass
 
 
 def log_in(conn: Connection, username: str, password: str) -> Optional[str]:
@@ -316,7 +305,7 @@ def _verify_token(conn: Connection, token: str) -> Optional[User]:
                         PrivacyOption(privacy_str), session)
 
 
-def verify_auth_cookie(conn: Connection, require_admin=False, redirect_to_login=False) -> User:
+def verify_auth_cookie(conn: Connection, require_admin=False, redirect_to_login=False, require_csrf=False) -> User:
     """
     Verify auth token sent as cookie, raising AuthError if missing or not valid.
     Args:
@@ -339,6 +328,17 @@ def verify_auth_cookie(conn: Connection, require_admin=False, redirect_to_login=
 
     if require_admin and not user.admin:
         raise AuthError(AuthErrorReason.ADMIN_REQUIRED, redirect_to_login)
+
+    if require_csrf:
+        if request.content_type == 'application/json':
+            csrf_token = request.json['csrf']
+        elif request.content_type == 'application/x-www-form-urlencoded':
+            csrf_token = request.form['csrf']
+        else:
+            raise AuthError(AuthErrorReason.MISSING_CSRF, False)
+
+        if not hmac.compare_digest(csrf_token, user.get_csrf()):
+            raise AuthError(AuthErrorReason.INVALID_CSRF, False)
 
     return user
 

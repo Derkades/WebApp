@@ -78,8 +78,7 @@ def route_upload():
     Form target to upload file, called from file manager
     """
     with db.connect(read_only=True) as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
 
         upload_dir = music.from_relpath(request.form['dir'])
 
@@ -109,19 +108,15 @@ def route_rename():
     Page and form target to rename file
     """
     with db.connect(read_only=request.method == 'GET') as conn:
-        user = auth.verify_auth_cookie(conn)
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
 
         if request.method == 'POST':
             if request.is_json:
-                csrf = request.json['csrf']
                 relpath = request.json['path']
                 new_name = request.json['new_name']
             else:
-                csrf = request.form['csrf']
                 relpath = request.form['path']
                 new_name = request.form['new-name']
-
-            user.verify_csrf(csrf)
 
             path = music.from_relpath(relpath)
             util.check_filename(new_name)
@@ -154,8 +149,7 @@ def route_mkdir():
     Create directory, then enter it
     """
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
 
     path = music.from_relpath(request.form['path'])
 

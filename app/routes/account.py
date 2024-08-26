@@ -34,13 +34,13 @@ def route_account():
 
 
 @bp.route('/change_password', methods=['POST'])
-def route_change__password():
+def route_change_password():
     """
     Form target to change password, called from /account page
     """
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf_token'])
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
+
         if not user.verify_password(request.form['current_password']):
             return _('Incorrect password.')
 
@@ -57,8 +57,7 @@ def route_change_nickname():
     Form target to change nickname, called from /account page
     """
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf_token'])
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
 
         conn.execute('UPDATE user SET nickname=? WHERE id=?',
                      (request.form['nickname'], user.user_id))
@@ -69,8 +68,7 @@ def route_change_nickname():
 @bp.route('/change_language', methods=['POST'])
 def route_change_language():
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf_token'])
+        auth.verify_auth_cookie(conn, require_csrf=True)
 
         lang_code = request.form['language']
         if lang_code == '':
@@ -88,8 +86,7 @@ def route_change_language():
 @bp.route('/change_privacy_setting', methods=['POST'])
 def route_change_privacy_setting():
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf_token'])
+        auth.verify_auth_cookie(conn, require_csrf=True)
 
         privacy = request.form['privacy']
         assert privacy in {'none', 'aggregate', 'hidden'}

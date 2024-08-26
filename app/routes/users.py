@@ -38,7 +38,7 @@ def route_users():
 def route_edit():
     """Change username or password"""
     with db.connect(read_only=request.method == 'GET') as conn:
-        user = auth.verify_auth_cookie(conn, require_admin=True)
+        user = auth.verify_auth_cookie(conn, require_admin=True, require_csrf=request.method == 'POST')
 
         if request.method == 'GET':
             csrf_token = user.get_csrf()
@@ -48,7 +48,6 @@ def route_edit():
                                    csrf_token=csrf_token,
                                    username=username)
 
-        user.verify_csrf(request.form['csrf'])
         username = request.form['username']
         new_username = request.form['new_username']
         new_password = request.form['new_password']
@@ -71,14 +70,12 @@ def route_edit():
 @bp.route('/new', methods=['POST'])
 def route_new():
     """Create new user"""
-    form = request.form
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, require_admin=True)
-        user.verify_csrf(form['csrf'])
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn, require_admin=True, require_csrf=True)
 
-    # Close connection, password hashing takes a while
-    username = form['username']
-    password = form['password']
+    # Close database connection, password hashing takes a while
+    username = request.form['username']
+    password = request.form['password']
     hashed_password = util.hash_password(password)
 
     with db.connect() as conn:

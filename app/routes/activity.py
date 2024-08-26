@@ -155,8 +155,7 @@ def route_now_playing():
         return Response(None, 200)
 
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
 
         if user.privacy != PrivacyOption.NONE:
             log.info('Ignoring, user has enabled private mode')
@@ -233,8 +232,7 @@ def route_played():
         return Response(None, 200)
 
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
 
         track = Track.by_relpath(conn, request.json['track'])
         if track is None:

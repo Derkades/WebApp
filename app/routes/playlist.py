@@ -35,8 +35,8 @@ def route_favorite():
     Form target to mark a playlist as favorite.
     """
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
+
         playlist = request.form['playlist']
         is_favorite = request.form['favorite']
         if is_favorite == '1':
@@ -55,10 +55,9 @@ def route_set_primary():
     Form target to configure a primary playlist.
     """
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
-        playlist = request.form['primary-playlist']
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
 
+        playlist = request.form['primary-playlist']
         conn.execute('UPDATE user SET primary_playlist=? WHERE id=?',
                      (playlist, user.user_id))
 
@@ -71,8 +70,7 @@ def route_create():
     Form target to create playlist, called from /playlist/manage page
     """
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
 
         dir_name = request.form['path']
 
@@ -114,8 +112,7 @@ def route_share():
                                usernames=usernames)
 
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
         playlist_relpath = request.form['playlist']
         username = request.form['username']
 
@@ -157,8 +154,7 @@ def route_track(playlist):
     Choose random track from the provided playlist directory.
     """
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
 
         playlist_obj = music.playlist(conn, playlist)
         require_metadata = request.json['require_metadata'] if 'require_metadata' in request.json else False

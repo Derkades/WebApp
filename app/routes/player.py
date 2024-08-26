@@ -31,8 +31,8 @@ def route_copy_track():
     Endpoint used by music player to copy a track to the user's primary playlist
     """
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
+
         playlist_name = request.json['playlist']
 
         playlist = music.user_playlist(conn, playlist_name, user.user_id)

@@ -146,8 +146,7 @@ def route_update_metadata(path):
     """
     payload = request.json
     with db.connect(read_only=True) as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(payload['csrf'])
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
 
         track = Track.by_relpath(conn, path)
         assert track is not None

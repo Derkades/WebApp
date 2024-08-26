@@ -37,8 +37,7 @@ def create():
     Endpoint to create a share link, called from web music player.
     """
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
 
         track = Track.by_relpath(conn, request.json['track'])
         if track is None:

@@ -1,10 +1,10 @@
 import logging
 
-from flask import (Blueprint, Response, abort, redirect, render_template,
+from flask import (Blueprint, Response, redirect, render_template,
                    request)
 
 from app import auth, db, jsonw
-from app.auth import AuthError, RequestTokenError
+from app.auth import AuthError
 
 log = logging.getLogger('app.routes.auth')
 bp = Blueprint('auth', __name__, url_prefix='/auth')
@@ -18,14 +18,6 @@ def handle_auth_error(err: AuthError):
         return redirect('/auth/login', code=303)
 
     return Response(render_template('403.jinja2', reason=err.reason.message), 403)
-
-
-def handle_token_error(_err: RequestTokenError):
-    """
-    Return bad request
-    """
-    log.warning('Invalid CSRF token')
-    abort(400, 'Invalid CSRF token')
 
 
 @bp.route('/login', methods=['GET', 'POST'])

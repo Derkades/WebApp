@@ -69,8 +69,7 @@ def route_lastfm_connect():
 @bp.route('lastfm_disconnect', methods=['POST'])
 def route_lastfm_disconnect():
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
         conn.execute('DELETE FROM user_lastfm WHERE user=?',
                      (user.user_id,))
     return redirect('/account', code=303)

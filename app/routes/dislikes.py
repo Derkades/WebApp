@@ -9,8 +9,7 @@ bp = Blueprint('dislikes', __name__, url_prefix='/dislikes')
 def route_add():
     """Used by music player"""
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
         track = request.json['track']
         conn.execute('INSERT OR IGNORE INTO dislikes (user, track) VALUES (?, ?)',
                      (user.user_id, track))
@@ -21,8 +20,7 @@ def route_add():
 def route_remove():
     """Used by form on dislikes page"""
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.form['csrf'])
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
         conn.execute('DELETE FROM dislikes WHERE user=? AND track=?',
                      (user.user_id, request.form['track']))
 
