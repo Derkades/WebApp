@@ -1,12 +1,10 @@
 import logging
 from datetime import datetime, timezone
-from typing import Any
 
 from flask import Blueprint, Response, abort, request
 
-from app import auth, db, image, jsonw, music, scanner, settings
+from app import auth, db, image, music, scanner, settings
 from app.image import ImageFormat
-from app.metadata import sort_artists
 from app.music import AudioType, Track
 
 log = logging.getLogger('app.routes.track')
@@ -165,75 +163,6 @@ def route_lyrics():
         'source': lyrics.source_url,
         'html': lyrics.lyrics_html,
     }
-
-
-# TODO phase out
-@bp.route('/list')
-def route_list():
-    """Return list of playlists and tracks"""
-    with db.connect(read_only=True) as conn:
-        user = auth.verify_auth_cookie(conn)
-
-        timestamp_row = conn.execute('''
-                                     SELECT timestamp FROM scanner_log
-                                     ORDER BY id DESC
-                                     LIMIT 1
-                                     ''').fetchone()
-        if timestamp_row:
-            last_modified = datetime.fromtimestamp(timestamp_row[0], timezone.utc)
-        else:
-            last_modified = datetime.now(timezone.utc)
-
-        if request.if_modified_since and last_modified <= request.if_modified_since:
-            log.info('Last modified before If-Modified-Since header')
-            return Response(None, 304)  # Not Modified
-
-        user_playlists = music.user_playlists(conn, user.user_id, all_writable=user.admin)
-
-        playlist_response: list[dict[str, Any]] = []
-
-        for playlist in user_playlists:
-            if playlist.track_count == 0:
-                continue
-
-            playlist_json = {
-                'name': playlist.name,
-                'track_count': playlist.track_count,
-                'favorite': playlist.favorite,
-                'write': playlist.write,
-                'tracks': [],
-            }
-            playlist_response.append(playlist_json)
-
-            track_rows = conn.execute('''
-                                      SELECT path, mtime, duration, title, album, album_artist, year
-                                      FROM track
-                                      WHERE playlist=?
-                                      ''', (playlist.name,)).fetchall()
-
-            for relpath, mtime, duration, title, album, album_artist, year in track_rows:
-                track_json = {
-                    'path': relpath,
-                    'mtime': mtime,
-                    'duration': duration,
-                    'title': title,
-                    'album': album,
-                    'album_artist': album_artist,
-                    'year': year,
-                    'artists': None,
-                    'tags': [],
-                }
-                playlist_json['tracks'].append(track_json)
-
-                artist_rows = conn.execute('SELECT artist FROM track_artist WHERE track=?',
-                                           (relpath,)).fetchall()
-                if artist_rows:
-                    track_json['artists'] = sort_artists([row[0] for row in artist_rows], album_artist)
-
-                tag_rows = conn.execute('SELECT tag FROM track_tag WHERE track=?', (relpath,))
-                track_json['tags'] = [tag for tag, in tag_rows]
-
-    return jsonw.json_response({'playlists': playlist_response}, last_modified=last_modified)
 
 
 @bp.route('/filter')
