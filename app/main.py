@@ -23,7 +23,7 @@ from app.routes import files as app_files
 from app.routes import games as app_games
 from app.routes import news as app_news
 from app.routes import player as app_player
-from app.routes import playlists as app_playlists
+from app.routes import playlist as app_playlist
 from app.routes import radio as app_radio
 from app.routes import root as app_root
 from app.routes import share as app_share
@@ -57,7 +57,7 @@ def get_app(proxy_count: int, template_reload: bool):
     app.register_blueprint(app_games.bp)
     app.register_blueprint(app_news.bp)
     app.register_blueprint(app_player.bp)
-    app.register_blueprint(app_playlists.bp)
+    app.register_blueprint(app_playlist.bp)
     app.register_blueprint(app_radio.bp)
     app.register_blueprint(app_root.bp)
     app.register_blueprint(app_share.bp)

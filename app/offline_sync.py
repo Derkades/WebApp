@@ -126,13 +126,13 @@ class OfflineSync:
         Download audio, album cover and lyrics for a track and store in the 'content' database table.
         """
         def download_audio() -> bytes:
-            return self.request_get('/track/audio?type=webm_opus_high&path=' + urlencode(path)).content
+            return self.request_get(f'/track/{urlencode(path)}/audio?type=webm_opus_high').content
 
         def download_cover() -> bytes:
-            return self.request_get('/track/album_cover?quality=high&path=' + urlencode(path)).content
+            return self.request_get(f'/track/{urlencode(path)}/cover?quality=high').content
 
         def download_lyrics() -> str:
-            return self.request_get('/track/lyrics?path=' + urlencode(path)).text
+            return self.request_get(f'/track/{urlencode(path)}/lyrics').text
 
         with ThreadPool(3) as pool:
             result_audio = pool.apply_async(download_audio)
@@ -248,7 +248,7 @@ class OfflineSync:
 
         if len(enabled_playlists) == 0:
             log.info('No playlists selected. Fetching favorite playlists...')
-            playlists = self.request_get('/playlists/list').json()
+            playlists = self.request_get('/playlist/list').json()
             enabled_playlists = [playlist['name'] for playlist in playlists if playlist['favorite']]
 
         log.info('Syncing playlists: %s', ','.join(enabled_playlists))

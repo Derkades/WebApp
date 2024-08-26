@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime, timezone
 
 from flask import Blueprint, Response, abort, request
 
@@ -12,55 +11,28 @@ log = logging.getLogger('app.routes.track')
 bp = Blueprint('track', __name__, url_prefix='/track')
 
 
-@bp.route('/choose', methods=['POST'])
-def route_track():
-    """
-    Choose random track from the provided playlist directory.
-    """
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(request.json['csrf'])
-
-        dir_name = request.json['playlist']
-        playlist = music.playlist(conn, dir_name)
-        require_metadata = request.json['require_metadata'] if 'require_metadata' in request.json else False
-        if 'tag_mode' in request.args: # TODO move tags from args to json body
-            tag_mode = request.json['tag_mode']
-            assert tag_mode in {'allow', 'deny'}
-            tags = request.json['tags'].split(';')
-            chosen_track = playlist.choose_track(user, require_metadata=require_metadata, tag_mode=tag_mode, tags=tags)
-        else:
-            chosen_track = playlist.choose_track(user, require_metadata=require_metadata)
-
-        if chosen_track is None:
-            return Response('no track found', 404, content_type='text/plain')
-
-        return chosen_track.info_dict()
-
-
-@bp.route('/info')
-def route_info():
+@bp.route('/<path:path>/info')
+def route_info(path):
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
-        track = Track.by_relpath(conn, request.args['path'])
+        track = Track.by_relpath(conn, path)
         return track.info_dict()
 
 
-@bp.route('/audio')
-def route_audio():
+@bp.route('/<path:path>/audio')
+def route_audio(path):
     """
     Get transcoded audio for the given track path.
     """
     if settings.offline_mode:
         with db.offline(read_only=True) as conn:
-            path = request.args['path']
             music_data, = conn.execute('SELECT music_data FROM content WHERE path=?',
                                        (path,))
             return Response(music_data, content_type='audio/webm')
 
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
-        track = Track.by_relpath(conn, request.args['path'])
+        track = Track.by_relpath(conn, path)
 
     if track is None:
         abort(404, 'Track does not exist')
@@ -96,25 +68,21 @@ def route_audio():
     return response
 
 
-@bp.route('/album_cover')
-def route_album_cover() -> Response:
+@bp.route('/<path:path>/cover')
+def route_album_cover(path) -> Response:
     """
     Get album cover image for the provided track path.
     """
-    # TODO Album title and album artist as parameters, instead of track path
-
     if settings.offline_mode:
         with db.offline(read_only=True) as conn:
-            path = request.args['path']
-            cover_data, = conn.execute('SELECT cover_data FROM content WHERE path=?',
-                                       (path,))
+            cover_data, = conn.execute('SELECT cover_data FROM content WHERE path=?', (path,))
             return Response(cover_data, content_type='image/webp')
 
     meme = 'meme' in request.args and bool(int(request.args['meme']))
 
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
-        track = Track.by_relpath(conn, request.args['path'])
+        track = Track.by_relpath(conn, path)
 
         last_modified = track.mtime_dt
         if request.if_modified_since and last_modified <= request.if_modified_since:
@@ -132,25 +100,24 @@ def route_album_cover() -> Response:
 
     response = Response(image_bytes, content_type='image/webp')
     response.last_modified = last_modified
+    response.cache_control.no_cache = True  # always revalidate cache
     return response
 
 
-@bp.route('/lyrics')
-def route_lyrics():
+@bp.route('/<path:path>/lyrics')
+def route_lyrics(path):
     """
     Get lyrics for the provided track path.
     """
     if settings.offline_mode:
         with db.offline(read_only=True) as conn:
-            path = request.args['path']
-            lyrics_json, = conn.execute('SELECT lyrics_json FROM content WHERE path=?',
-                                        (path,))
+            lyrics_json, = conn.execute('SELECT lyrics_json FROM content WHERE path=?', (path,))
             return Response(lyrics_json, content_type='application/json')
 
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
 
-        track = Track.by_relpath(conn, request.args['path'])
+        track = Track.by_relpath(conn, path)
         meta = track.metadata()
 
     if meta.lyrics:
@@ -170,6 +137,39 @@ def route_lyrics():
         'source': lyrics.source_url,
         'html': lyrics.lyrics_html,
     }
+
+
+@bp.route('/<path:path>/update_metadata', methods=['POST'])
+def route_update_metadata(path):
+    """
+    Endpoint to update track metadata
+    """
+    payload = request.json
+    with db.connect(read_only=True) as conn:
+        user = auth.verify_auth_cookie(conn)
+        user.verify_csrf(payload['csrf'])
+
+        track = Track.by_relpath(conn, path)
+        assert track is not None
+
+        playlist = music.playlist(conn, track.playlist)
+        if not playlist.has_write_permission(user):
+            return Response('No write permission for this playlist', 403, content_type='text/plain')
+
+        meta = track.metadata()
+
+    meta.title = payload['title']
+    meta.album = payload['album']
+    meta.artists = payload['artists']
+    meta.album_artist = payload['album_artist']
+    meta.tags = payload['tags']
+    meta.year = payload['year']
+    track.write_metadata(meta)
+
+    with db.connect() as conn:
+        scanner.scan_tracks(conn, track.playlist)
+
+    return Response(None, 200)
 
 
 @bp.route('/filter')
@@ -235,36 +235,3 @@ def route_tags():
         tags = [row[0] for row in result]
 
     return tags
-
-
-@bp.route('/update_metadata', methods=['POST'])
-def route_update_metadata():
-    """
-    Endpoint to update track metadata
-    """
-    payload = request.json
-    with db.connect(read_only=True) as conn:
-        user = auth.verify_auth_cookie(conn)
-        user.verify_csrf(payload['csrf'])
-
-        track = Track.by_relpath(conn, payload['path'])
-        assert track is not None
-
-        playlist = music.playlist(conn, track.playlist)
-        if not playlist.has_write_permission(user):
-            return Response('No write permission for this playlist', 403, content_type='text/plain')
-
-        meta = track.metadata()
-
-    meta.title = payload['title']
-    meta.album = payload['album']
-    meta.artists = payload['artists']
-    meta.album_artist = payload['album_artist']
-    meta.tags = payload['tags']
-    meta.year = payload['year']
-    track.write_metadata(meta)
-
-    with db.connect() as conn:
-        scanner.scan_tracks(conn, track.playlist)
-
-    return Response(None, 200)

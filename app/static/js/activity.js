@@ -11,8 +11,8 @@ function getNowPlayingCardHtml(info) {
     cardBody.classList.add('card-body');
     card.append(cardBody);
 
-    const coverThumbUrl = '/track/album_cover?quality=low&path=' + encodeURIComponent(info.path);
-    const coverFullUrl = '/track/album_cover?quality=high&path=' + encodeURIComponent(info.path);
+    const coverThumbUrl = `/track/${encodeURIComponent(info.path)}/cover?quality=low`;
+    const coverFullUrl = `/track/${encodeURIComponent(info.path)}/cover?quality=low`;
 
     const coverImg = document.createElement('a');
     coverImg.classList.add('cover-img')

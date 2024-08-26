@@ -1,13 +1,11 @@
-from typing import Any
-
-from flask import Blueprint, abort, redirect, render_template, request
+from flask import Blueprint, abort, redirect, render_template, request, Response
 
 from app import auth, db, jsonw, music, scanner, settings, util
 
-bp = Blueprint('playlists', __name__, url_prefix='/playlists')
+bp = Blueprint('playlists', __name__, url_prefix='/playlist')
 
 
-@bp.route('')
+@bp.route('/manage')
 def route_playlists():
     """
     Playlist management page
@@ -48,7 +46,7 @@ def route_favorite():
             conn.execute('DELETE FROM user_playlist_favorite WHERE user=? AND playlist=?',
                          (user.user_id, playlist))
 
-    return redirect('/playlists', code=303)
+    return redirect('/playlist/manage', code=303)
 
 
 @bp.route('/set_primary', methods=['POST'])
@@ -64,13 +62,13 @@ def route_set_primary():
         conn.execute('UPDATE user SET primary_playlist=? WHERE id=?',
                      (playlist, user.user_id))
 
-    return redirect('/playlists', code=303)
+    return redirect('/playlist/manage', code=303)
 
 
 @bp.route('/create', methods=['POST'])
 def route_create():
     """
-    Form target to create playlist, called from /playlists page
+    Form target to create playlist, called from /playlist/manage page
     """
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn)
@@ -95,7 +93,7 @@ def route_create():
         conn.execute('INSERT INTO user_playlist_write VALUES (?, ?)',
                      (user.user_id, dir_name))
 
-    return redirect('/playlists', code=303)
+    return redirect('/playlist/manage', code=303)
 
 
 @bp.route('/share', methods=['GET', 'POST'])
@@ -133,7 +131,7 @@ def route_share():
         conn.execute('INSERT INTO user_playlist_write VALUES(?, ?) ON CONFLICT DO NOTHING',
                      (target_user_id, playlist_relpath))
 
-        return redirect('/playlists', code=303)
+        return redirect('/playlist/manage', code=303)
 
 
 @bp.route('/list')
@@ -151,3 +149,28 @@ def route_list():
         response = jsonw.json_response(json)
         response.cache_control.max_age = 60;
         return response
+
+
+@bp.route('/<playlist>/choose_track', methods=['POST'])
+def route_track(playlist):
+    """
+    Choose random track from the provided playlist directory.
+    """
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn)
+        user.verify_csrf(request.json['csrf'])
+
+        playlist_obj = music.playlist(conn, playlist)
+        require_metadata = request.json['require_metadata'] if 'require_metadata' in request.json else False
+        if 'tag_mode' in request.args: # TODO move tags from args to json body
+            tag_mode = request.json['tag_mode']
+            assert tag_mode in {'allow', 'deny'}
+            tags = request.json['tags'].split(';')
+            chosen_track = playlist_obj.choose_track(user, require_metadata=require_metadata, tag_mode=tag_mode, tags=tags)
+        else:
+            chosen_track = playlist_obj.choose_track(user, require_metadata=require_metadata)
+
+        if chosen_track is None:
+            return Response('no track found', 404, content_type='text/plain')
+
+        return chosen_track.info_dict()

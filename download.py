@@ -47,9 +47,8 @@ def setup_state() -> State:
 
 
 def download_track(state: State, relpath: str, local_path: Path):
-    r = requests.get(state.server + '/track/audio',
-                     params={'path': relpath,
-                             'type': 'mp3_with_metadata'},
+    r = requests.get(state.server + '/track/' + quote(relpath) + '/audio',
+                     params={'type': 'mp3_with_metadata'},
                      timeout=60, # transcoding may take a while
                      headers={'Cookie': 'token=' + state.token},
                      stream=True)

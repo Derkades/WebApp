@@ -11,7 +11,7 @@ class Music {
     async playlists() {
         await navigator.locks.request("api_playlists", async lock => {
             if (this.#playlists == undefined) {
-                const response = await fetch('/playlists/list');
+                const response = await fetch('/playlist/list');
                 checkResponseCode(response);
                 const json = await response.json();
                 this.#playlists = [];
@@ -81,7 +81,7 @@ class Music {
      * @returns {Promise<Track>}
      */
     async track(path) {
-        const response = await fetch('/track/info?path=' + encodeURIComponent(path));
+        const response = await fetch(`/track/info${encodeURIComponent(path)}/info`);
         checkResponseCode(response);
         const json = await response.json();
         return new Track(json.playlist, json);
@@ -120,7 +120,7 @@ class Playlist {
     }
 
     async chooseRandomTrack(requireMetadata, tagFilter) {
-        const chooseResponse = await jsonPost('/track/choose', {'playlist': this.name, 'require_metadata': requireMetadata, ...tagFilter});
+        const chooseResponse = await jsonPost('/playlist/' + encodeURIComponent(this.name) + '/choose_track', {'require_metadata': requireMetadata, ...tagFilter});
         const trackData = await chooseResponse.json();
         console.info('api: chosen track', trackData.path);
         return new Track(trackData);
@@ -272,7 +272,7 @@ class Track {
      * @returns {Promise<string>} URL
      */
     async getAudio(audioType, stream) {
-        const audioUrl = `/track/audio?path=${encodeURIComponent(this.path)}&type=${audioType}`;
+        const audioUrl = `/track/${encodeURIComponent(this.path)}/audio?type=${audioType}`;
         if (stream) {
             return audioUrl;
         } else {
@@ -291,8 +291,8 @@ class Track {
      * @param {boolean} memeCover
      * @returns {Promise<string>} URL
      */
-    async getCover(imageQuality, stream, memeCover) {
-        const imageUrl = `/track/album_cover?path=${encodeURIComponent(this.path)}&quality=${imageQuality}&meme=${memeCover ? 1 : 0}`;
+    async getCover(imageQuality, stream=false, memeCover=false) {
+        const imageUrl = `/track/${encodeURIComponent(this.path)}/cover?quality=${imageQuality}&meme=${memeCover ? 1 : 0}`;
         if (stream) {
             return imageUrl;
         } else {
@@ -308,7 +308,7 @@ class Track {
      * @returns {Promise<Lyrics|null>}
      */
     async getLyrics() {
-        const lyricsUrl = `/track/lyrics?path=${encodeURIComponent(this.path)}`;
+        const lyricsUrl = `/track/${encodeURIComponent(this.path)}/lyrics`;
         const lyricsResponse = await fetch(lyricsUrl);
         checkResponseCode(lyricsResponse);
         const lyricsJson = await lyricsResponse.json();
@@ -347,7 +347,6 @@ class Track {
      */
     async saveMetadata() {
         const payload = {
-            path: this.path,
             title: this.title,
             album: this.album,
             artists: this.artists,
@@ -356,7 +355,7 @@ class Track {
             year: this.year,
         };
 
-        await jsonPost('/track/update_metadata', payload);
+        await jsonPost(`/track/${encodeURIComponent(this.path)}/update_metadata`, payload);
     }
 }
 

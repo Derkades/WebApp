@@ -18,7 +18,7 @@
     {% endif %}
 </p>
 
-<form action="/playlists/set_primary" method="POST">
+<form action="/playlist/set_primary" method="POST">
     <input type="hidden" name="csrf" value="{{ csrf_token }}">
     <select name="primary-playlist">
         {% for playlist in playlists %}
@@ -29,7 +29,7 @@
 </form>
 
 <h2>{% trans %}Create new playlist{% endtrans %}</h2>
-<form action="/playlists/create" method="POST">
+<form action="/playlist/create" method="POST">
     <input type="hidden" name="csrf" value="{{ csrf_token }}">
     <input type="text" name="path" placeholder="{% trans %}Directory name{% endtrans %}">
     <input type="submit" value="{% trans %}Create{% endtrans %}">
@@ -73,7 +73,7 @@
                     {% endif %}
                 </td>
                 <td>
-                    <form action="/playlists/favorite" method="POST">
+                    <form action="/playlist/favorite" method="POST">
                         <input type="hidden" name="csrf" value="{{ csrf_token }}">
                         <input type="hidden" name="playlist" value="{{ playlist.name }}">
                         {% if playlist.favorite %}
@@ -85,7 +85,7 @@
                         {% endif %}
                     </form>
                     {% if user_is_admin or playlist.write %}
-                        <form action="/playlists/share" method="GET">
+                        <form action="/playlist/share" method="GET">
                             <input type="hidden" name="csrf" value="{{ csrf_token }}">
                             <input type="hidden" name="playlist" value="{{ playlist.name }}">
                             <input type="submit" value="{% trans %}Share{% endtrans %}">
