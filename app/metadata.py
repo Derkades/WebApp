@@ -102,7 +102,7 @@ def ignore_album_artist(artist: str) -> bool:
     return artist.lower() in ALBUM_ARTIST_IGNORE
 
 
-def strip_keywords(inp: str) -> str:
+def _strip_keywords(inp: str) -> str:
     """
     Remove undesirable keywords from title, as a result of being downloaded from the internet.
     """
@@ -111,7 +111,7 @@ def strip_keywords(inp: str) -> str:
     return inp
 
 
-def is_alpha(char: str) -> bool:
+def _is_alpha(char: str) -> bool:
     """
     Check whether given character is alphanumeric, a dash or a space
     """
@@ -122,12 +122,12 @@ def is_alpha(char: str) -> bool:
            '0' <= char <= '9'
 
 
-def join_meta_list(entries: list[str]) -> str:
+def _join_meta_list(entries: list[str]) -> str:
     """Join list with semicolons"""
     return '; '.join(entries)
 
 
-def split_meta_list(meta_list: str) -> list[str]:
+def _split_meta_list(meta_list: str) -> list[str]:
     """
     Split list (stored as string in metadata) by semicolon
     """
@@ -139,7 +139,7 @@ def split_meta_list(meta_list: str) -> list[str]:
     return entries
 
 
-def has_advertisement(metadata_str: str) -> bool:
+def _has_advertisement(metadata_str: str) -> bool:
     """Check whether string contains advertisements and should be ignored"""
     for keyword in METADATA_ADVERTISEMENT_KEYWORDS:
         if keyword in metadata_str.lower():
@@ -147,7 +147,7 @@ def has_advertisement(metadata_str: str) -> bool:
     return False
 
 
-def sort_artists(artists: Optional[list[str]], album_artist: Optional[str]) -> Optional[list[str]]:
+def _sort_artists(artists: Optional[list[str]], album_artist: Optional[str]) -> Optional[list[str]]:
     """
     Move album artist to start of artist list
     """
@@ -197,7 +197,7 @@ class Metadata:
             pass
         # Remove YouTube id suffix
         title = re.sub(r' \[[a-zA-Z0-9\-_]+\]', '', title)
-        title = strip_keywords(title)
+        title = _strip_keywords(title)
         title.strip()
         return title
 
@@ -208,7 +208,7 @@ class Metadata:
         """
         title = self.filename_title()
         # Remove special characters
-        title = ''.join([c for c in title if is_alpha(c)])
+        title = ''.join([c for c in title if _is_alpha(c)])
         title = title.strip()
         return title
 
@@ -245,7 +245,7 @@ class Metadata:
         if self.album:
             metadata_options.extend((option, 'album=' + self.album))
         if self.artists is not None:
-            metadata_options.extend((option, 'artist=' + join_meta_list(self.artists)))
+            metadata_options.extend((option, 'artist=' + _join_meta_list(self.artists)))
         if self.title is not None:
             metadata_options.extend((option, 'title=' + self.title))
         if self.year is not None:
@@ -257,7 +257,7 @@ class Metadata:
         if self.lyrics is not None:
             metadata_options.extend((option, 'lyrics=' + str(self.track_number)))
         if self.tags:
-            metadata_options.extend((option, 'genre=' + join_meta_list(self.tags)))
+            metadata_options.extend((option, 'genre=' + _join_meta_list(self.tags)))
         return metadata_options
 
 
@@ -313,7 +313,7 @@ def probe(path: Path) -> Metadata | None:
         # sometimes ffprobe returns tags in uppercase
         name = name.lower()
 
-        if has_advertisement(value):
+        if _has_advertisement(value):
             log.info('Ignoring advertisement: %s = %s', name, value)
             continue
 
@@ -321,10 +321,10 @@ def probe(path: Path) -> Metadata | None:
             album = value
 
         if name == 'artist':
-            artists = split_meta_list(value)
+            artists = _split_meta_list(value)
 
         if name == 'title':
-            title = strip_keywords(value).strip()
+            title = _strip_keywords(value).strip()
 
         if name == 'date':
             try:
@@ -342,7 +342,7 @@ def probe(path: Path) -> Metadata | None:
                 log.warning("Invalid track number '%s' in file '%s'", value, path.resolve().as_posix())
 
         if name == 'genre':
-            tags = split_meta_list(value)
+            tags = _split_meta_list(value)
 
         if name in {'lyrics', 'lyrics-en', 'lyrics-eng', 'lyrics-english'}:
             lyrics = value
@@ -353,7 +353,7 @@ def probe(path: Path) -> Metadata | None:
 
     return Metadata(music.to_relpath(path),
                     duration,
-                    sort_artists(artists, album_artist),
+                    _sort_artists(artists, album_artist),
                     album,
                     title,
                     year,
@@ -383,4 +383,4 @@ def cached(conn: Connection, relpath: str) -> Metadata:
     rows = conn.execute('SELECT tag FROM track_tag WHERE track=?', (relpath,)).fetchall()
     tags = [row[0] for row in rows]
 
-    return Metadata(relpath, duration, sort_artists(artists, album_artist), album, title, year, album_artist, track_number, tags, lyrics)
+    return Metadata(relpath, duration, _sort_artists(artists, album_artist), album, title, year, album_artist, track_number, tags, lyrics)
