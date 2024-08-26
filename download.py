@@ -5,6 +5,7 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import quote
 
 import requests
 
@@ -57,28 +58,20 @@ def download_track(state: State, relpath: str, local_path: Path):
         shutil.copyfileobj(r.raw, fp)
 
 
-def get_playlist_json(state: State, playlist_name: str):
-    print('Downloading track list')
-    r = requests.get(state.server + '/track/list',
+def track_list(state: State, playlist_name: str):
+    r = requests.get(state.server + '/track/filter?playlist=' + quote(playlist_name),
                      timeout=10,
                      headers={'Cookie': 'token=' + state.token})
     r.raise_for_status()
-    playlists = r.json()['playlists']
-    for playlist in playlists:
-        if playlist['name'] == playlist_name:
-            return playlist
-
-    print(f'Playlist "{playlist_name}" not found')
-    sys.exit(1)
+    return r.json()['tracks']
 
 
 def download_playlist(state: State, playlist_name: str):
-    playlist = get_playlist_json(state, playlist_name)
+    tracks = track_list(state, playlist_name)
     playlist_path = Path(playlist_name).resolve()
-
     all_local_paths: set[str] = set()
 
-    for track in playlist['tracks']:
+    for track in tracks:
         relpath = track['path']
         local_path = Path(relpath + '.mp3').resolve()
         all_local_paths.add(local_path.as_posix())
