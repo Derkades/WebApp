@@ -157,7 +157,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const deleteSpinner = document.getElementById('delete-spinner');
             deleteSpinner.classList.remove('hidden');
             await queue.currentTrack.track.delete();
-            await music.updateTrackList();
             queue.next();
             deleteSpinner.classList.add('hidden');
         });
