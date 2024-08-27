@@ -10,7 +10,7 @@ CREATE TABLE track_tag_new (
     UNIQUE (track, tag)
 ) STRICT;
 
-INSERT INTO track_tag_new SELECT * FROM track_tag;
+INSERT INTO track_tag_new SELECT track, tag FROM track_tag;
 
 DROP TABLE track_tag;
 

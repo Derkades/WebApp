@@ -9,7 +9,7 @@ CREATE TABLE radio_track_new (
     start_time INTEGER NOT NULL
 ) STRICT;
 
-INSERT INTO radio_track_new SELECT * FROM radio_track;
+INSERT INTO radio_track_new SELECT track, start_time FROM radio_track;
 
 DROP TABLE radio_track;
 

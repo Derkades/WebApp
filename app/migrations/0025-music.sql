@@ -17,7 +17,7 @@ CREATE TABLE session_new (
 -- Discard any old sessions that still have a null csrf token. It has been 8 months since
 -- the column was added, so legacy sessions without such a token really shouldn't exist
 -- anymore.
-INSERT INTO session_new SELECT * FROM session WHERE csrf_token IS NOT NULL;
+INSERT INTO session_new SELECT user, token, csrf_token, creation_date, user_agent, remote_address, last_use FROM session WHERE csrf_token IS NOT NULL;
 
 DROP TABLE session;
 

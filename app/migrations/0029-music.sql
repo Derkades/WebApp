@@ -22,7 +22,7 @@ CREATE TABLE track_new (
     lyrics TEXT NULL
 ) STRICT;
 
-INSERT INTO track_new SELECT * FROM track;
+INSERT INTO track_new SELECT path, playlist, duration, title, album, album_artist, track_number, year, mtime, last_chosen, lyrics FROM track;
 
 DROP TABLE track;
 

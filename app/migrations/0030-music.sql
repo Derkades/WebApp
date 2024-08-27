@@ -10,7 +10,7 @@ CREATE TABLE track_artist_new (
     UNIQUE (track, artist)
 ) STRICT;
 
-INSERT INTO track_artist_new SELECT * FROM track_artist;
+INSERT INTO track_artist_new SELECT track, artist FROM track_artist;
 
 DROP TABLE track_artist;
 
