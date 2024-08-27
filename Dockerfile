@@ -93,7 +93,8 @@ RUN cd /build/ffmpeg && \
 RUN mkdir /ffmpeg-libs && \
     cp -a /usr/lib/x86_64-linux-gnu/libopus.so* /ffmpeg-libs && \
     cp -a /usr/lib/x86_64-linux-gnu/libwebp.so* /ffmpeg-libs && \
-    cp -a /usr/lib/x86_64-linux-gnu/libmp3lame.so* /ffmpeg-libs
+    cp -a /usr/lib/x86_64-linux-gnu/libmp3lame.so* /ffmpeg-libs && \
+    cp -a /usr/lib/x86_64-linux-gnu/libsharpyuv.so* /ffmpeg-libs
 
 ###############################################################################
 
