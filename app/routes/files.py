@@ -108,7 +108,7 @@ def route_rename():
     Page and form target to rename file
     """
     with db.connect(read_only=request.method == 'GET') as conn:
-        user = auth.verify_auth_cookie(conn, require_csrf=True)
+        user = auth.verify_auth_cookie(conn, require_csrf=request.method == 'POST')
 
         if request.method == 'POST':
             if request.is_json:
