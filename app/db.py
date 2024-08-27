@@ -106,7 +106,14 @@ def get_migrations() -> list[Migration]:
     return migrations
 
 
+def get_version():
+    with sqlite3.connect(':memory:') as conn:
+        return conn.execute('SELECT sqlite_version()').fetchone()[0]
+
+
 def migrate() -> None:
+    log.info('Using SQLite version: %s', get_version())
+
     log.info('Migrating databases...')
     create_databases()
 
