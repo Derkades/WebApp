@@ -39,7 +39,7 @@ class OfflineSync:
     def request_get(self, route: str, raise_for_status: bool = True) -> Response:
         response = requests.get(self.base_url + route,
                                 headers=self.get_headers(),
-                                timeout=30)
+                                timeout=60)
         if raise_for_status:
             response.raise_for_status()
         return response
@@ -167,7 +167,7 @@ class OfflineSync:
             insert = [(track['path'], artist) for artist in track['artists']]
             self.db_music.executemany('INSERT INTO track_artist (track, artist) VALUES (?, ?)', insert)
 
-    def _insert_track(self, playlist, track) -> None:
+    def _insert_track(self, playlist: str, track) -> None:
         self._download_track_content(track['path'])
 
         self.db_music.execute(
@@ -176,7 +176,7 @@ class OfflineSync:
                                album_artist, year, mtime)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (track['path'], playlist['name'], track['duration'], track['title'],
+            (track['path'], playlist, track['duration'], track['title'],
              track['album'], track['album_artist'], track['year'], track['mtime'])
         )
 
@@ -213,10 +213,15 @@ class OfflineSync:
                                   dislikes: set[str],
                                   all_track_paths: set[str],
                                   force_resync: float):
-        self.db_music.execute('INSERT INTO playlist VALUES (?) ON CONFLICT (path) DO NOTHING',
-                                  (playlist['name'],))
+        log.info('Syncing playlist: %s', playlist)
 
-        for track in playlist['tracks']:
+        self.db_music.execute('INSERT INTO playlist VALUES (?) ON CONFLICT (path) DO NOTHING',
+                                  (playlist,))
+
+        r = self.request_get('/track/filter?playlist=' + urlencode(playlist))
+        tracks = r.json()['tracks']
+
+        for track in tracks:
             if track['path'] in dislikes:
                 continue
 
@@ -258,7 +263,7 @@ class OfflineSync:
 
         all_track_paths: set[str] = set()
 
-        for playlist in playlists:
+        for playlist in enabled_playlists:
             self._sync_tracks_for_playlist(playlist, dislikes, all_track_paths, force_resync)
 
         self._prune_tracks(all_track_paths)
