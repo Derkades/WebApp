@@ -89,7 +89,7 @@ class Search {
 
                 const img = document.createElement('div');
                 img.classList.add('search-result-album');
-                const imgUri = track.getCover('low', true);
+                const imgUri = await track.getCover('low', true);
                 img.style.background = `black url("${imgUri}") no-repeat center`;
                 img.style.backgroundSize = 'cover';
                 img.onclick = () => browse.browseAlbum(track.album, track.albumArtist);
