@@ -1,4 +1,9 @@
-FROM python:3.12-slim AS base
+# FROM python:3.12-slim AS base
+# Temporary fix for missing FTS5 trigram tokenizer in the sqlite3 library version in standard python:3.12-slim image.
+FROM debian:sid AS base
+
+RUN apt-get update && \
+    apt-get install -y python3-pip
 
 FROM base AS ffmpeg-build
 
@@ -95,7 +100,7 @@ RUN mkdir /ffmpeg-libs && \
 FROM base AS common
 
 COPY requirements.txt /
-RUN PYTHONDONTWRITEBYTECODE=1 pip install --no-cache-dir -r /requirements.txt
+RUN PYTHONDONTWRITEBYTECODE=1 pip install --break-system-packages --no-cache-dir -r /requirements.txt
 
 # FFmpeg
 COPY --from=ffmpeg-build /build/ffmpeg/ffmpeg /build/ffmpeg/ffprobe /usr/local/bin/
