@@ -155,7 +155,7 @@ def last_change(conn: Connection, playlist: Optional[str] = None):
         query = 'SELECT timestamp FROM scanner_log WHERE playlist = ? ORDER BY id DESC LIMIT 1'
         params = (playlist,)
     else:
-        query = 'SELECT timestamp FROM scanner_log WHERE playlist = ? ORDER BY id DESC LIMIT 1'
+        query = 'SELECT timestamp FROM scanner_log ORDER BY id DESC LIMIT 1'
         params = ()
     timestamp_row = conn.execute(query, params).fetchone()
     if timestamp_row:
