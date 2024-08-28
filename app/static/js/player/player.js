@@ -174,15 +174,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         copyButton.addEventListener('click', async function() {
             copyButton.disabled = true;
-            const response = await jsonPost('/player/copy_track', {playlist: copyPlaylist.value, track: queue.currentTrack.track.path}, false);
-            console.debug('player: copy_track:', response.status);
-            if (response.status == 200) {
-                const text = await response.text();
-                if (text != "") {
-                    alert(text);
-                }
-            } else {
-                alert('Error');
+            try {
+                await queue.currentTrack.track.copyTo(copyPlaylist.value);
+            } catch (err) {
+                console.error(err);
+                alert('Error: ' + err);
             }
             dialogs.close('dialog-copy');
             copyButton.disabled = false;

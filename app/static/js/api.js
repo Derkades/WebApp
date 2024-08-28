@@ -393,6 +393,10 @@ class Track {
 
         await jsonPost(`/track/${encodeURIComponent(this.path)}/update_metadata`, payload);
     }
+
+    async copyTo(playlistName) {
+        await jsonPost('/player/copy_track', {track: this.path, playlist: playlistName});
+    }
 }
 
 class DownloadedTrack {
