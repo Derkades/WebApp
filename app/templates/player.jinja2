@@ -57,8 +57,6 @@
                         {{ icon_button('play', 'button-play', title=gettext('Play')) }}
                         {{ icon_button('pause', 'button-pause', title=gettext('Pause')) }}
                         {{ icon_button('skip-next', 'button-next', title=gettext('Skip to next track')) }}
-                        {# {{ icon_button('microphone', 'button-lyrics', title=gettext('Show lyrics instead of album cover')) }}
-                        {{ icon_button('album', 'button-album', title=gettext('Show album cover instead of lyrics')) }} #}
                         {% if not offline_mode %}
                             {{ icon_button('thumb-down', 'button-dislike', title=gettext('Never play again')) }}
                             {{ icon_button('pencil', 'button-edit', title=gettext('Open metadata editor')) }}
@@ -147,7 +145,7 @@
                     <option value="stream">{% trans %}Stream audio (experimental){% endtrans %}</option>
                 </select>
 
-                <label for="settings-audio-gain">{% trans %}Audio gain (reduces audio quality){% endtrans %}</label>
+                <label for="settings-audio-gain">{% trans %}Audio gain{% endtrans %} <span class="secondary">reduces audio quality</span></label>
                 <select id="settings-audio-gain">
                     <option value="1" selected>1</option>
                     <option value="2">2</option>
