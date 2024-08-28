@@ -1,8 +1,6 @@
 const PLAYED_TIMER_INTERVAL_SECONDS = 5;
 
 class History {
-    /** @type {string} */
-    playerId;
     /** @type {Track} */
     currentlyPlayingTrack;
     /** @type {boolean} */
@@ -15,7 +13,6 @@ class History {
     startTimestamp;
 
     constructor() {
-        this.playerId = uuidv4();
         this.currentlyPlayingTrack = null;
 
         eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => this.#onNewTrack());
@@ -57,7 +54,7 @@ class History {
         if (!this.hasScrobbled && this.playingCounter > this.requiredPlayingCounter) {
             console.info('history: played');
             this.hasScrobbled = true;
-            await this.scrobble();
+            await music.played(this.currentlyPlayingTrack, this.startTimestamp);
         }
     }
 
@@ -67,22 +64,9 @@ class History {
             return;
         }
         const audioElem = getAudioElement();
-        const data = {
-            player_id: this.playerId,
-            track: this.currentlyPlayingTrack.path,
-            paused: audioElem.paused,
-            progress: Math.round((audioElem.currentTime / this.currentlyPlayingTrack.duration) * 100),
-        };
-        await jsonPost('/activity/now_playing', data);
+        await music.nowPlaying(this.currentlyPlayingTrack, audioElem.paused, audioElem.currentTime / this.currentlyPlayingTrack.duration);
     }
 
-    async scrobble() {
-        const data = {
-            track: this.currentlyPlayingTrack.path,
-            timestamp: this.startTimestamp,
-        }
-        await jsonPost('/activity/played', data);
-    }
 }
 
 const history = new History();

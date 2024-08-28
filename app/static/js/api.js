@@ -4,7 +4,15 @@
 // Scripts using this API must implement a getCsrfToken() function that returns a usable CSRF token as a string.
 
 class Music {
+    /** @type {string} */
+    #playerId;
+    /** @type {Array<Playlist>} */
     #playlists;
+
+    constructor() {
+        this.#playerId = uuidv4();
+    }
+
     /**
      * @returns {Promise<Array<Playlist>>}
      */
@@ -94,6 +102,34 @@ class Music {
         const response = await fetch('/track/tags');
         checkResponseCode(response);
         return await response.json();
+    }
+
+    /**
+     * Send signal to music player that this track is currently playing. Must be sent at least
+     * every 60 seconds, more frequently is recommended if progress data is included.
+     * @param {Track} track
+     * @param {boolean} paused
+     * @param {number|undefined} progress Percentage
+     */
+    async nowPlaying(track, paused, progress) {
+        const data = {
+            player_id: this.#playerId,
+            track: track.path,
+            paused: paused,
+            progress: progress,
+        };
+        await jsonPost('/activity/now_playing', data);
+    }
+
+    /**
+     * @param {track} track
+     */
+    async played(track, startTimestamp) {
+        const data = {
+            track: track.path,
+            timestamp: startTimestamp,
+        }
+        await jsonPost('/activity/played', data);
     }
 }
 
