@@ -548,7 +548,7 @@ class Playlist:
 
         if require_metadata:
             # Has at least metadata for: title, album, album artist, artists
-            query += ' AND title NOT NULL AND album NOT NULL AND album_artist NOT NULL AND EXISTS(SELECT artist FROM track_artist WHERE track = path)'
+            query += ' AND title NOT NULL AND album NOT NULL AND EXISTS(SELECT artist FROM track_artist WHERE track = path)'
 
         query += f' ORDER BY last_chosen ASC LIMIT {self.track_count // 4 + 1}'
 
