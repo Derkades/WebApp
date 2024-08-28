@@ -12,6 +12,8 @@
     flex-basis: 50%;
     flex-grow: 1;
     margin: var(--gap);
+    border-radius: var(--border-radius);
+    overflow: hidden;
 }
 
 .sidebar .boxes {
