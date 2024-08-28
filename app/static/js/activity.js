@@ -56,7 +56,7 @@ function getNowPlayingCardHtml(info) {
 
     const progressBar = document.createElement('div');
     progressBar.classList.add('card-progress');
-    progressBar.style.width = info.progress * 100 + '%';
+    progressBar.style.width = info.progress + '%';
     card.append(progressBar);
 
     return card;

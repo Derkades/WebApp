@@ -116,7 +116,7 @@ class Music {
             player_id: this.#playerId,
             track: track.path,
             paused: paused,
-            progress: progress,
+            progress: Math.round(progress * 100),
         };
         await jsonPost('/activity/now_playing', data);
     }
