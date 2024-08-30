@@ -62,7 +62,7 @@ const buttons = {
     year: document.getElementById('year'),
 };
 
-async function loadCharts(buttonName, button) {
+async function loadCharts(button) {
     // Immediately change buttons and remove old charts for responsiveness
     for (const otherButton of Object.values(buttons)) {
         otherButton.disabled = false;
@@ -112,14 +112,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const button = buttons[buttonName];
         button.addEventListener('click', () => {
             window.location.hash = buttonName;
-            loadCharts(buttonName, button);
+            loadCharts(button);
         });
     }
 
     let foundHash = false;
     for (const buttonName in buttons) {
         if (window.location.hash == '#' + buttonName) {
-            loadCharts(buttonName, buttons[buttonName]);
+            loadCharts(buttons[buttonName]);
             foundHash = true;
             break;
         }
