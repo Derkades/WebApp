@@ -13,8 +13,6 @@
 <p>{% trans %}Enter a search query, then click search to populate a table with results. Click on one of the results to copy the URL for that video to the URL field below. Finally, click the download button below. Currently, a maximum of one result is displayed.{% endtrans %}</p>
 
 <form action="" id="search-form" class="form">
-    <input id="csrf-token" type="hidden" value="{{ csrf_token }}">
-
     <label for="search-query">{% trans %}Search query{% endtrans %}</label>
     <input id="search-query" type="text">
 
@@ -52,6 +50,8 @@
 </div>
 
 <div id="download-log" class="logbox fill-width"></div>
+
+<div class="hidden" id="csrf-token">{{ csrf_token }}</div>
 
 <script src="/static/js/base.js"></script>
 <script src="/static/js/api.js"></script>
