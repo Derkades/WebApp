@@ -22,12 +22,10 @@ def _connect(db_name: str, read_only: bool) -> Connection:
     if read_only:
         db_uri += '?mode=ro'
     conn = sqlite3.connect(db_uri, uri=True, timeout=30.0)
-    conn.execute('PRAGMA auto_vacuum = INCREMENTAL')
     conn.execute('PRAGMA foreign_keys = ON')
     conn.execute('PRAGMA temp_store = MEMORY')
-    if not read_only:  # pragma sometimes throws error when executed in read-only mode
-        conn.execute('PRAGMA journal_mode = WAL')
-        conn.execute('PRAGMA synchronous = NORMAL')
+    conn.execute('PRAGMA journal_mode = WAL')
+    conn.execute('PRAGMA synchronous = NORMAL')
     return conn
 
 
@@ -62,6 +60,7 @@ def create_databases() -> None:
     for db_name in DATABASE_NAMES:
         log.info('Creating database: %s', db_name)
         with _connect(db_name, False) as conn:
+            conn.execute('PRAGMA auto_vacuum = INCREMENTAL') # must be set before any tables are created
             conn.executescript((settings.init_sql_dir / f'{db_name}.sql').read_text(encoding='utf-8'))
 
     with _connect('meta', False) as conn:
@@ -73,7 +72,7 @@ def create_databases() -> None:
 
         log.info('Setting initial database version to %s', version)
 
-        conn.execute('INSERT INTO db_version VALUES(?)', (version,))
+        conn.execute('INSERT INTO db_version VALUES (?)', (version,))
 
 
 @dataclass
