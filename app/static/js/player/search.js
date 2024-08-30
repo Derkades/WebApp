@@ -48,7 +48,7 @@ class Search {
         }
 
         const tracks = await music.search(query);
-        this.#searchResultTracks.replaceChildren(browse.generateTrackList(tracks));
+        this.#searchResultTracks.replaceChildren(await browse.generateTrackList(tracks));
 
         {
             const table = document.createElement('table');

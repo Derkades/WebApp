@@ -65,7 +65,7 @@ class Browse {
 
         if (Object.keys(current.filter).length > 0) {
             const tracks = await music.filter(current.filter);
-            const table = this.generateTrackList(tracks);
+            const table = await this.generateTrackList(tracks);
             document.getElementById('browse-no-content').classList.add('hidden');
             document.getElementById('browse-content').replaceChildren(table);
         } else {
@@ -117,7 +117,7 @@ class Browse {
      * @param {Array<Track>} tracks
      * @returns {HTMLTableElement}
      */
-    generateTrackList(tracks) {
+    async generateTrackList(tracks) {
         const table = document.createElement('table');
         table.classList.add('track-list-table');
         const headerRow = document.createElement('tr');
@@ -164,7 +164,7 @@ class Browse {
 
             const colEdit = document.createElement('td');
 
-            if (music.playlist(track.playlistName).write) {
+            if ((await music.playlist(track.playlistName)).write) {
                 const editButton2 = editButton.cloneNode(true);
                 editButton2.addEventListener('click', () => editor.open(track));
                 colEdit.appendChild(editButton2);
