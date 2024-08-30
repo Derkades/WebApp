@@ -63,8 +63,7 @@ function createIconButton(iconName) {
     const button = document.createElement('button');
     button.classList.add('icon-button');
     const icon = document.createElement('div');
-    icon.classList.add('icon');
-    icon.classList.add('icon-' + iconName);
+    icon.classList.add('icon', 'icon-' + iconName);
     button.appendChild(icon);
     return button;
 }
@@ -75,8 +74,10 @@ function createIconButton(iconName) {
  * @param {string} iconName
  */
 function replaceIconButton(iconButton, iconName) {
+    /** @type {HTMLElement} */
     const icon = iconButton.firstChild;
-    icon.style.backgroundImage = `url("/static/icon/${iconName}")`
+    icon.classList.remove(...icon.classList.values());
+    icon.classList.add('icon', 'icon-' + iconName);
 }
 
 /**

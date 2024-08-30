@@ -144,7 +144,7 @@ class Browse {
 
             const addButton2 = addButton.cloneNode(true);
             addButton2.addEventListener('click', async function() {
-                replaceIconButton(addButton2, 'loading.svg');
+                replaceIconButton(addButton2, 'loading');
                 addButton2.firstChild.classList.add('spinning');
                 addButton2.disabled = true;
 
@@ -155,7 +155,7 @@ class Browse {
                     console.error('browse: error adding track to queue', ex)
                 }
 
-                replaceIconButton(addButton2, 'playlist-plus.svg')
+                replaceIconButton(addButton2, 'playlist-plus')
                 addButton2.firstChild.classList.remove('spinning');
                 addButton2.disabled = false;
             });
