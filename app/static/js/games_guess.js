@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     (async function() {
         setInterval(fillCachedTracks, 2000);
-        await fillCachedTracks();
+        fillCachedTracks(); // intentionally not awaited
         start();
     })();
 
