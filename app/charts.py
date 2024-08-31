@@ -3,8 +3,7 @@ from collections import Counter
 from datetime import date, datetime, timedelta
 from enum import Enum, unique
 from sqlite3 import Connection
-from typing import Any
-from typing import Iterable
+from typing import Any, Iterable
 
 from flask_babel import _
 
@@ -282,6 +281,29 @@ def chart_unique_artists(conn: Connection):
     ratio_rows = [(playlist, artists / tracks) for playlist, tracks, artists in rows]
     ratio_rows = sorted(ratio_rows, key=lambda x: x[1])
     return bar(_('Artist diversity'), _('Ratio'), *rows_to_xy(ratio_rows))
+def chart_popular_artists(conn: Connection):
+    artists = [row[0] for row in conn.execute('SELECT artist FROM track_artist GROUP BY artist ORDER BY COUNT(artist) DESC LIMIT 10')]
+
+    rows = conn.execute('''
+                        SELECT playlist, artist, COUNT(artist)
+                        FROM track INNER JOIN track_artist ON track.path = track_artist.track
+                        WHERE artist IN (SELECT artist
+                                         FROM track_artist
+                                         GROUP BY artist
+                                         ORDER BY COUNT(artist) DESC
+                                         LIMIT 10)
+                        GROUP BY artist, playlist
+                        ''').fetchall()
+
+    artist_counts: dict[str, list[int]] = {}
+
+    for playlist, artist, artist_count in rows:
+        if playlist not in artist_counts:
+            artist_counts[playlist] = [0] * len(artists)
+
+        artist_counts[playlist][artists.index(artist)] = artist_count
+
+    return multibar(_('Popular artists'), artists, artist_counts, horizontal=True)
 
 
 def get_data(period: StatsPeriod):
@@ -293,6 +315,7 @@ def get_data(period: StatsPeriod):
                 *charts_playlists(conn),
                 chart_track_year(conn),
                 chart_last_chosen(conn),
-                chart_unique_artists(conn)]
+                chart_unique_artists(conn),
+                chart_popular_artists(conn)]
 
     return data
