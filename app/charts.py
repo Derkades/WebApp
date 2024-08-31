@@ -58,6 +58,9 @@ def chart(title: str, ldata: Iterable[str], xdata: Iterable[str|int], series, ho
         },
         'tooltip': {},
         'legend': {
+            'orient': 'vertical',
+            'right': 0,
+            'top': 'center',
             'data': ldata
         },
         'xAxis': {},
