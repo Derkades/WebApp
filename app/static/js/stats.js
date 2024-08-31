@@ -85,25 +85,30 @@ async function loadCharts(button) {
         chartElem.style.height = '30rem';
         chartElem.style.marginBottom = '1rem';
         chartsContainer.append(chartElem);
-        const args = {el: chartElem, data: chart['data'], options: chart['options']};
-        args.options.theme = theme;
+        // const args = {el: chartElem, data: chart['data'], options: chart['options']};
+
+        // args.options.theme = theme;
         // Disable Google tracking: https://github.com/nhn/tui.chart/tree/main/apps/chart#collect-statistics-on-the-use-of-open-source
         // This was caught by our strict Content-Security-Policy :)
-        args.options.usageStatistics = false;
-        switch (chart['type']) {
-            case 'bar':
-                toastui.Chart.barChart(args);
-                break;
-            case 'column':
-                toastui.Chart.columnChart(args);
-                break;
-            case 'line':
-                toastui.Chart.lineChart(args);
-                break;
-            default:
-                throw new Error('invalid type: ' + chart['type']);
-                break;
-        }
+        // args.options.usageStatistics = false;
+        const eChart = echarts.init(chartElem);
+        eChart.setOption({
+
+        });
+        // switch (chart['type']) {
+        //     case 'bar':
+        //         toastui.Chart.barChart(args);
+        //         break;
+        //     case 'column':
+        //         toastui.Chart.columnChart(args);
+        //         break;
+        //     case 'line':
+        //         toastui.Chart.lineChart(args);
+        //         break;
+        //     default:
+        //         throw new Error('invalid type: ' + chart['type']);
+        //         break;
+        // }
     }
 }
 
