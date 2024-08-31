@@ -458,7 +458,19 @@ function delayedResize() {
 document.addEventListener('DOMContentLoaded', () => {
     echarts.registerTheme('custom', theme);
 
-    window.addEventListener('resize', delayedResize);
+    let foundHash = false;
+    for (const buttonName in buttons) {
+        if (window.location.hash == '#' + buttonName) {
+            console.info(buttonName);
+            loadCharts(buttons[buttonName]);
+            foundHash = true;
+            break;
+        }
+    }
+
+    if (!foundHash) {
+        loadCharts(buttons['week'])
+    }
 
     for (const buttonName in buttons) {
         const button = buttons[buttonName];
@@ -468,16 +480,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    let foundHash = false;
-    for (const buttonName in buttons) {
-        if (window.location.hash == '#' + buttonName) {
-            loadCharts(buttons[buttonName]);
-            foundHash = true;
-            break;
-        }
-    }
-
-    if (!foundHash) {
-        loadCharts('week', buttons['week'])
-    }
+    window.addEventListener('resize', delayedResize);
 });
