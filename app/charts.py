@@ -153,7 +153,7 @@ def chart_track_year(conn: Connection):
     min_year, max_year = conn.execute('SELECT MAX(1950, MIN(year)), MIN(2030, MAX(year)) FROM track').fetchone()
 
     data = {}
-    for playlist, in conn.execute('SELECT path FROM playlist').fetchall():
+    for playlist, in conn.execute('SELECT playlist FROM track GROUP BY playlist ORDER BY COUNT(*) DESC LIMIT 15').fetchall():
         data[playlist] = [0] * (max_year - min_year + 1)
 
     rows = conn.execute('''SELECT playlist, year, COUNT(year)
@@ -162,7 +162,7 @@ def chart_track_year(conn: Connection):
                            GROUP BY playlist, year
                            ORDER BY year ASC''').fetchall()
     for playlist, year, count in rows:
-        if year < min_year or year > max_year:
+        if year < min_year or year > max_year or playlist not in data:
             continue
         data[playlist][year - min_year] = count
 
