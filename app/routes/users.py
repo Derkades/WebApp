@@ -13,8 +13,9 @@ def route_users():
         new_csrf_token = user.get_csrf()
 
         result = conn.execute('''
-                              SELECT id, username, admin, primary_playlist, MAX(last_use)
-                              FROM user JOIN session ON user.id = session.user
+                              SELECT user.id, username, admin, primary_playlist, MAX(last_use)
+                              FROM user LEFT JOIN session ON user.id = session.user
+                              GROUP BY user.id
                               ''')
         users = [{'id': user_id,
                   'username': username,
