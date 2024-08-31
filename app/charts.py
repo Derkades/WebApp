@@ -60,7 +60,8 @@ def chart(title: str, ldata: Iterable[str], xdata: Iterable[str|int], series, ho
             'orient': 'vertical',
             'right': 0,
             'top': 'center',
-            'data': ldata
+            'type': 'scroll',
+            'data': ldata,
         },
         'xAxis': {},
         'yAxis': {},
@@ -78,6 +79,7 @@ def chart(title: str, ldata: Iterable[str], xdata: Iterable[str|int], series, ho
         chart['xAxis']['data'] = xdata
 
     return chart
+
 
 def bar(title: str, name: str, xdata: Iterable[str|int], ydata: Iterable[int], horizontal=False):
     return chart(title, [], xdata, {'name': name, 'type': 'bar', 'data': ydata}, horizontal)
