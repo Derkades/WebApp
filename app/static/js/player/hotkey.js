@@ -19,6 +19,7 @@ function handleKey(key) {
             // Toggle checkbox
             checkboxes[keyInt-1].checked ^= 1;
         }
+        savePlaylistState();
     } else if (key === 'p' || key === ' ') {
         const audioElem = getAudioElement();
         if (audioElem.paused) {
