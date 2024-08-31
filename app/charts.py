@@ -273,14 +273,14 @@ def charts_history(conn: Connection, period: StatsPeriod):
 
 def chart_unique_artists(conn: Connection):
     rows = conn.execute('''
-                        SELECT playlist, COUNT(artist), COUNT(DISTINCT artist)
-                        FROM track
-                            INNER JOIN track_artist ON track.path = track_artist.track
+                        SELECT playlist, ROUND(COUNT(DISTINCT artist) / CAST(COUNT(artist) AS float), 2) AS ratio
+                        FROM track INNER JOIN track_artist ON track.path = track_artist.track
                         GROUP BY playlist
-                        ''')
-    ratio_rows = [(playlist, artists / tracks) for playlist, tracks, artists in rows]
-    ratio_rows = sorted(ratio_rows, key=lambda x: x[1])
-    return bar(_('Artist diversity'), _('Ratio'), *rows_to_xy(ratio_rows))
+                        ORDER BY ratio
+                        ''').fetchall()
+    return bar(_('Artist diversity'), _('Ratio'), *rows_to_xy(rows))
+
+
 def chart_popular_artists(conn: Connection):
     artists = [row[0] for row in conn.execute('SELECT artist FROM track_artist GROUP BY artist ORDER BY COUNT(artist) DESC LIMIT 10')]
 
