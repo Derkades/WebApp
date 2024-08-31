@@ -130,12 +130,12 @@ def get_lyrics(query: str) -> Lyrics | None:
     except Exception:
         log.info('Search error')
         traceback.print_exc()
-        # Return not found now, but don't cache so we try again in the future when the bug is fixed
-        return Lyrics(None, 'Error during lyrics search, please report this issue if it persists.')
+        cache.store_json(cache_key, {'found': False}, cache.MONTH)
+        return None
 
     if genius_url is None:
         log.info('No lyrics found: %s', query)
-        cache.store_json(cache_key, {'found': False})
+        cache.store_json(cache_key, {'found': False}, cache.MONTH)
         return None
 
     log.info('Found URL: %s', genius_url)
@@ -144,22 +144,19 @@ def get_lyrics(query: str) -> Lyrics | None:
         lyrics_html = _extract_lyrics(genius_url)
 
         if lyrics_html is None:
-            cache.store_json(cache_key, {'found': False})
+            cache.store_json(cache_key, {'found': False}, cache.MONTH)
             return None
     except Exception:
         log.info('Error retrieving lyrics')
         traceback.print_exc()
-        # Don't cache so we try again in the future when the bug is fixed
-        return Lyrics(genius_url,
-                      '''
-                      Error retrieving lyrics, please report this issue. Make sure to include the source URL in
-                      your report. Please look at the logs for a more detailed message, if you are able to.
-                      ''')
+        cache.store_json(cache_key, {'found': False}, cache.MONTH)
+        return None
 
     cache.store_json(cache_key,
                      {'found': True,
                       'source_url': genius_url,
-                      'lyrics': lyrics_html})
+                      'lyrics': lyrics_html},
+                     cache.YEAR)
 
     return Lyrics(genius_url, lyrics_html)
 

@@ -15,12 +15,13 @@ HOUR = 60*60
 DAY = 24*HOUR
 WEEK = 7*DAY
 MONTH = 30*DAY
-DEFAULT = 4*MONTH
+HALFYEAR = 6*MONTH
+YEAR = 12*MONTH
 
 
 def store(key: str,
           data: bytes,
-          duration: int = DEFAULT) -> None:
+          duration: int) -> None:
     """
     Args:
         key: Cache key
@@ -80,11 +81,11 @@ def cleanup() -> None:
         log.info('Deleted %s entries from cache', count)
 
 
-def store_json(key: str, data: Any, **kwargs) -> None:
+def store_json(key: str, data: Any, duration: int) -> None:
     """
     Dump object as json, encode as utf-8 and then use store()
     """
-    store(key, jsonw.to_json(data).encode(), **kwargs)
+    store(key, jsonw.to_json(data).encode(), duration)
 
 
 def retrieve_json(cache_key: str, **kwargs) -> Any | None:

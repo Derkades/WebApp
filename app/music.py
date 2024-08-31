@@ -152,7 +152,7 @@ def get_cover(artist: Optional[str], album: str, meme: bool,
                         output_path = Path(temp_dir, 'output' + quality.name + img_format2.name)
                         image.thumbnail(input_path, output_path, img_format2, img_quality, square=not meme)
                         image_bytes = output_path.read_bytes()
-                        cache.store(cache_key + quality.name + img_format2.name, image_bytes)
+                        cache.store(cache_key + quality.name + img_format2.name, image_bytes, cache.HALFYEAR)
 
                         if quality == img_quality and img_format2 == img_format:
                             return_data = image_bytes
@@ -301,7 +301,8 @@ class Track:
                 f"offset={meas_json['target_offset']}:" \
                 'linear=true'
 
-        cache.store(cache_key, loudnorm.encode())
+        # Cache for a year, expensive to calculate and orphan entries don't take up much space
+        cache.store(cache_key, loudnorm.encode(), duration=cache.YEAR)
         return loudnorm
 
     def transcoded_audio(self,
@@ -384,7 +385,9 @@ class Track:
         if audio_type == AudioType.MP3_WITH_METADATA:
             cover_temp_file.close()
 
-        cache.store(cache_key, audio_data)
+        # Audio for sure doesn't change so ideally we'd cache for longer, but that would mean
+        # deleted tracks remain in the cache for longer as well.
+        cache.store(cache_key, audio_data, cache.HALFYEAR)
         return audio_data
 
     def write_metadata(self, meta: Metadata):
