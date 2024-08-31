@@ -407,6 +407,7 @@ const buttons = {
     month: document.getElementById('month'),
     year: document.getElementById('year'),
 };
+const charts = [];
 
 async function loadCharts(button) {
     // Immediately change buttons and remove old charts for responsiveness
@@ -423,6 +424,8 @@ async function loadCharts(button) {
     const data = await response.json();
     spinner.classList.add('hidden');
 
+    charts.length = 0; // Clear old charts
+
     // Render charts
     for (const options of data) {
         const chartElem = document.createElement('div');
@@ -433,11 +436,29 @@ async function loadCharts(button) {
 
         const eChart = echarts.init(chartElem, 'custom');
         eChart.setOption(options);
+        charts.push(eChart);
     }
+}
+
+// Delayed resize, to avoid redrawing charts many times during a resize
+let resizeTimerId = 0;
+
+function doResize() {
+    charts.forEach(chart => chart.resize());
+}
+
+function delayedResize() {
+    if (resizeTimerId != 0) {
+        clearTimeout(resizeTimerId);
+        resizeTimerId = 0;
+    }
+    resizeTimerId = setTimeout(doResize, 100);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     echarts.registerTheme('custom', theme);
+
+    window.addEventListener('resize', delayedResize);
 
     for (const buttonName in buttons) {
         const button = buttons[buttonName];
