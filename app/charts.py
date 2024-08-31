@@ -4,6 +4,7 @@ from datetime import date, datetime, timedelta
 from enum import Enum, unique
 from sqlite3 import Connection
 from typing import Any
+from typing import Iterable
 
 from flask_babel import _
 
@@ -50,35 +51,48 @@ class StatsPeriod(Enum):
         raise ValueError()
 
 
-def chart(chart_type: str, title: str, categories: list[str], series_dict: dict, stack=False) -> ChartT:
-    """
-    Create chart json expected by javascript in stats.jinja2
-    Args:
-        chart_type: Chart type, see stats.jinja2 for accepted values
-        title: Chart type
-        categories: List of category names (names for each value column)
-        series_dict: Dict with series name as key and data points as values (must be same length as categories)
-    """
-    return {
-        'type': chart_type,
-        'options': {
-            'series': {
-                'stack': stack,
-            },
-            'chart': {
-                'title': title,
-                'width': 'auto',
-                'height': 'auto',
-            },
+def chart(title: str, ldata: Iterable[str], xdata: Iterable[str|int], series, horizontal):
+    chart = {
+        'title': {
+            'text': title
         },
-        'data': {
-            'categories': categories,
-            'series': [{'name': name, 'data': data} for name, data in series_dict.items()],
-        }
+        'tooltip': {},
+        'legend': {
+            'data': ldata
+        },
+        'xAxis': {},
+        'yAxis': {},
+        'series': series,
     }
 
+    if horizontal:
+        chart['xAxis']['type'] = 'value'
+        chart['yAxis']['type'] = 'category'
+        chart['yAxis']['data'] = xdata
+        chart['yAxis']['inverse'] = True
+    else:
+        chart['xAxis']['type'] = 'category'
+        chart['yAxis']['type'] = 'value'
+        chart['xAxis']['data'] = xdata
 
-def data_from_rows(series_name: str, rows: list[tuple[str, int]]):
+    return chart
+
+def bar(title: str, name: str, xdata: Iterable[str|int], ydata: Iterable[int], horizontal=False):
+    return chart(title, [], xdata, {'name': name, 'type': 'bar', 'data': ydata}, horizontal)
+
+
+def multibar(title: str, xdata: Iterable[str|int], ydata: dict[str, Iterable[int]], horizontal=False, stack=True):
+    series = [{'name': name,
+               'type': 'bar',
+               'data': data}
+              for name, data in ydata.items()]
+    if stack:
+        for item in series:
+            item['stack'] = 'x'
+    return chart(title, [name for name, _ in ydata.items()], xdata, series, horizontal)
+
+
+def rows_to_xy(rows: list[tuple[str, int]]):
     """
     Args:
         series_name: Name for single series (single color in chart)
@@ -86,17 +100,10 @@ def data_from_rows(series_name: str, rows: list[tuple[str, int]]):
               SELECT column, COUNT(*) GROUP BY column
     Returns: series_dict for chart() function
     """
-    return [row[0] for row in rows], {series_name: [row[1] for row in rows]}
+    return [row[0] for row in rows], [row[1] for row in rows]
 
-
-def data_from_counter(series_name: str, counter: Counter):
-    """
-    Args:
-        series_name: Name for single series (single color in chart)
-        counter: Counter
-    Returns: series_dict for chart() function
-    """
-    return data_from_rows(series_name, counter.most_common(COUNTER_AMOUNT))
+def counter_to_xy(counter: Counter):
+    return rows_to_xy(counter.most_common(COUNTER_AMOUNT))
 
 
 def chart_last_chosen(conn: Connection):
@@ -118,10 +125,10 @@ def chart_last_chosen(conn: Connection):
         else:
             counts[3] += 1 # long ago
 
-    return chart('bar',
-                 _('When tracks were last chosen by algorithm'),
-                 [_('Today'), _('This week'), _('This month'), _('Long ago'), _('Never')],
-                 {_('Number of tracks'): counts})
+    return bar(_('When tracks were last chosen by algorithm'),
+               _('Number of tracks'),
+               [_('Today'), _('This week'), _('This month'), _('Long ago'), _('Never')],
+               counts)
 
 def charts_playlists(conn: Connection):
     """
@@ -130,9 +137,9 @@ def charts_playlists(conn: Connection):
     counts = conn.execute('SELECT playlist, COUNT(*) FROM track GROUP BY playlist ORDER BY COUNT(*) DESC').fetchall()
     totals = conn.execute('SELECT playlist, SUM(duration)/60 FROM track GROUP BY playlist ORDER BY SUM(duration) DESC').fetchall()
     means = conn.execute('SELECT playlist, AVG(duration)/60 FROM track GROUP BY playlist ORDER BY AVG(duration) DESC').fetchall()
-    return [chart('column', _('Number of tracks in playlists'), *data_from_rows(_('Number of tracks'), counts)),
-            chart('column', _('Mean duration of tracks in playlists'), *data_from_rows(_('Track duration'), means)),
-            chart('column', _('Total duration of tracks in playlists'), *data_from_rows(_('Track duration'), totals))]
+    return [bar(_('Number of tracks in playlists'), _('Number of tracks'), *rows_to_xy(counts)),
+            bar(_('Mean duration of tracks in playlists'), _('Track duration'), *rows_to_xy(means)),
+            bar(_('Total duration of tracks in playlists'), _('Track duration'), *rows_to_xy(totals))]
 
 
 def chart_track_year(conn: Connection):
@@ -155,16 +162,14 @@ def chart_track_year(conn: Connection):
             continue
         data[playlist][year - min_year] = count
 
-    return chart('column',
-                 _('Track release year distribution'),
-                 [str(year) for year in range(min_year, max_year+1)],
-                 data,
-                 stack=True)
+    return multibar(_('Track release year distribution'),
+                    [str(year) for year in range(min_year, max_year+1)],
+                    data)
 
 
 def to_usernames(usernames: str, counts: dict[int, list[int]]) -> dict[str, list[int]]:
     return {usernames[i]: values
-            for i, (user_id, values) in enumerate(counts.items())}
+            for i, (_user_id, values) in enumerate(counts.items())}
 
 
 def charts_history(conn: Connection, period: StatsPeriod):
@@ -247,20 +252,18 @@ def charts_history(conn: Connection, period: StatsPeriod):
             track_counter.update((relpath,))
 
     charts = [
-        chart('bar', _('Most active users'), usernames, user_counts, stack=True),
-        chart('bar', _('Most played playlists'), playlists, to_usernames(usernames, playlists_counts), stack=True),
-        chart('bar', _('Most played tracks'), *data_from_counter(_('Times played'), track_counter)),
-        chart('bar', _('Most played artists'), *data_from_counter(_('Times played'), artist_counter)),
-        chart('bar', _('Most played albums'), *data_from_counter(_('Times played'), album_counter)),
-        chart('column', _('Time of day'),
-              [f'{i:02}:00' for i in range(0, 24)],
-              to_usernames(usernames, time_of_day), stack=True),
-        chart('column', _('Day of week'),
-              [_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday'), _('Saturday'), _('Sunday')],
-              to_usernames(usernames, day_of_week), stack=True),
-        chart('line', _('Historic play count'),
-              [(min_day + timedelta(days=i)).isoformat() for i in range(0, num_days + 1)],
-              to_usernames(usernames, day_counts), stack=True)
+        multibar(_('Most active users'), usernames, user_counts),
+        multibar(_('Most played playlists'), playlists, to_usernames(usernames, playlists_counts)),
+        bar(_('Most played tracks'), _('Times played'), *counter_to_xy(track_counter), horizontal=True),
+        bar(_('Most played artists'), _('Times played'), *counter_to_xy(artist_counter), horizontal=True),
+        bar(_('Most played albums'), _('Times played'), *counter_to_xy(album_counter), horizontal=True),
+        multibar(_('Time of day'), [f'{i:02}:00' for i in range(0, 24)], to_usernames(usernames, time_of_day)),
+        multibar(_('Day of week'),
+                    [_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday'), _('Saturday'), _('Sunday')],
+                    to_usernames(usernames, day_of_week)),
+        # chart('line', _('Historic play count'),
+        #       [(min_day + timedelta(days=i)).isoformat() for i in range(0, num_days + 1)],
+        #       to_usernames(usernames, day_counts), stack=True)
     ]
 
     return charts
@@ -275,7 +278,7 @@ def chart_unique_artists(conn: Connection):
                         ''')
     ratio_rows = [(playlist, artists / tracks) for playlist, tracks, artists in rows]
     ratio_rows = sorted(ratio_rows, key=lambda x: x[1])
-    return chart('bar', _('Artist diversity'), *data_from_rows(_('Ratio'), ratio_rows))
+    return bar(_('Artist diversity'), _('Ratio'), *rows_to_xy(ratio_rows))
 
 
 def get_data(period: StatsPeriod):

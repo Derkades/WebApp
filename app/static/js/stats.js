@@ -1,56 +1,402 @@
-// https://github.com/nhn/tui.chart/blob/main/docs/en/common-theme.md
 const theme = {
-    chart: {
-        backgroundColor: 'transparent',
+    "color": [
+        "#dd6b66",
+        "#759aa0",
+        "#e69d87",
+        "#8dc1a9",
+        "#ea7e53",
+        "#eedd78",
+        "#73a373",
+        "#73b9bc",
+        "#7289ab",
+        "#91ca8c",
+        "#f49f42"
+    ],
+    "backgroundColor": "transparent",
+    "textStyle": {
+        "fontFamily": "Quicksand",
     },
-    title: {
-        color: 'white',
-        fontFamily: 'Quicksand',
-    },
-    xAxis: {
-        title: {
-            color: 'white',
-            fontFamily: 'Quicksand',
+    "title": {
+        "textStyle": {
+            "color": "#eeeeee"
         },
-        label: {
-            color: 'white',
-            fontFamily: 'Quicksand',
-        },
-        color: 'white',
-    },
-    yAxis: {
-        title: {
-            color: 'white',
-            fontFamily: 'Quicksand',
-        },
-        label: {
-            color: 'white',
-            fontFamily: 'Quicksand',
-        },
-        color: 'white',
-    },
-    legend: {
-        label: {
-            color: 'white',
-            fontFamily: 'Quicksand',
+        "subtextStyle": {
+            "color": "#aaaaaa"
         }
     },
-    tooltip: {
-        header: {
-            fontFamily: 'Quicksand',
+    "line": {
+        "itemStyle": {
+            "borderWidth": 1
         },
-        body: {
-            fontFamily: 'Quicksand',
+        "lineStyle": {
+            "width": 2
         },
+        "symbolSize": 4,
+        "symbol": "circle",
+        "smooth": false
     },
-    plot: {
-        vertical: {
-            lineColor: 'transparent',
+    "radar": {
+        "itemStyle": {
+            "borderWidth": 1
         },
-        horizontal: {
-            lineColor: 'transparent',
+        "lineStyle": {
+            "width": 2
+        },
+        "symbolSize": 4,
+        "symbol": "circle",
+        "smooth": false
+    },
+    "bar": {
+        "itemStyle": {
+            "barBorderWidth": 0,
+            "barBorderColor": "#ccc"
         }
     },
+    "pie": {
+        "itemStyle": {
+            "borderWidth": 0,
+            "borderColor": "#ccc"
+        }
+    },
+    "scatter": {
+        "itemStyle": {
+            "borderWidth": 0,
+            "borderColor": "#ccc"
+        }
+    },
+    "boxplot": {
+        "itemStyle": {
+            "borderWidth": 0,
+            "borderColor": "#ccc"
+        }
+    },
+    "parallel": {
+        "itemStyle": {
+            "borderWidth": 0,
+            "borderColor": "#ccc"
+        }
+    },
+    "sankey": {
+        "itemStyle": {
+            "borderWidth": 0,
+            "borderColor": "#ccc"
+        }
+    },
+    "funnel": {
+        "itemStyle": {
+            "borderWidth": 0,
+            "borderColor": "#ccc"
+        }
+    },
+    "gauge": {
+        "itemStyle": {
+            "borderWidth": 0,
+            "borderColor": "#ccc"
+        }
+    },
+    "candlestick": {
+        "itemStyle": {
+            "color": "#fd1050",
+            "color0": "#0cf49b",
+            "borderColor": "#fd1050",
+            "borderColor0": "#0cf49b",
+            "borderWidth": 1
+        }
+    },
+    "graph": {
+        "itemStyle": {
+            "borderWidth": 0,
+            "borderColor": "#ccc"
+        },
+        "lineStyle": {
+            "width": 1,
+            "color": "#aaaaaa"
+        },
+        "symbolSize": 4,
+        "symbol": "circle",
+        "smooth": false,
+        "color": [
+            "#dd6b66",
+            "#759aa0",
+            "#e69d87",
+            "#8dc1a9",
+            "#ea7e53",
+            "#eedd78",
+            "#73a373",
+            "#73b9bc",
+            "#7289ab",
+            "#91ca8c",
+            "#f49f42"
+        ],
+        "label": {
+            "color": "#eeeeee"
+        }
+    },
+    "map": {
+        "itemStyle": {
+            "areaColor": "#eee",
+            "borderColor": "#444",
+            "borderWidth": 0.5
+        },
+        "label": {
+            "color": "#000"
+        },
+        "emphasis": {
+            "itemStyle": {
+                "areaColor": "rgba(255,215,0,0.8)",
+                "borderColor": "#444",
+                "borderWidth": 1
+            },
+            "label": {
+                "color": "rgb(100,0,0)"
+            }
+        }
+    },
+    "geo": {
+        "itemStyle": {
+            "areaColor": "#eee",
+            "borderColor": "#444",
+            "borderWidth": 0.5
+        },
+        "label": {
+            "color": "#000"
+        },
+        "emphasis": {
+            "itemStyle": {
+                "areaColor": "rgba(255,215,0,0.8)",
+                "borderColor": "#444",
+                "borderWidth": 1
+            },
+            "label": {
+                "color": "rgb(100,0,0)"
+            }
+        }
+    },
+    "categoryAxis": {
+        "axisLine": {
+            "show": true,
+            "lineStyle": {
+                "color": "#eeeeee"
+            }
+        },
+        "axisTick": {
+            "show": true,
+            "lineStyle": {
+                "color": "#eeeeee"
+            }
+        },
+        "axisLabel": {
+            "show": true,
+            "color": "#eeeeee"
+        },
+        "splitLine": {
+            "show": true,
+            "lineStyle": {
+                "color": [
+                    "#aaaaaa"
+                ]
+            }
+        },
+        "splitArea": {
+            "show": false,
+            "areaStyle": {
+                "color": [
+                    "#eeeeee"
+                ]
+            }
+        }
+    },
+    "valueAxis": {
+        "axisLine": {
+            "show": true,
+            "lineStyle": {
+                "color": "#eeeeee"
+            }
+        },
+        "axisTick": {
+            "show": true,
+            "lineStyle": {
+                "color": "#eeeeee"
+            }
+        },
+        "axisLabel": {
+            "show": true,
+            "color": "#eeeeee"
+        },
+        "splitLine": {
+            "show": true,
+            "lineStyle": {
+                "color": [
+                    "#aaaaaa"
+                ]
+            }
+        },
+        "splitArea": {
+            "show": false,
+            "areaStyle": {
+                "color": [
+                    "#eeeeee"
+                ]
+            }
+        }
+    },
+    "logAxis": {
+        "axisLine": {
+            "show": true,
+            "lineStyle": {
+                "color": "#eeeeee"
+            }
+        },
+        "axisTick": {
+            "show": true,
+            "lineStyle": {
+                "color": "#eeeeee"
+            }
+        },
+        "axisLabel": {
+            "show": true,
+            "color": "#eeeeee"
+        },
+        "splitLine": {
+            "show": true,
+            "lineStyle": {
+                "color": [
+                    "#aaaaaa"
+                ]
+            }
+        },
+        "splitArea": {
+            "show": false,
+            "areaStyle": {
+                "color": [
+                    "#eeeeee"
+                ]
+            }
+        }
+    },
+    "timeAxis": {
+        "axisLine": {
+            "show": true,
+            "lineStyle": {
+                "color": "#eeeeee"
+            }
+        },
+        "axisTick": {
+            "show": true,
+            "lineStyle": {
+                "color": "#eeeeee"
+            }
+        },
+        "axisLabel": {
+            "show": true,
+            "color": "#eeeeee"
+        },
+        "splitLine": {
+            "show": true,
+            "lineStyle": {
+                "color": [
+                    "#aaaaaa"
+                ]
+            }
+        },
+        "splitArea": {
+            "show": false,
+            "areaStyle": {
+                "color": [
+                    "#eeeeee"
+                ]
+            }
+        }
+    },
+    "toolbox": {
+        "iconStyle": {
+            "borderColor": "#999999"
+        },
+        "emphasis": {
+            "iconStyle": {
+                "borderColor": "#666666"
+            }
+        }
+    },
+    "legend": {
+        "textStyle": {
+            "color": "#eeeeee"
+        }
+    },
+    "tooltip": {
+        "axisPointer": {
+            "lineStyle": {
+                "color": "#eeeeee",
+                "width": "1"
+            },
+            "crossStyle": {
+                "color": "#eeeeee",
+                "width": "1"
+            }
+        }
+    },
+    "timeline": {
+        "lineStyle": {
+            "color": "#eeeeee",
+            "width": 1
+        },
+        "itemStyle": {
+            "color": "#dd6b66",
+            "borderWidth": 1
+        },
+        "controlStyle": {
+            "color": "#eeeeee",
+            "borderColor": "#eeeeee",
+            "borderWidth": 0.5
+        },
+        "checkpointStyle": {
+            "color": "#e43c59",
+            "borderColor": "#c23531"
+        },
+        "label": {
+            "color": "#eeeeee"
+        },
+        "emphasis": {
+            "itemStyle": {
+                "color": "#a9334c"
+            },
+            "controlStyle": {
+                "color": "#eeeeee",
+                "borderColor": "#eeeeee",
+                "borderWidth": 0.5
+            },
+            "label": {
+                "color": "#eeeeee"
+            }
+        }
+    },
+    "visualMap": {
+        "color": [
+            "#bf444c",
+            "#d88273",
+            "#f6efa6"
+        ]
+    },
+    "dataZoom": {
+        "backgroundColor": "rgba(47,69,84,0)",
+        "dataBackgroundColor": "rgba(255,255,255,0.3)",
+        "fillerColor": "rgba(167,183,204,0.4)",
+        "handleColor": "#a7b7cc",
+        "handleSize": "100%",
+        "textStyle": {
+            "color": "#eeeeee"
+        }
+    },
+    "markPoint": {
+        "label": {
+            "color": "#eeeeee"
+        },
+        "emphasis": {
+            "label": {
+                "color": "#eeeeee"
+            }
+        }
+    }
 }
 
 const chartsContainer = document.getElementById('charts');
@@ -70,49 +416,29 @@ async function loadCharts(button) {
     button.disabled = true;
 
     chartsContainer.replaceChildren();
-    spinner.classList.remove('hidden');
 
     // Download data
+    spinner.classList.remove('hidden');
     const response = await fetch('/stats/data?period=' + encodeURIComponent(button.id));
     const data = await response.json();
-
     spinner.classList.add('hidden');
 
     // Render charts
-    for (const chart of data) {
+    for (const options of data) {
         const chartElem = document.createElement('div');
         chartElem.style.width = '100%';
         chartElem.style.height = '30rem';
         chartElem.style.marginBottom = '1rem';
         chartsContainer.append(chartElem);
-        // const args = {el: chartElem, data: chart['data'], options: chart['options']};
 
-        // args.options.theme = theme;
-        // Disable Google tracking: https://github.com/nhn/tui.chart/tree/main/apps/chart#collect-statistics-on-the-use-of-open-source
-        // This was caught by our strict Content-Security-Policy :)
-        // args.options.usageStatistics = false;
-        const eChart = echarts.init(chartElem);
-        eChart.setOption({
-
-        });
-        // switch (chart['type']) {
-        //     case 'bar':
-        //         toastui.Chart.barChart(args);
-        //         break;
-        //     case 'column':
-        //         toastui.Chart.columnChart(args);
-        //         break;
-        //     case 'line':
-        //         toastui.Chart.lineChart(args);
-        //         break;
-        //     default:
-        //         throw new Error('invalid type: ' + chart['type']);
-        //         break;
-        // }
+        const eChart = echarts.init(chartElem, 'custom');
+        eChart.setOption(options);
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    echarts.registerTheme('custom', theme);
+
     for (const buttonName in buttons) {
         const button = buttons[buttonName];
         button.addEventListener('click', () => {
