@@ -1,6 +1,9 @@
+import time
+
+from flask_babel import format_timedelta, gettext as _
 from flask import Blueprint, redirect, render_template, request
 
-from app import auth, db, util
+from app import auth, db
 
 bp = Blueprint('users', __name__, url_prefix='/users')
 
@@ -29,6 +32,10 @@ def route_users():
                                   (user_dict['id'],))
             user_dict['writable_playlists'] = [playlist for playlist, in result]
             user_dict['writable_playlists_str'] = ', '.join(user_dict['writable_playlists'])
+            if user_dict['last_use'] is None:
+                user_dict['last_use'] = _('More than 30 days ago')
+            else:
+                user_dict['last_use'] = format_timedelta(user_dict['last_use'] - int(time.time()), add_direction=True)
 
     return render_template('users.jinja2',
                            csrf_token=new_csrf_token,
