@@ -1,10 +1,6 @@
 function getTransformedVolume(volumeZeroToHundred) {
     // https://www.dr-lex.be/info-stuff/volumecontrols.html
-    // Values for 60dB dynamic range
-    const a = 1e-3
-    const b = 6.907 // slightly lower than value in article so result never exceeds 1.0
-    const x = volumeZeroToHundred / 100;
-    return a * Math.exp(x * b);
+    return Math.pow(volumeZeroToHundred / 100, 3);
 }
 
 function onVolumeChange() {
