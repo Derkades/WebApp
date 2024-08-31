@@ -13,7 +13,7 @@ class Visualiser {
     #dataArray;
     /** @type {HTMLCanvasElement} */
     #canvas;
-    #stopRequested = false;
+    #running = false;
 
     constructor() {
         this.#canvas = document.getElementById('visualiser');
@@ -23,18 +23,22 @@ class Visualiser {
     stop() {
         console.info('visualiser: stopped');
         this.#canvas.style.transform = 'translateY(100%)';
-        this.#stopRequested = true;
+        this.#running = false;
     }
 
     start() {
+        if (this.#running) {
+            console.warn('visualiser: already running');
+            return;
+        }
         console.info('visualiser: started');
         this.#canvas.style.transform = null;
-        this.#stopRequested = false;
+        this.#running = true;
         this.#draw();
     }
 
     #draw() {
-        if (this.#stopRequested) {
+        if (!this.#running) {
             return;
         }
 
