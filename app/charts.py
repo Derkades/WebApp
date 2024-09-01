@@ -283,29 +283,28 @@ def chart_unique_artists(conn: Connection):
     return bar(_('Artist diversity'), _('Ratio'), *rows_to_xy(rows))
 
 
-def chart_popular_artists(conn: Connection):
-    artists = [row[0] for row in conn.execute('SELECT artist FROM track_artist GROUP BY artist ORDER BY COUNT(artist) DESC LIMIT 10')]
+def chart_popular_artists_tags(conn: Connection):
+    for table, title in (('artist', _('Popular artists')), ('tag', _('Popular tags'))):
+        top10query = f'SELECT {table} FROM track_{table} GROUP BY {table} ORDER BY COUNT({table}) DESC LIMIT 15'
+        artists: list[str] = [row[0] for row in conn.execute(top10query)]
+        artists_lower = [artist.lower() for artist in artists]
 
-    rows = conn.execute('''
-                        SELECT playlist, artist, COUNT(artist)
-                        FROM track INNER JOIN track_artist ON track.path = track_artist.track
-                        WHERE artist IN (SELECT artist
-                                         FROM track_artist
-                                         GROUP BY artist
-                                         ORDER BY COUNT(artist) DESC
-                                         LIMIT 10)
-                        GROUP BY artist, playlist
-                        ''').fetchall()
+        rows = conn.execute(f'''
+                            SELECT playlist, {table}, COUNT({table})
+                            FROM track INNER JOIN track_{table} ON track.path = track_{table}.track
+                            WHERE {table} IN ({top10query})
+                            GROUP BY {table}, playlist
+                            ''').fetchall()
 
-    artist_counts: dict[str, list[int]] = {}
+        artist_counts: dict[str, list[int]] = {}
 
-    for playlist, artist, artist_count in rows:
-        if playlist not in artist_counts:
-            artist_counts[playlist] = [0] * len(artists)
+        for playlist, artist, artist_count in rows:
+            if playlist not in artist_counts:
+                artist_counts[playlist] = [0] * len(artists)
 
-        artist_counts[playlist][artists.index(artist)] = artist_count
+            artist_counts[playlist][artists_lower.index(artist.lower())] = artist_count
 
-    return multibar(_('Popular artists'), artists, artist_counts, horizontal=True)
+        yield multibar(title, artists, artist_counts, horizontal=True)
 
 
 def get_data(period: StatsPeriod):
@@ -318,6 +317,6 @@ def get_data(period: StatsPeriod):
                 chart_track_year(conn),
                 chart_last_chosen(conn),
                 chart_unique_artists(conn),
-                chart_popular_artists(conn)]
+                *chart_popular_artists_tags(conn)]
 
     return data
