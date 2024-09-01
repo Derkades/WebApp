@@ -1,6 +1,6 @@
 import time
 from collections import Counter
-from datetime import date, datetime, timedelta
+from datetime import datetime
 from enum import Enum, unique
 from sqlite3 import Connection
 from typing import Any, Iterable
@@ -8,7 +8,6 @@ from typing import Any, Iterable
 from flask_babel import _
 
 from app import db
-from app.music import Track
 
 ChartT = dict[str, Any]
 
@@ -107,38 +106,47 @@ def rows_to_xy(rows: list[tuple[str, int]]):
     return [row[0] for row in rows], [row[1] for row in rows]
 
 
-def rows_to_xy_multi(rows: list[tuple[str, str, int]], case_sensitive=False) -> tuple[list[str], dict[str, list[int]]]:
+def rows_to_xy_multi(rows: list[tuple[str, str, int]], case_sensitive=True, restore_case=False) -> tuple[list[str], dict[str, list[int]]]:
     """
     Convert rows
     [a1, b1, c1]
     [a1, b2, c2]
     [a2, b1, c3]
-    to xdata: [b1, b2], ydata: {a1: [c1, c2], a2: [c3, 0]}
-    Where a appears in the legend (is stacked), b appears on the x axis, and c is data.
+    to xdata: [a1, a2], ydata: {b1: [c1, c3], b2: [c2, 0]}
+    Where a appears on the x axis, b appears in in the legend (is stacked), and c is data.
     """
-    # Create list of b values, sorted by total c for all a
-    b_list: list[str] = []
-    b_counts: dict[str, int] = {} # for sorting
-    for _a, b, c in rows:
-        if b not in b_list:
-            b_list.append(b)
-            b_counts[b] = 0
-        b_counts[b] += c
-    b_list = sorted(b_list, key=lambda b: -b_counts[b])
+    # Create list of a values, sorted by total b for all a
+    a_list: list[str] = []
+    a_counts: dict[str, int] = {} # for sorting
+    for a, _b, c in rows:
+        if not case_sensitive:
+            a = a.lower()
 
-    # Some b values are case insensitive (artist, tag, album) should be compared lower case
-    if not case_sensitive:
-        b_list_lower = [b.lower() for b in b_list]
+        if a not in a_list:
+            a_list.append(a)
+            a_counts[a] = 0
+
+        a_counts[a if case_sensitive else a.lower()] += c
+
+    a_list = sorted(a_list, key=lambda a: -a_counts[a])
 
     ydata: dict[str, list[int]] = {}
 
     for a, b, c in rows:
-        if a not in ydata:
-            ydata[a] = [0] * len(b_list)
-        b_index = b_list.index(b) if case_sensitive else b_list_lower.index(b.lower())
-        ydata[a][b_index] = c
+        if b not in ydata:
+            ydata[b] = [0] * len(a_list)
+        a_index = a_list.index(a if case_sensitive else a.lower())
+        ydata[b][a_index] = c
 
-    return b_list, ydata
+    if restore_case:
+        # Restore original case
+        for i, a in enumerate(a_list):
+            for a2, _b, _c in rows:
+                if a.lower() == a2.lower():
+                    a_list[i] = a2
+                    break
+
+    return a_list, ydata
 
 
 def counter_to_xy(counter: Counter):
@@ -217,95 +225,82 @@ def charts_history(conn: Connection, period: StatsPeriod):
     """
     after_timestamp = int(time.time()) - period.value
 
-    min_time, max_time = conn.execute('SELECT MIN(timestamp), MAX(timestamp) FROM history WHERE timestamp > ?',
-                                      (after_timestamp,)).fetchone()
-    # If no tracks are played in the specified period
-    if min_time is None:
-        return []
+    rows = conn.execute('''
+                        SELECT username, playlist, COUNT(*)
+                        FROM history JOIN user ON history.user = user.id
+                        WHERE timestamp > ?
+                        GROUP BY user, playlist
+                        ''', (after_timestamp,)).fetchall()
+    yield multibar(_('Active users'), *rows_to_xy_multi(rows))
 
-    min_day = date.fromtimestamp(min_time)
-    num_days = (date.fromtimestamp(max_time) - min_day).days + 1
+    rows = [(b, a, c) for a, b, c in rows]
+    yield multibar(_('Played playlists'), *rows_to_xy_multi(rows))
 
-    playlists: list[str] = [row[0] for row in
-                            conn.execute('SELECT DISTINCT playlist FROM history WHERE timestamp > ?', (after_timestamp,))]
-    user_ids: list[int] = []
-    usernames: list[str] = []
-    for user_id, username, nickname in conn.execute('''
-                                                    SELECT DISTINCT user, username, nickname
-                                                    FROM history
-                                                    JOIN user ON user.id = user
-                                                    WHERE timestamp > ?
-                                                    ''', (after_timestamp,)):
-        user_ids.append(user_id)
-        if nickname:
-            usernames.append(nickname)
-        elif username:
-            usernames.append(username)
-        else:
-            usernames.append('[deleted user]')
+    rows = conn.execute('''
+                        SELECT track, username, COUNT(*)
+                        FROM history
+                            JOIN user ON history.user = user.id
+                        WHERE timestamp > ?
+                            AND track IN (SELECT track
+                                           FROM history
+                                           WHERE timestamp > ?
+                                           GROUP BY track
+                                           ORDER BY COUNT(*) DESC
+                                           LIMIT 10)
+                        GROUP BY track, username
+                        ''', (after_timestamp, after_timestamp,)).fetchall()
+    yield multibar(_('Most played tracks'), *rows_to_xy_multi(rows), horizontal=True)
 
-    time_of_day: dict[int, list[int]] = {}
-    day_of_week: dict[int, list[int]] = {}
-    day_counts: dict[int, list[int]] = {}
-    playlists_counts: dict[int, list[int]] = {} # playlist plays per user
-    user_counts: dict[str, list[int]] = {} # user plays per playlist
+    rows = conn.execute('''
+                        SELECT artist, username, COUNT(*)
+                        FROM history
+                            INNER JOIN track ON history.track = track.path
+                            JOIN track_artist ON track_artist.track = track.path
+                            JOIN user ON history.user = user.id
+                        WHERE timestamp > ?
+                            AND artist IN (SELECT artist
+                                           FROM history
+                                               INNER JOIN track ON history.track = track.path
+                                               JOIN track_artist ON track_artist.track = track.path
+                                           WHERE timestamp > ?
+                                           GROUP BY artist
+                                           ORDER BY COUNT(*) DESC
+                                           LIMIT 10)
+                        GROUP BY artist, username
+                        ''', (after_timestamp, after_timestamp,)).fetchall()
+    yield multibar(_('Most played artists'), *rows_to_xy_multi(rows, case_sensitive=False, restore_case=True), horizontal=True)
 
-    for user_id in user_ids:
-        time_of_day[user_id] = [0] * 24
-        day_of_week[user_id] = [0] * 7
-        day_counts[user_id] = [0] * num_days
+    rows = conn.execute('''
+                        SELECT album, username, COUNT(*)
+                        FROM history
+                            INNER JOIN track ON history.track = track.path
+                            JOIN user ON history.user = user.id
+                        WHERE timestamp > ?
+                            AND album IN (SELECT album
+                                           FROM history
+                                               INNER JOIN track ON history.track = track.path
+                                           WHERE timestamp > ?
+                                           GROUP BY album
+                                           ORDER BY COUNT(*) DESC
+                                           LIMIT 10)
+                        GROUP BY album, username
+                        ''', (after_timestamp, after_timestamp,)).fetchall()
+    yield multibar(_('Most played albums'), *rows_to_xy_multi(rows, case_sensitive=False, restore_case=True), horizontal=True)
 
-        playlists_counts[user_id] = [0] * len(playlists)
+    time_of_day: dict[str, list[int]] = {}
+    day_of_week: dict[str, list[int]] = {}
 
-    for playlist in playlists:
-        user_counts[playlist] = [0] * len(user_ids)
+    for username, in conn.execute('SELECT DISTINCT username FROM history JOIN user ON history.user = user.id WHERE timestamp > ?', (after_timestamp,)):
+        time_of_day[username] = [0] * 24
+        day_of_week[username] = [0] * 7
 
-    result = conn.execute('''
-                          SELECT timestamp, user, history.track, history.playlist
-                          FROM history
-                          WHERE timestamp > ?
-                          ''', (after_timestamp,))
-
-    artist_counter: Counter[str] = Counter()
-    track_counter: Counter[str] = Counter()
-    album_counter: Counter[str] = Counter()
-
-    for timestamp, user_id, relpath, playlist in result:
+    for timestamp, username in conn.execute('SELECT timestamp, username FROM history JOIN user ON history.user = user.id WHERE timestamp > ?', (after_timestamp,)):
         dt = datetime.fromtimestamp(timestamp)
-        time_of_day[user_id][dt.hour] += 1
-        day_of_week[user_id][dt.weekday()] += 1
-        day_counts[user_id][(dt.date() - min_day).days] += 1
+        time_of_day[username][dt.hour] += 1
+        day_of_week[username][dt.weekday()] += 1
 
-        playlists_counts[user_id][playlists.index(playlist)] += 1
-        user_counts[playlist][user_ids.index(user_id)] += 1
-
-        track = Track.by_relpath(conn, relpath)
-        if track:
-            meta = track.metadata()
-            if meta.artists:
-                artist_counter.update(meta.artists)
-            if meta.album:
-                album_counter.update((meta.album,))
-            track_counter.update((meta.display_title(),))
-        else:
-            track_counter.update((relpath,))
-
-    charts = [
-        multibar(_('Most active users'), usernames, user_counts),
-        multibar(_('Most played playlists'), playlists, to_usernames(usernames, playlists_counts)),
-        bar(_('Most played tracks'), _('Times played'), *counter_to_xy(track_counter), horizontal=True),
-        bar(_('Most played artists'), _('Times played'), *counter_to_xy(artist_counter), horizontal=True),
-        bar(_('Most played albums'), _('Times played'), *counter_to_xy(album_counter), horizontal=True),
-        multibar(_('Time of day'), [f'{i:02}:00' for i in range(0, 24)], to_usernames(usernames, time_of_day)),
-        multibar(_('Day of week'),
-                    [_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday'), _('Saturday'), _('Sunday')],
-                    to_usernames(usernames, day_of_week)),
-        # chart('line', _('Historic play count'),
-        #       [(min_day + timedelta(days=i)).isoformat() for i in range(0, num_days + 1)],
-        #       to_usernames(usernames, day_counts), stack=True)
-    ]
-
-    return charts
+    yield multibar(_('Time of day'), [f'{i:02}:00' for i in range(0, 24)], time_of_day)
+    yield multibar(_('Day of week'), [_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday'), _('Saturday'), _('Sunday')], day_of_week)
 
 
 def chart_unique_artists(conn: Connection):
@@ -321,12 +316,12 @@ def chart_unique_artists(conn: Connection):
 def chart_popular_artists_tags(conn: Connection):
     for table, title in (('artist', _('Popular artists')), ('tag', _('Popular tags'))):
         rows = conn.execute(f'''
-                            SELECT playlist, {table}, COUNT({table})
+                            SELECT {table}, playlist, COUNT({table})
                             FROM track INNER JOIN track_{table} ON track.path = track_{table}.track
-                            WHERE {table} IN (SELECT {table} FROM track_{table} GROUP BY {table} LIMIT 15)
+                            WHERE {table} IN (SELECT {table} FROM track_{table} GROUP BY {table} ORDER BY COUNT({table}) DESC LIMIT 15)
                             GROUP BY {table}, playlist
                             ''').fetchall()
-        yield multibar(title, *rows_to_xy_multi(rows), horizontal=True)
+        yield multibar(title, *rows_to_xy_multi(rows, case_sensitive=False, restore_case=table == 'artist'), horizontal=True)
 
 
 def get_data(period: StatsPeriod):

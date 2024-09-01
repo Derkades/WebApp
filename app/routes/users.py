@@ -1,7 +1,8 @@
 import time
 
-from flask_babel import format_timedelta, gettext as _
 from flask import Blueprint, redirect, render_template, request
+from flask_babel import format_timedelta
+from flask_babel import gettext as _
 
 from app import auth, db
 
