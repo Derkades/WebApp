@@ -66,6 +66,7 @@ def route_data():
                                 JOIN user ON now_playing.user = user.id
                                 JOIN track ON now_playing.track = track.path
                               WHERE now_playing.timestamp > ?
+                              ORDER BY player_id
                               ''',
                               (int(time.time()) - 70,))  # based on JS update interval
 
