@@ -22,18 +22,14 @@ class StatsPeriod(Enum):
     WEEK = 7*DAY
     MONTH = 30*DAY
     YEAR = 365*DAY
+    ALL = 0
 
-    def translated_str(self) -> str:
-        if self == StatsPeriod.DAY:
-            return _('last day')
-        elif self == StatsPeriod.WEEK:
-            return _('last week')
-        elif self == StatsPeriod.MONTH:
-            return _('last month')
-        elif self == StatsPeriod.YEAR:
-            return _('last year')
-
-        raise ValueError()
+    @property
+    def after_timestamp(self):
+        if self is StatsPeriod.ALL:
+            return 0
+        else:
+            return int(time.time()) - self.value
 
     @staticmethod
     def from_str(period: str) -> 'StatsPeriod':
@@ -45,6 +41,8 @@ class StatsPeriod(Enum):
             return StatsPeriod.MONTH
         elif period == 'year':
             return StatsPeriod.YEAR
+        elif period == 'all':
+            return StatsPeriod.ALL
 
         raise ValueError()
 
@@ -219,12 +217,10 @@ def to_usernames(usernames: str, counts: dict[int, list[int]]) -> dict[str, list
             for i, (_user_id, values) in enumerate(counts.items())}
 
 
-def charts_history(conn: Connection, period: StatsPeriod):
+def charts_history(conn: Connection, after_timestamp: int):
     """
     Playback history related charts
     """
-    after_timestamp = int(time.time()) - period.value
-
     rows = conn.execute('''
                         SELECT username, playlist, COUNT(*)
                         FROM history JOIN user ON history.user = user.id
@@ -314,7 +310,7 @@ def chart_unique_artists(conn: Connection):
 
 
 def chart_popular_artists_tags(conn: Connection):
-    for table, title in (('artist', _('Popular artists')), ('tag', _('Popular tags'))):
+    for table, title in (('artist', _('Artists in playlists')), ('tag', _('Tags in playlists'))):
         rows = conn.execute(f'''
                             SELECT {table}, playlist, COUNT({table})
                             FROM track INNER JOIN track_{table} ON track.path = track_{table}.track
@@ -329,7 +325,7 @@ def get_data(period: StatsPeriod):
     Generate charts as json data for stats.jinja2
     """
     with db.connect(read_only=True) as conn:
-        data = [*charts_history(conn, period),
+        data = [*charts_history(conn, period.after_timestamp),
                 *charts_playlists(conn),
                 chart_track_year(conn),
                 chart_last_chosen(conn),

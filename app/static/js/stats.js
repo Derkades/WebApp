@@ -29,6 +29,7 @@ const buttons = {
     week: document.getElementById('week'),
     month: document.getElementById('month'),
     year: document.getElementById('year'),
+    all: document.getElementById('all'),
 };
 const charts = [];
 
