@@ -106,6 +106,41 @@ def rows_to_xy(rows: list[tuple[str, int]]):
     """
     return [row[0] for row in rows], [row[1] for row in rows]
 
+
+def rows_to_xy_multi(rows: list[tuple[str, str, int]], case_sensitive=False) -> tuple[list[str], dict[str, list[int]]]:
+    """
+    Convert rows
+    [a1, b1, c1]
+    [a1, b2, c2]
+    [a2, b1, c3]
+    to xdata: [b1, b2], ydata: {a1: [c1, c2], a2: [c3, 0]}
+    Where a appears in the legend (is stacked), b appears on the x axis, and c is data.
+    """
+    # Create list of b values, sorted by total c for all a
+    b_list: list[str] = []
+    b_counts: dict[str, int] = {} # for sorting
+    for _a, b, c in rows:
+        if b not in b_list:
+            b_list.append(b)
+            b_counts[b] = 0
+        b_counts[b] += c
+    b_list = sorted(b_list, key=lambda b: -b_counts[b])
+
+    # Some b values are case insensitive (artist, tag, album) should be compared lower case
+    if not case_sensitive:
+        b_list_lower = [b.lower() for b in b_list]
+
+    ydata: dict[str, list[int]] = {}
+
+    for a, b, c in rows:
+        if a not in ydata:
+            ydata[a] = [0] * len(b_list)
+        b_index = b_list.index(b) if case_sensitive else b_list_lower.index(b.lower())
+        ydata[a][b_index] = c
+
+    return b_list, ydata
+
+
 def counter_to_xy(counter: Counter):
     return rows_to_xy(counter.most_common(COUNTER_AMOUNT))
 
@@ -285,26 +320,13 @@ def chart_unique_artists(conn: Connection):
 
 def chart_popular_artists_tags(conn: Connection):
     for table, title in (('artist', _('Popular artists')), ('tag', _('Popular tags'))):
-        top10query = f'SELECT {table} FROM track_{table} GROUP BY {table} ORDER BY COUNT({table}) DESC LIMIT 15'
-        artists: list[str] = [row[0] for row in conn.execute(top10query)]
-        artists_lower = [artist.lower() for artist in artists]
-
         rows = conn.execute(f'''
                             SELECT playlist, {table}, COUNT({table})
                             FROM track INNER JOIN track_{table} ON track.path = track_{table}.track
-                            WHERE {table} IN ({top10query})
+                            WHERE {table} IN (SELECT {table} FROM track_{table} GROUP BY {table} LIMIT 15)
                             GROUP BY {table}, playlist
                             ''').fetchall()
-
-        artist_counts: dict[str, list[int]] = {}
-
-        for playlist, artist, artist_count in rows:
-            if playlist not in artist_counts:
-                artist_counts[playlist] = [0] * len(artists)
-
-            artist_counts[playlist][artists_lower.index(artist.lower())] = artist_count
-
-        yield multibar(title, artists, artist_counts, horizontal=True)
+        yield multibar(title, *rows_to_xy_multi(rows), horizontal=True)
 
 
 def get_data(period: StatsPeriod):
