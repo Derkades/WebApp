@@ -64,7 +64,7 @@ def route_data():
                               SELECT user.username, user.nickname, track, paused, progress
                               FROM now_playing
                                 JOIN user ON now_playing.user = user.id
-                                JOIN track ON now_playing.track = track.path
+                                INNER JOIN track ON now_playing.track = track.path
                               WHERE now_playing.timestamp > ?
                               ORDER BY player_id
                               ''',
@@ -80,6 +80,7 @@ def route_data():
                               SELECT history.timestamp, user.username, user.nickname, history.track
                               FROM history
                                   LEFT JOIN user ON history.user = user.id
+                                  INNER JOIN track ON history.track = track.path -- To ensure no deleted tracks are returned
                               WHERE history.private = 0
                               ORDER BY history.timestamp DESC
                               LIMIT 10
