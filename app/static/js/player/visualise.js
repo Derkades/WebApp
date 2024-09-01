@@ -13,7 +13,8 @@ class Visualiser {
     #dataArray;
     /** @type {HTMLCanvasElement} */
     #canvas;
-    #running = false;
+    /** @type {number} */
+    #taskId = null;
 
     constructor() {
         this.#canvas = document.getElementById('visualiser');
@@ -23,27 +24,27 @@ class Visualiser {
     stop() {
         console.info('visualiser: stopped');
         this.#canvas.style.transform = 'translateY(100%)';
-        this.#running = false;
+        clearInterval(this.#taskId);
+        if (this.#taskId != null) {
+            cancelAnimationFrame(this.#taskId)
+            this.#taskId = null;
+        }
     }
 
     start() {
-        if (this.#running) {
-            console.warn('visualiser: already running');
-            return;
+        // Prevent double animation in case start() is accidentally called twice
+        if (this.#taskId != null) {
+            console.warn('visualiser: was already running');
+            cancelAnimationFrame(this.#taskId);
         }
+
         console.info('visualiser: started');
         this.#canvas.style.transform = null;
-        this.#running = true;
-        this.#draw();
+        this.#taskId = requestAnimationFrame(() => this.#draw());
     }
 
     #draw() {
-        if (!this.#running) {
-            return;
-        }
-
-        if (!audioContextManager.analyser || document.visibilityState == "hidden") {
-            setTimeout(() => this.#draw(), 100);
+        if (!audioContextManager.analyser) {
             return;
         }
 
@@ -57,11 +58,6 @@ class Visualiser {
 
         draw.clearRect(0, 0, height, width);
         draw.fillStyle = "white";
-
-        if (getAudioElement().paused) {
-            setTimeout(() => this.#draw(), 100);
-            return;
-        }
 
         audioContextManager.analyser.getByteFrequencyData(this.#dataArray);
 
@@ -81,7 +77,7 @@ class Visualiser {
             document.getElementsByTagName('body')[0].style.scale = 1 + bassAmount * this.bassScaleAmount;
         }
 
-        requestAnimationFrame(() => this.#draw());
+        this.#taskId = requestAnimationFrame(() => this.#draw());
     }
 
 }
@@ -92,7 +88,7 @@ eventBus.subscribe(MusicEvent.SETTINGS_LOADED, () => {
     const checkbox = document.getElementById('settings-visualiser');
 
     function updateVisualiserState() {
-        if (checkbox.checked && !getAudioElement().paused) {
+        if (checkbox.checked && !getAudioElement().paused && document.visibilityState == 'visible') {
             visualiser.start();
         } else {
             visualiser.stop();
@@ -102,4 +98,5 @@ eventBus.subscribe(MusicEvent.SETTINGS_LOADED, () => {
     checkbox.addEventListener('change', updateVisualiserState);
     getAudioElement().addEventListener('play', updateVisualiserState);
     getAudioElement().addEventListener('pause', updateVisualiserState);
+    document.addEventListener('visibilitychange', updateVisualiserState);
 });
