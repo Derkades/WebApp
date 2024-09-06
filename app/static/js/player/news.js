@@ -49,7 +49,7 @@ class News {
         checkResponseCode(imageResponse);
         const imageBlob = URL.createObjectURL(await imageResponse.blob());
 
-        const queuedTrack = new QueuedTrack(null, audioBlob, imageBlob, "News");
+        const queuedTrack = new DownloadedTrack(null, audioBlob, imageBlob, null);
         queue.add(queuedTrack, true, true)
     }
 }

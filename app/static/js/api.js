@@ -413,10 +413,17 @@ class DownloadedTrack {
      */
     imageUrl;
     /**
-     * @type {lyrics}
+     * @type {Lyrics|null}
      */
     lyrics;
 
+    /**
+     *
+     * @param {Track|null} track
+     * @param {string} audioUrl
+     * @param {string} imageUrl
+     * @param {Lyrics|null} lyrics
+     */
     constructor(track, audioUrl, imageUrl, lyrics) {
         this.track = track;
         this.audioUrl = audioUrl;
