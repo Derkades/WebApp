@@ -432,7 +432,6 @@ class DownloadedTrack {
     }
 
     revokeObjects() {
-        console.debug('queue: revoke objects:', this.track.path);
         URL.revokeObjectURL(this.audioUrl);
         URL.revokeObjectURL(this.imageUrl);
     }
