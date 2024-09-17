@@ -91,8 +91,7 @@ class Music {
     async track(path) {
         const response = await fetch(`/track/info${encodeURIComponent(path)}/info`);
         checkResponseCode(response);
-        const json = await response.json();
-        return new Track(json.playlist, json);
+        return new Track(await response.json());
     }
 
     /**
@@ -184,6 +183,10 @@ class Track {
     year;
 
     constructor(trackData) {
+        this.#updateLocalVariablesFromTrackDataResponse(trackData);
+    };
+
+    #updateLocalVariablesFromTrackDataResponse(trackData) {
         this.path = trackData.path;
         this.playlistName = trackData.playlist;
         this.duration = trackData.duration;
@@ -193,7 +196,7 @@ class Track {
         this.album = trackData.album;
         this.albumArtist = trackData.album_artist;
         this.year = trackData.year;
-    };
+    }
 
     // TODO uses player-specific code, does not belong in api.js
     /**
@@ -396,6 +399,12 @@ class Track {
 
     async copyTo(playlistName) {
         await jsonPost('/player/copy_track', {track: this.path, playlist: playlistName});
+    }
+
+    async refresh() {
+        const response = await fetch(`/track/info${encodeURIComponent(path)}/info`);
+        checkResponseCode(response);
+        this.#updateLocalVariablesFromTrackDataResponse(await response.json());
     }
 }
 
