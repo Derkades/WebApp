@@ -12,7 +12,7 @@ function getNowPlayingCardHtml(info) {
     card.append(cardBody);
 
     const coverThumbUrl = `/track/${encodeURIComponent(info.path)}/cover?quality=low`;
-    const coverFullUrl = `/track/${encodeURIComponent(info.path)}/cover?quality=low`;
+    const coverFullUrl = `/track/${encodeURIComponent(info.path)}/cover?quality=high`;
 
     const coverImg = document.createElement('a');
     coverImg.classList.add('cover-img')
