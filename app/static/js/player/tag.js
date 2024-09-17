@@ -29,7 +29,6 @@ async function updateTagCheckboxes() {
     document.getElementById('tag-checkboxes').replaceChildren(...newChildren);
 }
 
-eventBus.subscribe(MusicEvent.METADATA_CHANGE, updateTagCheckboxes);
 document.addEventListener('DOMContentLoaded', updateTagCheckboxes);
 
 function getTagFilter() {

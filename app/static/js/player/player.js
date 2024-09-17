@@ -137,7 +137,13 @@ function replaceAllTrackHtml() {
 eventBus.subscribe(MusicEvent.TRACK_CHANGE, replaceAllTrackHtml);
 
 // Update track title, metadata may have changed
-eventBus.subscribe(MusicEvent.METADATA_CHANGE, replaceTrackDisplayTitle);
+eventBus.subscribe(MusicEvent.METADATA_CHANGE, updatedTrack => {
+    if (queue.currentTrack && queue.currentTrack.track.path && queue.currentTrack.track.path == updatedTrack.path) {
+        console.debug('player: updating currently playing track following METADATA_CHANGE event');
+        queue.currentTrack.track = updatedTrack;
+    }
+    replaceTrackDisplayTitle();
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     const dislikeButton = document.getElementById('button-dislike')

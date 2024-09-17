@@ -5,9 +5,13 @@ class Browse {
         this.#history = [];
 
         eventBus.subscribe(MusicEvent.METADATA_CHANGE, () => {
-            if (dialogs.isOpen('dialog-browse')) {
-                this.updateContent();
+            if (!dialogs.isOpen('dialog-browse')) {
+                console.debug('browse: ignore METADATA_CHANGE, browse window is not open. Is editor open: ', dialogs.isOpen('dialog-editor'));
+                return;
             }
+
+            console.debug('browse: received METADATA_CHANGE, updating content');
+            this.updateContent();
         });
     };
 
@@ -115,7 +119,7 @@ class Browse {
     /**
      * also used by search.js
      * @param {Array<Track>} tracks
-     * @returns {HTMLTableElement}
+     * @returns {Promise<HTMLTableElement>}
      */
     async generateTrackList(tracks) {
         const table = document.createElement('table');

@@ -23,8 +23,20 @@ class Queue {
         this.manualQueuedTracks = []
         this.autoQueuedTracks = [];
 
-        eventBus.subscribe(MusicEvent.METADATA_CHANGE, () => {
-            this.updateHtml();
+        eventBus.subscribe(MusicEvent.METADATA_CHANGE, updatedTrack => {
+            let queueChanged = false;
+            for (const queue of [this.previousTracks, this.manualQueuedTracks, this.autoQueuedTracks]) {
+                for (const downloadedTrack of queue) {
+                    if (downloadedTrack.track && downloadedTrack.track.path == updatedTrack.path) {
+                        console.debug('queue: updating track in queue following a METADATA_CHANGE event', updatedTrack.path);
+                        downloadedTrack.track = updatedTrack;
+                        queueChanged = true;
+                    }
+                }
+            }
+            if (queueChanged) {
+                this.updateHtml();
+            }
         });
 
         document.getElementById('queue-clear').addEventListener('click', () => {

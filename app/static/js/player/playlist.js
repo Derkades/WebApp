@@ -142,7 +142,6 @@ async function updatePlaylists() {
     updatePlaylistDropdowns(playlists);
 }
 
-eventBus.subscribe(MusicEvent.METADATA_CHANGE, updatePlaylists);
 document.addEventListener('DOMContentLoaded', updatePlaylists);
 
 function loadPlaylistState() {

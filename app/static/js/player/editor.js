@@ -84,7 +84,7 @@ class Editor {
 
         // Make request to update metadata
         try {
-            this.#track.saveMetadata();
+            await this.#track.saveMetadata();
         } catch (e) {
             alert('An error occurred while updating metadata.');
             document.getElementById('editor-writing').classList.add('hidden');
@@ -96,10 +96,12 @@ class Editor {
         dialogs.close('dialog-editor');
         document.getElementById('editor-writing').classList.add('hidden');
         document.getElementById('editor-save').classList.remove('hidden');
-        this.#track = null;
 
-        // Music player should update all track-related HTML with new metadata
-        eventBus.publish(MusicEvent.METADATA_CHANGE);
+        // Music player should update all track-related HTML with new metadata. This event must be
+        // fired after the editor dialog is closed, so other dialogs can check whether they are open.
+        eventBus.publish(MusicEvent.METADATA_CHANGE, this.#track);
+
+        this.#track = null;
     };
 
 };

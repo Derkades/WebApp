@@ -15,7 +15,14 @@ class Search {
     #searchTimeoutId = null;
 
     constructor() {
-        eventBus.subscribe(MusicEvent.METADATA_CHANGE, () => this.#performSearch());
+        eventBus.subscribe(MusicEvent.METADATA_CHANGE, () => {
+            if (!dialogs.isOpen('dialog-search')) {
+                console.debug('search: ignore METADATA_CHANGE, search dialog is not open');
+                return;
+            }
+            console.debug('search: search again after receiving METADATA_CHANGE event');
+            this.#performSearch();
+        });
         this.#queryInput.addEventListener('input', () => this.#performSearch());
     }
 
