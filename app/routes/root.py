@@ -101,7 +101,10 @@ def route_pwa():
 def route_csp_reports():
     # TODO Add rate limit
     assert request.content_type == 'application/csp-report'
-    log.warning('Received Content-Security-Policy report: %s', jsonw.from_json(request.data))
+    if len(request.data) > 1000:
+        log.warning('Received large Content-Security-Policy: %s bytes', len(request.data))
+    else:
+        log.warning('Received Content-Security-Policy report: %s', jsonw.from_json(request.data))
     return Response(None, 200)
 
 
