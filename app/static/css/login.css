@@ -1,6 +1,6 @@
 .fancy {
     font-family: monospace;
-    animation: sleutelframes 1s ease-in-out infinite, rainbow 5s linear infinite;
+    animation: sleutelframes 2s ease-in-out infinite, rainbow 5s linear infinite;
     position: relative;
     font-size: 1.8em;
     color: hsl(0deg, 100%, 70%);
