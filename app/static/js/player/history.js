@@ -1,8 +1,6 @@
 const PLAYED_TIMER_INTERVAL_SECONDS = 5;
 
 class History {
-    /** @type {Track} */
-    currentlyPlayingTrack;
     /** @type {boolean} */
     hasScrobbled;
     /** @type {number} */
@@ -13,29 +11,23 @@ class History {
     startTimestamp;
 
     constructor() {
-        this.currentlyPlayingTrack = null;
-
         eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => this.#onNewTrack());
     }
 
     #onNewTrack() {
-        const track = queue.currentTrack.track;
-        if (track === null) {
-            console.warn('history: missing track info');
-            this.currentlyPlayingTrack = false;
-            return;
-        }
-        console.debug('history: track changed');
-        this.currentlyPlayingTrack = track;
         this.hasScrobbled = false;
         this.playingCounter = 0;
-        // last.fm requires track to be played for half its duration or for 4 minutes (whichever is less)
-        this.requiredPlayingCounter = Math.min(4*60, Math.round(track.duration / 2));
         this.startTimestamp = Math.floor((new Date()).getTime() / 1000);
+        // last.fm requires track to be played for half its duration or for 4 minutes (whichever is less)
+        if (queue.currentTrack && queue.currentTrack.track) {
+            this.requiredPlayingCounter = Math.min(4*60, Math.round(queue.currentTrack.track.duration / 2));
+        } else {
+            this.requiredPlayingCounter = null;
+        }
     }
 
     async update() {
-        if (this.currentlyPlayingTrack === null) {
+        if (this.requiredPlayingCounter == null) {
             console.debug('history: no current track');
             return;
         }
@@ -54,17 +46,17 @@ class History {
         if (!this.hasScrobbled && this.playingCounter > this.requiredPlayingCounter) {
             console.info('history: played');
             this.hasScrobbled = true;
-            await music.played(this.currentlyPlayingTrack, this.startTimestamp);
+            await music.played(queue.currentTrack.track, this.startTimestamp);
         }
     }
 
     async updateNowPlaying() {
-        if (this.currentlyPlayingTrack == null || this.currentlyPlayingTrack.path == null) {
+        if (this.requiredPlayingCounter == null) {
             console.debug('history: no track playing or not an actual track');
             return;
         }
         const audioElem = getAudioElement();
-        await music.nowPlaying(this.currentlyPlayingTrack, audioElem.paused, audioElem.currentTime / this.currentlyPlayingTrack.duration);
+        await music.nowPlaying(queue.currentTrack.track , audioElem.paused, audioElem.currentTime);
     }
 
 }

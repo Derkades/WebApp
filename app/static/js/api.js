@@ -109,14 +109,14 @@ class Music {
      * every 60 seconds, more frequently is recommended if progress data is included.
      * @param {Track} track
      * @param {boolean} paused
-     * @param {number|undefined} progress Percentage
+     * @param {number} currentTime
      */
-    async nowPlaying(track, paused, progress) {
+    async nowPlaying(track, paused, currentTime) {
         const data = {
             player_id: this.#playerId,
             track: track.path,
             paused: paused,
-            progress: Math.round(progress * 100),
+            progress: Math.round((currentTime / track.duration) * 100),
         };
         await jsonPost('/activity/now_playing', data);
     }
