@@ -30,6 +30,7 @@ body {
     background-color: black;
     color: white;
     height: 100vh;
+    min-width: fit-content; /* if content is wider than screen width, body should extend to fit content */
 }
 
 body.colorful {
