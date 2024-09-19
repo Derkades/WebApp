@@ -1,10 +1,10 @@
 class Dialogs {
     baseIndex;
-    openDialogs;
+    #openDialogs;
 
     constructor() {
         this.baseIndex = 100;
-        this.openDialogs = [];
+        this.#openDialogs = [];
     }
 
     /**
@@ -12,30 +12,32 @@ class Dialogs {
      * @param {string} idToOpen HTML id of dialog element
      */
     open(idToOpen) {
+        console.debug('dialog: open:', idToOpen);
+
         const dialogToOpen = document.getElementById(idToOpen);
         if (!dialogToOpen.classList.contains('dialog-overlay')) {
             throw new Error('Dialog is missing dialog-overlay class');
         }
 
-        if (this.openDialogs.indexOf(idToOpen) !== -1) {
+        if (this.#openDialogs.indexOf(idToOpen) !== -1) {
             // Already open, elevate existing dialog to top
 
             // Create new array with dialog to open removed, then add it on top
-            const newOpenDialogs = this.openDialogs.filter(openDialog => openDialog !== dialogToOpen);
-            newOpenDialogs.push(idToOpen);
+            const newOpenDialogss = this.#openDialogs.filter(openDialog => openDialog !== dialogToOpen);
+            nnewOpenDialogs.push(idToOpen);
 
             // Change z-index of all open dialogs
             let i = 1;
-            for (const openDialog of newOpenDialogs) {
+            for (const openDialog of newopenDialogs) {
                 console.debug('dialog: is open:', openDialog);
                 document.getElementById(openDialog).style.zIndex = this.baseIndex + i++;
             }
 
-            this.openDialogs = newOpenDialogs;
+            this.#openDialogs = newOpenDialogs;
         } else {
             // Add dialog to top (end of array), set z-index and make visible
-            this.openDialogs.push(idToOpen);
-            dialogToOpen.style.zIndex = this.baseIndex + this.openDialogs.length;
+            this.#openDialogs.push(idToOpen);
+            dialogToOpen.style.zIndex = this.baseIndex + this.#openDialogs.indexOf(idToOpen);
             dialogToOpen.classList.remove('overlay-hidden');
         }
     }
@@ -45,15 +47,18 @@ class Dialogs {
      * @param {string} idToClose HTML id of dialog element
      */
     close(idToClose) {
+        console.debug('dialog: close:', idToClose);
+
         // Hide closed dialog
         document.getElementById(idToClose).classList.add('overlay-hidden');
 
         // Remove closed dialog from array
-        this.openDialogs = this.openDialogs.filter(id => id !== idToClose);
+        this.#openDialogs = this.#openDialogs.filter(id => id !== idToClose);
 
         // Update z-index for open dialogs
-        for (const id of this.openDialogs) {
-            document.getElementById(id).style.zIndex = this.baseIndex + this.openDialogs.length;
+        let zIndex = 0;
+        for (const id of this.#openDialogs) {
+            document.getElementById(id).style.zIndex = this.baseIndex + zIndex++;
         }
     }
 
@@ -61,8 +66,8 @@ class Dialogs {
      * Close top dialog
      */
     closeTop() {
-        if (this.openDialogs.length > 0) {
-            this.close(this.openDialogs.pop());
+        if (this.#openDialogs.length > 0) {
+            this.close(this.#openDialogs.pop());
         }
     }
 
