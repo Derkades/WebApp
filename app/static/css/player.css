@@ -66,10 +66,6 @@
     background-size: cover;
 }
 
-#album-covers, #lyrics-box {
-    cursor: pointer;
-}
-
 .album-cover-box {
     position: relative;
 }
