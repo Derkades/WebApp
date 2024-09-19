@@ -127,6 +127,7 @@ def route_rename():
 
             path.rename(Path(path.parent, new_name))
 
+            # TODO use scanner.scan_track to only scan the two changed tracks
             scanner.scan_tracks(conn, playlist.name)
 
             if request.is_json:

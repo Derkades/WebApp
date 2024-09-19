@@ -148,7 +148,7 @@ def route_update_metadata(path):
     track.write_metadata(meta)
 
     with db.connect() as conn:
-        scanner.scan_tracks(conn, track.playlist)
+        scanner.scan_track(conn, track.playlist, track.path, track.relpath)
 
     return Response(None, 200)
 

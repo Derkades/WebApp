@@ -45,6 +45,7 @@ def route_copy_track():
 
         shutil.copy(track.path, playlist.path)
 
+        # TODO use scanner.scan_track to only scan the newly added track
         scanner.scan_tracks(conn, playlist.name)
 
         return Response(None, 200)
