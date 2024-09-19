@@ -19,6 +19,7 @@ from app.routes import activity as app_activity
 from app.routes import auth as app_auth
 from app.routes import dislikes as app_dislikes
 from app.routes import download as app_download
+from app.routes import export as app_export
 from app.routes import files as app_files
 from app.routes import games as app_games
 from app.routes import news as app_news
@@ -52,6 +53,7 @@ def get_app(proxy_count: int, template_reload: bool):
     app.register_blueprint(app_auth.bp)
     app.register_blueprint(app_dislikes.bp)
     app.register_blueprint(app_download.bp)
+    app.register_blueprint(app_export.bp)
     app.register_blueprint(app_files.bp)
     app.register_blueprint(app_games.bp)
     app.register_blueprint(app_news.bp)
