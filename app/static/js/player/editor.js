@@ -33,7 +33,7 @@ class Editor {
             for (const item of value.split(';')) {
                 const trimmed = item.trim();
                 if (trimmed) {
-                    list.append(trimmed);
+                    list.push(trimmed);
                 }
             }
             return list
