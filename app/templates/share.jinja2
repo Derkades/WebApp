@@ -36,9 +36,9 @@
 
     <div class="box padding lyrics">
         {% if lyrics %}
-        {{ lyrics }}
+        {{ lyrics|safe }}
         {% else %}
-        <i>">{% trans %}No lyrics found{% endtrans %}</i>
+        <i>{% trans %}No lyrics found{% endtrans %}</i>
         {% endif %}
     </div>
 </div>

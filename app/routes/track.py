@@ -109,34 +109,12 @@ def route_lyrics(path):
     """
     Get lyrics for the provided track path.
     """
-    if settings.offline_mode:
-        with db.offline(read_only=True) as conn:
-            lyrics_json, = conn.execute('SELECT lyrics_json FROM content WHERE path=?', (path,))
-            return Response(lyrics_json, content_type='application/json')
-
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
 
         track = Track.by_relpath(conn, path)
-        meta = track.metadata()
 
-    if meta.lyrics:
-        log.info('using lyrics from metadata')
-        return {'found': True,
-                'source': None,
-                'html': meta.lyrics.replace('\n', '<br>')}
-
-    from app import genius
-
-    lyrics = genius.get_lyrics(meta.lyrics_search_query())
-    if lyrics is None:
-        return {'found': False}
-
-    return {
-        'found': True,
-        'source': lyrics.source_url,
-        'html': lyrics.lyrics_html,
-    }
+        return track.lyrics_html_dict()
 
 
 @bp.route('/<path:path>/update_metadata', methods=['POST'])

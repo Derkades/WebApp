@@ -14,7 +14,7 @@ from sqlite3 import Connection
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, Iterator, Literal, Optional
 
-from app import cache, image, jsonw, metadata, musicbrainz, reddit, settings
+from app import cache, image, jsonw, metadata, musicbrainz, reddit, settings, db
 from app.auth import User
 from app.image import ImageFormat, ImageQuality
 
@@ -431,6 +431,40 @@ class Track:
             'display': meta.display_title(),
         }
 
+    def lyrics_html_dict(self):
+        """
+        Returns lyrics dictionary with the following variables:
+            found: bool - Whether lyrics was found
+            source: str|None - Source URL, if lyrics are from an online source
+            html: str - Lyrics HTML that (hopefully) only contains safe HTML and should be rendered in unescaped form.
+
+        """
+        # TODO found boolean is unnecessary
+        # TODO remove all HTML from lyrics, replace <br> with regular newline. Configure CSS to line break on newlines. Raw HTML is a bit too risky...
+        if settings.offline_mode:
+            with db.offline(read_only=True) as conn:
+                lyrics_json, = conn.execute('SELECT lyrics_json FROM content WHERE path=?', (self.path,))
+                return jsonw.from_json(lyrics_json)
+
+        meta = self.metadata()
+
+        if meta.lyrics:
+            log.info('using lyrics from metadata')
+            return {'found': True,
+                    'source': None,
+                    'html': meta.lyrics.replace('\n', '<br>')}
+
+        from app import genius
+
+        lyrics = genius.get_lyrics(meta.lyrics_search_query())
+        if lyrics is None:
+            return {'found': False}
+
+        return {
+            'found': True,
+            'source': lyrics.source_url,
+            'html': lyrics.lyrics_html,
+        }
 
     @staticmethod
     def by_relpath(conn: Connection, relpath: str) -> 'Track' | None:

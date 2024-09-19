@@ -71,5 +71,6 @@ def get_app(proxy_count: int, template_reload: bool):
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=proxy_count)
     app.jinja_env.auto_reload = template_reload
     app.jinja_env.undefined = jinja2.StrictUndefined
+    app.jinja_env.autoescape = True  # autoescape is on by default, but only for files extensions like .html, but we use .jinja2. Enable autoescape unconditionally.
     Babel(app, locale_selector=language.get_locale)
     return app
