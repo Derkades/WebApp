@@ -441,7 +441,7 @@ class Track:
     def lyrics(self) -> Optional[Lyrics]:
         if settings.offline_mode:
             with db.offline(read_only=True) as conn:
-                lyrics_json, = conn.execute('SELECT lyrics_json FROM content WHERE path=?', (self.path,))
+                lyrics_json, = conn.execute('SELECT lyrics_json FROM content WHERE path=?', (self.relpath,))
                 return jsonw.from_json(lyrics_json)
 
         meta = self.metadata()
