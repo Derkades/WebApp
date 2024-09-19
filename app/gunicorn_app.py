@@ -22,7 +22,7 @@ class GunicornApp(BaseApplication):
         pass
 
     def load(self):
-        return main.get_app(self.proxy_count, True)
+        return main.get_app(self.proxy_count, False)
 
     def load_config(self):
         self.cfg.set('bind', self.bind)
