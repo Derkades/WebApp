@@ -352,7 +352,7 @@ class Track {
         checkResponseCode(lyricsResponse);
         const lyricsJson = await lyricsResponse.json();
         console.debug('track: downloaded lyrics', lyricsUrl);
-        return lyricsJson.found ? new Lyrics(lyricsJson.source, lyricsJson.html) : null;
+        return lyricsJson.lyrics ? new Lyrics(lyricsJson.source_url, lyricsJson.lyrics) : null;
     }
 
     /**
@@ -450,10 +450,10 @@ class Lyrics {
     /** @type {string | null} */
     source;
     /** @type {string} */
-    html;
-    constructor(source, html) {
+    lyrics;
+    constructor(source, lyrics) {
         this.source = source;
-        this.html = html;
+        this.lyrics = lyrics;
     };
 };
 

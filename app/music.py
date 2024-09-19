@@ -14,7 +14,8 @@ from sqlite3 import Connection
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, Iterator, Literal, Optional
 
-from app import cache, image, jsonw, metadata, musicbrainz, reddit, settings, db
+from app import (cache, db, image, jsonw, metadata, musicbrainz, reddit,
+                 settings)
 from app.auth import User
 from app.image import ImageFormat, ImageQuality
 
@@ -190,6 +191,12 @@ class AudioType(Enum):
     compatibility.
     """
     MP3_WITH_METADATA = 3
+
+
+@dataclass
+class Lyrics:
+    source_url: Optional[str]
+    lyrics: str
 
 
 @dataclass
@@ -431,16 +438,7 @@ class Track:
             'display': meta.display_title(),
         }
 
-    def lyrics_html_dict(self):
-        """
-        Returns lyrics dictionary with the following variables:
-            found: bool - Whether lyrics was found
-            source: str|None - Source URL, if lyrics are from an online source
-            html: str - Lyrics HTML that (hopefully) only contains safe HTML and should be rendered in unescaped form.
-
-        """
-        # TODO found boolean is unnecessary
-        # TODO remove all HTML from lyrics, replace <br> with regular newline. Configure CSS to line break on newlines. Raw HTML is a bit too risky...
+    def lyrics(self) -> Optional[Lyrics]:
         if settings.offline_mode:
             with db.offline(read_only=True) as conn:
                 lyrics_json, = conn.execute('SELECT lyrics_json FROM content WHERE path=?', (self.path,))
@@ -450,21 +448,11 @@ class Track:
 
         if meta.lyrics:
             log.info('using lyrics from metadata')
-            return {'found': True,
-                    'source': None,
-                    'html': meta.lyrics.replace('\n', '<br>')}
+            return Lyrics(None, meta.lyrics)
 
         from app import genius
 
-        lyrics = genius.get_lyrics(meta.lyrics_search_query())
-        if lyrics is None:
-            return {'found': False}
-
-        return {
-            'found': True,
-            'source': lyrics.source_url,
-            'html': lyrics.lyrics_html,
-        }
+        return genius.get_lyrics(meta.lyrics_search_query())
 
     @staticmethod
     def by_relpath(conn: Connection, relpath: str) -> 'Track' | None:

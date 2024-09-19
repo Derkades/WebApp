@@ -113,8 +113,12 @@ def route_lyrics(path):
         auth.verify_auth_cookie(conn)
 
         track = Track.by_relpath(conn, path)
-
-        return track.lyrics_html_dict()
+        lyrics = track.lyrics()
+        if lyrics:
+            return {'lyrics': lyrics.lyrics,
+                    'source_url': lyrics.source_url}
+        else:
+            return {'lyrics': False}
 
 
 @bp.route('/<path:path>/update_metadata', methods=['POST'])

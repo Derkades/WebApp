@@ -3,12 +3,12 @@ import json
 import logging
 import sys
 import traceback
-from dataclasses import dataclass
 
 import requests
 from bs4 import BeautifulSoup, NavigableString, PageElement, Tag
 
 from app import cache, settings
+from app.music import Lyrics
 
 log = logging.getLogger('app.genius')
 
@@ -16,12 +16,6 @@ log = logging.getLogger('app.genius')
 if settings.offline_mode:
     # Module must not be imported to ensure no data is ever downloaded in offline mode.
     raise RuntimeError('Cannot use genius in offline mode')
-
-
-@dataclass
-class Lyrics:
-    source_url: str | None
-    lyrics_html: str
 
 
 def _search(title: str) -> str | None:
@@ -43,17 +37,17 @@ def _search(title: str) -> str | None:
     return None
 
 
-def _html_tree_to_lyrics(elements: list[PageElement], level: int = 0) -> str:
+def _html_tree_to_lyrics(elements: list[PageElement]) -> str:
     lyrics_str = ''
     for element in elements:
         if isinstance(element, NavigableString):
-            lyrics_str += html.escape(str(element))
+            lyrics_str += str(element).replace('\n', '') # remove line breaks, only <br> tags should become line breaks
         elif isinstance(element, Tag):
             if element.name == 'br':
-                lyrics_str += '<br>'
+                lyrics_str += '\n'
             else:
                 # Probably an element like <a>, <p>, <i> with important text inside it.
-                lyrics_str += _html_tree_to_lyrics(element.contents, level + 1)
+                lyrics_str += _html_tree_to_lyrics(element.contents)
         else:
             log.warning('Encountered unexpected element type: %s', type(element))
     return lyrics_str
@@ -113,7 +107,7 @@ def get_lyrics(query: str) -> Lyrics | None:
         query: Search query
     Returns: Lyrics object, or None if no lyrics were found
     """
-    cache_key = 'genius3' + query
+    cache_key = 'genius6' + query
     cached_data = cache.retrieve_json(cache_key)
 
     if cached_data is not None:

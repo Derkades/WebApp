@@ -83,7 +83,7 @@ function replaceLyrics() {
     if (queuedTrack.lyrics) {
         notFoundElem.classList.add('hidden');
         textElem.classList.remove('hidden');
-        textElem.innerHTML = queuedTrack.lyrics.html + '<br>';
+        textElem.textContent = queuedTrack.lyrics.lyrics;
     } else {
         notFoundElem.classList.remove('hidden');
         textElem.classList.add('hidden');

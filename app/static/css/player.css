@@ -83,6 +83,12 @@
     position: absolute;
 }
 
+/* LYRICS */
+
+#lyrics-text {
+    white-space: pre-line; /* render newlines */
+}
+
 /* PLAYLISTS */
 
 .other-checkboxes {

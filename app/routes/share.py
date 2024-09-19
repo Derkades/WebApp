@@ -111,12 +111,11 @@ def show(code):
                                   WHERE share_code=?
                                   ''', (code,)).fetchone()
 
-        lyrics_dict = track.lyrics_html_dict()
-        lyrics = lyrics_dict['html'] if lyrics_dict['found'] else None
+        lyrics = track.lyrics()
         meta = track.metadata()
 
     return render_template('share.jinja2',
                            code=code,
                            shared_by=shared_by,
                            track=meta.display_title(),
-                           lyrics=lyrics)
+                           lyrics=lyrics.lyrics)

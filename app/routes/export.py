@@ -1,15 +1,15 @@
-import logging
-from threading import Thread
-
-from flask import Blueprint, Response, abort, render_template, request, send_file
-from zipfile import ZipFile, ZIP_LZMA
-from io import BytesIO, IOBase
-from app import auth, db, music, scanner
-from app.jsonw import to_json
-from typing import Iterable, Iterator
 import json
-from queue import Queue
+import logging
 from dataclasses import dataclass
+from io import IOBase
+from queue import Queue
+from threading import Thread
+from typing import Iterable, Iterator
+from zipfile import ZIP_LZMA, ZipFile
+
+from flask import Blueprint, Response
+
+from app import auth, db
 
 log = logging.getLogger('app.routes.export')
 bp = Blueprint('export', __name__, url_prefix='/export')
