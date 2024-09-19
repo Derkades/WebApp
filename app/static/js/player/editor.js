@@ -26,12 +26,15 @@ class Editor {
      * @param {boolean} list If enabled, the value is split to a list by the semicolon character
      * @returns Value of HTML input with the given id.
      */
-    getValue(id, list = false) {
+    #getValue(id, isList = false) {
         let value = document.getElementById(id).value;
-        if (list) {
-            const list = value.split(';');
-            for (let i = 0; i < list.length; i++) {
-                list[i] = list[i].trim();
+        if (isList) {
+            const list = [];
+            for (const item of value.split(';')) {
+                const trimmed = item.trim();
+                if (trimmed) {
+                    list.append(trimmed);
+                }
             }
             return list
         } else {
@@ -64,12 +67,12 @@ class Editor {
      * Copy content from input fields to track object
      */
     htmlToTrack() {
-        this.#track.title = this.getValue('editor-title');
-        this.#track.album = this.getValue('editor-album');
-        this.#track.artists = this.getValue('editor-artists', true);
-        this.#track.albumArtist = this.getValue('editor-album-artist');
-        this.#track.tags = this.getValue('editor-tags', true);
-        this.#track.year = this.getValue('editor-year');
+        this.#track.title = this.#getValue('editor-title');
+        this.#track.album = this.#getValue('editor-album');
+        this.#track.artists = this.#getValue('editor-artists', true);
+        this.#track.albumArtist = this.#getValue('editor-album-artist');
+        this.#track.tags = this.#getValue('editor-tags', true);
+        this.#track.year = this.#getValue('editor-year');
     }
 
     /**
