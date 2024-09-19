@@ -21,7 +21,7 @@ class Search {
                 return;
             }
             console.debug('search: search again after receiving METADATA_CHANGE event');
-            this.#performSearch();
+            this.#performSearch(true);
         });
         this.#queryInput.addEventListener('input', () => this.#performSearch());
     }
