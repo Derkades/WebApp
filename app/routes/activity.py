@@ -172,15 +172,6 @@ def route_now_playing():
         progress = request.json['progress']
         assert isinstance(progress, int)
 
-        user_key = lastfm.get_user_key(user)
-
-        if user_key:
-            result = conn.execute('''
-                                  SELECT timestamp FROM now_playing
-                                  WHERE user = ? AND track = ?
-                                  ''', (user.user_id, relpath)).fetchone()
-            previous_update = None if result is None else result[0]
-
         conn.execute('''
                      INSERT INTO now_playing (player_id, user, timestamp, track, paused, progress)
                      VALUES (:player_id, :user_id, :timestamp, :relpath, :paused, :progress)
@@ -194,23 +185,16 @@ def route_now_playing():
                       'paused': paused,
                       'progress': progress})
 
-        if not user_key:
-            # Skip last.fm now playing, account is not linked
-            return Response(None, 200, content_type='text/plain')
+        user_key = lastfm.get_user_key(user)
+        if user_key and not paused:
+            track = Track.by_relpath(conn, relpath)
+            meta = track.metadata()
 
-        # If now playing has already been sent for this track, only send an update to
-        # last.fm if it was more than 5 minutes ago.
-        if previous_update is not None and int(time.time()) - previous_update < 5*60:
-            # Skip last.fm now playing, already sent recently
-            return Response(None, 200, content_type='text/plain')
+    # Don't keep database connection open while making last.fm request
+    if user_key and not paused:
+        log.info('Sending now playing to last.fm: %s', track.relpath)
+        lastfm.update_now_playing(user_key, meta)
 
-        track = Track.by_relpath(conn, relpath)
-        meta = track.metadata()
-
-    # Request to last.fm takes a while, so close database connection first
-
-    log.info('Sending now playing to last.fm: %s', track.relpath)
-    lastfm.update_now_playing(user_key, meta)
     return Response(None, 200, content_type='text/plain')
 
 

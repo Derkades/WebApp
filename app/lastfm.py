@@ -9,7 +9,7 @@ from app import metadata, settings
 from app.auth import StandardUser
 from app.metadata import Metadata
 
-log = logging.getLogger('app.radio')
+log = logging.getLogger('app.lastfm')
 
 
 def get_connect_url() -> str | None:
@@ -83,6 +83,7 @@ def obtain_session_key(user: StandardUser, auth_token: str) -> str:
 
 def update_now_playing(user_key: str, meta: Metadata):
     """Send now playing status to last.fm"""
+    # TODO rate limit
     if not is_configured():
         log.info('Skipped scrobble, last.fm not configured')
         return
