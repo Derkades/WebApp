@@ -441,8 +441,15 @@ class Track:
     def lyrics(self) -> Optional[Lyrics]:
         if settings.offline_mode:
             with db.offline(read_only=True) as conn:
-                lyrics_json, = conn.execute('SELECT lyrics_json FROM content WHERE path=?', (self.relpath,))
-                return jsonw.from_json(lyrics_json)
+                lyrics_json = jsonw.from_json(conn.execute('SELECT lyrics_json FROM content WHERE path=?', (self.relpath,)).fetchone()[0])
+                if 'found' in lyrics_json and lyrics_json['found']:
+                    # Legacy HTML lyrics, best effort conversion from HTML to plain text
+                    import html
+                    return Lyrics(lyrics_json['source'], html.unescape(lyrics_json['html'].replace('<br>', '\n')))
+                elif 'lyrics' in lyrics_json and lyrics_json['lyrics'] is not None:
+                    return Lyrics(lyrics_json['source_url'], lyrics_json['lyrics'])
+                else:
+                    return None
 
         meta = self.metadata()
 
