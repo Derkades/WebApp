@@ -311,8 +311,9 @@ input::placeholder {
 
 .table thead tr {
     background: black;
-    position: sticky;
+    position: sticky; /* stay visible when scrolling */
     top: 0;
+    z-index: 1; /* heading should be above table content */
 }
 
 .table td,
