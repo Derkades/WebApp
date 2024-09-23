@@ -153,7 +153,6 @@ def scan_tracks(conn: Connection, playlist_name: str) -> None:
     Scan for added, removed or changed tracks in a playlist.
     """
     log.info('Scanning playlist: %s', playlist_name)
-    print(playlist_name, music.from_relpath(playlist_name))
     paths_db: set[str] = set()
 
     for track_relpath, in conn.execute('SELECT path FROM track WHERE playlist=?',
@@ -162,8 +161,8 @@ def scan_tracks(conn: Connection, playlist_name: str) -> None:
             paths_db.add(track_relpath)
 
     for track_path in music.list_tracks_recursively(music.from_relpath(playlist_name)):
-        relpath = music.to_relpath(track_path)
-        if relpath not in paths_db:
+        track_relpath = music.to_relpath(track_path)
+        if track_relpath not in paths_db:
             scan_track(conn, playlist_name, track_path, track_relpath)
 
 
