@@ -23,17 +23,15 @@ class Dialogs {
             // Already open, elevate existing dialog to top
 
             // Create new array with dialog to open removed, then add it on top
-            const newOpenDialogss = this.#openDialogs.filter(openDialog => openDialog !== dialogToOpen);
-            nnewOpenDialogs.push(idToOpen);
+            this.#openDialogs = this.#openDialogs.filter(openDialog => openDialog !== dialogToOpen);
+            this.#openDialogs.push(idToOpen);
 
             // Change z-index of all open dialogs
             let i = 1;
-            for (const openDialog of newopenDialogs) {
+            for (const openDialog of this.#openDialogs) {
                 console.debug('dialog: is open:', openDialog);
                 document.getElementById(openDialog).style.zIndex = this.baseIndex + i++;
             }
-
-            this.#openDialogs = newOpenDialogs;
         } else {
             // Add dialog to top (end of array), set z-index and make visible
             this.#openDialogs.push(idToOpen);
