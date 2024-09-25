@@ -6,6 +6,7 @@ from flask import (Blueprint, Response, abort, redirect, render_template,
 
 from app import auth, db, music, scanner, settings, util
 from app.music import Playlist, Track
+from app.util import send_directory
 
 bp = Blueprint('files', __name__, url_prefix='/files')
 
@@ -167,9 +168,20 @@ def route_mkdir():
 @bp.route('/download')
 def route_download():
     """
-    Download track
+    Download single file
     """
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
     path = music.from_relpath(request.args['path'])
     return send_file(path, as_attachment=True)
+
+
+@bp.route('/download_zip')
+def route_download_zip():
+    """
+    Download directory as zip file
+    """
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn)
+    path = music.from_relpath(request.args['path'])
+    return send_directory(path)

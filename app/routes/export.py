@@ -1,15 +1,14 @@
 import json
 import logging
 from dataclasses import dataclass
-from io import IOBase
-from queue import Queue
 from threading import Thread
-from typing import Iterable, Iterator
+from typing import Iterable
 from zipfile import ZIP_LZMA, ZipFile
 
 from flask import Blueprint, Response
 
 from app import auth, db
+from app.util import QueueIO
 
 log = logging.getLogger('app.routes.export')
 bp = Blueprint('export', __name__, url_prefix='/export')
@@ -27,35 +26,6 @@ class ExportQuery:
     query: str
     params: Iterable[str|int]
     one: bool
-
-
-class QueueIO(IOBase):
-    queue: Queue[bytes|None]
-
-    def __init__(self) -> None:
-        self.queue = Queue(maxsize=32)
-
-    def close(self):
-        super().close()
-        self.queue.put(None)
-
-    def readable():
-        return False
-
-    def seekable():
-        return False
-
-    def write(self, data: bytes):
-        self.queue.put(data)
-        return len(data)
-
-    def iterator(self) -> Iterator[bytes]:
-        while True:
-            data = self.queue.get(True)
-            if data is None:
-                return
-
-            yield data
 
 
 def generate_zip(queue_io: QueueIO, user_id: int):
