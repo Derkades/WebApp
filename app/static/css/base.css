@@ -200,6 +200,10 @@ input::placeholder {
     color: #ccc;
 }
 
+.form-inline {
+    display: inline;
+}
+
 .form {
     display: grid;
     grid-template-columns: auto auto;
