@@ -1,4 +1,4 @@
-gunicorn~=22.0
+gunicorn~=23.0
 flask~=3.0
 flask-babel~=4.0
 requests~=2.0
