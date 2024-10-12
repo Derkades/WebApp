@@ -12,8 +12,7 @@ class News {
     }
 
     check() {
-        const provider = this.#newsSetting.value;
-        if (provider == 'disabled') {
+        if (!this.#newsSetting.checked) {
             console.debug('news: is disabled')
             return;
         }

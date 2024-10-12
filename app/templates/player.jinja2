@@ -164,9 +164,7 @@
                 <input id="settings-theater" type="checkbox">
 
                 {% if offline_mode %}
-                    <select id="settings-news" class="hidden">
-                        <option value="disabled" selected></option>
-                    </select>
+                    <input id="settings-news" type="checkbox" class="hidden">
                 {% else %}
                     <label for="settings-news">{% trans %}Hourly news{% endtrans %}</label>
                     <input id="settings-news" type="checkbox">
