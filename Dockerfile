@@ -1,9 +1,10 @@
-# FROM python:3.12-slim AS base
 # Temporary fix for missing FTS5 trigram tokenizer in the sqlite3 library version in standard python:3.12-slim image.
-FROM debian:sid AS base
+# TODO Migrate back to Python base image when trixie is released
+FROM debian:trixie AS base
 
 RUN apt-get update && \
-    apt-get install -y python3-pip
+    apt-get install -y python3-pip && \
+    rm -rf /var/lib/apt/lists/*
 
 FROM base AS ffmpeg-build
 
