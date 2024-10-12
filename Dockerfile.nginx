@@ -4,7 +4,7 @@ USER root
 RUN rm /usr/share/nginx/html/*
 USER www-data
 
-COPY --chown=www-data app/static /usr/share/nginx/html/static
+COPY --chown=www-data raphson_mp/static /usr/share/nginx/html/static
 
 COPY docker/nginx/default.conf /etc/nginx/conf.d/
 COPY docker/nginx/proxy.conf.template /etc/nginx/templates/

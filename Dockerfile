@@ -120,11 +120,11 @@ WORKDIR "/mp"
 
 FROM common AS prod
 
-COPY ./app /mp/app
+COPY ./raphson_mp /mp/raphson_mp
 
-RUN PYTHONDONTWRITEBYTECODE=1 pybabel compile -d /mp/app/translations
+RUN PYTHONDONTWRITEBYTECODE=1 pybabel compile -d /mp/raphson_mp/translations
 
-ENTRYPOINT ["python3", "-m", "app"]
+ENTRYPOINT ["python3", "-m", "raphson_mp"]
 CMD ["start", "--host", "0.0.0.0"]
 
 ###############################################################################

@@ -34,14 +34,14 @@ python3 mp.py start --dev
   * `docker/`: additional files used to build containers.
   * `docs/`: documentation in markdown format.
   * (`music/`): default music directory.
-  * `app/migrations/`: sql files used to update the database.
-  * `app/routes`: files containing flask blueprints and routes
-  * `app/sql/`: sql files used to initialize the database, also useful as a database layout reference.
-  * `app/static/`: static files that are served as-is by the frontend, under the `/static` URL.
-  * `app/js/player/*.js`: concatenated to `src/js/player.js` on-the-fly, or manually during building for better performance.
-  * `app/templates/`: jinja2 template files for web pages.
-  * `app/translations/`: translation files. Do not edit manually, see translations section.
-  * `app/`: contains program source code
+  * `raphson_mp/migrations/`: sql files used to update the database.
+  * `raphson_mp/routes`: files containing flask blueprints and routes
+  * `raphson_mp/sql/`: sql files used to initialize the database, also useful as a database layout reference.
+  * `raphson_mp/static/`: static files that are served as-is by the frontend, under the `/static` URL.
+  * `raphson_mp/js/player/*.js`: concatenated to `src/js/player.js` on-the-fly, or manually during building for better performance.
+  * `raphson_mp/templates/`: jinja2 template files for web pages.
+  * `raphson_mp/translations/`: translation files. Do not edit manually, see translations section.
+  * `raphson_mp/`: contains program source code
   * `mp.py`: main entrypoint
 
 ## Import sorting
