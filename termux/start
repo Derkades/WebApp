@@ -4,4 +4,4 @@
 set -e
 mkdir -p data
 pybabel compile -d app/translations
-python mp.py --offline --data-dir=./data --short-log-format start $@
+python -m app --offline --data-dir=./data --short-log-format start $@

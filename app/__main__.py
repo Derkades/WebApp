@@ -8,7 +8,7 @@ from typing import Any, Optional
 
 from app import auth, logconfig, settings
 
-log = logging.getLogger('cli')
+log = logging.getLogger('app.cli')
 
 
 def handle_start(args: Any, logconfig_dict: dict) -> None:

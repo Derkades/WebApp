@@ -1,2 +1,2 @@
 #!/bin/bash
-exec python3 /mp/mp.py $@
+exec python3 -m app $@

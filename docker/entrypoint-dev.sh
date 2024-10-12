@@ -5,4 +5,4 @@ set -e
 # compiled during build so need to be compiled now.
 pybabel compile -d app/translations
 
-exec python3 mp.py $@
+exec python3 -m app $@

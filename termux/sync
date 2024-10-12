@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 set -e
-python mp.py --offline --data-dir=./data --short-log-format sync $@
+python -m app --offline --data-dir=./data --short-log-format sync $@
