@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
+echo "Termux scripts are deprecated and will be removed in a future version."
+
 # Install python
 pkg install -y python python-pip
 

@@ -2,6 +2,9 @@
 # Start music player in offline mode
 # Intended for running music player in Termux environment
 set -e
+
+echo "Termux scripts are deprecated and will be removed in a future version."
+
 mkdir -p data
 pybabel compile -d raphson_mp/translations
 python -m raphson_mp --offline --data-dir=./data --short-log-format start $@
