@@ -7,3 +7,4 @@ __pycache__/
 messages.pot
 *.mo
 download-state.json
+dist/

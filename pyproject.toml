@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "raphson_mp"
+version = "1.0.0"
+authors = [
+  { name="Robin Slot", email="robin@rslot.nl" },
+]
+description = "Raphson music player"
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Framework :: Flask",
+    "Intended Audience :: End Users/Desktop",
+    "Natural Language :: English",
+    "Natural Language :: Dutch",
+    "Operating System :: POSIX",
+    "Topic :: Multimedia :: Sound/Audio :: Players",
+    "Typing :: Typed"
+]
+
+[project.urls]
+Homepage = "https://github.com/Derkades/WebApp"
+Issues = "https://github.com/Derkades/WebApp/issues"
