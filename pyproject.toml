@@ -23,6 +23,21 @@ classifiers = [
     "Topic :: Multimedia :: Sound/Audio :: Players",
     "Typing :: Typed"
 ]
+dependencies = [
+    "gunicorn>=21.0", # previous versions have logging issues
+    "flask>=3.0",
+    "flask-babel>=4.0", # required for compat with flask 3
+    "requests>=2.25.0", # arbitrary somewhat recent version
+]
+
+[project.optional-dependencies]
+online = [
+    "beautifulsoup4>=4.0",
+    "lxml>=4.0",
+    "bcrypt>=3.0",
+    "yt-dlp"
+]
+prometheus = ["prometheus-client>=0.15.0"]
 
 [project.urls]
 Homepage = "https://github.com/Derkades/WebApp"
