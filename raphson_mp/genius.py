@@ -1,8 +1,7 @@
-import html
 import json
 import logging
-import sys
 import traceback
+from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup, NavigableString, PageElement, Tag
@@ -53,7 +52,7 @@ def _html_tree_to_lyrics(elements: list[PageElement]) -> str:
     return lyrics_str
 
 
-def _extract_lyrics(genius_url: str) -> str | None:
+def _extract_lyrics(genius_url: str, debug=False) -> str | None:
     """
     Extract lyrics from the supplied Genius lyrics page
     Parameters:
@@ -66,6 +65,8 @@ def _extract_lyrics(genius_url: str) -> str | None:
                      timeout=10,
                      headers={'User-Agent': settings.webscraping_user_agent})
     text = r.text
+    if debug:
+        Path('debug_genius_full.html').write_text(text)
     # Find the important bit of javascript using these known parts of the code
     start = text.index('window.__PRELOADED_STATE__ = JSON.parse(') + 41
     end = text.index("}');") + 1
@@ -78,6 +79,8 @@ def _extract_lyrics(genius_url: str) -> str | None:
         .replace('\\\\', '\\') \
         .replace('\\$', '$') \
         .replace('\\`', '`')
+    if debug:
+        Path('debug_genius_info.json').write_text(info_json_string)
     try:
         # Now, the JSON object is ready to be parsed.
         info_json = json.loads(info_json_string)
@@ -153,22 +156,3 @@ def get_lyrics(query: str) -> Lyrics | None:
                      cache.YEAR)
 
     return Lyrics(genius_url, lyrics_html)
-
-
-if __name__ == '__main__':
-    if len(sys.argv) == 3:
-        if sys.argv[1] == 'search':
-            print(_search(sys.argv[2]))
-            sys.exit(0)
-        elif sys.argv[1] == 'extract':
-            lyrics = _extract_lyrics(sys.argv[2])
-            if lyrics is None:
-                print('no lyrics found')
-            else:
-                for line in lyrics.split('<br>'):
-                    print(line)
-            sys.exit(0)
-
-    print('Usage:')
-    print(f' - {sys.argv[0]} search [search query]')
-    print(f' - {sys.argv[0]} extract [genius url]')

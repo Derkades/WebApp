@@ -215,6 +215,19 @@ def handle_cover(args: Any) -> None:
     Path('cover.jpg').write_bytes(cover_bytes)
 
 
+def handle_genius_search(args: Any) -> None:
+    from raphson_mp import genius
+    print(genius._search(args.query))
+
+def handle_genius_search(args: Any) -> None:
+    from raphson_mp import genius
+    lyrics = genius._extract_lyrics(args.url, debug=True)
+    if lyrics is None:
+        print('no lyrics found')
+    else:
+        print(lyrics)
+
+
 def _strenv(name: str, default: str = None):
     return os.getenv('MUSIC_' + name, default)
 
@@ -337,6 +350,14 @@ def main():
     cmd_cover.add_argument('title')
     cmd_cover.add_argument('--meme', action='store_true')
     cmd_cover.set_defaults(func=handle_cover)
+
+    cmd_cover = subparsers.add_parser('debug-genius-search')
+    cmd_cover.add_argument('query')
+    cmd_cover.set_defaults(func=handle_genius_search)
+
+    cmd_cover = subparsers.add_parser('debug-genius-extract')
+    cmd_cover.add_argument('url')
+    cmd_cover.set_defaults(func=handle_genius_search)
 
     args = parser.parse_args()
 
