@@ -69,7 +69,7 @@ def _extract_lyrics(genius_url: str, debug=False) -> str | None:
         Path('debug_genius_full.html').write_text(text)
     # Find the important bit of javascript using these known parts of the code
     start = text.index('window.__PRELOADED_STATE__ = JSON.parse(') + 41
-    end = text.index("}');") + 1
+    end = start + text[start:].index("}');") + 1
     # Inside the javascript bit that has now been extracted, is a string. This string contains
     # JSON data. Because it is in a string, some characters are escaped. These need to be
     # un-escaped first.
