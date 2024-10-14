@@ -60,20 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     seekBar.addEventListener('wheel', event => {
         seekRelative(event.deltaY < 0 ? 3 : -3);
     }, {passive: true});
-
-    hideButtons();
 });
-
-function hideButtons() {
-    if (!document.getElementById('button-dislike')) {
-        // if dislike button does not exist, we are running in offline mode and other buttons also don't exist
-        return;
-    }
-
-    document.getElementById('button-edit').classList.add('hidden');
-    document.getElementById('button-delete').classList.add('hidden');
-    document.getElementById('button-dislike').classList.add('hidden');
-}
 
 // Update seek bar
 function updateSeekBar() {
@@ -125,7 +112,7 @@ eventBus.subscribe(MusicEvent.TRACK_CHANGE, async function() {
 
     // Show dislike button if track is real (e.g. not a virtual news track)
     const showDislike = track !== null;
-    const showEditDelete = track !== null && (await music.playlist(track.playlistName)).write;
+    const showEdit = track !== null && (await music.playlist(track.playlistName)).write;
 
     if (showDislike) {
         document.getElementById('button-dislike').classList.remove('hidden');
@@ -133,12 +120,14 @@ eventBus.subscribe(MusicEvent.TRACK_CHANGE, async function() {
         document.getElementById('button-dislike').classList.add('hidden');
     }
 
-    if (showEditDelete) {
+    if (showEdit) {
         document.getElementById('button-edit').classList.remove('hidden');
         document.getElementById('button-delete').classList.remove('hidden');
+        document.getElementById('button-copy').classList.remove('hidden');
     } else {
         document.getElementById('button-edit').classList.add('hidden');
         document.getElementById('button-delete').classList.add('hidden');
+        document.getElementById('button-copy').classList.add('hidden');
     }
 });
 
