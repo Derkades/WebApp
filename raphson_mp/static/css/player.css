@@ -31,10 +31,6 @@
         flex-wrap: wrap;
     }
 
-    .sidebar {
-        margin: calc(var(--gap) / 2);
-    }
-
     #right-scroll {
         max-height: 100%;
     }
@@ -293,7 +289,7 @@ h4 > .icon {
 
 .checkbox-with-label {
     display: inline-block;
-    margin-right: 1rem;
+    margin-right: var(--gap);
     margin-bottom: .25rem;
     margin-top: .25rem;
     white-space: nowrap;

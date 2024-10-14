@@ -10,6 +10,12 @@
     --box-background-color: rgba(20, 20, 20, 0.4);
 }
 
+@media screen and (max-width: 900px) {
+    :root {
+        --gap: .8rem;
+    }
+}
+
 /* FONT */
 
 @font-face {
@@ -40,7 +46,7 @@ body.colorful {
 
 main {
     background-color: rgba(0, 0, 0, 0.5);
-    padding: 1rem;
+    padding: var(--gap);
     width: 100%;
     max-width: 100rem;
     box-sizing: border-box; /* include padding in max-width */
@@ -48,7 +54,7 @@ main {
 
 @media screen and (min-width: 100rem) {
     main {
-        margin: 1rem;
+        margin: var(--gap);
         border-radius: var(--border-radius);
     }
 }
@@ -124,13 +130,13 @@ input[type=password],
 input[type=checkbox],
 input[type=range],
 .logbox {
-    padding: .25rem;
+    padding: var(--smallgap);
     background-color: var(--elem-background-color);
     border-radius: var(--border-radius);
     color: white;
     margin-bottom: .3rem;
     border: 1px solid var(--elem-border-color);
-    font-size: 0.9em;
+    font-size: .9em;
 }
 
 button:disabled,
@@ -349,7 +355,7 @@ input::placeholder {
 
 .boxes {
     display: flex;
-    gap: 1rem;
+    gap: var(--gap);
     flex-wrap: wrap;
     width: 100%;
 }
@@ -359,7 +365,7 @@ input::placeholder {
 }
 
 .padding {
-    padding: 1rem;
+    padding: var(--gap);
 }
 
 .flex-content-center {
