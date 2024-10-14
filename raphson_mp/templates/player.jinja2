@@ -180,10 +180,11 @@
         <div class="dialog">
             {{ dialog_header('dialog-tags', gettext('Tags')) }}
             <div class="dialog-body">
-                <label for="tag-mode">{% trans %}Tracks with selected tags{% endtrans %}</label>
+                <label for="tag-mode">{% trans %}Tag mode{% endtrans %}</label>
                 <select id="tag-mode">
-                    <option value="allow">{% trans %}may be chosen (untagged tracks are not chosen){% endtrans %}</option>
-                    <option value="deny" selected>{% trans %}may not be chosen (untagged tracks are chosen){% endtrans %}</option>
+                    <option value="none" selected>{% trans %}Ignore tags when choosing tracks{% endtrans %}</option>
+                    <option value="allow">{% trans %}Only choose tracks with selected tags (untagged tracks are not chosen){% endtrans %}</option>
+                    <option value="deny">{% trans %}Don't choose tracks with selected tags (untagged tracks are chosen){% endtrans %}</option>
                 </select>
                 <button id="select-all">{% trans %}(Un)select all{% endtrans %}</button>
                 <div id="tag-checkboxes"></div>

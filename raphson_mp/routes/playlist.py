@@ -162,7 +162,8 @@ def route_track(playlist):
         if 'tag_mode' in request.json:
             tag_mode = request.json['tag_mode']
             assert tag_mode in {'allow', 'deny'}
-            tags = request.json['tags'].split(';')
+            tags = request.json['tags']
+            assert isinstance(tags, list)
             chosen_track = playlist_obj.choose_track(user, require_metadata=require_metadata, tag_mode=tag_mode, tags=tags)
         else:
             chosen_track = playlist_obj.choose_track(user, require_metadata=require_metadata)

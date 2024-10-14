@@ -33,14 +33,18 @@ document.addEventListener('DOMContentLoaded', updateTagCheckboxes);
 
 function getTagFilter() {
     const mode = document.getElementById('tag-mode').value;
+    if (mode == 'none') {
+        return {};
+    }
+
     const tags = [];
     for (const checkbox of document.getElementsByClassName('tag-checkbox')) {
-        if (checkbox.checked && mode === 'allow' || !checkbox.checked && mode == 'deny') {
+        if (checkbox.checked) {
             tags.push(checkbox.dataset.tag);
         }
     }
 
-    return {tag_mode: mode, tags: tags.join(';')};
+    return {tag_mode: mode, tags: tags};
 }
 
 function areAllCheckboxesChecked() {
