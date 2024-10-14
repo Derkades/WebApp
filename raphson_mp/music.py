@@ -15,7 +15,7 @@ from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, Iterator, Literal, Optional
 
 from raphson_mp import (cache, db, image, jsonw, metadata, musicbrainz, reddit,
-                 settings)
+                        settings)
 from raphson_mp.auth import User
 from raphson_mp.image import ImageFormat, ImageQuality
 

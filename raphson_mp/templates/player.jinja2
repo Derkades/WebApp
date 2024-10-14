@@ -84,7 +84,10 @@
                             {{ icon_button('tag-multiple', 'open-dialog-tags', title=gettext('Open tag selection')) }}
                             {{ icon_button('playlist-music', 'browse-all', title=gettext('Browse all tracks')) }}
                             {{ icon_button('text-search', 'open-dialog-search', title=gettext('Search in tracks')) }}
-                            {{ icon_button('cog', 'open-dialog-settings', title=gettext('Open settings')) }}
+                            {{ icon_button('web', 'open-dialog-online', title=gettext('Queue track from online source')) }}
+                            {% if not offline_mode %}
+                                {{ icon_button('cog', 'open-dialog-settings', title=gettext('Open settings')) }}
+                            {% endif %}
                         </div>
                     </div>
                     <div class="scroll">
@@ -264,6 +267,18 @@
     </div>
 
     {% if not offline_mode %}
+        <div id="dialog-online" class="full-page-overlay dialog-overlay overlay-hidden">
+            <div class="dialog">
+                {{ dialog_header('dialog-online', gettext('Add from online source (beta)')) }}
+                <div class="dialog-body form" id="editor-content">
+                    <label for="online-url">{% trans %}URL{% endtrans %}</label>
+                    <input type="text" id="online-url" value="" placeholder="https://youtube.com/watch?v=...">
+
+                    {{ icon_button('playlist-plus', 'online-add') }}
+                </div>
+            </div>
+        </div>
+
         <div id="dialog-copy" class="full-page-overlay dialog-overlay overlay-hidden">
             <div class="dialog">
                 {{ dialog_header('dialog-copy', gettext('Copy track')) }}

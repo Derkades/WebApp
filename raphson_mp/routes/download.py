@@ -1,8 +1,11 @@
 import logging
+import tempfile
+from pathlib import Path
 
-from flask import Blueprint, Response, abort, render_template, request
+from flask import (Blueprint, Response, abort, render_template, request,
+                   send_file)
 
-from raphson_mp import auth, db, music, scanner
+from raphson_mp import auth, cache, db, music, scanner
 
 log = logging.getLogger(__name__)
 bp = Blueprint('download', __name__, url_prefix='/download')
@@ -70,3 +73,18 @@ def route_ytdl():
             yield f'Failed with status code {status_code}'
 
     return Response(generate(), content_type='text/plain')
+
+
+@bp.route('/ephemeral')
+def route_ephemeral():
+    from raphson_mp import downloader
+
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn)
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            temp_path = Path(tempdir)
+            for _log in downloader.download(tempdir, request.args['url']):
+                pass
+            response = send_file(next(temp_path.iterdir()))
+            return response

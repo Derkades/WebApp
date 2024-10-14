@@ -130,6 +130,18 @@ class Music {
         }
         await jsonPost('/activity/played', data);
     }
+
+    /**
+     * @param {string} url
+     * @returns {Promise<DownloadedTrack>}
+     */
+    async downloadTrackFromWeb(url) {
+        const audioResponse = await fetch('/download/ephemeral?url=' + encodeURIComponent(url));
+        checkResponseCode(audioResponse);
+        const audio = URL.createObjectURL(await audioResponse.blob());
+        const image = '/static/img/raphson_small.webp';
+        return new DownloadedTrack(null, audio, image, null);
+    }
 }
 
 const music = new Music();
@@ -441,6 +453,7 @@ class DownloadedTrack {
     }
 
     revokeObjects() {
+        // audioUrl and imageUrl are not always object URLs. If they are not, revokeObjectURL does not raise an error.
         URL.revokeObjectURL(this.audioUrl);
         URL.revokeObjectURL(this.imageUrl);
     }
