@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "raphson_mp"
 version = "1.0.0"
 authors = [
-  { name="Robin Slot", email="robin@rslot.nl" },
+    { name = "Robin Slot", email = "robin@rslot.nl" },
 ]
 description = "Raphson music player"
 readme = "README.md"
@@ -42,3 +42,6 @@ prometheus = ["prometheus-client>=0.15.0"]
 [project.urls]
 Homepage = "https://github.com/Derkades/WebApp"
 Issues = "https://github.com/Derkades/WebApp/issues"
+
+[project.scripts]
+raphson-mp = "raphson_mp.__main__:main"

@@ -2,26 +2,21 @@
 
 See [databases](./databases.md) and [music files](./music-files.md) for more information about the file structure required by the music player.
 
-## Git clone
+## Pipx
 
-Requirements: ffmpeg, python3 and some dependencies (see requirements.txt)
+Pipx can install Python programs, automatically installing dependencies in a virtual environment.
 
-Clone the repository:
-```
-git clone https://github.com/DanielKoomen/WebApp
-```
+First install pipx using your system package manager, e.g. `sudo dnf install pipx`.
 
-Create the required directories:
+Then, run:
+
 ```
-mkdir data music
+pipx install raphson-mp
 ```
 
-Start the server:
-```
-python3 mp.py start
-```
+The music player is now available as the command `raphson-mp`.
 
-For options help please run `python3 mp.py --help`.
+Unless you are using the music player only in offline mode, ffmpeg is required. Install it using your system package manager, e.g. `sudo dnf install ffmpeg`.
 
 ## Docker
 
