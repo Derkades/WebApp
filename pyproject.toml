@@ -45,3 +45,6 @@ Issues = "https://github.com/Derkades/WebApp/issues"
 
 [project.scripts]
 raphson-mp = "raphson_mp.__main__:main"
+
+[tool.hatch.build]
+artifacts = ["*.mo"]
