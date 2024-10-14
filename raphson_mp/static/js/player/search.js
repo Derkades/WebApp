@@ -116,7 +116,10 @@ const search = new Search();
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('open-dialog-search').addEventListener('click', () => {
-        document.getElementById('search-query').value = '';
+        /** @type {HTMLInputElement} */
+        const queryField = document.getElementById('search-query');
+        queryField.value = '';
+        setTimeout(() => queryField.focus({focusVisible: true}), 50); // high delay is necessary, I don't know why
         search.clearSearch();
-    })
+    });
 });
