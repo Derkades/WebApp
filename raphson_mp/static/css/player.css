@@ -200,11 +200,12 @@
 
 /* QUEUE */
 
+/* queue height must be fixed in two-column mode, or buttons jump around */
 .box-queue .scroll {
-    max-height: 35vh;
+    height: 35vh;
 }
 
-/* allow greater height on mobile */
+/* allow greater height on mobile, and can adapt to queue size */
 @media screen and (max-width: 900px) {
     .box-queue .scroll {
         max-height: 40rem;
