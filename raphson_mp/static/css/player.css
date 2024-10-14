@@ -204,6 +204,7 @@
 /* allow greater height on mobile, and can adapt to queue size */
 @media screen and (max-width: 900px) {
     .box-queue .scroll {
+        height: auto;
         max-height: 40rem;
     }
 }
