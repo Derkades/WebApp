@@ -365,7 +365,7 @@ def verify_auth_cookie(conn: Connection, require_admin=False, redirect_to_login=
     if require_csrf:
         if request.content_type == 'application/json':
             csrf_token = request.json['csrf']
-        elif request.content_type == 'application/x-www-form-urlencoded' or request.content_type.startswith('multipart/form-data'):
+        elif request.content_type == 'application/x-www-form-urlencoded' or (request.content_type and request.content_type.startswith('multipart/form-data')):
             csrf_token = request.form['csrf']
         else:
             raise AuthError(AuthErrorReason.MISSING_CSRF, False)
