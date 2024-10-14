@@ -1,6 +1,8 @@
 const VOLUME_HOTKEY_CHANGE = 5;
 
-function handleKey(key) {
+function handleKey(event) {
+    const key = event.key;
+
     // Don't perform hotkey actions when user is typing in a text field
     // But do still allow escape key
     if (document.activeElement.tagName === 'INPUT' &&
@@ -47,9 +49,9 @@ function handleKey(key) {
             slider.value = 0;
         }
         onVolumeChange();
-    } else if (key === '.') {
+    } else if (key === '.' || key == '>') {
         seekRelative(3);
-    } else if (key === ',') {
+    } else if (key === ',' || key == '<') {
         seekRelative(-3);
     } else if (key === 'Escape') {
         dialogs.closeTop();
@@ -61,11 +63,14 @@ function handleKey(key) {
         } else {
             container.scrollTo({top: topAtBottom, behavior: 'smooth'});
         }
+    } else if (key == '/') {
+        event.preventDefault(true);
+        document.getElementById('open-dialog-search').click();
     } else {
         console.debug('hotkey: unhandled keypress:', key);
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.addEventListener('keydown', event => handleKey(event.key));
+    document.addEventListener('keydown', handleKey);
 });
