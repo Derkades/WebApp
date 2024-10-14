@@ -101,7 +101,7 @@ RUN mkdir /ffmpeg-libs && \
 
 FROM base AS common
 
-COPY requirements.txt /
+COPY docker/requirements.txt /
 RUN PYTHONDONTWRITEBYTECODE=1 pip install --break-system-packages --no-cache-dir -r /requirements.txt
 
 # FFmpeg
