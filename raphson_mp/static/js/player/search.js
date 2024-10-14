@@ -89,7 +89,7 @@ class Search {
             const newChildren = [];
             const listedAlbums = new Set();
             for (const track of tracks) {
-                if (listedAlbums.has(track.album)) {
+                if (track.album == null || listedAlbums.has(track.album)) {
                     continue;
                 }
                 listedAlbums.add(track.album);
