@@ -21,7 +21,18 @@ class Search {
             console.debug('search: search again after receiving METADATA_CHANGE event');
             this.#performSearch(true);
         });
-        this.#queryInput.addEventListener('input', () => this.#performSearch());
+
+        document.addEventListener('DOMContentLoaded', () => {
+            this.#queryInput.addEventListener('input', () => this.#performSearch());
+
+            document.getElementById('open-dialog-search').addEventListener('click', () => {
+                /** @type {HTMLInputElement} */
+                const queryField = document.getElementById('search-query');
+                queryField.value = '';
+                setTimeout(() => queryField.focus({focusVisible: true}), 50); // high delay is necessary, I don't know why
+                this.#searchResultParent.classList.add('hidden');
+            });
+        });
     }
 
     async #performSearch(searchNow = false) {
@@ -112,12 +123,3 @@ class Search {
 }
 
 const search = new Search();
-
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('open-dialog-search').addEventListener('click', () => {
-        /** @type {HTMLInputElement} */
-        const queryField = document.getElementById('search-query');
-        queryField.value = '';
-        setTimeout(() => queryField.focus({focusVisible: true}), 50); // high delay is necessary, I don't know why
-    });
-});
