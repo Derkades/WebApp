@@ -202,9 +202,14 @@ def route_search():
     # TODO ensure valid FTS syntax, perhaps remove non-alphanumeric characters?
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
-        result = conn.execute('SELECT path FROM track_fts WHERE track_fts MATCH ? ORDER BY rank LIMIT 20', (query,))
+        query = query.replace('"', '""')
+        query = '"' + query.replace(' ', '" "') + '"'
+        log.info('search: %s', query)
+        result = conn.execute('SELECT path FROM track_fts WHERE track_fts MATCH ? ORDER BY rank LIMIT 25', (query,))
         tracks = [Track.by_relpath(conn, row[0]) for row in result]
-        return {'tracks': [track.info_dict() for track in tracks]}
+        albums = [{'album': row[0], 'artist': row[1]}
+                  for row in conn.execute('SELECT DISTINCT album, album_artist FROM track_fts WHERE album MATCH ? ORDER BY rank LIMIT 10', (query,))]
+        return {'tracks': [track.info_dict() for track in tracks], 'albums': albums}
 
 
 @bp.route('/tags')
