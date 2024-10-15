@@ -102,6 +102,11 @@ class Search {
             const newChildren = [];
             const listedAlbums = new Set();
             for (const track of tracks) {
+                // Do not show too many albums, each of them causes an image load
+                if (listedAlbums.size > 8) {
+                    break;
+                }
+
                 if (track.album == null || listedAlbums.has(track.album)) {
                     continue;
                 }
