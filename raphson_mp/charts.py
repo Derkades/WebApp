@@ -1,9 +1,9 @@
 import time
-from collections import Counter
+from collections import Counter, deque
 from datetime import datetime
 from enum import Enum, unique
 from sqlite3 import Connection
-from typing import Any, Iterable
+from typing import Any, Iterable, Optional
 
 from flask_babel import _
 
@@ -47,7 +47,8 @@ class StatsPeriod(Enum):
         raise ValueError()
 
 
-def chart(title: str, ldata: Iterable[str], xdata: Iterable[str|int], series, horizontal):
+def chart(title: str, ldata: Iterable[str], xdata: Optional[Iterable[str|int]], ydata: Optional[Iterable[str|int]], series: list[object],
+          all_labels = False, extra = {}):
     chart = {
         'title': {
             'text': title
@@ -60,37 +61,63 @@ def chart(title: str, ldata: Iterable[str], xdata: Iterable[str|int], series, ho
             'type': 'scroll',
             'data': ldata,
         },
-        'xAxis': {},
-        'yAxis': {},
+        'xAxis': {
+            'type': 'category' if xdata else 'value',
+            'data': xdata,
+        },
+        'yAxis': {
+            'type': 'category' if ydata else 'value',
+            'data': ydata,
+        },
         'series': series,
+        **extra,
     }
 
-    if horizontal:
-        chart['xAxis']['type'] = 'value'
-        chart['yAxis']['type'] = 'category'
-        chart['yAxis']['data'] = xdata
+    if ydata and not xdata:
         chart['yAxis']['inverse'] = True
-    else:
-        chart['xAxis']['type'] = 'category'
-        chart['yAxis']['type'] = 'value'
-        chart['xAxis']['data'] = xdata
+
+    if all_labels:
+        for axis in ('xAxis', 'yAxis'):
+            chart[axis]['axisLabel'] = {'interval': 0}
 
     return chart
 
 
-def bar(title: str, name: str, xdata: Iterable[str|int], ydata: Iterable[int], horizontal=False):
-    return chart(title, [], xdata, {'name': name, 'type': 'bar', 'data': ydata}, horizontal)
+def chart_singleaxis(title: str, ldata: Iterable[str], axisdata: Iterable[str|int], series, horizontal):
+    if horizontal:
+        ydata = axisdata
+        xdata = None
+    else:
+        xdata = axisdata
+        ydata = None
+    return chart(title, ldata, xdata, ydata, series)
 
 
-def multibar(title: str, xdata: Iterable[str|int], ydata: dict[str, Iterable[int]], horizontal=False, stack=True):
+def bar(title: str, name: str, axisdata: Iterable[str|int], seriesdata: Iterable[int], horizontal=False):
+    return chart_singleaxis(title, [], axisdata, [{'name': name, 'type': 'bar', 'data': seriesdata}], horizontal)
+
+
+def multibar(title: str, axisdata: Iterable[str|int], seriesdata: dict[str, Iterable[int]], horizontal=False, stack=True):
     series = [{'name': name,
                'type': 'bar',
                'data': data}
-              for name, data in ydata.items()]
+              for name, data in seriesdata.items()]
     if stack:
         for item in series:
             item['stack'] = 'x'
-    return chart(title, [name for name, _ in ydata.items()], xdata, series, horizontal)
+    return chart_singleaxis(title, [name for name, _ in seriesdata.items()], axisdata, series, horizontal)
+
+
+def heatmap(title: str, name: str, xdata: Iterable[str|int], ydata: Iterable[str|int], seriesdata):
+    series = [{'name': name,
+               'type': 'heatmap',
+               'data': seriesdata}]
+    extra = {'visualMap': {'min': 0,
+                           'max': max(item[2] for item in seriesdata) if len(seriesdata) else 0,
+                           'orient': 'vertical',
+                           'right': 0,
+                           'top': 'center'}}
+    return chart(title, [], xdata, ydata, series, all_labels=True, extra=extra)
 
 
 def rows_to_xy(rows: list[tuple[str, int]]):
@@ -320,16 +347,48 @@ def chart_popular_artists_tags(conn: Connection):
         yield multibar(title, *rows_to_xy_multi(rows, case_sensitive=False, restore_case=table == 'artist'), horizontal=True)
 
 
+def similarity_heatmap(conn: Connection):
+    playlists = [row[0] for row in conn.execute('SELECT playlist FROM track GROUP BY playlist ORDER BY COUNT(*) DESC LIMIT 15')]
+    result = conn.execute('''
+                          SELECT t1.playlist, t2.playlist, COUNT(DISTINCT ta1.artist)
+                          FROM track_artist ta1
+                             JOIN track_artist ta2 ON ta1.artist = ta2.artist
+                             JOIN track t1 ON ta1.track = t1.path
+                             JOIN track t2 ON ta2.track = t2.path
+                          GROUP BY t1.playlist, t2.playlist
+                          ''')
+
+    data_dict: dict[tuple(str, str), int] = {}
+    for p1, p2, count in result:
+        data_dict[(p1, p2)] = count
+
+    xp = playlists[:-1]
+    yp = playlists[1:]
+    data = []
+    for i1, p1 in enumerate(xp):
+        for i2, p2 in enumerate(yp):
+            if i1 > i2:
+                continue
+            elif (p1, p2) in data_dict:
+                if data_dict[(p1, p2)] is not None:
+                    data.append([i1, i2, data_dict[(p1, p2)]])
+            else:
+                data.append([i1, i2, 0])
+
+    return heatmap(_('Artist similarity'), _('Number of artists in common'), xp, yp, data)
+
+
 def get_data(period: StatsPeriod):
     """
     Generate charts as json data for stats.jinja2
     """
     with db.connect(read_only=True) as conn:
         data = [*charts_history(conn, period.after_timestamp),
-                *charts_playlists(conn),
+                similarity_heatmap(conn),
+                *chart_popular_artists_tags(conn),
                 chart_track_year(conn),
+                *charts_playlists(conn),
                 chart_last_chosen(conn),
-                chart_unique_artists(conn),
-                *chart_popular_artists_tags(conn)]
+                chart_unique_artists(conn)]
 
     return data
