@@ -137,7 +137,7 @@ CREATE VIRTUAL TABLE track_fts USING fts5 (
     album,
     album_artist,
     artists,
-    tokenize='trigram remove_diacritics 1'
+    tokenize='unicode61 remove_diacritics 2' -- https://sqlite.org/fts5.html#unicode61_tokenizer
 );
 
 CREATE TRIGGER track_fts_insert AFTER INSERT ON track BEGIN
