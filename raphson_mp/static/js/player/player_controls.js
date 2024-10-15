@@ -3,9 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Home
     const homeButton = document.getElementById('button-home');
-    if (homeButton) {
-        homeButton.addEventListener('click', () => window.open('/', '_blank'));
-    }
+    homeButton.addEventListener('click', () => window.open('/', '_blank'));
 
     // Skip to previous
     document.getElementById('button-prev').addEventListener('click', () => {
