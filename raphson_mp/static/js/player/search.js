@@ -1,7 +1,5 @@
 class Search {
     /** @type {HTMLDivElement} */
-    #searchResultEmpty = document.getElementById('search-result-empty');
-    /** @type {HTMLDivElement} */
     #searchResultParent = document.getElementById('search-result-parent');
     /** @type {HTMLDivElement} */
     #searchResultTracks = document.getElementById('search-result-tracks');
@@ -26,14 +24,6 @@ class Search {
         this.#queryInput.addEventListener('input', () => this.#performSearch());
     }
 
-    clearSearch() {
-        this.#searchResultParent.classList.add('hidden');
-        this.#searchResultTracks.replaceChildren();
-        this.#searchResultArtists.replaceChildren();
-        this.#searchResultAlbums.replaceChildren();
-        this.#searchResultEmpty.classList.remove('hidden');
-    }
-
     async #performSearch(searchNow = false) {
         // Only start searching after user has finished typing for better performance and fewer network requests
         if (!searchNow) {
@@ -48,15 +38,25 @@ class Search {
 
         const query = this.#queryInput.value;
 
-        // Don't display any results for short queries
-        if (query.length < 3) {
-            this.clearSearch();
-            return;
+        let tracks = [];
+        if (query.length > 1) {
+            tracks = await music.search(query);
+        } else {
+            tracks = [];
         }
 
-        const tracks = await music.search(query);
-        this.#searchResultTracks.replaceChildren(await browse.generateTrackList(tracks));
+        if (tracks.length == 0) {
+            this.#searchResultParent.classList.add('hidden');
+        } else {
+            this.#searchResultParent.classList.remove('hidden');
+        }
 
+        // Tracks
+        {
+            this.#searchResultTracks.replaceChildren(await browse.generateTrackList(tracks));
+        }
+
+        // Artists
         {
             const table = document.createElement('table');
             const listedArtists = new Set(); // to prevent duplicates, but is not actually used to preserve ordering
@@ -82,9 +82,11 @@ class Search {
                     table.append(row);
                 }
             }
+
             this.#searchResultArtists.replaceChildren(table);
         }
 
+        // Albums
         {
             const newChildren = [];
             const listedAlbums = new Set();
@@ -102,13 +104,10 @@ class Search {
                 img.onclick = () => browse.browseAlbum(track.album, track.albumArtist);
 
                 newChildren.push(img);
-
             }
+
             this.#searchResultAlbums.replaceChildren(...newChildren);
         }
-
-        this.#searchResultEmpty.classList.add('hidden');
-        this.#searchResultParent.classList.remove('hidden');
     }
 }
 
@@ -120,6 +119,5 @@ document.addEventListener('DOMContentLoaded', () => {
         const queryField = document.getElementById('search-query');
         queryField.value = '';
         setTimeout(() => queryField.focus({focusVisible: true}), 50); // high delay is necessary, I don't know why
-        search.clearSearch();
     });
 });

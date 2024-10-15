@@ -214,11 +214,7 @@
         <div class="dialog">
             {{ dialog_header('dialog-search', gettext('Search')) }}
             <div class="dialog-body">
-                <input id="search-query" type="text" placeholder="{% trans %}Search query{% endtrans %}" class="fill-width">
-
-                <div id="search-result-empty">
-                    {% trans %}Please enter a search query.{% endtrans %}
-                </div>
+                <input id="search-query" type="text" placeholder="{% trans %}Search query{% endtrans %}" class="fill-width"><br>
 
                 <div id="search-result-parent" class="hidden">
                     <h3>{% trans %}Tracks{% endtrans %}</h3>
