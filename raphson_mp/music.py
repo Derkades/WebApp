@@ -446,6 +446,9 @@ class Track:
                     # Legacy HTML lyrics, best effort conversion from HTML to plain text
                     import html
                     return Lyrics(lyrics_json['source'], html.unescape(lyrics_json['html'].replace('<br>', '\n')))
+                elif 'lyrics' in lyrics_json and lyrics_json['lyrics'] is False:
+                    # Legacy
+                    return None
                 elif 'lyrics' in lyrics_json and lyrics_json['lyrics'] is not None:
                     return Lyrics(lyrics_json['source_url'], lyrics_json['lyrics'])
                 else:

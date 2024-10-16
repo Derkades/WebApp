@@ -118,7 +118,7 @@ def route_lyrics(path):
             return {'lyrics': lyrics.lyrics,
                     'source_url': lyrics.source_url}
         else:
-            return {'lyrics': False}
+            return {'lyrics': None}
 
 
 @bp.route('/<path:path>/update_metadata', methods=['POST'])
