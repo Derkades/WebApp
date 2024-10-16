@@ -111,18 +111,6 @@ function replaceTrackDisplayTitle() {
         // Nothing playing
         document.getElementById('current-track').textContent = '-';
     }
-
-    const previous = queue.getPreviousTrack();
-    if (previous !== null) {
-        const previousTrack = previous.track;
-        if (previousTrack !== null) {
-            document.getElementById('previous-track').replaceChildren(previousTrack.displayHtml(true));
-        } else {
-            document.getElementById('previous-track').replaceChildren(trackInfoUnavailableSpan());
-        }
-    } else {
-        document.getElementById('previous-track').textContent = '-';
-    }
 }
 
 function replaceAllTrackHtml() {
