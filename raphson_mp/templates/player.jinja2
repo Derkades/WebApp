@@ -75,11 +75,11 @@
                     <div class="flex-space-between">
                         <h3>{% trans %}Queue{% endtrans %} <span class="secondary" id="current-queue-size">0</span></h3>
                         <div id="queue-buttons">
+                            {{ icon_button('web', 'open-dialog-online', title=gettext('Queue track from online source')) }}
                             {{ icon_button('playlist-remove', 'queue-clear', title=gettext('Clear queue')) }}
                             {{ icon_button('tag-multiple', 'open-dialog-tags', title=gettext('Open tag selection')) }}
                             {{ icon_button('playlist-music', 'browse-all', title=gettext('Browse all tracks')) }}
                             {{ icon_button('text-search', 'open-dialog-search', title=gettext('Search in tracks')) }}
-                            {{ icon_button('web', 'open-dialog-online', title=gettext('Queue track from online source')) }}
                             {% if not offline_mode %}
                                 {{ icon_button('cog', 'open-dialog-settings', title=gettext('Open settings')) }}
                             {% endif %}
