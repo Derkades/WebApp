@@ -203,7 +203,7 @@ def route_search():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
         query = query.replace('"', '""')
-        query = '"' + query.replace(' ', '" "') + '"'
+        query = '"' + query.replace(' ', '" OR "') + '"'
         log.info('search: %s', query)
         result = conn.execute('SELECT path FROM track_fts WHERE track_fts MATCH ? ORDER BY rank LIMIT 25', (query,))
         tracks = [Track.by_relpath(conn, row[0]) for row in result]
