@@ -12,7 +12,7 @@ from raphson_mp import settings
 
 if settings.offline_mode:
     # Module must not be imported to ensure no data is ever downloaded in offline mode.
-    raise RuntimeError('Cannot use bing in offline mode')
+    raise RuntimeError('Cannot use musicbrainz in offline mode')
 
 
 log = logging.getLogger(__name__)

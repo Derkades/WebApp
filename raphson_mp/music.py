@@ -14,7 +14,7 @@ from sqlite3 import Connection
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, Iterator, Literal, Optional
 
-from raphson_mp import (cache, db, image, jsonw, metadata, musicbrainz, reddit,
+from raphson_mp import (cache, db, image, jsonw, metadata, reddit,
                         settings)
 from raphson_mp.auth import User
 from raphson_mp.image import ImageFormat, ImageQuality
@@ -96,7 +96,7 @@ def list_tracks_recursively(path: Path, trashed: bool = False) -> Iterator[Path]
 
 
 def _get_possible_covers(artist: Optional[str], album: str, meme: bool) -> Iterator[bytes]:
-    from raphson_mp import bing
+    from raphson_mp import bing, musicbrainz
 
     if meme:
         if random.random() > 0.5:
@@ -131,6 +131,8 @@ def get_cover(artist: Optional[str], album: str, meme: bool,
         meta: Track metadata
     Returns: Album cover image bytes, or None if MusicBrainz nor bing found an image.
     """
+    from raphson_mp import musicbrainz
+
     cache_key =  f'cover{artist}{album}{meme}'  # quality is appended later
 
     cache_data = cache.retrieve(cache_key + img_quality.name + img_format.name)

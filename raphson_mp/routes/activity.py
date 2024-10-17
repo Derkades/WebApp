@@ -6,7 +6,7 @@ from sqlite3 import Connection
 from flask import Blueprint, Response, render_template, request
 from flask_babel import _, format_timedelta
 
-from raphson_mp import auth, db, lastfm, settings
+from raphson_mp import auth, db, settings
 from raphson_mp.auth import PrivacyOption
 from raphson_mp.music import Track
 
@@ -156,6 +156,8 @@ def route_now_playing():
     if settings.offline_mode:
         return Response(None, 200)
 
+    from raphson_mp import lastfm
+
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn, require_csrf=True)
 
@@ -216,6 +218,8 @@ def route_played():
             conn.execute('INSERT INTO history VALUES (?, ?)',
                          (timestamp, track))
         return Response(None, 200)
+
+    from raphson_mp import lastfm
 
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn, require_csrf=True)

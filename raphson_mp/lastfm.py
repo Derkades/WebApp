@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 if settings.offline_mode:
     # Module must not be imported to ensure no data is ever downloaded in offline mode.
-    raise RuntimeError('Cannot use bing in offline mode')
+    raise RuntimeError('Cannot use last.fm in offline mode')
 
 
 def get_connect_url() -> str | None:

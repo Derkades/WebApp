@@ -1,7 +1,7 @@
 from flask import Blueprint, Response, redirect, render_template, request
 from flask_babel import gettext as _
 
-from raphson_mp import auth, db, language, lastfm
+from raphson_mp import auth, db, language
 
 bp = Blueprint('account', __name__, url_prefix='/account')
 
@@ -11,6 +11,8 @@ def route_account():
     """
     Account information page
     """
+    from raphson_mp import lastfm
+
     with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn)
         csrf_token = user.get_csrf()
