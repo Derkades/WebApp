@@ -219,6 +219,7 @@ def handle_genius_search(args: Any) -> None:
     from raphson_mp import genius
     print(genius._search(args.query))
 
+
 def handle_genius_search(args: Any) -> None:
     from raphson_mp import genius
     lyrics = genius._extract_lyrics(args.url, debug=True)
@@ -226,6 +227,25 @@ def handle_genius_search(args: Any) -> None:
         print('no lyrics found')
     else:
         print(lyrics)
+
+
+def handle_acoustid(args: Any) -> None:
+    from raphson_mp import acoustid, musicbrainz
+
+    fp = acoustid.get_fingerprint(Path(args.path))
+    log.info('duration: %s', fp.duration)
+    log.info('fingerprint: %s', fp.fingerprint_b64)
+
+    recordings = acoustid.lookup(fp)
+    if len(recordings) == 0:
+        log.warning('no MusicBrainz recording found')
+        return
+
+    log.info('MusicBrainz recordings: %s', recordings)
+
+    for recording in recordings[:2]:
+        for meta in musicbrainz.get_recording_metadata(recording):
+            log.info('possible metadata for recording %s: %s', recording, meta)
 
 
 def _strenv(name: str, default: str = None):
@@ -358,6 +378,10 @@ def main():
     cmd_cover = subparsers.add_parser('debug-genius-extract')
     cmd_cover.add_argument('url')
     cmd_cover.set_defaults(func=handle_genius_search)
+
+    cmd_cover = subparsers.add_parser('debug-acoustid')
+    cmd_cover.add_argument('path')
+    cmd_cover.set_defaults(func=handle_acoustid)
 
     args = parser.parse_args()
 

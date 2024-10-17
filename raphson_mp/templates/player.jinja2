@@ -228,31 +228,48 @@
     <div id="dialog-editor" class="full-page-overlay dialog-overlay overlay-hidden">
         <div class="dialog">
             {{ dialog_header('dialog-editor', gettext('Metadata editor')) }}
-            <div class="dialog-body form" id="editor-content">
-                <label for="editor-path">{% trans %}File path{% endtrans %}</label>
-                <input type="text" id="editor-path" value="" readonly>
+            <div class="dialog-body" id="editor-content">
+                <div class="form">
+                    <label for="editor-path">{% trans %}File path{% endtrans %}</label>
+                    <input type="text" id="editor-path" value="" readonly>
 
-                <label for="editor-title">{% trans %}Title{% endtrans %}</label>
-                <input type="text" id="editor-title" value="">
+                    <label for="editor-title">{% trans %}Title{% endtrans %}</label>
+                    <input type="text" id="editor-title" value="">
 
-                <label for="editor-album">{% trans %}Album{% endtrans %}</label>
-                <input type="text" id="editor-album" value="">
+                    <label for="editor-album">{% trans %}Album{% endtrans %}</label>
+                    <input type="text" id="editor-album" value="">
 
-                <label for="editor-artists">{% trans %}Artists (delimit multiple using <kbd>;</kbd>){% endtrans %}</label>
-                <input type="text" id="editor-artists" value="">
+                    <label for="editor-artists">{% trans %}Artists (delimit multiple using <kbd>;</kbd>){% endtrans %}</label>
+                    <input type="text" id="editor-artists" value="">
 
-                <label for="editor-album-artist">{% trans %}Album artist{% endtrans %}</label>
-                <input type="text" id="editor-album-artist" value="">
+                    <label for="editor-album-artist">{% trans %}Album artist{% endtrans %}</label>
+                    <input type="text" id="editor-album-artist" value="">
 
-                <label for="editor-album-tags">{% trans %}Tags (delimit multiple using <kbd>;</kbd>){% endtrans %}</label>
-                <input type="text" id="editor-tags" value="">
+                    <label for="editor-album-tags">{% trans %}Tags (delimit multiple using <kbd>;</kbd>){% endtrans %}</label>
+                    <input type="text" id="editor-tags" value="">
 
-                <label for="editor-year">{% trans %}Year (4 characters){% endtrans %}</label>
-                <input type="text" id="editor-year" value="">
+                    <label for="editor-year">{% trans %}Year (4 characters){% endtrans %}</label>
+                    <input type="text" id="editor-year" value="">
 
-                {{ icon_button('content-save', 'editor-save') }}
+                    {{ icon_button('content-save', 'editor-save', title=gettext('Save')) }} {{ icon_button('auto-fix', 'editor-auto', title=gettext('Determine tags automatically')) }}
+                </div>
 
                 <p id="editor-writing" class="hidden">{% trans %}Writing metadata...{% endtrans %}</p>
+
+                <table id="editor-auto-result" class="table hidden">
+                    <thead>
+                        <tr>
+                            <th>{% trans %}Title{% endtrans %}</th>
+                            <th>{% trans %}Artist{% endtrans %}</th>
+                            <th>{% trans %}Album{% endtrans %}</th>
+                            <th>{% trans %}Year{% endtrans %}</th>
+                            <th>{% trans %}Type{% endtrans %}</th>
+                            <th>{% trans %}Packaging{% endtrans %}</th>
+                        </tr>
+                    </thead>
+                    <tbody id="editor-auto-result-body">
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

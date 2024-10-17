@@ -97,6 +97,12 @@ RUN mkdir /ffmpeg-libs && \
     cp -a /usr/lib/x86_64-linux-gnu/libmp3lame.so* /ffmpeg-libs && \
     cp -a /usr/lib/x86_64-linux-gnu/libsharpyuv.so* /ffmpeg-libs
 
+# AcoustID fpcalc
+# is also available via a debian package, but that pulls in lots of dependencies (like ffmpeg, which we already build ourselves)
+RUN cd /build && \
+    wget https://github.com/acoustid/chromaprint/releases/download/v1.5.1/chromaprint-fpcalc-1.5.1-linux-x86_64.tar.gz && \
+    tar xzf chromaprint-fpcalc-1.5.1-linux-x86_64.tar.gz
+
 ###############################################################################
 
 FROM base AS common
@@ -107,6 +113,9 @@ RUN PYTHONDONTWRITEBYTECODE=1 pip install --break-system-packages --no-cache-dir
 # FFmpeg
 COPY --from=ffmpeg-build /build/ffmpeg/ffmpeg /build/ffmpeg/ffprobe /usr/local/bin/
 COPY --from=ffmpeg-build /ffmpeg-libs /usr/lib/x86_64-linux-gnu
+
+# AcoustID fpcalc
+COPY --from=ffmpeg-build /build/chromaprint-fpcalc-1.5.1-linux-x86_64/fpcalc /usr/local/bin/
 
 COPY ./docker/manage.sh /usr/local/bin/manage
 

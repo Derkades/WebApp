@@ -6,6 +6,7 @@ from raphson_mp import auth, db, image, music, scanner, settings
 from raphson_mp.image import ImageFormat
 from raphson_mp.jsonw import json_response
 from raphson_mp.music import AudioType, Track
+import time
 
 log = logging.getLogger(__name__)
 bp = Blueprint('track', __name__, url_prefix='/track')
@@ -151,6 +152,33 @@ def route_update_metadata(path):
         scanner.scan_track(conn, track.playlist, track.path, track.relpath)
 
     return Response(None, 200)
+
+
+@bp.route('/<path:relpath>/acoustid', methods=['GET'])
+def route_acoustid(relpath):
+    from raphson_mp import acoustid, musicbrainz
+
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn)
+        track = Track.by_relpath(conn, relpath)
+        fp = acoustid.get_fingerprint(track.path)
+        known_ids = set()
+        meta_list = []
+        for recording in acoustid.lookup(fp):
+            log.info('found recording: %s', recording)
+            for meta in musicbrainz.get_recording_metadata(recording):
+                if meta.id in known_ids:
+                    continue
+                log.info('found possible metadata: %s', meta)
+                meta_list.append(meta)
+                known_ids.add(meta.id)
+
+            if len(meta_list) > 2:
+                break
+
+            time.sleep(1) # crude way of avoiding rate limits
+
+    return meta_list
 
 
 @bp.route('/filter')

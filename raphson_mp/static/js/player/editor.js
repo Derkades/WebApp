@@ -17,6 +17,9 @@ class Editor {
         this.#track = track;
         this.trackToHtml();
 
+        document.getElementById('editor-auto-result').classList.add('hidden');
+        document.getElementById('editor-auto').classList.remove('hidden');
+
         // Make editor dialog window visisble, and bring it to the top
         dialogs.open('dialog-editor');
     };
@@ -107,6 +110,38 @@ class Editor {
         this.#track = null;
     };
 
+    async auto() {
+        document.getElementById('editor-auto').classList.add('hidden');
+
+        try {
+            const array = await this.#track.acoustid();
+
+            const rows = []
+            for (const meta of array) {
+                const tdTitle = document.createElement('td');
+                tdTitle.textContent = meta.title;
+                const tdArtist = document.createElement('td');
+                tdArtist.textContent = meta.artists;
+                const tdAlbum = document.createElement('td');
+                tdAlbum.textContent = meta.album;
+                const tdYear = document.createElement('td');
+                tdYear.textContent = meta.year;
+                const tdType = document.createElement('td');
+                tdType.textContent = meta.releaseType;
+                const tdPackaging = document.createElement('td');
+                tdPackaging.textContent = meta.packaging;
+                const row = document.createElement('tr');
+                row.append(tdTitle, tdArtist, tdAlbum, tdYear, tdType, tdPackaging);
+                rows.push(row);
+            }
+
+            document.getElementById('editor-auto-result-body').replaceChildren(...rows);
+            document.getElementById('editor-auto-result').classList.remove('hidden');
+        } catch (ex) {
+            alert('Could not fingerprint audio file, maybe it is corrupt?');
+        }
+    }
+
 };
 
 const editor = new Editor();
@@ -128,4 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Save button
     document.getElementById('editor-save').addEventListener('click', () => editor.save());
+
+    // Auto tag button
+    document.getElementById('editor-auto').addEventListener('click', () => editor.auto());
 });

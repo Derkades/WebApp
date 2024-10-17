@@ -174,6 +174,39 @@ class Playlist {
     }
 }
 
+/**
+ * Metadata suggested by AcoustID
+ */
+class SuggestedMetadata {
+    /** @type {string} */
+    id;
+    /** @type {string} */
+    title;
+    /** @type {Array<string>} */
+    artists;
+    /** @type {string} */
+    album;
+    /** @type {string} */
+    albumArtist;
+    /** @type {number | null} */
+    year;
+    /** @type {string} */
+    releaseType;
+    /** @type {string} */
+    packaging;
+
+    constructor(metaObj) {
+        this.id = metaObj.id;
+        this.title = metaObj.title;
+        this.artists = metaObj.artists;
+        this.album = metaObj.album;
+        this.albumArtist = metaObj.album_artist;
+        this.year = metaObj.year;
+        this.releaseType = metaObj.release_type;
+        this.packaging = metaObj.packaging;
+    }
+}
+
 class Track {
     /** @type {string} */
     path;
@@ -409,14 +442,31 @@ class Track {
         await jsonPost(`/track/${encodeURIComponent(this.path)}/update_metadata`, payload);
     }
 
+    /**
+     * Copy track to other playlist
+     * @param {string} playlistName
+     * @returns {Promise<void>}
+     */
     async copyTo(playlistName) {
         await jsonPost('/player/copy_track', {track: this.path, playlist: playlistName});
     }
 
     async refresh() {
-        const response = await fetch(`/track/info${encodeURIComponent(path)}/info`);
-        checkResponseCode(response);
-        this.#updateLocalVariablesFromTrackDataResponse(await response.json());
+        const json = await jsonGet(`/track/${encodeURIComponent(this.path)}/info`);
+        this.#updateLocalVariablesFromTrackDataResponse(json);
+    }
+
+    /**
+     * Look up metadata for this track using the AcoustID service
+     * @returns {Promise<Array<SuggestedMetadata>>}
+     */
+    async acoustid() {
+        const json = await jsonGet(`/track/${encodeURIComponent(this.path)}/acoustid`)
+        const array = [];
+        for (const meta of json) {
+            array.push(new SuggestedMetadata(meta));
+        }
+        return array;
     }
 }
 

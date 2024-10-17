@@ -1,12 +1,19 @@
+from dataclasses import dataclass
 import logging
 import re
 import traceback
-from pathlib import Path
-from typing import Any
+from typing import Any, Optional, Iterator
+from requests.exceptions import HTTPError
 
 import requests
 
 from raphson_mp import settings
+
+
+if settings.offline_mode:
+    # Module must not be imported to ensure no data is ever downloaded in offline mode.
+    raise RuntimeError('Cannot use bing in offline mode')
+
 
 log = logging.getLogger(__name__)
 
@@ -109,3 +116,51 @@ def get_cover(artist: str, album: str) -> bytes | None:
         log.info('Error retrieving album art from musicbrainz: %s', ex)
         traceback.print_exc()
         return None
+
+
+@dataclass
+class MBMeta:
+    id: str
+    title: str
+    album: str
+    artists: list[str]
+    album_artist: str
+    year: Optional[int]
+    release_type: str
+    packaging: str
+
+
+def get_recording_metadata(recording_id: str) -> Iterator[MBMeta]:
+    try:
+        result = _mb_get('recording/' + recording_id, {'inc': 'artists+releases+release-groups'})
+    except HTTPError as ex:
+        if ex.response.status_code == 404:
+            log.warning('got 404 for recording %s', recording_id)
+            return
+        raise ex
+
+    title = result['title']
+    artists = [artist['name'] for artist in result['artist-credit']]
+
+    for release in result['releases']:
+        if 'Compilation' in release['release-group']['secondary-types']:
+            log.info('ignoring compilation release: %s', release['id'])
+            continue
+
+        release_type = release['release-group']['primary-type']
+
+        album = release['title']
+
+        # Ideally we'd get the correct artist from the release group, but that would require many API requests.
+        album_artist = artists[0]
+
+        if 'date' in release and len(release['date']) >= 4:
+            year = int(release['date'][:4])
+        else:
+            year = None
+
+        packaging = release['packaging']
+        if packaging is None or packaging == 'None':
+            packaging = 'Digital'
+
+        yield MBMeta(release['id'], title, album, artists, album_artist, year, release_type, packaging)
