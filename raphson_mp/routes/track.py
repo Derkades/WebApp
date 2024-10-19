@@ -173,10 +173,10 @@ def route_acoustid(relpath):
                 meta_list.append(meta)
                 known_ids.add(meta.id)
 
-            if len(meta_list) > 2:
+            if len(meta_list) > 0:
                 break
 
-            time.sleep(1) # crude way of avoiding rate limits
+            time.sleep(2) # crude way of avoiding rate limits
 
     return meta_list
 
