@@ -4,6 +4,7 @@ import logging
 import os
 from argparse import ArgumentParser
 from pathlib import Path
+import sys
 from typing import Any, Optional
 
 from raphson_mp import auth, logconfig, settings
@@ -248,6 +249,22 @@ def handle_acoustid(args: Any) -> None:
             log.info('possible metadata for recording %s: %s', recording, meta)
 
 
+def handle_lyrics(args: Any) -> None:
+    from raphson_mp.lyrics import find, PlainLyrics, TimeSyncedLyrics
+
+    lyrics = find(args.title, args.artist, args.album, args.duration)
+
+    if isinstance(lyrics, PlainLyrics):
+        print(lyrics.text)
+    elif isinstance(lyrics, TimeSyncedLyrics):
+        print(lyrics.to_lrc())
+    elif lyrics is None:
+        print('No lyrics found')
+        sys.exit(1)
+    else:
+        raise ValueError(lyrics)
+
+
 def _strenv(name: str, default: str = None):
     return os.getenv('MUSIC_' + name, default)
 
@@ -382,6 +399,13 @@ def main():
     cmd_cover = subparsers.add_parser('debug-acoustid')
     cmd_cover.add_argument('path')
     cmd_cover.set_defaults(func=handle_acoustid)
+
+    cmd_cover = subparsers.add_parser('debug-lyrics')
+    cmd_cover.add_argument('--title', required=True)
+    cmd_cover.add_argument('--artist', required=True)
+    cmd_cover.add_argument('--album')
+    cmd_cover.add_argument('--duration', type=int)
+    cmd_cover.set_defaults(func=handle_lyrics)
 
     args = parser.parse_args()
 

@@ -2,7 +2,7 @@ import logging
 
 from flask import Blueprint, Response, abort, request
 
-from raphson_mp import auth, db, image, music, scanner, settings
+from raphson_mp import auth, db, image, music, scanner, settings, lyrics, jsonw
 from raphson_mp.image import ImageFormat
 from raphson_mp.jsonw import json_response
 from raphson_mp.music import AudioType, Track
@@ -122,6 +122,31 @@ def route_lyrics(path):
             return {'lyrics': None}
 
 
+@bp.route('/<path:path>/lyrics2')
+def route_lyrics2(path):
+    """
+    Get lyrics for the provided track path.
+    """
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn)
+
+        track = Track.by_relpath(conn, path)
+
+        if request.if_modified_since and track.mtime_dt <= request.if_modified_since:
+            return Response(None, 304)
+
+        meta = track.metadata()
+        title = meta.title
+        artist = meta.primary_artist()
+        if title and artist:
+            lyr = lyrics.find(title, artist, meta.album, meta.duration)
+        else:
+            log.warning('could not search for lyrics due to missing metadata')
+            lyr = None
+
+        return jsonw.json_response(lyrics.to_dict(lyr), last_modified=track.mtime)
+
+
 @bp.route('/<path:path>/update_metadata', methods=['POST'])
 def route_update_metadata(path):
     """
@@ -227,7 +252,6 @@ def route_filter():
 @bp.route('/search')
 def route_search():
     query = request.args['query']
-    # TODO ensure valid FTS syntax, perhaps remove non-alphanumeric characters?
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
         query = query.replace('"', '""')
@@ -244,8 +268,7 @@ def route_search():
 def route_tags():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
-        # TODO make case insensitive, or is it already?
-        result = conn.execute('SELECT DISTINCT tag FROM track_tag ORDER BY tag');
+        result = conn.execute('SELECT DISTINCT tag FROM track_tag ORDER BY tag')
         tags = [row[0] for row in result]
 
     return tags

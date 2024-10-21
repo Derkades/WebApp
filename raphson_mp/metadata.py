@@ -240,6 +240,21 @@ class Metadata:
 
         return self._filename_title_search()
 
+    def primary_artist(self) -> Optional[str]:
+        if self.artists is not None:
+            if len(self.artists) == 1:
+                return self.artists[0] # if there is only one artist, it is the primary artist
+            elif len(self.artists) > 1:
+                # if there are multiple artists, the album artist is probably the primary artist
+                if self.album_artist is not None:
+                    if self.album_artist in self.artists:
+                        return self.album_artist
+
+                # if album artist is not known, we have to guess
+                return self.artists[0]
+
+        return None
+
     def get_ffmpeg_options(self, option='-metadata') -> list[str]:
         metadata_options: list[str] = []
         if self.album:

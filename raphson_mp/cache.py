@@ -3,6 +3,7 @@ Functions related to the cache (cache.db)
 """
 
 import logging
+import pickle
 import random
 import time
 from typing import Any
@@ -88,11 +89,11 @@ def store_json(key: str, data: Any, duration: int) -> None:
     store(key, jsonw.to_json(data).encode(), duration)
 
 
-def retrieve_json(cache_key: str, **kwargs) -> Any | None:
+def retrieve_json(key: str, **kwargs) -> Any | None:
     """
     Retrieve bytes, if exists decode and return object
     """
-    data = retrieve(cache_key, **kwargs)
+    data = retrieve(key, **kwargs)
     if data is None:
         return None
 
