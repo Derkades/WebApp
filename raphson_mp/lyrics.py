@@ -69,22 +69,37 @@ class LrcLibFetcher(LyricsFetcher):
             params['album_name'] = album
         if duration is not None:
             params['duration'] = duration
-        response = requests.get('http://lrclib.net/api/get/',
+        response = requests.get('https://lrclib.net/api/get',
                                 params=params,
                                 timeout=5,
                                 headers={'User-Agent': settings.user_agent})
-        if response.status_code == 404:
-            return None
-        response.raise_for_status()
-        json = response.json()
+        if response.status_code != 404:
+            response.raise_for_status()
+            json = response.json()
+        else:
+            log.info('lrclib: no results for direct get, trying search')
+            response = requests.get('https://lrclib.net/api/search',
+                                    params={'artist_name': artist,
+                                            'track_name': title},
+                                    timeout=5,
+                                    headers={'User-Agent': settings.user_agent})
+            response.raise_for_status()
+            json = response.json()
+            if len(json) == 0:
+                return None
+            json = json[0]
+
+            # Sanity check on title and artist
+            if not _strmatch(artist, json['artistName']):
+                return None
+            if not _strmatch(title, json['trackName']):
+                return None
 
         if 'syncedLyrics' in json:
-            return TimeSyncedLyrics.from_lrc('LRCLIB ' + json['id'], json['syncedLyrics'])
+            return TimeSyncedLyrics.from_lrc('LRCLIB ' + str(json['id']), json['syncedLyrics'])
 
         if 'plainLyrics' in json:
-            return PlainLyrics('LRCLIB ' + json['id'], json['plainLyrics'])
-
-        # TODO if /api/get doesn't find anything, try /api/search
+            return PlainLyrics('LRCLIB ' + str(json['id']), json['plainLyrics'])
 
         return None
 
