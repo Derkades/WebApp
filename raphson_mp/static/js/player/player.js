@@ -71,14 +71,6 @@ function replaceLyrics() {
     const queuedTrack = queue.currentTrack;
     const notFoundElem = document.getElementById('lyrics-not-found');
     const textElem = document.getElementById('lyrics-text');
-    const sourceElem = document.getElementById('lyrics-source');
-
-    if (queuedTrack.lyrics && queuedTrack.lyrics.source) {
-        sourceElem.classList.remove('hidden');
-        sourceElem.href = queuedTrack.lyrics.source;
-    } else {
-        sourceElem.classList.add('hidden');
-    }
 
     if (queuedTrack.lyrics) {
         notFoundElem.classList.add('hidden');
