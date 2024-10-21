@@ -50,6 +50,13 @@ class PlainLyrics(Lyrics):
     text: str
 
 
+def _strmatch(a: str, b: str):
+    is_match = difflib.SequenceMatcher(None, a.lower(), b.lower()).ratio() > 0.8
+    if not is_match:
+        log.log("strings don't match: '%s' '%s'", a, b)
+    return is_match
+
+
 class LyricsFetcher(ABC):
     name: str
     supports_synced: bool
@@ -102,10 +109,6 @@ class LrcLibFetcher(LyricsFetcher):
             return PlainLyrics('LRCLIB ' + str(json['id']), json['plainLyrics'])
 
         return None
-
-
-def _strmatch(a: str, b: str):
-    return difflib.SequenceMatcher(None, a.lower(), b.lower()).ratio() > 0.8
 
 
 class MusixMatchFetcher(LyricsFetcher):
@@ -167,15 +170,10 @@ class MusixMatchFetcher(LyricsFetcher):
                 found_title = item['track']['track_name']
                 found_track_id = item['track']['track_id']
                 log.info('musixmatch: search result: %s: %s - %s', found_track_id, found_artist, found_title)
-                if not _strmatch(artist, found_artist):
-                    log.info('musixmatch: artist does not match')
-                    continue
-                if not _strmatch(title, found_title):
-                    log.info('musixmatch: title does not match')
-                    continue
-                lyrics = self.get_lyrics_from_list(found_track_id)
-                if lyrics is not None:
-                    return TimeSyncedLyrics.from_lrc('MusixMatch', lyrics)
+                if _strmatch(title, found_title) and _strmatch(artist, found_artist):
+                    lyrics = self.get_lyrics_from_list(found_track_id)
+                    if lyrics is not None:
+                        return TimeSyncedLyrics.from_lrc('MusixMatch', lyrics)
 
         return None
 
@@ -195,6 +193,8 @@ class AZLyricsFetcher(LyricsFetcher):
         response = requests.get(url,
                                 timeout=10,
                                 headers={'User-Agent': settings.webscraping_user_agent})
+        if response.status_code == 404:
+            return None
         response.raise_for_status()
         lyricscode = response.text.split('t. -->')[1].split('</div')[0]
         lyricstext = html.unescape(lyricscode).replace('<br />', '\n')
@@ -232,10 +232,8 @@ class GeniusFetcher(LyricsFetcher):
             if section['type'] == 'top_hit':
                 for hit in section['hits']:
                     if hit['index'] == 'song':
-                        if not _strmatch(title, hit['result']['title']):
-                            log.info('genius: ignoring hit with title %s', hit['result']['title'])
-                            continue
-                        return hit['result']['url']
+                        if _strmatch(title, hit['result']['title']):
+                            return hit['result']['url']
                 break
 
         return None
@@ -336,6 +334,10 @@ def _find(title: str, artist: str, album: Optional[str], duration: Optional[int]
         except:
             log.exception('%s: encountered an error', fetcher.name)
 
+        if lyrics is None:
+            log.info('%s: no lyrics found, continuing search', fetcher.name)
+            continue
+
         if isinstance(lyrics, TimeSyncedLyrics):
             log.info('%s: found time-synced lyrics', fetcher.name)
             return lyrics
@@ -349,11 +351,7 @@ def _find(title: str, artist: str, album: Optional[str], duration: Optional[int]
             plain_match = lyrics
             continue
 
-        if lyrics is None:
-            log.info('%s: no lyrics found, continuing search', fetcher.name)
-            continue
-
-        raise ValueError(type(lyrics))
+        raise ValueError(lyrics)
 
     if plain_match is not None:
         log.info('Returning plain lyrics')
