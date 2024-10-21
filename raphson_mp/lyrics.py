@@ -53,7 +53,7 @@ class PlainLyrics(Lyrics):
 def _strmatch(a: str, b: str):
     is_match = difflib.SequenceMatcher(None, a.lower(), b.lower()).ratio() > 0.8
     if not is_match:
-        log.log("strings don't match: '%s' '%s'", a, b)
+        log.info("strings don't match: '%s' '%s'", a, b)
     return is_match
 
 
@@ -102,10 +102,10 @@ class LrcLibFetcher(LyricsFetcher):
             if not _strmatch(title, json['trackName']):
                 return None
 
-        if 'syncedLyrics' in json:
+        if json['syncedLyrics']:
             return TimeSyncedLyrics.from_lrc('LRCLIB ' + str(json['id']), json['syncedLyrics'])
 
-        if 'plainLyrics' in json:
+        if json['plainLyrics']:
             return PlainLyrics('LRCLIB ' + str(json['id']), json['plainLyrics'])
 
         return None
@@ -333,6 +333,7 @@ def _find(title: str, artist: str, album: Optional[str], duration: Optional[int]
             lyrics = fetcher.find(title, artist, album, duration)
         except:
             log.exception('%s: encountered an error', fetcher.name)
+            continue
 
         if lyrics is None:
             log.info('%s: no lyrics found, continuing search', fetcher.name)
