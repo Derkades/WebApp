@@ -39,6 +39,12 @@
     #lyrics-box {
         margin-bottom: calc(var(--gap) / 2);
     }
+
+    /* fix double margin */
+    #right-sidebar {
+        margin-top: 0;
+    }
+
 }
 
 /* ALBUM COVERS */
