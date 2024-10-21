@@ -55,14 +55,6 @@ function handleKey(event) {
         seekRelative(-3);
     } else if (key === 'Escape') {
         dialogs.closeTop();
-    } else if (key === 'l') {
-        const container = document.getElementById('right-scroll');
-        const topAtBottom = container.scrollHeight - container.clientHeight;
-        if (container.scrollTop > topAtBottom / 2) {
-            container.scrollTo({top: 0, behavior: 'smooth'});
-        } else {
-            container.scrollTo({top: topAtBottom, behavior: 'smooth'});
-        }
     } else if (key == '/') {
         event.preventDefault(true);
         document.getElementById('open-dialog-search').click();

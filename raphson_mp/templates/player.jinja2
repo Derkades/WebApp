@@ -27,7 +27,7 @@
     <div class="dither"></div>
 
     <div class="sidebars">
-        <div class="sidebar">
+        <div class="sidebar" id="left-sidebar">
             <div class="boxes">
                 <div class="box padding" id="playlist-checkboxes">
                     {% trans %}Loading&mldr;{% endtrans %}
@@ -93,19 +93,17 @@
             </div>
         </div>
 
-        <div class="sidebar">
-            <div class="boxes scroll" id="right-scroll">
-                <div class="box square album-cover-box">
-                    <div id="album-cover-1" class="album-cover"></div>
-                    <div id="album-cover-2" class="album-cover"></div>
+        <div class="sidebar" id="right-sidebar">
+            <div class="boxes">
+                <div class="box" id="album-cover-box">
+                    <div id="album-cover-1" class="cover-img"></div>
+                    <div id="album-cover-2" class="cover-img"></div>
                      <canvas id="visualiser"></canvas>
                 </div>
-                <div class="box padding" id="lyrics-box">
-                    <div id="lyrics-scroll" class="scroll">
-                        <i id="lyrics-not-found" class="hidden">{% trans %}No lyrics found{% endtrans %}</i>
-                        <span id="lyrics-text"></span>
-                        <a id="lyrics-source" class="secondary hidden" href="#" target="_blank"><br>{% trans %}Source{% endtrans %}</a>
-                    </div>
+                <div class="box padding scroll" id="lyrics-box">
+                    <i id="lyrics-not-found" class="hidden">{% trans %}No lyrics found{% endtrans %}</i>
+                    <span id="lyrics-text"></span>
+                    <a id="lyrics-source" class="secondary hidden" href="#" target="_blank"><br>{% trans %}Source{% endtrans %}</a>
                 </div>
             </div>
         </div>

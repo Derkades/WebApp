@@ -124,8 +124,6 @@ function replaceAllTrackHtml() {
     replaceAlbumImages();
     replaceLyrics();
     replaceTrackDisplayTitle();
-
-    document.getElementById('right-scroll').scrollTo({top: 0, behavior: 'smooth'});
 }
 
 eventBus.subscribe(MusicEvent.TRACK_CHANGE, replaceAllTrackHtml);

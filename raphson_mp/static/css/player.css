@@ -18,21 +18,30 @@
 
 .sidebar .boxes {
     align-content: safe center;
+    justify-content: center;
 }
 
 @media screen and (min-width: 901px) {
-    .sidebar:first-child {
+    #left-sidebar {
         margin-right: 0;
+    }
+
+    #lyrics-box {
+        height: calc(20vh - var(--gap));
+    }
+
+    #album-cover-box {
+        max-height: calc(80vh - 2 * var(--gap));
+    }
+
+    #right-sidebar .box {
+        max-width: calc(80vh - 2 * var(--gap));
     }
 }
 
 @media screen and (max-width: 900px) {
     .sidebars {
         flex-wrap: wrap;
-    }
-
-    #right-scroll {
-        max-height: 100%;
     }
 
     /* flexbox ignores body padding and overflows due to gap? */
@@ -68,14 +77,12 @@
     background-size: cover;
 }
 
-.album-cover-box {
+#album-cover-box {
     position: relative;
+    aspect-ratio: 1/1;
 }
 
-.album-cover {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: contain;
+.cover-img {
     height: 100%;
     width: 100%;
     position: absolute;

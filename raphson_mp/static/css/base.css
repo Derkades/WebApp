@@ -361,10 +361,6 @@ input::placeholder {
     width: 100%;
 }
 
-.square {
-    aspect-ratio: 1/1;
-}
-
 .padding {
     padding: var(--gap);
 }
@@ -458,7 +454,7 @@ input::placeholder {
     display: block;
     background-repeat: no-repeat;
     background-position: center;
-    background-size: cover;
+    background-size: contain;
     aspect-ratio: 1/1;
 }
 
