@@ -1,5 +1,9 @@
 /* SIDEBARS */
 
+:root {
+    --cover-size: 0.7; /* size of cover compared to lyrics from 0.0 to 1.0 */
+}
+
 .sidebars {
     display: flex;
     width: 100%;
@@ -27,15 +31,15 @@
     }
 
     #lyrics-box {
-        height: calc(20vh - var(--gap));
+        height: calc(100vh - var(--cover-size) * 100vh - var(--gap));
     }
 
     #album-cover-box {
-        max-height: calc(80vh - 2 * var(--gap));
+        max-height: calc(var(--cover-size) * 100vh - 2 * var(--gap));
     }
 
     #right-sidebar .box {
-        max-width: calc(80vh - 2 * var(--gap));
+        max-width: calc(var(--cover-size) * 100vh - 2 * var(--gap));
     }
 }
 
