@@ -392,12 +392,23 @@ class Track {
      * @returns {Promise<Lyrics|null>}
      */
     async getLyrics() {
-        const lyricsUrl = `/track/${encodeURIComponent(this.path)}/lyrics`;
+        const lyricsUrl = `/track/${encodeURIComponent(this.path)}/lyrics2`;
         const lyricsResponse = await fetch(lyricsUrl);
         checkResponseCode(lyricsResponse);
         const lyricsJson = await lyricsResponse.json();
         console.debug('track: downloaded lyrics', lyricsUrl);
-        return lyricsJson.lyrics ? new Lyrics(lyricsJson.source_url, lyricsJson.lyrics) : null;
+        switch(lyricsJson.type) {
+            case "none":
+                return null;
+            case "synced":
+                const lines = [];
+                for (const line of lyricsJson.text) {
+                    lines.push(new LyricsLine(line.start_time, line.text));
+                }
+                return new TimeSyncedLyrics(lyricsJson.source, lines);
+            case "plain":
+                return new PlainLyrics(lyricsJson.source, lyricsJson.text);
+        }
     }
 
     /**
@@ -512,12 +523,49 @@ class DownloadedTrack {
 class Lyrics {
     /** @type {string | null} */
     source;
-    /** @type {string} */
-    lyrics;
-    constructor(source, lyrics) {
+    constructor(source) {
         this.source = source;
-        this.lyrics = lyrics;
     };
+};
+
+class PlainLyrics extends Lyrics {
+    /** @type {string} */
+    text;
+    constructor(source, text) {
+        super(source)
+        this.text = text;
+    };
+};
+
+class LyricsLine {
+    /** @type {number} */
+    startTime;
+    /** @type {string} */
+    text;
+    constructor(startTime, text) {
+        this.startTime = startTime;
+        this.text = text;
+    }
+}
+
+class TimeSyncedLyrics extends Lyrics {
+    /** @type {Array<LyricsLine>} */
+    text;
+    constructor(source, text) {
+        super(source);
+        this.text = text;
+    };
+
+    /**
+     * @returns {string}
+     */
+    asPlainText() {
+        const lines = [];
+        for (const line of this.text) {
+            lines.push(line.text);
+        }
+        return lines.join('\n');
+    }
 };
 
 /**

@@ -314,7 +314,6 @@ def _find(title: str, artist: str, album: Optional[str], duration: Optional[int]
     for fetcher in FETCHERS:
         if plain_match is not None and not fetcher.supports_synced:
             # if we already have plain lyrics, we do not need to try any fetchers that only support plain lyrics
-            log.info('%s: ', fetcher.name)
             continue
 
         try:

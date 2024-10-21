@@ -109,6 +109,7 @@ def route_album_cover(path) -> Response:
 def route_lyrics(path):
     """
     Get lyrics for the provided track path.
+    DEPRECATED
     """
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)

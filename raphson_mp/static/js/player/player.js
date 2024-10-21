@@ -83,7 +83,13 @@ function replaceLyrics() {
     if (queuedTrack.lyrics) {
         notFoundElem.classList.add('hidden');
         textElem.classList.remove('hidden');
-        textElem.textContent = queuedTrack.lyrics.lyrics;
+        let lyricsText;
+        if (queuedTrack.lyrics instanceof PlainLyrics) {
+            lyricsText = queuedTrack.lyrics.text;
+        } else if (queuedTrack.lyrics instanceof TimeSyncedLyrics) {
+            lyricsText = queuedTrack.lyrics.asPlainText();
+        }
+        textElem.textContent = lyricsText;
     } else {
         notFoundElem.classList.remove('hidden');
         textElem.classList.add('hidden');
