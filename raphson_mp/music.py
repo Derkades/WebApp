@@ -440,6 +440,7 @@ class Track:
             'display': meta.display_title(),
         }
 
+    # TODO remove
     def lyrics(self) -> Optional[Lyrics]:
         if settings.offline_mode:
             with db.offline(read_only=True) as conn:

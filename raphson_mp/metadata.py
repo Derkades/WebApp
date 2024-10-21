@@ -228,6 +228,7 @@ class Metadata:
         """
         return re.sub(r'[^\x00-\x7f]', r'', self.display_title())
 
+    # TODO remove
     def lyrics_search_query(self) -> str:
         """
         Generate a search query to find lyrics

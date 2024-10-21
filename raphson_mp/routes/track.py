@@ -6,6 +6,7 @@ from raphson_mp import auth, db, image, music, scanner, settings, lyrics, jsonw
 from raphson_mp.image import ImageFormat
 from raphson_mp.jsonw import json_response
 from raphson_mp.music import AudioType, Track
+from raphson_mp.lyrics import PlainLyrics
 import time
 
 log = logging.getLogger(__name__)
@@ -111,14 +112,15 @@ def route_lyrics(path):
     Get lyrics for the provided track path.
     DEPRECATED
     """
+    # TODO remove this endpoint
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
 
         track = Track.by_relpath(conn, path)
-        lyrics = track.lyrics()
-        if lyrics:
-            return {'lyrics': lyrics.lyrics,
-                    'source_url': lyrics.source_url}
+        lyr = track.lyrics()
+        if lyr:
+            return {'lyrics': lyr.lyrics,
+                    'source_url': lyr.source_url}
         else:
             return {'lyrics': None}
 
@@ -128,6 +130,23 @@ def route_lyrics2(path):
     """
     Get lyrics for the provided track path.
     """
+    if settings.offline_mode:
+        with db.offline(read_only=True) as conn:
+            lyrics_json = jsonw.from_json(conn.execute('SELECT lyrics_json FROM content WHERE path=?', (path,)).fetchone()[0])
+            if 'found' in lyrics_json and lyrics_json['found']:
+                # Legacy HTML lyrics, best effort conversion from HTML to plain text
+                import html
+                lyr = PlainLyrics(lyrics_json['source'], html.unescape(lyrics_json['html'].replace('<br>', '\n')))
+            elif 'lyrics' in lyrics_json and 'source_url' in lyrics_json and lyrics_json['lyrics'] is not None and lyrics_json['source_url'] is not None:
+                # Legacy plaintext lyrics
+                lyr = PlainLyrics(lyrics_json['source_url'], lyrics_json['lyrics'])
+            elif 'type' in lyrics_json:
+                # Modern lyrics
+                lyr = lyrics.from_dict(lyrics_json)
+            else:
+                lyr = None
+            return lyrics.to_dict(lyr)
+
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
 
