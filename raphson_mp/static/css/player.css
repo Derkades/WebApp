@@ -31,7 +31,7 @@
     }
 
     #lyrics-box {
-        height: calc(100vh - var(--cover-size) * 100vh - var(--gap));
+        max-height: calc(100vh - var(--cover-size) * 100vh - var(--gap));
     }
 
     #album-cover-box {
@@ -96,6 +96,7 @@
 
 #lyrics-text {
     white-space: pre-line; /* render newlines */
+    font-size: 1.2em;
 }
 
 /* PLAYLISTS */

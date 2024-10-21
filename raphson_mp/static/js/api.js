@@ -566,6 +566,16 @@ class TimeSyncedLyrics extends Lyrics {
         }
         return lines.join('\n');
     }
+
+    currentLine(currentTime) {
+        // current line is the last line where currentTime is after the line start time
+        for (let i = 0; i < this.text.length; i++) {
+            if (currentTime < this.text[i].startTime) {
+                return i - 1;
+            }
+        }
+        return this.text.length - 1;
+    }
 };
 
 /**
