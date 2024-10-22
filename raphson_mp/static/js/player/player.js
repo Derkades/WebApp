@@ -69,17 +69,16 @@ function replaceAlbumImages() {
 
 function replaceLyrics() {
     const queuedTrack = queue.currentTrack;
-    const boxElem = document.getElementById('lyrics-box')
-    const textElem = document.getElementById('lyrics-text');
+    const lyricsElem = document.getElementById('lyrics-box')
 
     if (queuedTrack.lyrics) {
-        boxElem.classList.remove('hidden');
+        lyricsElem.classList.remove('hidden');
         if (queuedTrack.lyrics instanceof PlainLyrics) {
-            textElem.textContent = queuedTrack.lyrics.text;
+            lyricsElem.textContent = queuedTrack.lyrics.text;
         }
         // time-synced lyrics is handled by lyrics.js
     } else {
-        boxElem.classList.add('hidden');
+        lyricsElem.classList.add('hidden');
     }
 }
 

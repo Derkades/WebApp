@@ -94,7 +94,7 @@
 
 /* LYRICS */
 
-#lyrics-text {
+#lyrics-box {
     white-space: pre-line; /* render newlines */
     font-size: 1.2em;
 }

@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const audioElem = getAudioElement();
-    const lyricsElem = document.getElementById('lyrics-text');
+    const lyricsElem = document.getElementById('lyrics-box');
 
     let lastLine = null;
 
