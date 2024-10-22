@@ -142,6 +142,19 @@ class Music {
         const image = '/static/img/raphson_small.webp';
         return new DownloadedTrack(null, audio, image, null);
     }
+
+    /**
+     * @returns {Promise<DownloadedTrack>}
+     */
+    async downloadNews() {
+        const audioResponse = await fetch('/news/audio');
+        checkResponseCode(audioResponse);
+        const audioBlob = URL.createObjectURL(await audioResponse.blob());
+
+        const imageUrl = '/static/img/raphson.png';
+
+        return new DownloadedTrack(null, audioBlob, imageUrl, null);
+    }
 }
 
 const music = new Music();

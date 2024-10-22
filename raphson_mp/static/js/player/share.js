@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    shareButton.addEventListener('click', (async function() {
+    shareButton.addEventListener('click', async () => {
         if (!queue.currentTrack || !queue.currentTrack.track) {
             // Music not loaded yet
             return;
@@ -30,5 +30,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         window.open(absoluteShareUrl, '_blank');
-    }));
+    });
 });

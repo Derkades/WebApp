@@ -11,6 +11,10 @@ class News {
         });
     }
 
+    /**
+     * Called every minute. Checks if news should be queued.
+     * @returns {void}
+     */
     check() {
         if (!this.#newsSetting.checked) {
             console.debug('news: is disabled')
@@ -39,16 +43,11 @@ class News {
         this.queue().then(() => this.#hasQueuedNews = true);
     }
 
+    /**
+     * Downloads news, and add it to the queue
+     */
     async queue() {
-        const audioResponse = await fetch('/news/audio');
-        checkResponseCode(audioResponse);
-        const audioBlob = URL.createObjectURL(await audioResponse.blob());
-
-        const imageResponse = await fetch('/static/img/raphson.png');
-        checkResponseCode(imageResponse);
-        const imageBlob = URL.createObjectURL(await imageResponse.blob());
-
-        const queuedTrack = new DownloadedTrack(null, audioBlob, imageBlob, null);
+        const track = await music.downloadNews();
         queue.add(queuedTrack, true, true)
     }
 }

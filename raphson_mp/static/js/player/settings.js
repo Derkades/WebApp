@@ -36,11 +36,6 @@ function syncInputWithStorage(elemId) {
     });
 }
 
-function syncInputsWithStorage() {
-    SETTING_ELEMENTS.forEach(syncInputWithStorage);
-    eventBus.publish(MusicEvent.SETTINGS_LOADED);
-}
-
 function getTrackDownloadParams() {
     let audioType = document.getElementById('settings-audio-type').value;
 
@@ -58,7 +53,8 @@ function getTrackDownloadParams() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    syncInputsWithStorage();
+    SETTING_ELEMENTS.forEach(syncInputWithStorage);
+    eventBus.publish(MusicEvent.SETTINGS_LOADED);
 
     document.getElementById('settings-queue-size').addEventListener('input', () => queue.fill());
 });

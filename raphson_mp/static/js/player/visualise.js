@@ -1,13 +1,10 @@
 // https://blog.logrocket.com/audio-visualizer-from-scratch-javascript/
 class Visualiser {
     // Settings
-    barWidth = 10;
-    bassFreq = 50;
-    minFreq = 50;
-    maxFreq = 14000;
-    xToFreqExp = 2;
-    bassScaleAmount = 0.1;
-    bassScaleEnabled = false;
+    #barWidth = 10;
+    #minFreq = 50;
+    #maxFreq = 14000;
+    #xToFreqExp = 2;
 
     /** @type {Uint8Array} */
     #dataArray;
@@ -61,25 +58,18 @@ class Visualiser {
 
         audioContextManager.analyser.getByteFrequencyData(this.#dataArray);
 
-        const minBin = this.minFreq / 48000 * audioContextManager.fftSize;
-        const maxBin = this.maxFreq / 48000 * audioContextManager.fftSize;
+        const minBin = this.#minFreq / 48000 * audioContextManager.fftSize;
+        const maxBin = this.#maxFreq / 48000 * audioContextManager.fftSize;
         const multiplyX = (maxBin - minBin);
 
-        for (let x = 0; x < width; x += this.barWidth) {
-            const i = Math.floor((x / width)**this.xToFreqExp * multiplyX + minBin);
+        for (let x = 0; x < width; x += this.#barWidth) {
+            const i = Math.floor((x / width)**this.#xToFreqExp * multiplyX + minBin);
             const barHeight = this.#dataArray[i] * height / 256;
-            draw.fillRect(x, height - barHeight, this.barWidth, barHeight);
-        }
-
-        if (this.bassScaleEnabled) {
-            const bassIndex = Math.floor(this.bassFreq / 48000 * audioContextManager.fftSize);
-            const bassAmount = this.#dataArray[bassIndex] / 256;
-            document.getElementsByTagName('body')[0].style.scale = 1 + bassAmount * this.bassScaleAmount;
+            draw.fillRect(x, height - barHeight, this.#barWidth, barHeight);
         }
 
         this.#taskId = requestAnimationFrame(() => this.#draw());
     }
-
 }
 
 const visualiser = new Visualiser();

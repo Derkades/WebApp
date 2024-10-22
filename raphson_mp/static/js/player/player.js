@@ -1,25 +1,3 @@
-function seekRelative(delta) {
-    const audioElem = getAudioElement();
-
-    const newTime = audioElem.currentTime + delta;
-    if (newTime < 0) {
-        seekAbsolute(0);
-    } else if (newTime > audioElem.duration) {
-        seekAbsolute(audioElem.duration);
-    } else {
-        seekAbsolute(newTime);
-    }
-}
-
-function seekAbsolute(position) {
-    if (!isFinite(position)) {
-        console.warn('player: ignoring seek with non-finite position', position);
-        return;
-    }
-
-    getAudioElement().currentTime = position;
-}
-
 /**
  * @returns {HTMLAudioElement}
  */
@@ -27,22 +5,40 @@ function getAudioElement() {
     return document.getElementById('audio');
 }
 
-async function replaceAudioSource() {
-    const audio = getAudioElement();
-    audio.src = queue.currentTrack.audioUrl;
-    // Ensure audio volume matches slider
-    onVolumeChange();
-    try {
-        await audio.play();
-    } catch (exception) {
-        console.warn(exception);
+/**
+ * @returns {void}
+ */
+function seekRelative(delta) {
+    const audioElem = getAudioElement();
+
+    const newTime = audioElem.currentTime + delta;
+    if (newTime < 0) {
+        audioElem.currentTime = 0;
+    } else if (newTime > audioElem.duration) {
+        audioElem.currentTime = audioElem.duration;
+    } else {
+        audioElem.currentTime = newTime;
     }
 }
 
-function replaceAlbumImages() {
-    const imageUrl = queue.currentTrack.imageUrl;
+/**
+ * @returns {Promise<void>}
+ */
+async function replaceAudioSource() {
+    const audio = getAudioElement();
+    audio.src = queue.currentTrack.audioUrl;
+    try {
+        await audio.play();
+    } catch (exception) {
+        console.warn('player: failed to start playback: ', exception);
+    }
+}
 
-    const cssUrl = `url("${imageUrl}")`;
+/**
+ * @returns {void}
+ */
+function replaceAlbumImages() {
+    const cssUrl = `url("${queue.currentTrack.imageUrl}")`;
 
     const bgBottom = document.getElementById('bg-image-1');
     const bgTop = document.getElementById('bg-image-2');
@@ -67,13 +63,19 @@ function replaceAlbumImages() {
     }, 200);
 }
 
-function trackInfoUnavailableSpan() {
+/**
+ * @returns {HTMLSpanElement}
+ */
+function trackInfoUnavailableHtml() {
     const span = document.createElement('span');
     span.style.color = COLOR_MISSING_METADATA;
     span.textContent = '[track info unavailable]';
     return span;
 }
 
+/**
+ * @returns {void}
+ */
 function replaceTrackDisplayTitle() {
     if (queue.currentTrack !== null) {
         const track = queue.currentTrack.track;
@@ -81,7 +83,7 @@ function replaceTrackDisplayTitle() {
             document.getElementById('current-track').replaceChildren(track.displayHtml(true));
             document.title = track.displayText(true, true);
         } else {
-            document.getElementById('current-track').replaceChildren(trackInfoUnavailableSpan());
+            document.getElementById('current-track').replaceChildren(trackInfoUnavailableHtml());
             document.title = '[track info unavailable]';
         }
     } else {
@@ -90,13 +92,11 @@ function replaceTrackDisplayTitle() {
     }
 }
 
-function replaceAllTrackHtml() {
+eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {
     replaceAudioSource();
     replaceAlbumImages();
     replaceTrackDisplayTitle();
-}
-
-eventBus.subscribe(MusicEvent.TRACK_CHANGE, replaceAllTrackHtml);
+});
 
 // Update track title, metadata may have changed
 eventBus.subscribe(MusicEvent.METADATA_CHANGE, updatedTrack => {
@@ -110,7 +110,7 @@ eventBus.subscribe(MusicEvent.METADATA_CHANGE, updatedTrack => {
 document.addEventListener('DOMContentLoaded', () => {
     const dislikeButton = document.getElementById('button-dislike')
     if (dislikeButton) { // Missing in offline mode
-        dislikeButton.addEventListener('click', async function() {
+        dislikeButton.addEventListener('click', async () => {
             await queue.currentTrack.track.dislike();
             queue.next();
         });
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const deleteButton = document.getElementById('button-delete');
     if (deleteButton) { // Missing in offline mode
-        deleteButton.addEventListener('click', async function() {
+        deleteButton.addEventListener('click', async () => {
             if (queue.currentTrack === null) {
                 return;
             }
@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
             copyTrack.value = queue.currentTrack.path;
             dialogs.open('dialog-copy');
         });
-        copyButton.addEventListener('click', async function() {
+        copyButton.addEventListener('click', async () => {
             copyButton.disabled = true;
             try {
                 await queue.currentTrack.track.copyTo(copyPlaylist.value);
@@ -157,5 +157,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('audio').addEventListener('ended', () => queue.next());
+    getAudioElement().addEventListener('ended', () => queue.next());
 });

@@ -1,3 +1,6 @@
+/**
+ * @returns {Array<string>} list of playlist names
+ */
 function getActivePlaylists() {
     const active = [];
 
@@ -11,6 +14,10 @@ function getActivePlaylists() {
     return active;
 }
 
+/**
+ * @param {string} currentPlaylist current playlist name
+ * @returns {string} next playlist name
+ */
 function getNextPlaylist(currentPlaylist) {
     const active = getActivePlaylists();
 
@@ -38,15 +45,12 @@ function getNextPlaylist(currentPlaylist) {
 }
 
 /**
- *
- * @param {Playlist} playlist
- * @param {number} index
+ * @param {Playlist} playlist Playlist
+ * @param {number} index Hotkey number, set to >=10 to not assign a hotkey
+ * @param {boolean} defaultChecked Whether checkbox should be checked
  * @returns {HTMLSpanElement}
  */
 function createPlaylistCheckbox(playlist, index, defaultChecked) {
-    const span = document.createElement("span");
-    span.classList.add("checkbox-with-label");
-
     const input = document.createElement("input");
     input.type = 'checkbox';
     input.classList.add('playlist-checkbox');
@@ -54,9 +58,6 @@ function createPlaylistCheckbox(playlist, index, defaultChecked) {
     input.checked = defaultChecked;
     input.oninput = savePlaylistState;
 
-    const label = document.createElement("label");
-    label.htmlFor = "checkbox-" + playlist.name;
-    label.textContent = playlist.name;
     const sup = document.createElement('sup');
     if (index < 10) { // Assume number keys higher than 9 don't exist
         sup.textContent = index;
@@ -66,18 +67,22 @@ function createPlaylistCheckbox(playlist, index, defaultChecked) {
     trackCount.classList.add('secondary');
     trackCount.textContent = ' ' + playlist.trackCount;
 
-    label.replaceChildren(
-        playlist.name,
-        sup,
-        trackCount,
-    );
+    const label = document.createElement("label");
+    label.htmlFor = "checkbox-" + playlist.name;
+    label.textContent = playlist.name;
+    label.replaceChildren(playlist.name, sup, trackCount);
 
-    span.appendChild(input);
-    span.appendChild(label);
+    const span = document.createElement("span");
+    span.classList.add("checkbox-with-label");
+    span.replaceChildren(input, label);
 
     return span;
 }
 
+/**
+ * @param {Array<Playlist>} playlists
+ * @returns {void}
+ */
 function updatePlaylistCheckboxHtml(playlists) {
     console.debug('playlist: update playlist checkboxes');
 
@@ -100,6 +105,10 @@ function updatePlaylistCheckboxHtml(playlists) {
     loadPlaylistState();
 }
 
+/**
+ * @param {Array<Playlist>} playlists
+ * @returns {void}
+ */
 function updatePlaylistDropdowns(playlists) {
     console.debug('playlist: updating dropdowns');
 
@@ -136,14 +145,16 @@ function updatePlaylistDropdowns(playlists) {
     }
 }
 
-async function updatePlaylists() {
+document.addEventListener('DOMContentLoaded', async () => {
     const playlists = await music.playlists();
     updatePlaylistCheckboxHtml(playlists)
     updatePlaylistDropdowns(playlists);
-}
+});
 
-document.addEventListener('DOMContentLoaded', updatePlaylists);
-
+/**
+ * Update checked state of playlist checkboxes from local storage
+ * @returns {void}
+ */
 function loadPlaylistState() {
     const playlistsString = localStorage.getItem('playlists');
     if (!playlistsString) {
@@ -161,7 +172,11 @@ function loadPlaylistState() {
     }
 }
 
-async function savePlaylistState() {
+/**
+ * Save state of playlist checkboxes to local storage
+ * @returns {void}
+ */
+function savePlaylistState() {
     const checkboxes = document.getElementById('playlist-checkboxes').querySelectorAll('.playlist-checkbox');
     const checkedPlaylists = [];
     for (const checkbox of checkboxes) {

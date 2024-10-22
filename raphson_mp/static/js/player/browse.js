@@ -147,7 +147,7 @@ class Browse {
             colTitle.appendChild(track.displayHtml());
 
             const addButton2 = addButton.cloneNode(true);
-            addButton2.addEventListener('click', async function() {
+            addButton2.addEventListener('click', async () => {
                 replaceIconButton(addButton2, 'loading');
                 addButton2.firstChild.classList.add('spinning');
                 addButton2.disabled = true;

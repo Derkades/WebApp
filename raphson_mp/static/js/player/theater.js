@@ -1,5 +1,4 @@
 class Theater {
-    #allowed = false;
     #stillCount = 0;
     #timerId = null;
     #listenerFunction = null;

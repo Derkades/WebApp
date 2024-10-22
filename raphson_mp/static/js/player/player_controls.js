@@ -20,12 +20,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('button-next').addEventListener('click', () => queue.next());
 
     // Play pause
-    document.getElementById('button-play').addEventListener('click', () => {
-        audioElem.play();
-    });
-    document.getElementById('button-pause').addEventListener('click', () => {
-        audioElem.pause();
-    });
+    document.getElementById('button-play').addEventListener('click', () => audioElem.play());
+    document.getElementById('button-pause').addEventListener('click', () => audioElem.pause());
+
+    audioElem.addEventListener('pause', updatePlayPauseButtons);
+    audioElem.addEventListener('play', updatePlayPauseButtons);
+
+    // Hide play/pause buttons on initial page load
+    document.getElementById('button-pause').classList.add('hidden');
+    document.getElementById('button-play').classList.add('hidden');
 
     // Seek bar
     const seekBar = document.getElementById('outer-progress-bar');
@@ -43,7 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     seekBar.addEventListener('mousedown', event => {
         const audioElem = getAudioElement();
-        seekAbsolute(((event.clientX - seekBar.offsetLeft) / seekBar.offsetWidth) * audioElem.duration);
+        const newTime = ((event.clientX - seekBar.offsetLeft) / seekBar.offsetWidth) * audioElem.duration;
+        audioElem.currentTime = newTime;
 
         // Keep updating while mouse is moving
         document.addEventListener('mousemove', onMove);
@@ -58,9 +62,17 @@ document.addEventListener('DOMContentLoaded', () => {
     seekBar.addEventListener('wheel', event => {
         seekRelative(event.deltaY < 0 ? 3 : -3);
     }, {passive: true});
+
+    audioElem.addEventListener('durationchange', updateSeekBar);
+    audioElem.addEventListener('timeupdate', updateSeekBar);
+
+    // Seek bar is not updated when page is not visible. Immediately update it when the page does become visibile.
+    document.addEventListener('visibilitychange', updateSeekBar);
 });
 
-// Update seek bar
+/**
+ * @returns {void}
+ */
 function updateSeekBar() {
     // Save resources updating seek bar if it's not visible
     if (document.visibilityState != 'visible') {
@@ -88,7 +100,9 @@ function updateSeekBar() {
     document.getElementById('progress-bar').style.width = barWidth
 }
 
-// Update play/pause buttons
+/**
+ * @returns {void}
+ */
 function updatePlayPauseButtons() {
     if (getAudioElement().paused) {
         document.getElementById('button-pause').classList.add('hidden');
@@ -100,7 +114,7 @@ function updatePlayPauseButtons() {
 }
 
 // Only show metadata edit and track delete buttons if playlist is writable
-eventBus.subscribe(MusicEvent.TRACK_CHANGE, async function() {
+eventBus.subscribe(MusicEvent.TRACK_CHANGE, async () => {
     if (!document.getElementById('button-dislike')) {
         // if dislike button does not exist, we are running in offline mode and other buttons also don't exist
         return;
@@ -127,18 +141,4 @@ eventBus.subscribe(MusicEvent.TRACK_CHANGE, async function() {
         document.getElementById('button-delete').classList.add('hidden');
         document.getElementById('button-copy').classList.add('hidden');
     }
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-    getAudioElement().addEventListener('durationchange', updateSeekBar);
-    getAudioElement().addEventListener('timeupdate', updateSeekBar);
-    getAudioElement().addEventListener('pause', updatePlayPauseButtons);
-    getAudioElement().addEventListener('play', updatePlayPauseButtons);
-    updatePlayPauseButtons();
-    // Seek bar is not updated when page is not visible. Immediately update it when the page does become visibile.
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState == 'visible') {
-            updateSeekBar();
-        }
-    });
 });
