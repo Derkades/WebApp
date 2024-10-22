@@ -132,7 +132,7 @@ class OfflineSync:
             return self.request_get(f'/track/{urlencode(path)}/cover?quality=high').content
 
         def download_lyrics() -> str:
-            return self.request_get(f'/track/{urlencode(path)}/lyrics').text
+            return self.request_get(f'/track/{urlencode(path)}/lyrics2').text
 
         with ThreadPool(3) as pool:
             result_audio = pool.apply_async(download_audio)
