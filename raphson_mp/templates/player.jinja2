@@ -248,7 +248,9 @@
                     <label for="editor-year">{% trans %}Year (4 characters){% endtrans %}</label>
                     <input type="text" id="editor-year" value="">
 
-                    {{ icon_button('content-save', 'editor-save', title=gettext('Save')) }} {{ icon_button('auto-fix', 'editor-auto', title=gettext('Determine tags automatically')) }}
+                    {{ icon_button('content-save', 'editor-save', title=gettext('Save')) }}
+
+                    {{ icon_button('auto-fix', 'editor-auto', title=gettext('Find metadata')) }}
                 </div>
 
                 <p id="editor-writing" class="hidden">{% trans %}Writing metadata...{% endtrans %}</p>
