@@ -256,9 +256,6 @@ class GeniusFetcher(LyricsFetcher):
                 if tag == 'br':
                     self.text += "\n"
 
-            def handle_endtag(self, tag):
-                pass
-
             def handle_data(self, data):
                 self.text += data.strip()
 
