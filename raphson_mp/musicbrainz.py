@@ -1,5 +1,6 @@
 import logging
 import re
+import time
 import traceback
 from dataclasses import dataclass
 from typing import Any, Iterator, Optional
@@ -37,10 +38,12 @@ def _mb_get(url: str, params: dict[str, str]) -> dict[str, Any]:
 
 
 def _get_release_group_cover(release_group: str) -> Optional[bytes]:
-    response = requests.get(f'https://coverartarchive.org/release-group/{release_group}/front-1200',
-                             headers={'User-Agent': settings.user_agent},
-                             allow_redirects=True,
-                             timeout=20)
+    url = f'https://coverartarchive.org/release-group/{release_group}/front-1200'
+    log.info('downloading: %s', url)
+    response = requests.get(url,
+                            headers={'User-Agent': settings.user_agent},
+                            allow_redirects=True,
+                            timeout=30) # long timeout, internet archive can be slow
     if response.status_code == 404:
         log.info('release group has no image')
         return None
@@ -52,17 +55,17 @@ def _search_release_group(artist: str, title: str) -> str | None:
     """
     Search for a release group id using the provided search query
     """
-    query = f'artist:"{lucene_escape(artist)}" AND releasegroup:"{lucene_escape(title)}"'
-    log.info('Performing MB search for query: %s', query)
-    result = _mb_get('release-group',
-                     {'query': query,
-                      'limit': '1',
-                      'primarytype': 'Album'}) # preference for albums, but this is not a strict filter
-    groups = result['release-groups']
-    if groups:
-        group = groups[0]
-        log.info('Found release group: %s: %s (%s)', group['id'], group['title'], group['primary-type'])
-        return group['id']
+    for query in [f'artist:"{lucene_escape(artist)}" AND releasegroup:"{lucene_escape(title)}" AND primarytype:Album',
+                  f'artist:"{lucene_escape(artist)}" AND releasegroup:"{lucene_escape(title)}"']:
+        log.info('Performing MB search for query: %s', query)
+        result = _mb_get('release-group', {'query': query, 'limit': '1'})
+        groups = result['release-groups']
+        if groups:
+            group = groups[0]
+            log.info('Found release group: %s: %s (%s)', group['id'], group['title'], group['primary-type'])
+            return group['id']
+
+        time.sleep(1) # avoid rate limit
 
     log.info('No release group found')
     return None
