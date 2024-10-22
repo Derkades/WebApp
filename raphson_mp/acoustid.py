@@ -1,11 +1,12 @@
-from pathlib import Path
-import subprocess
-import requests
-from dataclasses import dataclass
-from raphson_mp import settings
 import logging
+import subprocess
+from dataclasses import dataclass
+from pathlib import Path
 from typing import Iterator
 
+import requests
+
+from raphson_mp import settings
 
 if settings.offline_mode:
     # Module must not be imported to ensure no data is ever downloaded in offline mode.

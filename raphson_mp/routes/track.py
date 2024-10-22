@@ -1,13 +1,13 @@
 import logging
+import time
 
 from flask import Blueprint, Response, abort, request
 
-from raphson_mp import auth, db, image, music, scanner, settings, lyrics, jsonw
+from raphson_mp import auth, db, image, jsonw, lyrics, music, scanner, settings
 from raphson_mp.image import ImageFormat
 from raphson_mp.jsonw import json_response
+from raphson_mp.lyrics import PlainLyrics, TimeSyncedLyrics
 from raphson_mp.music import AudioType, Track
-from raphson_mp.lyrics import PlainLyrics
-import time
 
 log = logging.getLogger(__name__)
 bp = Blueprint('track', __name__, url_prefix='/track')
@@ -110,6 +110,7 @@ def route_album_cover(path) -> Response:
 def route_lyrics(path):
     """
     Get lyrics for the provided track path.
+    Legacy lyrics endpoint for compatibility, re-implemented using new lyrics system
     DEPRECATED
     """
     # TODO remove this endpoint
@@ -118,11 +119,13 @@ def route_lyrics(path):
 
         track = Track.by_relpath(conn, path)
         lyr = track.lyrics()
-        if lyr:
-            return {'lyrics': lyr.lyrics,
-                    'source_url': lyr.source_url}
-        else:
+        if lyr is None:
             return {'lyrics': None}
+        elif isinstance(lyr, TimeSyncedLyrics):
+            lyr = lyr.to_plain()
+
+        return {'lyrics': lyr.text,
+                'source_url': lyr.source}
 
 
 @bp.route('/<path:path>/lyrics2')
@@ -155,18 +158,7 @@ def route_lyrics2(path):
         if request.if_modified_since and track.mtime_dt <= request.if_modified_since:
             return Response(None, 304)
 
-        meta = track.metadata()
-        if meta.lyrics:
-            log.info('returning lyrics from metadata')
-            lyr = PlainLyrics('metadata', meta.lyrics)
-        else:
-            title = meta.title
-            artist = meta.primary_artist()
-            if title and artist:
-                lyr = lyrics.find(title, artist, meta.album, meta.duration)
-            else:
-                log.warning('could not search for lyrics due to missing metadata')
-                lyr = None
+        lyr = track.lyrics()
 
         return jsonw.json_response(lyrics.to_dict(lyr), last_modified=track.mtime)
 

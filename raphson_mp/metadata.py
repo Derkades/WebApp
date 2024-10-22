@@ -228,19 +228,6 @@ class Metadata:
         """
         return re.sub(r'[^\x00-\x7f]', r'', self.display_title())
 
-    # TODO remove
-    def lyrics_search_query(self) -> str:
-        """
-        Generate a search query to find lyrics
-        """
-        if self.album_artist and not ignore_album_artist(self.album_artist) and self.title:
-            return self.album_artist + ' - ' + self.title
-
-        if self.artists and self.title:
-            return ' '.join(self.artists) + ' - ' + self.title
-
-        return self._filename_title_search()
-
     def primary_artist(self) -> Optional[str]:
         if self.artists is not None:
             if len(self.artists) == 1:

@@ -1,17 +1,18 @@
-from abc import ABC, abstractmethod
-import json
-from pathlib import Path
-from bs4 import BeautifulSoup, NavigableString, PageElement, Tag
-import requests
-import re
-import logging
-from typing import Optional
-from raphson_mp import settings, cache
-import time
 import difflib
 import html
+import json
+import logging
+import re
+import time
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Optional
 
+import requests
+from bs4 import BeautifulSoup, NavigableString, PageElement, Tag
+
+from raphson_mp import cache, settings
 
 log = logging.getLogger(__name__)
 
@@ -31,9 +32,13 @@ class TimeSyncedLyrics(Lyrics):
     source: str
     text: list[LyricsLine]
 
-    def to_lrc(self):
+    def to_lrc(self) -> str:
         # TODO proper time format
         return '\n'.join([f'[{line.start_time}] {line.text}' for line in self.text])
+
+    def to_plain(self) -> 'PlainLyrics':
+        text = '\n'.join([line.text for line in self.text])
+        return PlainLyrics(self.source, text)
 
     @classmethod
     def from_lrc(cls, source: str, lrc: str):

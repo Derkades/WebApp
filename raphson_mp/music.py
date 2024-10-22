@@ -14,10 +14,11 @@ from sqlite3 import Connection
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, Iterator, Literal, Optional
 
-from raphson_mp import (cache, db, image, jsonw, metadata, reddit,
+from raphson_mp import (cache, db, image, jsonw, lyrics, metadata, reddit,
                         settings)
 from raphson_mp.auth import User
 from raphson_mp.image import ImageFormat, ImageQuality
+from raphson_mp.lyrics import Lyrics, PlainLyrics
 
 if TYPE_CHECKING:
     from metadata import Metadata
@@ -196,17 +197,12 @@ class AudioType(Enum):
 
 
 @dataclass
-class Lyrics:
-    source_url: Optional[str]
-    lyrics: str
-
-
-@dataclass
 class Track:
     conn: Connection
     relpath: str
     path: Path
     mtime: int
+    _metadata: Optional[Metadata] = None
 
     @property
     def playlist(self) -> str:
@@ -223,7 +219,9 @@ class Track:
         """
         Returns: Cached metadata for this track, as a Metadata object
         """
-        return metadata.cached(self.conn, self.relpath)
+        if not self._metadata:
+            self._metadata = metadata.cached(self.conn, self.relpath)
+        return self._metadata
 
     def get_cover(self, meme: bool, img_quality: ImageQuality, img_format: ImageFormat) -> bytes:
         """
@@ -440,7 +438,6 @@ class Track:
             'display': meta.display_title(),
         }
 
-    # TODO remove
     def lyrics(self) -> Optional[Lyrics]:
         if settings.offline_mode:
             with db.offline(read_only=True) as conn:
@@ -458,14 +455,17 @@ class Track:
                     return None
 
         meta = self.metadata()
-
         if meta.lyrics:
             log.info('using lyrics from metadata')
-            return Lyrics(None, meta.lyrics)
+            return PlainLyrics('metadata', meta.lyrics)
 
-        from raphson_mp import genius
+        title = meta.title
+        artist = meta.primary_artist()
+        if title and artist:
+            return lyrics.find(title, artist, meta.album, meta.duration)
 
-        return genius.get_lyrics(meta.lyrics_search_query())
+        log.warning('could not search for lyrics due to missing metadata')
+        return None
 
     @staticmethod
     def by_relpath(conn: Connection, relpath: str) -> 'Track' | None:

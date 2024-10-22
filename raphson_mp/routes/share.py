@@ -7,6 +7,7 @@ from flask import (Blueprint, Response, abort, render_template, request,
 
 from raphson_mp import auth, db, jsonw
 from raphson_mp.image import QUALITY_HIGH, ImageFormat
+from raphson_mp.lyrics import PlainLyrics, TimeSyncedLyrics
 from raphson_mp.music import AudioType, Track
 
 bp = Blueprint('share', __name__, url_prefix='/share')
@@ -114,8 +115,17 @@ def show(code):
         lyrics = track.lyrics()
         meta = track.metadata()
 
+        if lyrics is None:
+            lyrics_text = None
+        elif isinstance(lyrics, PlainLyrics):
+            lyrics_text = lyrics.text
+        elif isinstance(lyrics, TimeSyncedLyrics):
+            lyrics_text = lyrics.to_plain().text
+        else:
+            raise ValueError(lyrics)
+
     return render_template('share.jinja2',
                            code=code,
                            shared_by=shared_by,
                            track=meta.display_title(),
-                           lyrics=lyrics.lyrics)
+                           lyrics=lyrics_text)

@@ -1,14 +1,13 @@
-from dataclasses import dataclass
 import logging
 import re
 import traceback
-from typing import Any, Optional, Iterator
-from requests.exceptions import HTTPError
+from dataclasses import dataclass
+from typing import Any, Iterator, Optional
 
 import requests
+from requests.exceptions import HTTPError
 
 from raphson_mp import settings
-
 
 if settings.offline_mode:
     # Module must not be imported to ensure no data is ever downloaded in offline mode.

@@ -2,9 +2,9 @@
 
 import logging
 import os
+import sys
 from argparse import ArgumentParser
 from pathlib import Path
-import sys
 from typing import Any, Optional
 
 from raphson_mp import auth, logconfig, settings
@@ -216,20 +216,6 @@ def handle_cover(args: Any) -> None:
     Path('cover.jpg').write_bytes(cover_bytes)
 
 
-def handle_genius_search(args: Any) -> None:
-    from raphson_mp import genius
-    print(genius._search(args.query))
-
-
-def handle_genius_search(args: Any) -> None:
-    from raphson_mp import genius
-    lyrics = genius._extract_lyrics(args.url, debug=True)
-    if lyrics is None:
-        print('no lyrics found')
-    else:
-        print(lyrics)
-
-
 def handle_acoustid(args: Any) -> None:
     from raphson_mp import acoustid, musicbrainz
 
@@ -250,7 +236,7 @@ def handle_acoustid(args: Any) -> None:
 
 
 def handle_lyrics(args: Any) -> None:
-    from raphson_mp.lyrics import find, PlainLyrics, TimeSyncedLyrics
+    from raphson_mp.lyrics import PlainLyrics, TimeSyncedLyrics, find
 
     lyrics = find(args.title, args.artist, args.album, args.duration)
 
@@ -387,14 +373,6 @@ def main():
     cmd_cover.add_argument('title')
     cmd_cover.add_argument('--meme', action='store_true')
     cmd_cover.set_defaults(func=handle_cover)
-
-    cmd_cover = subparsers.add_parser('debug-genius-search')
-    cmd_cover.add_argument('query')
-    cmd_cover.set_defaults(func=handle_genius_search)
-
-    cmd_cover = subparsers.add_parser('debug-genius-extract')
-    cmd_cover.add_argument('url')
-    cmd_cover.set_defaults(func=handle_genius_search)
 
     cmd_cover = subparsers.add_parser('debug-acoustid')
     cmd_cover.add_argument('path')
