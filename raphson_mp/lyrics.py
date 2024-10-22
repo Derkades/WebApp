@@ -314,9 +314,8 @@ else:
     FETCHERS: list[LyricsFetcher] = [
         LrcLibFetcher(), # No rate limit
         MusixMatchFetcher(), # Strict rate limiting
-        # LrcLibFetcher(), # No rate limit
         GeniusFetcher(), # Relaxed rate limiting, no time-synced lyrics
-        # AZLyricsFetcher(), # Unknown rate limiting, no time-synced lyrics
+        AZLyricsFetcher(), # Unknown rate limiting, no time-synced lyrics
     ]
 
 
