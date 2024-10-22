@@ -29,6 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function registerListener() {
+        // When track changes, current state is no longer accurate
+        lastLine = null;
+
         if (document.visibilityState == 'visible'
             && queue.currentTrack
             && queue.currentTrack.lyrics
