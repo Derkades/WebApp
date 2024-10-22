@@ -82,6 +82,13 @@ def route_album_cover(path) -> Response:
 
     meme = 'meme' in request.args and bool(int(request.args['meme']))
 
+    if request.args['quality'] == 'high':
+        quality = image.QUALITY_HIGH
+    elif request.args['quality'] == 'low':
+        quality = image.QUALITY_LOW
+    else:
+        raise ValueError('invalid quality')
+
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
         track = Track.by_relpath(conn, path)
@@ -90,13 +97,7 @@ def route_album_cover(path) -> Response:
         if request.if_modified_since and last_modified <= request.if_modified_since:
             return Response(None, 304)
 
-        quality_str = request.args['quality']
-        if quality_str == 'high':
-            quality = image.QUALITY_HIGH
-        elif quality_str == 'low':
-            quality = image.QUALITY_LOW
-        else:
-            raise ValueError('invalid quality')
+
 
         image_bytes = track.get_cover(meme, quality, ImageFormat.WEBP)
 

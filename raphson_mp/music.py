@@ -127,13 +127,11 @@ def _get_possible_covers(artist: Optional[str], album: str, meme: bool) -> Itera
 def get_cover(artist: Optional[str], album: str, meme: bool,
               img_quality: ImageQuality, img_format: ImageFormat) -> bytes:
     """
-    Find album cover using MusicBrainz or Bing.
+    Find album cover
     Parameters:
         meta: Track metadata
-    Returns: Album cover image bytes, or None if MusicBrainz nor bing found an image.
+    Returns: Album cover image bytes, or None if no image was found.
     """
-    from raphson_mp import musicbrainz
-
     cache_key =  f'cover{artist}{album}{meme}'  # quality is appended later
 
     cache_data = cache.retrieve(cache_key + img_quality.name + img_format.name)
@@ -152,13 +150,13 @@ def get_cover(artist: Optional[str], album: str, meme: bool,
             try:
                 log.info('Generating thumbnails')
                 for img_format2 in ImageFormat:
-                    for quality in (image.QUALITY_HIGH, image.QUALITY_LOW):
-                        output_path = Path(temp_dir, 'output' + quality.name + img_format2.name)
-                        image.thumbnail(input_path, output_path, img_format2, img_quality, square=not meme)
+                    for img_quality2 in (image.QUALITY_HIGH, image.QUALITY_LOW):
+                        output_path = Path(temp_dir, 'output' + img_quality2.name + img_format2.name)
+                        image.thumbnail(input_path, output_path, img_format2, img_quality2, square=not meme)
                         image_bytes = output_path.read_bytes()
-                        cache.store(cache_key + quality.name + img_format2.name, image_bytes, cache.HALFYEAR)
+                        cache.store(cache_key + img_quality2.name + img_format2.name, image_bytes, cache.HALFYEAR)
 
-                        if quality == img_quality and img_format2 == img_format:
+                        if img_quality2 == img_quality and img_format2 == img_format:
                             return_data = image_bytes
             except CalledProcessError:
                 log.warning('Failed to generate thumbnail, image is probably corrupt. Trying another image.')
