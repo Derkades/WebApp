@@ -6,11 +6,11 @@ import re
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from html.parser import HTMLParser
 from pathlib import Path
 from typing import Optional
 
 import requests
-from bs4 import BeautifulSoup, NavigableString, PageElement, Tag
 
 from raphson_mp import cache, settings
 
@@ -243,24 +243,30 @@ class GeniusFetcher(LyricsFetcher):
 
         return None
 
+    def _html_to_lyrics(self, html: str) -> str:
+        # Extract text from HTML tags
+        # Source HTML contains <p>, <b>, <i>, <a> etc. with lyrics inside.
+        class Parser(HTMLParser):
+            text = ''
 
-    def _html_tree_to_lyrics(self, elements: list[PageElement]) -> str:
-        lyrics_str = ''
-        for element in elements:
-            if isinstance(element, NavigableString):
-                lyrics_str += str(element).replace('\n', '') # remove line breaks, only <br> tags should become line breaks
-            elif isinstance(element, Tag):
-                if element.name == 'br':
-                    lyrics_str += '\n'
-                else:
-                    # Probably an element like <a>, <p>, <i> with important text inside it.
-                    lyrics_str += self._html_tree_to_lyrics(element.contents)
-            else:
-                log.warning('Encountered unexpected element type: %s', type(element))
-        return lyrics_str
+            def __init__(self):
+                HTMLParser.__init__(self)
 
+            def handle_starttag(self, tag, attrs):
+                if tag == 'br':
+                    self.text += "\n"
 
-    def _extract_lyrics(self, genius_url: str, debug=False) -> str | None:
+            def handle_endtag(self, tag):
+                pass
+
+            def handle_data(self, data):
+                self.text += data.strip()
+
+        parser = Parser()
+        parser.feed(html)
+        return parser.text
+
+    def _extract_lyrics(self, genius_url: str) -> str | None:
         """
         Extract lyrics from the supplied Genius lyrics page
         Parameters:
@@ -273,11 +279,11 @@ class GeniusFetcher(LyricsFetcher):
                         timeout=10,
                         headers={'User-Agent': settings.webscraping_user_agent})
         text = r.text
-        if debug:
-            Path('debug_genius_full.html').write_text(text)
+
         # Find the important bit of javascript using these known parts of the code
         start = text.index('window.__PRELOADED_STATE__ = JSON.parse(') + 41
         end = start + text[start:].index("}');") + 1
+
         # Inside the javascript bit that has now been extracted, is a string. This string contains
         # JSON data. Because it is in a string, some characters are escaped. These need to be
         # un-escaped first.
@@ -287,27 +293,18 @@ class GeniusFetcher(LyricsFetcher):
             .replace('\\\\', '\\') \
             .replace('\\$', '$') \
             .replace('\\`', '`')
-        if debug:
-            Path('debug_genius_info.json').write_text(info_json_string)
+
+        # Now, the JSON object is ready to be parsed.
         try:
-            # Now, the JSON object is ready to be parsed.
             info_json = json.loads(info_json_string)
         except json.decoder.JSONDecodeError as ex:
             log.info('Error retrieving lyrics: json decode error at %s', ex.pos)
             log.info('Neighbouring text: "%s"', info_json_string[ex.pos-20:ex.pos+20])
             raise ex
-        # For some reason, the JSON object happens to contain lyrics HTML. This HTML is parsed
-        # using BeautifulSoup. The _html_tree_to_lyrics() function is responsible for extracting
-        # text from this HTML tree.
-        lyric_html = info_json['songPage']['lyricsData']['body']['html']
-        soup = BeautifulSoup(lyric_html, 'lxml')
-        p = soup.find('p')
-        if not isinstance(p, Tag):
-            log.warning('Cannot extract lyrics from URL: %s', genius_url)
-            log.warning('It is probably marked as unreleased')
-            return None
 
-        return self._html_tree_to_lyrics(p.contents)
+        # For some reason, the JSON object happens to contain lyrics HTML. This HTML is parsed.
+        lyrics_html = info_json['songPage']['lyricsData']['body']['html']
+        return self._html_to_lyrics(lyrics_html)
 
 
 if settings.offline_mode:
@@ -317,8 +314,9 @@ else:
     FETCHERS: list[LyricsFetcher] = [
         LrcLibFetcher(), # No rate limit
         MusixMatchFetcher(), # Strict rate limiting
+        # LrcLibFetcher(), # No rate limit
         GeniusFetcher(), # Relaxed rate limiting, no time-synced lyrics
-        AZLyricsFetcher(), # Unknown rate limiting, no time-synced lyrics
+        # AZLyricsFetcher(), # Unknown rate limiting, no time-synced lyrics
     ]
 
 
@@ -402,6 +400,8 @@ def find(title: str, artist: str, album: Optional[str], duration: Optional[int])
     if cached_dict is not None:
         log.info('returning lyrics from cache')
         return from_dict(cached_dict)
+    #     log.info('returning lyrics from cache')
+    #     return from_dict(cached_dict)
 
     lyrics = _find(title, artist, album, duration)
 
