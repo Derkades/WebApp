@@ -67,21 +67,6 @@ function replaceAlbumImages() {
     }, 200);
 }
 
-function replaceLyrics() {
-    const queuedTrack = queue.currentTrack;
-    const lyricsElem = document.getElementById('lyrics-box')
-
-    if (queuedTrack.lyrics) {
-        lyricsElem.classList.remove('hidden');
-        if (queuedTrack.lyrics instanceof PlainLyrics) {
-            lyricsElem.textContent = queuedTrack.lyrics.text;
-        }
-        // time-synced lyrics is handled by lyrics.js
-    } else {
-        lyricsElem.classList.add('hidden');
-    }
-}
-
 function trackInfoUnavailableSpan() {
     const span = document.createElement('span');
     span.style.color = COLOR_MISSING_METADATA;
@@ -108,7 +93,6 @@ function replaceTrackDisplayTitle() {
 function replaceAllTrackHtml() {
     replaceAudioSource();
     replaceAlbumImages();
-    replaceLyrics();
     replaceTrackDisplayTitle();
 }
 

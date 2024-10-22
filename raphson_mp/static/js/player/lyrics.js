@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let lastLine = null;
 
-    function updateLyrics() {
+    function updateSyncedLyrics() {
         const lyrics = queue.currentTrack.lyrics;
         const currentLine = lyrics.currentLine(audioElem.currentTime);
 
@@ -38,16 +38,34 @@ document.addEventListener('DOMContentLoaded', () => {
             && queue.currentTrack.lyrics
             && queue.currentTrack.lyrics instanceof TimeSyncedLyrics) {
             console.debug('lyrics: registered timeupdate listener');
-            audioElem.removeEventListener('timeupdate', updateLyrics); // remove it in case it is already registered
-            audioElem.addEventListener('timeupdate', updateLyrics);
+            audioElem.removeEventListener('timeupdate', updateSyncedLyrics); // remove it in case it is already registered
+            audioElem.addEventListener('timeupdate', updateSyncedLyrics);
             return;
         } else {
             console.debug('lyrics: unregistered timeupdate listener');
-            audioElem.removeEventListener('timeupdate', updateLyrics);
+            audioElem.removeEventListener('timeupdate', updateSyncedLyrics);
         }
     }
 
-    eventBus.subscribe(MusicEvent.TRACK_CHANGE, registerListener);
+    function replaceLyrics() {
+        const queuedTrack = queue.currentTrack;
+        const lyricsElem = document.getElementById('lyrics-box')
+
+        if (queuedTrack.lyrics) {
+            lyricsElem.classList.remove('hidden');
+            if (queuedTrack.lyrics instanceof PlainLyrics) {
+                lyricsElem.textContent = queuedTrack.lyrics.text;
+            }
+            // time-synced lyrics is handled by updateSyncedLyrics
+        } else {
+            lyricsElem.classList.add('hidden');
+        }
+    }
+
+    eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {
+        registerListener();
+        replaceLyrics();
+    });
 
     document.addEventListener('visibilitychange', registerListener);
 });
