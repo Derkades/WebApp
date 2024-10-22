@@ -305,7 +305,10 @@ class GeniusFetcher(LyricsFetcher):
 
         # For some reason, the JSON object happens to contain lyrics HTML. This HTML is parsed.
         lyrics_html = info_json['songPage']['lyricsData']['body']['html']
-        return self._html_to_lyrics(lyrics_html)
+        lyrics_text = self._html_to_lyrics(lyrics_html)
+        if lyrics_text == '[Instrumental]':
+            return None
+        return lyrics_text
 
 
 if settings.offline_mode:
