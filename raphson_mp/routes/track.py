@@ -156,13 +156,17 @@ def route_lyrics2(path):
             return Response(None, 304)
 
         meta = track.metadata()
-        title = meta.title
-        artist = meta.primary_artist()
-        if title and artist:
-            lyr = lyrics.find(title, artist, meta.album, meta.duration)
+        if meta.lyrics:
+            log.info('returning lyrics from metadata')
+            lyr = PlainLyrics('metadata', meta.lyrics)
         else:
-            log.warning('could not search for lyrics due to missing metadata')
-            lyr = None
+            title = meta.title
+            artist = meta.primary_artist()
+            if title and artist:
+                lyr = lyrics.find(title, artist, meta.album, meta.duration)
+            else:
+                log.warning('could not search for lyrics due to missing metadata')
+                lyr = None
 
         return jsonw.json_response(lyrics.to_dict(lyr), last_modified=track.mtime)
 
