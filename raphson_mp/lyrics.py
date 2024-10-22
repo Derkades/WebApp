@@ -167,7 +167,11 @@ class MusixMatchFetcher(LyricsFetcher):
         url = self._SEARCH_URL % 'track.search'
         query = [('q', title + ' ' + artist), ('page_size', '5'), ('page', '1'), ('app_id', 'web-desktop-app-v1.0'), ('usertoken', self.get_token()), ('t', int(time.time()))]
         response = self._session.get(url, params=query, timeout=10)
-        result = response.json()
+        try:
+            result = response.json()
+        except json.JSONDecodeError:
+            log.warning('failed to decode json: %s', response.text)
+            return None
 
         if 'message' in result and 'body' in result["message"] and 'track_list' in result["message"]["body"] and result["message"]["body"]["track_list"]:
             for item in result["message"]["body"]["track_list"]:
