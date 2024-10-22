@@ -1,3 +1,8 @@
+## 1.2.0 2024-10-22
+* New: time-synced lyrics
+* New: automatic metadata lookup using AcoustID and MusicBrainz
+* Fixed: untranslated strings
+
 ## 1.1.0 2024-10-16
 
 * New: add track to queue from web URL
