@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let lyricsText = "";
         for (let i = currentLine - context; i <= currentLine + context; i++) {
             if (i < 0 || i >= lyrics.text.length) {
+                lyricsText += '\n';
                 continue;
             }
             lyricsText += lyrics.text[i].text + '\n';
