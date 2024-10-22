@@ -1,10 +1,4 @@
-# Temporary fix for missing FTS5 trigram tokenizer in the sqlite3 library version in standard python:3.12-slim image.
-# TODO Migrate back to Python base image when trixie is released
-FROM debian:trixie AS base
-
-RUN apt-get update && \
-    apt-get install -y python3-pip && \
-    rm -rf /var/lib/apt/lists/*
+FROM python:3.12-slim-bookworm AS base
 
 FROM base AS ffmpeg-build
 
@@ -94,8 +88,7 @@ RUN cd /build/ffmpeg && \
 RUN mkdir /ffmpeg-libs && \
     cp -a /usr/lib/x86_64-linux-gnu/libopus.so* /ffmpeg-libs && \
     cp -a /usr/lib/x86_64-linux-gnu/libwebp.so* /ffmpeg-libs && \
-    cp -a /usr/lib/x86_64-linux-gnu/libmp3lame.so* /ffmpeg-libs && \
-    cp -a /usr/lib/x86_64-linux-gnu/libsharpyuv.so* /ffmpeg-libs
+    cp -a /usr/lib/x86_64-linux-gnu/libmp3lame.so* /ffmpeg-libs
 
 # AcoustID fpcalc
 # is also available via a debian package, but that pulls in lots of dependencies (like ffmpeg, which we already build ourselves)
