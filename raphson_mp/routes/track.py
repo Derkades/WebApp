@@ -97,8 +97,6 @@ def route_album_cover(path) -> Response:
         if request.if_modified_since and last_modified <= request.if_modified_since:
             return Response(None, 304)
 
-
-
         image_bytes = track.get_cover(meme, quality, ImageFormat.WEBP)
 
     response = Response(image_bytes, content_type='image/webp')
