@@ -20,7 +20,7 @@ pip3 install -r requirements-dev.txt
 
 Fedora packages, if you prefer:
 ```
-sudo dnf install python3-flask python3-flask-babel python3-requests python3-beautifulsoup4 python3-bcrypt yt-dlp babel poedit pylint python3-mypy python3-types-requests python3-types-beautifulsoup4
+sudo dnf install python3-flask python3-flask-babel python3-requests python3-beautifulsoup4 python3-bcrypt yt-dlp babel poedit pylint python3-mypy python3-types-requests python3-types-beautifulsoup4 python3-build twine
 ```
 
 Start the web server in development mode, which supports live reloading:
