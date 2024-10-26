@@ -1,3 +1,9 @@
+## 1.2.1 2024-10-26
+* Improved: MusicBrainz search is more likely to find the correct cover image
+* Fix: album cover from cache always being low quality
+* Fix: time-synced lyrics are now available in offline-mode
+* Fix: language and privacy account settings were applied for all users
+
 ## 1.2.0 2024-10-22
 * New: time-synced lyrics
 * New: automatic metadata lookup using AcoustID and MusicBrainz
