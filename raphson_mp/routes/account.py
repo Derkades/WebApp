@@ -70,17 +70,17 @@ def route_change_nickname():
 @bp.route('/change_language', methods=['POST'])
 def route_change_language():
     with db.connect() as conn:
-        auth.verify_auth_cookie(conn, require_csrf=True)
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
 
         lang_code = request.form['language']
         if lang_code == '':
-            conn.execute('UPDATE user SET language = NULL')
+            conn.execute('UPDATE user SET language = NULL WHERE id=?', (user.user_id,))
         else:
             if lang_code not in language.LANGUAGES:
                 return Response('Invalid language code', 400, content_type='text/plain')
 
-            conn.execute('UPDATE user SET language=?',
-                         (lang_code,))
+            conn.execute('UPDATE user SET language=? WHERE id=?',
+                         (lang_code, user.user_id))
 
     return redirect('/account', code=303)
 
@@ -88,14 +88,14 @@ def route_change_language():
 @bp.route('/change_privacy_setting', methods=['POST'])
 def route_change_privacy_setting():
     with db.connect() as conn:
-        auth.verify_auth_cookie(conn, require_csrf=True)
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
 
         privacy = request.form['privacy']
         assert privacy in {'none', 'aggregate', 'hidden'}
 
         if privacy == 'none':
-            conn.execute('UPDATE user SET privacy = NULL')
+            conn.execute('UPDATE user SET privacy = NULL WHERE id=?', (user.user_id,))
         else:
-            conn.execute('UPDATE user SET privacy = ?', (privacy,))
+            conn.execute('UPDATE user SET privacy = ? WHERE id=?', (privacy, user.user_id))
 
     return redirect('/account', code=303)
