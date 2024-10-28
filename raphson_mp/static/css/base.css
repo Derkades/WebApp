@@ -81,6 +81,9 @@ a:hover {
 
 .secondary {
     color: #ccc;
+}
+
+.small {
     font-size: .8em;
 }
 

@@ -290,7 +290,7 @@ class Track {
         }
 
         const secondary = document.createElement('span');
-        secondary.classList.add('secondary');
+        secondary.classList.add('secondary', 'small');
         secondary.append(document.createElement('br'));
         html.append(secondary);
 
@@ -580,7 +580,12 @@ class TimeSyncedLyrics extends Lyrics {
         return lines.join('\n');
     }
 
+    /**
+     * @param {number} currentTime
+     * @returns {number}
+     */
     currentLine(currentTime) {
+        currentTime += 0.5; // go to next line slightly earlier, to give the user time to read
         // current line is the last line where currentTime is after the line start time
         for (let i = 0; i < this.text.length; i++) {
             if (currentTime < this.text[i].startTime) {

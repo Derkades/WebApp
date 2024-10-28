@@ -49,7 +49,7 @@ function getNowPlayingCardHtml(info) {
     }
 
     const playlistDiv = document.createElement('div');
-    playlistDiv.classList.add('secondary');
+    playlistDiv.classList.add('secondary', 'small');
     playlistDiv.style.marginTop = '.5rem';
     playlistDiv.textContent = info.playlist;
     infoDiv.append(playlistDiv);

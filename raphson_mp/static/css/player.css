@@ -95,7 +95,7 @@
 /* LYRICS */
 
 #lyrics-box {
-    white-space: pre-line; /* render newlines */
+    white-space: pre-line; /* render newlines, for non-time-synced lyrics */
     font-size: 1.2em;
 }
 

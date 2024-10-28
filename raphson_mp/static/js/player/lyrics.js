@@ -17,16 +17,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Show current line, with context
         const context = 3;
-        let lyricsText = "";
+        const lyricsHtml = [];
         for (let i = currentLine - context; i <= currentLine + context; i++) {
-            if (i < 0 || i >= lyrics.text.length) {
-                lyricsText += '\n';
-                continue;
+            if (i >= 0 && i < lyrics.text.length) {
+                const lineHtml = document.createElement('span');
+                lineHtml.textContent = lyrics.text[i].text;
+                if (i != currentLine) {
+                    lineHtml.classList.add('secondary');
+                }
+                lyricsHtml.push(lineHtml);
             }
-            lyricsText += lyrics.text[i].text + '\n';
+            lyricsHtml.push(document.createElement('br'));
         }
 
-        lyricsElem.textContent = lyricsText;
+        lyricsElem.replaceChildren(...lyricsHtml);
     }
 
     function registerListener() {
