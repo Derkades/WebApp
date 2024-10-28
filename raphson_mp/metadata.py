@@ -5,7 +5,6 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from sqlite3 import Connection
-from typing import Optional
 
 from raphson_mp import music
 
@@ -36,7 +35,7 @@ FILENAME_STRIP_KEYWORDS = [
     '[Audio]',
     '(Remastered)',
     '_ Napalm Records',
-    '| Napalm Records'
+    '| Napalm Records',
     '(Lyrics)',
     '[Official Lyric Video]',
     '(Official Videoclip)',
@@ -131,7 +130,7 @@ def _split_meta_list(meta_list: str) -> list[str]:
     """
     Split list (stored as string in metadata) by semicolon
     """
-    entries = []
+    entries: list[str] = []
     for entry in meta_list.split(';'):
         entry = entry.strip()
         if entry != '' and entry not in entries:
@@ -147,7 +146,7 @@ def _has_advertisement(metadata_str: str) -> bool:
     return False
 
 
-def _sort_artists(artists: Optional[list[str]], album_artist: Optional[str]) -> Optional[list[str]]:
+def _sort_artists(artists: list[str] | None, album_artist: str | None) -> list[str] | None:
     """
     Move album artist to start of artist list
     """
@@ -162,16 +161,16 @@ def _sort_artists(artists: Optional[list[str]], album_artist: Optional[str]) -> 
 class Metadata:
     relpath: str
     duration: int
-    artists: Optional[list[str]]
-    album: Optional[str]
-    title: Optional[str]
-    year: Optional[int]
-    album_artist: Optional[str]
-    track_number: Optional[int]
+    artists: list[str] | None
+    album: str | None
+    title: str | None
+    year: int | None
+    album_artist: str | None
+    track_number: int | None
     tags: list[str]
-    lyrics: Optional[str]
+    lyrics: str | None
 
-    def _meta_title(self) -> Optional[str]:
+    def _meta_title(self) -> str | None:
         """
         Generate title from 'artist', 'title' and 'date' metadata
         Returns: Generated title, or None if the track lacks the required metadata
@@ -228,7 +227,7 @@ class Metadata:
         """
         return re.sub(r'[^\x00-\x7f]', r'', self.display_title())
 
-    def primary_artist(self) -> Optional[str]:
+    def primary_artist(self) -> str | None:
         if self.artists is not None:
             if len(self.artists) == 1:
                 return self.artists[0] # if there is only one artist, it is the primary artist
@@ -243,7 +242,7 @@ class Metadata:
 
         return None
 
-    def get_ffmpeg_options(self, option='-metadata') -> list[str]:
+    def get_ffmpeg_options(self, option: str = '-metadata') -> list[str]:
         metadata_options: list[str] = []
         if self.album:
             metadata_options.extend((option, 'album=' + self.album))
@@ -302,7 +301,7 @@ def probe(path: Path) -> Metadata | None:
     tags = []
     lyrics = None
 
-    meta_tags = []
+    meta_tags: list[tuple[str, str]] = []
 
     for stream in data['streams']:
         if stream['codec_type'] == 'audio':

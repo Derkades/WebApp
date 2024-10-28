@@ -36,7 +36,7 @@ def route_files():
             playlist = Playlist.from_path(conn, browse_path)
             write_permission = playlist.has_write_permission(user)
 
-        children = []
+        children: list[dict[str, str]] = []
 
         for path in browse_path.iterdir():
             if music.is_trashed(path) != show_trashed:
@@ -58,7 +58,7 @@ def route_files():
                 file_info['title'] = meta.title if meta.title else ''
 
     # Sort directories first, and ignore case for file name
-    def sort_name(obj):
+    def sort_name(obj: dict[str, str]) -> str:
         return ('a' if obj['type'] == 'dir' else 'b') + obj['name'].lower()
 
     children = sorted(children, key=sort_name)

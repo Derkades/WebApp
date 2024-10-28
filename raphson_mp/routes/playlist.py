@@ -158,7 +158,7 @@ def route_track(playlist):
         user = auth.verify_auth_cookie(conn, require_csrf=True)
 
         playlist_obj = music.playlist(conn, playlist)
-        require_metadata = request.json['require_metadata'] if 'require_metadata' in request.json else False
+        require_metadata: bool = request.json['require_metadata'] if 'require_metadata' in request.json else False
         if 'tag_mode' in request.json:
             tag_mode = request.json['tag_mode']
             assert tag_mode in {'allow', 'deny'}

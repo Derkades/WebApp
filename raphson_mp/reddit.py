@@ -1,10 +1,9 @@
 import logging
 import random
-from typing import Optional
 
 import requests
 
-from raphson_mp import image, settings
+from raphson_mp import settings
 
 log = logging.getLogger(__name__)
 
@@ -25,7 +24,7 @@ MEME_SUBREDDITS = [
 SUBREDDIT_ATTEMPTS = 2
 
 
-def _search(subreddit: Optional[str], query: str) -> Optional[str]:
+def _search(subreddit: str | None, query: str) -> str | None:
     log.info('Searching subreddit %s for: %s', subreddit if subreddit else "ALL", query)
 
     headers = {'User-Agent': settings.webscraping_user_agent}
@@ -60,14 +59,14 @@ def _search(subreddit: Optional[str], query: str) -> Optional[str]:
     return None
 
 
-def search(query: str) -> Optional[str]:
+def search(query: str) -> str | None:
     """
     Search several subreddits for an image
     Args:
         query: Search query
     Returns: Image URL string, or None if no image was found
     """
-    subreddits: list[Optional[str]] = random.choices(MEME_SUBREDDITS, k=SUBREDDIT_ATTEMPTS)
+    subreddits: list[str] = random.choices(MEME_SUBREDDITS, k=SUBREDDIT_ATTEMPTS)
     # subreddits.append(None) # If nothing was found, search all of reddit
     for subreddit in subreddits:
         url = _search(subreddit, query)
@@ -76,7 +75,7 @@ def search(query: str) -> Optional[str]:
     return None
 
 
-def get_image(query: str) -> Optional[bytes]:
+def get_image(query: str) -> bytes | None:
     """
     Search several subreddits for an image, and download it
     Args:

@@ -3,7 +3,7 @@ import subprocess
 import tempfile
 
 import requests
-from flask import Blueprint, Response, abort, request
+from flask import Blueprint, Response, abort
 
 from raphson_mp import settings
 

@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from sqlite3 import Connection
-from typing import Optional
 
 from raphson_mp import db, metadata, music, settings
 
@@ -166,7 +165,7 @@ def scan_tracks(conn: Connection, playlist_name: str) -> None:
             scan_track(conn, playlist_name, track_path, track_relpath)
 
 
-def last_change(conn: Connection, playlist: Optional[str] = None):
+def last_change(conn: Connection, playlist: str | None = None):
     if playlist:
         query = 'SELECT timestamp FROM scanner_log WHERE playlist = ? ORDER BY id DESC LIMIT 1'
         params = (playlist,)

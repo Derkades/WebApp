@@ -7,8 +7,7 @@ import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from html.parser import HTMLParser
-from pathlib import Path
-from typing import Optional
+from typing import Any, override
 
 import requests
 
@@ -67,7 +66,7 @@ class LyricsFetcher(ABC):
     supports_synced: bool
 
     @abstractmethod
-    def find(self, title: str, artist: str, album: Optional[str], duration: Optional[int]) -> Optional[Lyrics]:
+    def find(self, title: str, artist: str, album: str | None, duration: int | None) -> Lyrics | None:
         pass
 
 
@@ -75,7 +74,7 @@ class LrcLibFetcher(LyricsFetcher):
     name = 'lrclib.net'
     supports_synced = True
 
-    def find(self, title: str, artist: str, album: Optional[str], duration: Optional[int]) -> Optional[Lyrics]:
+    def find(self, title: str, artist: str, album: str | None, duration: int | None) -> Lyrics | None:
         params = {'track_name': title, 'artist_name': artist}
         if album is not None:
             params['album_name'] = album
@@ -126,7 +125,7 @@ class MusixMatchFetcher(LyricsFetcher):
 
     _SEARCH_URL = 'https://apic-desktop.musixmatch.com/ws/1.1/%s'
     _session = requests.Session
-    _cached_token: Optional[str] = None
+    _cached_token: str | None = None
     _cached_token_expiration_time: int = 0
 
     def __init__(self):
@@ -163,7 +162,8 @@ class MusixMatchFetcher(LyricsFetcher):
         log.warning('unexpected response: %s', result)
         return None
 
-    def find(self, title: str, artist: str, album: Optional[str], duration: Optional[int]):
+    @override
+    def find(self, title: str, artist: str, album: str | None, duration: int | None):
         url = self._SEARCH_URL % 'track.search'
         query = [('q', title + ' ' + artist), ('page_size', '5'), ('page', '1'), ('app_id', 'web-desktop-app-v1.0'), ('usertoken', self.get_token()), ('t', int(time.time()))]
         response = self._session.get(url, params=query, timeout=10)
@@ -195,7 +195,8 @@ class AZLyricsFetcher(LyricsFetcher):
     name = 'AZLyrics'
     supports_synced = False
 
-    def find(self, title: str, artist: str, album: Optional[str], duration: Optional[int]) -> Optional[PlainLyrics]:
+    @override
+    def find(self, title: str, artist: str, album: str | None, duration: int | None) -> PlainLyrics | None:
         artist = re.sub("[^a-zA-Z0-9]+", "", artist).lower().lstrip('the ')
         title = re.sub("[^a-zA-Z0-9]+", "", title).lower()
         url = f'https://www.azlyrics.com/lyrics/{artist}/{title}.html'
@@ -215,7 +216,8 @@ class GeniusFetcher(LyricsFetcher):
     name = 'Genius'
     supports_synced = False
 
-    def find(self, title: str, artist: str, album: Optional[str], duration: Optional[int]) -> Optional[PlainLyrics]:
+    @override
+    def find(self, title: str, artist: str, album: str | None, duration: int | None) -> PlainLyrics | None:
         url = self._search(title, artist)
         if url is None:
             return None
@@ -256,11 +258,13 @@ class GeniusFetcher(LyricsFetcher):
             def __init__(self):
                 HTMLParser.__init__(self)
 
-            def handle_starttag(self, tag, attrs):
+            @override
+            def handle_starttag(self, tag: str, attrs):
                 if tag == 'br':
                     self.text += "\n"
 
-            def handle_data(self, data):
+            @override
+            def handle_data(self, data: str):
                 self.text += data.strip()
 
         parser = Parser()
@@ -323,12 +327,12 @@ else:
     ]
 
 
-def _find(title: str, artist: str, album: Optional[str], duration: Optional[int]) -> Optional[Lyrics]:
+def _find(title: str, artist: str, album: str | None, duration: int | None) -> Lyrics | None:
     assert title is not None and artist is not None, "title and artist are required"
 
     log.info('fetching lyrics for: %s - %s', artist, title)
 
-    plain_match: Optional[Lyrics] = None
+    plain_match: Lyrics | None = None
 
     for fetcher in FETCHERS:
         if plain_match is not None and not fetcher.supports_synced:
@@ -368,7 +372,7 @@ def _find(title: str, artist: str, album: Optional[str], duration: Optional[int]
     return None
 
 
-def to_dict(lyrics: Optional[Lyrics]):
+def to_dict(lyrics: Lyrics | None) -> dict[str, Any]:
     if lyrics is None:
         return {'type': 'none'}
     elif isinstance(lyrics, TimeSyncedLyrics):
@@ -380,7 +384,7 @@ def to_dict(lyrics: Optional[Lyrics]):
         raise ValueError(lyrics)
 
 
-def from_dict(dict) -> Optional[Lyrics]:
+def from_dict(dict) -> Lyrics | None:
     if dict['type'] == 'none':
         return None
 
@@ -394,7 +398,7 @@ def from_dict(dict) -> Optional[Lyrics]:
     raise ValueError(dict['type'])
 
 
-def find(title: str, artist: str, album: Optional[str], duration: Optional[int]) -> Optional[Lyrics]:
+def find(title: str, artist: str, album: str | None, duration: int | None) -> Lyrics | None:
     assert title is not None and artist is not None, "title and artist are required"
 
     cache_key = f'lyrics{artist}{title}{album}{duration}'

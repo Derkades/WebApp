@@ -5,6 +5,7 @@ import random
 import shutil
 import subprocess
 import tempfile
+from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
@@ -12,7 +13,7 @@ from json.decoder import JSONDecodeError
 from pathlib import Path
 from sqlite3 import Connection
 from subprocess import CalledProcessError
-from typing import TYPE_CHECKING, Iterator, Literal, Optional
+from typing import TYPE_CHECKING, Literal
 
 from raphson_mp import (cache, db, image, jsonw, lyrics, metadata, reddit,
                         settings)
@@ -96,7 +97,7 @@ def list_tracks_recursively(path: Path, trashed: bool = False) -> Iterator[Path]
                 yield track_path
 
 
-def _get_possible_covers(artist: Optional[str], album: str, meme: bool) -> Iterator[bytes]:
+def _get_possible_covers(artist: str | None, album: str, meme: bool) -> Iterator[bytes]:
     from raphson_mp import bing, musicbrainz
 
     if meme:
@@ -111,7 +112,7 @@ def _get_possible_covers(artist: Optional[str], album: str, meme: bool) -> Itera
         if image_bytes := musicbrainz.get_cover(artist, album):
             yield image_bytes
 
-    search_queries = []
+    search_queries: list[str] = []
     if artist:
         search_queries.append(artist + ' - ' + album)
     search_queries.append(album + 'album cover art')
@@ -124,8 +125,8 @@ def _get_possible_covers(artist: Optional[str], album: str, meme: bool) -> Itera
     yield settings.raphson_png.read_bytes()
 
 
-def get_cover(artist: Optional[str], album: str, meme: bool,
-              img_quality: ImageQuality, img_format: ImageFormat) -> bytes:
+def get_cover(artist: str | None, album: str, meme: bool,
+              img_quality: ImageQuality, img_format: ImageFormat) -> bytes | None:
     """
     Find album cover
     Parameters:
@@ -200,7 +201,7 @@ class Track:
     relpath: str
     path: Path
     mtime: int
-    _metadata: Optional[Metadata] = None
+    _metadata: Metadata | None = None
 
     @property
     def playlist(self) -> str:
@@ -436,7 +437,7 @@ class Track:
             'display': meta.display_title(),
         }
 
-    def lyrics(self) -> Optional[Lyrics]:
+    def lyrics(self) -> Lyrics | None:
         if settings.offline_mode:
             with db.offline(read_only=True) as conn:
                 lyrics_json = jsonw.from_json(conn.execute('SELECT lyrics_json FROM content WHERE path=?', (self.relpath,)).fetchone()[0])
@@ -550,10 +551,10 @@ class Playlist:
     track_count: int
 
     def choose_track(self,
-                     user: Optional[User],
+                     user: User  | None,
                      require_metadata: bool = False,
-                     tag_mode: Optional[Literal['allow', 'deny']] = None,
-                     tags: Optional[list[str]] = None) -> Optional[Track]:
+                     tag_mode: Literal['allow', 'deny'] | None = None,
+                     tags: list[str] | None = None) -> Track | None:
         """
         Randomly choose a track from this playlist directory
         Args:

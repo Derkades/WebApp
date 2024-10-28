@@ -5,7 +5,7 @@ import os
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from raphson_mp import auth, logconfig, settings
 
@@ -41,7 +41,7 @@ def handle_useradd(args: Any) -> None:
     """
     Handle command to add user
     """
-    from raphson_mp import db, util
+    from raphson_mp import db
 
     username = args.username
     is_admin = int(args.admin)
@@ -264,8 +264,8 @@ def _boolenv(name: str) -> bool:
     return val == '1' or bool(val)
 
 
-def split_by_comma(inp: Optional[str]) -> list[str]:
-    if not inp:
+def split_by_comma(inp: str | None) -> list[str]:
+    if inp is None:
         return []
     return [s.strip() for s in inp.split(',') if s.strip() != '']
 

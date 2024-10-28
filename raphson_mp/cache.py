@@ -82,16 +82,16 @@ def cleanup() -> None:
         log.info('Deleted %s entries from cache', count)
 
 
-def store_json(key: str, data: Any, duration: int) -> None:
+def store_json(key: str, data: dict[Any, Any], duration: int) -> None:
     """
-    Dump object as json, encode as utf-8 and then use store()
+    Dump dict as json, encode as utf-8 and then use store()
     """
     store(key, jsonw.to_json(data).encode(), duration)
 
 
-def retrieve_json(key: str, **kwargs) -> Any | None:
+def retrieve_json(key: str, **kwargs) -> dict[Any, Any] | None:
     """
-    Retrieve bytes, if exists decode and return object
+    Retrieve bytes, if exists decode and return dict
     """
     data = retrieve(key, **kwargs)
     if data is None:

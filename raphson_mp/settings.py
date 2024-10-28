@@ -2,7 +2,6 @@
 
 from os import getenv
 from pathlib import Path
-from typing import Optional
 
 # Hardcoded settings
 csrf_validity_seconds = 3600
@@ -22,7 +21,7 @@ data_dir: Path = None
 ffmpeg_log_level: str = None
 track_max_duration_seconds: int = None
 radio_playlists: list[str] = []
-lastfm_api_key: Optional[str] = None
-lastfm_api_secret: Optional[str] = None
+lastfm_api_key: str | None = None
+lastfm_api_secret: str | None = None
 offline_mode: bool = None
 news_server: str = None

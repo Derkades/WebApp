@@ -2,8 +2,9 @@ import logging
 import re
 import time
 import traceback
+from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Any, Iterator, Optional
+from typing import Any
 
 import requests
 from requests.exceptions import HTTPError
@@ -37,7 +38,7 @@ def _mb_get(url: str, params: dict[str, str]) -> dict[str, Any]:
     return response.json()
 
 
-def _get_release_group_cover(release_group: str) -> Optional[bytes]:
+def _get_release_group_cover(release_group: str) -> bytes | None:
     url = f'https://coverartarchive.org/release-group/{release_group}/front-1200'
     log.info('downloading: %s', url)
     response = requests.get(url,
@@ -99,7 +100,7 @@ class MBMeta:
     album: str
     artists: list[str]
     album_artist: str
-    year: Optional[int]
+    year: int | None
     release_type: str
     packaging: str
 

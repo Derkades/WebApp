@@ -1,9 +1,10 @@
 import time
-from collections import Counter, deque
+from collections import Counter
+from collections.abc import Iterable
 from datetime import datetime
 from enum import Enum, unique
 from sqlite3 import Connection
-from typing import Any, Iterable, Optional
+from typing import Any
 
 from flask_babel import _
 
@@ -47,8 +48,10 @@ class StatsPeriod(Enum):
         raise ValueError()
 
 
-def chart(title: str, ldata: Iterable[str], xdata: Optional[Iterable[str|int]], ydata: Optional[Iterable[str|int]], series: list[object],
-          all_labels = False, extra = {}):
+def chart(title: str, ldata: Iterable[str], xdata: Iterable[str|int] | None, ydata: Iterable[str|int] | None, series: list[object],
+          all_labels: bool = False, extra: dict[str, Any] | None = None):
+    if extra is None:
+        extra = {}
     chart = {
         'title': {
             'text': title

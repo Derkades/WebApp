@@ -9,7 +9,6 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum, unique
 from sqlite3 import Connection, OperationalError
-from typing import Optional
 
 import flask_babel
 from flask import request
@@ -72,8 +71,8 @@ class Session:
     token: str
     csrf_token: str
     creation_timestamp: int
-    user_agent: Optional[str]
-    remote_address: Optional[str]
+    user_agent: str | None
+    remote_address: str | None
     last_use: int
 
     @property
@@ -93,7 +92,7 @@ class Session:
         return flask_babel.format_timedelta(seconds_ago, add_direction=True)
 
     @property
-    def last_device(self) -> Optional[str]:
+    def last_device(self) -> str | None:
         """
         Last device string, based on user agent string
         """
@@ -143,8 +142,8 @@ class User(ABC):
     username: str
     nickname: str
     admin: bool
-    primary_playlist: Optional[str]
-    language: Optional[str]
+    primary_playlist: str | None
+    language: str | None
     privacy: PrivacyOption
 
     @abstractmethod
@@ -173,8 +172,8 @@ class StandardUser(User):
     username: str
     nickname: str
     admin: bool
-    primary_playlist: Optional[str]
-    language: Optional[str]
+    primary_playlist: str | None
+    language: str | None
     privacy: PrivacyOption
     session: Session
 
@@ -252,7 +251,7 @@ class AuthError(Exception):
     redirect: bool
 
 
-def log_in(conn: Connection, username: str, password: str) -> Optional[str]:
+def log_in(conn: Connection, username: str, password: str) -> str | None:
     """
     Log in using username and password.
     Args:
@@ -294,7 +293,7 @@ def log_in(conn: Connection, username: str, password: str) -> Optional[str]:
     return token
 
 
-def _verify_token(conn: Connection, token: str) -> Optional[User]:
+def _verify_token(conn: Connection, token: str) -> User | None:
     """
     Verify session token, and return corresponding user
     Args:

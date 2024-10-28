@@ -37,11 +37,11 @@ def route_login():
             return render_template('login.jinja2', invalid_password=False)
 
         if request.is_json:
-            username = request.json['username']
-            password = request.json['password']
+            username: str = request.json['username']
+            password: str = request.json['password']
         else:
-            username = request.form['username']
-            password = request.form['password']
+            username: str = request.form['username']
+            password: str = request.form['password']
 
         token = auth.log_in(conn, username, password)
 

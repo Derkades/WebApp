@@ -8,28 +8,30 @@ from raphson_mp.image import ImageFormat
 from raphson_mp.jsonw import json_response
 from raphson_mp.lyrics import PlainLyrics, TimeSyncedLyrics
 from raphson_mp.music import AudioType, Track
+from raphson_mp.musicbrainz import MBMeta
 
 log = logging.getLogger(__name__)
 bp = Blueprint('track', __name__, url_prefix='/track')
 
 
 @bp.route('/<path:path>/info')
-def route_info(path):
+def route_info(path: str):
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
         track = Track.by_relpath(conn, path)
+        if track is None:
+            abort(404, 'track not found')
         return track.info_dict()
 
 
 @bp.route('/<path:path>/audio')
-def route_audio(path):
+def route_audio(path: str):
     """
     Get transcoded audio for the given track path.
     """
     if settings.offline_mode:
         with db.offline(read_only=True) as conn:
-            music_data, = conn.execute('SELECT music_data FROM content WHERE path=?',
-                                       (path,))
+            music_data: bytes = conn.execute('SELECT music_data FROM content WHERE path=?', (path,)).fetchone()[0]
             return Response(music_data, content_type='audio/webm')
 
     with db.connect(read_only=True) as conn:
@@ -71,13 +73,13 @@ def route_audio(path):
 
 
 @bp.route('/<path:path>/cover')
-def route_album_cover(path) -> Response:
+def route_album_cover(path: str) -> Response:
     """
     Get album cover image for the provided track path.
     """
     if settings.offline_mode:
         with db.offline(read_only=True) as conn:
-            cover_data, = conn.execute('SELECT cover_data FROM content WHERE path=?', (path,))
+            cover_data: bytes = conn.execute('SELECT cover_data FROM content WHERE path=?', (path,)).fetchone()[0]
             return Response(cover_data, content_type='image/webp')
 
     meme = 'meme' in request.args and bool(int(request.args['meme']))
@@ -92,6 +94,8 @@ def route_album_cover(path) -> Response:
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
         track = Track.by_relpath(conn, path)
+        if track is None:
+            abort(404, 'track not found')
 
         last_modified = track.mtime_dt
         if request.if_modified_since and last_modified <= request.if_modified_since:
@@ -106,7 +110,7 @@ def route_album_cover(path) -> Response:
 
 
 @bp.route('/<path:path>/lyrics')
-def route_lyrics(path):
+def route_lyrics(path: str):
     """
     Get lyrics for the provided track path.
     Legacy lyrics endpoint for compatibility, re-implemented using new lyrics system
@@ -128,13 +132,14 @@ def route_lyrics(path):
 
 
 @bp.route('/<path:path>/lyrics2')
-def route_lyrics2(path):
+def route_lyrics2(path: str):
     """
     Get lyrics for the provided track path.
     """
     if settings.offline_mode:
         with db.offline(read_only=True) as conn:
-            lyrics_json = jsonw.from_json(conn.execute('SELECT lyrics_json FROM content WHERE path=?', (path,)).fetchone()[0])
+            lyrics_json_str: str = conn.execute('SELECT lyrics_json FROM content WHERE path=?', (path,)).fetchone()[0]
+            lyrics_json = jsonw.from_json(lyrics_json_str)
             if 'found' in lyrics_json and lyrics_json['found']:
                 # Legacy HTML lyrics, best effort conversion from HTML to plain text
                 import html
@@ -154,6 +159,9 @@ def route_lyrics2(path):
 
         track = Track.by_relpath(conn, path)
 
+        if track is None:
+            return abort(404, 'track not found')
+
         if request.if_modified_since and track.mtime_dt <= request.if_modified_since:
             return Response(None, 304)
 
@@ -163,11 +171,10 @@ def route_lyrics2(path):
 
 
 @bp.route('/<path:path>/update_metadata', methods=['POST'])
-def route_update_metadata(path):
+def route_update_metadata(path: str):
     """
     Endpoint to update track metadata
     """
-    payload = request.json
     with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn, require_csrf=True)
 
@@ -180,12 +187,12 @@ def route_update_metadata(path):
 
         meta = track.metadata()
 
-    meta.title = payload['title']
-    meta.album = payload['album']
-    meta.artists = payload['artists']
-    meta.album_artist = payload['album_artist']
-    meta.tags = payload['tags']
-    meta.year = payload['year']
+    meta.title = request.json['title']
+    meta.album = request.json['album']
+    meta.artists = request.json['artists']
+    meta.album_artist = request.json['album_artist']
+    meta.tags = request.json['tags']
+    meta.year = request.json['year']
     track.write_metadata(meta)
 
     with db.connect() as conn:
@@ -195,15 +202,17 @@ def route_update_metadata(path):
 
 
 @bp.route('/<path:relpath>/acoustid', methods=['GET'])
-def route_acoustid(relpath):
+def route_acoustid(relpath: str):
     from raphson_mp import acoustid, musicbrainz
 
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
         track = Track.by_relpath(conn, relpath)
+        if track is None:
+            abort(404, 'track not found')
         fp = acoustid.get_fingerprint(track.path)
-        known_ids = set()
-        meta_list = []
+        known_ids: set[str] = set()
+        meta_list: list[MBMeta] = []
         for recording in acoustid.lookup(fp):
             log.info('found recording: %s', recording)
             for meta in musicbrainz.get_recording_metadata(recording):
@@ -232,7 +241,7 @@ def route_filter():
             return Response(None, 304)  # Not Modified
 
         query = 'SELECT path FROM track WHERE true'
-        params = []
+        params: list[str] = []
         if 'playlist' in request.args:
             query += ' AND playlist = ?'
             params.append(request.args['playlist'])

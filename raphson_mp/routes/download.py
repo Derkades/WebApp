@@ -1,6 +1,7 @@
 import logging
 import tempfile
 from pathlib import Path
+from typing import Iterator
 
 from flask import (Blueprint, Response, abort, render_template, request,
                    send_file)
@@ -50,8 +51,8 @@ def route_ytdl():
     with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn, require_csrf=True)
 
-        directory = request.json['directory']
-        url = request.json['url']
+        directory: str = request.json['directory']
+        url: str = request.json['url']
 
         playlist = music.playlist(conn, directory)
         if not playlist.has_write_permission(user):
@@ -61,7 +62,7 @@ def route_ytdl():
 
     # Release database connection during download
 
-    def generate():
+    def generate() -> Iterator[str]:
         status_code = yield from downloader.download(playlist.path, url)
         if status_code == 0:
             yield 'Scanning playlists...\n'

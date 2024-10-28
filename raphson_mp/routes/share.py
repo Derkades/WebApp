@@ -1,6 +1,7 @@
 import os
 import time
 from base64 import b32encode
+from sqlite3 import Connection
 
 from flask import (Blueprint, Response, abort, render_template, request,
                    send_file)
@@ -20,7 +21,7 @@ def gen_share_code() -> str:
     return b32encode(os.urandom(8)).decode().lower().rstrip('=')
 
 
-def track_by_code(conn, code: str) -> Track:
+def track_by_code(conn: Connection, code: str) -> Track:
     """
     Find track using a provided share code
     """
@@ -29,7 +30,10 @@ def track_by_code(conn, code: str) -> Track:
     if row is None:
         abort(404, 'No share was found with the given code')
 
-    return Track.by_relpath(conn, row[0])
+    track = Track.by_relpath(conn, row[0])
+    if track is None:
+        raise ValueError('track cannot be null, foreign key broken?')
+    return track
 
 
 @bp.route('/create', methods=["POST"])
@@ -53,7 +57,7 @@ def create():
 
 
 @bp.route('/<code>/cover')
-def cover(code):
+def cover(code: str):
     """
     Route providing a WEBP album cover image
     """
@@ -65,7 +69,7 @@ def cover(code):
 
 
 @bp.route('/<code>/audio')
-def audio(code):
+def audio(code: str):
     """
     Route to stream opus audio.
     """
@@ -77,7 +81,7 @@ def audio(code):
 
 
 @bp.route('/<code>/download/<file_format>')
-def download(code, file_format):
+def download(code: str, file_format: str):
     """
     Route to download an audio file.
     """
@@ -99,7 +103,7 @@ def download(code, file_format):
 
 
 @bp.route('/<code>')
-def show(code):
+def show(code: str):
     """
     Web page displaying a shared track.
     """

@@ -3,7 +3,6 @@ import random
 from dataclasses import dataclass
 from datetime import datetime
 from sqlite3 import Connection
-from typing import Optional
 
 from raphson_mp import music, settings
 from raphson_mp.music import Track
@@ -17,12 +16,12 @@ class RadioTrack:
     start_time: int
 
 
-def _choose_track(conn: Connection, previous_playlist: Optional[str] = None) -> Track:
+def _choose_track(conn: Connection, previous_playlist: str | None = None) -> Track:
     playlist_candidates = [p for p in settings.radio_playlists if len(settings.radio_playlists) == 1 or p != previous_playlist]
     playlist_name = random.choice(playlist_candidates)
 
     playlist = music.playlist(conn, playlist_name)
-    track = playlist.choose_track(None, None, None)
+    track = playlist.choose_track(None)
     return track
 
 
