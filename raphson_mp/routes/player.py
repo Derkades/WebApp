@@ -1,4 +1,5 @@
 import shutil
+import time
 
 from flask import Blueprint, Response, render_template, request
 from flask_babel import _
@@ -21,6 +22,7 @@ def route_player():
     return render_template('player.jinja2',
                            mobile=util.is_mobile(),
                            primary_playlist=user.primary_playlist,
+                           load_timestamp=int(time.time()),
                            offline_mode=settings.offline_mode,
                            csrf_token=csrf_token)
 
