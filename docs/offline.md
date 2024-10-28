@@ -17,7 +17,7 @@ To install the music player in offline mode, follow the [standard installation i
 
 To synchronize history and music, run:
 ```
-python3 mp.py sync
+python3 -m raphson_mp sync
 ```
 or, if using docker:
 ```

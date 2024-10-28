@@ -1,6 +1,0 @@
-pylint
-mypy
-types-beautifulsoup4
-types-requests
-build
-twine

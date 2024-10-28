@@ -11,21 +11,16 @@ Before doing so, you will need to create a music and data directory. You may nee
 
 ## Development without Docker
 
-Installing python and dependencies locally may be useful, for example to get linting and suggestions in your IDE.
+pyproject.toml specifies the project's dependencies, which you [have to install manually](https://github.com/pypa/pip/issues/11440) using pip for now.
 
-```
-pip3 install -r requirements.txt
-pip3 install -r requirements-dev.txt
-```
-
-Fedora packages, if you prefer:
+Fedora packages, if you prefer (this list may be outdated):
 ```
 sudo dnf install python3-flask python3-flask-babel python3-requests python3-beautifulsoup4 python3-bcrypt yt-dlp babel poedit pylint python3-mypy python3-types-requests python3-types-beautifulsoup4 python3-build twine
 ```
 
 Start the web server in development mode, which supports live reloading:
 ```
-python3 mp.py start --dev
+python3 -m raphson_mp start --dev
 ```
 
 ## Code structure

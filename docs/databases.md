@@ -1,6 +1,6 @@
 # Databases
 
-The application stores data using several SQLite databases in `/data`.
+The application stores data using several SQLite databases in `/data`. Files in this directory must never be deleted.
 
 ## `music.db`
 
@@ -10,7 +10,7 @@ This is the main database. All important data is stored here, like accounts, set
 
 The cache database is used to store the result of expensive operations. For example, it stores transcoded audio, lyrics, album cover images and thumbnails. The database size varies depending on your usage, but expect it to be around 10GB for every 1000 tracks.
 
-This database, like other databases, may **not** be deleted. If you really need to free space and can't wait for cache entries to expire, you can empty the table: `sqlite3 cache.db 'DELETE FROM cache;'`
+This database, like other databases, must not be deleted.
 
 ## `meta.db`
 

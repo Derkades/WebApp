@@ -24,6 +24,6 @@ music
     └── A Warrior's Call.mp3
 ```
 
-Don't worry about removing strings like "(Official Audio)" from song titles, these are automatically removed. If possible, do add metadata to each file, like artist, album artist, album title, song title. This can be done using the metadata editor in the music player itself.
+If possible, add metadata to each file, like artist, album artist, album title, song title. This can be done using the metadata editor in the music player itself.
 
-The first startup wil be slow, since all files need to be scanned. Later, unmodified files can be skipped (based on the file modification time).
+While the music player has built-in file management capabilities, manually modifying the file system is fully supported. You do however need to  restart the server or manually invoke the scanner: `raphson_mp scan`.

@@ -38,6 +38,14 @@ online = [
     "yt-dlp"
 ]
 prometheus = ["prometheus-client>=0.15.0"]
+dev = [
+    "pylint",
+    "mypy",
+    "types-beautifulsoup4",
+    "types-requests",
+    "build",
+    "twine",
+]
 
 [project.urls]
 Homepage = "https://github.com/Derkades/WebApp"
