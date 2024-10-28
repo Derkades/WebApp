@@ -48,3 +48,8 @@ raphson-mp = "raphson_mp.__main__:main"
 
 [tool.hatch.build]
 artifacts = ["*.mo"]
+
+[tool.basedpyright]
+include = ["raphson_mp"]
+reportUnusedCallResult = false
+reportAny = false
