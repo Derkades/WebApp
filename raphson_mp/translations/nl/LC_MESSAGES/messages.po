@@ -869,11 +869,11 @@ msgstr "Wachtrij"
 
 #: templates/player.jinja2:78
 msgid "Queue track from online source"
-msgstr "Nummer in wachtrij zetten van online bron"
+msgstr "Nummer van online bron in wachtrij zetten"
 
 #: templates/player.jinja2:79
 msgid "Clear queue"
-msgstr "Leeg wachtrij"
+msgstr "Wachtrij legen"
 
 #: templates/player.jinja2:80
 msgid "Open tag selection"
@@ -897,7 +897,7 @@ msgstr "Er zijn geen afspeellijsten geselecteerd"
 
 #: templates/player.jinja2:104 templates/share.jinja2:39
 msgid "No lyrics found"
-msgstr "Geen songtekst gevonden"
+msgstr "Geen songteksten gevonden"
 
 #: templates/player.jinja2:115
 msgid "Minimum queue size"
