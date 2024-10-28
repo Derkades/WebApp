@@ -26,9 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
     audioElem.addEventListener('pause', updatePlayPauseButtons);
     audioElem.addEventListener('play', updatePlayPauseButtons);
 
-    // Hide play/pause buttons on initial page load
+    // Hide pause button on initial page load, otherwise both play and pause will show
     document.getElementById('button-pause').classList.add('hidden');
-    document.getElementById('button-play').classList.add('hidden');
 
     // Seek bar
     const seekBar = document.getElementById('outer-progress-bar');
