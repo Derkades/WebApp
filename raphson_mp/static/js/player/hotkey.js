@@ -16,7 +16,7 @@ function handleKey(event) {
         if (keyInt == 0) {
             return;
         }
-        const checkboxes = document.getElementsByClassName('playlist-checkbox');
+        const checkboxes = document.getElementById('playlist-checkboxes').getElementsByTagName('input');
         if (checkboxes.length >= keyInt) {
             // Toggle checkbox
             checkboxes[keyInt-1].checked ^= 1;

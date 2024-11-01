@@ -99,13 +99,6 @@
     font-size: 1.2em;
 }
 
-/* PLAYLISTS */
-
-.other-checkboxes {
-    max-height: 20vh;
-    overflow-y: auto;
-}
-
 /* POPUP WINDOWS */
 
 .full-page-overlay {

@@ -155,6 +155,63 @@ class Music {
 
         return new DownloadedTrack(null, audioBlob, imageUrl, null);
     }
+
+    /**
+     * @param {Playlist} playlist Playlist
+     * @param {number} index Hotkey number, set to >=10 to not assign a hotkey
+     * @param {boolean} defaultChecked Whether checkbox should be checked
+     * @returns {HTMLSpanElement}
+     */
+    #createPlaylistCheckbox(playlist, index, defaultChecked) {
+        const input = document.createElement("input");
+        input.type = 'checkbox';
+        input.dataset.playlist = playlist.name;
+        input.checked = defaultChecked;
+        input.oninput = savePlaylistState;
+
+        const sup = document.createElement('sup');
+        if (index < 10) { // Assume number keys higher than 9 don't exist
+            sup.textContent = index;
+        }
+
+        const trackCount = document.createElement('span');
+        trackCount.classList.add('secondary', 'small');
+        trackCount.textContent = ' ' + playlist.trackCount;
+
+        const label = document.createElement("label");
+        label.htmlFor = "checkbox-" + playlist.name;
+        label.textContent = playlist.name;
+        label.replaceChildren(playlist.name, sup, trackCount);
+
+        const span = document.createElement("span");
+        span.classList.add("checkbox-with-label");
+        span.replaceChildren(input, label);
+
+        return span;
+    }
+
+    /**
+     * @returns {Promise<HTMLDivElement>}
+     */
+    async getPlaylistCheckboxes() {
+        let index = 1;
+        const mainDiv = document.createElement('div');
+        const otherDiv = document.createElement('div');
+        otherDiv.style.maxHeight = '20vh';
+        otherDiv.style.overflowY = 'auto';
+
+        for (const playlist of await this.playlists()) {
+            if (playlist.favorite) {
+                mainDiv.appendChild(this.#createPlaylistCheckbox(playlist, index++, true));
+            } else {
+                otherDiv.appendChild(this.#createPlaylistCheckbox(playlist, 10, false));
+            }
+        }
+
+        const parent = document.createElement('div');
+        parent.replaceChildren(mainDiv, otherDiv);
+        return parent;
+    }
 }
 
 const music = new Music();
