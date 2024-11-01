@@ -35,10 +35,9 @@
     <img class="box cover-img" src="/share/{{ code }}/cover">
 
     {# Ugly formatting here, because line breaks are preserved #}
-    <div class="box padding lyrics">{% if lyrics %}{{ lyrics }}{% else %}
-        <i>{% trans %}No lyrics found{% endtrans %}</i>
-        {% endif %}
-    </div>
+    {% if lyrics %}
+        <div class="box padding lyrics">{{ lyrics }}</div>
+    {% endif %}
 </div>
 
 {% endblock content %}
