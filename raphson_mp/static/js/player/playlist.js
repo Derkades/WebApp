@@ -114,11 +114,12 @@ function loadPlaylistState() {
         console.info('playlist: no state saved');
         return;
     }
+    /** @type {Array<string>} */
     const savedPlaylists = JSON.parse(playlistsString);
     console.debug('playlist: restoring state', savedPlaylists);
     const checkboxes = document.getElementById('playlist-checkboxes').getElementsByTagName('input');
     for (const checkbox of checkboxes) {
-        checkbox.checked = checkbox.dataset.playlist in savedPlaylists;
+        checkbox.checked = savedPlaylists.indexOf(checkbox.dataset.playlist) != -1;
     }
 }
 
