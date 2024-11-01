@@ -1,20 +1,9 @@
 /** @type {Array<DownloadedTrack>} */
 const downloadedTracks = [];
 
-async function fillCachedTracks() {
-    if (downloadedTracks.length > 3) {
-        return;
-    }
-
-    /** @type {Playlist} */
-    const playlist = choice(await music.playlists());
-
-    const track = await playlist.chooseRandomTrack(true, {});
-    const downloadedTrack = await track.download();
-    downloadedTracks.push(downloadedTrack);
-}
-
 document.addEventListener('DOMContentLoaded', () => {
+    /** @type {HTMLDivElement} */
+    const playlists = document.getElementById('playlists');
     /** @type {HTMLDivElement} */
     const cover = document.getElementById('cover');
     /** @type {HTMLAudioElement} */
@@ -77,12 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
         details.textContent = currentTrack.track.displayText(true, true);
     }
 
-    (async function() {
-        setInterval(fillCachedTracks, 2000);
-        fillCachedTracks(); // intentionally not awaited
-        start();
-    })();
-
     function onClick() {
         if (state == "start") {
             play();
@@ -93,10 +76,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    document.addEventListener('click', onClick);
+    cover.addEventListener('click', onClick);
     document.addEventListener('keydown', event => {
         if (event.key == ' ') {
             onClick();
         }
     });
+
+    async function fillCachedTracks() {
+        if (downloadedTracks.length > 2) {
+            return;
+        }
+
+        const enabledPlaylists = [];
+
+        for (const input of playlists.getElementsByTagName('input')) {
+            if (input.checked) {
+                enabledPlaylists.push(input.dataset.playlist);
+            }
+        }
+
+        if (enabledPlaylists.length == 0) {
+            return;
+        }
+
+        const playlistName = choice(enabledPlaylists);
+        const playlist = await music.playlist(playlistName);
+        const track = await playlist.chooseRandomTrack(true, {});
+        const downloadedTrack = await track.download();
+        downloadedTracks.push(downloadedTrack);
+    }
+
+    setInterval(fillCachedTracks, 2000);
+    fillCachedTracks(); // intentionally not awaited
+    start();
+
+    (async () => {
+        const checkboxes = await music.getPlaylistCheckboxes();
+        for (const input of checkboxes.getElementsByTagName('input')) {
+            input.addEventListener('input', () => {
+                downloadedTracks.length = 0;
+                fillCachedTracks();
+            });
+        }
+        playlists.replaceChildren(checkboxes);
+    })();
 });

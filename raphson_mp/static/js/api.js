@@ -167,7 +167,6 @@ class Music {
         input.type = 'checkbox';
         input.dataset.playlist = playlist.name;
         input.checked = defaultChecked;
-        input.oninput = savePlaylistState;
 
         const sup = document.createElement('sup');
         if (index < 10) { // Assume number keys higher than 9 don't exist

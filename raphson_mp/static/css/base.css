@@ -230,6 +230,14 @@ input::placeholder {
     grid-column: 1 / 3;
 }
 
+.checkbox-with-label {
+    display: inline-block;
+    margin-right: var(--gap);
+    margin-bottom: .25rem;
+    margin-top: .25rem;
+    white-space: nowrap;
+}
+
 /* ICONS */
 
 .icon {

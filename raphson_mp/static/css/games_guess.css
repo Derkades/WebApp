@@ -2,8 +2,15 @@
     justify-content: center;
 }
 
-#cover-container {
+#playlists {
+    padding: var(--gap);
+}
+
+#cover-container, #playlists {
     max-width: 70vh;
+}
+
+#cover-container {
     aspect-ratio: 1/1;
     position: relative;
 }

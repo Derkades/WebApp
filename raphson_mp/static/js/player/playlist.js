@@ -52,6 +52,9 @@ async function updatePlaylistCheckboxHtml() {
     console.debug('playlist: update playlist checkboxes');
     const parent = document.getElementById('playlist-checkboxes');
     parent.replaceChildren(await music.getPlaylistCheckboxes());
+    for (const input of parent.getElementsByTagName('input')) {
+        input.oninput = savePlaylistState;
+    }
     loadPlaylistState();
 }
 

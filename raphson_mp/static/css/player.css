@@ -299,14 +299,6 @@ h4 > .icon {
     margin-top: 4rem;
 }
 
-.checkbox-with-label {
-    display: inline-block;
-    margin-right: var(--gap);
-    margin-bottom: .25rem;
-    margin-top: .25rem;
-    white-space: nowrap;
-}
-
 #track-list-output {
     max-height: 40rem;
 }
