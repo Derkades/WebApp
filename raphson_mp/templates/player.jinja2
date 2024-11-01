@@ -80,9 +80,7 @@
                             {{ icon_button('tag-multiple', 'open-dialog-tags', title=gettext('Open tag selection')) }}
                             {{ icon_button('playlist-music', 'browse-all', title=gettext('Browse all tracks')) }}
                             {{ icon_button('text-search', 'open-dialog-search', title=gettext('Search in tracks')) }}
-                            {% if not offline_mode %}
-                                {{ icon_button('cog', 'open-dialog-settings', title=gettext('Open settings')) }}
-                            {% endif %}
+                            {{ icon_button('cog', 'open-dialog-settings', title=gettext('Open settings')) }}
                         </div>
                     </div>
                     <div class="scroll">
