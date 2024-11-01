@@ -16,7 +16,7 @@ def handle_start(args: Any, logconfig_dict: dict) -> None:
     """
     Handle command to start server
     """
-    from raphson_mp import cleanup, db, gunicorn_app
+    from raphson_mp import cleanup, db
     from raphson_mp import main as app_main
     from raphson_mp import scanner
 
@@ -30,6 +30,8 @@ def handle_start(args: Any, logconfig_dict: dict) -> None:
         app = app_main.get_app(args.proxy_count, True)
         app.run(host=args.host, port=args.port, debug=True)
         return
+
+    from raphson_mp import gunicorn_app
 
     log.info('Starting gunicorn web server')
     bind = f'[{args.host}]:{args.port}'
