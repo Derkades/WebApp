@@ -1,6 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     /** @type {HTMLButtonElement} */
     const videoButton = document.getElementById('button-video');
+    if (videoButton == null) {
+        console.warn('video: missing button, running in offline mode?');
+        return;
+    }
+
     /** @type {HTMLVideoElement} */
     const videoElem = document.getElementById('video');
     /** @type {HTMLAudioElement} */
