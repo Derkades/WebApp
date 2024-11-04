@@ -1,6 +1,7 @@
 from flask import Blueprint, Response, redirect, render_template, request
 
-from raphson_mp import auth, db, metadata
+from raphson_mp import auth, db
+from raphson_mp.music import Track
 
 bp = Blueprint('dislikes', __name__, url_prefix='/dislikes')
 
@@ -42,7 +43,7 @@ def route_dislikes():
                             ''', (user.user_id,)).fetchall()
         tracks = [{'path': path,
                    'playlist': playlist,
-                   'title': metadata.cached(conn, path).display_title()}
+                   'title': Track.by_relpath(conn, path).metadata().display_title()}
                   for playlist, path in rows]
 
     return render_template('dislikes.jinja2',

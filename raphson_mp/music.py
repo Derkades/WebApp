@@ -13,17 +13,14 @@ from json.decoder import JSONDecodeError
 from pathlib import Path
 from sqlite3 import Connection
 from subprocess import CalledProcessError
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 
 from raphson_mp import (cache, db, image, jsonw, lyrics, metadata, reddit,
                         settings)
 from raphson_mp.auth import User
 from raphson_mp.image import ImageFormat, ImageQuality
 from raphson_mp.lyrics import Lyrics, PlainLyrics
-
-if TYPE_CHECKING:
-    from metadata import Metadata
-
+from raphson_mp.metadata import Metadata
 
 log = logging.getLogger(__name__)
 
@@ -126,7 +123,7 @@ def _get_possible_covers(artist: str | None, album: str, meme: bool) -> Iterator
 
 
 def get_cover(artist: str | None, album: str, meme: bool,
-              img_quality: ImageQuality, img_format: ImageFormat) -> bytes | None:
+              img_quality: ImageQuality, img_format: ImageFormat) -> bytes:
     """
     Find album cover
     Parameters:
@@ -164,6 +161,8 @@ def get_cover(artist: str | None, album: str, meme: bool,
                 continue
 
         return return_data
+
+    raise ValueError('always at least one possible cover must be returned')
 
 
 class AudioType(Enum):
@@ -218,9 +217,25 @@ class Track:
         """
         Returns: Cached metadata for this track, as a Metadata object
         """
-        if not self._metadata:
-            self._metadata = metadata.cached(self.conn, self.relpath)
-        return self._metadata
+        if self._metadata:
+            return self._metadata
+
+        query = 'SELECT duration, title, album, album_artist, track_number, year, lyrics FROM track WHERE path=?'
+        row = self.conn.execute(query, (self.relpath,)).fetchone()
+        if row is None:
+            raise ValueError('Missing track from database: ' + self.relpath)
+        duration, title, album, album_artist, track_number, year, lyrics = row
+
+        rows = self.conn.execute('SELECT artist FROM track_artist WHERE track=?', (self.relpath,)).fetchall()
+        if len(rows) == 0:
+            artists = None
+        else:
+            artists = [row[0] for row in rows]
+
+        rows = self.conn.execute('SELECT tag FROM track_tag WHERE track=?', (self.relpath,)).fetchall()
+        tags = [row[0] for row in rows]
+
+        return Metadata(self.relpath, duration, metadata.sort_artists(artists, album_artist), album, title, year, album_artist, track_number, tags, lyrics)
 
     def get_cover(self, meme: bool, img_quality: ImageQuality, img_format: ImageFormat) -> bytes:
         """

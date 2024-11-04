@@ -146,7 +146,7 @@ def _has_advertisement(metadata_str: str) -> bool:
     return False
 
 
-def _sort_artists(artists: list[str] | None, album_artist: str | None) -> list[str] | None:
+def sort_artists(artists: list[str] | None, album_artist: str | None) -> list[str] | None:
     """
     Move album artist to start of artist list
     """
@@ -344,7 +344,7 @@ def probe(path: Path) -> Metadata | None:
 
     return Metadata(music.to_relpath(path),
                     duration,
-                    _sort_artists(artists, album_artist),
+                    sort_artists(artists, album_artist),
                     album,
                     title,
                     year,
@@ -352,26 +352,3 @@ def probe(path: Path) -> Metadata | None:
                     track_number,
                     tags,
                     lyrics)
-
-
-def cached(conn: Connection, relpath: str) -> Metadata:
-    """
-    Create Metadata object from database contents
-    Returns: Metadata, or None if the track is not known
-    """
-    query = 'SELECT duration, title, album, album_artist, track_number, year, lyrics FROM track WHERE path=?'
-    row = conn.execute(query, (relpath,)).fetchone()
-    if row is None:
-        raise ValueError('Missing track from database: ' + relpath)
-    duration, title, album, album_artist, track_number, year, lyrics = row
-
-    rows = conn.execute('SELECT artist FROM track_artist WHERE track=?', (relpath,)).fetchall()
-    if len(rows) == 0:
-        artists = None
-    else:
-        artists = [row[0] for row in rows]
-
-    rows = conn.execute('SELECT tag FROM track_tag WHERE track=?', (relpath,)).fetchall()
-    tags = [row[0] for row in rows]
-
-    return Metadata(relpath, duration, _sort_artists(artists, album_artist), album, title, year, album_artist, track_number, tags, lyrics)
