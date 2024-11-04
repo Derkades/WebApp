@@ -226,11 +226,6 @@ def handle_acoustid(args: Any) -> None:
     log.info('fingerprint: %s', fp.fingerprint_b64)
 
     recordings = acoustid.lookup(fp)
-    if len(recordings) == 0:
-        log.warning('no MusicBrainz recording found')
-        return
-
-    log.info('MusicBrainz recordings: %s', recordings)
 
     for recording in recordings[:2]:
         for meta in musicbrainz.get_recording_metadata(recording):
@@ -265,8 +260,11 @@ def _strenv(name: str, default: str | None = None) -> str | None:
     return os.getenv('MUSIC_' + name, default)
 
 
-def _intenv(name: str, default: int):
-    return int(_strenv(name, str(default)))
+def _intenv(name: str, default: int) -> int | None:
+    text = _strenv(name, str(default))
+    if text is None:
+        return None
+    return int(text)
 
 
 def _boolenv(name: str) -> bool:
