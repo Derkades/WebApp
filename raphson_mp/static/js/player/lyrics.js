@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     const audioElem = getAudioElement();
     const lyricsElem = document.getElementById('lyrics-box');
+    const lyricsSetting = document.getElementById('settings-lyrics');
+
+    let shouldShowLyrics = true;
 
     let lastLine = null;
 
@@ -40,7 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (document.visibilityState == 'visible'
             && queue.currentTrack
             && queue.currentTrack.lyrics
-            && queue.currentTrack.lyrics instanceof TimeSyncedLyrics) {
+            && queue.currentTrack.lyrics instanceof TimeSyncedLyrics
+            && lyricsSetting.checked
+        ) {
             console.debug('lyrics: registered timeupdate listener');
             audioElem.removeEventListener('timeupdate', updateSyncedLyrics); // remove it in case it is already registered
             audioElem.addEventListener('timeupdate', updateSyncedLyrics);
@@ -55,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const queuedTrack = queue.currentTrack;
         const lyricsElem = document.getElementById('lyrics-box')
 
-        if (queuedTrack.lyrics) {
+        if (queuedTrack && queuedTrack.lyrics && lyricsSetting.checked) {
             lyricsElem.classList.remove('hidden');
             if (queuedTrack.lyrics instanceof PlainLyrics) {
                 lyricsElem.textContent = queuedTrack.lyrics.text;
@@ -64,12 +69,18 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             lyricsElem.classList.add('hidden');
         }
+        registerListener();
     }
 
-    eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {
-        registerListener();
+    eventBus.subscribe(MusicEvent.TRACK_CHANGE, replaceLyrics);
+    eventBus.subscribe(MusicEvent.SETTINGS_LOADED, replaceLyrics);
+
+    // Quick toggle for lyrics setting
+    document.getElementById('album-cover-box').addEventListener('click', () => {
+        lyricsSetting.checked = !lyricsSetting.checked;
         replaceLyrics();
     });
 
-    document.addEventListener('visibilitychange', registerListener);
+    // Handle lyrics setting being changed
+    lyricsSetting.addEventListener('change', replaceLyrics);
 });

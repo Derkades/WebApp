@@ -9,6 +9,7 @@ const SETTING_ELEMENTS = [
     'settings-news',
     'settings-theater',
     'settings-visualiser',
+    'settings-lyrics',
 ];
 
 function syncInputWithStorage(elemId) {
