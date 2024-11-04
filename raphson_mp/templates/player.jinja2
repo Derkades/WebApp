@@ -110,7 +110,10 @@
         <div class="dialog">
             {{ dialog_header('dialog-settings', gettext('Settings')) }}
             <div class="dialog-body form">
-                <label for="settings-queue-size">{% trans %}Minimum queue size{% endtrans %}</label>
+                <label for="settings-queue-size">
+                    {% trans %}Minimum queue size{% endtrans %}<br>
+                    <span class="secondary">{% trans %}Tracks in the queue can be played without an internet connection.{% endtrans %}</span>
+                </label>
                 <input type="number" value="5" size="3" min="0" max="100" id="settings-queue-size">
 
                 {% if offline_mode %}
@@ -118,7 +121,10 @@
                         <option value="webm_opus_high" selected>hidden</option>
                     </select>
                 {% else %}
-                    <label for="settings-audio-type">{% trans %}Audio and image quality{% endtrans %}</label>
+                    <label for="settings-audio-type">
+                        {% trans %}Audio format{% endtrans %}<br>
+                        <span class="secondary">{% trans %}Opus 128k provides excellent quality at a low bit rate, audibly indistinguishable from uncompressed music. Select 48k Opus to save even more data at the cost of audio quality. In addition to the lower audio bit rate, smaller images will be loaded. AAC is available if your browser does not support Opus, but is otherwise not recommended.{% endtrans %}</span>
+                    </label>
                     <select id="settings-audio-type">
                         <option value="webm_opus_high" selected>{% trans %}Very high quality (128k Opus){% endtrans %}</option>
                         <option value="webm_opus_low">{% trans %}Low quality (48k Opus){% endtrans %}</option>
@@ -126,19 +132,28 @@
                     </select>
                 {% endif %}
 
-                <label for="settings-queue-removal-behaviour">{% trans %}Queue removal behaviour{% endtrans %}</label>
+                <label for="settings-queue-removal-behaviour">
+                    {% trans %}Queue removal behaviour{% endtrans %}<br>
+                    <span class="secondary">{% trans %}From which playlist is a replacement track chosen, when a track is removed from the queue?{% endtrans %}</span>
+                </label>
                 <select id="settings-queue-removal-behaviour">
                     <option value="roundrobin" selected>{% trans %}New track from next round-robin playlist{% endtrans %}</option>
                     <option value="same">{% trans %}New track from same playlist{% endtrans %}</option>
                 </select>
 
-                <label for="settings-download-mode">{% trans %}Audio download mode{% endtrans %}</label>
+                <label for="settings-download-mode">
+                    {% trans %}Audio download mode{% endtrans %}<br>
+                    <span class="secondary">{% trans %}Streaming mode decreases the time needed to add tracks to the queue, but will introduce a buffering delay when tracks are finally played.{% endtrans %}</span>
+                </label>
                 <select id="settings-download-mode">
                     <option value="download" selected>{% trans %}Download full track when queued{% endtrans %}</option>
                     <option value="stream">{% trans %}Stream audio (experimental){% endtrans %}</option>
                 </select>
 
-                <label for="settings-audio-gain">{% trans %}Audio gain{% endtrans %} <span class="secondary">{% trans %}reduces audio quality{% endtrans %}</span></label>
+                <label for="settings-audio-gain">
+                    {% trans %}Audio gain{% endtrans %}<br>
+                    <span class="secondary">{% trans %}Last resort if you cannot get enough volume out of your system. Try setting everything else to maximum volume first, as setting a gain here will worsen audio quality.{% endtrans %}</span>
+                </label>
                 <select id="settings-audio-gain">
                     <option value="1" selected>1</option>
                     <option value="2">2</option>
@@ -149,24 +164,39 @@
                 {% if offline_mode %}
                     <input id="settings-meme-mode" type="hidden">
                 {% else %}
-                    <label for="settings-meme-mode">{% trans %}Album cover art memes{% endtrans %}</label>
+                    <label for="settings-meme-mode">
+                        {% trans %}Album cover art memes{% endtrans %}<br>
+                        <span class="secondary">{% trans %}Show memes relevant to the album title instead of the original album cover image.{% endtrans %}</span>
+                    </label>
                     <input id="settings-meme-mode" type="checkbox">
                 {% endif %}
 
-                <label for="settings-theater">{% trans %}Theater mode{% endtrans %}</label>
+                <label for="settings-theater">
+                    {% trans %}Theater mode{% endtrans %}<br>
+                    <span class="secondary">{% trans %}Hide controls when there hasn't been any mouse movement for a while.{% endtrans %}</span>
+                </label>
                 <input id="settings-theater" type="checkbox">
 
                 {% if offline_mode %}
                     <input id="settings-news" type="checkbox" class="hidden">
                 {% else %}
-                    <label for="settings-news">{% trans %}Hourly news{% endtrans %}</label>
+                    <label for="settings-news">
+                        {% trans %}Hourly news{% endtrans %}<br>
+                        <span class="secondary">{% trans %}Add news to the queue on the hour.{% endtrans %}</span>
+                    </label>
                     <input id="settings-news" type="checkbox">
                 {% endif %}
 
-                <label for="settings-visualiser">{% trans %}Visualiser{% endtrans %} <span class="secondary">{% trans %}increases energy usage{% endtrans %}</span></label>
+                <label for="settings-visualiser">
+                    {% trans %}Visualiser{% endtrans %}<br>
+                    <span class="secondary">{% trans %}Increases energy usage while active. Is automatically deactivated when the browser reports the page is not visible.{% endtrans %}</span>
+                </label>
                 <input id="settings-visualiser" type="checkbox">
 
-                <label for="settings-lyrics">{% trans %}Lyrics{% endtrans %} <span class="secondary">{% trans %}quickly toggle by clicking album cover{% endtrans %}</span></label>
+                <label for="settings-lyrics">
+                    {% trans %}Lyrics{% endtrans %}<br>
+                    <span class="secondary">{% trans %}Can also be toggled quickly by clicking the album cover.{% endtrans %}</span>
+                </label>
                 <input id="settings-lyrics" type="checkbox" checked>
             </div>
         </div>

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: robin@rslot.nl\n"
-"POT-Creation-Date: 2024-11-01 20:19+0100\n"
-"PO-Revision-Date: 2024-10-22 10:46+0200\n"
+"POT-Creation-Date: 2024-11-05 00:58+0100\n"
+"PO-Revision-Date: 2024-11-05 00:58+0100\n"
 "Last-Translator: \n"
 "Language: nl\n"
 "Language-Team: nl <robin@rslot.nl>\n"
@@ -400,7 +400,7 @@ msgid "Music downloader"
 msgstr "Muziekdownloader"
 
 #: templates/download.jinja2:11 templates/download.jinja2:19
-#: templates/player.jinja2:205
+#: templates/player.jinja2:238
 msgid "Search"
 msgstr "Zoeken"
 
@@ -416,13 +416,13 @@ msgstr ""
 "video te kopieren naar het veld hieronder. Als laatste, klik op de "
 "downloadknop. Op dit moment wordt er slechts 1 zoekresultaat getoond."
 
-#: templates/download.jinja2:16 templates/player.jinja2:207
+#: templates/download.jinja2:16 templates/player.jinja2:240
 msgid "Search query"
 msgstr "Zoekopdracht"
 
 #: templates/download.jinja2:26 templates/download_offline.jinja2:26
 #: templates/download_offline.jinja2:41 templates/files.jinja2:88
-#: templates/player.jinja2:231 templates/player.jinja2:259
+#: templates/player.jinja2:264 templates/player.jinja2:292
 #: templates/playlists.jinja2:125
 msgid "Title"
 msgstr "Titel"
@@ -524,7 +524,7 @@ msgstr "Toon normale bestanden"
 msgid "Show trashed files"
 msgstr "Toon verwijderde bestanden"
 
-#: templates/files.jinja2:85 templates/player.jinja2:263
+#: templates/files.jinja2:85 templates/player.jinja2:296
 msgid "Type"
 msgstr "Type"
 
@@ -532,7 +532,7 @@ msgstr "Type"
 msgid "File name"
 msgstr "Bestandsnaam"
 
-#: templates/files.jinja2:87 templates/player.jinja2:213
+#: templates/files.jinja2:87 templates/player.jinja2:246
 #: templates/playlists.jinja2:122
 msgid "Artists"
 msgstr "Artiesten"
@@ -863,27 +863,31 @@ msgstr "Kopieer nummer naar een andere afspeellijst"
 msgid "Open share link"
 msgstr "Open deellink"
 
-#: templates/player.jinja2:76
+#: templates/player.jinja2:61
+msgid "Play video"
+msgstr "Speel video"
+
+#: templates/player.jinja2:77
 msgid "Queue"
 msgstr "Wachtrij"
 
-#: templates/player.jinja2:78
+#: templates/player.jinja2:79
 msgid "Queue track from online source"
 msgstr "Nummer van online bron in wachtrij zetten"
 
-#: templates/player.jinja2:79
+#: templates/player.jinja2:80
 msgid "Clear queue"
 msgstr "Wachtrij legen"
 
-#: templates/player.jinja2:80
+#: templates/player.jinja2:81
 msgid "Open tag selection"
 msgstr "Open label selectie"
 
-#: templates/player.jinja2:81
+#: templates/player.jinja2:82
 msgid "Browse all tracks"
 msgstr "Verken alle nummers"
 
-#: templates/player.jinja2:82
+#: templates/player.jinja2:83
 msgid "Search in tracks"
 msgstr "Zoeken in nummers"
 
@@ -891,217 +895,291 @@ msgstr "Zoeken in nummers"
 msgid "Open settings"
 msgstr "Open instellingen"
 
-#: templates/player.jinja2:89
+#: templates/player.jinja2:88
 msgid "No playlists are selected"
 msgstr "Er zijn geen afspeellijsten geselecteerd"
 
-#: templates/player.jinja2:113
+#: templates/player.jinja2:114
 msgid "Minimum queue size"
 msgstr "Minimum wachtrijlengte"
 
-#: templates/player.jinja2:121
-msgid "Audio and image quality"
-msgstr "Audio- en afbeeldingkwaliteit"
+#: templates/player.jinja2:115
+msgid "Tracks in the queue can be played without an internet connection."
+msgstr ""
+"Nummers in de wachtrij kunnen zonder een internetverbinding worden "
+"afgespeeld."
 
-#: templates/player.jinja2:123
+#: templates/player.jinja2:125
+msgid "Audio format"
+msgstr "Audioformaat"
+
+#: templates/player.jinja2:126
+msgid ""
+"Opus 128k provides excellent quality at a low bit rate, audibly "
+"indistinguishable from uncompressed music. Select 48k Opus to save even "
+"more data at the cost of audio quality. In addition to the lower audio "
+"bit rate, smaller images will be loaded. AAC is available if your browser"
+" does not support Opus, but is otherwise not recommended."
+msgstr ""
+"Opus 128k geeft uitstekende geluidskwaliteit bij een lage bitrate, voor "
+"het oor niet te onderscheiden van ongecomprimeerde muziek. Kies voor 48k "
+"Opus om nog meer data te besparen, ten konste van geluidskwaliteit. Naast"
+" de audio bitrate, wordt ook de kwaliteit van afbeeldingen verlaagd. AAC "
+"is beschikbaar voor browsers die geen ondersteuning bieden voor Opus, "
+"maar wordt anders afgeraden."
+
+#: templates/player.jinja2:129
 msgid "Very high quality (128k Opus)"
 msgstr "Zeer hoge kwaliteit (128k Opus)"
 
-#: templates/player.jinja2:124
+#: templates/player.jinja2:130
 msgid "Low quality (48k Opus)"
 msgstr "Lage kwaliteit (48k Opus)"
 
-#: templates/player.jinja2:125
+#: templates/player.jinja2:131
 msgid "iOS/Safari (VBR 128kbps AAC)"
 msgstr "iOS/Safari (VBR 128k AAC)"
 
-#: templates/player.jinja2:129
+#: templates/player.jinja2:136
 msgid "Queue removal behaviour"
 msgstr "Vervanging voor nummer uit wachtrij"
 
-#: templates/player.jinja2:131
+#: templates/player.jinja2:137
+msgid ""
+"From which playlist is a replacement track chosen, when a track is "
+"removed from the queue?"
+msgstr ""
+"Van welke afspeellijst wordt een nieuw nummer gekozen, als een nummer "
+"verwijderd wordt uit de wachtrij?"
+
+#: templates/player.jinja2:140
 msgid "New track from next round-robin playlist"
 msgstr "Nieuw nummer uit de volgende afspeellijst"
 
-#: templates/player.jinja2:132
+#: templates/player.jinja2:141
 msgid "New track from same playlist"
 msgstr "Nieuw nummer uit dezelfde afspeellijst"
 
-#: templates/player.jinja2:135
+#: templates/player.jinja2:145
 msgid "Audio download mode"
 msgstr "Audio downloadmodus"
 
-#: templates/player.jinja2:137
+#: templates/player.jinja2:146
+msgid ""
+"Streaming mode decreases the time needed to add tracks to the queue, but "
+"will introduce a buffering delay when tracks are finally played."
+msgstr ""
+"In streamingmodus kunnen nummers sneller in de wachtrij gezet worden, in "
+"ruil voor een vertraging zodra het nummer daadwerkelijk wordt afgespeeld."
+
+#: templates/player.jinja2:149
 msgid "Download full track when queued"
 msgstr "Download gehele nummer in de wachtrij"
 
-#: templates/player.jinja2:138
+#: templates/player.jinja2:150
 msgid "Stream audio (experimental)"
 msgstr "Stream audio (experimenteel)"
 
-#: templates/player.jinja2:141
+#: templates/player.jinja2:154
 msgid "Audio gain"
 msgstr "Audioversterking"
 
-#: templates/player.jinja2:141
-msgid "reduces audio quality"
-msgstr "verslechtert audiokwaliteit"
+#: templates/player.jinja2:155
+msgid ""
+"Last resort if you cannot get enough volume out of your system. Try "
+"setting everything else to maximum volume first, as setting a gain here "
+"will worsen audio quality."
+msgstr ""
+"Noodoplossing als je niet genoeg volume uit je systeem krijgt. Zorg eerst"
+" dat op alle andere plekken het volume maximaal staat ingesteld, "
+"aangezien het instellen van versterking de geluidskwaliteit behoorlijk "
+"verslechterd."
 
-#: templates/player.jinja2:152
+#: templates/player.jinja2:168
 msgid "Album cover art memes"
 msgstr "Albumhoes memes"
 
-#: templates/player.jinja2:156
+#: templates/player.jinja2:169
+msgid ""
+"Show memes relevant to the album title instead of the original album "
+"cover image."
+msgstr ""
+"Toon memes met enige relevantie aan de albumtitel, in de plaats van de "
+"originele albumhoesafbeeldingen."
+
+#: templates/player.jinja2:175
 msgid "Theater mode"
 msgstr "Theatermodus"
 
-#: templates/player.jinja2:162
+#: templates/player.jinja2:176
+msgid "Hide controls when there hasn't been any mouse movement for a while."
+msgstr ""
+"Verberg bedieningselementen wanneer de muis een kleine tijd niet bewogen "
+"is."
+
+#: templates/player.jinja2:184
 msgid "Hourly news"
 msgstr "Nieuws op het hele uur"
 
-#: templates/player.jinja2:166
+#: templates/player.jinja2:185
+msgid "Add news to the queue on the hour."
+msgstr "Voeg op het uur nieuws aan de wachtrij toe."
+
+#: templates/player.jinja2:191
 msgid "Visualiser"
 msgstr "Muziekweergave"
 
-#: templates/player.jinja2:166
-msgid "increases energy usage"
-msgstr "verhoogt energieverbruik"
+#: templates/player.jinja2:192
+msgid ""
+"Increases energy usage while active. Is automatically deactivated when "
+"the browser reports the page is not visible."
+msgstr ""
+"Verhoogt energiegebruik zolang de weergave actief is. Wordt automatisch "
+"gepauzeerd als volgens de browser de pagina niet zichtbaar is."
 
-#: templates/player.jinja2:174
+#: templates/player.jinja2:197
+msgid "Lyrics"
+msgstr "Songtekst"
+
+#: templates/player.jinja2:198
+msgid "Can also be toggled quickly by clicking the album cover."
+msgstr "Kan ook sneller omgeschakeld worden door te klikken op de albumhoes."
+
+#: templates/player.jinja2:207
 msgid "Tags"
 msgstr "Tags"
 
-#: templates/player.jinja2:176
+#: templates/player.jinja2:209
 msgid "Tag mode"
 msgstr "Tagmodus"
 
-#: templates/player.jinja2:178
+#: templates/player.jinja2:211
 msgid "Ignore tags when choosing tracks"
 msgstr "Negeer tags bij het kiezen van nummers"
 
-#: templates/player.jinja2:179
+#: templates/player.jinja2:212
 msgid "Only choose tracks with selected tags (untagged tracks are not chosen)"
 msgstr ""
 "Kies alleen nummers met geselecteerde tags (nummers zonder tags worden "
 "niet gekozen)"
 
-#: templates/player.jinja2:180
+#: templates/player.jinja2:213
 msgid "Don't choose tracks with selected tags (untagged tracks are chosen)"
 msgstr ""
 "Kies nummers met geselecteerde tags niet (nummers zonder tags worden wel "
 "gekozen)"
 
-#: templates/player.jinja2:182
+#: templates/player.jinja2:215
 msgid "(Un)select all"
 msgstr "(De)selecteer alles"
 
-#: templates/player.jinja2:193
+#: templates/player.jinja2:226
 msgid "All"
 msgstr "Alles"
 
-#: templates/player.jinja2:196
+#: templates/player.jinja2:229
 msgid "Please select a playlist."
 msgstr "Selecteer een afspeellijst."
 
-#: templates/player.jinja2:210 templates/playlists.jinja2:121
+#: templates/player.jinja2:243 templates/playlists.jinja2:121
 msgid "Tracks"
 msgstr "Nummers"
 
-#: templates/player.jinja2:216
+#: templates/player.jinja2:249
 msgid "Albums"
 msgstr "Albums"
 
-#: templates/player.jinja2:225
+#: templates/player.jinja2:258
 msgid "Metadata editor"
 msgstr "Metadata wijzigen"
 
-#: templates/player.jinja2:228
+#: templates/player.jinja2:261
 msgid "File path"
 msgstr "Bestandspad"
 
-#: templates/player.jinja2:234 templates/player.jinja2:261
+#: templates/player.jinja2:267 templates/player.jinja2:294
 #: templates/playlists.jinja2:126
 msgid "Album"
 msgstr "Album"
 
-#: templates/player.jinja2:237
+#: templates/player.jinja2:270
 msgid "Artists (delimit multiple using <kbd>;</kbd>)"
 msgstr "Artiesten (scheid meerdere met <kbd>;</kbd>)"
 
-#: templates/player.jinja2:240 templates/playlists.jinja2:127
+#: templates/player.jinja2:273 templates/playlists.jinja2:127
 msgid "Album artist"
 msgstr "Albumartiest"
 
-#: templates/player.jinja2:243
+#: templates/player.jinja2:276
 msgid "Tags (delimit multiple using <kbd>;</kbd>)"
 msgstr "Tags (scheid meerdere met <kbd>;</kbd>)"
 
-#: templates/player.jinja2:246
+#: templates/player.jinja2:279
 msgid "Year (4 characters)"
 msgstr "Jaar (4 tekens)"
 
-#: templates/player.jinja2:249
+#: templates/player.jinja2:282
 msgid "Save"
 msgstr "Opslaan"
 
-#: templates/player.jinja2:251
+#: templates/player.jinja2:284
 msgid "Find metadata"
 msgstr "Vind metadata"
 
-#: templates/player.jinja2:254
+#: templates/player.jinja2:287
 msgid "Writing metadata..."
 msgstr "Metadata schrijven..."
 
-#: templates/player.jinja2:260 templates/playlists.jinja2:129
+#: templates/player.jinja2:293 templates/playlists.jinja2:129
 msgid "Artist"
 msgstr "Artiest"
 
-#: templates/player.jinja2:262 templates/playlists.jinja2:128
+#: templates/player.jinja2:295 templates/playlists.jinja2:128
 #: templates/stats.jinja2:14
 msgid "Year"
 msgstr "Jaar"
 
-#: templates/player.jinja2:264
+#: templates/player.jinja2:297
 msgid "Packaging"
 msgstr "Verpakking"
 
-#: templates/player.jinja2:277
+#: templates/player.jinja2:310
 msgid "Add from online source (beta)"
 msgstr "Toevoegen van online bron (beta)"
 
-#: templates/player.jinja2:279
+#: templates/player.jinja2:312
 msgid "URL"
 msgstr "URL"
 
-#: templates/player.jinja2:289
+#: templates/player.jinja2:322
 msgid "Copy track"
 msgstr "Kopieer nummer"
 
-#: templates/player.jinja2:291
+#: templates/player.jinja2:324
 msgid "Select playlist to copy track to:"
 msgstr "Selecteer afspeellijst waarnaar dit nummer gekopieerd moet worden:"
 
-#: templates/player.jinja2:294
+#: templates/player.jinja2:327
 msgid "Copy"
 msgstr "Kopiëren"
 
-#: templates/player.jinja2:309
+#: templates/player.jinja2:342
 msgid "Artist: "
 msgstr "Artiest: "
 
-#: templates/player.jinja2:310
+#: templates/player.jinja2:343
 msgid "Album: "
 msgstr "Album: "
 
-#: templates/player.jinja2:311
+#: templates/player.jinja2:344
 msgid "Tag: "
 msgstr "Tag: "
 
-#: templates/player.jinja2:312
+#: templates/player.jinja2:345
 msgid "Playlist: "
 msgstr "Afspeellijst: "
 
-#: templates/player.jinja2:313
+#: templates/player.jinja2:346
 msgid "Browse"
 msgstr "Bladeren"
 
@@ -1311,7 +1389,4 @@ msgstr "Nieuw wachtwoord (laat leeg om niet te veranderen)"
 #: templates/users_edit.jinja2:21
 msgid "Submit"
 msgstr "Versturen"
-
-#~ msgid "No lyrics found"
-#~ msgstr "Geen songteksten gevonden"
 
