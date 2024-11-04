@@ -26,14 +26,14 @@ def route_login():
     If the provided password is invalid, the login template is rendered with invalid_password=True
     """
     with db.connect() as conn:
-        try:
-            auth.verify_auth_cookie(conn)
-            # User is already logged in
-            return redirect('/', code=303)
-        except AuthError:
-            pass
-
         if request.method == 'GET':
+            try:
+                auth.verify_auth_cookie(conn)
+                # User is already logged in
+                return redirect('/', code=303)
+            except AuthError:
+                pass
+
             return render_template('login.jinja2', invalid_password=False)
 
         if request.is_json:
