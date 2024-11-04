@@ -31,6 +31,7 @@ from raphson_mp.routes import share as app_share
 from raphson_mp.routes import stats as app_stats
 from raphson_mp.routes import track as app_track
 from raphson_mp.routes import users as app_users
+from raphson_mp.routes import *
 
 log = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ def _handle_exception(e):
     return Response('Sorry! Cannot continue due to an unhandled exception. The error has been logged. Please contact the server administrator.', 500, content_type='text/plain')
 
 
-def get_app(proxy_count: int, template_reload: bool):
+def get_app(proxy_count: int, template_reload: bool) -> Flask:
     app = Flask(__name__, template_folder='templates')
     app.register_error_handler(Exception, _handle_exception)
     app.register_error_handler(AuthError, app_auth.handle_auth_error)
@@ -66,7 +67,8 @@ def get_app(proxy_count: int, template_reload: bool):
     app.register_blueprint(app_track.bp)
     app.register_blueprint(app_users.bp)
     if prometheus_client:
-        from raphson_mp import prometheus  # pylint: disable=unused-import
+        from raphson_mp import prometheus
+        prometheus.register_collectors()
         app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {'/metrics': prometheus_client.make_wsgi_app()})
     else:
         log.warning('prometheus_client is not available, continuing without /metrics endpoint')
