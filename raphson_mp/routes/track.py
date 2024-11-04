@@ -1,7 +1,9 @@
 import logging
+import subprocess
 import time
 
-from flask import Blueprint, Response, abort, request
+from flask import Blueprint, Response, abort, request, send_file
+from flask.typing import TemplateContextProcessorCallable
 
 from raphson_mp import auth, db, image, jsonw, lyrics, music, scanner, settings
 from raphson_mp.image import ImageFormat
@@ -9,6 +11,7 @@ from raphson_mp.jsonw import json_response
 from raphson_mp.lyrics import PlainLyrics, TimeSyncedLyrics
 from raphson_mp.music import AudioType, Track
 from raphson_mp.musicbrainz import MBMeta
+from tempfile import NamedTemporaryFile
 
 log = logging.getLogger(__name__)
 bp = Blueprint('track', __name__, url_prefix='/track')
@@ -22,6 +25,33 @@ def route_info(path: str):
         if track is None:
             abort(404, 'track not found')
         return track.info_dict()
+
+
+@bp.route('/<path:path>/video')
+def route_raw(path: str):
+    """
+    Return video stream
+    """
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn)
+        track = Track.by_relpath(conn, path)
+        if track is None:
+            abort(404, 'track not found')
+
+        meta = track.metadata()
+
+        if meta.video == 'vp9':
+            output_format = 'webm'
+            output_media_type = 'video/webm'
+        elif meta.video == 'h264':
+            output_format = 'mp4'
+            output_media_type = 'video/mp4'
+        else:
+            abort(400, 'file has no suitable video stream')
+
+        with NamedTemporaryFile() as tempfile:
+            subprocess.check_call(['ffmpeg', *settings.ffmpeg_flags(), '-y', '-i', track.path.as_posix(), '-c:v', 'copy', '-map', '0:v', '-f', output_format, tempfile.name], shell=False)
+            return send_file(tempfile.name, mimetype=output_media_type)
 
 
 @bp.route('/<path:path>/audio')

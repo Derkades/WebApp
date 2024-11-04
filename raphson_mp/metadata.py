@@ -295,15 +295,15 @@ def probe(path: Path) -> Metadata | None:
     meta_tags: list[tuple[str, str]] = []
 
     for stream in data['streams']:
-        log.info('stream: %s', stream['codec_name'])
         if stream['codec_type'] == 'audio':
             if 'tags' in stream:
                 meta_tags.extend(stream['tags'].items())
 
         if stream['codec_type'] == 'video':
             if stream['codec_name'] == 'vp9':
-                print('test')
                 video = 'vp9'
+            elif stream['codec_name'] == 'h264':
+                video = 'h264'
             else:
                 log.warning('ignoring video stream: %s', stream['codec_name'])
 

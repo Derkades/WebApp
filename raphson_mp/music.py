@@ -390,9 +390,7 @@ class Track:
         with tempfile.NamedTemporaryFile() as temp_output:
             command = ['ffmpeg',
                     '-y',  # overwriting file is required, because the created temp file already exists
-                    '-hide_banner',
-                    '-nostats',
-                    '-loglevel', settings.ffmpeg_log_level,
+                    *settings.ffmpeg_flags(),
                     '-i', self.path.resolve().as_posix(),
                     *input_options,
                     *audio_options,

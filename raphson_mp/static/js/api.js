@@ -295,6 +295,8 @@ class Track {
     albumArtist;
     /** @type {number | null} */
     year;
+    /** @type {string | null} */
+    video;
 
     constructor(trackData) {
         this.#updateLocalVariablesFromTrackDataResponse(trackData);
@@ -310,6 +312,7 @@ class Track {
         this.album = trackData.album;
         this.albumArtist = trackData.album_artist;
         this.year = trackData.year;
+        this.video = trackData.video;
     }
 
     // TODO uses player-specific code, does not belong in api.js
@@ -547,6 +550,10 @@ class Track {
             array.push(new SuggestedMetadata(meta));
         }
         return array;
+    }
+
+    getVideoURL() {
+        return `/track/${encodeURIComponent(this.path)}/video`
     }
 }
 

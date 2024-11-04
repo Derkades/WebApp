@@ -58,6 +58,7 @@
                             {{ icon_button('delete', 'button-delete', title=gettext('Delete currently playing track from playlist')) }}
                             {{ icon_button('content-duplicate', 'button-copy', title=gettext('Copy track to a different playlist')) }}
                             {{ icon_button('share', 'button-share', title=gettext('Open share link')) }}
+                            {{ icon_button('video', 'button-video', title=gettext('Play video')) }}
                         {% endif %}
 
                         <div id="delete-spinner" class="raphson-spinner hidden"></div>
@@ -94,9 +95,10 @@
         <div class="sidebar" id="right-sidebar">
             <div class="boxes">
                 <div class="box" id="album-cover-box">
+                    <video id="video" muted></video>
                     <div id="album-cover-1" class="cover-img"></div>
                     <div id="album-cover-2" class="cover-img"></div>
-                     <canvas id="visualiser"></canvas>
+                    <canvas id="visualiser"></canvas>
                 </div>
                 <div class="box padding scroll hidden" id="lyrics-box">
                 </div>

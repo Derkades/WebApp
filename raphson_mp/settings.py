@@ -25,3 +25,6 @@ lastfm_api_key: str | None = None
 lastfm_api_secret: str | None = None
 offline_mode: bool = None
 news_server: str = None
+
+def ffmpeg_flags():
+    return ['-hide_banner', '-nostats', '-loglevel', ffmpeg_log_level]

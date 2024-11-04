@@ -121,7 +121,6 @@ eventBus.subscribe(MusicEvent.TRACK_CHANGE, async () => {
 
     const track = queue.currentTrack.track;
 
-    // Show dislike button if track is real (e.g. not a virtual news track)
     const isRealTrack = track !== null;
     const isEditable = track !== null && (await music.playlist(track.playlistName)).write;
 
