@@ -83,7 +83,9 @@ ALBUM_ARTIST_IGNORE = {
 
 METADATA_ADVERTISEMENT_KEYWORDS = [
     'electronicfresh.com',
-    'djsoundtop.com'
+    'djsoundtop.com',
+    'https://runderground.ru',
+    'Speeeedy EDM Blog',
 ]
 
 
