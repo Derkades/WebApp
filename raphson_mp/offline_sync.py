@@ -218,7 +218,7 @@ class OfflineSync:
         self.db_music.execute('INSERT INTO playlist VALUES (?) ON CONFLICT (path) DO NOTHING',
                                   (playlist,))
 
-        r = self.request_get('/track/filter?playlist=' + urlencode(playlist))
+        r = self.request_get('/tracks/filter?playlist=' + urlencode(playlist))
         tracks = r.json()['tracks']
 
         for track in tracks:

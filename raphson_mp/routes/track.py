@@ -6,12 +6,11 @@ from tempfile import NamedTemporaryFile
 from flask import Blueprint, Response, abort, request, send_file
 from flask.typing import TemplateContextProcessorCallable
 
-from raphson_mp import auth, db, image, jsonw, lyrics, music, scanner, settings
+from raphson_mp import (acoustid, auth, db, image, jsonw, lyrics, music,
+                        musicbrainz, scanner, settings)
 from raphson_mp.image import ImageFormat
-from raphson_mp.jsonw import json_response
-from raphson_mp.lyrics import PlainLyrics, TimeSyncedLyrics
+from raphson_mp.lyrics import TimeSyncedLyrics
 from raphson_mp.music import AudioType, Track
-from raphson_mp.musicbrainz import MBMeta
 
 log = logging.getLogger(__name__)
 bp = Blueprint('track', __name__, url_prefix='/track')
@@ -59,11 +58,6 @@ def route_audio(path: str):
     """
     Get transcoded audio for the given track path.
     """
-    if settings.offline_mode:
-        with db.offline(read_only=True) as conn:
-            music_data: bytes = conn.execute('SELECT music_data FROM content WHERE path=?', (path,)).fetchone()[0]
-            return Response(music_data, content_type='audio/webm')
-
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
         track = Track.by_relpath(conn, path)
@@ -107,11 +101,6 @@ def route_album_cover(path: str) -> Response:
     """
     Get album cover image for the provided track path.
     """
-    if settings.offline_mode:
-        with db.offline(read_only=True) as conn:
-            cover_data: bytes = conn.execute('SELECT cover_data FROM content WHERE path=?', (path,)).fetchone()[0]
-            return Response(cover_data, content_type='image/webp')
-
     meme = 'meme' in request.args and bool(int(request.args['meme']))
 
     if request.args['quality'] == 'high':
@@ -166,24 +155,6 @@ def route_lyrics2(path: str):
     """
     Get lyrics for the provided track path.
     """
-    if settings.offline_mode:
-        with db.offline(read_only=True) as conn:
-            lyrics_json_str: str = conn.execute('SELECT lyrics_json FROM content WHERE path=?', (path,)).fetchone()[0]
-            lyrics_json = jsonw.from_json(lyrics_json_str)
-            if 'found' in lyrics_json and lyrics_json['found']:
-                # Legacy HTML lyrics, best effort conversion from HTML to plain text
-                import html
-                lyr = PlainLyrics(lyrics_json['source'], html.unescape(lyrics_json['html'].replace('<br>', '\n')))
-            elif 'lyrics' in lyrics_json and 'source_url' in lyrics_json and lyrics_json['lyrics'] is not None and lyrics_json['source_url'] is not None:
-                # Legacy plaintext lyrics
-                lyr = PlainLyrics(lyrics_json['source_url'], lyrics_json['lyrics'])
-            elif 'type' in lyrics_json:
-                # Modern lyrics
-                lyr = lyrics.from_dict(lyrics_json)
-            else:
-                lyr = None
-            return lyrics.to_dict(lyr)
-
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
 
@@ -233,8 +204,6 @@ def route_update_metadata(path: str):
 
 @bp.route('/<path:relpath>/acoustid', methods=['GET'])
 def route_acoustid(relpath: str):
-    from raphson_mp import acoustid, musicbrainz
-
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
         track = Track.by_relpath(conn, relpath)
@@ -242,7 +211,7 @@ def route_acoustid(relpath: str):
             abort(404, 'track not found')
         fp = acoustid.get_fingerprint(track.path)
         known_ids: set[str] = set()
-        meta_list: list[MBMeta] = []
+        meta_list: list[musicbrainz.MBMeta] = []
         for recording in acoustid.lookup(fp):
             log.info('found recording: %s', recording)
             for meta in musicbrainz.get_recording_metadata(recording):
@@ -260,69 +229,21 @@ def route_acoustid(relpath: str):
     return meta_list
 
 
+# TODO remove legacy compatibility endpoints when clients (especially offline sync) have had time to update.
+
 @bp.route('/filter')
 def route_filter():
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
-
-        last_modified = scanner.last_change(conn, request.args['playlist'] if 'playlist' in request.args else None)
-
-        if request.if_modified_since and last_modified <= request.if_modified_since:
-            return Response(None, 304)  # Not Modified
-
-        query = 'SELECT path FROM track WHERE true'
-        params: list[str] = []
-        if 'playlist' in request.args:
-            query += ' AND playlist = ?'
-            params.append(request.args['playlist'])
-
-        if 'artist' in request.args:
-            query += ' AND EXISTS(SELECT artist FROM track_artist WHERE track = path AND artist = ?)'
-            params.append(request.args['artist'])
-
-        if 'album_artist' in request.args:
-            query += ' AND album_artist = ?'
-            params.append(request.args['album_artist'])
-
-        if 'album' in request.args:
-            query += ' AND album = ?'
-            params.append(request.args['album'])
-
-        if 'has_metadata' in request.args and request.args['has_metadata'] == '1':
-            # Has at least metadata for: title, album, album artist, artists
-            query += ' AND title NOT NULL AND album NOT NULL AND album_artist NOT NULL AND EXISTS(SELECT artist FROM track_artist WHERE track = path)'
-
-        if 'tag' in request.args:
-            query += ' AND EXISTS(SELECT tag FROM track_tag WHERE track = path AND tag = ?)'
-            params.append(request.args['tag'])
-
-        query += ' LIMIT 5000'
-        result = conn.execute(query, params)
-        tracks = [Track.by_relpath(conn, row[0]) for row in result]
-
-        return json_response({'tracks': [track.info_dict() for track in tracks]}, last_modified=last_modified)
+    from raphson_mp.routes.tracks import route_filter as compat
+    return compat()
 
 
 @bp.route('/search')
 def route_search():
-    query = request.args['query']
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
-        query = query.replace('"', '""')
-        query = '"' + query.replace(' ', '" OR "') + '"'
-        log.info('search: %s', query)
-        result = conn.execute('SELECT path FROM track_fts WHERE track_fts MATCH ? ORDER BY rank LIMIT 25', (query,))
-        tracks = [Track.by_relpath(conn, row[0]) for row in result]
-        albums = [{'album': row[0], 'artist': row[1]}
-                  for row in conn.execute('SELECT DISTINCT album, album_artist FROM track_fts WHERE album MATCH ? ORDER BY rank LIMIT 10', (query,))]
-        return {'tracks': [track.info_dict() for track in tracks], 'albums': albums}
+    from raphson_mp.routes.tracks import route_search as compat
+    return compat()
 
 
 @bp.route('/tags')
 def route_tags():
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
-        result = conn.execute('SELECT DISTINCT tag FROM track_tag ORDER BY tag')
-        tags = [row[0] for row in result]
-
-    return tags
+    from raphson_mp.routes.tracks import route_tags as compat
+    return compat()

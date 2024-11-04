@@ -6,7 +6,7 @@ from typing import Iterator
 from flask import (Blueprint, Response, abort, render_template, request,
                    send_file)
 
-from raphson_mp import auth, cache, db, music, scanner
+from raphson_mp import auth, db, downloader, music, scanner
 
 log = logging.getLogger(__name__)
 bp = Blueprint('download', __name__, url_prefix='/download')
@@ -30,8 +30,6 @@ def route_download():
 @bp.route('/search', methods=['POST'])
 def route_search():
     """Search using yt-dlp"""
-    from raphson_mp import downloader
-
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn, require_csrf=True)
 
@@ -46,8 +44,6 @@ def route_ytdl():
     """
     Use yt-dlp to download the provided URL to a playlist directory
     """
-    from raphson_mp import downloader
-
     with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn, require_csrf=True)
 
@@ -78,8 +74,6 @@ def route_ytdl():
 
 @bp.route('/ephemeral')
 def route_ephemeral():
-    from raphson_mp import downloader
-
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
 

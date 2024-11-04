@@ -67,7 +67,7 @@ class Music {
         for (const filter in filters) {
             encodedFilters.push(filter + '=' + encodeURIComponent(filters[filter]));
         }
-        const response = await fetch('/track/filter?' + encodedFilters.join('&'));
+        const response = await fetch('/tracks/filter?' + encodedFilters.join('&'));
         checkResponseCode(response);
         const json = await response.json();
         return this.#tracksFromJson(json.tracks);
@@ -78,7 +78,7 @@ class Music {
      * @returns {Promise<Array<Track>>}
      */
     async search(query) {
-        const response = await fetch('/track/search?query=' + encodeURIComponent(query));
+        const response = await fetch('/tracks/search?query=' + encodeURIComponent(query));
         checkResponseCode(response);
         const json = await response.json();
         return this.#tracksFromJson(json.tracks);
@@ -98,7 +98,7 @@ class Music {
      * @returns {Promise<Array<string>>}
      */
     async tags() {
-        const response = await fetch('/track/tags');
+        const response = await fetch('/tracks/tags');
         checkResponseCode(response);
         return await response.json();
     }

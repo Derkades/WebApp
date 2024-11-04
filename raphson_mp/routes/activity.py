@@ -153,9 +153,6 @@ def route_now_playing():
      - paused (bool): Whether track is paused
      - progress (int): Track position, as a percentage
     """
-    if settings.offline_mode:
-        return Response(None, 200)
-
     from raphson_mp import lastfm
 
     with db.connect() as conn:
@@ -211,14 +208,6 @@ def route_played():
      - timestamp: time at which track met played conditions (roughly)
      - csrf: csrf token (ignored in offline mode)
     """
-    if settings.offline_mode:
-        with db.offline() as conn:
-            track = request.json['track']
-            timestamp = request.json['timestamp']
-            conn.execute('INSERT INTO history VALUES (?, ?)',
-                         (timestamp, track))
-        return Response(None, 200)
-
     from raphson_mp import lastfm
 
     with db.connect() as conn:

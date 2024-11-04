@@ -58,7 +58,7 @@ def download_track(state: State, relpath: str, local_path: Path):
 
 
 def track_list(state: State, playlist_name: str):
-    r = requests.get(state.server + '/track/filter?playlist=' + quote(playlist_name),
+    r = requests.get(state.server + '/tracks/filter?playlist=' + quote(playlist_name),
                      timeout=10,
                      headers={'Cookie': 'token=' + state.token})
     r.raise_for_status()

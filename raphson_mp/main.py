@@ -12,26 +12,7 @@ from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from raphson_mp import language
-from raphson_mp.auth import AuthError
-from raphson_mp.routes import account as app_account
-from raphson_mp.routes import activity as app_activity
-from raphson_mp.routes import auth as app_auth
-from raphson_mp.routes import dislikes as app_dislikes
-from raphson_mp.routes import download as app_download
-from raphson_mp.routes import export as app_export
-from raphson_mp.routes import files as app_files
-from raphson_mp.routes import games as app_games
-from raphson_mp.routes import news as app_news
-from raphson_mp.routes import player as app_player
-from raphson_mp.routes import playlist as app_playlist
-from raphson_mp.routes import radio as app_radio
-from raphson_mp.routes import root as app_root
-from raphson_mp.routes import share as app_share
-from raphson_mp.routes import stats as app_stats
-from raphson_mp.routes import track as app_track
-from raphson_mp.routes import users as app_users
-from raphson_mp.routes import *
+from raphson_mp import language, settings
 
 log = logging.getLogger(__name__)
 
@@ -48,24 +29,37 @@ def _handle_exception(e):
 def get_app(proxy_count: int, template_reload: bool) -> Flask:
     app = Flask(__name__, template_folder='templates')
     app.register_error_handler(Exception, _handle_exception)
-    app.register_error_handler(AuthError, app_auth.handle_auth_error)
-    app.register_blueprint(app_account.bp)
-    app.register_blueprint(app_activity.bp)
-    app.register_blueprint(app_auth.bp)
-    app.register_blueprint(app_dislikes.bp)
-    app.register_blueprint(app_download.bp)
-    app.register_blueprint(app_export.bp)
-    app.register_blueprint(app_files.bp)
-    app.register_blueprint(app_games.bp)
-    app.register_blueprint(app_news.bp)
-    app.register_blueprint(app_player.bp)
-    app.register_blueprint(app_playlist.bp)
-    app.register_blueprint(app_radio.bp)
-    app.register_blueprint(app_root.bp)
-    app.register_blueprint(app_share.bp)
-    app.register_blueprint(app_stats.bp)
-    app.register_blueprint(app_track.bp)
-    app.register_blueprint(app_users.bp)
+
+    from raphson_mp.routes import auth, games, player, playlist, root, tracks
+    app.register_error_handler(auth.AuthError, auth.handle_auth_error)
+    app.register_blueprint(auth.bp)
+    app.register_blueprint(games.bp)
+    app.register_blueprint(player.bp)
+    app.register_blueprint(playlist.bp)
+    app.register_blueprint(root.bp)
+    app.register_blueprint(tracks.bp)
+
+    if settings.offline_mode:
+        from raphson_mp.routes import activity_offline, track_offline
+        app.register_blueprint(activity_offline.bp)
+        app.register_blueprint(track_offline.bp)
+    else:
+        from raphson_mp.routes import (account, activity, dislikes, download,
+                                       export, files, news, radio, share,
+                                       stats, track, users)
+        app.register_blueprint(account.bp)
+        app.register_blueprint(activity.bp)
+        app.register_blueprint(dislikes.bp)
+        app.register_blueprint(download.bp)
+        app.register_blueprint(export.bp)
+        app.register_blueprint(files.bp)
+        app.register_blueprint(news.bp)
+        app.register_blueprint(radio.bp)
+        app.register_blueprint(share.bp)
+        app.register_blueprint(stats.bp)
+        app.register_blueprint(track.bp)
+        app.register_blueprint(users.bp)
+
     if prometheus_client:
         from raphson_mp import prometheus
         prometheus.register_collectors()

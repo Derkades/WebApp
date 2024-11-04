@@ -1,12 +1,12 @@
-from pathlib import Path
 import random
-import unittest
 import secrets
+import tracemalloc
+import unittest
+from pathlib import Path
 
 from flask.testing import FlaskClient
-from raphson_mp import main, settings
 
-import tracemalloc
+from raphson_mp import main, settings
 
 tracemalloc.start()
 
