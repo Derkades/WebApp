@@ -23,7 +23,7 @@ Music is crucial when working on projects. However, when you're with a group, wh
     - Audio files and images are compressed on-the-fly, with various quality options to save data.
     - Also keyboard-friendly interface; hotkeys are available for common actions, allowing you to skip a track while wearing welding gloves.
 - Statistics
-    - See what other's are playing now or in the past
+    - See what others are playing now or in the past
     - Statistics page with graphs based on historical data
     - Last.fm scrobbling (each user can connect their own last.fm account)
 - Fun
