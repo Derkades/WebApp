@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (lyricsBox.classList.contains('hidden')) {
             // No lyrics
-            setMaxHeight(`calc(100vh - 2*var(--gap)`);
+            setMaxHeight(`calc(100vh - 2*var(--gap))`);
             return;
         }
 
