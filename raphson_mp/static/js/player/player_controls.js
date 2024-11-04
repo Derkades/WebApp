@@ -122,22 +122,22 @@ eventBus.subscribe(MusicEvent.TRACK_CHANGE, async () => {
     const track = queue.currentTrack.track;
 
     // Show dislike button if track is real (e.g. not a virtual news track)
-    const showDislike = track !== null;
-    const showEdit = track !== null && (await music.playlist(track.playlistName)).write;
+    const isRealTrack = track !== null;
+    const isEditable = track !== null && (await music.playlist(track.playlistName)).write;
 
-    if (showDislike) {
+    if (isRealTrack) {
         document.getElementById('button-dislike').classList.remove('hidden');
+        document.getElementById('button-copy').classList.remove('hidden');
     } else {
         document.getElementById('button-dislike').classList.add('hidden');
+        document.getElementById('button-copy').classList.add('hidden');
     }
 
-    if (showEdit) {
+    if (isEditable) {
         document.getElementById('button-edit').classList.remove('hidden');
         document.getElementById('button-delete').classList.remove('hidden');
-        document.getElementById('button-copy').classList.remove('hidden');
     } else {
         document.getElementById('button-edit').classList.add('hidden');
         document.getElementById('button-delete').classList.add('hidden');
-        document.getElementById('button-copy').classList.add('hidden');
     }
 });
