@@ -1,6 +1,7 @@
 import logging
 import subprocess
 import time
+from tempfile import NamedTemporaryFile
 
 from flask import Blueprint, Response, abort, request, send_file
 from flask.typing import TemplateContextProcessorCallable
@@ -11,7 +12,6 @@ from raphson_mp.jsonw import json_response
 from raphson_mp.lyrics import PlainLyrics, TimeSyncedLyrics
 from raphson_mp.music import AudioType, Track
 from raphson_mp.musicbrainz import MBMeta
-from tempfile import NamedTemporaryFile
 
 log = logging.getLogger(__name__)
 bp = Blueprint('track', __name__, url_prefix='/track')

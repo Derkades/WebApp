@@ -1,13 +1,12 @@
 import json
 import logging
-import sys
 import traceback
+from collections.abc import Iterator
+from html.parser import HTMLParser
 from multiprocessing.pool import ThreadPool
-from pathlib import Path
-from typing import Iterator
+from typing import override
 
 import requests
-from bs4 import BeautifulSoup
 
 from raphson_mp import settings
 
@@ -44,8 +43,21 @@ def _download(image_url: str) -> bytes | None:
     return img_bytes
 
 
-def _sort_key_len(download: bytes) -> int:
-    return len(download)
+def _download_all(image_urls: list[str]) -> Iterator[bytes]:
+    """
+    Download multiple images, returning the image of the largest size first (probably the
+    highest quality image)
+    """
+    def _sort_key(download: bytes) -> int:
+        return len(download)
+
+    with ThreadPool(5) as pool:
+        maybe_downloads = pool.map(_download, image_urls)
+
+    # Remove failed downloads
+    downloads = [d for d in maybe_downloads if d is not None]
+
+    yield from sorted(downloads, key=_sort_key)
 
 
 def image_search(bing_query: str) -> Iterator[bytes]:
@@ -65,44 +77,37 @@ def image_search(bing_query: str) -> Iterator[bytes]:
                                  'first': '1',
                                  'scenario': 'ImageBasicHover'},
                          cookies={'SRCHHPGUSR': 'ADLT=OFF'})  # disable safe search :-)
-        soup = BeautifulSoup(r.text, 'lxml')
-        results = soup.find_all('a', {'class': 'iusc'})
 
-        # Download multiple images, looking for the image of the largest
-        # size (which is probably the highest quality image)
+        r.raise_for_status()
 
-        image_urls = []
-        for result in results:
-            try:
-                # Some images have no 'm' attribute for some reason, skip those.
-                m_attr = result['m']
-            except KeyError:
-                log.info('Skipping result without "m" attribute: %s', result)
-                continue
+        class Parser(HTMLParser):
+            image_urls: list[str] = []
 
-            image_urls.append(json.loads(m_attr)['murl'])
+            @override
+            def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]):
+                if tag != 'a':
+                    return
 
-            if len(image_urls) >= 5:
-                break
+                attrs_dict = dict(attrs)
 
-        with ThreadPool(5) as pool:
-            maybe_downloads = pool.map(_download, image_urls)
+                if 'class' not in attrs_dict:
+                    return
 
-        # Remove failed downloads
-        downloads = [d for d in maybe_downloads if d is not None]
+                if attrs_dict['class'] != 'iusc':
+                    return
 
-        yield from sorted(downloads, key=_sort_key_len)
+                if 'm' not in attrs_dict:
+                    return
+
+                m_attr: str = attrs_dict['m']
+                image_url = json.loads(m_attr)['murl']
+                self.image_urls.append(image_url)
+
+        parser = Parser()
+        parser.feed(r.text)
+
+        yield from _download_all(parser.image_urls[:5])
     except Exception:
         log.info('Error during bing search. This is probably a bug.')
         traceback.print_exc()
         yield from []
-
-
-if __name__ == '__main__':
-    query = sys.argv[1]
-    result_bytes = image_search(query)
-    if result_bytes is None:
-        print('no result found')
-        sys.exit(1)
-
-    Path('test_bing_result').write_bytes(result_bytes)

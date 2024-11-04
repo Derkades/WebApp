@@ -253,7 +253,15 @@ def handle_lyrics(args: Any) -> None:
         raise ValueError(lyrics)
 
 
-def _strenv(name: str, default: str = None):
+def handle_bing(args: Any) -> None:
+    from raphson_mp import bing
+
+    results = bing.image_search(args.query)
+    Path('bing_result').write_bytes(next(results))
+    log.info('saved to bing_result file')
+
+
+def _strenv(name: str, default: str | None = None) -> str | None:
     return os.getenv('MUSIC_' + name, default)
 
 
@@ -386,6 +394,10 @@ def main():
     cmd_cover.add_argument('--album')
     cmd_cover.add_argument('--duration', type=int)
     cmd_cover.set_defaults(func=handle_lyrics)
+
+    cmd_cover = subparsers.add_parser('debug-bing')
+    cmd_cover.add_argument('query')
+    cmd_cover.set_defaults(func=handle_bing)
 
     args = parser.parse_args()
 

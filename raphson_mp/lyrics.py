@@ -7,7 +7,7 @@ import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from html.parser import HTMLParser
-from typing import Any, override
+from typing import Any, Final, override
 
 import requests
 
@@ -253,13 +253,13 @@ class GeniusFetcher(LyricsFetcher):
         # Extract text from HTML tags
         # Source HTML contains <p>, <b>, <i>, <a> etc. with lyrics inside.
         class Parser(HTMLParser):
-            text = ''
+            text: str = ''
 
             def __init__(self):
                 HTMLParser.__init__(self)
 
             @override
-            def handle_starttag(self, tag: str, attrs):
+            def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]):
                 if tag == 'br':
                     self.text += "\n"
 
@@ -317,9 +317,9 @@ class GeniusFetcher(LyricsFetcher):
 
 if settings.offline_mode:
     # set fetchers to an empty list, as an additional safety measure to ensure no data is used in offline mode
-    FETCHERS: list[LyricsFetcher] = []
+    FETCHERS: Final[list[LyricsFetcher]] = []
 else:
-    FETCHERS: list[LyricsFetcher] = [
+    FETCHERS: Final[list[LyricsFetcher]] = [
         LrcLibFetcher(), # No rate limit
         MusixMatchFetcher(), # Strict rate limiting
         GeniusFetcher(), # Relaxed rate limiting, no time-synced lyrics

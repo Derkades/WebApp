@@ -2,8 +2,6 @@ gunicorn~=23.0
 flask~=3.0
 flask-babel~=4.0
 requests~=2.0
-beautifulsoup4~=4.0
-lxml~=5.0
 bcrypt~=4.0
 yt-dlp
 prometheus-client~=0.21.0
