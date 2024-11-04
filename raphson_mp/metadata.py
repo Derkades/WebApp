@@ -200,17 +200,6 @@ class Metadata:
         title.strip()
         return title
 
-    def _filename_title_search(self) -> str:
-        """
-        Generate search title from file name. Same as _filename_title(), but
-        special characters are removed
-        """
-        title = self.filename_title()
-        # Remove special characters
-        title = ''.join([c for c in title if _is_alpha(c)])
-        title = title.strip()
-        return title
-
     def display_title(self) -> str:
         """
         Generate display title. It is generated using metadata if
