@@ -171,6 +171,7 @@ class Metadata:
     track_number: int | None
     tags: list[str]
     lyrics: str | None
+    video: str | None
 
     def _meta_title(self) -> str | None:
         """
@@ -278,9 +279,7 @@ def probe(path: Path) -> Metadata | None:
         log.warning('Error scanning track %s, is it corrupt?', path)
         return None
 
-    output_bytes = result.stdout
-
-    data = json.loads(output_bytes.decode())
+    data = json.loads(result.stdout.decode())
 
     duration = int(float(data['format']['duration']))
     artists = None
@@ -291,13 +290,23 @@ def probe(path: Path) -> Metadata | None:
     track_number = None
     tags = []
     lyrics = None
+    video: str | None = None
 
     meta_tags: list[tuple[str, str]] = []
 
     for stream in data['streams']:
+        log.info('stream: %s', stream['codec_name'])
         if stream['codec_type'] == 'audio':
             if 'tags' in stream:
                 meta_tags.extend(stream['tags'].items())
+
+        if stream['codec_type'] == 'video':
+            if stream['codec_name'] == 'vp9':
+                print('test')
+                video = 'vp9'
+            else:
+                log.warning('ignoring video stream: %s', stream['codec_name'])
+
 
     if 'tags' in data['format']:
         meta_tags.extend(data['format']['tags'].items())
@@ -353,4 +362,5 @@ def probe(path: Path) -> Metadata | None:
                     album_artist,
                     track_number,
                     tags,
-                    lyrics)
+                    lyrics,
+                    video)

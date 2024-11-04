@@ -18,7 +18,7 @@ def scan_playlists(conn: Connection) -> set[str]:
     paths_db = {row[0] for row in conn.execute('SELECT path FROM playlist').fetchall()}
     paths_disk = {p.name for p in settings.music_dir.iterdir() if p.is_dir() and not music.is_trashed(p)}
 
-    add_to_db = []
+    add_to_db: list[tuple[str]] = []
 
     for path in paths_db:
         if path not in paths_disk:
@@ -58,7 +58,8 @@ def query_params(relpath: str, path: Path) -> QueryParams | None:
                                           'album_artist': meta.album_artist,
                                           'track_number': meta.track_number,
                                           'year': meta.year,
-                                          'lyrics': meta.lyrics}
+                                          'lyrics': meta.lyrics,
+                                          'video': meta.video}
     if meta.artists is None:
         artist_data = []
     else:
@@ -96,8 +97,8 @@ def scan_track(conn: Connection, playlist_name: str, track_path: Path, track_rel
             log.warning('Skipping due to metadata error')
             return False
         conn.execute('''
-                     INSERT INTO track (path, playlist, duration, title, album, album_artist, track_number, year, lyrics, mtime)
-                     VALUES (:path, :playlist, :duration, :title, :album, :album_artist, :track_number, :year, :lyrics, :mtime)
+                     INSERT INTO track (path, playlist, duration, title, album, album_artist, track_number, year, lyrics, video, mtime)
+                     VALUES (:path, :playlist, :duration, :title, :album, :album_artist, :track_number, :year, :lyrics, :video, :mtime)
                      ''',
                      {**params.main_data,
                       'playlist': playlist_name,
@@ -127,6 +128,7 @@ def scan_track(conn: Connection, playlist_name: str, track_path: Path, track_rel
                             track_number=:track_number,
                             year=:year,
                             lyrics=:lyrics,
+                            video=:video,
                             mtime=:mtime
                         WHERE path=:path
                     ''',

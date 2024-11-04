@@ -220,11 +220,11 @@ class Track:
         if self._metadata:
             return self._metadata
 
-        query = 'SELECT duration, title, album, album_artist, track_number, year, lyrics FROM track WHERE path=?'
+        query = 'SELECT duration, title, album, album_artist, track_number, year, lyrics, video FROM track WHERE path=?'
         row = self.conn.execute(query, (self.relpath,)).fetchone()
         if row is None:
             raise ValueError('Missing track from database: ' + self.relpath)
-        duration, title, album, album_artist, track_number, year, lyrics = row
+        duration, title, album, album_artist, track_number, year, lyrics, video = row
 
         rows = self.conn.execute('SELECT artist FROM track_artist WHERE track=?', (self.relpath,)).fetchall()
         if len(rows) == 0:
@@ -235,7 +235,7 @@ class Track:
         rows = self.conn.execute('SELECT tag FROM track_tag WHERE track=?', (self.relpath,)).fetchall()
         tags = [row[0] for row in rows]
 
-        return Metadata(self.relpath, duration, metadata.sort_artists(artists, album_artist), album, title, year, album_artist, track_number, tags, lyrics)
+        return Metadata(self.relpath, duration, metadata.sort_artists(artists, album_artist), album, title, year, album_artist, track_number, tags, lyrics, video)
 
     def get_cover(self, meme: bool, img_quality: ImageQuality, img_format: ImageFormat) -> bytes:
         """
@@ -449,6 +449,7 @@ class Track:
             'year': meta.year,
             'artists': meta.artists,
             'tags': meta.tags,
+            'video': meta.video,
             'display': meta.display_title(),
         }
 
