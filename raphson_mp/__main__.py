@@ -308,6 +308,10 @@ def main():
                         default=_strenv('LASTFM_API_KEY'))
     parser.add_argument('--lastfm-api-secret',
                         default=_strenv('LASTFM_API_SECRET'))
+    parser.add_argument('--spotify-api-id',
+                        default=_strenv('SPOTIFY_API_ID'))
+    parser.add_argument('--spotify-api-secret',
+                        default=_strenv('SPOTIFY_API_SECRET'))
     parser.add_argument('--offline',
                         action='store_true',
                         default=_boolenv('OFFLINE_MODE'),
@@ -406,6 +410,8 @@ def main():
     settings.radio_playlists = split_by_comma(args.radio_playlists)
     settings.lastfm_api_key = args.lastfm_api_key
     settings.lastfm_api_secret = args.lastfm_api_secret
+    settings.spotify_api_id = args.spotify_api_id
+    settings.spotify_api_secret = args.spotify_api_secret
     settings.offline_mode = args.offline
     settings.news_server = args.news_server
 

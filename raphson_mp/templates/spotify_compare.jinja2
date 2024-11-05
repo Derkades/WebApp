@@ -1,0 +1,112 @@
+{% extends "base_static.jinja2" %}
+
+{% block title %}
+    {% trans %}Spotify compare{% endtrans %}
+{% endblock title %}
+
+{% block content %}
+
+{{ page_heading(gettext('Spotify compare'), back_url='/playlist/manage') }}
+
+<h2>{% trans %}Duplicates in Spotify playlist{% endtrans %}</h2>
+
+{% if duplicates %}
+    <p>{% trans %}Try to remove all duplicates first. Duplicate tracks may erroneously show as missing.{% endtrans %}</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>{% trans %}Artists{% endtrans %}</th>
+                <th>{% trans %}Title{% endtrans %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in duplicates %}
+                <tr>
+                    <td>{{ row.title }}</td>
+                    <td>{{ row.artists|join(', ') }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>{% trans %}No duplicates found.{% endtrans %}</p>
+{% endif %}
+
+<h2>{% trans %}Missing in Spotify{% endtrans %}</h2>
+
+{% if only_local %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>{% trans %}Artists{% endtrans %}</th>
+                <th>{% trans %}Title{% endtrans %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in only_local %}
+                <tr>
+                    <td>{{ row.title }}</td>
+                    <td>{{ row.artists|join(', ') }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>{% trans %}None found.{% endtrans %}</p>
+{% endif %}
+
+<h2>{% trans %}Missing in music player{% endtrans %}</h2>
+
+{% if only_spotify %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>{% trans %}Artists{% endtrans %}</th>
+                <th>{% trans %}Title{% endtrans %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in only_spotify %}
+                <tr>
+                    <td>{{ row.title }}</td>
+                    <td>{{ row.artists|join(', ') }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>{% trans %}None found.{% endtrans %}</p>
+{% endif %}
+
+<h2>{% trans %}Present in both{% endtrans %}</h2>
+
+{% if both %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th colspan="2">Music player</th>
+                <th colspan="2">Spotify</th>
+            </tr>
+            <tr>
+                <th>{% trans %}Artists{% endtrans %}</th>
+                <th>{% trans %}Title{% endtrans %}</th>
+                <th>{% trans %}Artists{% endtrans %}</th>
+                <th>{% trans %}Title{% endtrans %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in both %}
+                <tr>
+                    <td>{{ row[0].title }}</td>
+                    <td>{{ row[0].artists|join(', ') }}</td>
+                    <td>{{ row[1].title }}</td>
+                    <td>{{ row[1].artists|join(', ') }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>{% trans %}None found.{% endtrans %}</p>
+{% endif %}
+
+{% endblock content %}

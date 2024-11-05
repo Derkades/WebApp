@@ -35,6 +35,21 @@
     <input type="submit" value="{% trans %}Create{% endtrans %}">
 </form>
 
+{% if spotify_available %}
+    <h2>{% trans %}Compare to Spotify playlist{% endtrans %}</h2>
+    <div class="form">
+        <label for="spotify-playlist">{% trans %}Local playlist{% endtrans %}</label>
+        <select id="spotify-playlist">
+            {% for playlist in playlists %}
+                <option value="{{ playlist.name }}" {% if playlist.name == primary_playlist %}selected{% endif %}>{{ playlist.name }}</option>
+            {% endfor %}
+        </select>
+        <label for="spotify-url">{% trans %}Spotify playlist URL{% endtrans %}</label>
+        <input id="spotify-url" type="text"  placeholder="https://open.spotify.com/playlist/49Fh8IQU36G28uEGJxaDcI" size="60">
+        <input id="spotify-submit" type="submit" value="{% trans %}Compare (will take a while){% endtrans %}">
+    </div>
+{% endif %}
+
 <h2>{% trans %}Playlists{% endtrans %}</h2>
 
 {% if user_is_admin %}
@@ -156,5 +171,6 @@
 </table>
 
 <script src="/static/js/base.js"></script>
+<script src="/static/js/playlists.js"></script>
 
 {% endblock content %}

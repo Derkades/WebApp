@@ -23,6 +23,8 @@ track_max_duration_seconds: int = None
 radio_playlists: list[str] = []
 lastfm_api_key: str | None = None
 lastfm_api_secret: str | None = None
+spotify_api_id: str | None = None
+spotify_api_secret: str | None = None
 offline_mode: bool = None
 news_server: str = None
 

@@ -645,6 +645,12 @@ class Playlist:
         """
         return PlaylistStats(self.conn, self.name)
 
+    def tracks(self) -> list[Track]:
+        tracks: list[Track] = []
+        for relpath, mtime in self.conn.execute('SELECT path, mtime FROM track WHERE playlist = ?', (self.name,)):
+            tracks.append(Track(self.conn, relpath, from_relpath(relpath), mtime))
+        return tracks
+
     @staticmethod
     def from_path(conn: Connection, path: Path) -> 'Playlist':
         """

@@ -88,6 +88,24 @@ METADATA_ADVERTISEMENT_KEYWORDS = [
     'Speeeedy EDM Blog',
 ]
 
+_NORMALIZE_PATTERN = re.compile(r'(\(ft\. .*?\))|' +
+                                       r'(\(feat\. .*?\))|' +
+                                       r'(\(with .*?\))|' +
+                                       r'(\(w/ .*?\))|' +
+                                       r'( - Remastered \d{4})|' +
+                                       r'( - \d{4} remaster)|' +
+                                       r'( - remastered)|' +
+                                       r'( - album version remastered)|' +
+                                       r'( - rerecorded)|' +
+                                       r'( - original version)|' +
+                                       r'( - original mix)|' +
+                                       r'( - radio edit)')
+
+
+def normalize_title(text: str) -> str:
+    """Return lower case title with some parts removed for the purpose of matching"""
+    return re.sub(_NORMALIZE_PATTERN, '', text.lower())
+
 
 def ignore_album(album: str) -> bool:
     """Check whether album name should be ignored"""

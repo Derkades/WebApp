@@ -1,7 +1,12 @@
+import difflib
+import re
 from flask import (Blueprint, Response, abort, redirect, render_template,
                    request)
 
-from raphson_mp import auth, db, jsonw, music, scanner, settings, util
+
+from raphson_mp import auth, db, jsonw, music, scanner, settings, spotify, util
+from raphson_mp import metadata
+from raphson_mp.metadata import Metadata
 
 bp = Blueprint('playlists', __name__, url_prefix='/playlist')
 
@@ -22,12 +27,15 @@ def route_playlists():
                             'stats': playlist.stats()}
                            for playlist in user_playlists]
 
+    spotify_available = settings.spotify_api_id and settings.spotify_api_secret
+
     return render_template('playlists.jinja2',
                            user_is_admin=user.admin,
                            playlists=user_playlists,
                            csrf_token=csrf_token,
                            primary_playlist=primary_playlist,
-                           playlists_stats=playlists_stats)
+                           playlists_stats=playlists_stats,
+                           spotify_available=spotify_available)
 
 
 @bp.route('/favorite', methods=['POST'])
@@ -172,3 +180,68 @@ def route_track(playlist):
             return Response('no track found', 404, content_type='text/plain')
 
         return chosen_track.info_dict()
+
+
+@bp.route('/<playlist_name>/compare_spotify')
+def route_compare_spotify(playlist_name: str):
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn)
+
+        playlist = music.playlist(conn, playlist_name)
+        tracks = playlist.tracks()
+        client = spotify.SpotifyClient()
+        spotify_tracks = client.get_playlist(request.args['playlist_id'])
+
+        duplicates: list[spotify.SpotifyTrack] = []
+        both: list[tuple[Metadata, spotify.SpotifyTrack]] = []
+        only_spotify: list[spotify.SpotifyTrack] = []
+        only_local: list[Metadata] = []
+
+        for spotify_track in spotify_tracks:
+            matches: list[spotify.SpotifyTrack] = []
+            for spotify_track2 in spotify_tracks:
+                if spotify_track.title == spotify_track2.title and spotify_track.artists == spotify_track2.artists:
+                    matches.append(spotify_track2)
+
+            if len(matches) == 1:
+                continue
+
+            for match in matches[1:]:
+                spotify_tracks.remove(match)
+
+            duplicates.append(spotify_track)
+
+        for track in tracks:
+            meta = track.metadata()
+
+            if meta.artists is None or meta.title is None:
+                only_local.append(meta)
+                return
+
+            for spotify_track in spotify_tracks:
+                title_match = difflib.SequenceMatcher(None, metadata.normalize_title(meta.title), metadata.normalize_title(spotify_track.title)).ratio() > 0.8
+
+                artist_match = False
+                for artist_a in meta.artists:
+                    for artist_b in spotify_track.artists:
+                        if difflib.SequenceMatcher(None, artist_a.lower(), artist_b.lower()).ratio() > 0.8:
+                            artist_match = True
+                            break
+
+                if title_match and artist_match:
+                    break
+            else:
+                only_local.append(meta)
+                continue
+
+            spotify_tracks.remove(spotify_track)
+            both.append((meta, spotify_track))
+
+        for spotify_track in spotify_tracks:
+            only_spotify.append(spotify_track)
+
+    return render_template('spotify_compare.jinja2',
+                           duplicates=duplicates,
+                           both=both,
+                           only_local=only_local,
+                           only_spotify=only_spotify)

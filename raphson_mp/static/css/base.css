@@ -335,7 +335,7 @@ input::placeholder {
     overflow: hidden; /* prevent top row from overlapping rounded corners */
 }
 
-.table thead tr {
+.table thead {
     background: black;
     position: sticky; /* stay visible when scrolling */
     top: 0;
@@ -355,6 +355,10 @@ input::placeholder {
 .table .button-col {
     width: 2.75rem;
     height: 2.75rem;
+}
+
+th[colspan] {
+    text-align: center;
 }
 
 /* Boxes */
