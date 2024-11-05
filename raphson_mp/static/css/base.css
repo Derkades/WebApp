@@ -219,6 +219,7 @@ input::placeholder {
     grid-template-columns: auto auto;
     column-gap: var(--gap);
     row-gap: var(--smallgap);
+    align-items: center; /* center vertically, if one element in a row is taller than another */
     width: 100%;
     max-width: 60rem;
     box-sizing: border-box;
