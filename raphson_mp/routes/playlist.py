@@ -196,6 +196,12 @@ def route_compare_spotify(playlist_name: str):
         both: list[tuple[Metadata, spotify.SpotifyTrack]] = []
         only_spotify: list[spotify.SpotifyTrack] = []
         only_local: list[Metadata] = []
+        missing_metadata: list[str] = []
+
+        # cache normalized titles for better performance
+        normalized_spotify_titles: dict[str, str] = {}
+        for track in spotify_tracks:
+            normalized_spotify_titles[track.title] = metadata.normalize_title(track.title)
 
         for spotify_track in spotify_tracks:
             matches: list[spotify.SpotifyTrack] = []
@@ -215,21 +221,24 @@ def route_compare_spotify(playlist_name: str):
             meta = track.metadata()
 
             if meta.artists is None or meta.title is None:
-                only_local.append(meta)
-                return
+                missing_metadata.append(track.relpath)
+                continue
+
+            normalized_title = metadata.normalize_title(meta.title)
 
             for spotify_track in spotify_tracks:
-                title_match = difflib.SequenceMatcher(None, metadata.normalize_title(meta.title), metadata.normalize_title(spotify_track.title)).ratio() > 0.8
+                if difflib.SequenceMatcher(None, normalized_title, normalized_spotify_titles[spotify_track.title]).ratio() > 0.8:
+                    # Title matches, now check if artist matches (more expensive)
 
-                artist_match = False
-                for artist_a in meta.artists:
-                    for artist_b in spotify_track.artists:
-                        if difflib.SequenceMatcher(None, artist_a.lower(), artist_b.lower()).ratio() > 0.8:
-                            artist_match = True
-                            break
+                    artist_match = False
+                    for artist_a in meta.artists:
+                        for artist_b in spotify_track.artists:
+                            if difflib.SequenceMatcher(None, artist_a.lower(), artist_b.lower()).ratio() > 0.8:
+                                artist_match = True
+                                break
 
-                if title_match and artist_match:
-                    break
+                    if artist_match:
+                        break
             else:
                 only_local.append(meta)
                 continue
@@ -242,6 +251,7 @@ def route_compare_spotify(playlist_name: str):
 
     return render_template('spotify_compare.jinja2',
                            duplicates=duplicates,
+                           missing_metadata=missing_metadata,
                            both=both,
                            only_local=only_local,
                            only_spotify=only_spotify)
