@@ -1,8 +1,12 @@
+:root {
+    font-size: 1.2em;
+}
+
 .fancy {
     font-family: monospace;
     animation: sleutelframes 2s ease-in-out infinite, rainbow 5s linear infinite;
     position: relative;
-    font-size: 1.8em;
+    font-size: 1.5em;
     color: hsl(0deg, 100%, 70%);
     text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.4);
 }
@@ -31,8 +35,10 @@ main {
     border-radius: var(--border-radius);
     display: flex;
     align-items: center;
+    justify-content: center;
     flex-wrap: wrap;
-    gap: var(--gap);
+    gap: calc(2 * var(--gap));
+    margin: var(--gap);
 }
 
 .flex-content-center {
