@@ -81,11 +81,11 @@ def route_create():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn, require_csrf=True)
 
-        dir_name = request.form['path']
+        name = request.form['name']
 
-        util.check_filename(dir_name)
+        util.check_filename(name)
 
-        path = settings.music_dir / dir_name
+        path = settings.music_dir / name
 
         if path.exists():
             abort(400, 'Playlist path already exists')
@@ -98,7 +98,7 @@ def route_create():
     with db.connect() as conn:
         # New playlist should be writable for user who created it
         conn.execute('INSERT INTO user_playlist_write VALUES (?, ?)',
-                     (user.user_id, dir_name))
+                     (user.user_id, name))
 
     return redirect('/playlist/manage', code=303)
 
