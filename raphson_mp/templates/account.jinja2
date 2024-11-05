@@ -33,6 +33,10 @@
     <input type="submit" value="{% trans %}Change language{% endtrans %}">
 </form>
 
+<h2>{% trans %}Data export{% endtrans %}</h2>
+<p>{% trans %}This export contains personal data stored in the database. It does not include music files, which can be downloaded separately using the file manager.{% endtrans %}</p>
+<p><a class="button" target="_blank" href="/export/data">{% trans %}Download{% endtrans %}</a></p>
+
 <h2>{% trans %}Privacy{% endtrans %}</h2>
 
 <form method="POST" action="/account/change_privacy_setting" class="form">
