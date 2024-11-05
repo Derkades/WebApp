@@ -111,6 +111,9 @@ class Session:
         if self.user_agent == 'rmp-playback-server':
             return 'Playback server'
 
+        if 'Werkzeug' in self.user_agent:
+            return 'Flask test client'
+
         browsers = ['Firefox', 'Chromium', 'Chrome', 'Vivaldi', 'Opera', 'Safari']
         systems = ['Windows', 'macOS', 'Android', 'iOS', 'Ubuntu', 'Debian', 'Fedora', 'Linux']
 
