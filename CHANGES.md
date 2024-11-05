@@ -1,3 +1,20 @@
+## 1.3.0 2024-11-05
+* New: playlist selection in guessing game
+* New: experimental music video support
+* New: setting to enable or disable lyrics
+* New: download data export in account settings
+* Improve: highlight current lyrics line
+* Improve: automatically reload if browser loads outdated player from cache
+* Improve: better sizing of cover image and lyrics box, will now take up as much screen space as possible
+* Improve: remove BeautifulSoup and lxml dependency
+* Improve: reduce memory usage and startup time in offline mode by only importing necessary modules
+* Improve: add description to settings
+* Improve: login box design
+* Fix: missing play button for first track
+* Fix: restore missing settings button in offline mode
+* Fix: copy button missing if source playlist is not writable (source doesn't need to be writable)
+* Fix: broken box shadows in music player
+
 ## 1.2.1 2024-10-26
 * Improve: MusicBrainz search is more likely to find the correct cover image
 * Fix: album cover from cache always being low quality
