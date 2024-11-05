@@ -76,7 +76,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {
         videoElem.removeAttribute('src');
-        videoElem.load();
+        try {
+            videoElem.load();
+        } catch (ignored) {} // may throw exception if tab is not visible
         resetBlur();
 
         if (queue.currentTrack.track.video != null) {
