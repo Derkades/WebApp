@@ -94,6 +94,7 @@ _NORMALIZE_PATTERN = re.compile(r'(\(ft\. .*?\))|' +
                                        r'(\(w/ .*?\))|' +
                                        r'( - Remastered \d{4})|' +
                                        r'( - \d{4} remaster)|' +
+                                       r'( - \d{4} remastered version)|' +
                                        r'( - remastered)|' +
                                        r'( - album version remastered)|' +
                                        r'( - rerecorded)|' +
