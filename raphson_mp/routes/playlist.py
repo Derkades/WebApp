@@ -1,12 +1,13 @@
 import difflib
 import re
+from unicodedata import normalize
 from flask import (Blueprint, Response, abort, redirect, render_template,
                    request)
 
 
 from raphson_mp import auth, db, jsonw, music, scanner, settings, spotify, util
 from raphson_mp import metadata
-from raphson_mp.metadata import Metadata
+from raphson_mp.metadata import Metadata, normalize_title
 
 bp = Blueprint('playlists', __name__, url_prefix='/playlist')
 
@@ -187,71 +188,70 @@ def route_compare_spotify(playlist_name: str):
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn)
 
-        playlist = music.playlist(conn, playlist_name)
-        tracks = playlist.tracks()
+        local_tracks: dict[tuple[str, tuple[str]], tuple[str, list[str]]] = {}
+
+        for title, artists in conn.execute("""
+                                           SELECT title, GROUP_CONCAT(artist, ';') AS artists
+                                           FROM track JOIN track_artist ON track.path = track_artist.track
+                                           WHERE track.playlist = ?
+                                           GROUP BY track.path
+                                           """, (playlist_name,)):
+            local_track = (title, artists.split(';'))
+            key = (normalize_title(title), tuple(local_track[1]))
+            local_tracks[key] = local_track
+
         client = spotify.SpotifyClient()
         spotify_tracks = client.get_playlist(request.args['playlist_id'])
 
+        duplicate_check: set[str] = set()
         duplicates: list[spotify.SpotifyTrack] = []
-        both: list[tuple[Metadata, spotify.SpotifyTrack]] = []
+        both: list[tuple[tuple[str, list[str]], spotify.SpotifyTrack]] = []
         only_spotify: list[spotify.SpotifyTrack] = []
-        only_local: list[Metadata] = []
-        missing_metadata: list[str] = []
-
-        # cache normalized titles for better performance
-        normalized_spotify_titles: dict[str, str] = {}
-        for track in spotify_tracks:
-            normalized_spotify_titles[track.title] = metadata.normalize_title(track.title)
+        only_local: list[tuple[str, list[str]]] = []
 
         for spotify_track in spotify_tracks:
-            matches: list[spotify.SpotifyTrack] = []
-            for spotify_track2 in spotify_tracks:
-                if spotify_track.title == spotify_track2.title and spotify_track.artists == spotify_track2.artists:
-                    matches.append(spotify_track2)
+            normalized_title = metadata.normalize_title(spotify_track.title)
 
-            if len(matches) == 1:
-                continue
+            # Spotify duplicates
+            duplicate_check_entry = spotify_track.display
+            if duplicate_check_entry in duplicate_check:
+                duplicates.append(spotify_track)
+            duplicate_check.add(duplicate_check_entry)
 
-            for match in matches[1:]:
-                spotify_tracks.remove(match)
-
-            duplicates.append(spotify_track)
-
-        for track in tracks:
-            meta = track.metadata()
-
-            if meta.artists is None or meta.title is None:
-                missing_metadata.append(track.relpath)
-                continue
-
-            normalized_title = metadata.normalize_title(meta.title)
-
-            for spotify_track in spotify_tracks:
-                if difflib.SequenceMatcher(None, normalized_title, normalized_spotify_titles[spotify_track.title]).ratio() > 0.8:
-                    # Title matches, now check if artist matches (more expensive)
-
-                    artist_match = False
-                    for artist_a in meta.artists:
-                        for artist_b in spotify_track.artists:
-                            if difflib.SequenceMatcher(None, artist_a.lower(), artist_b.lower()).ratio() > 0.8:
-                                artist_match = True
-                                break
-
-                    if artist_match:
-                        break
+            # Try to find fast exact match
+            local_track_key = (normalized_title, tuple(spotify_track.artists))
+            if local_track_key in local_tracks:
+                local_track = local_tracks[local_track_key]
             else:
-                only_local.append(meta)
-                continue
+                # Cannot find exact match, look for partial match
+                for local_track_key, local_track in local_tracks.items():
+                    (local_track_normalized_title, local_track_artists) = local_track_key
+                    if difflib.SequenceMatcher(None, normalized_title, local_track_normalized_title).ratio() > 0.8:
+                        # Title matches, now check if artist matches (more expensive)
 
-            spotify_tracks.remove(spotify_track)
-            both.append((meta, spotify_track))
+                        artist_match = False
+                        for artist_a in spotify_track.artists:
+                            for artist_b in local_track_artists:
+                                if difflib.SequenceMatcher(None, artist_a.lower(), artist_b.lower()).ratio() > 0.8:
+                                    artist_match = True
+                                    break
 
-        for spotify_track in spotify_tracks:
-            only_spotify.append(spotify_track)
+                        if artist_match:
+                            break
+                else:
+                    # no match found
+                    only_spotify.append(spotify_track)
+                    continue
+
+            # match found, present in both
+            del local_tracks[local_track_key]
+            both.append((local_track, spotify_track))
+
+        # any local tracks still left in the dict must have no matching spotify track
+        only_local.extend(local_tracks.values())
 
     return render_template('spotify_compare.jinja2',
                            duplicates=duplicates,
-                           missing_metadata=missing_metadata,
                            both=both,
                            only_local=only_local,
                            only_spotify=only_spotify)

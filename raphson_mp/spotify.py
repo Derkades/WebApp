@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 import logging
 from pathlib import Path
 import time
@@ -41,10 +42,8 @@ class SpotifyClient:
         self._access_token_expiry = int(time.time()) + response.json()['expires_in']
         return access_token
 
-    def get_playlist(self, playlist_id: str) -> list[SpotifyTrack]:
+    def get_playlist(self, playlist_id: str) -> Iterator[SpotifyTrack]:
         url = 'https://api.spotify.com/v1/playlists/' + quote(playlist_id)
-
-        tracks: list[SpotifyTrack] = []
 
         while url:
             log.info('making request to: %s', url)
@@ -63,8 +62,6 @@ class SpotifyClient:
             for track in tracks_json['items']:
                 title = track['track']['name']
                 artists = [artist['name'] for artist in track['track']['artists']]
-                tracks.append(SpotifyTrack(title, artists))
+                yield SpotifyTrack(title, artists)
 
             url = tracks_json['next']
-
-        return tracks

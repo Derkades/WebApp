@@ -22,24 +22,14 @@
         <tbody>
             {% for row in duplicates %}
                 <tr>
-                    <td>{{ row.title }}</td>
                     <td><kbd>{{ row.artists|join('</kbd> <kbd>'|safe) }}</kbd></td>
+                    <td>{{ row.title }}</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
 {% else %}
     <p>{% trans %}No duplicates found.{% endtrans %}</p>
-{% endif %}
-
-{% if missing_metadata %}
-    <h2>{% trans %}Missing metadata{% endtrans %}</h2>
-    <p>{% trans %}Tracks without title and artist metadata can't be linked to Spotify tracks.{% endtrans %}</p>
-    <ul>
-        {% for relpath in missing_metadata %}
-            <li>{{ relpath }}</li>
-        {% endfor %}
-    </ul>
 {% endif %}
 
 <h2>{% trans %}Missing in Spotify{% endtrans %}</h2>
@@ -55,8 +45,8 @@
         <tbody>
             {% for row in only_local %}
                 <tr>
-                    <td><kbd>{{ row.artists|join('</kbd> <kbd>'|safe) }}</kbd></td>
-                    <td>{{ row.title }}</td>
+                    <td><kbd>{{ row[1]|join('</kbd> <kbd>'|safe) }}</kbd></td>
+                    <td>{{ row[0] }}</td>
                 </tr>
             {% endfor %}
         </tbody>
@@ -107,8 +97,8 @@
         <tbody>
             {% for row in both %}
                 <tr>
-                    <td><kbd>{{ row[0].artists|join('</kbd> <kbd>'|safe) }}</kbd></td>
-                    <td>{{ row[0].title }}</td>
+                    <td><kbd>{{ row[0][1]|join('</kbd> <kbd>'|safe) }}</kbd></td>
+                    <td>{{ row[0][0] }}</td>
                     <td><kbd>{{ row[1].artists|join('</kbd> <kbd>'|safe) }}</kbd></td>
                     <td>{{ row[1].title }}</td>
                 </tr>
