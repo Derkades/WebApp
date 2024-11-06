@@ -4,7 +4,7 @@ import traceback
 from collections.abc import Iterator
 from html.parser import HTMLParser
 from multiprocessing.pool import ThreadPool
-from typing import override
+from typing import cast, override
 
 import requests
 
@@ -99,7 +99,7 @@ def image_search(bing_query: str) -> Iterator[bytes]:
                 if 'm' not in attrs_dict:
                     return
 
-                m_attr: str = attrs_dict['m']
+                m_attr: str = cast(str, attrs_dict['m'])
                 image_url = json.loads(m_attr)['murl']
                 self.image_urls.append(image_url)
 

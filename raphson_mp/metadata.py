@@ -4,7 +4,6 @@ import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from sqlite3 import Connection
 
 from raphson_mp import music
 
@@ -129,17 +128,6 @@ def _strip_keywords(inp: str) -> str:
     for strip_keyword in FILENAME_STRIP_KEYWORDS:
         inp = inp.replace(strip_keyword, '')
     return inp
-
-
-def _is_alpha(char: str) -> bool:
-    """
-    Check whether given character is alphanumeric, a dash or a space
-    """
-    return char == ' ' or \
-           char == '-' or \
-           'a' <= char <= 'z' or \
-           'A' <= char <= 'Z' or \
-           '0' <= char <= '9'
 
 
 def _join_meta_list(entries: list[str]) -> str:

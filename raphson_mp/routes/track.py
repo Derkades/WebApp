@@ -128,28 +128,6 @@ def route_album_cover(path: str) -> Response:
     return response
 
 
-@bp.route('/<path:path>/lyrics')
-def route_lyrics(path: str):
-    """
-    Get lyrics for the provided track path.
-    Legacy lyrics endpoint for compatibility, re-implemented using new lyrics system
-    DEPRECATED
-    """
-    # TODO remove this endpoint
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
-
-        track = Track.by_relpath(conn, path)
-        lyr = track.lyrics()
-        if lyr is None:
-            return {'lyrics': None}
-        elif isinstance(lyr, TimeSyncedLyrics):
-            lyr = lyr.to_plain()
-
-        return {'lyrics': lyr.text,
-                'source_url': lyr.source}
-
-
 @bp.route('/<path:path>/lyrics2')
 def route_lyrics2(path: str):
     """

@@ -9,12 +9,13 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum, unique
 from sqlite3 import Connection, OperationalError
+from typing import override
 
 import flask_babel
 from flask import request
 from flask_babel import _
 
-from raphson_mp import jsonw, settings, util
+from raphson_mp import jsonw, settings
 
 log = logging.getLogger(__name__)
 
@@ -180,6 +181,7 @@ class StandardUser(User):
     privacy: PrivacyOption
     session: Session
 
+    @override
     def sessions(self) -> list[Session]:
         results = self.conn.execute("""
                                     SELECT rowid, token, csrf_token, creation_date, user_agent, remote_address, last_use
@@ -187,9 +189,11 @@ class StandardUser(User):
                                     """, (self.user_id,)).fetchall()
         return [Session(*row) for row in results]
 
+    @override
     def get_csrf(self) -> str:
         return self.session.csrf_token
 
+    @override
     def update_password(self, new_password: str) -> None:
         password_hash = hash_password(new_password)
         self.conn.execute('UPDATE user SET password=? WHERE id=?',
@@ -208,13 +212,16 @@ class OfflineUser(User):
         self.language = None
         self.privacy = PrivacyOption.NONE
 
+    @override
     def sessions(self) -> list[Session]:
         return []
 
+    @override
     def get_csrf(self) -> str:
         return 'fake_csrf_token'
 
-    def update_password(self, _new_password: str) -> None:
+    @override
+    def update_password(self, new_password: str) -> None:
         raise RuntimeError('Cannot update password in offline mode')
 
 
@@ -242,7 +249,7 @@ class AuthErrorReason(Enum):
             return _('Your are not an administrator, but this page requires administrative privileges')
         elif self is AuthErrorReason.MISSING_CSRF:
             return _('Missing CSRF token from request.')
-        elif self is AuthErrorReason.INVALID_TOKEN:
+        elif self is AuthErrorReason.INVALID_CSRF:
             return _('Invalid CSRF token in request. Please refresh the page and try again.')
 
         return ValueError()
@@ -268,13 +275,13 @@ def log_in(conn: Connection, username: str, password: str) -> str | None:
     if settings.offline_mode:
         raise RuntimeError('Login not available in offline mode')
 
-    result = conn.execute('SELECT id, password FROM user WHERE username=?', (username,)).fetchone()
+    result = conn.execute('SELECT id FROM user WHERE username=?', (username,)).fetchone()
 
     if result is None:
         log.warning("Login attempt with non-existent username: '%s'", username)
         return None
 
-    user_id, hashed_password = result
+    user_id, = result
 
     if not verify_password(conn, user_id, password):
         log.warning('Failed login for user %s', username)
@@ -340,7 +347,10 @@ def _verify_token(conn: Connection, token: str) -> User | None:
                         PrivacyOption(privacy_str), session)
 
 
-def verify_auth_cookie(conn: Connection, require_admin=False, redirect_to_login=False, require_csrf=False) -> User:
+def verify_auth_cookie(conn: Connection,
+                       require_admin: bool = False,
+                       redirect_to_login: bool = False,
+                       require_csrf: bool = False) -> User:
     """
     Verify auth token sent as cookie, raising AuthError if missing or not valid.
     Args:

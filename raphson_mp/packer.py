@@ -1,7 +1,5 @@
 from pathlib import Path
 
-from raphson_mp import settings
-
 
 def pack(path: Path) -> bytes:
     """

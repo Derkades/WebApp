@@ -1,9 +1,10 @@
 import logging
+from collections.abc import Iterator
 from io import IOBase
 from pathlib import Path
 from queue import Queue
 from threading import Thread
-from typing import Iterator
+from typing import override
 from zipfile import ZipFile
 
 from flask import Response, request
@@ -36,16 +37,20 @@ class QueueIO(IOBase):
     def __init__(self) -> None:
         self.queue = Queue(maxsize=32)
 
+    @override
     def close(self):
         super().close()
         self.queue.put(None)
 
-    def readable():
+    @override
+    def readable(self):
         return False
 
-    def seekable():
+    @override
+    def seekable(self):
         return False
 
+    @override
     def write(self, data: bytes):
         self.queue.put(data)
         return len(data)

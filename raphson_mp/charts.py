@@ -52,7 +52,7 @@ def chart(title: str, ldata: Iterable[str], xdata: Iterable[str|int] | None, yda
           all_labels: bool = False, extra: dict[str, Any] | None = None):
     if extra is None:
         extra = {}
-    chart = {
+    chart: dict[str, Any] = {
         'title': {
             'text': title
         },

@@ -1,8 +1,9 @@
 import logging
 import random
+import time
 from dataclasses import dataclass
-from datetime import datetime
 from sqlite3 import Connection
+from typing import cast
 
 from raphson_mp import music, settings
 from raphson_mp.music import Track
@@ -21,12 +22,12 @@ def _choose_track(conn: Connection, previous_playlist: str | None = None) -> Tra
     playlist_name = random.choice(playlist_candidates)
 
     playlist = music.playlist(conn, playlist_name)
-    track = playlist.choose_track(None)
+    track = cast(Track, playlist.choose_track(None))
     return track
 
 
 def get_current_track(conn: Connection) -> RadioTrack:
-    current_time = int(datetime.utcnow().timestamp() * 1000)
+    current_time = int(time.time() * 1000)
 
     last_track_info = conn.execute('''
                                     SELECT track.path, radio_track.start_time
@@ -44,7 +45,6 @@ def get_current_track(conn: Connection) -> RadioTrack:
 
     if last_track_info is None:
         log.info('No current song, choose track starting at random time')
-        current_time = int(datetime.utcnow().timestamp() * 1000)
         track = _choose_track(conn)
         meta = track.metadata()
         start_time = current_time - int((meta.duration * 1000) * random.random())
@@ -57,12 +57,12 @@ def get_current_track(conn: Connection) -> RadioTrack:
     log.info('Return current track')
 
     # Return current song from database
-    current_track = Track.by_relpath(conn, track_path)
+    current_track = cast(Track, Track.by_relpath(conn, track_path))
     return RadioTrack(current_track, start_time)
 
 
 def get_next_track(conn: Connection) -> RadioTrack:
-    current_time = int(datetime.utcnow().timestamp() * 1000)
+    current_time = int(time.time() * 1000)
 
     current_track_info = conn.execute('''
                                         SELECT radio_track.start_time + track.duration*1000 AS end_time, track.playlist
@@ -98,5 +98,5 @@ def get_next_track(conn: Connection) -> RadioTrack:
 
     log.info('Returning already chosen next track')
     (track_path, start_time) = next_track_info
-    track = Track.by_relpath(conn, track_path)
+    track = cast(Track, Track.by_relpath(conn, track_path))
     return RadioTrack(track, start_time)

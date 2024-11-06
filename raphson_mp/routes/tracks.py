@@ -1,5 +1,6 @@
 
 import logging
+from typing import cast
 
 from flask import Blueprint, Response, request
 
@@ -49,7 +50,7 @@ def route_filter():
 
         query += ' LIMIT 5000'
         result = conn.execute(query, params)
-        tracks = [Track.by_relpath(conn, row[0]) for row in result]
+        tracks = cast(list[Track], [Track.by_relpath(conn, row[0]) for row in result])
 
         return json_response({'tracks': [track.info_dict() for track in tracks]}, last_modified=last_modified)
 
@@ -63,7 +64,7 @@ def route_search():
         query = '"' + query.replace(' ', '" OR "') + '"'
         log.info('search: %s', query)
         result = conn.execute('SELECT path FROM track_fts WHERE track_fts MATCH ? ORDER BY rank LIMIT 25', (query,))
-        tracks = [Track.by_relpath(conn, row[0]) for row in result]
+        tracks = cast(list[Track], [Track.by_relpath(conn, row[0]) for row in result])
         albums = [{'album': row[0], 'artist': row[1]}
                   for row in conn.execute('SELECT DISTINCT album, album_artist FROM track_fts WHERE album MATCH ? ORDER BY rank LIMIT 10', (query,))]
         return {'tracks': [track.info_dict() for track in tracks], 'albums': albums}

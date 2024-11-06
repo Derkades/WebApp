@@ -1,9 +1,7 @@
 """
 Functions related to the cache (cache.db)
 """
-
 import logging
-import pickle
 import random
 import time
 from typing import Any

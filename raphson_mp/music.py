@@ -15,8 +15,7 @@ from sqlite3 import Connection
 from subprocess import CalledProcessError
 from typing import Literal
 
-from raphson_mp import (cache, db, image, jsonw, lyrics, metadata, reddit,
-                        settings)
+from raphson_mp import cache, image, jsonw, lyrics, metadata, reddit, settings
 from raphson_mp.auth import User
 from raphson_mp.image import ImageFormat, ImageQuality
 from raphson_mp.lyrics import Lyrics, PlainLyrics
@@ -307,19 +306,19 @@ class Track:
         log.info('Measured integrated loudness: %s', meas_json['input_i'])
 
         if float(meas_json['input_i']) > 0:
-            log.warning('Measured positive loudness. This should be impossible, but can happen '
-                        'with input files containing out of range values. Need to use '
+            log.warning('Measured positive loudness. This should be impossible, but can happen ' +
+                        'with input files containing out of range values. Need to use ' +
                         'single-pass loudnorm filter instead.')
             log.warning('Track: %s', self.path.resolve().as_posix())
             loudnorm = settings.loudnorm_filter
         else:
             loudnorm = \
-                f'{settings.loudnorm_filter}:' \
-                f"measured_I={meas_json['input_i']}:" \
-                f"measured_TP={meas_json['input_tp']}:" \
-                f"measured_LRA={meas_json['input_lra']}:" \
-                f"measured_thresh={meas_json['input_thresh']}:" \
-                f"offset={meas_json['target_offset']}:" \
+                f'{settings.loudnorm_filter}:' + \
+                f"measured_I={meas_json['input_i']}:" + \
+                f"measured_TP={meas_json['input_tp']}:" + \
+                f"measured_LRA={meas_json['input_lra']}:" + \
+                f"measured_thresh={meas_json['input_thresh']}:" + \
+                f"offset={meas_json['target_offset']}:" + \
                 'linear=true'
 
         # Cache for a year, expensive to calculate and orphan entries don't take up much space
@@ -386,6 +385,8 @@ class Track:
                              '-c:a', 'libmp3lame',
                              '-c:v', 'copy',  # Leave cover as JPEG, don't re-encode as PNG
                              '-q:a', '2']  # VBR 190kbps
+        else:
+            raise ValueError(audio_type)
 
         with tempfile.NamedTemporaryFile() as temp_output:
             command = ['ffmpeg',
@@ -402,7 +403,7 @@ class Track:
             audio_data = temp_output.read()
 
         if audio_type == AudioType.MP3_WITH_METADATA:
-            cover_temp_file.close()
+            cover_temp_file.close()  # pyright: ignore[reportPossiblyUnboundVariable]
 
         # Audio for sure doesn't change so ideally we'd cache for longer, but that would mean
         # deleted tracks remain in the cache for longer as well.
@@ -452,21 +453,6 @@ class Track:
         }
 
     def lyrics(self) -> Lyrics | None:
-        if settings.offline_mode:
-            with db.offline(read_only=True) as conn:
-                lyrics_json = jsonw.from_json(conn.execute('SELECT lyrics_json FROM content WHERE path=?', (self.relpath,)).fetchone()[0])
-                if 'found' in lyrics_json and lyrics_json['found']:
-                    # Legacy HTML lyrics, best effort conversion from HTML to plain text
-                    import html
-                    return Lyrics(lyrics_json['source'], html.unescape(lyrics_json['html'].replace('<br>', '\n')))
-                elif 'lyrics' in lyrics_json and lyrics_json['lyrics'] is False:
-                    # Legacy
-                    return None
-                elif 'lyrics' in lyrics_json and lyrics_json['lyrics'] is not None:
-                    return Lyrics(lyrics_json['source_url'], lyrics_json['lyrics'])
-                else:
-                    return None
-
         meta = self.metadata()
         if meta.lyrics:
             log.info('using lyrics from metadata')
@@ -481,7 +467,7 @@ class Track:
         return None
 
     @staticmethod
-    def by_relpath(conn: Connection, relpath: str) -> 'Track' | None:
+    def by_relpath(conn: Connection, relpath: str) -> Track | None:
         """
         Find track by relative path
         """
@@ -727,7 +713,7 @@ def playlists(conn: Connection) -> list[Playlist]:
             for name, track_count in rows]
 
 
-def user_playlists(conn: Connection, user_id: int, all_writable=False) -> list[UserPlaylist]:
+def user_playlists(conn: Connection, user_id: int, all_writable: bool = False) -> list[UserPlaylist]:
     """
     List playlists, with user-specific information
     Args:
