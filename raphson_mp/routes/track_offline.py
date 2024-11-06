@@ -68,7 +68,7 @@ def route_lyrics2(path: str):
         if 'found' in lyrics_json and lyrics_json['found']:
             # Legacy HTML lyrics, best effort conversion from HTML to plain text
             import html
-            lyr = PlainLyrics(lyrics_json['source'], html.unescape(lyrics_json['html'].replace('<br>', '\n')))
+            lyr = PlainLyrics(lyrics_json['source'], html.unescape(lyrics_json['html'].replace('\n', '').replace('<br>', '\n')))
         elif 'lyrics' in lyrics_json and 'source_url' in lyrics_json and lyrics_json['lyrics'] is not None and lyrics_json['source_url'] is not None:
             # Legacy plaintext lyrics
             lyr = PlainLyrics(lyrics_json['source_url'], lyrics_json['lyrics'])
