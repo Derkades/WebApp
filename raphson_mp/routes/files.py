@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import cast
 from urllib.parse import quote as urlencode
 
 from flask import (Blueprint, Response, abort, redirect, render_template,
@@ -113,8 +114,8 @@ def route_rename():
 
         if request.method == 'POST':
             if request.is_json:
-                relpath = request.json['path']
-                new_name = request.json['new_name']
+                relpath = cast(str, request.json['path'])
+                new_name = cast(str, request.json['new_name'])
             else:
                 relpath = request.form['path']
                 new_name = request.form['new-name']

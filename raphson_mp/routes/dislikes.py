@@ -1,3 +1,4 @@
+from typing import cast
 from flask import Blueprint, Response, redirect, render_template, request
 
 from raphson_mp import auth, db
@@ -11,9 +12,9 @@ def route_add():
     """Used by music player"""
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn, require_csrf=True)
-        track = request.json['track']
+        track_path = cast(str, request.json['track'])
         conn.execute('INSERT OR IGNORE INTO dislikes (user, track) VALUES (?, ?)',
-                     (user.user_id, track))
+                     (user.user_id, track_path))
     return Response(None, 200)
 
 
@@ -43,7 +44,7 @@ def route_dislikes():
                             ''', (user.user_id,)).fetchall()
         tracks = [{'path': path,
                    'playlist': playlist,
-                   'title': Track.by_relpath(conn, path).metadata().display_title()}
+                   'title': cast(Track, Track.by_relpath(conn, path)).metadata().display_title()}
                   for playlist, path in rows]
 
     return render_template('dislikes.jinja2',

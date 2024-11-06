@@ -1,7 +1,8 @@
+from collections.abc import Iterator
 import logging
 import tempfile
 from pathlib import Path
-from typing import Iterator
+from typing import cast
 
 from flask import (Blueprint, Response, abort, render_template, request,
                    send_file)
@@ -33,7 +34,7 @@ def route_search():
     with db.connect(read_only=True) as conn:
         auth.verify_auth_cookie(conn, require_csrf=True)
 
-        query = request.json['query']
+        query =cast(str, request.json['query'])
         results = downloader.search(query)
 
     return {'results': results}
@@ -47,8 +48,8 @@ def route_ytdl():
     with db.connect(read_only=True) as conn:
         user = auth.verify_auth_cookie(conn, require_csrf=True)
 
-        directory: str = request.json['directory']
-        url: str = request.json['url']
+        directory: str = cast(str, request.json['directory'])
+        url: str = cast(str, request.json['url'])
 
         playlist = music.playlist(conn, directory)
         if not playlist.has_write_permission(user):
@@ -79,7 +80,7 @@ def route_ephemeral():
 
         with tempfile.TemporaryDirectory() as tempdir:
             temp_path = Path(tempdir)
-            for _log in downloader.download(tempdir, request.args['url']):
+            for _log in downloader.download(temp_path, request.args['url']):
                 pass
             response = send_file(next(temp_path.iterdir()))
             return response

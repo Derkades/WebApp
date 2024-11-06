@@ -1,8 +1,9 @@
 import json
 import logging
 from dataclasses import dataclass
+from sqlite3 import Cursor
 from threading import Thread
-from typing import Iterable
+from typing import Any
 from zipfile import ZIP_LZMA, ZipFile
 
 from flask import Blueprint, Response
@@ -13,7 +14,7 @@ from raphson_mp.util import QueueIO
 log = logging.getLogger(__name__)
 bp = Blueprint('export', __name__, url_prefix='/export')
 
-def query_to_json(cursor, one=False):
+def query_to_json(cursor: Cursor, one: bool = False) -> Any:
     # Based on: https://stackoverflow.com/a/3287775
     r = [dict((cursor.description[i][0], value) \
                for i, value in enumerate(row)) for row in cursor.fetchall()]
@@ -24,7 +25,7 @@ def query_to_json(cursor, one=False):
 class ExportQuery:
     name: str
     query: str
-    params: Iterable[str|int]
+    params: tuple[str|int] | tuple[()]
     one: bool
 
 

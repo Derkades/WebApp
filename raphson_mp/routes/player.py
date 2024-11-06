@@ -1,7 +1,8 @@
 import shutil
 import time
+from typing import cast
 
-from flask import Blueprint, Response, render_template, request
+from flask import Blueprint, Response, abort, render_template, request
 from flask_babel import _
 
 from raphson_mp import auth, db, music, scanner, settings, util
@@ -35,12 +36,14 @@ def route_copy_track():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn, require_csrf=True)
 
-        playlist_name = request.json['playlist']
+        playlist_name = cast(str, request.json['playlist'])
 
-        playlist = music.user_playlist(conn, playlist_name, user.user_id)
-        assert playlist.write or user.admin
+        if not user.admin:
+            playlist = music.user_playlist(conn, playlist_name, user.user_id)
+            if not playlist.write:
+                abort(403)
 
-        track = Track.by_relpath(conn, request.json['track'])
+        track = Track.by_relpath(conn, cast(str, request.json['track']))
 
         if track.playlist == playlist.name:
             return Response(_('Track is already in this playlist'), content_type='text/plain')

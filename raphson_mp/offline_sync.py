@@ -4,6 +4,7 @@ import sys
 import traceback
 from multiprocessing.pool import ThreadPool
 from sqlite3 import Connection
+from typing import cast
 from urllib.parse import quote as urlencode
 
 import requests
@@ -44,7 +45,7 @@ class OfflineSync:
             response.raise_for_status()
         return response
 
-    def request_post(self, route: str, data, raise_for_status: bool = True) -> Response:
+    def request_post(self, route: str, data: dict[str, str], raise_for_status: bool = True) -> Response:
         response = requests.post(self.base_url + route,
                                  json=data,
                                  headers=self.get_headers(),
@@ -154,8 +155,8 @@ class OfflineSync:
              'cover_data': cover,
              'lyrics_json': lyrics})
 
-    def _update_track(self, track) -> None:
-        self._download_track_content(track['path'])
+    def _update_track(self, track: dict[str, str|int]) -> None:
+        self._download_track_content(cast(str, track['path']))
 
         self.db_music.execute('UPDATE track SET duration=?, title=?, album=?, album_artist=?, year=?, mtime=? WHERE path=?',
                               (track['duration'], track['title'], track['album'], track['album_artist'], track['year'],

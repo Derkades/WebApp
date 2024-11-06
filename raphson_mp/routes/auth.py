@@ -1,4 +1,5 @@
 import logging
+from typing import cast
 
 from flask import Blueprint, Response, redirect, render_template, request
 
@@ -36,12 +37,8 @@ def route_login():
 
             return render_template('login.jinja2', invalid_password=False)
 
-        if request.is_json:
-            username: str = request.json['username']
-            password: str = request.json['password']
-        else:
-            username: str = request.form['username']
-            password: str = request.form['password']
+        username: str = cast(str, request.json['username']) if request.is_json else request.form['username']
+        password: str = cast(str, request.json['password']) if request.is_json else request.form['password']
 
         token = auth.log_in(conn, username, password)
 

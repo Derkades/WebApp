@@ -59,3 +59,5 @@ artifacts = ["*.mo"]
 include = ["raphson_mp"]
 reportUnusedCallResult = false
 reportAny = false
+reportOptionalSubscript = false
+reportRedeclaration = false
