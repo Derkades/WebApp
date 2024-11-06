@@ -1,13 +1,15 @@
 import difflib
-import re
-from unicodedata import normalize
+from queue import Queue
+from threading import Thread
+from typing import cast
+
 from flask import (Blueprint, Response, abort, redirect, render_template,
                    request)
 
-
-from raphson_mp import auth, db, jsonw, music, scanner, settings, spotify, util
-from raphson_mp import metadata
-from raphson_mp.metadata import Metadata, normalize_title
+from raphson_mp import (auth, db, jsonw, metadata, music, scanner, settings,
+                        spotify, util)
+from raphson_mp.metadata import normalize_title
+from raphson_mp.spotify import SpotifyTrack
 
 bp = Blueprint('playlists', __name__, url_prefix='/playlist')
 
@@ -200,8 +202,19 @@ def route_compare_spotify(playlist_name: str):
             key = (normalize_title(title), tuple(local_track[1]))
             local_tracks[key] = local_track
 
-        client = spotify.SpotifyClient()
-        spotify_tracks = client.get_playlist(request.args['playlist_id'])
+        playlist_id = request.args['playlist_id']
+        spotify_tracks: Queue[SpotifyTrack|object] = Queue(maxsize=200)
+        sentinel = object()
+
+        # Retrieve track list from Spotify in a separate thread
+        def get_tracks():
+            try:
+                client = spotify.SpotifyClient()
+                for track in client.get_playlist(playlist_id):
+                    spotify_tracks.put(track)
+            finally:
+                spotify_tracks.put(sentinel)
+        Thread(target=get_tracks).start()
 
         duplicate_check: set[str] = set()
         duplicates: list[spotify.SpotifyTrack] = []
@@ -209,7 +222,10 @@ def route_compare_spotify(playlist_name: str):
         only_spotify: list[spotify.SpotifyTrack] = []
         only_local: list[tuple[str, list[str]]] = []
 
-        for spotify_track in spotify_tracks:
+        for spotify_track in iter(spotify_tracks.get, sentinel):
+            spotify_track = cast(SpotifyTrack, spotify_track)
+            spotify_tracks.task_done()
+
             normalized_title = metadata.normalize_title(spotify_track.title)
 
             # Spotify duplicates

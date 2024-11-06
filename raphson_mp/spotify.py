@@ -1,12 +1,12 @@
-from collections.abc import Iterator
 import logging
-from pathlib import Path
 import time
-import requests
-from raphson_mp import settings
-from urllib.parse import quote
+from collections.abc import Iterator
 from dataclasses import dataclass
+from urllib.parse import quote
 
+import requests
+
+from raphson_mp import settings
 
 log = logging.getLogger(__name__)
 
