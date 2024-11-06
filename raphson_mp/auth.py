@@ -36,6 +36,19 @@ def hash_password(password: str) -> str:
     return hash_json
 
 
+def _verify_hash(hashed_password: str, password: str):
+    hash_json = jsonw.from_json(hashed_password)
+    if hash_json['alg'] == 'scrypt':
+        hash_bytes = hashlib.scrypt(password.encode(),
+                                    salt=base64.b64decode(hash_json['salt']),
+                                    n=hash_json['n'],
+                                    r=hash_json['r'],
+                                    p=hash_json['p'])
+        return hmac.compare_digest(hash_bytes, base64.b64decode(hash_json['hash']))
+
+    raise ValueError('unsupported alg', hash_json)
+
+
 def verify_password(conn: Connection, user_id: int, password: str) -> bool:
     hashed_password, = conn.execute('SELECT password FROM user WHERE id = ?', (user_id,)).fetchone()
 
@@ -54,16 +67,7 @@ def verify_password(conn: Connection, user_id: int, password: str) -> bool:
         else:
             return False
 
-    hash_json = jsonw.from_json(hashed_password)
-    if hash_json['alg'] == 'scrypt':
-        hash_bytes = hashlib.scrypt(password.encode(),
-                                    salt=base64.b64decode(hash_json['salt']),
-                                    n=hash_json['n'],
-                                    r=hash_json['r'],
-                                    p=hash_json['p'])
-        return hmac.compare_digest(hash_bytes, base64.b64decode(hash_json['hash']))
-
-    raise ValueError('Unknown alg: ' + hash_json['alg'])
+    return _verify_hash(hashed_password, password)
 
 
 @dataclass

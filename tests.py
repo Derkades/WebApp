@@ -9,7 +9,7 @@ from pathlib import Path
 
 from flask.testing import FlaskClient
 
-from raphson_mp import main, packer, reddit, settings
+from raphson_mp import auth, main, packer, reddit, settings
 from raphson_mp.lyrics import AZLyricsFetcher, GeniusFetcher, LrcLibFetcher, PlainLyrics, TimeSyncedLyrics
 from raphson_mp.spotify import SpotifyClient
 
@@ -97,6 +97,15 @@ class TestReddit(unittest.TestCase):
         image_url = reddit.search('test')
         assert image_url
         assert image_url.startswith('https://'), image_url
+
+
+class TestPassword(unittest.TestCase):
+    def test_hash(self):
+        password = secrets.token_urlsafe(random.randint(0, 100))
+        notpassword = secrets.token_urlsafe(random.randint(0, 100))
+        hash = auth.hash_password(password)
+        assert auth._verify_hash(hash, password)  # pyright: ignore[reportPrivateUsage]
+        assert not auth._verify_hash(hash, notpassword)  # pyright: ignore[reportPrivateUsage]
 
 
 if __name__ == '__main__':
