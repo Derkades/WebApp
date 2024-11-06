@@ -61,8 +61,7 @@ def get_app(proxy_count: int, template_reload: bool) -> Flask:
         app.register_blueprint(users.bp)
 
     if prometheus_client:
-        from raphson_mp import prometheus
-        prometheus.register_collectors()
+        from raphson_mp import prometheus  # pyright: ignore[reportUnusedImport]
         app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {'/metrics': prometheus_client.make_wsgi_app()})
     else:
         log.warning('prometheus_client is not available, continuing without /metrics endpoint')
