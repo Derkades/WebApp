@@ -43,25 +43,21 @@ class SpotifyClient:
         return access_token
 
     def get_playlist(self, playlist_id: str) -> Iterator[SpotifyTrack]:
-        url = 'https://api.spotify.com/v1/playlists/' + quote(playlist_id)
+        url = 'https://api.spotify.com/v1/playlists/' + quote(playlist_id) + '/tracks'
 
         while url:
             log.info('making request to: %s', url)
             response = requests.get(url,
-                                    params={'fields': 'tracks.next,tracks.items(track(name,artists(name))),next,items(track(name,artists(name)))'},
+                                    params={'fields': 'next,items(track(name,artists(name)))'},
                                     headers={'Authorization': 'Bearer ' + self.access_token},
                                     timeout=10)
             response.raise_for_status()
 
             json = response.json()
-            if 'tracks' in json:
-                tracks_json = json['tracks']
-            else:
-                tracks_json = json
 
-            for track in tracks_json['items']:
+            for track in json['items']:
                 title = track['track']['name']
                 artists = [artist['name'] for artist in track['track']['artists']]
                 yield SpotifyTrack(title, artists)
 
-            url = tracks_json['next']
+            url = json['next']
