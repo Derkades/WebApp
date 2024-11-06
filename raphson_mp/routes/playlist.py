@@ -185,6 +185,16 @@ def route_track(playlist):
         return chosen_track.info_dict()
 
 
+def _is_close(a: str, b: str) -> bool:
+    if a == b:
+        return True
+
+    diff = difflib.SequenceMatcher(None, a, b)
+    # real_quick_ratio() provides an upper bound on quick_ratio(), which provides an upper bound on ratio()
+    # ratio() is expensive so we must avoid it when possible
+    return diff.real_quick_ratio() > 0.8 and diff.quick_ratio() > 0.8 and diff.ratio() > 0.8
+
+
 @bp.route('/<playlist_name>/compare_spotify')
 def route_compare_spotify(playlist_name: str):
     with db.connect(read_only=True) as conn:
@@ -217,9 +227,9 @@ def route_compare_spotify(playlist_name: str):
         Thread(target=get_tracks).start()
 
         duplicate_check: set[str] = set()
-        duplicates: list[spotify.SpotifyTrack] = []
-        both: list[tuple[tuple[str, list[str]], spotify.SpotifyTrack]] = []
-        only_spotify: list[spotify.SpotifyTrack] = []
+        duplicates: list[SpotifyTrack] = []
+        both: list[tuple[tuple[str, list[str]], SpotifyTrack]] = []
+        only_spotify: list[SpotifyTrack] = []
         only_local: list[tuple[str, list[str]]] = []
 
         for spotify_track in iter(spotify_tracks.get, sentinel):
@@ -240,18 +250,16 @@ def route_compare_spotify(playlist_name: str):
                 local_track = local_tracks[local_track_key]
             else:
                 # Cannot find exact match, look for partial match
-                for local_track_key, local_track in local_tracks.items():
+                for local_track_key in local_tracks.keys():
                     (local_track_normalized_title, local_track_artists) = local_track_key
-                    if difflib.SequenceMatcher(None, normalized_title, local_track_normalized_title).ratio() > 0.8:
+                    if _is_close(normalized_title, local_track_normalized_title):
                         # Title matches, now check if artist matches (more expensive)
-
                         artist_match = False
                         for artist_a in spotify_track.artists:
                             for artist_b in local_track_artists:
-                                if difflib.SequenceMatcher(None, artist_a.lower(), artist_b.lower()).ratio() > 0.8:
+                                if _is_close(artist_a, artist_b):
                                     artist_match = True
                                     break
-
                         if artist_match:
                             break
                 else:
@@ -260,8 +268,8 @@ def route_compare_spotify(playlist_name: str):
                     continue
 
             # match found, present in both
+            both.append((local_tracks[local_track_key], spotify_track))
             del local_tracks[local_track_key]
-            both.append((local_track, spotify_track))
 
         # any local tracks still left in the dict must have no matching spotify track
         only_local.extend(local_tracks.values())
