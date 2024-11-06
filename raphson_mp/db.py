@@ -1,9 +1,12 @@
 import logging
+import os
 import sqlite3
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from sqlite3 import Connection
+from types import TracebackType
+from typing import Literal, override
 
 from raphson_mp import settings
 
@@ -13,20 +16,38 @@ log = logging.getLogger(__name__)
 DATABASE_NAMES = ['cache', 'music', 'offline', 'meta']
 
 
-def db_path(db_name: str) -> Path:
+class ClosingConnection(Connection):
+    """
+    Strangely (in my opinion), the sqlite connection is not closed by the standard context manager.
+    So, we create a thin subclass with a "proper" __exit__ that calls close()
+    See: https://docs.python.org/3/library/sqlite3.html#sqlite3-connection-context-manager
+    """
+
+    @override
+    def __exit__(self, type: type[BaseException] | None, value: BaseException | None, traceback: TracebackType | None) -> Literal[False]:
+        super().__exit__(type, value, traceback)
+        self.close()
+        return False
+
+
+def _db_path(db_name: str) -> Path:
     return settings.data_dir / (db_name + '.db')
 
 
 def _connect(db_name: str, read_only: bool) -> Connection:
-    db_uri = f'file:{db_path(db_name)}'
+    db_uri = f'file:{_db_path(db_name)}'
     if read_only:
         db_uri += '?mode=ro'
-    conn = sqlite3.connect(db_uri, uri=True, timeout=30.0)
+    conn = ClosingConnection(db_uri, uri=True, timeout=30.0)
     conn.execute('PRAGMA foreign_keys = ON')
     conn.execute('PRAGMA temp_store = MEMORY')
     conn.execute('PRAGMA journal_mode = WAL')
     conn.execute('PRAGMA synchronous = NORMAL')
     return conn
+
+
+def db_size(db_name: str):
+    return os.stat(_db_path(db_name)).st_size
 
 
 def connect(read_only: bool = False) -> Connection:
