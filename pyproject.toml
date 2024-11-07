@@ -46,8 +46,8 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Derkades/WebApp"
-Issues = "https://github.com/Derkades/WebApp/issues"
+Homepage = "https://github.com/Derkades/raphson-music-player"
+Issues = "https://github.com/Derkades/raphson-music-player/issues"
 
 [project.scripts]
 raphson-mp = "raphson_mp.__main__:main"
