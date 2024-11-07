@@ -38,10 +38,9 @@ def route_copy_track():
 
         playlist_name = cast(str, request.json['playlist'])
 
-        if not user.admin:
-            playlist = music.user_playlist(conn, playlist_name, user.user_id)
-            if not playlist.write:
-                abort(403)
+        playlist = music.user_playlist(conn, playlist_name, user.user_id)
+        if not user.admin and not playlist.write:
+            abort(403)
 
         track = Track.by_relpath(conn, cast(str, request.json['track']))
 
