@@ -1,5 +1,16 @@
+class BrowseHistoryEntry {
+    /** @type {string} */
+    title;
+    /** @type {object} */
+    filters;
+    constructor(title, filters) {
+        this.title = title;
+        this.filters = filters;
+    }
+}
+
 class Browse {
-    /** @type {Array<object>} */
+    /** @type {Array<BrowseHistoryEntry>} */
     #history;
     constructor() {
         this.#history = [];
@@ -16,27 +27,33 @@ class Browse {
     };
 
     /**
+     * @returns {BrowseHistoryEntry}
+     */
+    current() {
+        if (this.#history.length === 0) {
+            throw new Exception();
+        }
+
+        return this.#history[this.#history.length - 1];
+    }
+
+    /**
      * @param {string} textContent
      */
     setHeader(textContent) {
         document.getElementById('dialog-browse').getElementsByTagName('h2')[0].textContent = textContent;
     };
 
-    open() {
-        dialogs.open('dialog-browse');
-    };
-
     /**
      * @param {string} title
-     * @param {object} filter
+     * @param {Array<Filter>} filters
      */
-    browse(title, filter) {
-        this.setHeader(title);
-        this.#history.push({
-            title: title,
-            filter: filter,
-        });
-        this.open();
+    browse(title, filters) {
+        dialogs.open('dialog-browse');
+        if (!filters.playlist) {
+            document.getElementById('browse-filter-playlist').value = 'all';
+        }
+        this.#history.push(new BrowseHistoryEntry(title, filters));
         this.updateContent();
     };
 
@@ -49,26 +66,24 @@ class Browse {
     };
 
     async updateContent() {
-        if (this.#history.length === 0) {
-            console.warn('browse: requested content update, but there are no entries in history');
-            return;
-        }
-
         // Remove previous content, while new content is loading
         // TODO loading animation?
         document.getElementById('browse-content').replaceChildren();
 
-        const current = this.#history[this.#history.length - 1];
+        const current = this.current();
         this.setHeader(current.title);
 
-        if (current.filter.playlist) {
-            document.getElementById('browse-filter-playlist').value = current.filter.playlist;
+        // update playlist dropdown from current filter
+        if (current.filters.playlist) {
+            document.getElementById('browse-filter-playlist').value = current.filters.playlist;
         } else {
             document.getElementById('browse-filter-playlist').value = 'all';
         }
 
-        if (Object.keys(current.filter).length > 0) {
-            const tracks = await music.filter(current.filter);
+        console.debug('browse:', current);
+
+        if (Object.keys(current.filters).length > 0) {
+            const tracks = await music.filter(current.filters);
             const table = await this.generateTrackList(tracks);
             document.getElementById('browse-no-content').classList.add('hidden');
             document.getElementById('browse-content').replaceChildren(table);
@@ -91,11 +106,11 @@ class Browse {
      */
     browseAlbum(albumName, albumArtistName) {
         const title = document.getElementById('trans-album').textContent + (albumArtistName === null ? '' : albumArtistName + ' - ') + albumName;
+        const filters = {'album': albumName}
         if (albumArtistName) {
-            this.browse(title, {'album_artist': albumArtistName, 'album': albumName});
-        } else {
-            this.browse(title, {'album': albumName});
+            filters.album_artist = albumArtistName;
         }
+        this.browse(title, filters);
     };
 
     /**
@@ -108,8 +123,8 @@ class Browse {
     /**
      * @param {string} playlistName
      */
-    browsePlaylist(playlist) {
-        this.browse(document.getElementById('trans-playlist').textContent + playlist, {'playlist': playlist})
+    browsePlaylist(playlistName) {
+        this.browse(document.getElementById('trans-playlist').textContent + playlistName, {playlist: playlistName})
     };
 
     browseButton() {
@@ -186,14 +201,18 @@ const browse = new Browse();
 
 document.addEventListener('DOMContentLoaded', () => {
     // Playlist dropdown
-    document.getElementById('browse-filter-playlist').addEventListener('change', event => {
+    document.getElementById('browse-filter-playlist').addEventListener('input', event => {
         console.debug('browse: filter-playlist input trigger');
         const playlist = event.target.value;
+        const current = browse.current();
+        // browse again, but with a changed playlist filter
+        const newFilter = {...current.filters}
         if (playlist == 'all') {
-            browse.browse(document.getElementById('trans-browse').textContent, {});
+            delete newFilter.playlist;
         } else {
-            browse.browse(document.getElementById('trans-playlist').textContent + playlist, {'playlist': playlist});
+            newFilter.playlist = playlist;
         }
+        browse.browse(current.title, newFilter);
     });
 
     // Button to open browse dialog
