@@ -95,8 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await setSrc();
         }
 
-        const timezoneOffset = new Date().getTimezoneOffset() * 60 * 1000;
-        const currentPos = (Date.now() - state.currentTrack.startTime) + timezoneOffset;
+        const currentPos = Date.now() - state.currentTrack.startTime;
         const offset = audio.currentTime*1000 - currentPos;
         let rate = 1;
 
