@@ -50,8 +50,13 @@ def route_raw(path: str):
 
         with NamedTemporaryFile() as tempfile:
             subprocess.check_call(['ffmpeg', *settings.ffmpeg_flags(), '-y', '-i', track.path.as_posix(), '-c:v', 'copy', '-map', '0:v', '-f', output_format, tempfile.name], shell=False)
-            return send_file(tempfile.name, mimetype=output_media_type)
-
+            # Range requests are disabled using conditional=False, or the browser would create many
+            # requests, each of them requiring ffmpeg to extract the video stream to a temp file
+            # again. The big downside is of course that the browser has to download the complete
+            # video file before being able to skip to the end, but since music videos are usually
+            # relatively small this is a sacrifice I am willing to make. A proper solution would
+            # require more work than I am currently willing to spend on this feature.
+            return send_file(tempfile.name, mimetype=output_media_type, conditional=False)
 
 @bp.route('/<path:path>/audio')
 def route_audio(path: str):
