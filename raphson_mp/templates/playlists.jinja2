@@ -11,16 +11,13 @@
 <h2>{% trans %}My playlist{% endtrans %}</h2>
 <p>
     {% trans %}Whenever a playlist needs to be selected, your playlist will be selected by default.{% endtrans %}
-    {% if primary_playlist %}
-        {% trans %}Your current primary playlist is '{{ primary_playlist }}'.{% endtrans %}
-    {% else %}
-        {% trans %}You do not have a playlist configured.{% endtrans %}
-    {% endif %}
 </p>
 
-<form action="/playlist/set_primary" method="POST">
+<form action="/playlist/set_primary" method="POST" class="form">
     <input type="hidden" name="csrf" value="{{ csrf_token }}">
-    <select name="primary-playlist">
+    <label for="primary-playlist">{% trans %}Playlist{% endtrans %}</label>
+    <select id="primary-playlist" name="primary-playlist">
+        <option value="" {% if not primary_playlist %}selected{% endif %}></option>
         {% for playlist in playlists %}
             <option value="{{ playlist.name }}" {% if playlist.name == primary_playlist %}selected{% endif %}>{{ playlist.name }}</option>
         {% endfor %}

@@ -70,8 +70,11 @@ def route_set_primary():
         user = auth.verify_auth_cookie(conn, require_csrf=True)
 
         playlist = request.form['primary-playlist']
-        conn.execute('UPDATE user SET primary_playlist=? WHERE id=?',
-                     (playlist, user.user_id))
+        if playlist == '':
+            conn.execute('UPDATE user SET primary_playlist = NULL WHERE id=?', (user.user_id,))
+        else:
+            conn.execute('UPDATE user SET primary_playlist=? WHERE id=?',
+                        (playlist, user.user_id))
 
     return redirect('/playlist/manage', code=303)
 
