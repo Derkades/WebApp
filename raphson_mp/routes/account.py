@@ -1,4 +1,4 @@
-from flask import Blueprint, Response, redirect, render_template, request
+from flask import Blueprint, Response, abort, redirect, render_template, request
 from flask_babel import gettext as _
 
 from raphson_mp import auth, db, language
@@ -44,10 +44,10 @@ def route_change_password():
         user = auth.verify_auth_cookie(conn, require_csrf=True)
 
         if not auth.verify_password(conn, user.user_id, request.form['current_password']):
-            return _('Incorrect password.')
+            abort(400, _('Incorrect password.'))
 
         if request.form['new_password'] != request.form['repeat_new_password']:
-            return _('Repeated new passwords do not match.')
+            abort(400, _('Repeated new passwords do not match.'))
 
         user.update_password(request.form['new_password'])
         return redirect('/', code=303)
