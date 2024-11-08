@@ -75,3 +75,11 @@ translated_string = _('Something in English')
 1. Run `./update-translations.sh`
 2. Edit the `messages.po` file in `src/translations/<language_code>/LC_MESSAGES/` using a text editor or PO editor like Poedit. To create a new language, run: `pybabel init -i messages.pot -d src/translations -l <language_code>`
 3. Run `./update-translations.sh` again to ensure the language files are in a consistent format.
+
+## Testing
+
+Run all tests: `python3 -m unittest`
+
+Run a specific test: `python3 -m unittest tests/test_flask.py`
+
+Note: it is normal to see error messages such as "failed login", as long as all tests succeed.
