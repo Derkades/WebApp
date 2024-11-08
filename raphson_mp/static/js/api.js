@@ -464,7 +464,7 @@ class Track {
      * @returns {Promise<Lyrics|null>}
      */
     async getLyrics() {
-        const lyricsUrl = `/track/${encodeURIComponent(this.path)}/lyrics2`;
+        const lyricsUrl = `/track/${encodeURIComponent(this.path)}/lyrics`;
         const lyricsResponse = await fetch(lyricsUrl);
         checkResponseCode(lyricsResponse);
         const lyricsJson = await lyricsResponse.json();

@@ -128,8 +128,9 @@ def route_album_cover(path: str) -> Response:
     return response
 
 
-@bp.route('/<path:path>/lyrics2')
-def route_lyrics2(path: str):
+@bp.route('/<path:path>/lyrics')
+@bp.route('/<path:path>/lyrics2') # temporary, for legacy clients
+def route_lyrics(path: str):
     """
     Get lyrics for the provided track path.
     """

@@ -1,3 +1,4 @@
+from typing import cast
 from flask import Blueprint, Response, request
 
 from raphson_mp import db
@@ -11,8 +12,7 @@ def route_now_playing():
 @bp.route('/played', methods=['POST'])
 def route_played():
     with db.offline() as conn:
-        track = request.json['track']
-        timestamp = request.json['timestamp']
-        conn.execute('INSERT INTO history VALUES (?, ?)',
-                        (timestamp, track))
+        track = cast(str, request.json['track'])
+        timestamp = cast(int, request.json['timestamp'])
+        conn.execute('INSERT INTO history VALUES (?, ?)', (timestamp, track))
     return Response(None, 200)

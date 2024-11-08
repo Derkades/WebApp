@@ -6,7 +6,7 @@ from sqlite3 import Connection
 from flask import Blueprint, Response, render_template, request
 from flask_babel import _, format_timedelta
 
-from raphson_mp import auth, db, settings
+from raphson_mp import auth, db
 from raphson_mp.auth import PrivacyOption
 from raphson_mp.music import Track
 
