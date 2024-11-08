@@ -28,7 +28,7 @@ def _download(image_url: str) -> bytes | None:
     try:
         resp = requests.get(image_url,
                             timeout=10,
-                            headers={'User-Agent': settings.webscraping_user_agent})
+                            headers={'User-Agent': settings.user_agent})
         if resp.status_code != 200:
             log.warning('Could not download %s, status code %s', image_url, resp.status_code)
             return None

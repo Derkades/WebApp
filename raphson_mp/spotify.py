@@ -33,8 +33,9 @@ class SpotifyClient:
 
         response= requests.post('https://accounts.spotify.com/api/token',
                                     data={'grant_type': 'client_credentials',
-                                            'client_id': settings.spotify_api_id,
-                                            'client_secret': settings.spotify_api_secret},
+                                          'client_id': settings.spotify_api_id,
+                                          'client_secret': settings.spotify_api_secret},
+                                    headers={'User-Agent': settings.user_agent}
                                     timeout=10)
         response.raise_for_status()
         access_token: str = response.json()['access_token']
@@ -49,7 +50,8 @@ class SpotifyClient:
             log.info('making request to: %s', url)
             response = requests.get(url,
                                     params={'fields': 'next,items(track(name,artists(name)))'},
-                                    headers={'Authorization': 'Bearer ' + self.access_token},
+                                    headers={'Authorization': 'Bearer ' + self.access_token,
+                                             'User-Agent': settings.user_agent},
                                     timeout=10)
             response.raise_for_status()
 

@@ -27,7 +27,7 @@ SUBREDDIT_ATTEMPTS = 2
 def _search(subreddit: str | None, query: str) -> str | None:
     log.info('Searching subreddit %s for: %s', subreddit if subreddit else "ALL", query)
 
-    headers = {'User-Agent': settings.webscraping_user_agent}
+    headers = {'User-Agent': settings.user_agent}
 
     params = {
         'q': query,
@@ -88,7 +88,7 @@ def get_image(query: str) -> bytes | None:
 
     r = requests.get(image_url,
                      timeout=10,
-                     headers={'User-Agent': settings.webscraping_user_agent})
+                     headers={'User-Agent': settings.user_agent})
 
     if r.status_code != 200:
         log.warning('Received status code %s while downloading image from Reddit', r.status_code)

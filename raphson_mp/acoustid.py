@@ -34,7 +34,8 @@ def lookup(fingerprint: Fingerprint) -> Iterator[str]:
                                     'client': API_KEY,
                                     'duration': fingerprint.duration,
                                     'fingerprint': fingerprint.fingerprint_b64,
-                                    'meta': 'recordingids'})
+                                    'meta': 'recordingids'},
+                            headers={'User-Agent': settings.user_agent})
     response.raise_for_status()
     json = response.json()
 
