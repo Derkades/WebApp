@@ -6,21 +6,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    /** @type {HTMLVideoElement} */
-    let videoElem = document.getElementById('video');
+    /** @type {HTMLDivElement} */
+    let videoContainer = document.getElementById('video');
     /** @type {HTMLAudioElement} */
     const audioElem = getAudioElement();
 
     videoButton.classList.add('hidden');
 
     function resetVideo() {
-        // cannot reliably remove source from video element, so we must create a new one
+        // cannot reliably remove source from video element, so we must remove the entire element
         // https://stackoverflow.com/q/79162209/4833737
-        const newElem = document.createElement('video');
-        newElem.id = 'video';
-        newElem.setAttribute('muted', '');
-        videoElem.replaceWith(newElem);
-        videoElem = newElem;
+        videoContainer.replaceChildren();
     }
 
     function blur() {
@@ -39,19 +35,32 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
+    function getVideoElement() {
+        const children = videoContainer.getElementsByTagName('video');
+        if (children.length > 0) {
+            return children[0];
+        }
+        return null;
+    }
+
     videoButton.addEventListener('click', () => {
+        videoButton.classList.add('hidden');
         const url =  queue.currentTrack.track.getVideoURL();
         console.info('video: set source', url);
+        const videoElem = document.createElement('video');
+        videoElem.setAttribute('muted', '');
         videoElem.src = url;
-        videoButton.classList.add('hidden');
+        videoElem.style.width = "100%";
         blur();
+        videoContainer.replaceChildren(videoElem);
         videoElem.play();
-
     });
 
     // Sync video time with audio
     audioElem.addEventListener('timeupdate', () => {
-        if (!videoElem.hasAttribute('src')) {
+        const videoElem = getVideoElement();
+
+        if (!videoElem) {
             return;
         }
 
@@ -81,8 +90,14 @@ document.addEventListener('DOMContentLoaded', () => {
         console.debug('video: in sync');
     });
 
-    audioElem.addEventListener('play', () => videoElem.play());
-    audioElem.addEventListener('pause', () => videoElem.pause());
+    audioElem.addEventListener('play', () => {
+        const videoElem = getVideoElement();
+        if (videoElem) videoElem.play();
+    });
+    audioElem.addEventListener('pause', () => {
+        const videoElem = getVideoElement();
+        if (videoElem) videoElem.pause();
+    });
 
     eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {
         resetVideo();
