@@ -2,6 +2,20 @@
 
 For all POST requests, a CSRF token is required as part of the request body with the name "csrf".
 
+Track object:
+  - `playlist` - playlist name (string)
+  - `path` - relative path to track
+  - `mtime` - integer, unix timestamp in seconds when the track was last modified
+  - `duration` - integer
+  - `title` - string
+  - `album` - string
+  - `album_artist` - string
+  - `year` - integer
+  - `artists` - list of artist names
+  - `tags` - list of tag names
+  - `video` - video type, `null`, `vp9`, `h264`
+  - `display` - display title (string)
+
 ## Tracks
 
 A track is identified by a `relpath` (relative path) locating a track within the music directory. For example: `RS/01 - Distraction.flac`.
@@ -79,7 +93,6 @@ Array of objects:
  - `release_type`: string
  - `packaging`: string
 
-
 ### GET `/tracks/filter`
 
 Params:
@@ -95,3 +108,52 @@ Response:
   - 304 Not Modified
 
 Response body (json): list of track objects
+
+### GET `/tracks/search`
+
+Params:
+  - `query` - string
+
+Response:
+  - 200 OK
+
+Response body (json):
+  - `tracks` list of track objects
+  - `albums` list of objects
+    - `album` album name
+    - `artist` album artist name
+
+### GET `/tracks/tags`
+
+Response:
+  - 200 OK
+
+Response body (json): list of strings
+
+## Playlists
+
+### GET `/playlist/list`
+
+Response:
+  - 200 OK
+
+Response body (json): list of objects:
+  - `name`
+  - `track_count`
+  - `favorite`
+  - `write`
+
+Note: empty playlists are not returned by this endpoint
+
+### POST `/playlist/<playlist_name>/choose_track`
+
+Request body (json):
+  - (`tag_mode`) `allow` or `deny`
+  - (`tags`) list of tag names
+  - (`require_metadata`) boolean
+
+Response:
+  - 200 OK
+  - 404 Not Found - if no track could be chosen from this playlist
+
+Response body (json): track object
