@@ -35,7 +35,7 @@ class SpotifyClient:
                                     data={'grant_type': 'client_credentials',
                                           'client_id': settings.spotify_api_id,
                                           'client_secret': settings.spotify_api_secret},
-                                    headers={'User-Agent': settings.user_agent}
+                                    headers={'User-Agent': settings.user_agent},
                                     timeout=10)
         response.raise_for_status()
         access_token: str = response.json()['access_token']
