@@ -9,7 +9,7 @@ from flask.typing import TemplateContextProcessorCallable
 from raphson_mp import (acoustid, auth, db, image, jsonw, lyrics, music,
                         musicbrainz, scanner, settings)
 from raphson_mp.image import ImageFormat
-from raphson_mp.lyrics import TimeSyncedLyrics
+from raphson_mp.lyrics import PlainLyrics, TimeSyncedLyrics
 from raphson_mp.music import AudioType, Track
 
 log = logging.getLogger(__name__)
@@ -146,6 +146,12 @@ def route_lyrics(path: str):
             return Response(None, 304)
 
         lyr = track.lyrics()
+
+        if 'type' in request.args:
+            if request.args['type'] == 'plain' and isinstance(lyr, TimeSyncedLyrics):
+                lyr = lyr.to_plain()
+            elif request.args['type'] == 'synced' and isinstance(lyr, PlainLyrics):
+                lyr = None
 
         return jsonw.json_response(lyrics.to_dict(lyr), last_modified=track.mtime)
 
