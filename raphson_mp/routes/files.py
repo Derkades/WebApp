@@ -154,11 +154,11 @@ def route_mkdir():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn, require_csrf=True)
 
-    path = music.from_relpath(request.form['path'])
+        path = music.from_relpath(request.form['path'])
 
-    playlist = Playlist.from_path(conn, path)
-    if not playlist.has_write_permission(user):
-        abort(403, 'No write permission for this playlist')
+        playlist = Playlist.from_path(conn, path)
+        if not playlist.has_write_permission(user):
+            abort(403, 'No write permission for this playlist')
 
     dirname = request.form['dirname']
     util.check_filename(dirname)
