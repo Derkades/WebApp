@@ -1,7 +1,8 @@
-from flask import Blueprint, Response, abort, redirect, render_template, request
+from flask import Blueprint, abort, redirect, render_template, request
 from flask_babel import gettext as _
 
-from raphson_mp import auth, db, language
+from raphson_mp import auth, db, language, music
+from raphson_mp.auth import PrivacyOption
 
 bp = Blueprint('account', __name__, url_prefix='/account')
 
@@ -25,6 +26,8 @@ def route_account():
         else:
             lastfm_name = None
 
+        playlists = music.playlists(conn)
+
     return render_template('account.jinja2',
                             user=user,
                             languages=language.LANGUAGES.items(),
@@ -32,7 +35,35 @@ def route_account():
                             sessions=sessions,
                             lastfm_enabled=lastfm.is_configured(),
                             lastfm_name=lastfm_name,
-                            lastfm_connect_url=lastfm.get_connect_url())
+                            lastfm_connect_url=lastfm.get_connect_url(),
+                            playlists=playlists)
+
+
+@bp.route('/change_settings', methods=['POST'])
+def route_change_settings():
+    with db.connect() as conn:
+        user = auth.verify_auth_cookie(conn, require_csrf=True)
+
+        nickname = request.form['nickname']
+        lang_code = request.form['language']
+        privacy = request.form['privacy']
+        playlist = request.form['playlist']
+
+        if nickname == '': nickname = None
+        if playlist == '': playlist = None
+        if lang_code == '': lang_code = None
+        if privacy == '': privacy = None
+
+        if lang_code not in language.LANGUAGES:
+            abort(400, 'Invalid language code')
+
+        if privacy not in PrivacyOption:
+            abort(400, 'Invalid privacy option')
+
+        conn.execute('UPDATE user SET nickname=?, language=?, privacy=?, primary_playlist=? WHERE id=?',
+                     (nickname, lang_code, privacy, playlist, user.user_id))
+
+    return redirect('/account', code=303)
 
 
 @bp.route('/change_password', methods=['POST'])
@@ -51,51 +82,3 @@ def route_change_password():
 
         user.update_password(request.form['new_password'])
         return redirect('/', code=303)
-
-
-@bp.route('/change_nickname', methods=['POST'])
-def route_change_nickname():
-    """
-    Form target to change nickname, called from /account page
-    """
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, require_csrf=True)
-
-        conn.execute('UPDATE user SET nickname=? WHERE id=?',
-                     (request.form['nickname'], user.user_id))
-
-    return redirect('/account', code=303)
-
-
-@bp.route('/change_language', methods=['POST'])
-def route_change_language():
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, require_csrf=True)
-
-        lang_code = request.form['language']
-        if lang_code == '':
-            conn.execute('UPDATE user SET language = NULL WHERE id=?', (user.user_id,))
-        else:
-            if lang_code not in language.LANGUAGES:
-                return Response('Invalid language code', 400, content_type='text/plain')
-
-            conn.execute('UPDATE user SET language=? WHERE id=?',
-                         (lang_code, user.user_id))
-
-    return redirect('/account', code=303)
-
-
-@bp.route('/change_privacy_setting', methods=['POST'])
-def route_change_privacy_setting():
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, require_csrf=True)
-
-        privacy = request.form['privacy']
-        assert privacy in {'none', 'aggregate', 'hidden'}
-
-        if privacy == 'none':
-            conn.execute('UPDATE user SET privacy = NULL WHERE id=?', (user.user_id,))
-        else:
-            conn.execute('UPDATE user SET privacy = ? WHERE id=?', (privacy, user.user_id))
-
-    return redirect('/account', code=303)

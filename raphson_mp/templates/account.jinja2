@@ -8,17 +8,13 @@
 
 {{ page_heading(gettext("Account settings for '%(username)s'", username=user.username)) }}
 
-<h2>{% trans %}Nickname{% endtrans %}</h2>
-<form method="POST" action="/account/change_nickname" class="form">
+<h2>{% trans %}Settings{% endtrans %}</h2>
+<form method="POST" action="/account/change_settings" class="form">
     <input type="hidden" value="{{ csrf_token }}" name="csrf">
+
     <label for="nickname">{% trans %}Nickname{% endtrans %}</label>
     <input type="text" value="{{ user.nickname if user.nickname }}" name="nickname" id="nickname">
-    <input type="submit" value="{% trans %}Change nickname{% endtrans %}">
-</form>
 
-<h2>{% trans %}Language{% endtrans %}</h2>
-<form method="POST" action="/account/change_language" class="form">
-    <input type="hidden" value="{{ csrf_token }}" name="csrf">
     <label for="language-select">{% trans %}Language{% endtrans %}</label>
     <select name="language" id="language">
         <option value="" {% if not user.language %}selected{% endif %}>{% trans %}System language{% endtrans %}</option>
@@ -30,25 +26,28 @@
             {% endif %}
         {% endfor %}
     </select>
-    <input type="submit" value="{% trans %}Change language{% endtrans %}">
+
+    <label for="privacy-select">{% trans %}Recording of listening activity{% endtrans %}</label>
+    <select name="privacy" id="privacy-select">
+        <option value="" {% if user.privacy.name == 'NONE' %}selected{% endif %}>{% trans %}Activity and statistics{% endtrans %}</option>
+        <option value="aggregate" {% if user.privacy.name == 'AGGREGATE' %}selected{% endif %}>{% trans %}Not in activity, only in statistics{% endtrans %}</option>
+        <option value="hidden" {% if user.privacy.name == 'HIDDEN' %}selected{% endif %}>{% trans %}No data recording{% endtrans %}</option>
+    </select>
+
+    <label for="playlist">{% trans %}Playlist{% endtrans %}</label>
+    <select id="playlist" name="playlist">
+        <option value="" {% if not user.primary_playlist %}selected{% endif %}></option>
+        {% for playlist in playlists %}
+            <option value="{{ playlist.name }}" {% if playlist.name == user.primary_playlist %}selected{% endif %}>{{ playlist.name }}</option>
+        {% endfor %}
+    </select>
+
+    <input type="submit" value="{% trans %}Save{% endtrans %}">
 </form>
 
 <h2>{% trans %}Data export{% endtrans %}</h2>
 <p>{% trans %}This export contains personal data stored in the database. It does not include music files, which can be downloaded separately using the file manager.{% endtrans %}</p>
 <p><a class="button" target="_blank" href="/export/data">{% trans %}Download{% endtrans %}</a></p>
-
-<h2>{% trans %}Privacy{% endtrans %}</h2>
-
-<form method="POST" action="/account/change_privacy_setting" class="form">
-    <input type="hidden" value="{{ csrf_token }}" name="csrf">
-    <label for="privacy-select">{% trans %}Recording of listening activity{% endtrans %}</label>
-    <select name="privacy" id="privacy-select">
-        <option value="none" {% if user.privacy.name == 'NONE' %}selected{% endif %}>{% trans %}Activity and statistics{% endtrans %}</option>
-        <option value="aggregate" {% if user.privacy.name == 'AGGREGATE' %}selected{% endif %}>{% trans %}Not in activity, only in statistics{% endtrans %}</option>
-        <option value="hidden" {% if user.privacy.name == 'HIDDEN' %}selected{% endif %}>{% trans %}No data recording{% endtrans %}</option>
-    </select>
-    <input type="submit" value="{% trans %}Change privacy setting{% endtrans %}">
-</form>
 
 <h2>{% trans %}Last.fm{% endtrans%}</h2>
 <p>

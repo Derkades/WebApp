@@ -61,24 +61,6 @@ def route_favorite():
     return redirect('/playlist/manage', code=303)
 
 
-@bp.route('/set_primary', methods=['POST'])
-def route_set_primary():
-    """
-    Form target to configure a primary playlist.
-    """
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, require_csrf=True)
-
-        playlist = request.form['primary-playlist']
-        if playlist == '':
-            conn.execute('UPDATE user SET primary_playlist = NULL WHERE id=?', (user.user_id,))
-        else:
-            conn.execute('UPDATE user SET primary_playlist=? WHERE id=?',
-                        (playlist, user.user_id))
-
-    return redirect('/playlist/manage', code=303)
-
-
 @bp.route('/create', methods=['POST'])
 def route_create():
     """
