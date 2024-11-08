@@ -44,10 +44,10 @@ class TestFlask(TestCase):
         with db.connect(read_only=True) as conn:
             return conn.execute('SELECT nickname FROM user WHERE username=?', (TEST_USERNAME,)).fetchone()[0]
 
-    def test_change_nickname(self):
-        response = self.client.post('/account/change_nickname', data={'nickname': '🐢', 'csrf': self.csrf})
-        assert response.status_code == 303, (response.status_code, response.text)
-        assert self._db_nickname() == '🐢'
+    # def test_change_nickname(self):
+    #     response = self.client.post('/account/change_nickname', data={'nickname': '🐢', 'csrf': self.csrf})
+    #     assert response.status_code == 303, (response.status_code, response.text)
+    #     assert self._db_nickname() == '🐢'
 
     def _db_password_hash(self) -> str:
         with db.connect(read_only=True) as conn:

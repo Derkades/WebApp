@@ -2,6 +2,8 @@ import logging
 
 import jinja2
 
+from raphson_mp.auth import AuthError
+
 try:
     import prometheus_client
 except ImportError:
@@ -17,7 +19,7 @@ from raphson_mp import language, settings
 log = logging.getLogger(__name__)
 
 
-def _handle_exception(e):
+def _handle_exception(e: BaseException):
     # pass through HTTP errors
     if isinstance(e, HTTPException):
         return e
@@ -31,7 +33,7 @@ def get_app(proxy_count: int, template_reload: bool) -> Flask:
     app.register_error_handler(Exception, _handle_exception)
 
     from raphson_mp.routes import auth, games, player, playlist, root, tracks
-    app.register_error_handler(auth.AuthError, auth.handle_auth_error)
+    app.register_error_handler(AuthError, auth.handle_auth_error)
     app.register_blueprint(auth.bp)
     app.register_blueprint(games.bp)
     app.register_blueprint(player.bp)

@@ -4,7 +4,6 @@ import time
 from tempfile import NamedTemporaryFile
 
 from flask import Blueprint, Response, abort, request, send_file
-from flask.typing import TemplateContextProcessorCallable
 
 from raphson_mp import (acoustid, auth, db, image, jsonw, lyrics, music,
                         musicbrainz, scanner, settings)

@@ -4,7 +4,7 @@ import sys
 import traceback
 from multiprocessing.pool import ThreadPool
 from sqlite3 import Connection
-from typing import cast
+from typing import Any, cast
 from urllib.parse import quote as urlencode
 
 import requests
@@ -155,7 +155,7 @@ class OfflineSync:
              'cover_data': cover,
              'lyrics_json': lyrics})
 
-    def _update_track(self, track: dict[str, str|int]) -> None:
+    def _update_track(self, track: dict[str, Any]) -> None:
         self._download_track_content(cast(str, track['path']))
 
         self.db_music.execute('UPDATE track SET duration=?, title=?, album=?, album_artist=?, year=?, mtime=? WHERE path=?',
@@ -165,10 +165,10 @@ class OfflineSync:
         self.db_music.execute('DELETE FROM track_artist WHERE track=?', (track['path'],))
 
         if track['artists']:
-            insert = [(track['path'], artist) for artist in track['artists']]
+            insert: list[tuple[str, str]] = [(track['path'], artist) for artist in track['artists']]
             self.db_music.executemany('INSERT INTO track_artist (track, artist) VALUES (?, ?)', insert)
 
-    def _insert_track(self, playlist: str, track) -> None:
+    def _insert_track(self, playlist: str, track: dict[str, Any]) -> None:
         self._download_track_content(track['path'])
 
         self.db_music.execute(
@@ -190,10 +190,8 @@ class OfflineSync:
         for path, in rows:
             if path not in track_paths:
                 log.info('Delete: %s', path)
-                self.db_offline.execute('DELETE FROM content WHERE path=?',
-                                        (path,))
-                self.db_music.execute('DELETE FROM track WHERE path=?',
-                                      (path,))
+                self.db_offline.execute('DELETE FROM content WHERE path=?', (path,))
+                self.db_music.execute('DELETE FROM track WHERE path=?', (path,))
 
     def _prune_playlists(self):
         # Remove empty playlists

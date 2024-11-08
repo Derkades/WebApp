@@ -61,3 +61,4 @@ reportUnusedCallResult = false
 reportAny = false
 reportOptionalSubscript = false
 reportRedeclaration = false
+reportImportCycles = false

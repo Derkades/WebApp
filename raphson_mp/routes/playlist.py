@@ -141,31 +141,31 @@ def route_list():
                 for playlist in user_playlists
                 if playlist.track_count > 0]
         response = jsonw.json_response(json)
-        response.cache_control.max_age = 60;
+        response.cache_control.max_age = 60
         return response
 
 
 @bp.route('/<playlist>/choose_track', methods=['POST'])
-def route_track(playlist):
+def route_track(playlist_name: str):
     """
     Choose random track from the provided playlist directory.
     """
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn, require_csrf=True)
 
-        playlist_obj = music.playlist(conn, playlist)
-        require_metadata: bool = request.json['require_metadata'] if 'require_metadata' in request.json else False
+        playlist = music.playlist(conn, playlist_name)
+        require_metadata: bool = cast(bool, request.json['require_metadata']) if 'require_metadata' in request.json else False
         if 'tag_mode' in request.json:
-            tag_mode = request.json['tag_mode']
+            tag_mode = cast(str, request.json['tag_mode'])
             assert tag_mode in {'allow', 'deny'}
-            tags = request.json['tags']
+            tags = cast(list[str], request.json['tags'])
             assert isinstance(tags, list)
-            chosen_track = playlist_obj.choose_track(user, require_metadata=require_metadata, tag_mode=tag_mode, tags=tags)
+            chosen_track = playlist.choose_track(user, require_metadata=require_metadata, tag_mode=tag_mode, tags=tags)
         else:
-            chosen_track = playlist_obj.choose_track(user, require_metadata=require_metadata)
+            chosen_track = playlist.choose_track(user, require_metadata=require_metadata)
 
         if chosen_track is None:
-            return Response('no track found', 404, content_type='text/plain')
+            abort(404, 'no track found')
 
         return chosen_track.info_dict()
 

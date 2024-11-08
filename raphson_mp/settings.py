@@ -21,17 +21,17 @@ webscraping_user_agent = getenv('MUSIC_WEBSCRAPING_USER_AGENT', 'Mozilla/5.0 (Wi
 loudnorm_filter = 'loudnorm=I=-16'
 
 # User configurable settings
-music_dir: Path = None
-data_dir: Path = None
-ffmpeg_log_level: str = None
-track_max_duration_seconds: int = None
+music_dir: Path = None  # pyright: ignore[reportAssignmentType]
+data_dir: Path = None  # pyright: ignore[reportAssignmentType]
+ffmpeg_log_level: str = 'warning'
+track_max_duration_seconds: int = 1200
 radio_playlists: list[str] = []
 lastfm_api_key: str | None = None
 lastfm_api_secret: str | None = None
 spotify_api_id: str | None = None
 spotify_api_secret: str | None = None
-offline_mode: bool = None
-news_server: str = None
+offline_mode: bool = False
+news_server: str | None = None
 
 def ffmpeg_flags():
     return ['-hide_banner', '-nostats', '-loglevel', ffmpeg_log_level]

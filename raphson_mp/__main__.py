@@ -260,8 +260,8 @@ def _strenv(name: str, default: str | None = None) -> str | None:
     return os.getenv('MUSIC_' + name, default)
 
 
-def _intenv(name: str, default: int) -> int | None:
-    text = _strenv(name, str(default))
+def _intenv(name: str, default: int | None = None) -> int | None:
+    text = _strenv(name, str(default) if default else None)
     if text is None:
         return None
     return int(text)
@@ -295,12 +295,12 @@ def main():
                         default=_strenv('MUSIC_DIR', './music'),
                         help='path to directory where music files are stored')
     # error level by default to hide unfixable "deprecated pixel format used" warning
-    parser.add_argument('--ffmpeg-log-level', default=_strenv('FFMPEG_LOG_LEVEL', 'error'),
+    parser.add_argument('--ffmpeg-log-level', default=_strenv('FFMPEG_LOG_LEVEL'),
                         choices=('quiet', 'fatal', 'error', 'warning', 'info', 'verbose', 'debug'),
                         help='log level for ffmpeg')
     parser.add_argument('--track-max-duration-seconds',
                         type=int,
-                        default=_intenv('TRACK_MAX_DURATION_SECONDS', 1200))
+                        default=_intenv('TRACK_MAX_DURATION_SECONDS'))
     parser.add_argument('--radio-playlists',
                         default=_strenv('RADIO_PLAYLISTS'),
                         help='comma-separated list of playlists to use for radio')
@@ -318,7 +318,7 @@ def main():
                         help='run in offline mode, using music synced from a primary music server')
     parser.add_argument('--news-server',
                         help='news server url: https://github.com/Derkades/news-scraper',
-                        default=_strenv('NEWS_SERVER', 'http://127.0.0.1:43473'))
+                        default=_strenv('NEWS_SERVER'))
 
     subparsers = parser.add_subparsers(required=True)
 
@@ -405,7 +405,8 @@ def main():
 
     settings.data_dir = Path(args.data_dir).absolute()
     assert settings.data_dir.exists(), 'data dir does not exist: ' + settings.data_dir.as_posix()
-    settings.ffmpeg_log_level = args.ffmpeg_log_level
+    if args.ffmpeg_log_level:
+        settings.ffmpeg_log_level = args.ffmpeg_log_level
     settings.track_max_duration_seconds = args.track_max_duration_seconds
     settings.radio_playlists = split_by_comma(args.radio_playlists)
     settings.lastfm_api_key = args.lastfm_api_key
@@ -413,7 +414,8 @@ def main():
     settings.spotify_api_id = args.spotify_api_id
     settings.spotify_api_secret = args.spotify_api_secret
     settings.offline_mode = args.offline
-    settings.news_server = args.news_server
+    if args.news_server:
+        settings.news_server = args.news_server
 
     if settings.offline_mode:
         settings.music_dir = Path('/dev/null')

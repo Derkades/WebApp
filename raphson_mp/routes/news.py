@@ -13,6 +13,8 @@ bp = Blueprint('news', __name__, url_prefix='/news')
 @bp.route('/audio')
 def audio():
     with tempfile.NamedTemporaryFile() as temp_input, tempfile.NamedTemporaryFile() as temp_output:
+        if not settings.news_server:
+            abort(503, 'news server not configured')
 
         # Download wave audio to temp file
         with requests.get(settings.news_server + '/news.wav',

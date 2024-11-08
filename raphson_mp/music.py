@@ -160,7 +160,7 @@ def get_cover(artist: str | None, album: str, meme: bool,
                 log.warning('Failed to generate thumbnail, image is probably corrupt. Trying another image.')
                 continue
 
-        return return_data
+        return return_data  # pyright: ignore[reportPossiblyUnboundVariable]
 
     raise ValueError('always at least one possible cover must be returned')
 
