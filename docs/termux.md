@@ -61,9 +61,9 @@ Run: `pip install --upgrade raphson-mp`
 ## Moving from legacy git clone installation to Python package
 
 1. Follow the installation instructions again, but do not start the music player yet.
-2. Move the `data` directory from `WebApp` to the correct location, for example `~/mp-data`
+2. Move the `data` directory from `raphson-music-player` to the correct location, for example `~/mp-data`
 3. Start the music player, and make sure it all works
-4. Delete the old installation: `rm -rf WebApp`
+4. Delete the old installation: `rm -rf raphson-music-player`
 
 ## Updating legacy git clone installation
 

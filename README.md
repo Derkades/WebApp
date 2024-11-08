@@ -1,4 +1,4 @@
-# WebApp
+# Raphson Music Player
 
 Web-based music player for communities (hacker spaces, maker spaces).
 
