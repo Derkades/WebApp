@@ -105,16 +105,17 @@ class Session:
             return _('Unknown')
 
         if 'Music-Player-Android' in self.user_agent:
-            return 'MusicPlayer, Android'
+            return 'Raphson Music Player, Android'
 
-        if self.user_agent == settings.user_agent:
-            return 'MusicPlayer'
+        if 'raphson-music-player' in self.user_agent:
+            return 'Raphson Music Player'
 
-        if self.user_agent == settings.user_agent_offline_sync:
-            return 'MusicPlayer offline sync'
+        # old versions
+        if 'DanielKoomen/WebApp' in self.user_agent:
+            return 'Raphson Music Player'
 
         if self.user_agent == 'rmp-playback-server':
-            return 'Playback server'
+            return 'Raphson playback server'
 
         if 'Werkzeug' in self.user_agent:
             return 'Flask test client'

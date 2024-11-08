@@ -2,6 +2,12 @@
 
 from os import getenv
 from pathlib import Path
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    _version = version(__name__.split('.')[0])
+except PackageNotFoundError:
+    _version = 'dev'
 
 # Hardcoded settings
 csrf_validity_seconds = 3600
@@ -10,8 +16,7 @@ static_dir = app_dir / 'static'
 migration_sql_dir = app_dir / 'migrations'
 init_sql_dir = app_dir / 'sql'
 raphson_png = static_dir / 'img' / 'raphson.png'
-user_agent = 'Super-fancy-music-player/2.0 (https://github.com/DanielKoomen/WebApp/)'
-user_agent_offline_sync = 'Super fancy music player (offline sync) (https://github.com/DanielKoomen/WebApp/)'
+user_agent = f'raphson-music-player/{_version} (https://github.com/Derkades/raphson-music-player)'
 webscraping_user_agent = getenv('MUSIC_WEBSCRAPING_USER_AGENT', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/114.0')  # https://useragents.me
 loudnorm_filter = 'loudnorm=I=-16'
 

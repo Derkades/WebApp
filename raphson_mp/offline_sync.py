@@ -32,7 +32,7 @@ class OfflineSync:
         """
         Returns header dictionary for use by requests library
         """
-        headers = {'User-Agent': settings.user_agent_offline_sync}
+        headers = {'User-Agent': settings.user_agent}
         if self.token is not None:
             headers['Cookie'] = 'token=' + self.token
         return headers
