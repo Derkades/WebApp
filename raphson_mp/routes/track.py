@@ -165,7 +165,8 @@ def route_update_metadata(path: str):
         user = auth.verify_auth_cookie(conn, require_csrf=True)
 
         track = Track.by_relpath(conn, path)
-        assert track is not None
+        if track is None:
+            return abort(404, 'track not found')
 
         playlist = music.playlist(conn, track.playlist)
         if not playlist.has_write_permission(user):
