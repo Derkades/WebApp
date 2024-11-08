@@ -7,17 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /** @type {HTMLDivElement} */
-    let videoContainer = document.getElementById('video');
+    const videoBox = document.getElementById('video-box');
     /** @type {HTMLAudioElement} */
     const audioElem = getAudioElement();
 
     videoButton.classList.add('hidden');
-
-    function resetVideo() {
-        // cannot reliably remove source from video element, so we must remove the entire element
-        // https://stackoverflow.com/q/79162209/4833737
-        videoContainer.replaceChildren();
-    }
 
     function blur() {
         for (const elem of document.getElementsByClassName('cover-img')) {
@@ -36,13 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getVideoElement() {
-        const children = videoContainer.getElementsByTagName('video');
-        if (children.length > 0) {
-            return children[0];
-        }
-        return null;
+        return document.getElementById('video');
     }
 
+    // Replace album cover with video
     videoButton.addEventListener('click', () => {
         videoButton.classList.add('hidden');
         const url =  queue.currentTrack.track.getVideoURL();
@@ -50,9 +41,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const videoElem = document.createElement('video');
         videoElem.setAttribute('muted', '');
         videoElem.src = url;
-        videoElem.style.width = "100%";
+        videoElem.id = 'video';
         blur();
-        videoContainer.replaceChildren(videoElem);
+        videoBox.replaceChildren(videoElem);
+        videoBox.classList.remove('hidden');
+        document.getElementById('album-cover-box').classList.add('hidden');
         videoElem.play();
     });
 
@@ -100,8 +93,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     eventBus.subscribe(MusicEvent.TRACK_CHANGE, () => {
-        resetVideo();
         resetBlur();
+
+        // cannot reliably remove source from video element, so we must remove the entire element
+        // https://stackoverflow.com/q/79162209/4833737
+        videoBox.replaceChildren();
+        videoBox.classList.add('hidden'); // should not cause flexbox gap
+
+        // Make cover visible again
+        document.getElementById('album-cover-box').classList.remove('hidden');
 
         if (queue.currentTrack.track.video != null) {
             videoButton.classList.remove('hidden');

@@ -366,9 +366,5 @@ input[type=range].input-volume-low::-moz-range-thumb {
 
 #video {
     width: 100%;
-    position: absolute;
-    z-index: 1;
-    /* center vertically: https://stackoverflow.com/a/23384995 */
-    top: 50%;
-    transform: translate(0, -50%);
+    display: block; /* otherwise video takes up a few pixels of extra space https://stackoverflow.com/a/36390497 */
 }
