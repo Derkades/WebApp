@@ -62,3 +62,4 @@ reportAny = false
 reportOptionalSubscript = false
 reportRedeclaration = false
 reportImportCycles = false
+reportUnusedImport = false # already handled by ruff
