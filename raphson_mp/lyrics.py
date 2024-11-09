@@ -301,14 +301,13 @@ class GeniusFetcher(LyricsFetcher):
                         headers={'User-Agent': settings.webscraping_user_agent})
         text = r.text
 
-        # Find the important bit of javascript using these known parts of the code
-        start = text.index('window.__PRELOADED_STATE__ = JSON.parse(') + 41
-        end = start + text[start:].index("}');") + 1
+        # Find the important bit of javascript using known parts of the code
+        text = _strcut(text, "window.__PRELOADED_STATE__ = JSON.parse('", "');")
 
         # Inside the javascript bit that has now been extracted, is a string. This string contains
         # JSON data. Because it is in a string, some characters are escaped. These need to be
         # un-escaped first.
-        info_json_string = text[start:end] \
+        text = text \
             .replace('\\"', "\"") \
             .replace("\\'", "'") \
             .replace('\\\\', '\\') \
@@ -317,10 +316,10 @@ class GeniusFetcher(LyricsFetcher):
 
         # Now, the JSON object is ready to be parsed.
         try:
-            info_json = json.loads(info_json_string)
+            info_json = json.loads(text)
         except json.decoder.JSONDecodeError as ex:
             log.info('Error retrieving lyrics: json decode error at %s', ex.pos)
-            log.info('Neighbouring text: "%s"', info_json_string[ex.pos-20:ex.pos+20])
+            log.info('Neighbouring text: "%s"', text[ex.pos-20:ex.pos+20])
             raise ex
 
         # For some reason, the JSON object happens to contain lyrics HTML. This HTML is parsed.
