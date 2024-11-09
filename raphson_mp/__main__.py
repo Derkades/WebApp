@@ -407,7 +407,8 @@ def main():
     assert settings.data_dir.exists(), 'data dir does not exist: ' + settings.data_dir.as_posix()
     if args.ffmpeg_log_level:
         settings.ffmpeg_log_level = args.ffmpeg_log_level
-    settings.track_max_duration_seconds = args.track_max_duration_seconds
+    if args.track_max_duration_seconds:
+        settings.track_max_duration_seconds = args.track_max_duration_seconds
     settings.radio_playlists = split_by_comma(args.radio_playlists)
     settings.lastfm_api_key = args.lastfm_api_key
     settings.lastfm_api_secret = args.lastfm_api_secret
