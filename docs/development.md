@@ -83,3 +83,9 @@ Run all tests: `python3 -m unittest`
 Run a specific test: `python3 -m unittest tests/test_flask.py`
 
 Note: it is normal to see error messages such as "failed login", as long as all tests succeed.
+
+Measure code coverage:
+```
+python3 -m coverage run -m unittest
+python3 -m coverage report
+```

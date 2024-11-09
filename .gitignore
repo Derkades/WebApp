@@ -8,3 +8,4 @@ messages.pot
 *.mo
 download-state.json
 dist/
+.coverage
