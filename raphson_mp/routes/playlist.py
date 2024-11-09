@@ -145,7 +145,7 @@ def route_list():
         return response
 
 
-@bp.route('/<playlist>/choose_track', methods=['POST'])
+@bp.route('/<playlist_name>/choose_track', methods=['POST'])
 def route_track(playlist_name: str):
     """
     Choose random track from the provided playlist directory.
