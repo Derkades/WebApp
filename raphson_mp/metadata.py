@@ -311,9 +311,6 @@ def probe(path: Path) -> Metadata | None:
                 video = 'vp9'
             elif stream['codec_name'] == 'h264':
                 video = 'h264'
-            else:
-                log.warning('ignoring video stream: %s', stream['codec_name'])
-
 
     if 'tags' in data['format']:
         meta_tags.extend(data['format']['tags'].items())
