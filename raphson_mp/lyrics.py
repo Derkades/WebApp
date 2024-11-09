@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 import difflib
 import html
 import json
@@ -7,8 +8,10 @@ import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from html.parser import HTMLParser
+import traceback
 from typing import Any, Final, override
 
+from flask import Response
 import requests
 
 from raphson_mp import cache, settings
@@ -59,6 +62,11 @@ def _strmatch(a: str, b: str):
     if not is_match:
         log.info("strings don't match: '%s' '%s'", a, b)
     return is_match
+
+def _strcut(text: str, start: str, end: str):
+    start_i = text.index(start) + len(start)
+    end_i = start_i + text[start_i:].index(end)
+    return text[start_i:end_i]
 
 
 class LyricsFetcher(ABC):
@@ -323,15 +331,79 @@ class GeniusFetcher(LyricsFetcher):
         return lyrics_text
 
 
+class LyricFindFetcher(LyricsFetcher):
+    # https://lyrics.lyricfind.com/openapi.spec.json
+    name: str = 'LyricFind'
+    supports_synced: bool = False
+
+    @override
+    def find(self, title: str, artist: str, album: str | None, duration: int | None) -> PlainLyrics | None:
+        for slug in self._search(title, artist, duration):
+            try:
+                return self._get(slug)
+            except:
+                traceback.print_exc()
+                continue
+        return None
+
+    def _search(self, title: str, artist: str, duration: int | None) -> Iterator[str]:
+        response = requests.get('https://lyrics.lyricfind.com/api/v1/search',
+                                headers={'User-Agent': settings.user_agent},
+                                params={'reqtype': 'default',
+                                        'territory': 'NL',
+                                        'searchtype': 'track',
+                                        'track': title,
+                                        'artist': artist,
+                                        'limit': 10,
+                                        'output': 'json',
+                                        'useragent': settings.user_agent},
+                                timeout=10)
+        response.raise_for_status()
+        for track in response.json()['tracks']:
+            log.info('found result: %s - %s', track['artist']['name'], track['title'])
+            if not _strmatch(title, track['title']):
+                continue
+
+            if not _strmatch(artist, track['artist']['name']) and artist not in [artist['name'] for artist in track['artists']]:
+                continue
+
+            if duration:
+                duration_str = track['duration']
+                duration_int = int(duration_str.split(':')[0]) * 60 + int(duration_str.split(':')[1])
+
+                if abs(duration - duration_int) > 5:
+                    log.info('duration not close enough')
+                    continue
+
+            yield track['slug']
+
+    def _get(self, slug: str) -> PlainLyrics:
+        # 'https://lyrics.lyricfind.com/api/v1/lyric' exists but seems to always return unauthorized
+        # use a web scraper instead :-)
+
+        url = 'https://lyrics.lyricfind.com/lyrics/' + slug
+        log.info('LyricFind: downloading from: %s', url)
+        response = requests.get(url,
+                                timeout=10,
+                                headers={'User-Agent': settings.webscraping_user_agent})
+        response.raise_for_status()
+        response_html = response.text
+        response_json = _strcut(response_html, '<script id="__NEXT_DATA__" type="application/json">', '</script>')
+        lyrics_text = json.loads(response_json)['props']['pageProps']['songData']['track']['lyrics']
+        return PlainLyrics(url, lyrics_text)
+
+
 if settings.offline_mode:
     # set fetchers to an empty list, as an additional safety measure to ensure no data is used in offline mode
     FETCHERS: Final[list[LyricsFetcher]] = []
 else:
     FETCHERS: Final[list[LyricsFetcher]] = [
-        LrcLibFetcher(), # No rate limit
-        MusixMatchFetcher(), # Strict rate limiting
-        GeniusFetcher(), # Relaxed rate limiting, no time-synced lyrics
-        AZLyricsFetcher(), # Unknown rate limiting, no time-synced lyrics
+        #                      ratelimit   time-synced   exact search  duration
+        LrcLibFetcher(),     # none        yes           yes           yes
+        MusixMatchFetcher(), # bad         yes           no            no
+        LyricFindFetcher(),  # unknown     no            yes           yes
+        GeniusFetcher(),     # good        no            no            no
+        AZLyricsFetcher(),   # unknown     no            yes           no
     ]
 
 

@@ -2,7 +2,7 @@
 
 from unittest import TestCase
 
-from raphson_mp.lyrics import AZLyricsFetcher, GeniusFetcher, LrcLibFetcher, PlainLyrics, TimeSyncedLyrics
+from raphson_mp.lyrics import AZLyricsFetcher, GeniusFetcher, LrcLibFetcher, LyricFindFetcher, PlainLyrics, TimeSyncedLyrics
 
 
 class TestLyrics(TestCase):
@@ -28,3 +28,8 @@ class TestLyrics(TestCase):
         lyrics = GeniusFetcher().find('Give Me One Reason', 'Tracy Chapman', None, None)
         assert isinstance(lyrics, PlainLyrics)
         assert "You know that I called you, I called too many times" in lyrics.text, lyrics.text
+
+    def test_lyricfind(self):
+        lyrics = LyricFindFetcher().find('Blank Space', 'Taylor Swift', None, None)
+        assert isinstance(lyrics, PlainLyrics)
+        assert "Nice to meet you, where you been?" in lyrics.text, lyrics.text
