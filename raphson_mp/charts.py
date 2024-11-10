@@ -366,12 +366,12 @@ def similarity_heatmap(conn: Connection):
     for p1, p2, count in result:
         data_dict[(p1, p2)] = count
 
-    xp = playlists[:-1]
-    yp = playlists[1:]
+    xp = playlists
+    yp = playlists
     data = []
     for i1, p1 in enumerate(xp):
         for i2, p2 in enumerate(yp):
-            if i1 > i2:
+            if i1 == i2:
                 continue
             elif (p1, p2) in data_dict:
                 if data_dict[(p1, p2)] is not None:
