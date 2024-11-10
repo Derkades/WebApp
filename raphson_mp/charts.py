@@ -1,6 +1,5 @@
 import time
 from collections import Counter
-from collections.abc import Iterable
 from datetime import datetime
 from enum import Enum, unique
 from sqlite3 import Connection
@@ -48,7 +47,7 @@ class StatsPeriod(Enum):
         raise ValueError()
 
 
-def chart(title: str, ldata: Iterable[str], xdata: Iterable[str|int] | None, ydata: Iterable[str|int] | None, series: list[object],
+def chart(title: str, ldata: list[str], xdata: list[str|int] | None, ydata: list[str|int] | None, series: list[object],
           all_labels: bool = False, extra: dict[str, Any] | None = None):
     if extra is None:
         extra = {}
@@ -86,7 +85,7 @@ def chart(title: str, ldata: Iterable[str], xdata: Iterable[str|int] | None, yda
     return chart
 
 
-def chart_singleaxis(title: str, ldata: Iterable[str], axisdata: Iterable[str|int], series, horizontal):
+def chart_singleaxis(title: str, ldata: list[str], axisdata: list[str|int], series, horizontal):
     if horizontal:
         ydata = axisdata
         xdata = None
@@ -96,11 +95,11 @@ def chart_singleaxis(title: str, ldata: Iterable[str], axisdata: Iterable[str|in
     return chart(title, ldata, xdata, ydata, series)
 
 
-def bar(title: str, name: str, axisdata: Iterable[str|int], seriesdata: Iterable[int], horizontal=False):
+def bar(title: str, name: str, axisdata: list[str|int], seriesdata: list[int], horizontal=False):
     return chart_singleaxis(title, [], axisdata, [{'name': name, 'type': 'bar', 'data': seriesdata}], horizontal)
 
 
-def multibar(title: str, axisdata: Iterable[str|int], seriesdata: dict[str, Iterable[int]], horizontal=False, stack=True):
+def multibar(title: str, axisdata: list[str|int], seriesdata: dict[str, list[int]], horizontal=False, stack=True):
     series = [{'name': name,
                'type': 'bar',
                'data': data}
@@ -111,7 +110,7 @@ def multibar(title: str, axisdata: Iterable[str|int], seriesdata: dict[str, Iter
     return chart_singleaxis(title, [name for name, _ in seriesdata.items()], axisdata, series, horizontal)
 
 
-def heatmap(title: str, name: str, xdata: Iterable[str|int], ydata: Iterable[str|int], seriesdata):
+def heatmap(title: str, name: str, xdata: list[str|int], ydata: list[str|int], seriesdata):
     series = [{'name': name,
                'type': 'heatmap',
                'data': seriesdata}]
@@ -185,25 +184,27 @@ def chart_last_chosen(conn: Connection):
     """
     Last chosen chart
     """
-    result = conn.execute('SELECT last_chosen FROM track')
-    counts = [0, 0, 0, 0, 0]
-    current = int(time.time())
-    for (timestamp,) in result:
-        if timestamp == 0:
-            counts[4] += 1  # never
-        if timestamp > current - 60*60*24:
-            counts[0] += 1 # today
-        elif timestamp > current - 60*60*24*7:
-            counts[1] += 1 # this week
-        elif timestamp > current - 60*60*24*30:
-            counts[2] += 1 # this month
-        else:
-            counts[3] += 1 # long ago
+    cur = conn.cursor()
+    result_playlists = [row[0] for row in cur.execute('SELECT playlist FROM track GROUP BY playlist ORDER BY playlist')]
+    result_today = cur.execute('SELECT playlist, COUNT(last_chosen) FROM track WHERE last_chosen >= unixepoch() - 60*60*24 GROUP BY playlist ORDER BY playlist').fetchall()
+    result_week = cur.execute('SELECT playlist, COUNT(last_chosen) FROM track WHERE last_chosen >= unixepoch() - 60*60*24*7 AND last_chosen < unixepoch() - 60*60*24 GROUP BY playlist ORDER BY playlist').fetchall()
+    result_month = cur.execute('SELECT playlist, COUNT(last_chosen) FROM track WHERE last_chosen >= unixepoch() - 60*60*24*30 AND last_chosen < unixepoch() - 60*60*24*7 GROUP BY playlist ORDER BY playlist').fetchall()
+    result_year = cur.execute('SELECT playlist, COUNT(last_chosen) FROM track WHERE last_chosen >= unixepoch() - 60*60*24*365 AND last_chosen < unixepoch() - 60*60*24*30 GROUP BY playlist ORDER BY playlist').fetchall()
+    result_long_ago = cur.execute('SELECT playlist, COUNT(last_chosen) FROM track WHERE last_chosen < unixepoch() - 60*60*24*365 AND last_chosen != 0 GROUP BY playlist ORDER BY playlist').fetchall()
+    result_never = cur.execute('SELECT playlist, COUNT(last_chosen) FROM track WHERE last_chosen == 0 GROUP BY playlist ORDER BY playlist').fetchall()
 
-    return bar(_('When tracks were last chosen by algorithm'),
-               _('Number of tracks'),
-               [_('Today'), _('This week'), _('This month'), _('Long ago'), _('Never')],
-               counts)
+    axis = [_('Today'), _('This week'), _('This month'), _('Last year'), _('Long ago'), _('Never')]
+    series = {}
+
+    for playlist in result_playlists:
+        series[playlist] = [0] * 6
+
+    for i, result in enumerate((result_today, result_week, result_month, result_year, result_long_ago, result_never)):
+        for playlist, count in result:
+            series[playlist][i] = count
+
+    return multibar(_('When tracks were last chosen by algorithm'), axis, series)
+
 
 def charts_playlists(conn: Connection):
     """
@@ -390,8 +391,8 @@ def get_data(period: StatsPeriod):
                 similarity_heatmap(conn),
                 *chart_popular_artists_tags(conn),
                 chart_track_year(conn),
-                *charts_playlists(conn),
                 chart_last_chosen(conn),
+                *charts_playlists(conn),
                 chart_unique_artists(conn)]
 
     return data
