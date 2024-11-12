@@ -7,17 +7,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: robin@rslot.nl\n"
-"POT-Creation-Date: 2024-11-08 21:45+0100\n"
-"PO-Revision-Date: 2024-11-08 21:49+0100\n"
+"POT-Creation-Date: 2024-11-12 17:30+0100\n"
+"PO-Revision-Date: 2024-11-12 17:19+0100\n"
 "Last-Translator: \n"
-"Language-Team: nl <robin@rslot.nl>\n"
 "Language: nl\n"
+"Language-Team: nl <robin@rslot.nl>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Generated-By: Babel 2.16.0\n"
-"X-Generator: Poedit 3.5\n"
 
 #: auth.py:105 auth.py:131 auth.py:138
 msgid "Unknown"
@@ -36,7 +35,8 @@ msgid ""
 "Your are not an administrator, but this page requires administrative "
 "privileges"
 msgstr ""
-"Je bent geen administrator, maar deze pagina vereist administratieve rechten"
+"Je bent geen administrator, maar deze pagina vereist administratieve "
+"rechten"
 
 #: auth.py:256
 msgid "Missing CSRF token from request."
@@ -46,133 +46,137 @@ msgstr "CSRF token ontbreekt."
 msgid "Invalid CSRF token in request. Please refresh the page and try again."
 msgstr "Ongeldige CSRF token in verzoek. Herlaad de pagina en probeer opnieuw."
 
-#: charts.py:203
-msgid "When tracks were last chosen by algorithm"
-msgstr "Wanneer nummers voor het laatst gekozen zijn door het algoritme"
-
-#: charts.py:204 charts.py:215
-msgid "Number of tracks"
-msgstr "Aantal nummers"
-
-#: charts.py:205
+#: charts.py:196
 msgid "Today"
 msgstr "Vandaag"
 
-#: charts.py:205
+#: charts.py:196
 msgid "This week"
 msgstr "Deze week"
 
-#: charts.py:205
+#: charts.py:196
 msgid "This month"
 msgstr "Deze maand"
 
-#: charts.py:205
+#: charts.py:196
+msgid "Last year"
+msgstr "Afgelopen jaar"
+
+#: charts.py:196
 msgid "Long ago"
 msgstr "Lang geleden"
 
-#: charts.py:205
+#: charts.py:196
 msgid "Never"
 msgstr "Nooit"
 
-#: charts.py:215
+#: charts.py:206
+msgid "When tracks were last chosen by algorithm"
+msgstr "Wanneer nummers voor het laatst gekozen zijn door het algoritme"
+
+#: charts.py:216
 msgid "Number of tracks in playlists"
 msgstr "Aantal nummers in afspeellijsten"
 
 #: charts.py:216
+msgid "Number of tracks"
+msgstr "Aantal nummers"
+
+#: charts.py:217
 msgid "Mean duration of tracks in playlists"
 msgstr "Gemiddelde lengte van nummers in afspeellijsten"
 
-#: charts.py:216 charts.py:217
+#: charts.py:217 charts.py:218
 msgid "Track duration"
 msgstr "Lengte van nummer"
 
-#: charts.py:217
+#: charts.py:218
 msgid "Total duration of tracks in playlists"
 msgstr "Totale lengte van nummers in afspeellijsten"
 
-#: charts.py:240
+#: charts.py:241
 msgid "Track release year distribution"
 msgstr "Distributie van jaar van uitgave"
 
-#: charts.py:260
+#: charts.py:261
 msgid "Active users"
 msgstr "Actieve gebruikers"
 
-#: charts.py:263
+#: charts.py:264
 msgid "Played playlists"
 msgstr "Gespeelde afspeellijsten"
 
-#: charts.py:278
+#: charts.py:279
 msgid "Most played tracks"
 msgstr "Meest gespeelde nummers"
 
-#: charts.py:297
+#: charts.py:298
 msgid "Most played artists"
 msgstr "Meest gespeelde artiesten"
 
-#: charts.py:314
+#: charts.py:315
 msgid "Most played albums"
 msgstr "Meest gespeelde albums"
 
-#: charts.py:328
+#: charts.py:329
 msgid "Time of day"
 msgstr "Moment van de dag"
 
-#: charts.py:329
+#: charts.py:330
 msgid "Day of week"
 msgstr "Dag van de week"
 
-#: charts.py:329
+#: charts.py:330
 msgid "Monday"
 msgstr "Maandag"
 
-#: charts.py:329
+#: charts.py:330
 msgid "Tuesday"
 msgstr "Dinsdag"
 
-#: charts.py:329
+#: charts.py:330
 msgid "Wednesday"
 msgstr "Woensdag"
 
-#: charts.py:329
+#: charts.py:330
 msgid "Thursday"
 msgstr "Donderdag"
 
-#: charts.py:329
+#: charts.py:330
 msgid "Friday"
 msgstr "Vrijdag"
 
-#: charts.py:329
+#: charts.py:330
 msgid "Saturday"
 msgstr "Zaterdag"
 
-#: charts.py:329
+#: charts.py:330
 msgid "Sunday"
 msgstr "Zondag"
 
-#: charts.py:339
+#: charts.py:340
 msgid "Artist diversity"
 msgstr "Artiestendiversiteit"
 
-#: charts.py:339
+#: charts.py:340
 msgid "Ratio"
 msgstr "Verhouding"
 
-#: charts.py:343
+#: charts.py:344
 msgid "Artists in playlists"
 msgstr "Artiesten in afspeellijsten"
 
-#: charts.py:343
+#: charts.py:344
 msgid "Tags in playlists"
 msgstr "Tags in afspeellijsten"
 
-#: charts.py:381
+#: charts.py:392
 msgid "Artist similarity"
 msgstr "Artiestenovereenkomst"
 
-#: charts.py:381
-msgid "Number of artists in common"
-msgstr "Aantal gemeenschappelijke artiesten"
+#: charts.py:392
+msgid "Percentage of artists in common"
+msgstr "Percentage gemeenschappelijke artiesten"
 
 #: routes/account.py:78
 msgid "Incorrect password."
@@ -182,15 +186,15 @@ msgstr "Onjuist wachtwoord."
 msgid "Repeated new passwords do not match."
 msgstr "Herhaalde wachtwoorden komen niet overeen."
 
-#: routes/activity.py:30
+#: routes/activity.py:31
 msgid "Added"
 msgstr "Toegevoegd"
 
-#: routes/activity.py:31
+#: routes/activity.py:32
 msgid "Removed"
 msgstr "Verwijderd"
 
-#: routes/activity.py:32
+#: routes/activity.py:33
 msgid "Modified"
 msgstr "Aangepast"
 
@@ -273,8 +277,8 @@ msgid ""
 "include music files, which can be downloaded separately using the file "
 "manager."
 msgstr ""
-"Dit archief bevat persoonlijke data uit de database. Muziek zit er dus niet "
-"in, dat kan los gedownload worden via bestandsbeheer."
+"Dit archief bevat persoonlijke data uit de database. Muziek zit er dus "
+"niet in, dat kan los gedownload worden via bestandsbeheer."
 
 #: templates/account.jinja2:50 templates/download.jinja2:35
 #: templates/download.jinja2:48 templates/download_offline.jinja2:4
@@ -301,11 +305,11 @@ msgstr "Verbind je last.fm account"
 
 #: templates/account.jinja2:65
 msgid ""
-"Last.fm integration is not available, because no API key is configured by "
-"the server administrator."
+"Last.fm integration is not available, because no API key is configured by"
+" the server administrator."
 msgstr ""
-"Koppeling met last.fm is niet beschikbaar, omdat er geen API key ingesteld "
-"is door de serverbeheerder."
+"Koppeling met last.fm is niet beschikbaar, omdat er geen API key "
+"ingesteld is door de serverbeheerder."
 
 #: templates/account.jinja2:69 templates/login.jinja2:21
 #: templates/users.jinja2:20
@@ -419,15 +423,15 @@ msgstr "Zoeken"
 
 #: templates/download.jinja2:13
 msgid ""
-"Enter a search query, then click search to populate a table with results. "
-"Click on one of the results to copy the URL for that video to the URL field "
-"below. Finally, click the download button below. Currently, a maximum of one "
-"result is displayed."
+"Enter a search query, then click search to populate a table with results."
+" Click on one of the results to copy the URL for that video to the URL "
+"field below. Finally, click the download button below. Currently, a "
+"maximum of one result is displayed."
 msgstr ""
-"Voer een zoekopdracht in, klik daarna op zoeken om een tabel te vullen met "
-"zoekresultaten. Klik op een van deze resultaten om de URL voor die video te "
-"kopieren naar het veld hieronder. Als laatste, klik op de downloadknop. Op "
-"dit moment wordt er slechts 1 zoekresultaat getoond."
+"Voer een zoekopdracht in, klik daarna op zoeken om een tabel te vullen "
+"met zoekresultaten. Klik op een van deze resultaten om de URL voor die "
+"video te kopieren naar het veld hieronder. Als laatste, klik op de "
+"downloadknop. Op dit moment wordt er slechts 1 zoekresultaat getoond."
 
 #: templates/download.jinja2:16 templates/player.jinja2:239
 msgid "Search query"
@@ -496,8 +500,8 @@ msgid ""
 "To create a new playlist, use the <a href=\"/playlist/manage\">playlist "
 "manager</a>."
 msgstr ""
-"Om een nieuwe afspeellijst te maken, ga naar <a href=\"/playlist/"
-"manage\">afspeellijstbeheer</a>."
+"Om een nieuwe afspeellijst te maken, ga naar <a "
+"href=\"/playlist/manage\">afspeellijstbeheer</a>."
 
 #: templates/files.jinja2:36
 msgid "Upload files"
@@ -523,7 +527,8 @@ msgstr "Aanmaken"
 #: templates/files.jinja2:65
 msgid "You don't have permission to upload files or create directories here."
 msgstr ""
-"Je hebt niet het recht om hier bestanden te uploaden of mappen aan te maken."
+"Je hebt niet het recht om hier bestanden te uploaden of mappen aan te "
+"maken."
 
 #: templates/files.jinja2:71
 msgid "Show regular files"
@@ -732,17 +737,18 @@ msgid ""
 "fancy music player</a>."
 msgstr ""
 "<a href=\"%(gh)s\" target=\"_blank\">Super fancy music player 2.0</a> is "
-"geïnspireerd op de originele <a href=\"%(insp_gh)s\" target=\"_blank\">Super "
-"fancy music player</a>."
+"geïnspireerd op de originele <a href=\"%(insp_gh)s\" "
+"target=\"_blank\">Super fancy music player</a>."
 
 #: templates/install.jinja2:11
 msgid ""
-"This website can be installed as a Progressive Web App (PWA). This will add "
-"it to your application launcher on your desktop computer or mobile device."
+"This website can be installed as a Progressive Web App (PWA). This will "
+"add it to your application launcher on your desktop computer or mobile "
+"device."
 msgstr ""
-"Deze website kan geïnstalleerd worden als een \"Progressive Web App\" (PWA). "
-"Dat betekent dat het aan je applicatielijst wordt toegevoegd op je desktop "
-"computer of mobiele telefoon."
+"Deze website kan geïnstalleerd worden als een \"Progressive Web App\" "
+"(PWA). Dat betekent dat het aan je applicatielijst wordt toegevoegd op je"
+" desktop computer of mobiele telefoon."
 
 #: templates/install.jinja2:17
 msgid "Look for an \"Install\" option in your browser menu or navigation bar."
@@ -754,44 +760,46 @@ msgstr "Browsers met PWA ondersteuning:"
 
 #: templates/install.jinja2:24
 msgid ""
-"Firefox and Chromium-based browsers on Android. Chromium-based browsers are "
-"recommended because Firefox does not provide media player controls."
+"Firefox and Chromium-based browsers on Android. Chromium-based browsers "
+"are recommended because Firefox does not provide media player controls."
 msgstr ""
 "Firefox en Chromium-gebaseerde browsers op Android. Chromium-gebaseerde "
-"browsers zijn aangeraden vanwege hun ondersteuning voor mediaspelerbesturing."
+"browsers zijn aangeraden vanwege hun ondersteuning voor "
+"mediaspelerbesturing."
 
 #: templates/install.jinja2:25
 msgid ""
-"Chromium-based browers for Linux, Windows, or macOS (Chrome, Edge, Opera, "
-"Brave, ...)"
+"Chromium-based browers for Linux, Windows, or macOS (Chrome, Edge, Opera,"
+" Brave, ...)"
 msgstr ""
-"Op Chromium gebaseerde browsers op Linux, Windows of macOS (Chrome, Edge, "
-"Opera, Brave, ...)"
+"Op Chromium gebaseerde browsers op Linux, Windows of macOS (Chrome, Edge,"
+" Opera, Brave, ...)"
 
 #: templates/install.jinja2:28
 msgid ""
-"iOS supports PWAs, but they are restricted to Safari only. New DMA laws by "
-"the European Union required\n"
+"iOS supports PWAs, but they are restricted to Safari only. New DMA laws "
+"by the European Union required\n"
 "    Apple to allow all browsers to provide the same functionality. But "
 "instead of allowing other browsers to install PWAs, they have\n"
 "    disabled support for PWAs completely for EU users because of <a "
 "href=\"https://developer.apple.com/support/dma-and-apps-in-the-"
 "eu\">\"privacy concerns\"</a>."
 msgstr ""
-"iOS ondersteunt PWAs, maar die ondersteuning is beperkt tot Safari. Nieuwe "
-"DMA wetgeving binnen de Europese Unie heeft Apple verlicht om voor alle "
-"browsers dezelfde functionaliteit mogelijk te maken. Maar in plaats van het "
-"voor alle browsers mogelijk te maken om PWAs te installeren, hebben ze juist "
-"PWA ondersteuning volledig weggehaald voor alle gebruikers in de EU wegens "
-"<a href=\"https://developer.apple.com/support/dma-and-apps-in-the-"
-"eu\">\"privacy redenen\"</a>."
+"iOS ondersteunt PWAs, maar die ondersteuning is beperkt tot Safari. "
+"Nieuwe DMA wetgeving binnen de Europese Unie heeft Apple verlicht om voor"
+" alle browsers dezelfde functionaliteit mogelijk te maken. Maar in plaats"
+" van het voor alle browsers mogelijk te maken om PWAs te installeren, "
+"hebben ze juist PWA ondersteuning volledig weggehaald voor alle "
+"gebruikers in de EU wegens <a href=\"https://developer.apple.com/support"
+"/dma-and-apps-in-the-eu\">\"privacy redenen\"</a>."
 
 #: templates/install.jinja2:34
 msgid ""
-"Click the install button below to install the music player as an application:"
+"Click the install button below to install the music player as an "
+"application:"
 msgstr ""
-"Klik de installeerknop hieronder om de muziekspeler als een applicatie te "
-"installeren:"
+"Klik de installeerknop hieronder om de muziekspeler als een applicatie te"
+" installeren:"
 
 #: templates/lastfm_callback.jinja2:5 templates/lastfm_connected.jinja2:5
 msgid "Last.fm connection"
@@ -920,17 +928,17 @@ msgstr "Audioformaat"
 #: templates/player.jinja2:125
 msgid ""
 "Opus 128k provides excellent quality at a low bit rate, audibly "
-"indistinguishable from uncompressed music. Select 48k Opus to save even more "
-"data at the cost of audio quality. In addition to the lower audio bit rate, "
-"smaller images will be loaded. AAC is available if your browser does not "
-"support Opus, but is otherwise not recommended."
+"indistinguishable from uncompressed music. Select 48k Opus to save even "
+"more data at the cost of audio quality. In addition to the lower audio "
+"bit rate, smaller images will be loaded. AAC is available if your browser"
+" does not support Opus, but is otherwise not recommended."
 msgstr ""
-"Opus 128k geeft uitstekende geluidskwaliteit bij een lage bitrate, voor het "
-"oor niet te onderscheiden van ongecomprimeerde muziek. Kies voor 48k Opus om "
-"nog meer data te besparen, ten konste van geluidskwaliteit. Naast de audio "
-"bitrate, wordt ook de kwaliteit van afbeeldingen verlaagd. AAC is "
-"beschikbaar voor browsers die geen ondersteuning bieden voor Opus, maar "
-"wordt anders afgeraden."
+"Opus 128k geeft uitstekende geluidskwaliteit bij een lage bitrate, voor "
+"het oor niet te onderscheiden van ongecomprimeerde muziek. Kies voor 48k "
+"Opus om nog meer data te besparen, ten konste van geluidskwaliteit. Naast"
+" de audio bitrate, wordt ook de kwaliteit van afbeeldingen verlaagd. AAC "
+"is beschikbaar voor browsers die geen ondersteuning bieden voor Opus, "
+"maar wordt anders afgeraden."
 
 #: templates/player.jinja2:128
 msgid "Very high quality (128k Opus)"
@@ -950,8 +958,8 @@ msgstr "Vervanging voor nummer uit wachtrij"
 
 #: templates/player.jinja2:136
 msgid ""
-"From which playlist is a replacement track chosen, when a track is removed "
-"from the queue?"
+"From which playlist is a replacement track chosen, when a track is "
+"removed from the queue?"
 msgstr ""
 "Van welke afspeellijst wordt een nieuw nummer gekozen, als een nummer "
 "verwijderd wordt uit de wachtrij?"
@@ -990,13 +998,14 @@ msgstr "Audioversterking"
 
 #: templates/player.jinja2:154
 msgid ""
-"Last resort if you cannot get enough volume out of your system. Try setting "
-"everything else to maximum volume first, as setting a gain here will worsen "
-"audio quality."
+"Last resort if you cannot get enough volume out of your system. Try "
+"setting everything else to maximum volume first, as setting a gain here "
+"will worsen audio quality."
 msgstr ""
-"Noodoplossing als je niet genoeg volume uit je systeem krijgt. Zorg eerst "
-"dat op alle andere plekken het volume maximaal staat ingesteld, aangezien "
-"het instellen van versterking de geluidskwaliteit behoorlijk verslechterd."
+"Noodoplossing als je niet genoeg volume uit je systeem krijgt. Zorg eerst"
+" dat op alle andere plekken het volume maximaal staat ingesteld, "
+"aangezien het instellen van versterking de geluidskwaliteit behoorlijk "
+"verslechterd."
 
 #: templates/player.jinja2:167
 msgid "Album cover art memes"
@@ -1004,8 +1013,8 @@ msgstr "Albumhoes memes"
 
 #: templates/player.jinja2:168
 msgid ""
-"Show memes relevant to the album title instead of the original album cover "
-"image."
+"Show memes relevant to the album title instead of the original album "
+"cover image."
 msgstr ""
 "Toon memes met enige relevantie aan de albumtitel, in de plaats van de "
 "originele albumhoesafbeeldingen."
@@ -1017,7 +1026,8 @@ msgstr "Theatermodus"
 #: templates/player.jinja2:175
 msgid "Hide controls when there hasn't been any mouse movement for a while."
 msgstr ""
-"Verberg bedieningselementen wanneer de muis een kleine tijd niet bewogen is."
+"Verberg bedieningselementen wanneer de muis een kleine tijd niet bewogen "
+"is."
 
 #: templates/player.jinja2:183
 msgid "Hourly news"
@@ -1033,8 +1043,8 @@ msgstr "Muziekweergave"
 
 #: templates/player.jinja2:191
 msgid ""
-"Increases energy usage while active. Is automatically deactivated when the "
-"browser reports the page is not visible."
+"Increases energy usage while active. Is automatically deactivated when "
+"the browser reports the page is not visible."
 msgstr ""
 "Verhoogt energiegebruik zolang de weergave actief is. Wordt automatisch "
 "gepauzeerd als volgens de browser de pagina niet zichtbaar is."
@@ -1062,8 +1072,8 @@ msgstr "Negeer tags bij het kiezen van nummers"
 #: templates/player.jinja2:211
 msgid "Only choose tracks with selected tags (untagged tracks are not chosen)"
 msgstr ""
-"Kies alleen nummers met geselecteerde tags (nummers zonder tags worden niet "
-"gekozen)"
+"Kies alleen nummers met geselecteerde tags (nummers zonder tags worden "
+"niet gekozen)"
 
 #: templates/player.jinja2:212
 msgid "Don't choose tracks with selected tags (untagged tracks are chosen)"
@@ -1310,8 +1320,8 @@ msgstr "Dubbele in Spotify afspeellijst"
 
 #: templates/spotify_compare.jinja2:14
 msgid ""
-"Try to remove all duplicates first. Duplicate tracks may erroneously show as "
-"missing."
+"Try to remove all duplicates first. Duplicate tracks may erroneously show"
+" as missing."
 msgstr ""
 "Probeer eerst alle dubbele te verwijderen. Anders kunnen ze namelijk "
 "abusievelijk als ontbrekend nummer verschijnen."
@@ -1432,11 +1442,13 @@ msgstr "Versturen"
 #~ msgstr "Mijn afspeellijst"
 
 #~ msgid ""
-#~ "Whenever a playlist needs to be selected, your playlist will be selected "
-#~ "by default."
+#~ "Whenever a playlist needs to be "
+#~ "selected, your playlist will be selected"
+#~ " by default."
 #~ msgstr ""
-#~ "Wanneer een afspeellijst geselecteerd moet worden, wordt jouw "
-#~ "afspeellijst standaard geselecteerd."
+#~ "Wanneer een afspeellijst geselecteerd moet "
+#~ "worden, wordt jouw afspeellijst standaard "
+#~ "geselecteerd."
 
 #~ msgid "Your current primary playlist is '%(primary_playlist)s'."
 #~ msgstr "Je huidige primaire afspeellijst is '%(primary_playlist)s'."
@@ -1446,3 +1458,4 @@ msgstr "Versturen"
 
 #~ msgid "Set as my playlist"
 #~ msgstr "Instellen als mijn afspeellijst"
+
