@@ -332,14 +332,25 @@ input::placeholder {
     border-spacing: 0;
     background: rgba(0, 0, 0, 0.5);
     border-radius: var(--border-radius);
-    overflow: hidden; /* prevent top row from overlapping rounded corners */
 }
 
 .table thead {
-    background: black;
     position: sticky; /* stay visible when scrolling */
     top: 0;
     z-index: 1; /* heading should be above table content */
+
+}
+
+.table thead th {
+    background: black;
+}
+
+.table thead th:first-child {
+    border-top-left-radius: var(--border-radius);
+}
+
+.table thead th:last-child {
+    border-top-right-radius: var(--border-radius);
 }
 
 .table td,
