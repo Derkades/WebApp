@@ -8,9 +8,9 @@
 
 ![screenshot](https://downloads.rkslot.nl/music-player-screenshots/history3.png)
 
-## Lyrics (June 2024)
+## Lyrics (November 2024)
 
-![screenshot](https://downloads.rkslot.nl/music-player-screenshots/lyrics2.png)
+![screenshot](https://downloads.rkslot.nl/music-player-screenshots/lyrics3.png)
 
 ## Statistics (December 2023)
 
@@ -24,9 +24,9 @@
 
 ![screenshot](https://downloads.rkslot.nl/music-player-screenshots/metadata-editor.png)
 
-## Home (June 2023)
+## Home (November 2024)
 
-![screenshot](https://downloads.rkslot.nl/music-player-screenshots/home2.png)
+![screenshot](https://downloads.rkslot.nl/music-player-screenshots/home3.png)
 
 ## Album view (January 2023)
 
@@ -36,6 +36,6 @@
 
 ![screenshot](https://downloads.rkslot.nl/music-player-screenshots/meme.png)
 
-## Account settings (January 2023)
+## Account settings (November 2024)
 
-![screenshot](https://downloads.rkslot.nl/music-player-screenshots/account.png)
+![screenshot](https://downloads.rkslot.nl/music-player-screenshots/account2.png)
