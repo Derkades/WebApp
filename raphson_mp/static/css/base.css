@@ -29,6 +29,10 @@ body, input, select, textarea, button {
     font-family: 'Quicksand', Verdana, sans-serif;
 }
 
+.wrap {
+    overflow-wrap: anywhere;
+}
+
 /* BODY */
 
 body {
@@ -36,10 +40,9 @@ body {
     background-color: black;
     color: white;
     height: 100vh;
-    min-width: fit-content; /* if content is wider than screen width, body should extend to fit content */
 }
 
-body.colorful {
+.colorful {
     background: url('/static/img/background-colorful.jpg') no-repeat fixed center;
     background-size: cover;
 }
@@ -332,25 +335,18 @@ input::placeholder {
     border-spacing: 0;
     background: rgba(0, 0, 0, 0.5);
     border-radius: var(--border-radius);
+    overflow: clip;
 }
 
 .table thead {
     position: sticky; /* stay visible when scrolling */
     top: 0;
     z-index: 1; /* heading should be above table content */
-
 }
 
-.table thead th {
+.table thead {
     background: black;
-}
-
-.table thead th:first-child {
-    border-top-left-radius: var(--border-radius);
-}
-
-.table thead th:last-child {
-    border-top-right-radius: var(--border-radius);
+    border-radius: var(--border-radius);
 }
 
 .table td,
@@ -370,6 +366,20 @@ input::placeholder {
 
 th[colspan] {
     text-align: center;
+}
+
+/* .collapse to remove column on small screen */
+@media screen and (max-width: 800px) {
+    th.collapse, td.collapse {
+        display: none;
+    }
+}
+
+/* .expand to show column on small screen */
+@media screen and (min-width: 801px) {
+    th.expand, td.expand {
+        display: none;
+    }
 }
 
 /* Boxes */
@@ -429,12 +439,6 @@ th[colspan] {
     margin-right: 1rem;
     margin-bottom: 1rem;
     max-width: 100%;
-}
-
-@media screen and (max-width: 800px) {
-    .collapse-col {
-        display: none;
-    }
 }
 
 /* Noise overlay to reduce color banding in background */

@@ -11,13 +11,16 @@
 <table class="table">
     <thead>
         <tr>
-            <th colspan="2">
+            <th class="expand">
+                {% trans %}Time{% endtrans %}
+            </th>
+            <th class="collapse" colspan="2">
                 {% trans %}Time{% endtrans %}
             </th>
             <th>
                 {% trans %}Action{% endtrans %}
             </th>
-            <th>
+            <th class="collapse">
                 {% trans %}Playlist{% endtrans %}
             </th>
             <th>
@@ -29,10 +32,10 @@
         {% for change in changes %}
             <tr>
                 <td class="format-timestamp">{{ change['timestamp'] }}</td>
-                <td>{{ change['time_ago'] }}</td>
+                <td class="collapse">{{ change['time_ago'] }}</td>
                 <td>{{ change['action'] }}</td>
-                <td>{{ change['playlist'] }}</td>
-                <td>{{ change['track'] }}</td>
+                <td class="collapse">{{ change['playlist'] }}</td>
+                <td class="wrap">{{ change['track'] }}</td>
             </tr>
         {% endfor %}
     </tbody>
