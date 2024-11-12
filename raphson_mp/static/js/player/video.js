@@ -105,6 +105,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (queue.currentTrack.track.video != null) {
             videoButton.classList.remove('hidden');
+        } else {
+            videoButton.classList.add('hidden');
         }
     });
 });
