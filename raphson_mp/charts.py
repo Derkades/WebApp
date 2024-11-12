@@ -362,24 +362,34 @@ def similarity_heatmap(conn: Connection):
                           GROUP BY t1.playlist, t2.playlist
                           ''')
 
-    data_dict: dict[tuple(str, str), int] = {}
-    for p1, p2, count in result:
-        data_dict[(p1, p2)] = count
+    matching_artist_counts: dict[tuple[str, str], int] = {}
+    for playlist1, playlist2, count in result:
+        matching_artist_counts[(playlist1, playlist2)] = count
+
+    result = conn.execute('''
+                          SELECT track.playlist, COUNT(DISTINCT artist)
+                          FROM track_artist JOIN track ON track_artist.track = track.path
+                          GROUP BY track.playlist''')
+
+    artist_counts: dict[str, int] = {}
+    for playlist, count in result:
+        artist_counts[playlist] = count
+
 
     xp = playlists
     yp = playlists
-    data = []
+    data: list[tuple[int, int, float]] = []
     for i1, p1 in enumerate(xp):
         for i2, p2 in enumerate(yp):
             if i1 == i2:
                 continue
-            elif (p1, p2) in data_dict:
-                if data_dict[(p1, p2)] is not None:
-                    data.append([i1, i2, data_dict[(p1, p2)]])
+            elif (p1, p2) in matching_artist_counts:
+                percentage = (matching_artist_counts[(p1, p2)] / (artist_counts[p1] + artist_counts[p2])) * 100
+                data.append((i1, i2, round(percentage, 2)))
             else:
-                data.append([i1, i2, 0])
+                data.append((i1, i2, 0))
 
-    return heatmap(_('Artist similarity'), _('Number of artists in common'), xp, yp, data)
+    return heatmap(_('Artist similarity'), _('Percentage of artists in common'), xp, yp, data)
 
 
 def get_data(period: StatsPeriod):
