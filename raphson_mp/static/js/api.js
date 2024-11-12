@@ -17,7 +17,8 @@ class Music {
      * @returns {Promise<Array<Playlist>>}
      */
     async playlists() {
-        await navigator.locks.request("api_playlists", async lock => {
+        // has to be an anonymous function assigned to a variable instead of a normal function or 'this' is not available
+        const retrievePlaylists = async () => {
             if (this.#playlists == undefined) {
                 const response = await fetch('/playlist/list');
                 checkResponseCode(response);
@@ -27,7 +28,14 @@ class Music {
                     this.#playlists.push(new Playlist(playlistObj));
                 }
             }
-        });
+        }
+
+        if (navigator.locks) {
+            await navigator.locks.request("api_playlists", retrievePlaylists);
+        } else {
+            console.warn('navigator.locks not available, redundant requests may happen');
+            await retrievePlaylists();
+        }
 
         return this.#playlists;
     }
