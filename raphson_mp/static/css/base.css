@@ -8,6 +8,8 @@
     --elem-background-color: rgba(50, 50, 50, 0.5);
     --elem-background-color-true: rgba(255, 255, 255, 0.8);
     --box-background-color: rgba(20, 20, 20, 0.4);
+    --hover-outline-width: 1px;
+    --hover-outline-color: white;
 }
 
 @media screen and (max-width: 900px) {
@@ -16,7 +18,7 @@
     }
 }
 
-/* FONT */
+/* TEXT */
 
 @font-face {
     font-family: 'Quicksand';
@@ -100,16 +102,42 @@ kbd {
 
 /* CONTROLS */
 
-button:hover,
-.button:hover,
-input[type=submit]:hover {
-    transition: transform .05s, background-color .1s;
+select,
+button,
+.button,
+input[type=submit],
+input[type=checkbox],
+label {
+    cursor: pointer;
 }
 
+select,
+button,
+.button,
+input,
+.logbox {
+    appearance: none; /* no native design */
+
+    padding: var(--smallgap);
+    background-color: var(--elem-background-color);
+    border-radius: var(--border-radius);
+    color: white;
+    margin-bottom: .3rem;
+    border: 1px solid var(--elem-border-color);
+    font-size: .9em;
+
+    transition: transform .05s, outline-color .1s;
+    outline-width: var(--hover-outline-width);
+    outline-style: solid;
+    outline-color: transparent;
+}
+
+select:hover,
 button:hover,
 .button:hover,
-input[type=submit]:hover {
-    background-color: rgba(150, 150, 150, 0.7);
+input:hover:not([readonly]),
+input[type=range]:focus {
+    outline-color: var(--hover-outline-color);
 }
 
 button:active,
@@ -118,38 +146,13 @@ input[type=submit]:active {
     transform: translate(1px, 1px);
 }
 
-select,
-button,
-.button,
-input[type=submit],
-input[type=checkbox] {
-    cursor: pointer;
-}
-
-select,
-button,
-.button,
-input[type=text],
-input[type=search],
-input[type=number],
-input[type=submit],
-input[type=password],
-input[type=checkbox],
-input[type=range],
-.logbox {
-    padding: var(--smallgap);
-    background-color: var(--elem-background-color);
-    border-radius: var(--border-radius);
-    color: white;
-    margin-bottom: .3rem;
-    border: 1px solid var(--elem-border-color);
-    font-size: .9em;
-}
-
+/* read-only or disabled inputs */
 button:disabled,
-input:disabled {
+input:disabled,
+input[readonly],
+.logbox {
     cursor: not-allowed;
-    color: gray;
+    color: lightgray;
 }
 
 .logbox {
@@ -159,7 +162,6 @@ input:disabled {
 }
 
 input[type=checkbox] {
-    appearance: none; /* No native checkbox design */
     height: 1rem;
     width: 1.25rem;
     margin-bottom: 0;
@@ -170,35 +172,35 @@ input[type=checkbox]:checked {
 }
 
 input[type=range] {
-    appearance: none;
-    height: 1.25rem;
+    --height: 1.25rem;
+    --thumb-width: 1.5rem;
+    height: var(--height);
     padding: 0;
     overflow: hidden;
 }
 
 input[type=range]::-moz-range-thumb {
     background: var(--elem-background-color-true);
-    height: calc(1.25rem + 2px);
-    width: calc(1.5rem + 2px);
+    height: var(--height);
+    width: var(--thumb-width);
     margin: 0;
     padding: 0;
+    border-radius: var(--border-radius);
     border: none;
+    box-sizing: border-box;
 }
 
+/* even though webkit is largely styled identically to mozilla, the two rules cannot be merged or webkit ignores styling */
 input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
     background: var(--elem-background-color-true);
-    height: calc(1.25rem + 2px);
-    width: calc(1.5rem + 2px);
+    height: var(--height);
+    width: var(--thumb-width);
     margin: 0;
-    margin-top: -1px;
     padding: 0;
     border-radius: var(--border-radius);
-}
-
-input[type=range]::-webkit-slider-runnable-track {
-    height: 1.25rem;
-    padding: 0;
+    border: none;
+    box-sizing: border-box;
 }
 
 input[type=range]:focus {
@@ -333,7 +335,7 @@ input::placeholder {
 .table {
     width: 100%;
     border-spacing: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--box-background-color);
     border-radius: var(--border-radius);
     overflow: clip;
 }
