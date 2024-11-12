@@ -2,6 +2,7 @@
 import logging
 import time
 from sqlite3 import Connection
+from typing import cast
 
 from flask import Blueprint, Response, render_template, request
 from flask_babel import _, format_timedelta
@@ -61,7 +62,7 @@ def route_data():
         auth.verify_auth_cookie(conn)
 
         result = conn.execute('''
-                              SELECT user.username, user.nickname, track, paused, progress
+                              SELECT user.username, user.nickname, timestamp, track, paused, position
                               FROM now_playing
                                 JOIN user ON now_playing.user = user.id
                                 INNER JOIN track ON now_playing.track = track.path
@@ -70,11 +71,21 @@ def route_data():
                               ''',
                               (int(time.time()) - 70,))  # based on JS update interval
 
-        now_playing = [{'username': nickname if nickname else username,
-                        'paused': paused,
-                        'progress': progress,
-                        **Track.by_relpath(conn, relpath).info_dict()}
-                       for username, nickname, relpath, paused, progress in result]
+        now_playing: list[dict[str, str|int|list[str]|None]] = []
+
+        current_timestamp = int(time.time())
+        for username, nickname, timestamp, relpath, paused, position in result:
+            track = cast(Track, Track.by_relpath(conn, relpath))
+            meta = track.metadata()
+            if not paused:
+                corrected_position = position + current_timestamp - timestamp
+                if corrected_position < meta.duration:
+                    position = corrected_position
+            now_playing.append({'username': nickname if nickname else username,
+                                'timestamp': timestamp,
+                                'paused': paused,
+                                'position': position,
+                                **track.info_dict()})
 
         result = conn.execute('''
                               SELECT history.timestamp, user.username, user.nickname, history.track
@@ -162,27 +173,30 @@ def route_now_playing():
             log.info('Ignoring, user has enabled private mode')
             return Response('ok', 200, content_type='text/plain')
 
-        player_id = request.json['player_id']
-        assert isinstance(player_id, str)
-        relpath = request.json['track']
-        assert isinstance(relpath, str)
-        paused = request.json['paused']
-        assert isinstance(paused, bool)
-        progress = request.json['progress']
-        assert isinstance(progress, int)
+        player_id = cast(str, request.json['player_id'])
+        relpath = cast(str, request.json['track'])
+        paused = cast(bool, request.json['paused'])
+
+        if 'progress' in request.json:
+            log.warning('now_playing received with legacy progress data')
+            track = cast(Track, Track.by_relpath(conn, relpath))
+            meta = track.metadata()
+            position = int(cast(int, request.json['progress']) / 100 * meta.duration)
+        else:
+            position = cast(int, request.json['position'])
 
         conn.execute('''
-                     INSERT INTO now_playing (player_id, user, timestamp, track, paused, progress)
-                     VALUES (:player_id, :user_id, :timestamp, :relpath, :paused, :progress)
+                     INSERT INTO now_playing (player_id, user, timestamp, track, paused, position)
+                     VALUES (:player_id, :user_id, :timestamp, :relpath, :paused, :position)
                      ON CONFLICT(player_id) DO UPDATE
-                         SET timestamp=:timestamp, track=:relpath, paused=:paused, progress=:progress
+                         SET timestamp=:timestamp, track=:relpath, paused=:paused, position=:position
                      ''',
                      {'player_id': player_id,
                       'user_id': user.user_id,
                       'timestamp': int(time.time()),
                       'relpath': relpath,
                       'paused': paused,
-                      'progress': progress})
+                      'position': position})
 
         user_key = lastfm.get_user_key(user)
         if user_key and not paused:

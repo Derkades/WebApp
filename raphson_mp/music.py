@@ -436,7 +436,7 @@ class Track:
             shutil.copy(temp_file.name, self.path)
 
 
-    def info_dict(self):
+    def info_dict(self) -> dict[str, str | int | list[str] | None]:
         meta = self.metadata()
         return {
             'playlist': self.playlist,

@@ -56,7 +56,7 @@ function getNowPlayingCardHtml(info) {
 
     const progressBar = document.createElement('div');
     progressBar.classList.add('card-progress');
-    progressBar.style.width = info.progress + '%';
+    progressBar.style.width = (100 * info.position / info.duration) + '%';
     card.append(progressBar);
 
     return card;
@@ -84,8 +84,22 @@ const nowPlayingDiv = document.getElementById('now-playing');
 const nothingPlayingText = document.getElementById('nothing-playing-text').textContent;
 const historyTable = document.getElementById('tbody-history');
 const fileChangesTable = document.getElementById('tbody-changes');
+let data = null;
 
-async function updateNowPlaying() {
+function updateHtml() {
+    const cards = data.now_playing.map(getNowPlayingCardHtml);
+    if (cards.length > 0) {
+        nowPlayingDiv.replaceChildren(...cards);
+    } else {
+        nowPlayingDiv.textContent = nothingPlayingText;
+    }
+
+    historyTable.replaceChildren(...data.history.map(getHistoryRowHtml));
+
+    fileChangesTable.replaceChildren(...data.file_changes.map(getFileChangeRowHtml));
+}
+
+async function fetchData() {
     if (document.visibilityState == "hidden") {
         return;
     }
@@ -96,25 +110,31 @@ async function updateNowPlaying() {
     }
     const json = await response.json();
     console.debug('fetched data:', json);
+    data = json;
+    updateHtml();
+}
 
-    const cards = json.now_playing.map(getNowPlayingCardHtml);
-    if (cards.length > 0) {
-        nowPlayingDiv.replaceChildren(...cards);
-    } else {
-        nowPlayingDiv.textContent = nothingPlayingText;
+function quickUpdate() {
+    if (data == null || document.visibilityState != "visible") {
+        return;
     }
 
-    historyTable.replaceChildren(...json.history.map(getHistoryRowHtml));
+    for (const now_playing of data['now_playing']) {
+        if (!now_playing.paused && now_playing.position < now_playing.duration - 1) {
+            now_playing.position += 1;
+        }
+    }
 
-    fileChangesTable.replaceChildren(...json.file_changes.map(getFileChangeRowHtml));
+    updateHtml();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    updateNowPlaying();
-    setInterval(updateNowPlaying, 5_000);
+    fetchData();
+    setInterval(fetchData, 10_000);
+    setInterval(quickUpdate, 1_000);
     addEventListener("visibilitychange", () => {
         if (!document.visibilityState != "hidden") {
-            updateNowPlaying();
+            fetchData();
         }
     });
 });

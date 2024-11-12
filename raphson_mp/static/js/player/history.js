@@ -56,7 +56,7 @@ class History {
             return;
         }
         const audioElem = getAudioElement();
-        await music.nowPlaying(queue.currentTrack.track , audioElem.paused, audioElem.currentTime);
+        await music.nowPlaying(queue.currentTrack.track, audioElem.paused, audioElem.currentTime);
     }
 
 }

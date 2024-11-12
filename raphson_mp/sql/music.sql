@@ -103,7 +103,7 @@ CREATE TABLE now_playing (
     user INTEGER NOT NULL,
     timestamp INTEGER NOT NULL,
     track TEXT NOT NULL REFERENCES track(path) ON DELETE CASCADE,
-    progress INTEGER NOT NULL, -- Number of seconds into the track
+    position INTEGER NOT NULL, -- Number of seconds into the track
     paused INTEGER NOT NULL
 ) STRICT;
 
