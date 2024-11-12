@@ -3,8 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const lyricsElem = document.getElementById('lyrics-box');
     const lyricsSetting = document.getElementById('settings-lyrics');
 
-    let shouldShowLyrics = true;
-
     let lastLine = null;
 
     function updateSyncedLyrics() {
@@ -74,6 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     eventBus.subscribe(MusicEvent.TRACK_CHANGE, replaceLyrics);
     eventBus.subscribe(MusicEvent.SETTINGS_LOADED, replaceLyrics);
+
+    // Listener is only registered if page is visible, so if page visibility
+    // changes we must register (or unregister) the listener.
+    document.addEventListener('visibilitychange', registerListener)
 
     // Quick toggle for lyrics setting
     document.getElementById('album-cover-box').addEventListener('click', () => {
