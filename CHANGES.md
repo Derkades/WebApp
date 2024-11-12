@@ -1,3 +1,22 @@
+## 1.4.0 2024-11-12
+* New: compare playlist with Spotify playlist
+* New: support for H264 music videos
+* New: fetch lyrics from LyricFind
+* Improve: music video layout
+* Improve: do not show "[Instrumental]" lyrics
+* Improve: layout of several forms
+* Improve: last chosen chart is now per playlist
+* Improve: artist similarity heatmap is no longer halved and now shows relative values
+* Improve: extrapolate current position in activity
+* Fix: several bugs related to music videos
+* Fix: adding track without metadata to queue
+* Fix: too many newlines for lyrics downloaded before v1.2.0 in offline mode
+* Fix: outdated lyrics showing when page was not visible while switching tracks
+* Technical: database connection is now closed properly
+* Technical: added tests
+* Technical: many code improvements
+* Meta: repository has been moved to https://github.com/Derkades/raphson-music-player
+
 ## 1.3.0 2024-11-05
 * New: playlist selection in guessing game
 * New: experimental music video support
