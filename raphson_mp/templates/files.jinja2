@@ -129,12 +129,12 @@
 
             <td class="button-col">
                 {% if file['type'] == 'dir' %}
-                    <form method="GET" action="/files/download_zip" class="inline-block">
+                    <form method="GET" action="/files/download_zip">
                         <input type="hidden" name="path" value="{{ file['path'] }}">
                         {{ icon_button('download', title=gettext('Download directory as zip file')) }}
                     </form>
                 {% else %}
-                    <form method="GET" action="/files/download" class="inline-block">
+                    <form method="GET" action="/files/download">
                         <input type="hidden" name="path" value="{{ file['path'] }}">
                         {{ icon_button('download', title=gettext('Download original file')) }}
                     </form>
@@ -143,7 +143,7 @@
 
             {% if write_permission %}
                 <td class="button-col">
-                    <form method="GET" action="/files/rename" class="inline-block">
+                    <form method="GET" action="/files/rename">
                         <input type="hidden" name="path" value="{{ file['path'] }}">
                         {% if base_path == '.' %}
                             <input type="hidden" name="back_url" value="/files">
@@ -156,7 +156,7 @@
 
                 {% if show_trashed %}
                     <td class="button-col">
-                        <form method="POST" action="/files/rename" class="inline-block">
+                        <form method="POST" action="/files/rename">
                             <input type="hidden" name="csrf" value="{{ csrf_token }}">
                             <input type="hidden" name="path" value="{{ file['path'] }}">
                             <input type="hidden" name="new-name" value="{{ file['name'][7:] }}">
@@ -165,7 +165,7 @@
                     </td>
                 {% else %}
                     <td class="button-col">
-                        <form method="POST" action="/files/rename" class="inline-block">
+                        <form method="POST" action="/files/rename">
                             <input type="hidden" name="csrf" value="{{ csrf_token }}">
                             <input type="hidden" name="path" value="{{ file['path'] }}">
                             <input type="hidden" name="new-name" value=".trash.{{ file['name'] }}">

@@ -134,6 +134,13 @@
     }
 }
 
+/* POPUP WINDOW CONTENT */
+
+#search-query,
+#browse-filter-playlist {
+    width: 100%;
+}
+
 /* PLAYBACK CONTROLS SEEK BAR */
 
 #seek-bar {

@@ -36,7 +36,7 @@
 
 <div class="form">
     <label for="download-url">{% trans %}Video or track URL{% endtrans %}</label>
-    <input id="download-url" type="text" class="fill-width">
+    <input id="download-url" type="text">
 
     <label for="download-playlist">{% trans %}Playlist{% endtrans %}</label>
     <select id="download-playlist">
@@ -47,9 +47,10 @@
 
     <button id="download-button">{% trans %}Download{% endtrans %}</button>
     <div hidden id="download-loading" class="icon icon-loading spinning"></div>
+
+    <div id="download-log" class="logbox"></div>
 </div>
 
-<div id="download-log" class="logbox fill-width"></div>
 
 <div hidden id="csrf-token">{{ csrf_token }}</div>
 

@@ -266,7 +266,8 @@ input::placeholder {
     }
 
     .form input[type=submit],
-    .form button {
+    .form button,
+    .form .logbox {
         grid-column: 1 / 3;
     }
 }
@@ -346,17 +347,6 @@ input::placeholder {
     align-items: center;
     font-size: 1.2em;
     margin-right: var(--smallgap);
-}
-
-/* POSITIONING UTLIITIES */
-
-.inline-block {
-    display: inline-block;
-}
-
-.fill-width {
-    width: calc(100%);
-    float: left;
 }
 
 /* TABLES */
