@@ -7,10 +7,12 @@
     --smallgap: .2rem; /* used for space between small elements like buttons */
     --outline-color: rgba(255, 255, 255, 0.3);
     --outline-width: 1px;
+    --outline: var(--outline-width) solid var(--outline-color);
     --background-color: rgba(20, 20, 20, 0.4);
     --background-color-active: rgba(255, 255, 255, 0.8);
     --hover-background-color: rgba(100, 100, 100, 0.4);
     --hover-outline-color: rgba(255, 255, 255, 0.8);
+    --box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
 }
 
 [hidden] {
@@ -420,7 +422,7 @@ input::placeholder {
 
 .box {
     border-radius: var(--border-radius);
-    box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
+    box-shadow: var(--box-shadow);
     background-color: var(--background-color);
     overflow: hidden;
     width: 100%;

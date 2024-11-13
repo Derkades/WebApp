@@ -79,7 +79,7 @@
 }
 
 .window {
-    box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
+    box-shadow: var(--box-shadow);
     border-radius: var(--border-radius);
     background-color: var(--background-color);
     overflow: hidden; /* prevent header from overlapping rounded corners */
