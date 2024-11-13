@@ -23,4 +23,16 @@
     .icon-text-button {
         width: 23rem;
     }
+
+    main {
+        display: flex;
+        flex-wrap: wrap;
+        align-content: start;
+        column-gap: var(--gap);
+        justify-content: center;
+    }
+}
+
+a:not(:last-child) {
+    margin-bottom: var(--halfgap);
 }

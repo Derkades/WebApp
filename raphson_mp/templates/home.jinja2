@@ -17,43 +17,60 @@
 
 {% block content %}
 
-{% if offline_mode %}
-    <h2>{% trans %}Music (offline mode){% endtrans %}</h2>
-{% else %}
-    <h2>{% trans %}Music{% endtrans %}</h2>
-{% endif %}
+<section>
+    {% if offline_mode %}
+        <h2>{% trans %}Music (offline mode){% endtrans %}</h2>
+    {% else %}
+        <h2>{% trans %}Music{% endtrans %}</h2>
+    {% endif %}
 
-{{ nav('/player', 'music', _('Music player')) }}
+    {{ nav('/player', 'music', _('Music player')) }}
 
-{% if not offline_mode %}
-    {{ nav('/activity', 'history', _('Activity')) }}
-    {{ nav('/stats', 'chart-bar', _('Statistics')) }}
-
-    <h2>{% trans %}Files{%endtrans %}</h2>
-    {{ nav('/files', 'folder', _('File manager')) }}
-    {{ nav('/playlist/manage', 'playlist-music', _('Playlist manager')) }}
-    {{ nav('/download', 'download', _('Downloader')) }}
-
-    <h2>{% trans %}Settings{% endtrans %}</h2>
-    {{ nav('/account', 'account-cog', _('Account')) }}
-    {{ nav('/dislikes', 'thumb-down', _('Dislikes')) }}
-{% endif %}
-
-<h2>{% trans %}Games{% endtrans %}</h2>
-{{ nav('/games/guess', 'dice-multiple', _('Guess')) }}
-{{ nav('/games/chairs', 'transit-transfer', _('Musical chairs')) }}
-
-<h2>{% trans %}Help{% endtrans %}</h2>
-{{ nav('/info', 'help-circle', _('Manual')) }}
-{{ nav('/install', 'application-import', _('Install as PWA')) }}
+    {% if not offline_mode %}
+        {{ nav('/activity', 'history', _('Activity')) }}
+        {{ nav('/stats', 'chart-bar', _('Statistics')) }}
+    {% endif %}
+</section>
 
 {% if not offline_mode %}
-    <h2>{% trans %}Experimental{% endtrans %}</h2>
-    {{ nav('/radio', 'radio', _('Radio')) }}
+    <section>
+        <h2>{% trans %}Files{%endtrans %}</h2>
+        {{ nav('/files', 'folder', _('File manager')) }}
+        {{ nav('/playlist/manage', 'playlist-music', _('Playlist manager')) }}
+        {{ nav('/download', 'download', _('Downloader')) }}
+    </section>
+
+    <section>
+        <h2>{% trans %}Settings{% endtrans %}</h2>
+        {{ nav('/account', 'account-cog', _('Account')) }}
+        {{ nav('/dislikes', 'thumb-down', _('Dislikes')) }}
+    </section>
+{% endif %}
+
+<section>
+    <h2>{% trans %}Games{% endtrans %}</h2>
+    {{ nav('/games/guess', 'dice-multiple', _('Guess')) }}
+    {{ nav('/games/chairs', 'transit-transfer', _('Musical chairs')) }}
+</section>
+
+<section>
+    <h2>{% trans %}Help{% endtrans %}</h2>
+    {{ nav('/info', 'help-circle', _('Manual')) }}
+    {{ nav('/install', 'application-import', _('Install as PWA')) }}
+</section>
+
+{% if not offline_mode %}
+
+    <section>
+        <h2>{% trans %}Experimental{% endtrans %}</h2>
+        {{ nav('/radio', 'radio', _('Radio')) }}
+    </section>
 
     {% if user_is_admin %}
-        <h2>{% trans %}Administrative{% endtrans %}</h2>
-        {{ nav('/users', 'account-multiple', _('User management')) }}
+        <section>
+            <h2>{% trans %}Administrative{% endtrans %}</h2>
+            {{ nav('/users', 'account-multiple', _('User management')) }}
+        </section>
     {% endif %}
 {% endif %}
 
