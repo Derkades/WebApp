@@ -138,7 +138,7 @@
 
 #seek-bar {
     border-radius: var(--border-radius);
-    height: 1.5rem;
+    height: 1.6rem;
     border: 1px solid var(--elem-border-color);
     width: 100%;
     margin: .5rem 0;
@@ -158,9 +158,7 @@
 #seek-bar-inner {
     background-color: #ccc;
     width: 0;
-    /* Inner progress bar needs to overlap border of outer bar to have matching corner radius */
-    height: calc(1.5rem + 2px);
-    margin: -1px;
+    height: calc(1.5rem);
 }
 
 .progress-time {
