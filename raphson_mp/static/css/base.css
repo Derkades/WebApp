@@ -111,7 +111,7 @@ a:hover {
 
 .secondary {
     color: #ccc;
-    font-size: .9em;
+    font-size: .8em;
 }
 
 .secondary-large {
@@ -199,8 +199,8 @@ input[type=checkbox]:checked {
 }
 
 input[type=range] {
-    --height: 1.25rem;
-    --thumb-width: 1.5rem;
+    --height: 1.4rem;
+    --thumb-width: 1.7rem;
     height: var(--height);
     padding: 0;
     overflow: hidden;

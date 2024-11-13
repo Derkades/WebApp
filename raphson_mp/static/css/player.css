@@ -23,6 +23,128 @@
     justify-content: center;
 }
 
+/* START OF LEFT SIDEBAR */
+
+/* PLAYER */
+
+#current-track {
+    font-size: 1.1em;
+}
+
+#settings-volume {
+    width: 7rem;
+}
+
+/* SEEK BAR */
+
+#seek-bar {
+    border-radius: var(--border-radius);
+    height: 1.8rem;
+    border: 1px solid var(--outline-color);
+    width: 100%;
+    margin: .5rem 0;
+    position: relative; /* required for positioning of child */
+    background-color: var(--background-color);
+    cursor: ew-resize;
+    /* Hide part of inner progress bar (corners) that goes outside of outer element) */
+    overflow: hidden;
+}
+
+#seek-bar > div {
+    position: absolute;
+    height: 100%;
+}
+
+#seek-bar-inner {
+    background-color: #ccc;
+    transition: width .05s linear;
+}
+
+#seek-bar-text {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .3rem;
+}
+
+.seek-bar-time {
+    font-size: 1.1rem;
+    mix-blend-mode: difference;
+}
+
+/* QUEUE */
+
+.box-queue .scroll {
+    height: auto;
+    max-height: 40rem;
+}
+
+.box-queue h3 {
+    margin: .5rem 0;
+}
+
+#queue-table {
+    width: 100%;
+    border-spacing: .5rem;
+    margin-left: -.5rem;
+}
+
+#queue-table td {
+    height: 4.5rem;
+    cursor: grab;
+}
+
+/* album image column */
+#queue-table td:first-child {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 4.5rem;
+    cursor: pointer;
+}
+
+#queue-table td.downloading {
+    text-align: center;
+}
+
+#queue-table td:nth-child(2) {
+    padding-left: .5rem;
+}
+
+.delete-overlay {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.delete-overlay > .icon {
+    opacity: 0;
+}
+
+.delete-overlay {
+    border-radius: 100%;
+    transition: background-color .25s;
+}
+
+.delete-overlay > .icon {
+    transition: opacity .25s;
+}
+
+.delete-overlay:hover {
+    background-color: red;
+}
+
+.delete-overlay:hover > .icon {
+    opacity: 1.0;
+}
+
+/* END OF LEFT SIDEBAR */
+
+/* START OF RIGHT SIDEBAR */
+
 /* ALBUM COVERS */
 
 #bg-image-2, #album-cover-2 {
@@ -56,12 +178,21 @@
     position: absolute;
 }
 
+/* MUSIC VIDEO */
+
+#video {
+    width: 100%;
+    display: block; /* otherwise video takes up a few pixels of extra space https://stackoverflow.com/a/36390497 */
+}
+
 /* LYRICS */
 
 #lyrics-box {
     white-space: pre-line; /* render newlines, for non-time-synced lyrics */
     font-size: 1.2em;
 }
+
+/* END OF RIGHT SIDEBAR */
 
 /* POPUP WINDOWS */
 
@@ -141,138 +272,7 @@
     width: 100%;
 }
 
-/* PLAYBACK CONTROLS SEEK BAR */
 
-#seek-bar {
-    border-radius: var(--border-radius);
-    height: 1.6rem;
-    border: 1px solid var(--outline-color);
-    width: 100%;
-    margin: .5rem 0;
-    position: relative; /* required for positioning of child */
-    background-color: var(--background-color);
-    cursor: ew-resize;
-    /* Hide part of inner progress bar (corners) that goes outside of outer element) */
-    overflow: hidden;
-}
-
-#seek-bar > div {
-    position: absolute;
-    top: 0;
-    transition: width .05s linear;
-}
-
-#seek-bar-inner {
-    background-color: #ccc;
-    width: 0;
-    height: calc(1.5rem);
-}
-
-.progress-time {
-    margin: 0 .25rem;
-    font-size: 1.1rem;
-    mix-blend-mode: difference;
-}
-
-/* QUEUE */
-
-.box-queue .scroll {
-    height: auto;
-    max-height: 40rem;
-}
-
-.box-queue h3 {
-    margin: .5rem 0;
-}
-
-#queue-table {
-    width: 100%;
-    border-spacing: .5rem;
-    margin-left: -.5rem;
-}
-
-#queue-table td {
-    height: 4.5rem;
-    cursor: grab;
-}
-
-/* album image column */
-#queue-table td:first-child {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    width: 4.5rem;
-    cursor: pointer;
-}
-
-#queue-table td.downloading {
-    text-align: center;
-}
-
-#queue-table td:nth-child(2) {
-    padding-left: .5rem;
-}
-
-.delete-overlay {
-    height: 100%;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.delete-overlay > .icon {
-    opacity: 0;
-}
-
-.delete-overlay {
-    border-radius: 100%;
-    transition: background-color .25s;
-}
-
-.delete-overlay > .icon {
-    transition: opacity .25s;
-}
-
-.delete-overlay:hover {
-    background-color: red;
-}
-
-.delete-overlay:hover > .icon {
-    opacity: 1.0;
-}
-
-h4 > .icon {
-    display: inline-block;
-}
-
-.scroll {
-    overflow-y: auto;
-}
-
-#loading-overlay {
-    background: rgba(0, 0, 0, 0.5);
-    transition: opacity .5s, visibility .5s;
-}
-
-.loading-text {
-    text-align: center;
-    margin-top: 4rem;
-}
-
-#track-list-output {
-    max-height: 40rem;
-}
-
-.track-list-table {
-    width: 100%;
-}
-
-.track-list-table td:nth-child(4),
-.track-list-table td:nth-child(5),
-.track-list-table td:nth-child(6) {
-    width: 2rem;
-}
 
 #visualiser {
     position: absolute;
@@ -290,12 +290,6 @@ h4 > .icon {
     width: 8rem;
     border-radius: var(--border-radius);
     cursor: pointer;
-}
-
-/* VOLUME SLIDER */
-
-#settings-volume {
-    width: 7rem;
 }
 
 /* For some reason, ::-webkit-slider-thumb and ::-moz-range-thumb cannot be in the same selector (comma separated), or Chrome loses styling */
@@ -341,12 +335,7 @@ input[type=range].input-volume-low::-moz-range-thumb {
     max-height: 45vh;
 }
 
-/* MUSIC VIDEO */
 
-#video {
-    width: 100%;
-    display: block; /* otherwise video takes up a few pixels of extra space https://stackoverflow.com/a/36390497 */
-}
 
 /* TWO COLUMN LAYOUT */
 
@@ -369,4 +358,10 @@ input[type=range].input-volume-low::-moz-range-thumb {
     .box-queue .scroll {
         height: 35vh;
     }
+}
+
+/* MISC */
+
+.scroll {
+    overflow-y: auto;
 }

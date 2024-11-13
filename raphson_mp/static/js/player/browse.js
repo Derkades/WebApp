@@ -138,7 +138,7 @@ class Browse {
      */
     async generateTrackList(tracks) {
         const table = document.createElement('table');
-        table.classList.add('track-list-table');
+        table.style.width = '100%';
         const headerRow = document.createElement('tr');
         table.appendChild(headerRow);
         const hcolPlaylist = document.createElement('th');
@@ -180,8 +180,10 @@ class Browse {
             });
             const colAdd = document.createElement('td');
             colAdd.appendChild(addButton2);
+            colAdd.style.width = '2rem';
 
             const colEdit = document.createElement('td');
+            colEdit.style.width = '2rem';
 
             if ((await music.playlist(track.playlistName)).write) {
                 const editButton2 = editButton.cloneNode(true);
