@@ -12,8 +12,8 @@ async function performSearch() {
     const downloadUrl = document.getElementById('download-url');
 
     searchResults.replaceChildren();
-    searchButton.classList.add('hidden');
-    searchLoading.classList.remove('hidden');
+    searchButton.hidden = true;
+    searchLoading.hidden = false;
 
     try {
         const response = await jsonPost('/download/search', {query: searchQuery.value});
@@ -36,14 +36,14 @@ async function performSearch() {
 
             row.addEventListener('click', () => downloadUrl.value = result.url);
         }
-        searchTable.classList.remove('hidden');
+        searchTable.hidden = false;
     } catch (exception) {
         console.error(exception);
         alert("Search error")
     }
 
-    searchButton.classList.remove('hidden');
-    searchLoading.classList.add('hidden');
+    searchButton.hidden = false;
+    searchLoading.hidden = true;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -58,24 +58,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadLoading = document.getElementById('download-loading');
     const downloadLog = document.getElementById('download-log');
 
-    downloadButton.addEventListener('click', () => {
-        downloadButton.classList.add('hidden');
-        downloadLoading.classList.remove('hidden');
+    downloadButton.addEventListener('click', async () => {
+        downloadButton.hidden = true;
+        downloadLoading.hidden = false;
 
         downloadLog.style.backgroundColor = '';
         downloadLog.textContent = '';
 
-        (async function(){
-            const decoder = new TextDecoder();
+        const decoder = new TextDecoder();
 
-            function handleResponse(result) {
-                downloadLog.textContent += decoder.decode(result.value);
-                downloadLog.scrollTop = downloadLog.scrollHeight;
-                return result
-            }
+        function handleResponse(result) {
+            downloadLog.textContent += decoder.decode(result.value);
+            downloadLog.scrollTop = downloadLog.scrollHeight;
+            return result
+        }
 
+        try {
             const response = await jsonPost('/download/ytdl', {directory: downloadPlaylist.value, url: downloadUrl.value});
-            const reader = await response.body.getReader();
+            const reader = response.body.getReader();
             await reader.read().then(function process(result) {
                 if (result.done) {
                     console.debug("stream done");
@@ -83,20 +83,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 return reader.read().then(handleResponse).then(process)
             });
-
-            if (downloadLog.textContent.endsWith('Done!')) {
-                downloadLog.style.backgroundColor = 'darkgreen';
-            } else {
-                downloadLog.style.backgroundColor = 'darkred';
-            }
-        })().then(() => {
-            downloadButton.classList.remove('hidden');
-            downloadLoading.classList.add('hidden');
-        }).catch(err => {
-            downloadButton.classList.remove('hidden');
-            downloadLoading.classList.add('hidden');
+        } catch (err) {
             console.error(err);
             alert('error, check console');
-        });
+        } finally {
+            downloadButton.hidden = false;
+            downloadLoading.hidden = true;
+        }
     });
 });

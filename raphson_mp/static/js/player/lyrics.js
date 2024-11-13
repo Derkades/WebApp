@@ -56,17 +56,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function replaceLyrics() {
         const queuedTrack = queue.currentTrack;
-        const lyricsElem = document.getElementById('lyrics-box')
+        const lyricsElem = document.getElementById('lyrics-box');
 
-        if (queuedTrack && queuedTrack.lyrics && lyricsSetting.checked) {
-            lyricsElem.classList.remove('hidden');
-            if (queuedTrack.lyrics instanceof PlainLyrics) {
-                lyricsElem.textContent = queuedTrack.lyrics.text;
-            }
-            // time-synced lyrics is handled by updateSyncedLyrics
-        } else {
-            lyricsElem.classList.add('hidden');
+        const hasLyrics = queuedTrack && queuedTrack.lyrics && lyricsSetting.checked;
+
+        lyricsElem.hidden = !hasLyrics;
+
+        if (hasLyrics && queuedTrack.lyrics instanceof PlainLyrics) {
+            lyricsElem.textContent = queuedTrack.lyrics.text;
         }
+
+        // time-synced lyrics is handled by updateSyncedLyrics
         registerListener();
     }
 

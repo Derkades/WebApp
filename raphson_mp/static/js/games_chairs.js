@@ -19,10 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {Track} track
      */
     async function choose(track) {
-        textChoose.classList.add('hidden');
+        textChoose.hidden = true;
         boxes.replaceChildren();
 
-        spinner.classList.remove('hidden');
+        spinner.hidden = false;
 
         downloadedTrack = await track.download();
 
@@ -37,15 +37,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         audio.src = downloadedTrack.audioUrl;
 
-        spinner.classList.add('hidden');
-        textStart.classList.remove('hidden');
+        spinner.hidden = true;
+        textStart.hidden = false;
     }
 
     function start() {
         console.debug('start');
         window.removeEventListener('click', start);
         window.removeEventListener('keydown', start);
-        textStart.classList.add('hidden');
+        textStart.hidden = true;
         audio.play();
         setTimeout(pause, randInt(...firstPlayRange));
     }

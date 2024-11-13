@@ -85,10 +85,10 @@ class Browse {
         if (Object.keys(current.filters).length > 0) {
             const tracks = await music.filter(current.filters);
             const table = await this.generateTrackList(tracks);
-            document.getElementById('browse-no-content').classList.add('hidden');
+            document.getElementById('browse-no-content').hidden = true;
             document.getElementById('browse-content').replaceChildren(table);
         } else {
-            document.getElementById('browse-no-content').classList.remove('hidden');
+            document.getElementById('browse-no-content').hidden = false;
             document.getElementById('browse-content').replaceChildren();
         }
     }

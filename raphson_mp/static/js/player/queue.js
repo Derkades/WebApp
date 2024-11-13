@@ -118,11 +118,12 @@ class Queue {
 
         if (playlist === null) {
             console.debug('queue: no playlists selected, trying again later');
-            document.getElementById('no-playlists-selected').classList.remove('hidden');
+            document.getElementById('no-playlists-selected').hidden = false;
             setTimeout(() => this.fill(), 1000);
             return;
         }
-        document.getElementById('no-playlists-selected').classList.add('hidden');
+
+        document.getElementById('no-playlists-selected').hidden = true;
 
         this.#fillBusy = true;
 

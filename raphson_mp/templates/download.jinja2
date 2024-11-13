@@ -17,10 +17,10 @@
     <input id="search-query" type="text">
 
     <input type="submit" id="search-button" value="{% trans %}Search{% endtrans %}">
-    <div id="search-loading" class="icon icon-loading spinning hidden"></div>
+    <div hidden id="search-loading" class="icon icon-loading spinning"></div>
 </form>
 
-<table class="table hidden" id="search-table">
+<table hidden class="table" id="search-table">
     <thead>
         <tr>
             <th>{% trans %}Title{% endtrans %}</th>
@@ -46,12 +46,12 @@
     </select>
 
     <button id="download-button">{% trans %}Download{% endtrans %}</button>
-    <div id="download-loading" class="icon icon-loading spinning hidden"></div>
+    <div hidden id="download-loading" class="icon icon-loading spinning"></div>
 </div>
 
 <div id="download-log" class="logbox fill-width"></div>
 
-<div class="hidden" id="csrf-token">{{ csrf_token }}</div>
+<div hidden id="csrf-token">{{ csrf_token }}</div>
 
 <script src="/static/js/base.js"></script>
 <script src="/static/js/api.js"></script>

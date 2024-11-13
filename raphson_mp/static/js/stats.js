@@ -43,10 +43,10 @@ async function loadCharts(button) {
     chartsContainer.replaceChildren();
 
     // Download data
-    spinner.classList.remove('hidden');
+    spinner.hidden = false;
     const response = await fetch('/stats/data?period=' + encodeURIComponent(button.id));
     const data = await response.json();
-    spinner.classList.add('hidden');
+    spinner.hidden = true;
 
     charts.length = 0; // Clear old charts
 

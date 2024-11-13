@@ -99,20 +99,15 @@ document.addEventListener('DOMContentLoaded', () => {
     playButton.addEventListener('click', () => audioElem.play());
 
     const updateButtons = () => {
-        if (audioElem.paused) {
-            pauseButton.classList.add('hidden');
-            playButton.classList.remove('hidden');
-        } else {
-            pauseButton.classList.remove('hidden');
-            playButton.classList.add('hidden');
-        }
+        pauseButton.hidden = audioElem.paused;
+        playButton.hidden = !audioElem.paused;
     };
 
     audioElem.addEventListener('pause', updateButtons);
     audioElem.addEventListener('play', updateButtons);
 
     // Hide pause button on initial page load, otherwise both play and pause will show
-    pauseButton.classList.add('hidden');
+    pauseButton.hidden = true;
 });
 
 // Handle presence of buttons that perform file actions and are not available in offline mode
@@ -133,25 +128,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function updateButtons() {
         const isRealTrack = queue.currentTrack && queue.currentTrack.track;
-        if (isRealTrack) {
-            for (const button of requiresRealTrack) {
-                button.classList.remove('hidden');
-            }
-        } else {
-            for (const button of requiresRealTrack) {
-                button.classList.add('hidden');
-            }
+        for (const button of requiresRealTrack) {
+            button.hidden = !isRealTrack;
         }
 
         const hasWriteAccess = isRealTrack && (await music.playlist(queue.currentTrack.track.playlistName)).write;
-        if (hasWriteAccess) {
-            for (const button of requiresWriteAccess) {
-                button.classList.remove('hidden');
-            }
-        } else {
-            for (const button of requiresWriteAccess) {
-                button.classList.add('hidden');
-            }
+        for (const button of requiresWriteAccess) {
+            button.hidden = !hasWriteAccess;
         }
     }
 

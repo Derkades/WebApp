@@ -61,7 +61,7 @@
                             {{ icon_button('video', 'button-video', title=gettext('Play video')) }}
                         {% endif %}
 
-                        <div id="delete-spinner" class="raphson-spinner hidden"></div>
+                        <div hidden id="delete-spinner" class="raphson-spinner"></div>
 
                         {% if mobile %}
                             {# 'data-restore=false' ensures volume is not overwritten from cookie #}
@@ -85,7 +85,7 @@
                         </div>
                     </div>
                     <div class="scroll">
-                        <span id="no-playlists-selected" class="hidden">{% trans %}No playlists are selected{% endtrans %}</span>
+                        <span hidden id="no-playlists-selected">{% trans %}No playlists are selected{% endtrans %}</span>
                         <table id="queue-table"></table>
                     </div>
                 </div>
@@ -94,15 +94,13 @@
 
         <div class="sidebar">
             <div class="boxes">
-                <div class="box" id="album-cover-box">
+                <div hidden class="box" id="album-cover-box">
                     <div id="album-cover-1" class="cover-img"></div>
                     <div id="album-cover-2" class="cover-img"></div>
                     <canvas id="visualiser"></canvas>
                 </div>
-                {% if not offline_mode %}
-                    <div class="box" id="video-box"></div>
-                {% endif %}
-                <div class="box padding scroll hidden" id="lyrics-box"></div>
+                <div hidden class="box" id="video-box"></div>
+                <div hidden class="box padding scroll" id="lyrics-box"></div>
             </div>
         </div>
     </div>
@@ -118,9 +116,7 @@
                 <input type="number" value="5" size="3" min="0" max="100" id="settings-queue-size">
 
                 {% if offline_mode %}
-                    <select id="settings-audio-type" disabled class="hidden">
-                        <option value="webm_opus_high" selected>hidden</option>
-                    </select>
+                    <input type="hidden" id="settings-audio-type" value="webm_opus_high">
                 {% else %}
                     <label for="settings-audio-type">
                         {% trans %}Audio format{% endtrans %}<br>
@@ -179,7 +175,7 @@
                 <input id="settings-theater" type="checkbox">
 
                 {% if offline_mode %}
-                    <input id="settings-news" type="checkbox" class="hidden">
+                    <input hidden id="settings-news" type="checkbox">
                 {% else %}
                     <label for="settings-news">
                         {% trans %}Hourly news{% endtrans %}<br>
@@ -240,7 +236,7 @@
             <div class="window-body">
                 <input id="search-query" type="search" placeholder="{% trans %}Search query{% endtrans %}" class="fill-width"><br>
 
-                <div id="search-result-parent" class="hidden">
+                <div hidden id="search-result-parent">
                     <h3>{% trans %}Tracks{% endtrans %}</h3>
                     <div id="search-result-tracks" class="scroll"></div>
 
@@ -285,9 +281,9 @@
                     {{ icon_button('auto-fix', 'editor-auto', title=gettext('Find metadata')) }}
                 </div>
 
-                <p id="editor-writing" class="hidden">{% trans %}Writing metadata...{% endtrans %}</p>
+                <p hidden id="editor-writing">{% trans %}Writing metadata...{% endtrans %}</p>
 
-                <table id="editor-auto-result" class="table hidden">
+                <table hidden id="editor-auto-result" class="table">
                     <thead>
                         <tr>
                             <th>{% trans %}Title{% endtrans %}</th>
@@ -298,8 +294,7 @@
                             <th>{% trans %}Packaging{% endtrans %}</th>
                         </tr>
                     </thead>
-                    <tbody id="editor-auto-result-body">
-                    </tbody>
+                    <tbody id="editor-auto-result-body"></tbody>
                 </table>
             </div>
         </div>
@@ -331,20 +326,20 @@
         </div>
     {% endif %}
 
-    <audio autoplay id="audio"></audio>
+    <audio hidden autoplay id="audio"></audio>
 
     <script src="/static/js/base.js"></script>
     <script src="/static/js/api.js"></script>
     <script src="/static/js/player.js"></script>
 
-    <div class="hidden" id="csrf-token">{{ csrf_token }}</div>
-    <div class="hidden" id="primary-playlist">{{ primary_playlist }}</div>
-    <div class="hidden" id="load-timestamp">{{ load_timestamp }} </div>
-    <div class="hidden" id="trans-artist">{% trans %}Artist: {% endtrans %}</div>
-    <div class="hidden" id="trans-album">{% trans %}Album: {% endtrans %}</div>
-    <div class="hidden" id="trans-tag">{% trans %}Tag: {% endtrans %}</div>
-    <div class="hidden" id="trans-playlist">{% trans %}Playlist: {% endtrans %}</div>
-    <div class="hidden" id="trans-browse">{% trans %}Browse{% endtrans %}</div>
+    <div hidden id="csrf-token">{{ csrf_token }}</div>
+    <div hidden id="primary-playlist">{{ primary_playlist }}</div>
+    <div hidden id="load-timestamp">{{ load_timestamp }} </div>
+    <div hidden id="trans-artist">{% trans %}Artist: {% endtrans %}</div>
+    <div hidden id="trans-album">{% trans %}Album: {% endtrans %}</div>
+    <div hidden id="trans-tag">{% trans %}Tag: {% endtrans %}</div>
+    <div hidden id="trans-playlist">{% trans %}Playlist: {% endtrans %}</div>
+    <div hidden id="trans-browse">{% trans %}Browse{% endtrans %}</div>
 
     <template id="template-queue-spinner">
         <tr>

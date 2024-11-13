@@ -13,14 +13,14 @@
 {{ page_heading(gettext('Musical chairs'), back_url='/') }}
 
 <h3 id="text-choose">{% trans %}Choose a track{% endtrans %}</h3>
-<h3 id="text-start" class="hidden">{% trans %}Press any key or click to start{% endtrans %}</h3>
-<div class="icon icon-loading spinning hidden" id="spinner"></div>
+<h3 hidden id="text-start">{% trans %}Press any key or click to start{% endtrans %}</h3>
+<div hidden class="icon icon-loading spinning" id="spinner"></div>
 
 <div class="boxes" id="boxes">
 </div>
 
 <audio id="audio"></audio>
-<div id="csrf-token" class="hidden">{{ csrf_token }}</div>
+<div hidden id="csrf-token">{{ csrf_token }}</div>
 
 <script src="/static/js/base.js"></script>
 <script src="/static/js/api.js"></script>

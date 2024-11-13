@@ -13,6 +13,11 @@
     --hover-outline-color: white;
 }
 
+[hidden] {
+    /* by default, setting the display property in css will override the hidden attribute */
+    display: none !important;
+}
+
 @media screen and (max-width: 900px) {
     :root {
         --gap: .8rem;
@@ -355,10 +360,6 @@ input::placeholder {
 .fill-width {
     width: calc(100%);
     float: left;
-}
-
-.hidden {
-    display: none !important;
 }
 
 /* TABLES */

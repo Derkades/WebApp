@@ -7,8 +7,8 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
     const no = document.getElementById('no-support');
     const yes = document.getElementById('yes-support');
-    yes.classList.remove('hidden');
-    no.classList.add('hidden');
+    yes.hidden = false;
+    no.hidden = true;
 
     document.getElementById('install-button').addEventListener('click', () => {
         deferredPrompt.prompt();

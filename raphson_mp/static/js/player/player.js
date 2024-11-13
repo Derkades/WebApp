@@ -123,10 +123,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             const deleteSpinner = document.getElementById('delete-spinner');
-            deleteSpinner.classList.remove('hidden');
+            deleteSpinner.hidden = false;
             await queue.currentTrack.track.delete();
             queue.next();
-            deleteSpinner.classList.add('hidden');
+            deleteSpinner.hidden = true;
         });
     }
 

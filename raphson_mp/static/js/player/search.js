@@ -30,7 +30,7 @@ class Search {
                 const queryField = document.getElementById('search-query');
                 queryField.value = '';
                 setTimeout(() => queryField.focus({focusVisible: true}), 50); // high delay is necessary, I don't know why
-                this.#searchResultParent.classList.add('hidden');
+                this.#searchResultParent.hidden = true;
             });
         });
     }
@@ -57,10 +57,11 @@ class Search {
         }
 
         if (tracks.length == 0) {
-            this.#searchResultParent.classList.add('hidden');
-        } else {
-            this.#searchResultParent.classList.remove('hidden');
+            this.#searchResultParent.hidden = true;
+            return;
         }
+
+        this.#searchResultParent.hidden = false;
 
         // Tracks
         {

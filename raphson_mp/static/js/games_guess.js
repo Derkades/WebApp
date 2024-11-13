@@ -42,17 +42,17 @@ document.addEventListener('DOMContentLoaded', () => {
         cover.style.backgroundImage = `url("${currentTrack.imageUrl}")`;
         audio.src = currentTrack.audioUrl;
         cover.classList.add('blurred');
-        startText.classList.remove('hidden');
-        nextText.classList.add('hidden');
-        loadingText.classList.add('hidden');
+        startText.hidden = false;
+        nextText.hidden = true;
+        loadingText.hidden = true;
     }
 
     function play() {
         // Hide start text, start playing audio, show reveal text
         state = 'playing';
         console.info('playing');
-        startText.classList.add('hidden');
-        revealText.classList.remove('hidden');
+        startText.hidden = true;
+        revealText.hidden = false;
         audio.play();
     }
 
@@ -61,8 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
         state = 'reveal'
         console.info('reveal');
         cover.classList.remove('blurred');
-        revealText.classList.add('hidden');
-        nextText.classList.remove('hidden');
+        revealText.hidden = true;
+        nextText.hidden = false;
         details.textContent = currentTrack.track.displayText(true, true);
     }
 

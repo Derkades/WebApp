@@ -17,8 +17,8 @@ class Editor {
         this.#track = track;
         this.trackToHtml();
 
-        document.getElementById('editor-auto-result').classList.add('hidden');
-        document.getElementById('editor-auto').classList.remove('hidden');
+        document.getElementById('editor-auto-result').hidden = true;
+        document.getElementById('editor-auto').hidden = false;
 
         // Make editor window window visisble, and bring it to the top
         windows.open('window-editor');
@@ -85,23 +85,23 @@ class Editor {
         this.htmlToTrack();
 
         // Loading text
-        document.getElementById('editor-save').classList.add("hidden");
-        document.getElementById('editor-writing').classList.remove("hidden");
+        document.getElementById('editor-save').hidden = true;
+        document.getElementById('editor-writing').hidden = false;
 
         // Make request to update metadata
         try {
             await this.#track.saveMetadata();
         } catch (e) {
             alert('An error occurred while updating metadata.');
-            document.getElementById('editor-writing').classList.add('hidden');
-            document.getElementById('editor-save').classList.remove('hidden');
             return;
+        } finally {
+            document.getElementById('editor-writing').hidden = true;
+            document.getElementById('editor-save').hidden = false;
         }
 
         // Close window, and restore save button
         windows.close('window-editor');
-        document.getElementById('editor-writing').classList.add('hidden');
-        document.getElementById('editor-save').classList.remove('hidden');
+
 
         // Music player should update all track-related HTML with new metadata. This event must be
         // fired after the editor window is closed, so other windows can check whether they are open.
@@ -111,7 +111,7 @@ class Editor {
     };
 
     async auto() {
-        document.getElementById('editor-auto').classList.add('hidden');
+        document.getElementById('editor-auto').hidden = true;
 
         try {
             const array = await this.#track.acoustid();
@@ -136,7 +136,7 @@ class Editor {
             }
 
             document.getElementById('editor-auto-result-body').replaceChildren(...rows);
-            document.getElementById('editor-auto-result').classList.remove('hidden');
+            document.getElementById('editor-auto-result').hidden = false;
         } catch (ex) {
             alert('Could not fingerprint audio file, maybe it is corrupt?');
         }

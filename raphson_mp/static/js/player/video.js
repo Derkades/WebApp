@@ -8,10 +8,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /** @type {HTMLDivElement} */
     const videoBox = document.getElementById('video-box');
+    /** @type {HTMLDivElement} */
+    const albumCoverBox = document.getElementById('album-cover-box');
     /** @type {HTMLAudioElement} */
     const audioElem = getAudioElement();
 
-    videoButton.classList.add('hidden');
+    videoButton.hidden = true;
 
     function blur() {
         for (const elem of document.getElementsByClassName('cover-img')) {
@@ -35,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Replace album cover with video
     videoButton.addEventListener('click', () => {
-        videoButton.classList.add('hidden');
+        videoButton.hidden = true;
         const url =  queue.currentTrack.track.getVideoURL();
         console.info('video: set source', url);
         const videoElem = document.createElement('video');
@@ -44,8 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
         videoElem.id = 'video';
         blur();
         videoBox.replaceChildren(videoElem);
-        videoBox.classList.remove('hidden');
-        document.getElementById('album-cover-box').classList.add('hidden');
+        videoBox.hidden = false;
+        document.getElementById('album-cover-box').hidden = true;
         videoElem.play();
     });
 
@@ -98,15 +100,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // cannot reliably remove source from video element, so we must remove the entire element
         // https://stackoverflow.com/q/79162209/4833737
         videoBox.replaceChildren();
-        videoBox.classList.add('hidden'); // should not cause flexbox gap
+        videoBox.hidden = true;
 
         // Make cover visible again
-        document.getElementById('album-cover-box').classList.remove('hidden');
+        albumCoverBox.hidden =false;
 
-        if (queue.currentTrack.track.video != null) {
-            videoButton.classList.remove('hidden');
-        } else {
-            videoButton.classList.add('hidden');
-        }
+        videoButton.hidden = !queue.currentTrack.track.video;
     });
 });
