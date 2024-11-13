@@ -74,17 +74,21 @@ function onVolumeChange() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    const volumeInput = document.getElementById('settings-volume');
+
     // Respond to gain changes
     document.getElementById('settings-audio-gain').addEventListener('input', event => {
         audioContextManager.setGain(event.target.value);
     });
 
     // Respond to volume button changes
-    document.getElementById('settings-volume').addEventListener('input', () => onVolumeChange());
+    volumeInput.addEventListener('input', onVolumeChange);
+
+    // Unfocus after use so arrow hotkeys still work for switching tracks
+    volumeInput.addEventListener('mouseup', () => volumeInput.blur())
 
     // Scroll to change volume
-    const volume = document.getElementById('settings-volume');
-    volume.addEventListener('wheel', event => {
+    volumeInput.addEventListener('wheel', event => {
         volume.value = parseInt(volume.value) + (event.deltaY < 0 ? 5 : -5);
         onVolumeChange();
     }, {passive: true});
