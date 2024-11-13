@@ -18,22 +18,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Skip to next
     document.getElementById('button-next').addEventListener('click', () => queue.next());
+});
 
-    // Play pause
-    document.getElementById('button-play').addEventListener('click', () => audioElem.play());
-    document.getElementById('button-pause').addEventListener('click', () => audioElem.pause());
-
-    audioElem.addEventListener('pause', updatePlayPauseButtons);
-    audioElem.addEventListener('play', updatePlayPauseButtons);
-
-    // Hide pause button on initial page load, otherwise both play and pause will show
-    document.getElementById('button-pause').classList.add('hidden');
-
-    // Seek bar
-    const seekBar = document.getElementById('outer-progress-bar');
+// Seek bar
+document.addEventListener('DOMContentLoaded', () => {
+    const audioElem = getAudioElement();
+    const seekBar = document.getElementById('seek-bar');
+    const seekBarInner =  document.getElementById('seek-bar-inner');
+    const textPosition = document.getElementById('seek-bar-text-position')
+    const textDuration = document.getElementById('seek-bar-text-duration')
 
     const onMove = event => {
-        const audioElem = getAudioElement();
         audioElem.currentTime = ((event.clientX - seekBar.offsetLeft) / seekBar.offsetWidth) * audioElem.duration;
         event.preventDefault(); // Prevent accidental text selection
     };
@@ -44,7 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     seekBar.addEventListener('mousedown', event => {
-        const audioElem = getAudioElement();
         const newTime = ((event.clientX - seekBar.offsetLeft) / seekBar.offsetWidth) * audioElem.duration;
         audioElem.currentTime = newTime;
 
@@ -62,6 +56,31 @@ document.addEventListener('DOMContentLoaded', () => {
         seekRelative(event.deltaY < 0 ? 3 : -3);
     }, {passive: true});
 
+    const updateSeekBar = () => {
+        // Save resources updating seek bar if it's not visible
+        if (document.visibilityState != 'visible') {
+            return;
+        }
+
+        var barCurrent;
+        var barDuration;
+        var barWidth;
+
+        if (isFinite(audioElem.currentTime) && isFinite(audioElem.duration)) {
+            barCurrent = durationToString(Math.round(audioElem.currentTime));
+            barDuration = durationToString(Math.round(audioElem.duration));
+            barWidth = ((audioElem.currentTime / audioElem.duration) * 100) + '%';
+        } else {
+            barCurrent = '--:--';
+            barDuration = '--:--';
+            barWidth = 0;
+        }
+
+        textPosition.textContent = barCurrent;
+        textDuration.textContent = barDuration;
+        seekBarInner.style.width = barWidth
+    }
+
     audioElem.addEventListener('durationchange', updateSeekBar);
     audioElem.addEventListener('timeupdate', updateSeekBar);
 
@@ -69,74 +88,73 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('visibilitychange', updateSeekBar);
 });
 
-/**
- * @returns {void}
- */
-function updateSeekBar() {
-    // Save resources updating seek bar if it's not visible
-    if (document.visibilityState != 'visible') {
-        return;
-    }
-
+// Play and pause buttons
+document.addEventListener('DOMContentLoaded', () => {
     const audioElem = getAudioElement();
+    const pauseButton = document.getElementById('button-pause');
+    const playButton = document.getElementById('button-play');
 
-    var barCurrent;
-    var barDuration;
-    var barWidth;
+    // Play pause click actions
+    pauseButton.addEventListener('click', () => audioElem.pause());
+    playButton.addEventListener('click', () => audioElem.play());
 
-    if (isFinite(audioElem.currentTime) && isFinite(audioElem.duration)) {
-        barCurrent = durationToString(Math.round(audioElem.currentTime));
-        barDuration = durationToString(Math.round(audioElem.duration));
-        barWidth = ((audioElem.currentTime / audioElem.duration) * 100) + '%';
-    } else {
-        barCurrent = '--:--';
-        barDuration = '--:--';
-        barWidth = 0;
-    }
+    const updateButtons = () => {
+        if (audioElem.paused) {
+            pauseButton.classList.add('hidden');
+            playButton.classList.remove('hidden');
+        } else {
+            pauseButton.classList.remove('hidden');
+            playButton.classList.add('hidden');
+        }
+    };
 
-    document.getElementById('progress-time-current').innerText = barCurrent;
-    document.getElementById('progress-time-duration').innerText = barDuration;
-    document.getElementById('progress-bar').style.width = barWidth
-}
+    audioElem.addEventListener('pause', updateButtons);
+    audioElem.addEventListener('play', updateButtons);
 
-/**
- * @returns {void}
- */
-function updatePlayPauseButtons() {
-    if (getAudioElement().paused) {
-        document.getElementById('button-pause').classList.add('hidden');
-        document.getElementById('button-play').classList.remove('hidden');
-    } else {
-        document.getElementById('button-pause').classList.remove('hidden');
-        document.getElementById('button-play').classList.add('hidden');
-    }
-}
+    // Hide pause button on initial page load, otherwise both play and pause will show
+    pauseButton.classList.add('hidden');
+});
 
-// Only show metadata edit and track delete buttons if playlist is writable
-eventBus.subscribe(MusicEvent.TRACK_CHANGE, async () => {
-    if (!document.getElementById('button-dislike')) {
+// Handle presence of buttons that perform file actions and are not available in offline mode
+document.addEventListener('DOMContentLoaded', () => {
+    const dislikeButton = document.getElementById('button-dislike');
+    const copyButton = document.getElementById('button-copy');
+    const shareButton = document.getElementById('button-share');
+    const editButton = document.getElementById('button-edit');
+    const deleteButton = document.getElementById('button-delete');
+
+    const requiresRealTrack = [dislikeButton, copyButton, shareButton];
+    const requiresWriteAccess = [editButton, deleteButton];
+
+    if (!dislikeButton) {
         // if dislike button does not exist, we are running in offline mode and other buttons also don't exist
         return;
     }
 
-    const track = queue.currentTrack.track;
+    async function updateButtons() {
+        const isRealTrack = queue.currentTrack && queue.currentTrack.track;
+        if (isRealTrack) {
+            for (const button of requiresRealTrack) {
+                button.classList.remove('hidden');
+            }
+        } else {
+            for (const button of requiresRealTrack) {
+                button.classList.add('hidden');
+            }
+        }
 
-    const isRealTrack = track !== null;
-    const isEditable = track !== null && (await music.playlist(track.playlistName)).write;
-
-    if (isRealTrack) {
-        document.getElementById('button-dislike').classList.remove('hidden');
-        document.getElementById('button-copy').classList.remove('hidden');
-    } else {
-        document.getElementById('button-dislike').classList.add('hidden');
-        document.getElementById('button-copy').classList.add('hidden');
+        const hasWriteAccess = isRealTrack && (await music.playlist(queue.currentTrack.track.playlistName)).write;
+        if (hasWriteAccess) {
+            for (const button of requiresWriteAccess) {
+                button.classList.remove('hidden');
+            }
+        } else {
+            for (const button of requiresWriteAccess) {
+                button.classList.add('hidden');
+            }
+        }
     }
 
-    if (isEditable) {
-        document.getElementById('button-edit').classList.remove('hidden');
-        document.getElementById('button-delete').classList.remove('hidden');
-    } else {
-        document.getElementById('button-edit').classList.add('hidden');
-        document.getElementById('button-delete').classList.add('hidden');
-    }
+    updateButtons();
+    eventBus.subscribe(MusicEvent.TRACK_CHANGE, updateButtons);
 });

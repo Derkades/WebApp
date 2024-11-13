@@ -155,7 +155,7 @@
 
 /* PLAYBACK CONTROLS SEEK BAR */
 
-#outer-progress-bar {
+#seek-bar {
     border-radius: var(--border-radius);
     height: 1.5rem;
     border: 1px solid var(--elem-border-color);
@@ -168,13 +168,13 @@
     overflow: hidden;
 }
 
-#outer-progress-bar > div {
+#seek-bar > div {
     position: absolute;
     top: 0;
     transition: width .05s linear;
 }
 
-#progress-bar {
+#seek-bar-inner {
     background-color: #ccc;
     width: 0;
     /* Inner progress bar needs to overlap border of outer bar to have matching corner radius */

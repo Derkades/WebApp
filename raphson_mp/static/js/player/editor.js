@@ -154,10 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Editor open button
     document.getElementById('button-edit').addEventListener('click', () => {
-        if (queue.currentTrack === null) {
-            alert('No current track in queue');
-            return;
-        }
         editor.open(queue.currentTrack.track);
     });
 
