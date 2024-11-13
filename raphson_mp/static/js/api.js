@@ -182,7 +182,7 @@ class Music {
         }
 
         const trackCount = document.createElement('span');
-        trackCount.classList.add('secondary', 'small');
+        trackCount.classList.add('secondary');
         trackCount.textContent = ' ' + playlist.trackCount;
 
         const label = document.createElement("label");
@@ -357,7 +357,7 @@ class Track {
         }
 
         const secondary = document.createElement('span');
-        secondary.classList.add('secondary', 'small');
+        secondary.classList.add('secondary');
         secondary.append(document.createElement('br'));
         html.append(secondary);
 

@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const lineHtml = document.createElement('span');
                 lineHtml.textContent = lyrics.text[i].text;
                 if (i != currentLine) {
-                    lineHtml.classList.add('secondary');
+                    lineHtml.classList.add('secondary-large');
                 }
                 lyricsHtml.push(lineHtml);
             }

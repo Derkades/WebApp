@@ -100,10 +100,11 @@ a:hover {
 
 .secondary {
     color: #ccc;
+    font-size: .9em;
 }
 
-.small {
-    font-size: .8em;
+.secondary-large {
+    color: #ccc;
 }
 
 kbd {
@@ -229,26 +230,38 @@ input::placeholder {
     color: #ccc;
 }
 
+/* FORMS */
+
 .form-inline {
     display: inline;
 }
 
 .form {
-    display: grid;
-    grid-template-columns: auto auto;
-    column-gap: var(--gap);
-    row-gap: var(--smallgap);
-    align-items: center; /* center vertically, if one element in a row is taller than another */
     width: 100%;
     max-width: 60rem;
     box-sizing: border-box;
     margin-top: var(--smallgap);
     margin-bottom: var(--smallgap);
+
+    display: grid;
+    grid-template-columns: auto;
+    gap: var(--small-gap);
 }
 
-.form input[type=submit],
-.form button {
-    grid-column: 1 / 3;
+.form-large-gap {
+    gap: var(--gap);
+}
+
+@media screen and (min-width: 40rem) {
+    .form {
+        grid-template-columns: auto auto;
+        align-items: center; /* center vertically, if one element in a row is taller than another */
+    }
+
+    .form input[type=submit],
+    .form button {
+        grid-column: 1 / 3;
+    }
 }
 
 .checkbox-with-label {
