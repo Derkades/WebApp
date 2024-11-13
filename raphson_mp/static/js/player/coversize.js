@@ -12,17 +12,17 @@ document.addEventListener('DOMContentLoaded', () => {
         console.debug('coversize: max height changed:', value);
     }
 
-    let lastHeightLyrics = 0;
-    let lastHeightBody = 0;
+    let lastLyricsHeight = 0;
+    let lastBodyHeight = 0;
     function resizeCover() {
-        if (lyricsBox.clientHeight == lastHeightLyrics && body.clientHeight == lastHeightBody) {
+        if (lyricsBox.clientHeight == lastLyricsHeight && body.clientWidth == lastBodyHeight) {
             return;
         }
-        lastHeightLyrics = lyricsBox.clientHeight;
-        lastHeightBody = body.clientHeight;
+        lastLyricsHeight = lyricsBox.clientHeight;
+        lastBodyHeight = body.clientHeight;
 
         // Do not set max height in single column interface
-        if (body.clientHeight <= 950) {
+        if (body.clientWidth <= 950) {
             setMaxHeight('none');
             return;
         }
