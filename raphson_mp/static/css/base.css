@@ -3,6 +3,7 @@
 :root {
     --border-radius: .5rem;
     --gap: 1rem; /* used for space between large elements like images, boxes, and large buttons */
+    --halfgap: calc(var(--gap) / 2);
     --smallgap: .2rem; /* used for space between small elements like buttons */
     --elem-border-color: rgba(255, 255, 255, 0.3);
     --elem-background-color: rgba(50, 50, 50, 0.5);

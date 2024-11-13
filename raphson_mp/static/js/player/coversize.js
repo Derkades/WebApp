@@ -3,22 +3,26 @@
 document.addEventListener('DOMContentLoaded', () => {
     const lyricsBox = document.getElementById('lyrics-box');
     const coverBox = document.getElementById('album-cover-box');
-    let lastHeight = 0;
+    const body = document.getElementsByTagName("body")[0];
 
     function setMaxHeight(value) {
         coverBox.style.maxHeight = value;
         coverBox.style.maxWidth = value;
         lyricsBox.style.maxWidth = value;
+        console.debug('coversize: max height changed:', value);
     }
 
+    let lastHeightLyrics = 0;
+    let lastHeightBody = 0;
     function resizeCover() {
-        if (lyricsBox.clientHeight == lastHeight) {
+        if (lyricsBox.clientHeight == lastHeightLyrics && body.clientHeight == lastHeightBody) {
             return;
         }
-        lastHeight = lyricsBox.clientHeight;
+        lastHeightLyrics = lyricsBox.clientHeight;
+        lastHeightBody = body.clientHeight;
 
         // Do not set max height in single column interface
-        if (window.innerWidth <= 950) {
+        if (body.clientHeight <= 950) {
             setMaxHeight('none');
             return;
         }
@@ -30,10 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         setMaxHeight(`calc(100vh - 3*var(--gap) - ${lyricsBox.clientHeight}px)`);
-
-        console.debug('coversize: height changed:', lyricsBox.clientHeight);
     }
 
     const resizeObserver = new ResizeObserver(resizeCover);
     resizeObserver.observe(lyricsBox);
+    resizeObserver.observe(body);
 });

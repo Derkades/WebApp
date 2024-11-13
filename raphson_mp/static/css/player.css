@@ -1,7 +1,6 @@
 /* SIDEBARS */
 
 .sidebars {
-    display: flex;
     width: 100%;
     height: 100%;
     box-sizing: border-box;
@@ -14,6 +13,10 @@
     padding: var(--gap);
 }
 
+#right-sidebar {
+    padding-top: 0;
+}
+
 .sidebar .boxes {
     align-content: safe center;
     justify-content: center;
@@ -22,24 +25,21 @@
 /* when changing media query, also update coversize.js */
 @media screen and (min-width: 951px) {
     #left-sidebar {
-        padding-right: 0;
+        padding-right: var(--halfgap);
+    }
+
+    #right-sidebar {
+        padding-left: var(--halfgap);
+        padding-top: var(--gap);
     }
 
     #lyrics-box {
         max-height: 300px;
     }
-}
 
-@media screen and (max-width: 950px) {
     .sidebars {
-        flex-wrap: wrap;
+        display: flex;
     }
-
-    /* fix double margin */
-    #right-sidebar {
-        padding-top: 0;
-    }
-
 }
 
 /* ALBUM COVERS */

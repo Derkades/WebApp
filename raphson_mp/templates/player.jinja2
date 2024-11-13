@@ -99,7 +99,9 @@
                     <div id="album-cover-2" class="cover-img"></div>
                     <canvas id="visualiser"></canvas>
                 </div>
-                <div class="box" id="video-box"></div>
+                {% if not offline_mode %}
+                    <div class="box" id="video-box"></div>
+                {% endif %}
                 <div class="box padding scroll hidden" id="lyrics-box"></div>
             </div>
         </div>
