@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
         lastHeight = lyricsBox.clientHeight;
 
         // Do not set max height in single column interface
-        if (window.innerWidth <= 900) {
+        if (window.innerWidth <= 950) {
             setMaxHeight('none');
             return;
         }

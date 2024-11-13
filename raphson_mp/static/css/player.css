@@ -19,7 +19,8 @@
     justify-content: center;
 }
 
-@media screen and (min-width: 901px) {
+/* when changing media query, also update coversize.js */
+@media screen and (min-width: 951px) {
     #left-sidebar {
         padding-right: 0;
     }
@@ -29,7 +30,7 @@
     }
 }
 
-@media screen and (max-width: 900px) {
+@media screen and (max-width: 950px) {
     .sidebars {
         flex-wrap: wrap;
     }
