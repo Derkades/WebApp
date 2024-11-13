@@ -19,6 +19,14 @@
     }
 }
 
+/* BOX SIZING */
+
+* {
+    /* include padding in element width */
+    /* https://www.paulirish.com/2012/box-sizing-border-box-ftw/ */
+    box-sizing: border-box;
+}
+
 /* TEXT */
 
 @font-face {
@@ -55,7 +63,6 @@ main {
     padding: var(--gap);
     width: 100%;
     max-width: 100rem;
-    box-sizing: border-box; /* include padding in max-width */
 }
 
 @media screen and (min-width: 100rem) {
@@ -203,7 +210,6 @@ input[type=range]::-moz-range-thumb {
     padding: 0;
     border-radius: var(--border-radius);
     border: none;
-    box-sizing: border-box;
 }
 
 /* even though webkit is largely styled identically to mozilla, the two rules cannot be merged or webkit ignores styling */
@@ -216,7 +222,6 @@ input[type=range]::-webkit-slider-thumb {
     padding: 0;
     border-radius: var(--border-radius);
     border: none;
-    box-sizing: border-box;
 }
 
 input[type=range]:focus {
@@ -240,7 +245,6 @@ input::placeholder {
 .form {
     width: 100%;
     max-width: 60rem;
-    box-sizing: border-box;
     margin-top: var(--smallgap);
     margin-bottom: var(--smallgap);
 
@@ -350,7 +354,6 @@ input::placeholder {
 
 .fill-width {
     width: calc(100%);
-    box-sizing: border-box;
     float: left;
 }
 
@@ -420,7 +423,6 @@ th[colspan] {
     background-color: var(--box-background-color);
     overflow: hidden;
     width: 100%;
-    box-sizing: border-box;
 }
 
 .boxes {

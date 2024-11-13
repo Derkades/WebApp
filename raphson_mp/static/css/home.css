@@ -4,7 +4,6 @@
     padding: calc(var(--gap) / 2);
     display: flex;
     width: 100%;
-    box-sizing: border-box;
     font-size: 1.5rem;
     gap: var(--smallgap);
     box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
