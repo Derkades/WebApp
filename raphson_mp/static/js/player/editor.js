@@ -20,8 +20,8 @@ class Editor {
         document.getElementById('editor-auto-result').classList.add('hidden');
         document.getElementById('editor-auto').classList.remove('hidden');
 
-        // Make editor dialog window visisble, and bring it to the top
-        dialogs.open('dialog-editor');
+        // Make editor window window visisble, and bring it to the top
+        windows.open('window-editor');
     };
 
     /**
@@ -98,13 +98,13 @@ class Editor {
             return;
         }
 
-        // Close dialog, and restore save button
-        dialogs.close('dialog-editor');
+        // Close window, and restore save button
+        windows.close('window-editor');
         document.getElementById('editor-writing').classList.add('hidden');
         document.getElementById('editor-save').classList.remove('hidden');
 
         // Music player should update all track-related HTML with new metadata. This event must be
-        // fired after the editor dialog is closed, so other dialogs can check whether they are open.
+        // fired after the editor window is closed, so other windows can check whether they are open.
         eventBus.publish(MusicEvent.METADATA_CHANGE, this.#track);
 
         this.#track = null;

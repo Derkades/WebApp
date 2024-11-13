@@ -54,10 +54,10 @@ function handleKey(event) {
     } else if (key === ',' || key == '<') {
         seekRelative(-3);
     } else if (key === 'Escape') {
-        dialogs.closeTop();
+        windows.closeTop();
     } else if (key == '/') {
         event.preventDefault(true);
-        document.getElementById('open-dialog-search').click();
+        document.getElementById('open-window-search').click();
     } else {
         console.debug('hotkey: unhandled keypress:', key);
     }

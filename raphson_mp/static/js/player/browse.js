@@ -16,8 +16,8 @@ class Browse {
         this.#history = [];
 
         eventBus.subscribe(MusicEvent.METADATA_CHANGE, () => {
-            if (!dialogs.isOpen('dialog-browse')) {
-                console.debug('browse: ignore METADATA_CHANGE, browse window is not open. Is editor open: ', dialogs.isOpen('dialog-editor'));
+            if (!windows.isOpen('window-browse')) {
+                console.debug('browse: ignore METADATA_CHANGE, browse window is not open. Is editor open: ', windows.isOpen('window-editor'));
                 return;
             }
 
@@ -41,7 +41,7 @@ class Browse {
      * @param {string} textContent
      */
     setHeader(textContent) {
-        document.getElementById('dialog-browse').getElementsByTagName('h2')[0].textContent = textContent;
+        document.getElementById('window-browse').getElementsByTagName('h2')[0].textContent = textContent;
     };
 
     /**
@@ -49,7 +49,7 @@ class Browse {
      * @param {Array<Filter>} filters
      */
     browse(title, filters) {
-        dialogs.open('dialog-browse');
+        windows.open('window-browse');
         if (!filters.playlist) {
             document.getElementById('browse-filter-playlist').value = 'all';
         }
@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
         browse.browse(current.title, newFilter);
     });
 
-    // Button to open browse dialog
+    // Button to open browse window
     document.getElementById('browse-all').addEventListener('click', () => browse.browseButton());
 
     // Back button in top left corner of browse window

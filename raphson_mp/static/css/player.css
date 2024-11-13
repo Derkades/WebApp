@@ -97,7 +97,7 @@
     transition: opacity .2s, visibility .2s;
 }
 
-.dialog {
+.window {
     box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
     border-radius: var(--border-radius);
     background-color: var(--box-background-color);
@@ -116,7 +116,7 @@
     transition: scale .2s;
 }
 
-.dialog-header {
+.window-header {
     background-color: var(--box-background-color);
     padding: var(--gap);
     display: flex;
@@ -124,12 +124,12 @@
     align-items: center;
 }
 
-.dialog-header > * {
+.window-header > * {
     display: inline;
     margin: 0;
 }
 
-.dialog-body {
+.window-body {
     padding: .5rem var(--gap);
     overflow-y: auto;
 }
@@ -139,12 +139,12 @@
     visibility: hidden;
 }
 
-.full-page-overlay.overlay-hidden .dialog {
+.full-page-overlay.overlay-hidden .window {
     scale: .95;
 }
 
 @media screen and (max-width: 900px) {
-    .dialog {
+    .window {
         margin: 0;
         box-shadow: none;
         border-radius: 0;

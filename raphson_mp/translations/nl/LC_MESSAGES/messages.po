@@ -718,7 +718,7 @@ msgid "Seek in track"
 msgstr "Bewegen in nummer"
 
 #: templates/info.jinja2:38
-msgid "Close dialog"
+msgid "Close window"
 msgstr "Sluit dialoogvenster"
 
 #: templates/info.jinja2:42
@@ -1458,4 +1458,3 @@ msgstr "Versturen"
 
 #~ msgid "Set as my playlist"
 #~ msgstr "Instellen als mijn afspeellijst"
-

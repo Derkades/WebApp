@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const copyButton = document.getElementById('copy-do-button');
         copyOpenButton.addEventListener('click', () => {
             copyTrack.value = queue.currentTrack.path;
-            dialogs.open('dialog-copy');
+            windows.open('window-copy');
         });
         copyButton.addEventListener('click', async () => {
             copyButton.disabled = true;
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error(err);
                 alert('Error: ' + err);
             }
-            dialogs.close('dialog-copy');
+            windows.close('window-copy');
             copyButton.disabled = false;
         });
     }

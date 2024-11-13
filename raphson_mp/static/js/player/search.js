@@ -14,8 +14,8 @@ class Search {
 
     constructor() {
         eventBus.subscribe(MusicEvent.METADATA_CHANGE, () => {
-            if (!dialogs.isOpen('dialog-search')) {
-                console.debug('search: ignore METADATA_CHANGE, search dialog is not open');
+            if (!windows.isOpen('window-search')) {
+                console.debug('search: ignore METADATA_CHANGE, search window is not open');
                 return;
             }
             console.debug('search: search again after receiving METADATA_CHANGE event');
@@ -25,7 +25,7 @@ class Search {
         document.addEventListener('DOMContentLoaded', () => {
             this.#queryInput.addEventListener('input', () => this.#performSearch());
 
-            document.getElementById('open-dialog-search').addEventListener('click', () => {
+            document.getElementById('open-window-search').addEventListener('click', () => {
                 /** @type {HTMLInputElement} */
                 const queryField = document.getElementById('search-query');
                 queryField.value = '';

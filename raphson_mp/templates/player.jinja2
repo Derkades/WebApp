@@ -1,12 +1,12 @@
 {% extends "base.jinja2" %}
 
-{% macro dialog_header(id, title, back_id = None) %}
-    <div class="dialog-header">
+{% macro window_header(id, title, back_id = None) %}
+    <div class="window-header">
         {% if back_id %}
             {{ icon_button('arrow-left', back_id) }}
         {% endif %}
         <h2>{{ title }}</h2>
-        <button class="dialog-close-button icon-button" data-for="{{id}}">
+        <button class="window-close-button icon-button" data-for="{{id}}">
             <div class="icon icon-close"></div>
         </button>
     </div>
@@ -76,12 +76,12 @@
                     <div class="flex-space-between">
                         <h3>{% trans %}Queue{% endtrans %} <span class="secondary" id="current-queue-size">0</span></h3>
                         <div id="queue-buttons">
-                            {{ icon_button('web', 'open-dialog-online', title=gettext('Queue track from online source')) }}
+                            {{ icon_button('web', 'open-window-online', title=gettext('Queue track from online source')) }}
                             {{ icon_button('playlist-remove', 'queue-clear', title=gettext('Clear queue')) }}
-                            {{ icon_button('tag-multiple', 'open-dialog-tags', title=gettext('Open tag selection')) }}
+                            {{ icon_button('tag-multiple', 'open-window-tags', title=gettext('Open tag selection')) }}
                             {{ icon_button('playlist-music', 'browse-all', title=gettext('Browse all tracks')) }}
-                            {{ icon_button('text-search', 'open-dialog-search', title=gettext('Search in tracks')) }}
-                            {{ icon_button('cog', 'open-dialog-settings', title=gettext('Open settings')) }}
+                            {{ icon_button('text-search', 'open-window-search', title=gettext('Search in tracks')) }}
+                            {{ icon_button('cog', 'open-window-settings', title=gettext('Open settings')) }}
                         </div>
                     </div>
                     <div class="scroll">
@@ -105,10 +105,10 @@
         </div>
     </div>
 
-    <div id="dialog-settings" class="full-page-overlay dialog-overlay overlay-hidden">
-        <div class="dialog">
-            {{ dialog_header('dialog-settings', gettext('Settings')) }}
-            <div class="dialog-body form form-large-gap">
+    <div id="window-settings" class="full-page-overlay window-overlay overlay-hidden">
+        <div class="window">
+            {{ window_header('window-settings', gettext('Settings')) }}
+            <div class="window-body form form-large-gap">
                 <label for="settings-queue-size">
                     {% trans %}Minimum queue size{% endtrans %}<br>
                     <span class="secondary">{% trans %}Tracks in the queue can be played without an internet connection.{% endtrans %}</span>
@@ -201,10 +201,10 @@
         </div>
     </div>
 
-    <div id="dialog-tags" class="full-page-overlay dialog-overlay overlay-hidden">
-        <div class="dialog">
-            {{ dialog_header('dialog-tags', gettext('Tags')) }}
-            <div class="dialog-body">
+    <div id="window-tags" class="full-page-overlay window-overlay overlay-hidden">
+        <div class="window">
+            {{ window_header('window-tags', gettext('Tags')) }}
+            <div class="window-body">
                 <label for="tag-mode">{% trans %}Tag mode{% endtrans %}</label>
                 <select id="tag-mode">
                     <option value="none" selected>{% trans %}Ignore tags when choosing tracks{% endtrans %}</option>
@@ -217,10 +217,10 @@
         </div>
     </div>
 
-    <div id="dialog-browse" class="full-page-overlay dialog-overlay overlay-hidden">
-        <div class="dialog">
-            {{ dialog_header('dialog-browse', 'placeholder', back_id='browse-back') }}
-            <div class="dialog-body">
+    <div id="window-browse" class="full-page-overlay window-overlay overlay-hidden">
+        <div class="window">
+            {{ window_header('window-browse', 'placeholder', back_id='browse-back') }}
+            <div class="window-body">
                 <select id="browse-filter-playlist" class="playlist-select">
                     <option value="all" data-keep="true">{% trans %}All{% endtrans %}</option>
                 </select>
@@ -232,10 +232,10 @@
         </div>
     </div>
 
-    <div id="dialog-search" class="full-page-overlay dialog-overlay overlay-hidden">
-        <div class="dialog">
-            {{ dialog_header('dialog-search', gettext('Search')) }}
-            <div class="dialog-body">
+    <div id="window-search" class="full-page-overlay window-overlay overlay-hidden">
+        <div class="window">
+            {{ window_header('window-search', gettext('Search')) }}
+            <div class="window-body">
                 <input id="search-query" type="search" placeholder="{% trans %}Search query{% endtrans %}" class="fill-width"><br>
 
                 <div id="search-result-parent" class="hidden">
@@ -252,10 +252,10 @@
         </div>
     </div>
 
-    <div id="dialog-editor" class="full-page-overlay dialog-overlay overlay-hidden">
-        <div class="dialog">
-            {{ dialog_header('dialog-editor', gettext('Metadata editor')) }}
-            <div class="dialog-body" id="editor-content">
+    <div id="window-editor" class="full-page-overlay window-overlay overlay-hidden">
+        <div class="window">
+            {{ window_header('window-editor', gettext('Metadata editor')) }}
+            <div class="window-body" id="editor-content">
                 <div class="form">
                     <label for="editor-path">{% trans %}File path{% endtrans %}</label>
                     <input type="text" id="editor-path" value="" readonly>
@@ -304,10 +304,10 @@
     </div>
 
     {% if not offline_mode %}
-        <div id="dialog-online" class="full-page-overlay dialog-overlay overlay-hidden">
-            <div class="dialog">
-                {{ dialog_header('dialog-online', gettext('Add from online source (beta)')) }}
-                <div class="dialog-body form" id="editor-content">
+        <div id="window-online" class="full-page-overlay window-overlay overlay-hidden">
+            <div class="window">
+                {{ window_header('window-online', gettext('Add from online source (beta)')) }}
+                <div class="window-body form" id="editor-content">
                     <label for="online-url">{% trans %}URL{% endtrans %}</label>
                     <input type="text" id="online-url" value="" placeholder="https://youtube.com/watch?v=...">
 
@@ -316,10 +316,10 @@
             </div>
         </div>
 
-        <div id="dialog-copy" class="full-page-overlay dialog-overlay overlay-hidden">
-            <div class="dialog">
-                {{ dialog_header('dialog-copy', gettext('Copy track')) }}
-                <div class="dialog-body">
+        <div id="window-copy" class="full-page-overlay window-overlay overlay-hidden">
+            <div class="window">
+                {{ window_header('window-copy', gettext('Copy track')) }}
+                <div class="window-body">
                     <p>{% trans %}Select playlist to copy track to:{% endtrans %}</p>
                     <input type="hidden" id="copy-track">
                     <select id="copy-playlist" class="playlist-select playlist-select-writable"></select>

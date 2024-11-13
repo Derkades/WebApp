@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     addButton.addEventListener('click', async () => {
-        dialogs.close('dialog-online');
+        windows.close('window-online');
         const track = await music.downloadTrackFromWeb(urlInput.value);
         queue.add(track, true);
     })
