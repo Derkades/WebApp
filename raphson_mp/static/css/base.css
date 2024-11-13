@@ -364,7 +364,7 @@ input::placeholder {
 .table {
     width: 100%;
     border-spacing: 0;
-    background: var(--box-background-color);
+    background-color: var(--background-color);
     border-radius: var(--border-radius);
     overflow: clip;
 }
@@ -401,6 +401,15 @@ input::placeholder {
 
 .table th[colspan] {
     text-align: center;
+}
+
+.table tbody tr {
+    background-color: transparent;
+    transition: background-color .1s;
+}
+
+.table tbody tr:hover {
+    background-color: var(--hover-background-color);
 }
 
 /* .collapse to remove column on small screen */
