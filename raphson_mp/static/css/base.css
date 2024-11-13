@@ -5,10 +5,10 @@
     --gap: 1rem; /* used for space between large elements like images, boxes, and large buttons */
     --halfgap: calc(var(--gap) / 2);
     --smallgap: .2rem; /* used for space between small elements like buttons */
-    --elem-border-color: rgba(255, 255, 255, 0.3);
-    --elem-background-color: rgba(50, 50, 50, 0.5);
-    --elem-background-color-true: rgba(255, 255, 255, 0.8);
-    --box-background-color: rgba(20, 20, 20, 0.4);
+    --outline-color: rgba(255, 255, 255, 0.3);
+    --background-color: rgba(20, 20, 20, 0.4);
+    --background-color-active: rgba(255, 255, 255, 0.8);
+    --hover-background-color: rgba(100, 100, 100, 0.4);
     --hover-outline-width: 1px;
     --hover-outline-color: white;
 }
@@ -93,10 +93,6 @@ main {
 
 /* BASIC ELEMENTS */
 
-td, th {
-    text-align: left;
-}
-
 p {
     margin: .2rem 0;
 }
@@ -147,11 +143,11 @@ input,
     appearance: none; /* no native design */
 
     padding: var(--smallgap);
-    background-color: var(--elem-background-color);
+    background-color: var(--background-color);
     border-radius: var(--border-radius);
     color: white;
     margin-bottom: .3rem;
-    border: 1px solid var(--elem-border-color);
+    border: 1px solid var(--outline-color);
     font-size: .9em;
 
     transition: transform .05s, outline-color .1s;
@@ -166,6 +162,7 @@ button:hover,
 input:hover:not([readonly]),
 input[type=range]:focus {
     outline-color: var(--hover-outline-color);
+    background-color: var(--hover-background-color);
 }
 
 button:active,
@@ -196,7 +193,7 @@ input[type=checkbox] {
 }
 
 input[type=checkbox]:checked {
-    background: url("data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHRpdGxlPmNoZWNrLWJvbGQ8L3RpdGxlPjxwYXRoIGQ9Ik05LDIwLjQyTDIuNzksMTQuMjFMNS42MiwxMS4zOEw5LDE0Ljc3TDE4Ljg4LDQuODhMMjEuNzEsNy43MUw5LDIwLjQyWiIgLz48L3N2Zz4=") no-repeat center, var(--elem-background-color-true);
+    background: url("data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHRpdGxlPmNoZWNrLWJvbGQ8L3RpdGxlPjxwYXRoIGQ9Ik05LDIwLjQyTDIuNzksMTQuMjFMNS42MiwxMS4zOEw5LDE0Ljc3TDE4Ljg4LDQuODhMMjEuNzEsNy43MUw5LDIwLjQyWiIgLz48L3N2Zz4=") no-repeat center, var(--background-color-active);
 }
 
 input[type=range] {
@@ -208,7 +205,7 @@ input[type=range] {
 }
 
 input[type=range]::-moz-range-thumb {
-    background: var(--elem-background-color-true);
+    background: var(--background-color-active);
     height: var(--height);
     width: var(--thumb-width);
     margin: 0;
@@ -220,7 +217,7 @@ input[type=range]::-moz-range-thumb {
 /* even though webkit is largely styled identically to mozilla, the two rules cannot be merged or webkit ignores styling */
 input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    background: var(--elem-background-color-true);
+    background: var(--background-color-active);
     height: var(--height);
     width: var(--thumb-width);
     margin: 0;
@@ -398,7 +395,11 @@ input::placeholder {
     height: 2.75rem;
 }
 
-th[colspan] {
+.table th {
+    text-align: left;
+}
+
+.table th[colspan] {
     text-align: center;
 }
 
@@ -421,7 +422,7 @@ th[colspan] {
 .box {
     border-radius: var(--border-radius);
     box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
-    background-color: var(--box-background-color);
+    background-color: var(--background-color);
     overflow: hidden;
     width: 100%;
 }
