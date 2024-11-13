@@ -6,11 +6,11 @@
     --halfgap: calc(var(--gap) / 2);
     --smallgap: .2rem; /* used for space between small elements like buttons */
     --outline-color: rgba(255, 255, 255, 0.3);
+    --outline-width: 1px;
     --background-color: rgba(20, 20, 20, 0.4);
     --background-color-active: rgba(255, 255, 255, 0.8);
     --hover-background-color: rgba(100, 100, 100, 0.4);
-    --hover-outline-width: 1px;
-    --hover-outline-color: white;
+    --hover-outline-color: rgba(255, 255, 255, 0.8);
 }
 
 [hidden] {
@@ -147,13 +147,13 @@ input,
     border-radius: var(--border-radius);
     color: white;
     margin-bottom: .3rem;
-    border: 1px solid var(--outline-color);
     font-size: .9em;
+    border: none;
 
     transition: transform .05s, outline-color .1s;
-    outline-width: var(--hover-outline-width);
+    outline-width: var(--outline-width);
     outline-style: solid;
-    outline-color: transparent;
+    outline-color: var(--outline-color);;
 }
 
 select:hover,
