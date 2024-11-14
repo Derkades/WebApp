@@ -22,7 +22,7 @@ class News {
         }
 
         const minutes = new Date().getMinutes();
-        const isNewsTime = minutes >= 6 && minutes < 8;
+        const isNewsTime = minutes >= 10 && minutes < 15;
         if (!isNewsTime) {
             console.debug('news: not news time');
             this.#hasQueuedNews = false;
