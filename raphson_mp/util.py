@@ -90,6 +90,12 @@ def str_match(a: str, b: str) -> bool:
     if a == b:
         return True
 
+    a = a.lower()
+    b = b.lower()
+
+    if a == b:
+        return True
+
     diff = difflib.SequenceMatcher(None, a, b)
     # real_quick_ratio() provides an upper bound on quick_ratio(), which provides an upper bound on ratio()
     # ratio() is expensive so we must avoid it when possible

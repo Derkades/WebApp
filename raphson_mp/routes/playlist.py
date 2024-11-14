@@ -170,6 +170,20 @@ def route_track(playlist_name: str):
         return chosen_track.info_dict()
 
 
+def _fuzzy_match_track(spotify_normalized_title: str, local_track_key: tuple[str, tuple[str]], spotify_track: SpotifyTrack) -> bool:
+    (local_track_normalized_title, local_track_artists) = local_track_key
+    if not util.str_match(spotify_normalized_title, local_track_normalized_title):
+        return False
+
+    # Title matches, now check if artist matches (more expensive)
+    for artist_a in spotify_track.artists:
+        for artist_b in local_track_artists:
+            if util.str_match(artist_a, artist_b):
+                return True
+
+    return False
+
+
 @bp.route('/<playlist_name>/compare_spotify')
 def route_compare_spotify(playlist_name: str):
     with db.connect(read_only=True) as conn:
@@ -226,17 +240,8 @@ def route_compare_spotify(playlist_name: str):
             else:
                 # Cannot find exact match, look for partial match
                 for local_track_key in local_tracks.keys():
-                    (local_track_normalized_title, local_track_artists) = local_track_key
-                    if util.str_match(normalized_title, local_track_normalized_title):
-                        # Title matches, now check if artist matches (more expensive)
-                        artist_match = False
-                        for artist_a in spotify_track.artists:
-                            for artist_b in local_track_artists:
-                                if util.str_match(artist_a, artist_b):
-                                    artist_match = True
-                                    break
-                        if artist_match:
-                            break
+                    if _fuzzy_match_track(normalized_title, local_track_key, spotify_track):
+                        break
                 else:
                     # no match found
                     only_spotify.append(spotify_track)
