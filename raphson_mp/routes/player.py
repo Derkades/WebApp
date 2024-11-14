@@ -20,12 +20,18 @@ def route_player():
         user = auth.verify_auth_cookie(conn, redirect_to_login=True)
         csrf_token = user.get_csrf()
 
-    return render_template('player.jinja2',
+    response = Response(render_template('player.jinja2',
                            mobile=util.is_mobile(),
                            primary_playlist=user.primary_playlist,
                            load_timestamp=int(time.time()),
                            offline_mode=settings.offline_mode,
-                           csrf_token=csrf_token)
+                           csrf_token=csrf_token))
+
+    # Refresh token cookie
+    if isinstance(user, auth.StandardUser):
+        user.session.set_cookie(response)
+
+    return response
 
 
 @bp.route('/copy_track', methods=['POST'])

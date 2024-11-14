@@ -14,6 +14,7 @@ from typing import override
 import flask_babel
 from flask import request
 from flask_babel import _
+from werkzeug.wrappers import Response
 
 from raphson_mp import jsonw, settings
 
@@ -72,7 +73,6 @@ def verify_password(conn: Connection, user_id: int, password: str) -> bool:
 
 @dataclass
 class Session:
-    rowid: int
     token: str
     csrf_token: str
     creation_timestamp: int
@@ -138,6 +138,9 @@ class Session:
             system = _('Unknown')
 
         return f'{browser}, {system}'
+
+    def set_cookie(self, response: Response):
+        response.set_cookie('token', self.token, max_age=3600*24*30, samesite='Strict')
 
 
 class PrivacyOption(Enum):
@@ -266,7 +269,7 @@ class AuthError(Exception):
     redirect: bool
 
 
-def log_in(conn: Connection, username: str, password: str) -> str | None:
+def log_in(conn: Connection, username: str, password: str) -> Session | None:
     """
     Log in using username and password.
     Args:
@@ -305,7 +308,7 @@ def log_in(conn: Connection, username: str, password: str) -> str | None:
 
     log.info('Successful login for user %s', username)
 
-    return token
+    return Session(token, csrf_token, int(time.time()), None, None, int(time.time()))
 
 
 def _verify_token(conn: Connection, token: str) -> User | None:
@@ -331,7 +334,7 @@ def _verify_token(conn: Connection, token: str) -> User | None:
     (session_rowid, session_token, session_csrf_token, session_creation_date, session_user_agent, session_remote_address,
      session_last_use, user_id, username, nickname, admin, primary_playlist, lang_code, privacy_str) = result
 
-    session = Session(session_rowid, session_token, session_csrf_token, session_creation_date, session_user_agent,
+    session = Session(session_token, session_csrf_token, session_creation_date, session_user_agent,
                       session_remote_address, session_last_use)
 
     try:

@@ -40,9 +40,9 @@ def route_login():
         username: str = cast(str, request.json['username']) if request.is_json else request.form['username']
         password: str = cast(str, request.json['password']) if request.is_json else request.form['password']
 
-        token = auth.log_in(conn, username, password)
+        session = auth.log_in(conn, username, password)
 
-        if token is None:
+        if session is None:
             if request.is_json:
                 return Response(None, 403)
 
@@ -52,7 +52,7 @@ def route_login():
             return {'token': token}
 
         response = redirect('/', code=303)
-        response.set_cookie('token', token, max_age=3600*24*30, samesite='Strict')
+        session.set_cookie(response)
         return response
 
 
