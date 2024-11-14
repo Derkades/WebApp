@@ -170,16 +170,6 @@ def route_track(playlist_name: str):
         return chosen_track.info_dict()
 
 
-def _is_close(a: str, b: str) -> bool:
-    if a == b:
-        return True
-
-    diff = difflib.SequenceMatcher(None, a, b)
-    # real_quick_ratio() provides an upper bound on quick_ratio(), which provides an upper bound on ratio()
-    # ratio() is expensive so we must avoid it when possible
-    return diff.real_quick_ratio() > 0.8 and diff.quick_ratio() > 0.8 and diff.ratio() > 0.8
-
-
 @bp.route('/<playlist_name>/compare_spotify')
 def route_compare_spotify(playlist_name: str):
     with db.connect(read_only=True) as conn:
@@ -237,12 +227,12 @@ def route_compare_spotify(playlist_name: str):
                 # Cannot find exact match, look for partial match
                 for local_track_key in local_tracks.keys():
                     (local_track_normalized_title, local_track_artists) = local_track_key
-                    if _is_close(normalized_title, local_track_normalized_title):
+                    if util.str_match(normalized_title, local_track_normalized_title):
                         # Title matches, now check if artist matches (more expensive)
                         artist_match = False
                         for artist_a in spotify_track.artists:
                             for artist_b in local_track_artists:
-                                if _is_close(artist_a, artist_b):
+                                if util.str_match(artist_a, artist_b):
                                     artist_match = True
                                     break
                         if artist_match:

@@ -1,3 +1,4 @@
+import difflib
 import logging
 from collections.abc import Iterator
 from io import IOBase
@@ -71,6 +72,7 @@ def _send_directory(queue_io: QueueIO, path: Path):
 
     queue_io.close()
 
+
 def send_directory(path: Path):
     """
     Flask response sending directory contents as ZipFile
@@ -82,3 +84,19 @@ def send_directory(path: Path):
     response = Response(queue_io.iterator(), direct_passthrough=True, mimetype='application/zip')
     response.headers['Content-Disposition'] = f'attachment; filename="{path.name}.zip"'
     return response
+
+
+def str_match(a: str, b: str) -> bool:
+    if a == b:
+        return True
+
+    diff = difflib.SequenceMatcher(None, a, b)
+    # real_quick_ratio() provides an upper bound on quick_ratio(), which provides an upper bound on ratio()
+    # ratio() is expensive so we must avoid it when possible
+    return diff.real_quick_ratio() > 0.8 and diff.quick_ratio() > 0.8 and diff.ratio() > 0.8
+
+
+def substr_keyword(text: str, start: str, end: str):
+    start_i = text.index(start) + len(start)
+    end_i = start_i + text[start_i:].index(end)
+    return text[start_i:end_i]

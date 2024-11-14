@@ -1,5 +1,4 @@
 from collections.abc import Iterator
-import difflib
 import html
 import json
 import logging
@@ -11,10 +10,9 @@ from html.parser import HTMLParser
 import traceback
 from typing import Any, Final, override
 
-from flask import Response
 import requests
 
-from raphson_mp import cache, settings
+from raphson_mp import cache, settings, util
 
 log = logging.getLogger(__name__)
 
@@ -55,18 +53,6 @@ class TimeSyncedLyrics(Lyrics):
 class PlainLyrics(Lyrics):
     source: str
     text: str
-
-
-def _strmatch(a: str, b: str):
-    is_match = difflib.SequenceMatcher(None, a.lower(), b.lower()).ratio() > 0.8
-    if not is_match:
-        log.info("strings don't match: '%s' '%s'", a, b)
-    return is_match
-
-def _strcut(text: str, start: str, end: str):
-    start_i = text.index(start) + len(start)
-    end_i = start_i + text[start_i:].index(end)
-    return text[start_i:end_i]
 
 
 class LyricsFetcher(ABC):
@@ -110,9 +96,9 @@ class LrcLibFetcher(LyricsFetcher):
             json = json[0]
 
             # Sanity check on title and artist
-            if not _strmatch(artist, json['artistName']):
+            if not util.str_match(artist, json['artistName']):
                 return None
-            if not _strmatch(title, json['trackName']):
+            if not util.str_match(title, json['trackName']):
                 return None
 
         if json['syncedLyrics']:
@@ -189,7 +175,7 @@ class MusixMatchFetcher(LyricsFetcher):
                 found_title = item['track']['track_name']
                 found_track_id = item['track']['track_id']
                 log.info('musixmatch: search result: %s: %s - %s', found_track_id, found_artist, found_title)
-                if not _strmatch(title, found_title) and _strmatch(artist, found_artist):
+                if not util.str_match(title, found_title) and util.str_match(artist, found_artist):
                     continue
 
                 lyrics = self.get_lyrics_from_list(found_track_id)
@@ -259,7 +245,7 @@ class GeniusFetcher(LyricsFetcher):
             if section['type'] == 'top_hit':
                 for hit in section['hits']:
                     if hit['index'] == 'song':
-                        if _strmatch(title, hit['result']['title']):
+                        if util.str_match(title, hit['result']['title']):
                             return hit['result']['url']
                 break
 
@@ -302,7 +288,7 @@ class GeniusFetcher(LyricsFetcher):
         text = r.text
 
         # Find the important bit of javascript using known parts of the code
-        text = _strcut(text, "window.__PRELOADED_STATE__ = JSON.parse('", "');")
+        text = util.substr_keyword(text, "window.__PRELOADED_STATE__ = JSON.parse('", "');")
 
         # Inside the javascript bit that has now been extracted, is a string. This string contains
         # JSON data. Because it is in a string, some characters are escaped. These need to be
@@ -360,10 +346,10 @@ class LyricFindFetcher(LyricsFetcher):
         response.raise_for_status()
         for track in response.json()['tracks']:
             log.info('found result: %s - %s', track['artist']['name'], track['title'])
-            if not _strmatch(title, track['title']):
+            if not util.str_match(title, track['title']):
                 continue
 
-            if not _strmatch(artist, track['artist']['name']) and artist not in [artist['name'] for artist in track['artists']]:
+            if not util.str_match(artist, track['artist']['name']) and artist not in [artist['name'] for artist in track['artists']]:
                 continue
 
             if duration:
@@ -387,7 +373,7 @@ class LyricFindFetcher(LyricsFetcher):
                                 headers={'User-Agent': settings.webscraping_user_agent})
         response.raise_for_status()
         response_html = response.text
-        response_json = _strcut(response_html, '<script id="__NEXT_DATA__" type="application/json">', '</script>')
+        response_json = util.substr_keyword(response_html, '<script id="__NEXT_DATA__" type="application/json">', '</script>')
         lyrics_text = json.loads(response_json)['props']['pageProps']['songData']['track']['lyrics']
         return PlainLyrics(url, lyrics_text)
 
