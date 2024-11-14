@@ -49,7 +49,7 @@ def route_login():
             return render_template('login.jinja2', invalid_password=True)
 
         if request.is_json:
-            return {'token': token}
+            return {'token': session.token, 'csrf': session.csrf_token}
 
         response = redirect('/', code=303)
         session.set_cookie(response)
