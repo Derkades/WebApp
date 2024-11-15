@@ -1,4 +1,5 @@
 import logging
+from threading import Thread
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -196,3 +197,21 @@ def scan() -> None:
             scan_tracks(conn, playlist)
         duration_ms = (time.time_ns() - start_time_ns) // 1000000
         log.info('Took %sms', duration_ms)
+
+
+def scan_background() -> None:
+    if settings.offline_mode:
+        log.info('Skip scanner in offline mode')
+        return
+
+    def scan_slowly():
+        with db.connect() as conn:
+            playlists = scan_playlists(conn)
+
+        for playlist in playlists:
+            with db.connect() as conn:
+                scan_tracks(conn, playlist)
+            # release database connection and allow server to process important requests
+            time.sleep(1)
+
+    Thread(target=scan_slowly, daemon=True).start()

@@ -22,7 +22,7 @@ def handle_start(args: Any, logconfig_dict: dict) -> None:
 
     if os.getenv('WERKZEUG_RUN_MAIN') != 'true':  # skip if reloading
         db.migrate()
-        scanner.scan()
+        scanner.scan_background()
         cleanup.cleanup()
 
     if args.dev:
