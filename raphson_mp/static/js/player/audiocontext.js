@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Scroll to change volume
     volumeInput.addEventListener('wheel', event => {
-        volume.value = parseInt(volume.value) + (event.deltaY < 0 ? 5 : -5);
+        volumeInput.value = parseInt(volumeInput.value) + (event.deltaY < 0 ? 5 : -5);
         onVolumeChange();
     }, {passive: true});
 
