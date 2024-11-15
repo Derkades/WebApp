@@ -29,7 +29,7 @@ class TestFlask(TestCase):
     @override
     def setUp(self):
         create_test_user()
-        app = main.get_app(0, False)
+        app = main.get_app()
         app.testing = True
         self.client = app.test_client()
         response = self.client.post('/auth/login', data={'username': TEST_USERNAME, 'password': TEST_PASSWORD})

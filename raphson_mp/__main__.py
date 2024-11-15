@@ -27,9 +27,14 @@ def handle_start(args: Any, logconfig_dict: dict) -> None:
 
     if args.dev:
         log.info('Starting Flask web server in debug mode')
-        app = app_main.get_app(args.proxy_count, True)
+        app = app_main.get_app(proxy_count=args.proxy_count, template_reload=True, profiler=args.profiler)
         app.run(host=args.host, port=args.port, debug=True)
         return
+
+    if args.profiler:
+        log.error('cannot use profiler with gunicorn webserver')
+        # it is technically possible, but not with multithreading which is currently always enabled
+        sys.exit(1)
 
     from raphson_mp import gunicorn_app
 
@@ -327,6 +332,7 @@ def main():
     cmd_start.add_argument('--port', default=8080, type=int)
     cmd_start.add_argument('--dev', action='store_true')
     cmd_start.add_argument('--proxy-count', type=int, default=_intenv('PROXY_COUNT', _intenv('PROXIES_X_FORWARDED_FOR', 0)))
+    cmd_start.add_argument('--profiler', action='store_true', help='enable performance profiler')
     cmd_start.set_defaults(func=handle_start)
 
     cmd_useradd = subparsers.add_parser('useradd', help='create new user')

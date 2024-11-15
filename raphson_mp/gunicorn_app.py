@@ -22,13 +22,13 @@ class GunicornApp(BaseApplication):
         pass
 
     def load(self):
-        return main.get_app(self.proxy_count, False)
+        return main.get_app(proxy_count=self.proxy_count)
 
     def load_config(self):
         self.cfg.set('bind', self.bind)
         self.cfg.set('worker_class', 'gthread')
         self.cfg.set('workers', 1)
-        self.cfg.set('threads', 8)
+        self.cfg.set('threads', 4)
         self.cfg.set('access_log_format', "%(h)s %(b)s %(M)sms %(m)s %(U)s?%(q)s")
         self.cfg.set('logconfig_dict', self.logconfig_dict)
         self.cfg.set('preload_app', True)

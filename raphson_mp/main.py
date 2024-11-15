@@ -1,4 +1,6 @@
 import logging
+from pathlib import Path
+import profile
 
 import jinja2
 
@@ -13,6 +15,7 @@ from flask_babel import Babel
 from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from werkzeug.middleware.proxy_fix import ProxyFix
+from werkzeug.middleware.profiler import ProfilerMiddleware
 
 from raphson_mp import language, settings
 
@@ -28,7 +31,9 @@ def _handle_exception(e: BaseException):
     return Response('Sorry! Cannot continue due to an unhandled exception. The error has been logged. Please contact the server administrator.', 500, content_type='text/plain')
 
 
-def get_app(proxy_count: int, template_reload: bool) -> Flask:
+def get_app(proxy_count: int = 0,
+            template_reload: bool = False,
+            profiler: bool = False) -> Flask:
     app = Flask(__name__, template_folder='templates')
     app.register_error_handler(Exception, _handle_exception)
 
@@ -68,6 +73,8 @@ def get_app(proxy_count: int, template_reload: bool) -> Flask:
     else:
         log.warning('prometheus_client is not available, continuing without /metrics endpoint')
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=proxy_count)
+    if profiler:
+        app.wsgi_app = ProfilerMiddleware(app.wsgi_app)
     app.jinja_env.auto_reload = template_reload
     app.jinja_env.undefined = jinja2.StrictUndefined
     app.jinja_env.autoescape = True  # autoescape is on by default, but only for files extensions like .html, but we use .jinja2. Enable autoescape unconditionally.
