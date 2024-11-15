@@ -104,7 +104,8 @@ CREATE TABLE now_playing (
     timestamp INTEGER NOT NULL,
     track TEXT NOT NULL REFERENCES track(path) ON DELETE CASCADE,
     position INTEGER NOT NULL, -- Number of seconds into the track
-    paused INTEGER NOT NULL
+    paused INTEGER NOT NULL,
+    lastfm_update_timestamp INTEGER NOT NULL DEFAULT 0,
 ) STRICT;
 
 CREATE INDEX idx_now_playing_timestamp ON now_playing(timestamp);

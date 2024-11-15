@@ -8,7 +8,7 @@ from flask import Blueprint, Response, render_template, request
 from flask_babel import _, format_timedelta
 
 from raphson_mp import auth, db
-from raphson_mp.auth import PrivacyOption
+from raphson_mp.auth import PrivacyOption, StandardUser
 from raphson_mp.music import Track
 
 log = logging.getLogger(__name__)
@@ -167,7 +167,7 @@ def route_now_playing():
     from raphson_mp import lastfm
 
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, require_csrf=True)
+        user = cast(StandardUser, auth.verify_auth_cookie(conn, require_csrf=True))
 
         if user.privacy != PrivacyOption.NONE:
             log.info('Ignoring, user has enabled private mode')
@@ -185,26 +185,29 @@ def route_now_playing():
         else:
             position = cast(int, request.json['position'])
 
-        conn.execute('''
+        lastfm_update_timestamp = conn.execute('''
                      INSERT INTO now_playing (player_id, user, timestamp, track, paused, position)
                      VALUES (:player_id, :user_id, :timestamp, :relpath, :paused, :position)
                      ON CONFLICT(player_id) DO UPDATE
                          SET timestamp=:timestamp, track=:relpath, paused=:paused, position=:position
+                     RETURNING lastfm_update_timestamp
                      ''',
                      {'player_id': player_id,
                       'user_id': user.user_id,
                       'timestamp': int(time.time()),
                       'relpath': relpath,
                       'paused': paused,
-                      'position': position})
+                      'position': position}).fetchone()[0]
 
         user_key = lastfm.get_user_key(user)
-        if user_key and not paused:
+        should_lastfm = user_key and not paused and time.time() - lastfm_update_timestamp > 60
+        if should_lastfm:
             track = Track.by_relpath(conn, relpath)
             meta = track.metadata()
+            conn.execute('UPDATE now_playing SET lastfm_update_timestamp = unixepoch() WHERE player_id = ?', (player_id,))
 
     # Don't keep database connection open while making last.fm request
-    if user_key and not paused:
+    if should_lastfm:
         log.info('Sending now playing to last.fm: %s', track.relpath)
         lastfm.update_now_playing(user_key, meta)
 
