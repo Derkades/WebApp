@@ -50,8 +50,11 @@ def route_copy_track():
 
         track = Track.by_relpath(conn, cast(str, request.json['track']))
 
+        if track is None:
+            abort(400, 'track does not exist')
+
         if track.playlist == playlist.name:
-            return Response(_('Track is already in this playlist'), content_type='text/plain')
+            abort(400, 'track already in playlist')
 
         shutil.copy(track.path, playlist.path)
 

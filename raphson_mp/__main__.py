@@ -12,7 +12,7 @@ from raphson_mp import auth, logconfig, settings
 log = logging.getLogger(__name__)
 
 
-def handle_start(args: Any, logconfig_dict: dict) -> None:
+def handle_start(args: Any, logconfig_dict: dict[str, Any]) -> None:
     """
     Handle command to start server
     """
@@ -219,7 +219,7 @@ def handle_sync(args: Any) -> None:
 def handle_cover(args: Any) -> None:
     from raphson_mp import music
 
-    cover_bytes = next(music._get_possible_covers(args.artist, args.title, args.meme))
+    cover_bytes = next(music.get_possible_covers(args.artist, args.title, args.meme))
     Path('cover.jpg').write_bytes(cover_bytes)
 
 

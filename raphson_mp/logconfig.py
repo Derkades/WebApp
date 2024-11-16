@@ -1,8 +1,9 @@
 from pathlib import Path
+from typing import Any
 
 
-def get_config_dict(short_log_format: bool, error_log_path: Path | None, log_level: str) -> dict:
-    config = {
+def get_config_dict(short_log_format: bool, error_log_path: Path | None, log_level: str) -> dict[str, Any]:
+    config: dict[str, Any] = {
         'version': 1,
         'formatters': {
             'detailed': {
@@ -53,7 +54,7 @@ def get_config_dict(short_log_format: bool, error_log_path: Path | None, log_lev
     return config
 
 
-def apply(logconfig_dict: dict) -> None:
+def apply(logconfig_dict: dict[str, Any]) -> None:
     """
     Apply dictionary config
     """

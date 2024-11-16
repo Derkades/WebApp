@@ -203,8 +203,11 @@ def route_now_playing():
         should_lastfm = user_key and not paused and time.time() - lastfm_update_timestamp > 60
         if should_lastfm:
             track = Track.by_relpath(conn, relpath)
-            meta = track.metadata()
-            conn.execute('UPDATE now_playing SET lastfm_update_timestamp = unixepoch() WHERE player_id = ?', (player_id,))
+            if track:
+                meta = track.metadata()
+                conn.execute('UPDATE now_playing SET lastfm_update_timestamp = unixepoch() WHERE player_id = ?', (player_id,))
+            else:
+                should_lastfm = False
 
     # Don't keep database connection open while making last.fm request
     if should_lastfm:
@@ -230,12 +233,12 @@ def route_played():
     with db.connect() as conn:
         user = auth.verify_auth_cookie(conn, require_csrf=True)
 
-        track = Track.by_relpath(conn, request.json['track'])
+        track = Track.by_relpath(conn, cast(str, request.json['track']))
         if track is None:
-            log.warning('skipping track that does not exist: %s', request.json['track'])
+            log.warning('skipping track that does not exist: %s', cast(str, request.json['track']))
             return Response('ok', 200, content_type='text/plain')
 
-        timestamp = int(request.json['timestamp'])
+        timestamp = int(cast(str, request.json['timestamp']))
 
         # In offline mode, tracks are chosen without last_chosen being updated. Update it now.
         conn.execute('UPDATE track SET last_chosen=MAX(last_chosen, ?) WHERE path=?',

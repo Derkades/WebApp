@@ -1,8 +1,10 @@
 import logging
+from typing import cast
 
 from flask import Blueprint, Response, redirect, render_template, request
 
 from raphson_mp import auth, db, jsonw, music, packer, settings
+from raphson_mp.auth import StandardUser
 
 bp = Blueprint('root', __name__, url_prefix='/')
 log = logging.getLogger(__name__)
@@ -58,7 +60,7 @@ def route_lastfm_connect():
     from raphson_mp import lastfm
 
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
+        user = cast(StandardUser, auth.verify_auth_cookie(conn))
         # This form does not have a CSRF token, because the user is known
         # in the code that serves the form. Not sure how to fix this.
         # An attacker being able to link their last.fm account is not that bad

@@ -94,7 +94,7 @@ def list_tracks_recursively(path: Path, trashed: bool = False) -> Iterator[Path]
                 yield track_path
 
 
-def _get_possible_covers(artist: str | None, album: str, meme: bool) -> Iterator[bytes]:
+def get_possible_covers(artist: str | None, album: str, meme: bool) -> Iterator[bytes]:
     from raphson_mp import bing, musicbrainz
 
     if meme:
@@ -140,7 +140,7 @@ def get_cover(artist: str | None, album: str, meme: bool,
 
     log.info('Cover thumbnail not cached, need to download album cover image: %s - %s', artist, album)
 
-    for cover_bytes in _get_possible_covers(artist, album, meme):
+    for cover_bytes in get_possible_covers(artist, album, meme):
         with tempfile.TemporaryDirectory(prefix='music-cover') as temp_dir:
             input_path = Path(temp_dir, 'input')
             input_path.write_bytes(cover_bytes)
@@ -535,6 +535,11 @@ class PlaylistStats:
                           ''', (relpath,)).fetchone()
 
 
+class TagMode(Enum):
+    ALLOW = 'allow'
+    DENY = 'deny'
+
+
 @dataclass
 class Playlist:
 
@@ -546,7 +551,7 @@ class Playlist:
     def choose_track(self,
                      user: User  | None,
                      require_metadata: bool = False,
-                     tag_mode: Literal['allow', 'deny'] | None = None,
+                     tag_mode: TagMode | None = None,
                      tags: list[str] | None = None) -> Track | None:
         """
         Randomly choose a track from this playlist directory
@@ -567,11 +572,11 @@ class Playlist:
             params.append(user.user_id)
 
         track_tags_query = 'SELECT tag FROM track_tag WHERE track = track.path'
-        if tag_mode == 'allow':
+        if tag_mode == TagMode.ALLOW:
             assert tags is not None
             query += ' AND (' + ' OR '.join(len(tags) * [f'? IN ({track_tags_query})']) + ')'
             params.extend(tags)
-        elif tag_mode == 'deny':
+        elif TagMode.DENY:
             assert tags is not None
             query += ' AND (' + ' AND '.join(len(tags) * [f'? NOT IN ({track_tags_query})']) + ')'
             params.extend(tags)
