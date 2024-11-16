@@ -295,7 +295,7 @@ class Track {
     tags;
     /** @type {string | null} */
     title;
-    /** @type {Array<string> | null} */
+    /** @type {Array<string>} */
     artists;
     /** @type {string | null} */
     album;
@@ -333,7 +333,7 @@ class Track {
         const html = document.createElement('span');
         html.classList.add('track-display-html');
 
-        if (this.artists !== null && this.title !== null) {
+        if (this.artists.length > 0 && this.title) {
             let first = true;
             for (const artist of this.artists) {
                 if (first) {

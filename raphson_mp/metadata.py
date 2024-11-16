@@ -155,7 +155,7 @@ def _has_advertisement(metadata_str: str) -> bool:
     return False
 
 
-def sort_artists(artists: list[str] | None, album_artist: str | None) -> list[str] | None:
+def sort_artists(artists: list[str], album_artist: str | None) -> list[str]:
     """
     Move album artist to start of artist list
     """
@@ -170,7 +170,7 @@ def sort_artists(artists: list[str] | None, album_artist: str | None) -> list[st
 class Metadata:
     relpath: str
     duration: int
-    artists: list[str] | None
+    artists: list[str]
     album: str | None
     title: str | None
     year: int | None
@@ -227,25 +227,25 @@ class Metadata:
         return re.sub(r'[^\x00-\x7f]', r'', self.display_title())
 
     def primary_artist(self) -> str | None:
-        if self.artists is not None:
-            if len(self.artists) == 1:
-                return self.artists[0] # if there is only one artist, it is the primary artist
-            elif len(self.artists) > 1:
-                # if there are multiple artists, the album artist is probably the primary artist
-                if self.album_artist is not None:
-                    if self.album_artist in self.artists:
-                        return self.album_artist
+        if len(self.artists) == 1:
+            return self.artists[0] # if there is only one artist, it is the primary artist
+        elif len(self.artists) > 1:
+            # if there are multiple artists, the album artist is probably the primary artist
+            if self.album_artist is not None:
+                if self.album_artist in self.artists:
+                    return self.album_artist
 
-                # if album artist is not known, we have to guess
-                return self.artists[0]
-
-        return None
+            # if album artist is not known, we have to guess
+            return self.artists[0]
+        else:
+            # no artists
+            return None
 
     def get_ffmpeg_options(self, option: str = '-metadata') -> list[str]:
         metadata_options: list[str] = []
         if self.album:
             metadata_options.extend((option, 'album=' + self.album))
-        if self.artists is not None:
+        if self.artists:
             metadata_options.extend((option, 'artist=' + _join_meta_list(self.artists)))
         if self.title is not None:
             metadata_options.extend((option, 'title=' + self.title))
@@ -289,14 +289,14 @@ def probe(path: Path) -> Metadata | None:
     data = json.loads(result.stdout.decode())
 
     duration = int(float(data['format']['duration']))
-    artists = None
-    album = None
-    title = None
-    year = None
-    album_artist = None
-    track_number = None
-    tags = []
-    lyrics = None
+    artists: list[str] = []
+    album: str | None = None
+    title: str | None = None
+    year: int | None = None
+    album_artist: str | None = None
+    track_number: int | None = None
+    tags: list[str] = []
+    lyrics: str | None = None
     video: str | None = None
 
     meta_tags: list[tuple[str, str]] = []

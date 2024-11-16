@@ -73,7 +73,7 @@ class Search {
             const table = document.createElement('table');
             const listedArtists = new Set(); // to prevent duplicates, but is not actually used to preserve ordering
             for (const track of tracks) {
-                if (track.artists == null) {
+                if (track.artists.length == 0) {
                     continue;
                 }
 

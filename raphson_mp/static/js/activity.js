@@ -33,7 +33,7 @@ function getNowPlayingCardHtml(info) {
     infoDiv.style.marginLeft = '.5rem';
     cardBody.append(infoDiv);
 
-    if (info.title && info.artists) {
+    if (info.title && info.artists.length > 0) {
         const titleDiv = document.createElement('div');
         titleDiv.style.fontSize = '1.3em';
         titleDiv.textContent = info.title;

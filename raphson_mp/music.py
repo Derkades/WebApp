@@ -227,10 +227,7 @@ class Track:
         duration, title, album, album_artist, track_number, year, lyrics, video = row
 
         rows = self.conn.execute('SELECT artist FROM track_artist WHERE track=?', (self.relpath,)).fetchall()
-        if len(rows) == 0:
-            artists = None
-        else:
-            artists = [row[0] for row in rows]
+        artists = [row[0] for row in rows]
 
         rows = self.conn.execute('SELECT tag FROM track_tag WHERE track=?', (self.relpath,)).fetchall()
         tags = [row[0] for row in rows]
@@ -253,12 +250,7 @@ class Track:
         else:
             album = self.relpath.split('/')[-1]
 
-        if meta.album_artist:
-            artist = meta.album_artist
-        elif meta.artists:
-            artist = ' '.join(meta.artists)
-        else:
-            artist = None
+        artist = meta.primary_artist()
 
         return get_cover(artist, album, meme, img_quality, img_format)
 

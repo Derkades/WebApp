@@ -61,11 +61,8 @@ def query_params(relpath: str, path: Path) -> QueryParams | None:
                                           'year': meta.year,
                                           'lyrics': meta.lyrics,
                                           'video': meta.video}
-    if meta.artists is None:
-        artist_data = []
-    else:
-        artist_data = [{'track': relpath,
-                        'artist': artist} for artist in meta.artists]
+    artist_data = [{'track': relpath,
+                    'artist': artist} for artist in meta.artists]
     tag_data = [{'track': relpath,
                  'tag': tag} for tag in meta.tags]
 

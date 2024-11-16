@@ -59,7 +59,7 @@ class MediaSessionUpdater {
             artwork: [{src: queue.currentTrack.imageUrl}],
         }
 
-        if (track.title && track.artists) {
+        if (track.title && track.artists.length > 0) {
             metaObj.title = track.title;
             metaObj.artist = track.artists.join(', ');
             if (track.album) {
