@@ -539,6 +539,13 @@ class TagMode(Enum):
     ALLOW = 'allow'
     DENY = 'deny'
 
+    @staticmethod
+    def from_value(value: str):
+        for tag_mode in TagMode:
+            if tag_mode.value == value:
+                return tag_mode
+        raise ValueError(value)
+
 
 @dataclass
 class Playlist:
@@ -576,7 +583,7 @@ class Playlist:
             assert tags is not None
             query += ' AND (' + ' OR '.join(len(tags) * [f'? IN ({track_tags_query})']) + ')'
             params.extend(tags)
-        elif TagMode.DENY:
+        elif tag_mode == TagMode.DENY:
             assert tags is not None
             query += ' AND (' + ' AND '.join(len(tags) * [f'? NOT IN ({track_tags_query})']) + ')'
             params.extend(tags)

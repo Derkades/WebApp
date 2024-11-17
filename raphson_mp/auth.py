@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum, unique
 from sqlite3 import Connection, OperationalError
-from typing import override
+from typing import cast, override
 
 import flask_babel
 from flask import request
@@ -384,7 +384,7 @@ def verify_auth_cookie(conn: Connection,
 
     if require_csrf:
         if request.content_type == 'application/json':
-            csrf_token = request.json['csrf']
+            csrf_token = cast(str, request.json['csrf'])
         elif request.content_type == 'application/x-www-form-urlencoded' or (request.content_type and request.content_type.startswith('multipart/form-data')):
             csrf_token = request.form['csrf']
         else:

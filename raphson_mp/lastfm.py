@@ -29,8 +29,11 @@ def is_configured() -> bool:
     return bool(settings.lastfm_api_key) and bool(settings.lastfm_api_secret)
 
 
-def _make_request(method: str, api_method: str, **extra_params) -> dict[Any, Any]:
-    params = {
+def _make_request(method: str, api_method: str, **extra_params: str) -> dict[Any, Any]:
+    if not settings.lastfm_api_key or not settings.lastfm_api_secret:
+        raise ValueError('no lastfm api key')
+
+    params: dict[str, str] = {
         'api_key': settings.lastfm_api_key,
         'method': api_method,
         'format': 'json',

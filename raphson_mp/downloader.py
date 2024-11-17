@@ -31,7 +31,7 @@ class YtDone:
 
 
 class YtQueueLogger:
-    queue: Queue  # contains log strings or YtDone object to indicate yt-dlp has finished
+    queue: Queue[str|YtDone]  # contains log strings or YtDone object to indicate yt-dlp has finished
 
     def __init__(self) -> None:
         self.queue = Queue()

@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from gunicorn.app.base import BaseApplication
 
@@ -10,9 +11,9 @@ log = logging.getLogger(__name__)
 class GunicornApp(BaseApplication):
     bind: str
     proxy_count: int
-    logconfig_dict: dict
+    logconfig_dict: dict[str, Any]
 
-    def __init__(self, bind: str, proxy_count: int, logconfig_dict: dict):
+    def __init__(self, bind: str, proxy_count: int, logconfig_dict: dict[str, Any]):
         self.bind = bind
         self.proxy_count = proxy_count
         self.logconfig_dict = logconfig_dict

@@ -103,7 +103,7 @@ def handle_passwd(args: Any) -> None:
     """
     Handle command to change a user's password
     """
-    from raphson_mp import db, util
+    from raphson_mp import db
 
     with db.connect() as conn:
         result = conn.execute('SELECT id FROM user WHERE username=?',
@@ -232,7 +232,7 @@ def handle_acoustid(args: Any) -> None:
 
     recordings = acoustid.lookup(fp)
 
-    for recording in recordings[:2]:
+    for recording in recordings:
         for meta in musicbrainz.get_recording_metadata(recording):
             log.info('possible metadata for recording %s: %s', recording, meta)
 

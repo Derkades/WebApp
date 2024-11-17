@@ -1,15 +1,15 @@
-import difflib
 from queue import Queue
 from threading import Thread
 from typing import cast
 
-from flask import (Blueprint, Response, abort, redirect, render_template,
+from flask import (Blueprint, abort, redirect, render_template,
                    request)
 
 from raphson_mp import (auth, db, jsonw, metadata, music, scanner, settings,
                         spotify, util)
 from raphson_mp.metadata import normalize_title
 from raphson_mp.spotify import SpotifyTrack
+from raphson_mp.music import TagMode
 
 bp = Blueprint('playlists', __name__, url_prefix='/playlist')
 
@@ -156,10 +156,8 @@ def route_track(playlist_name: str):
         playlist = music.playlist(conn, playlist_name)
         require_metadata: bool = cast(bool, request.json['require_metadata']) if 'require_metadata' in request.json else False
         if 'tag_mode' in request.json:
-            tag_mode = cast(str, request.json['tag_mode'])
-            assert tag_mode in {'allow', 'deny'}
+            tag_mode = TagMode.from_value(cast(str, request.json['tag_mode']))
             tags = cast(list[str], request.json['tags'])
-            assert isinstance(tags, list)
             chosen_track = playlist.choose_track(user, require_metadata=require_metadata, tag_mode=tag_mode, tags=tags)
         else:
             chosen_track = playlist.choose_track(user, require_metadata=require_metadata)

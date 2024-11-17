@@ -99,7 +99,7 @@ def route_data():
 
         history = [{'time_ago': format_timedelta(timestamp - int(time.time()), add_direction=True),
                     'username': nickname if nickname else username,
-                    **Track.by_relpath(conn, relpath).info_dict()}
+                    **cast(Track, Track.by_relpath(conn, relpath)).info_dict()}
                    for timestamp, username, nickname, relpath in result]
 
         file_changes = get_file_changes_list(conn, 10)
@@ -141,7 +141,7 @@ def route_all():
         history = []
         for timestamp, username, nickname, playlist, relpath, track_exists in result:
             if track_exists:
-                title = Track.by_relpath(conn, relpath).metadata().display_title()
+                title = cast(Track, Track.by_relpath(conn, relpath)).metadata().display_title()
             else:
                 title = relpath
 
@@ -231,7 +231,7 @@ def route_played():
     from raphson_mp import lastfm
 
     with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, require_csrf=True)
+        user = cast(StandardUser, auth.verify_auth_cookie(conn, require_csrf=True))
 
         track = Track.by_relpath(conn, cast(str, request.json['track']))
         if track is None:
