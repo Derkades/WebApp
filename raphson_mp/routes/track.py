@@ -1,11 +1,12 @@
 import logging
+from pathlib import Path
 import subprocess
 import time
 from tempfile import NamedTemporaryFile
 
 from flask import Blueprint, Response, abort, request, send_file
 
-from raphson_mp import (acoustid, auth, db, image, jsonw, lyrics, music,
+from raphson_mp import (acoustid, auth, cache, db, image, jsonw, lyrics, music,
                         musicbrainz, scanner, settings)
 from raphson_mp.image import ImageFormat
 from raphson_mp.lyrics import PlainLyrics, TimeSyncedLyrics
@@ -47,15 +48,20 @@ def route_raw(path: str):
         else:
             abort(400, 'file has no suitable video stream')
 
-        with NamedTemporaryFile() as tempfile:
-            subprocess.check_call(['ffmpeg', *settings.ffmpeg_flags(), '-y', '-i', track.path.as_posix(), '-c:v', 'copy', '-map', '0:v', '-f', output_format, tempfile.name], shell=False)
-            # Range requests are disabled using conditional=False, or the browser would create many
-            # requests, each of them requiring ffmpeg to extract the video stream to a temp file
-            # again. The big downside is of course that the browser has to download the complete
-            # video file before being able to skip to the end, but since music videos are usually
-            # relatively small this is a sacrifice I am willing to make. A proper solution would
-            # require more work than I am currently willing to spend on this feature.
-            return send_file(tempfile.name, mimetype=output_media_type, conditional=False)
+        cache_key: str = f'video{track.relpath}{track.mtime}'
+
+        response = cache.retrieve_response(cache_key, output_media_type)
+
+        if not response:
+            with NamedTemporaryFile() as tempfile:
+                subprocess.check_call(['ffmpeg', *settings.ffmpeg_flags(), '-y', '-i', track.path.as_posix(), '-c:v', 'copy', '-map', '0:v', '-f', output_format, tempfile.name], shell=False)
+                cache.store(cache_key, Path(tempfile.name), cache.MONTH)
+            response = cache.retrieve_response(cache_key, output_media_type)
+            if not response:
+                raise ValueError()
+
+        return response
+
 
 @bp.route('/<path:path>/audio')
 def route_audio(path: str):
