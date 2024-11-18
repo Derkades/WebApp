@@ -352,12 +352,13 @@ class LyricFindFetcher(LyricsFetcher):
                                 timeout=10)
         response.raise_for_status()
         for track in response.json()['tracks']:
-            log.info('found result: %s - %s', track['artist']['name'], track['title'])
             if not util.str_match(title, track['title']):
                 continue
 
             if not util.str_match(artist, track['artist']['name']) and artist not in [artist['name'] for artist in track['artists']]:
                 continue
+
+            log.info('found result: %s - %s', track['artist']['name'], track['title'])
 
             if duration:
                 duration_str = track['duration']
@@ -369,7 +370,7 @@ class LyricFindFetcher(LyricsFetcher):
 
             yield track['slug']
 
-    def _get(self, slug: str) -> PlainLyrics:
+    def _get(self, slug: str) -> PlainLyrics | None:
         # 'https://lyrics.lyricfind.com/api/v1/lyric' exists but seems to always return unauthorized
         # use a web scraper instead :-)
 
@@ -381,9 +382,12 @@ class LyricFindFetcher(LyricsFetcher):
         response.raise_for_status()
         response_html = response.text
         response_json = util.substr_keyword(response_html, '<script id="__NEXT_DATA__" type="application/json">', '</script>')
-        lyrics_text = json.loads(response_json)['props']['pageProps']['songData']['track']['lyrics']
-        return PlainLyrics(url, lyrics_text)
-
+        track_json = json.loads(response_json)['props']['pageProps']['songData']['track']
+        if 'lyrics' in track_json:
+            return PlainLyrics(url, track_json['lyrics'])
+        else:
+            # Instrumental
+            return None
 
 if settings.offline_mode:
     # set fetchers to an empty list, as an additional safety measure to ensure no data is used in offline mode
