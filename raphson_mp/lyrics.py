@@ -149,7 +149,11 @@ class MusixMatchFetcher(LyricsFetcher):
         url = self._SEARCH_URL % 'track.subtitle.get'
         query: dict[str, str] = {'track_id': track_id, 'subtitle_format': 'lrc', 'app_id': 'web-desktop-app-v1.0', 'usertoken': self.get_token(), 't': str(int(time.time()))}
         response = self._session.get(url, params=query, timeout=10)
-        result = response.json()
+        try:
+            result = response.json()
+        except json.JSONDecodeError:
+            log.warning('MusixMatch: failed to decode json: %s', response.text)
+            return None
 
         if 'message' in result and 'body' in result["message"] and 'subtitle' in result["message"]["body"] and 'subtitle_body' in result["message"]["body"]["subtitle"]:
             lyrics = result["message"]["body"]["subtitle"]["subtitle_body"]
@@ -166,7 +170,7 @@ class MusixMatchFetcher(LyricsFetcher):
         try:
             result = response.json()
         except json.JSONDecodeError:
-            log.warning('failed to decode json: %s', response.text)
+            log.warning('MusixMatch: failed to decode json: %s', response.text)
             return None
 
         if 'message' in result and 'body' in result["message"] and 'track_list' in result["message"]["body"] and result["message"]["body"]["track_list"]:
