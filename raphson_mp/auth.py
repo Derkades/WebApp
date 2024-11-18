@@ -192,7 +192,7 @@ class StandardUser(User):
     @override
     def sessions(self) -> list[Session]:
         results = self.conn.execute("""
-                                    SELECT rowid, token, csrf_token, creation_date, user_agent, remote_address, last_use
+                                    SELECT token, csrf_token, creation_date, user_agent, remote_address, last_use
                                     FROM session WHERE user=?
                                     """, (self.user_id,)).fetchall()
         return [Session(*row) for row in results]
