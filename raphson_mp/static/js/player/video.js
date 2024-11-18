@@ -48,7 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
         videoBox.replaceChildren(videoElem);
         videoBox.hidden = false;
         document.getElementById('album-cover-box').hidden = true;
-        videoElem.play();
+        if (!audioElem.paused) {
+            videoElem.play();
+        }
     });
 
     // Sync video time with audio
@@ -64,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Large difference => skip
-        if (Math.abs(audioElem.currentTime - videoElem.currentTime) > 2) {
+        if (Math.abs(audioElem.currentTime - videoElem.currentTime) > 1) {
             console.info('video: skip from', videoElem.currentTime, 'to', audioElem.currentTime);
             videoElem.currentTime = audioElem.currentTime;
             return;
