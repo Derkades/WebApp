@@ -456,7 +456,7 @@ class Track:
         if title and artist:
             return lyrics.find(title, artist, meta.album, meta.duration)
 
-        log.warning('could not search for lyrics due to missing metadata')
+        log.info("can't search for lyrics due to missing metadata")
         return None
 
     @staticmethod

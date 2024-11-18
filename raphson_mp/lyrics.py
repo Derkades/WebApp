@@ -155,6 +155,9 @@ class MusixMatchFetcher(LyricsFetcher):
             log.warning('MusixMatch: failed to decode json: %s', response.text)
             return None
 
+        if 'instrumental' in result and result['instrumental'] == 1:
+            return None
+
         if 'message' in result and 'body' in result["message"] and 'subtitle' in result["message"]["body"] and 'subtitle_body' in result["message"]["body"]["subtitle"]:
             lyrics = result["message"]["body"]["subtitle"]["subtitle_body"]
             return lyrics
@@ -185,7 +188,7 @@ class MusixMatchFetcher(LyricsFetcher):
                 lyrics = self.get_lyrics_from_list(found_track_id)
                 if lyrics is None or lyrics == '':
                     # when this happens, the website shows "Unfortunately we're not authorized to show these lyrics..."
-                    log.warning('musixmatch: lyrics are unavailable, likely for legal reasons')
+                    log.info('musixmatch: lyrics are empty')
                     continue
 
                 return TimeSyncedLyrics.from_lrc('MusixMatch', lyrics)
