@@ -117,13 +117,18 @@ function dedup(array) {
  * @param {Error} error
  */
 async function errorHandler(error) {
-    const errorJson = JSON.stringify({
-        "name": error.name,
-        "message": error.message,
-        "stack": error.stack,
-    });
-    console.log('unhandled error', errorJson);
-    await fetch('/report_error', {method: 'POST', body: errorJson, headers: {'Content-Type': 'application/json'}});
+    console.error('unhandled error:', error)
+    try {
+        const errorJson = JSON.stringify({
+            "name": error.name,
+            "message": error.message,
+            "stack": error.stack,
+        });
+        console.log('unhandled error', errorJson);
+        await fetch('/report_error', {method: 'POST', body: errorJson, headers: {'Content-Type': 'application/json'}});
+    } catch (error2) {
+        console.error('unable to report error:', error2)
+    }
 }
 
 window.addEventListener("error", event => errorHandler(event.error));
