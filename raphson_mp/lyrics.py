@@ -149,6 +149,7 @@ class MusixMatchFetcher(LyricsFetcher):
         url = self._SEARCH_URL % 'track.subtitle.get'
         query: dict[str, str] = {'track_id': track_id, 'subtitle_format': 'lrc', 'app_id': 'web-desktop-app-v1.0', 'usertoken': self.get_token(), 't': str(int(time.time()))}
         response = self._session.get(url, params=query, timeout=10)
+        response.raise_for_status()
         try:
             result = response.json()
         except json.JSONDecodeError:
