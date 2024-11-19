@@ -48,7 +48,7 @@ class News {
      */
     async queue() {
         const track = await music.downloadNews();
-        queue.add(queuedTrack, true, true)
+        queue.add(track, true, true);
     }
 }
 
