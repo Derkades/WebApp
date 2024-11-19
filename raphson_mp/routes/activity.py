@@ -4,7 +4,7 @@ import time
 from sqlite3 import Connection
 from typing import cast
 
-from flask import Blueprint, Response, render_template, request
+from flask import Blueprint, Response, abort, render_template, request
 from flask_babel import _, format_timedelta
 
 from raphson_mp import auth, db
@@ -177,9 +177,13 @@ def route_now_playing():
         relpath = cast(str, request.json['track'])
         paused = cast(bool, request.json['paused'])
 
+        track = Track.by_relpath(conn, relpath)
+
+        if track is None:
+            abort(400, 'track does not exist')
+
         if 'progress' in request.json:
             log.warning('now_playing received with legacy progress data')
-            track = cast(Track, Track.by_relpath(conn, relpath))
             meta = track.metadata()
             position = int(cast(int, request.json['progress']) / 100 * meta.duration)
         else:
@@ -202,12 +206,8 @@ def route_now_playing():
         user_key = lastfm.get_user_key(user)
         should_lastfm = user_key and not paused and time.time() - lastfm_update_timestamp > 60
         if should_lastfm:
-            track = Track.by_relpath(conn, relpath)
-            if track:
-                meta = track.metadata()
-                conn.execute('UPDATE now_playing SET lastfm_update_timestamp = unixepoch() WHERE player_id = ?', (player_id,))
-            else:
-                should_lastfm = False
+            meta = track.metadata()
+            conn.execute('UPDATE now_playing SET lastfm_update_timestamp = unixepoch() WHERE player_id = ?', (player_id,))
 
     # Don't keep database connection open while making last.fm request
     if should_lastfm:
