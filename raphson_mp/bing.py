@@ -30,10 +30,10 @@ def _download(image_url: str) -> bytes | None:
                             timeout=10,
                             headers={'User-Agent': settings.user_agent})
         if resp.status_code != 200:
-            log.warning('Could not download %s, status code %s', image_url, resp.status_code)
+            log.info('Could not download %s, status code %s', image_url, resp.status_code)
             return None
     except requests.exceptions.RequestException:
-        log.warning('Could not download %s, connection error', image_url)
+        log.info('Could not download %s, connection error', image_url)
         return None
 
     img_bytes = resp.content
