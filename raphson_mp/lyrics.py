@@ -155,9 +155,6 @@ class MusixMatchFetcher(LyricsFetcher):
             log.warning('MusixMatch: failed to decode json: %s', response.text)
             return None
 
-        if 'instrumental' in result and result['instrumental'] == 1:
-            return None
-
         if 'message' in result and 'body' in result["message"] and 'subtitle' in result["message"]["body"] and 'subtitle_body' in result["message"]["body"]["subtitle"]:
             lyrics = result["message"]["body"]["subtitle"]["subtitle_body"]
             return lyrics
