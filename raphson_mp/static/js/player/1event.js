@@ -27,7 +27,7 @@ class EventBus {
             try {
                 callable(...params);
             } catch (error) {
-                console.error('error in event listener', error);
+                errorHandler(error);
             }
         }
     }
