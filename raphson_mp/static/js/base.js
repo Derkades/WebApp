@@ -112,3 +112,19 @@ function dedup(array) {
     }
     return array2;
 }
+
+/**
+ * @param {Error} error
+ */
+async function errorHandler(error) {
+    const errorJson = JSON.stringify({
+        "name": error.name,
+        "message": error.message,
+        "stack": error.stack,
+    });
+    console.log('unhandled error', errorJson);
+    await fetch('/report_error', {method: 'POST', body: errorJson, headers: {'Content-Type': 'application/json'}});
+}
+
+window.addEventListener("error", event => errorHandler(event.error));
+window.addEventListener("unhandledrejection", event => errorHandler(event.reason));

@@ -1,7 +1,7 @@
 import logging
 from typing import cast
 
-from flask import Blueprint, Response, redirect, render_template, request
+from flask import Blueprint, Response, abort, redirect, render_template, request
 
 from raphson_mp import auth, db, jsonw, music, packer, settings
 from raphson_mp.auth import StandardUser
@@ -61,7 +61,7 @@ def route_lastfm_connect():
 
     with db.connect() as conn:
         user = cast(StandardUser, auth.verify_auth_cookie(conn))
-        # This form does not have a CSRF token, because the user is known
+        # This form does not have a CSRF token, because the user is not known
         # in the code that serves the form. Not sure how to fix this.
         # An attacker being able to link their last.fm account is not that bad
         # of an issue, so we'll deal with it later.
@@ -110,6 +110,24 @@ def route_csp_reports():
     else:
         log.warning('Received Content-Security-Policy report: %s', jsonw.from_json(request.data))
     return Response(None, 200)
+
+
+@bp.route('report_error', methods=['POST'])
+def route_error_report():
+    with db.connect(read_only=True) as conn:
+        auth.verify_auth_cookie(conn)
+        if not request.is_json:
+            abort(400)
+
+        if len(request.data) > 1000:
+            log.warning('Received large error report: %s bytes', len(request.data))
+        else:
+            log.warning('Received JavaScript error: %s: %s\n%s',
+                        cast(str, request.json['name']),
+                        cast(str, request.json['message']),
+                        cast(str, request.json['stack']).rstrip('\n'))
+
+        return Response(None, 200)
 
 
 @bp.route('health_check')
