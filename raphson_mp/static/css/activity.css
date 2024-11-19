@@ -5,7 +5,7 @@
 }
 
 .card {
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--background-color);
     border-radius: var(--border-radius);
     overflow: hidden; /* prevent header from overlapping rounded corners */
     flex-grow: 1;
@@ -13,7 +13,7 @@
 }
 
 .card .card-header {
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--background-color);
     padding: .5rem;
     font-size: 1.3em;
 }

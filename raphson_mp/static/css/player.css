@@ -56,7 +56,7 @@
 }
 
 #seek-bar-inner {
-    background-color: #ccc;
+    background: #ccc;
     transition: width .05s linear;
 }
 
@@ -71,6 +71,7 @@
 .seek-bar-time {
     font-size: 1.1rem;
     mix-blend-mode: difference;
+    color: white; /* required for mix-blend-mode: difference */
 }
 
 /* QUEUE */

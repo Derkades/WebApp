@@ -1,0 +1,55 @@
+/* inspired by: https://jdan.github.io/98.css */
+
+:root {
+    --body-background: #007f82;
+    --main-background: silver;
+    --font: 'Helvetica', sans-serif;
+    --text-color: black;
+    --text-color-secondary: gray;
+    --text-color-link: blue;
+    --border-radius: 0;
+    --gap: .5rem;
+    --smallgap: 1px;
+    --border-width: 2px;
+    --border-style: solid;
+    --border-color: white black black  white;
+    --border-width-hover: var(--border-width);
+    --border-style-hover: var(--border-style);
+    --border-color-hover: black white white black;
+    --background-color: silver;
+    --background-color-active: var(--background-color);
+    --background-color-hover: var(--background-color);
+    --box-shadow: none;
+}
+
+.table,
+.logbox,
+input[type=text],
+input[type=text]:hover,
+input[type=checkbox],
+input[type=checkbox]:hover {
+    background: white;
+}
+
+input[type=checkbox]:checked {
+    background: url("data:image/svg+xml;charset=utf-8,%3Csvg width='7' height='7' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M7 0H6v1H5v1H4v1H3v1H2V3H1V2H0v3h1v1h1v1h1V6h1V5h1V4h1V3h1V0z' fill='%23000'/%3E%3C/svg%3E") no-repeat center, white;
+}
+
+input[type=checkbox] {
+    width: 1rem;
+}
+
+.table th {
+    background: var(--background-color);
+    border-style: var(--border-style);
+    border-color: var(--border-color);
+    border-width: var(--border-width);
+}
+
+.icon {
+    filter: none;
+}
+
+#seek-bar-inner {
+    background: linear-gradient(to right, #08216b, #a5cef7);
+}
