@@ -86,7 +86,7 @@ function replaceIconButton(iconButton, iconName) {
  */
 function checkResponseCode(response) {
     if (!response.ok) {
-        throw 'response code ' + response.status;
+        throw Error('response code ' + response.status);
     }
 }
 
