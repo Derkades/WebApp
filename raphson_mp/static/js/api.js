@@ -514,7 +514,7 @@ class Track {
     }
 
     async dislike() {
-        jsonPost('/dislikes/add', {track: this.path});
+        await jsonPost('/dislikes/add', {track: this.path});
     }
 
     /**
