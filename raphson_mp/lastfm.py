@@ -112,11 +112,9 @@ def scrobble(user_key: str, meta: Metadata, start_timestamp: int):
         log.info('Skipped scrobble, last.fm not configured')
         return
 
-    if meta.title and meta.album_artist:
-        artist = meta.album_artist
-    elif meta.title and meta.artists:
-        artist = ' & '.join(meta.artists)
-    else:
+    artist = meta.primary_artist()
+
+    if not meta.title or not artist:
         log.info('Skipped scrobble, missing metadata')
         return
 
