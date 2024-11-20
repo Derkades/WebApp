@@ -17,7 +17,7 @@
 
 /* TEXT */
 
-body, input, select {
+body, input, select, button {
     font-family: var(--font);
     color: var(--text-color);
 }

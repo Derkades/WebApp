@@ -176,7 +176,7 @@ def rows_to_xy_multi(rows: list[tuple[str, str, int]], case_sensitive=True, rest
     return a_list, ydata
 
 
-def counter_to_xy(counter: Counter):
+def counter_to_xy(counter: Counter[str]):
     return rows_to_xy(counter.most_common(COUNTER_AMOUNT))
 
 
@@ -186,20 +186,19 @@ def chart_last_chosen(conn: Connection):
     """
     cur = conn.cursor()
     result_playlists = [row[0] for row in cur.execute('SELECT playlist FROM track GROUP BY playlist ORDER BY playlist')]
-    result_today = cur.execute('SELECT playlist, COUNT(last_chosen) FROM track WHERE last_chosen >= unixepoch() - 60*60*24 GROUP BY playlist ORDER BY playlist').fetchall()
-    result_week = cur.execute('SELECT playlist, COUNT(last_chosen) FROM track WHERE last_chosen >= unixepoch() - 60*60*24*7 AND last_chosen < unixepoch() - 60*60*24 GROUP BY playlist ORDER BY playlist').fetchall()
-    result_month = cur.execute('SELECT playlist, COUNT(last_chosen) FROM track WHERE last_chosen >= unixepoch() - 60*60*24*30 AND last_chosen < unixepoch() - 60*60*24*7 GROUP BY playlist ORDER BY playlist').fetchall()
-    result_year = cur.execute('SELECT playlist, COUNT(last_chosen) FROM track WHERE last_chosen >= unixepoch() - 60*60*24*365 AND last_chosen < unixepoch() - 60*60*24*30 GROUP BY playlist ORDER BY playlist').fetchall()
-    result_long_ago = cur.execute('SELECT playlist, COUNT(last_chosen) FROM track WHERE last_chosen < unixepoch() - 60*60*24*365 AND last_chosen != 0 GROUP BY playlist ORDER BY playlist').fetchall()
+    result_week = cur.execute('SELECT playlist, COUNT(last_chosen) FROM track WHERE unixepoch() - last_chosen <= 60*60*24*7 GROUP BY playlist ORDER BY playlist').fetchall()
+    result_month = cur.execute('SELECT playlist, COUNT(last_chosen) FROM track WHERE unixepoch() - last_chosen <= 60*60*24*30 AND unixepoch() - last_chosen > 60*60*24*7 GROUP BY playlist ORDER BY playlist').fetchall()
+    result_year = cur.execute('SELECT playlist, COUNT(last_chosen) FROM track WHERE unixepoch() - last_chosen <= 60*60*24*365 AND unixepoch() - last_chosen > 60*60*24*30 GROUP BY playlist ORDER BY playlist').fetchall()
+    result_long_ago = cur.execute('SELECT playlist, COUNT(last_chosen) FROM track WHERE unixepoch() - last_chosen <= 60*60*24*365 AND last_chosen != 0 GROUP BY playlist ORDER BY playlist').fetchall()
     result_never = cur.execute('SELECT playlist, COUNT(last_chosen) FROM track WHERE last_chosen == 0 GROUP BY playlist ORDER BY playlist').fetchall()
 
-    axis = [_('Today'), _('This week'), _('This month'), _('Last year'), _('Long ago'), _('Never')]
+    axis = [_('Last week'), _('Last month'), _('Last year'), _('Long ago'), _('Never')]
     series = {}
 
     for playlist in result_playlists:
         series[playlist] = [0] * 6
 
-    for i, result in enumerate((result_today, result_week, result_month, result_year, result_long_ago, result_never)):
+    for i, result in enumerate((result_week, result_month, result_year, result_long_ago, result_never)):
         for playlist, count in result:
             series[playlist][i] = count
 
