@@ -25,3 +25,9 @@
     filter: invert(1);
     mix-blend-mode: difference;
 }
+
+.box {
+    flex-grow: 1;
+    min-width: min(100%, 25rem);
+    width: auto;
+}
