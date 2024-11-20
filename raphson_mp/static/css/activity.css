@@ -1,29 +1,14 @@
-.card-container {
+.activity-box-body {
+    padding: var(--halfgap);
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--gap);
+    gap: var(--halfgap);
 }
 
-.card {
-    background: var(--background-color);
-    border-radius: var(--border-radius);
-    overflow: hidden; /* prevent header from overlapping rounded corners */
-    flex-grow: 1;
-    min-width: min(100%, 25rem);
+.activity-box-body div {
+    margin: var(--smallgap);
 }
 
-.card .card-header {
-    background: var(--background-color);
-    padding: .5rem;
-    font-size: 1.3em;
-}
-
-.card-body {
-    padding: .5rem;
-    display: flex;
-}
-
-.card-progress {
+.activity-progress {
     height: 2px;
     background-color: white;
 }

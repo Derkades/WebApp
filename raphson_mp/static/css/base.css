@@ -397,6 +397,12 @@ input::placeholder {
     width: 100%;
 }
 
+.box-header {
+    background: var(--header-background);
+    padding: var(--halfgap);
+    font-size: 1.2em;
+}
+
 .boxes {
     display: flex;
     gap: var(--gap);

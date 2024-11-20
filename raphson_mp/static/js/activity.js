@@ -1,14 +1,14 @@
 function getNowPlayingCardHtml(info) {
     const card = document.createElement('div');
-    card.classList.add('card');
+    card.classList.add('box');
 
     const cardHeader = document.createElement('div');
-    cardHeader.classList.add('card-header');
+    cardHeader.classList.add('box-header');
     cardHeader.textContent = info.username;
     card.append(cardHeader);
 
     const cardBody = document.createElement('div');
-    cardBody.classList.add('card-body');
+    cardBody.classList.add('activity-box-body');
     card.append(cardBody);
 
     const coverThumbUrl = `/track/${encodeURIComponent(info.path)}/cover?quality=low`;
@@ -30,7 +30,6 @@ function getNowPlayingCardHtml(info) {
     cardBody.append(coverImg);
 
     const infoDiv = document.createElement('div');
-    infoDiv.style.marginLeft = '.5rem';
     cardBody.append(infoDiv);
 
     if (info.title && info.artists.length > 0) {
@@ -50,12 +49,11 @@ function getNowPlayingCardHtml(info) {
 
     const playlistDiv = document.createElement('div');
     playlistDiv.classList.add('secondary');
-    playlistDiv.style.marginTop = '.5rem';
     playlistDiv.textContent = info.playlist;
     infoDiv.append(playlistDiv);
 
     const progressBar = document.createElement('div');
-    progressBar.classList.add('card-progress');
+    progressBar.classList.add('activity-progress');
     progressBar.style.width = (100 * info.position / info.duration) + '%';
     card.append(progressBar);
 
