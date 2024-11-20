@@ -48,9 +48,7 @@ input[type=checkbox] {
 .table th,
 .box {
     background: var(--background-color);
-    border-style: var(--border-style);
-    border-color: var(--border-color);
-    border-width: var(--border-width);
+    box-shadow: var(--controls-box-shadow);
 }
 
 .icon {
