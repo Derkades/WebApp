@@ -1,7 +1,7 @@
 import json
 import logging
 from dataclasses import dataclass
-from sqlite3 import Cursor
+from sqlite3 import Connection, Cursor
 from threading import Thread
 from typing import Any
 from zipfile import ZIP_LZMA, ZipFile
@@ -9,6 +9,7 @@ from zipfile import ZIP_LZMA, ZipFile
 from flask import Blueprint, Response
 
 from raphson_mp import auth, db
+from raphson_mp.decorators import route
 from raphson_mp.util import QueueIO
 
 log = logging.getLogger(__name__)
@@ -50,11 +51,8 @@ def generate_zip(queue_io: QueueIO, user_id: int):
         queue_io.close()
 
 
-@bp.route('/data')
-def data():
-    with db.connect(read_only=True) as conn:
-        user = auth.verify_auth_cookie(conn)
-
+@route(bp, '/data')
+def data(_conn: Connection, user: auth.User):
     queue_io = QueueIO()
     Thread(target=generate_zip, args=(queue_io, user.user_id)).start()
     return Response(queue_io.iterator(), direct_passthrough=True, mimetype='application/zip')

@@ -1,21 +1,20 @@
+from sqlite3 import Connection
 from flask import Blueprint, render_template
 
-from raphson_mp import auth, db
+from raphson_mp import db
+from raphson_mp.auth import User
+from raphson_mp.decorators import route
 
 bp = Blueprint('games', __name__, url_prefix='/games')
 
 
-@bp.route('/guess')
-def route_guess():
-    with db.connect(read_only=True) as conn:
-        user = auth.verify_auth_cookie(conn)
+@route(bp, '/guess', redirect_to_login=True)
+def route_guess(_conn: Connection, user: User):
     return render_template('games_guess.jinja2',
                            csrf_token=user.get_csrf())
 
 
-@bp.route('/chairs')
-def route_chairs():
-    with db.connect(read_only=True) as conn:
-        user = auth.verify_auth_cookie(conn)
+@route(bp, '/chairs', redirect_to_login=True)
+def route_chairs(_conn: Connection, user: User):
     return render_template('games_chairs.jinja2',
                            csrf_token=user.get_csrf())

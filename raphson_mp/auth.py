@@ -17,6 +17,7 @@ from flask_babel import _
 from werkzeug.wrappers import Response
 
 from raphson_mp import jsonw, settings
+from raphson_mp.theme import DEFAULT_THEME
 
 log = logging.getLogger(__name__)
 
@@ -164,6 +165,7 @@ class User(ABC):
         Get all sessions for users
         """
 
+    # TODO make it a property
     @abstractmethod
     def get_csrf(self) -> str:
         """
@@ -187,6 +189,7 @@ class StandardUser(User):
     primary_playlist: str | None
     language: str | None
     privacy: PrivacyOption
+    theme: str
     session: Session
 
     @override
@@ -219,6 +222,7 @@ class OfflineUser(User):
         self.primary_playlist = None
         self.language = None
         self.privacy = PrivacyOption.NONE
+        self.theme = DEFAULT_THEME
 
     @override
     def sessions(self) -> list[Session]:
@@ -322,7 +326,7 @@ def _verify_token(conn: Connection, token: str) -> User | None:
     result = conn.execute("""
                           SELECT session.rowid, session.token, session.csrf_token, session.creation_date, session.user_agent,
                                  session.remote_address, session.last_use, user.id, user.username, user.nickname,
-                                 user.admin, user.primary_playlist, user.language, user.privacy
+                                 user.admin, user.primary_playlist, user.language, user.privacy, user.theme
                           FROM user
                               INNER JOIN session ON user.id = session.user
                           WHERE session.token=?
@@ -332,7 +336,7 @@ def _verify_token(conn: Connection, token: str) -> User | None:
         return None
 
     (session_rowid, session_token, session_csrf_token, session_creation_date, session_user_agent, session_remote_address,
-     session_last_use, user_id, username, nickname, admin, primary_playlist, lang_code, privacy_str) = result
+     session_last_use, user_id, username, nickname, admin, primary_playlist, lang_code, privacy_str, theme) = result
 
     session = Session(session_token, session_csrf_token, session_creation_date, session_user_agent,
                       session_remote_address, session_last_use)
@@ -352,7 +356,7 @@ def _verify_token(conn: Connection, token: str) -> User | None:
             raise ex
 
     return StandardUser(conn, user_id, username, nickname, admin == 1, primary_playlist, lang_code,
-                        PrivacyOption(privacy_str), session)
+                        PrivacyOption(privacy_str), theme, session)
 
 
 def verify_auth_cookie(conn: Connection,

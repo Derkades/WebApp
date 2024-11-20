@@ -1,13 +1,14 @@
 from flask import Blueprint, Response, abort, request
 
 from raphson_mp import auth, db, image, jsonw, lyrics, settings
+from raphson_mp.decorators import route
 from raphson_mp.image import ImageFormat
 from raphson_mp.lyrics import PlainLyrics
 from raphson_mp.music import Track
 
 bp = Blueprint('track', __name__, url_prefix='/track')
 
-@bp.route('/<path:path>/info')
+@route(bp, '/<path:path>/info', public=True)
 def route_info(path: str):
     with db.connect(read_only=True) as conn:
         track = Track.by_relpath(conn, path)
@@ -16,14 +17,14 @@ def route_info(path: str):
         return track.info_dict()
 
 
-@bp.route('/<path:path>/audio')
+@route(bp, '/<path:path>/audio', public=True)
 def route_audio(path: str):
     with db.offline(read_only=True) as conn:
         music_data: bytes = conn.execute('SELECT music_data FROM content WHERE path=?', (path,)).fetchone()[0]
         return Response(music_data, content_type='audio/webm')
 
 
-@bp.route('/<path:path>/cover')
+@route(bp, '/<path:path>/cover', public=True)
 def route_album_cover(path: str) -> Response:
     if settings.offline_mode:
         with db.offline(read_only=True) as conn:
@@ -57,7 +58,7 @@ def route_album_cover(path: str) -> Response:
     return response
 
 
-@bp.route('/<path:path>/lyrics')
+@route(bp, '/<path:path>/lyrics', public=True)
 def route_lyrics(path: str):
     """
     Get lyrics for the provided track path.

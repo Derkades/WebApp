@@ -1,28 +1,28 @@
 import logging
+from sqlite3 import Connection
 from typing import cast
 
 from flask import Blueprint, Response, abort, redirect, render_template, request
 
-from raphson_mp import auth, db, jsonw, music, packer, settings
-from raphson_mp.auth import StandardUser
+from raphson_mp import db, jsonw, music, packer, settings
+from raphson_mp.auth import StandardUser, User
+from raphson_mp.decorators import route
 
 bp = Blueprint('root', __name__, url_prefix='/')
 log = logging.getLogger(__name__)
 
 
-@bp.route('')
-def route_home():
+@route(bp, '', redirect_to_login=True)
+def route_home(_conn: Connection, user: User):
     """
     Home page, with links to file manager and music player
     """
-    with db.connect(read_only=True) as conn:
-        user = auth.verify_auth_cookie(conn, redirect_to_login=True)
     return render_template('home.jinja2',
                            user_is_admin=user.admin,
                            offline_mode=settings.offline_mode)
 
 
-@bp.route('static/js/player.js')
+@route(bp, 'static/js/player.js', public=True)
 def route_player_js():
     """
     Concatenated javascript file for music player. Only used during development.
@@ -31,17 +31,15 @@ def route_player_js():
                     content_type='application/javascript')
 
 
-@bp.route('info')
-def route_info():
+@route(bp, 'info')
+def route_info(_conn: Connection, _user: User):
     """
     Information/manual page
     """
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
     return render_template('info.jinja2')
 
 
-@bp.route('lastfm_callback')
+@route(bp, 'lastfm_callback', public=True)
 def route_lastfm_callback():
     # After allowing access, last.fm sends the user to this page with an
     # authentication token. The authentication token can only be used once,
@@ -55,53 +53,46 @@ def route_lastfm_callback():
                            auth_token=auth_token)
 
 
-@bp.route('lastfm_connect', methods=['POST'])
-def route_lastfm_connect():
+@route(bp, 'lastfm_connect', methods=['POST'], write=True, skip_csrf_check=True)
+def route_lastfm_connect(conn: Connection, user: StandardUser):
+    # This form does not have a CSRF token, because the user is not known
+    # in the code that serves the form. Not sure how to fix this.
+
     from raphson_mp import lastfm
 
-    with db.connect() as conn:
-        user = cast(StandardUser, auth.verify_auth_cookie(conn))
-        # This form does not have a CSRF token, because the user is not known
-        # in the code that serves the form. Not sure how to fix this.
-        # An attacker being able to link their last.fm account is not that bad
-        # of an issue, so we'll deal with it later.
-        auth_token = request.form['auth_token']
-        name = lastfm.obtain_session_key(user, auth_token)
+    auth_token = request.form['auth_token']
+    name = lastfm.obtain_session_key(user, auth_token)
+
     return render_template('lastfm_connected.jinja2',
                            name=name)
 
-@bp.route('lastfm_disconnect', methods=['POST'])
-def route_lastfm_disconnect():
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, require_csrf=True)
-        conn.execute('DELETE FROM user_lastfm WHERE user=?',
-                     (user.user_id,))
+@route(bp, 'lastfm_disconnect', methods=['POST'], write=True)
+def route_lastfm_disconnect(conn: Connection, user: User):
+    conn.execute('DELETE FROM user_lastfm WHERE user=?', (user.user_id,))
     return redirect('/account', code=303)
 
 
-@bp.route('download_offline')
-def route_download_offline():
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
-        playlists = music.playlists(conn)
+@route(bp, 'download_offline', redirect_to_login=True)
+def route_download_offline(conn: Connection, _user: StandardUser):
+    playlists = music.playlists(conn)
 
     return render_template('download_offline.jinja2',
                            playlists=playlists)
 
 
-@bp.route('install')
-def route_install():
+@route(bp, 'install')
+def route_install(_conn: Connection, _user: StandardUser):
     return render_template('install.jinja2')
 
 
-@bp.route('pwa')
+@route(bp, 'pwa', public=True)
 def route_pwa():
     # Cannot have /player as an entrypoint directly, because for some reason the first request
     # to the start_url does not include cookies. Even a regular 302 redirect doesn't work!
     return '<meta http-equiv="refresh" content="0;URL=\'/player\'">'
 
 
-@bp.route('csp_reports', methods=['POST'])
+@route(bp, 'csp_reports', methods=['POST'], public=True)
 def route_csp_reports():
     # TODO Add rate limit
     assert request.content_type == 'application/csp-report'
@@ -112,31 +103,28 @@ def route_csp_reports():
     return Response(None, 200)
 
 
-@bp.route('report_error', methods=['POST'])
-def route_error_report():
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
-        if not request.is_json:
-            abort(400)
+@route(bp, 'report_error', methods=['POST'])
+def route_error_report(_conn: Connection, _user: StandardUser):
+    if not request.is_json:
+        abort(400)
 
-        if len(request.data) > 1000:
-            log.warning('Received large error report: %s bytes', len(request.data))
-        else:
-            log.warning('Received JavaScript error: %s: %s\n%s',
-                        cast(str, request.json['name']),
-                        cast(str, request.json['message']),
-                        cast(str, request.json['stack']).rstrip('\n'))
+    if len(request.data) > 1000:
+        log.warning('Received large error report: %s bytes', len(request.data))
+    else:
+        log.warning('Received JavaScript error: %s: %s\n%s',
+                    cast(str, request.json['name']),
+                    cast(str, request.json['message']),
+                    cast(str, request.json['stack']).rstrip('\n'))
 
-        return Response(None, 200)
+    return Response(None, 200)
 
 
-@bp.route('health_check')
+@route(bp, 'health_check', public=True)
 def route_health_check():
     return Response('ok', content_type='text/plain')
 
 
-@bp.route('security.txt')
-@bp.route('.well-known/security.txt')
+@route(bp, ['security.txt', '.well-known/security.txt'], public=True)
 def security_txt():
     content = """Contact: mailto:robin@rslot.nl
 Expires: 2026-12-31T23:59:59.000Z

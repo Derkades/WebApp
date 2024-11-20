@@ -1,4 +1,5 @@
 import shutil
+from sqlite3 import Connection
 import subprocess
 import tempfile
 
@@ -6,12 +7,14 @@ import requests
 from flask import Blueprint, Response, abort
 
 from raphson_mp import settings
+from raphson_mp.auth import User
+from raphson_mp.decorators import route
 
 bp = Blueprint('news', __name__, url_prefix='/news')
 
 
-@bp.route('/audio')
-def audio():
+@route(bp, '/audio')
+def audio(_conn: Connection, _user: User):
     with tempfile.NamedTemporaryFile() as temp_input, tempfile.NamedTemporaryFile() as temp_output:
         if not settings.news_server:
             abort(503, 'news server not configured')

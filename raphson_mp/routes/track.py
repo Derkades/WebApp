@@ -1,13 +1,16 @@
 import logging
 from pathlib import Path
+from sqlite3 import Connection
 import subprocess
 import time
 from tempfile import NamedTemporaryFile
 
 from flask import Blueprint, Response, abort, request, send_file
 
-from raphson_mp import (acoustid, auth, cache, db, image, jsonw, lyrics, music,
+from raphson_mp import (acoustid, cache, db, image, jsonw, lyrics, music,
                         musicbrainz, scanner, settings)
+from raphson_mp.auth import User
+from raphson_mp.decorators import route
 from raphson_mp.image import ImageFormat
 from raphson_mp.lyrics import PlainLyrics, TimeSyncedLyrics
 from raphson_mp.music import AudioType, Track
@@ -15,65 +18,57 @@ from raphson_mp.music import AudioType, Track
 log = logging.getLogger(__name__)
 bp = Blueprint('track', __name__, url_prefix='/track')
 
-
-@bp.route('/<path:path>/info')
-def route_info(path: str):
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
-        track = Track.by_relpath(conn, path)
-        if track is None:
-            abort(404, 'track not found')
-        return track.info_dict()
+def _track(conn: Connection, relpath: str) -> Track:
+    track = Track.by_relpath(conn, relpath)
+    if track is None:
+        abort(404, 'track not found')
+    return track
 
 
-@bp.route('/<path:path>/video')
-def route_raw(path: str):
+@route(bp, '/<path:relpath>/info')
+def route_info(conn: Connection, _user: User, relpath: str):
+    track = _track(conn, relpath)
+    return track.info_dict()
+
+
+@route(bp, '/<path:relpath>/video')
+def route_raw(conn: Connection, _user: User, relpath: str):
     """
     Return video stream
     """
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
-        track = Track.by_relpath(conn, path)
-        if track is None:
-            abort(404, 'track not found')
+    track = _track(conn, relpath)
+    meta = track.metadata()
 
-        meta = track.metadata()
+    if meta.video == 'vp9':
+        output_format = 'webm'
+        output_media_type = 'video/webm'
+    elif meta.video == 'h264':
+        output_format = 'mp4'
+        output_media_type = 'video/mp4'
+    else:
+        abort(400, 'file has no suitable video stream')
 
-        if meta.video == 'vp9':
-            output_format = 'webm'
-            output_media_type = 'video/webm'
-        elif meta.video == 'h264':
-            output_format = 'mp4'
-            output_media_type = 'video/mp4'
-        else:
-            abort(400, 'file has no suitable video stream')
+    cache_key: str = f'video{track.relpath}{track.mtime}'
 
-        cache_key: str = f'video{track.relpath}{track.mtime}'
+    response = cache.retrieve_response(cache_key, output_media_type)
 
+    if not response:
+        with NamedTemporaryFile() as tempfile:
+            subprocess.check_call(['ffmpeg', *settings.ffmpeg_flags(), '-y', '-i', track.path.as_posix(), '-c:v', 'copy', '-map', '0:v', '-f', output_format, tempfile.name], shell=False)
+            cache.store(cache_key, Path(tempfile.name), cache.MONTH)
         response = cache.retrieve_response(cache_key, output_media_type)
-
         if not response:
-            with NamedTemporaryFile() as tempfile:
-                subprocess.check_call(['ffmpeg', *settings.ffmpeg_flags(), '-y', '-i', track.path.as_posix(), '-c:v', 'copy', '-map', '0:v', '-f', output_format, tempfile.name], shell=False)
-                cache.store(cache_key, Path(tempfile.name), cache.MONTH)
-            response = cache.retrieve_response(cache_key, output_media_type)
-            if not response:
-                raise ValueError()
+            raise ValueError()
 
-        return response
+    return response
 
 
-@bp.route('/<path:path>/audio')
-def route_audio(path: str):
+@route(bp, '/<path:relpath>/audio')
+def route_audio(conn: Connection, _user: User, relpath: str):
     """
     Get transcoded audio for the given track path.
     """
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
-        track = Track.by_relpath(conn, path)
-
-    if track is None:
-        abort(404, 'Track does not exist')
+    track = _track(conn, relpath)
 
     last_modified = track.mtime_dt
     if request.if_modified_since and last_modified <= request.if_modified_since:
@@ -106,11 +101,13 @@ def route_audio(path: str):
     return response
 
 
-@bp.route('/<path:path>/cover')
-def route_album_cover(path: str) -> Response:
+@route(bp, '/<path:relpath>/cover')
+def route_album_cover(conn: Connection, _user: User, relpath: str) -> Response:
     """
     Get album cover image for the provided track path.
     """
+    track = _track(conn, relpath)
+
     meme = 'meme' in request.args and bool(int(request.args['meme']))
 
     if request.args['quality'] == 'high':
@@ -120,17 +117,11 @@ def route_album_cover(path: str) -> Response:
     else:
         raise ValueError('invalid quality')
 
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
-        track = Track.by_relpath(conn, path)
-        if track is None:
-            abort(404, 'track not found')
+    last_modified = track.mtime_dt
+    if request.if_modified_since and last_modified <= request.if_modified_since:
+        return Response(None, 304)
 
-        last_modified = track.mtime_dt
-        if request.if_modified_since and last_modified <= request.if_modified_since:
-            return Response(None, 304)
-
-        image_bytes = track.get_cover(meme, quality, ImageFormat.WEBP)
+    image_bytes = track.get_cover(meme, quality, ImageFormat.WEBP)
 
     response = Response(image_bytes, content_type='image/webp')
     response.last_modified = last_modified
@@ -138,51 +129,40 @@ def route_album_cover(path: str) -> Response:
     return response
 
 
-@bp.route('/<path:path>/lyrics')
-@bp.route('/<path:path>/lyrics2') # temporary, for legacy clients
-def route_lyrics(path: str):
+# TODO remove lyrics2 when offline mode clients have had time to update
+@route(bp, ['/<path:path>/lyrics', '/<path:path>/lyrics2'])
+def route_lyrics(conn: Connection, _user: User, path: str):
     """
     Get lyrics for the provided track path.
     """
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
+    track = _track(conn, path)
 
-        track = Track.by_relpath(conn, path)
+    if request.if_modified_since and track.mtime_dt <= request.if_modified_since:
+        return Response(None, 304)
 
-        if track is None:
-            return abort(404, 'track not found')
+    lyr = track.lyrics()
 
-        if request.if_modified_since and track.mtime_dt <= request.if_modified_since:
-            return Response(None, 304)
+    if 'type' in request.args:
+        if request.args['type'] == 'plain' and isinstance(lyr, TimeSyncedLyrics):
+            lyr = lyr.to_plain()
+        elif request.args['type'] == 'synced' and isinstance(lyr, PlainLyrics):
+            lyr = None
 
-        lyr = track.lyrics()
-
-        if 'type' in request.args:
-            if request.args['type'] == 'plain' and isinstance(lyr, TimeSyncedLyrics):
-                lyr = lyr.to_plain()
-            elif request.args['type'] == 'synced' and isinstance(lyr, PlainLyrics):
-                lyr = None
-
-        return jsonw.json_response(lyrics.to_dict(lyr), last_modified=track.mtime)
+    return jsonw.json_response(lyrics.to_dict(lyr), last_modified=track.mtime)
 
 
-@bp.route('/<path:path>/update_metadata', methods=['POST'])
-def route_update_metadata(path: str):
+@route(bp, '/<path:relpath>/update_metadata', methods=['POST'])
+def route_update_metadata(conn: Connection, user: User, relpath: str):
     """
     Endpoint to update track metadata
     """
-    with db.connect(read_only=True) as conn:
-        user = auth.verify_auth_cookie(conn, require_csrf=True)
+    track = _track(conn, relpath)
 
-        track = Track.by_relpath(conn, path)
-        if track is None:
-            return abort(404, 'track not found')
+    playlist = music.playlist(conn, track.playlist)
+    if not playlist.has_write_permission(user):
+        return Response('No write permission for this playlist', 403, content_type='text/plain')
 
-        playlist = music.playlist(conn, track.playlist)
-        if not playlist.has_write_permission(user):
-            return Response('No write permission for this playlist', 403, content_type='text/plain')
-
-        meta = track.metadata()
+    meta = track.metadata()
 
     meta.title = request.json['title']
     meta.album = request.json['album']
@@ -190,56 +170,53 @@ def route_update_metadata(path: str):
     meta.album_artist = request.json['album_artist']
     meta.tags = request.json['tags']
     meta.year = request.json['year']
-    track.write_metadata(meta)
 
-    with db.connect() as conn:
-        scanner.scan_track(conn, track.playlist, track.path, track.relpath)
+    with db.connect() as writable_conn:
+        track.conn = writable_conn
+        track.write_metadata(meta)
+        scanner.scan_track(writable_conn, track.playlist, track.path, track.relpath)
 
     return Response(None, 200)
 
 
-@bp.route('/<path:relpath>/acoustid', methods=['GET'])
-def route_acoustid(relpath: str):
-    with db.connect(read_only=True) as conn:
-        auth.verify_auth_cookie(conn)
-        track = Track.by_relpath(conn, relpath)
-        if track is None:
-            abort(404, 'track not found')
-        fp = acoustid.get_fingerprint(track.path)
-        known_ids: set[str] = set()
-        meta_list: list[musicbrainz.MBMeta] = []
-        for recording in acoustid.lookup(fp):
-            log.info('found recording: %s', recording)
-            for meta in musicbrainz.get_recording_metadata(recording):
-                if meta.id in known_ids:
-                    continue
-                log.info('found possible metadata: %s', meta)
-                meta_list.append(meta)
-                known_ids.add(meta.id)
+@route(bp, '/<path:relpath>/acoustid', methods=['GET'])
+def route_acoustid(conn: Connection, _user: User, relpath: str):
+    track = _track(conn, relpath)
+    fp = acoustid.get_fingerprint(track.path)
+    known_ids: set[str] = set()
+    meta_list: list[musicbrainz.MBMeta] = []
+    for recording in acoustid.lookup(fp):
+        log.info('found recording: %s', recording)
+        for meta in musicbrainz.get_recording_metadata(recording):
+            if meta.id in known_ids:
+                continue
+            log.info('found possible metadata: %s', meta)
+            meta_list.append(meta)
+            known_ids.add(meta.id)
 
-            if len(meta_list) > 0:
-                break
+        if len(meta_list) > 0:
+            break
 
-            time.sleep(2) # crude way of avoiding rate limits
+        time.sleep(2) # crude way of avoiding rate limits
 
     return meta_list
 
 
 # TODO remove legacy compatibility endpoints when clients (especially offline sync) have had time to update.
 
-@bp.route('/filter')
+@bp.route('/filter')  # pyright: ignore[reportArgumentType]
 def route_filter():
     from raphson_mp.routes.tracks import route_filter as compat
     return compat()
 
 
-@bp.route('/search')
+@bp.route('/search')  # pyright: ignore[reportArgumentType]
 def route_search():
     from raphson_mp.routes.tracks import route_search as compat
     return compat()
 
 
-@bp.route('/tags')
+@bp.route('/tags')  # pyright: ignore[reportArgumentType]
 def route_tags():
     from raphson_mp.routes.tracks import route_tags as compat
     return compat()

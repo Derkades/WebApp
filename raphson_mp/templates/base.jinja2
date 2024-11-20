@@ -1,5 +1,5 @@
 {% macro icon(icon_name) %}
-    <div class="icon icon-{{icon_name}}"></div>
+    <div class="icon icon-{{ icon_name }}"></div>
 {% endmacro %}
 
 {% macro icon_button(icon_name, id = None, title = None) %}
@@ -28,7 +28,12 @@
     <title>{% block title %}{% endblock title %}</title>
     <link rel="stylesheet" href="/static/css/base.css">
     {% block styles %}{% endblock styles %}
-    <link rel="stylesheet" href="/static/css/theme/default.css">
+    {% if g.user %}
+        <link rel="stylesheet" href="/static/css/theme/{{ g.user.theme }}.css">
+    {% else %}
+        <link rel="stylesheet" href="/static/css/theme/default.css">
+    {% endif %}
+
 </head>
 {% block body %}{% endblock body %}
 </html>

@@ -6,7 +6,9 @@ from sqlite3 import Connection
 from flask import (Blueprint, Response, abort, render_template, request,
                    send_file)
 
-from raphson_mp import auth, db, jsonw
+from raphson_mp import db, jsonw
+from raphson_mp.auth import User
+from raphson_mp.decorators import route
 from raphson_mp.image import QUALITY_HIGH, ImageFormat
 from raphson_mp.lyrics import PlainLyrics, TimeSyncedLyrics
 from raphson_mp.music import AudioType, Track
@@ -36,27 +38,24 @@ def track_by_code(conn: Connection, code: str) -> Track:
     return track
 
 
-@bp.route('/create', methods=["POST"])
-def create():
+@route(bp, '/create', methods=["POST"], write=True)
+def create(conn: Connection, user: User):
     """
     Endpoint to create a share link, called from web music player.
     """
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, require_csrf=True)
+    track = Track.by_relpath(conn, request.json['track'])
+    if track is None:
+        abort(400, 'track does not exist')
 
-        track = Track.by_relpath(conn, request.json['track'])
-        if track is None:
-            abort(400, 'track does not exist')
+    code = gen_share_code()
 
-        code = gen_share_code()
+    conn.execute('INSERT INTO shares (share_code, user, track, create_timestamp) VALUES (?, ?, ?, ?)',
+                    (code, user.user_id, track.relpath, int(time.time())))
 
-        conn.execute('INSERT INTO shares (share_code, user, track, create_timestamp) VALUES (?, ?, ?, ?)',
-                     (code, user.user_id, track.relpath, int(time.time())))
-
-        return jsonw.json_response({'code': code})
+    return jsonw.json_response({'code': code})
 
 
-@bp.route('/<code>/cover')
+@route(bp, '/<code>/cover', public=True)
 def cover(code: str):
     """
     Route providing a WEBP album cover image
@@ -64,11 +63,10 @@ def cover(code: str):
     with db.connect(read_only=True) as conn:
         track = track_by_code(conn, code)
         cover_bytes = track.get_cover(meme=False, img_quality=QUALITY_HIGH, img_format=ImageFormat.WEBP)
-
     return Response(cover_bytes, content_type='image/webp')
 
 
-@bp.route('/<code>/audio')
+@route(bp, '/<code>/audio', public=True)
 def audio(code: str):
     """
     Route to stream opus audio.
@@ -80,7 +78,7 @@ def audio(code: str):
     return Response(audio_bytes, content_type='audio/webm')
 
 
-@bp.route('/<code>/download/<file_format>')
+@route(bp, '/<code>/download/<file_format>', public=True)
 def download(code: str, file_format: str):
     """
     Route to download an audio file.
@@ -102,7 +100,7 @@ def download(code: str, file_format: str):
     return response
 
 
-@bp.route('/<code>')
+@route(bp, '/<code>', public=True)
 def show(code: str):
     """
     Web page displaying a shared track.

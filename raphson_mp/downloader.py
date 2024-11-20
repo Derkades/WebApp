@@ -1,10 +1,10 @@
+from collections.abc import Generator
 import logging
 import os
 from dataclasses import dataclass
 from pathlib import Path
 from queue import Queue
 from threading import Thread
-from typing import Generator
 
 from yt_dlp import DownloadError, YoutubeDL
 

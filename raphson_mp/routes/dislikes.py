@@ -1,65 +1,59 @@
+from sqlite3 import Connection
 from typing import cast
 from flask import Blueprint, Response, redirect, render_template, request
 
 from raphson_mp import auth, db
+from raphson_mp.decorators import route
 from raphson_mp.music import Track
+from raphson_mp.auth import User
 
 bp = Blueprint('dislikes', __name__, url_prefix='/dislikes')
 
 
-@bp.route('/add', methods=['POST'])
-def route_add():
+@route(bp, '/add', methods=['POST'], write=True)
+def route_add(conn: Connection, user: User):
     """Used by music player"""
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, require_csrf=True)
-        track_path = cast(str, request.json['track'])
-        conn.execute('INSERT OR IGNORE INTO dislikes (user, track) VALUES (?, ?)',
-                     (user.user_id, track_path))
+    track_path = cast(str, request.json['track'])
+    conn.execute('INSERT OR IGNORE INTO dislikes (user, track) VALUES (?, ?)',
+                    (user.user_id, track_path))
     return Response(None, 200)
 
 
-@bp.route('/remove', methods=['POST'])
-def route_remove():
+@route(bp, '/remove', methods=['POST'], write=True)
+def route_remove(conn: Connection, user: User):
     """Used by form on dislikes page"""
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn, require_csrf=True)
-        conn.execute('DELETE FROM dislikes WHERE user=? AND track=?',
-                     (user.user_id, request.form['track']))
-
+    conn.execute('DELETE FROM dislikes WHERE user=? AND track=?',
+                    (user.user_id, request.form['track']))
     return redirect('/dislikes', code=303)
 
 
-@bp.route('')
-def route_dislikes():
+@route(bp, '')
+def route_dislikes(conn: Connection, user: User):
     """
     Page showing a table with disliked tracks, with buttons to undo disliking each trach.
     """
-    with db.connect(read_only=True) as conn:
-        user = auth.verify_auth_cookie(conn, redirect_to_login=True)
-        csrf_token = user.get_csrf()
-        rows = conn.execute('''
-                            SELECT playlist, track
-                            FROM dislikes JOIN track on dislikes.track = track.path
-                            WHERE user=?
-                            ''', (user.user_id,)).fetchall()
-        tracks = [{'path': path,
-                   'playlist': playlist,
-                   'title': cast(Track, Track.by_relpath(conn, path)).metadata().display_title()}
-                  for playlist, path in rows]
+    csrf_token = user.get_csrf()
+    rows = conn.execute('''
+                        SELECT playlist, track
+                        FROM dislikes JOIN track on dislikes.track = track.path
+                        WHERE user=?
+                        ''', (user.user_id,)).fetchall()
+    tracks = [{'path': path,
+                'playlist': playlist,
+                'title': cast(Track, Track.by_relpath(conn, path)).metadata().display_title()}
+                for playlist, path in rows]
 
     return render_template('dislikes.jinja2',
                            csrf_token=csrf_token,
                            tracks=tracks)
 
 
-@bp.route('/json')
-def route_json():
+@route(bp, '/json')
+def route_json(conn: Connection, user: User):
     """
     Return disliked track paths in json format, for offline mode sync
     """
-    with db.connect() as conn:
-        user = auth.verify_auth_cookie(conn)
-        rows = conn.execute('SELECT track FROM dislikes WHERE user=?',
+    rows = conn.execute('SELECT track FROM dislikes WHERE user=?',
                             (user.user_id,)).fetchall()
 
     return {'tracks': [row[0] for row in rows]}
