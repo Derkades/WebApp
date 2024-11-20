@@ -8,17 +8,16 @@
     --border-radius: .5rem;
     --gap: 1rem; /* used for space between large elements like images, boxes, and large buttons */
     --smallgap: .2rem; /* used for space between small elements like buttons */
-    --border-width: 1px;
-    --border-style: solid;
-    --border-color: rgba(255, 255, 255, 0.3);
-    --border-width-hover: var(--border-width);
-    --border-style-hover: var(--border-style);
-    --border-color-hover: rgba(255, 255, 255, 0.8);
     --background-color: rgba(20, 20, 20, 0.5);
     --background-color-active: rgba(255, 255, 255, 0.8);
-    --background-color-hover: rgba(100, 100, 100, 0.4);
+    --background-color-hover: rgba(50, 50, 50, 0.5);
     --box-shadow: .3rem .3rem 1rem rgba(0, 0, 0, 0.3);
+    --controls-box-shadow: 0 0 0 1px rgba(128, 128, 128, 0.5);
+    --controls-box-shadow-hover: 0 0 0 1px rgba(255, 255, 255, 0.5);
+    --controls-box-shadow-active: 0 0 0 1px rgba(192, 192, 192, 0.5);
+    --controls-box-shadow-focus: 0 0 0 1px rgba(192, 192, 192, 0.5);
     --header-background: black;
+    --header-color: white;
 }
 
 @media screen and (max-width: 900px) {

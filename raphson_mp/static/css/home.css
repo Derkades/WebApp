@@ -4,7 +4,7 @@
     width: 100%;
     font-size: 1.5rem;
     gap: var(--halfgap);
-    box-shadow: var(--box-shadow);
+    box-shadow: var(--controls-box-shadow), var(--box-shadow);
     transition: background-color .05s;
 }
 

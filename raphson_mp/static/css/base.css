@@ -17,13 +17,53 @@
 
 /* TEXT */
 
-* {
+body, input, select {
     font-family: var(--font);
     color: var(--text-color);
 }
 
 .wrap {
     overflow-wrap: anywhere;
+}
+
+p {
+    margin: .2rem 0;
+}
+
+a {
+    color: var(--text-color-link);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* links that are buttons should not have special style */
+
+a.button {
+    color: var(--text-color);
+}
+
+a.button:hover {
+    text-decoration: none;
+}
+
+.secondary {
+    color: var(--text-color-secondary);
+    font-size: .8em;
+}
+
+.secondary-large {
+    color: var(--text-color-secondary);
+}
+
+kbd {
+    background-color: var(--background-color);
+    padding: .2rem .4rem .1rem .4rem;
+    border-bottom: .2rem solid gray;
+    border-radius: .2rem;
 }
 
 /* BODY */
@@ -62,38 +102,6 @@ main {
     image-rendering: pixelated;
 }
 
-/* BASIC ELEMENTS */
-
-p {
-    margin: .2rem 0;
-}
-
-a {
-    color: var(--text-color-link);
-    text-decoration: none;
-}
-
-a:hover {
-    text-decoration: underline;
-    cursor: pointer;
-}
-
-.secondary {
-    color: var(--text-color-secondary);
-    font-size: .8em;
-}
-
-.secondary-large {
-    color: var(--text-color-secondary);
-}
-
-kbd {
-    background-color: var(--background-color);
-    padding: .2rem .4rem .1rem .4rem;
-    border-bottom: .2rem solid gray;
-    border-radius: .2rem;
-}
-
 /* CONTROLS */
 
 select,
@@ -119,10 +127,8 @@ input,
     font-size: .9em;
     border: none;
 
-    transition: transform .05s, outline-color .1s;
-    border-width: var(--border-width);
-    border-color: var(--border-color);
-    border-style: var(--border-style);
+    transition: transform .1s, background-color .1s, box-shadow .1s;
+    box-shadow: var(--controls-box-shadow);
 }
 
 select:hover,
@@ -130,9 +136,7 @@ button:hover,
 .button:hover,
 input:hover:not([readonly]),
 input[type=range]:focus {
-    border-width: var(--border-width-hover);
-    border-color: var(--border-color-hover);
-    border-style: var(--border-style-hover);
+    box-shadow: var(--controls-box-shadow-hover);
     background-color: var(--background-color-hover);
 }
 
@@ -140,6 +144,16 @@ button:active,
 .button:active,
 input[type=submit]:active {
     transform: translate(1px, 1px);
+    box-shadow: var(--controls-box-shadow-active);
+}
+
+select:focus,
+button:focus,
+.button:focus,
+input:focus {
+    border: none;
+    outline: none;
+    box-shadow: var(--controls-box-shadow-focus);
 }
 
 /* read-only or disabled inputs */
@@ -183,6 +197,7 @@ input[type=range]::-moz-range-thumb {
     padding: 0;
     border-radius: var(--border-radius);
     border: none;
+    box-shadow: var(--controls-box-shadow);
 }
 
 /* even though webkit is largely styled identically to mozilla, the two rules cannot be merged or webkit ignores styling */
@@ -195,6 +210,7 @@ input[type=range]::-webkit-slider-thumb {
     padding: 0;
     border-radius: var(--border-radius);
     border: none;
+    box-shadow: var(--controls-box-shadow);
 }
 
 input[type=range]:focus {
@@ -399,6 +415,7 @@ input::placeholder {
 
 .box-header {
     background: var(--header-background);
+    color: var(--header-color);
     padding: var(--halfgap);
     font-size: 1.2em;
 }

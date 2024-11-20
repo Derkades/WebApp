@@ -9,23 +9,29 @@
     --text-color-link: blue;
     --border-radius: 0;
     --gap: .5rem;
-    --smallgap: 1px;
-    --border-width: 2px;
-    --border-style: solid;
-    --border-color: white black black  white;
-    --border-width-hover: var(--border-width);
-    --border-style-hover: var(--border-style);
-    --border-color-hover: black white white black;
+    --smallgap: .2rem;
     --background-color: silver;
     --background-color-active: var(--background-color);
     --background-color-hover: var(--background-color);
-    --box-shadow: none;
+    --box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey, inset 2px 2px #dfdfdf;
+    --controls-box-shadow: var(--box-shadow);
+    --controls-box-shadow-hover: var(--controls-box-shadow);
+    --controls-box-shadow-active: inset -1px -1px #ffffff, inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf, inset 2px 2px #808080;
+    --controls-box-shadow-focus: var(--controls-box-shadow);
+    --header-background: linear-gradient(to right, navy, #1084d0);
+    --header-color: white;
+}
+
+:root {
+    font-size: 14px;
 }
 
 .table,
 .logbox,
 input[type=text],
 input[type=text]:hover,
+input[type=password],
+input[type=password]:hover,
 input[type=checkbox],
 input[type=checkbox]:hover {
     background: white;
@@ -39,7 +45,8 @@ input[type=checkbox] {
     width: 1rem;
 }
 
-.table th {
+.table th,
+.box {
     background: var(--background-color);
     border-style: var(--border-style);
     border-color: var(--border-color);
@@ -50,6 +57,34 @@ input[type=checkbox] {
     filter: none;
 }
 
-#seek-bar-inner {
-    background: linear-gradient(to right, #08216b, #a5cef7);
+#seek-bar > #seek-bar-inner {
+    background: var(--header-background);
+    height: calc(100% - 4px);
+    margin-top: 2px;
+    margin-left: 2px;
+}
+
+/* ACTIVITY */
+
+.activity-progress {
+    background: navy;
+}
+
+/* PLAYER */
+
+.bg-image {
+    display: none;
+}
+
+.window-header {
+    background: var(--header-background);
+    color: var(--header-color);
+}
+
+.full-page-overlay {
+    backdrop-filter: none;
+}
+
+.full-page-overlay, .window {
+    transition: none;
 }
