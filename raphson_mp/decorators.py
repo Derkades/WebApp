@@ -18,6 +18,8 @@ def route(bp: Blueprint,
 
     def decorator(func: Callable[..., ResponseReturnValue]) -> RouteCallable:
         def wrapped(*args: Any, **kwargs: Any) -> ResponseReturnValue:
+            g.user = None
+
             if public:
                 return func(*args, **kwargs)
 
