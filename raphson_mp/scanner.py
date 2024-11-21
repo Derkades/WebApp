@@ -201,6 +201,12 @@ def scan_background() -> None:
         log.info('Skip scanner in offline mode')
         return
 
+    # Call regular scan function instead, background scanning is broken
+    # Causes sqlite disk I/O errors when a different thread writes simulatenously
+    # TODO figure out why
+    scan()
+    return
+
     def scan_slowly():
         with db.connect() as conn:
             playlists = scan_playlists(conn)
