@@ -116,6 +116,7 @@ function dedup(array) {
 function errorObjectToJson(error) {
     if (error instanceof ErrorEvent) {
         return {
+            type: 'ErrorEvent',
             message: error.message,
             file: error.filename,
             line: error.lineno,
@@ -125,20 +126,29 @@ function errorObjectToJson(error) {
 
     if (error instanceof PromiseRejectionEvent) {
         return {
-            reason: error.reason,
+            type: 'PromiseRejectionEvent',
+            reason: errorObjectToJson(error.reason),
         }
     }
 
     if (['string', 'number', 'boolean'].indexOf(typeof(error)) != -1) {
-        return {'value': error}
+        return {
+            type: 'literal',
+            value: error,
+        }
     }
 
     if (error instanceof Error) {
         return {
+            type: 'Error',
             name: error.name,
             message: error.message,
             stack: error.stack,
         }
+    }
+
+    if (error == null) {
+        return null;
     }
 
     return {
@@ -153,6 +163,7 @@ async function sendErrorReport(error) {
         const errorJson = JSON.stringify(errorObjectToJson(error));
         await fetch('/report_error', {method: 'POST', body: errorJson, headers: {'Content-Type': 'application/json'}});
     } catch (error2) {
+        // need to catch errors, this function must never throw an error or a loop is created
         console.error('unable to report error:', error2)
     }
 }
