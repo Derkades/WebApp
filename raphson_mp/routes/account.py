@@ -2,7 +2,7 @@ from sqlite3 import Connection
 from flask import Blueprint, abort, redirect, render_template, request
 from flask_babel import gettext as _
 
-from raphson_mp import auth, db, language, music
+from raphson_mp import auth, language, music
 from raphson_mp.auth import PrivacyOption, User
 from raphson_mp.decorators import route
 from raphson_mp.theme import THEMES
@@ -30,7 +30,6 @@ def route_account(conn: Connection, user: User):
     playlists = music.playlists(conn)
 
     return render_template('account.jinja2',
-                            user=user,
                             languages=language.LANGUAGES.items(),
                             csrf_token=csrf_token,
                             sessions=sessions,

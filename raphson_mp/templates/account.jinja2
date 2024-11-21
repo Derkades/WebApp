@@ -6,42 +6,45 @@
 
 {% block content %}
 
-{{ page_heading(gettext("Account settings for '%(username)s'", username=user.username)) }}
+{{ page_heading(gettext("Account settings")) }}
 
 <h2>{% trans %}Settings{% endtrans %}</h2>
 <form method="POST" action="/account/change_settings" class="form">
     <input type="hidden" value="{{ csrf_token }}" name="csrf">
 
+    <label for="username">{% trans %}Username{% endtrans %}</label>
+    <input type="text" value="{{ g.user.username }}" id="username" readonly>
+
     <label for="nickname">{% trans %}Nickname{% endtrans %}</label>
-    <input type="text" value="{{ user.nickname if user.nickname }}" name="nickname" id="nickname">
+    <input type="text" value="{{ g.user.nickname if g.user.nickname }}" name="nickname" id="nickname">
 
     <label for="language-select">{% trans %}Language{% endtrans %}</label>
     <select name="language" id="language">
-        <option value="" {% if not user.language %}selected{% endif %}>{% trans %}System language{% endtrans %}</option>
+        <option value="" {% if not g.user.language %}selected{% endif %}>{% trans %}System language{% endtrans %}</option>
         {% for lang_code, lang_display in languages %}
-            <option value="{{ lang_code }}" {% if lang_code == user.language %}selected{% endif %}>{{ lang_display }}</option>
+            <option value="{{ lang_code }}" {% if lang_code == g.user.language %}selected{% endif %}>{{ lang_display }}</option>
         {% endfor %}
     </select>
 
     <label for="theme">{% trans %}Theme{% endtrans %}</label>
     <select name="theme" id="theme">
         {% for theme, theme_display in themes %}
-            <option value="{{ theme }}" {% if theme == user.theme %}selected{% endif %}>{{ theme_display }}</option>
+            <option value="{{ theme }}" {% if theme == g.user.theme %}selected{% endif %}>{{ theme_display }}</option>
         {% endfor %}
     </select>
 
     <label for="privacy-select">{% trans %}Recording of listening activity{% endtrans %}</label>
     <select name="privacy" id="privacy-select">
-        <option value="" {% if user.privacy.name == 'NONE' %}selected{% endif %}>{% trans %}Activity and statistics{% endtrans %}</option>
-        <option value="aggregate" {% if user.privacy.name == 'AGGREGATE' %}selected{% endif %}>{% trans %}Not in activity, only in statistics{% endtrans %}</option>
-        <option value="hidden" {% if user.privacy.name == 'HIDDEN' %}selected{% endif %}>{% trans %}No data recording{% endtrans %}</option>
+        <option value="" {% if g.user.privacy.name == 'NONE' %}selected{% endif %}>{% trans %}Activity and statistics{% endtrans %}</option>
+        <option value="aggregate" {% if g.user.privacy.name == 'AGGREGATE' %}selected{% endif %}>{% trans %}Not in activity, only in statistics{% endtrans %}</option>
+        <option value="hidden" {% if g.user.privacy.name == 'HIDDEN' %}selected{% endif %}>{% trans %}No data recording{% endtrans %}</option>
     </select>
 
     <label for="playlist">{% trans %}Playlist{% endtrans %}</label>
     <select id="playlist" name="playlist">
-        <option value="" {% if not user.primary_playlist %}selected{% endif %}></option>
+        <option value="" {% if not g.user.primary_playlist %}selected{% endif %}></option>
         {% for playlist in playlists %}
-            <option value="{{ playlist.name }}" {% if playlist.name == user.primary_playlist %}selected{% endif %}>{{ playlist.name }}</option>
+            <option value="{{ playlist.name }}" {% if playlist.name == g.user.primary_playlist %}selected{% endif %}>{{ playlist.name }}</option>
         {% endfor %}
     </select>
 
