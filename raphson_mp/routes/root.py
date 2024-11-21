@@ -103,7 +103,7 @@ def route_csp_reports():
     return Response(None, 200)
 
 
-@route(bp, 'report_error', methods=['POST'])
+@route(bp, 'report_error', methods=['POST'], skip_csrf_check=True)
 def route_error_report(_conn: Connection, _user: StandardUser):
     if not request.is_json:
         abort(400)
@@ -111,11 +111,7 @@ def route_error_report(_conn: Connection, _user: StandardUser):
     if len(request.data) > 1000:
         log.warning('Received large error report: %s bytes', len(request.data))
     else:
-        log.warning('Received JavaScript error: %s: %s\n%s',
-                    cast(str, request.json['name']),
-                    cast(str, request.json['message']),
-                    cast(str, request.json['stack']).rstrip('\n'))
-
+        log.warning('Received JavaScript error: %s', request.json)
     return Response(None, 200)
 
 

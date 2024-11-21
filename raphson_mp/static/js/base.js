@@ -113,23 +113,49 @@ function dedup(array) {
     return array2;
 }
 
-/**
- * @param {Error} error
- */
-async function errorHandler(error) {
-    console.error('unhandled error:', error)
+function errorObjectToJson(error) {
+    if (error instanceof ErrorEvent) {
+        return {
+            message: error.message,
+            file: error.filename,
+            line: error.lineno,
+            error: errorObjectToJson(error.error),
+        }
+    }
+
+    if (error instanceof PromiseRejectionEvent) {
+        return {
+            reason: error.reason,
+        }
+    }
+
+    if (['string', 'number', 'boolean'].indexOf(typeof(error)) != -1) {
+        return {'value': error}
+    }
+
+    if (error instanceof Error) {
+        return {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+        }
+    }
+
+    return {
+        name: 'unknown error object',
+        type: typeof(error),
+        string: String(error),
+    }
+}
+
+async function sendErrorReport(error) {
     try {
-        const errorJson = JSON.stringify({
-            "name": error.name,
-            "message": error.message,
-            "stack": error.stack,
-        });
-        console.log('unhandled error', errorJson);
+        const errorJson = JSON.stringify(errorObjectToJson(error));
         await fetch('/report_error', {method: 'POST', body: errorJson, headers: {'Content-Type': 'application/json'}});
     } catch (error2) {
         console.error('unable to report error:', error2)
     }
 }
 
-window.addEventListener("error", event => errorHandler(event.error));
-window.addEventListener("unhandledrejection", event => errorHandler(event.reason));
+window.addEventListener("error", sendErrorReport);
+window.addEventListener("unhandledrejection", sendErrorReport);

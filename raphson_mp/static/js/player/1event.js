@@ -27,11 +27,10 @@ class EventBus {
             try {
                 callable(...params);
             } catch (error) {
-                errorHandler(error);
+                sendErrorReport(error);
             }
         }
     }
-
 }
 
 const eventBus = new EventBus();
