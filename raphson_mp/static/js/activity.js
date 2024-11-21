@@ -84,16 +84,17 @@ const historyTable = document.getElementById('tbody-history');
 const fileChangesTable = document.getElementById('tbody-changes');
 let data = null;
 
-function updateHtml() {
+function updateNowPlayingHtml() {
     const cards = data.now_playing.map(getNowPlayingCardHtml);
     if (cards.length > 0) {
         nowPlayingDiv.replaceChildren(...cards);
     } else {
         nowPlayingDiv.textContent = nothingPlayingText;
     }
+}
 
+function updateTableHtml() {
     historyTable.replaceChildren(...data.history.map(getHistoryRowHtml));
-
     fileChangesTable.replaceChildren(...data.file_changes.map(getFileChangeRowHtml));
 }
 
@@ -109,7 +110,8 @@ async function fetchData() {
     const json = await response.json();
     console.debug('fetched data:', json);
     data = json;
-    updateHtml();
+
+    updateTableHtml();
 }
 
 function quickUpdate() {
@@ -123,16 +125,19 @@ function quickUpdate() {
         }
     }
 
-    updateHtml();
+    updateNowPlayingHtml();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    fetchData();
-    setInterval(fetchData, 10_000);
+document.addEventListener('DOMContentLoaded', async () => {
+    setInterval(fetchData, 15_000);
     setInterval(quickUpdate, 1_000);
-    addEventListener("visibilitychange", () => {
+    addEventListener("visibilitychange", async () => {
         if (!document.visibilityState != "hidden") {
-            fetchData();
+            await fetchData();
+            quickUpdate();
         }
     });
+
+    await fetchData();
+    updateNowPlayingHtml();
 });
