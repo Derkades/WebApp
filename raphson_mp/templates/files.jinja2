@@ -31,7 +31,7 @@
                 <tr>
                     <form method="POST" action="/files/upload" enctype="multipart/form-data">
                         <td>
-                            <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                            <input type="hidden" name="csrf" value="{{ g.user.csrf }}">
                             <input type="hidden" name="dir" value="{{ base_path }}">
                             {% trans %}Upload files{% endtrans %}
                         </td>
@@ -49,7 +49,7 @@
                             {% trans %}Create directory{% endtrans %}
                         </td>
                         <td>
-                            <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                            <input type="hidden" name="csrf" value="{{ g.user.csrf }}">
                             <input type="hidden" name="path" value="{{ base_path }}">
                             <input type="text" name="dirname" placeholder="{% trans %}Directory name{% endtrans %}">
                         </td>
@@ -157,7 +157,7 @@
                 {% if show_trashed %}
                     <td class="button-col">
                         <form method="POST" action="/files/rename">
-                            <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                            <input type="hidden" name="csrf" value="{{ g.user.csrf }}">
                             <input type="hidden" name="path" value="{{ file['path'] }}">
                             <input type="hidden" name="new-name" value="{{ file['name'][7:] }}">
                             {{ icon_button('delete-restore', title=gettext('Restore file from trash')) }}
@@ -166,7 +166,7 @@
                 {% else %}
                     <td class="button-col">
                         <form method="POST" action="/files/rename">
-                            <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                            <input type="hidden" name="csrf" value="{{ g.user.csrf }}">
                             <input type="hidden" name="path" value="{{ file['path'] }}">
                             <input type="hidden" name="new-name" value=".trash.{{ file['name'] }}">
                             {{ icon_button('delete', title=gettext('Move file to trash')) }}
@@ -179,7 +179,7 @@
     </tbody>
 </table>
 
-<input type="hidden" id="upload_csrf" value="{{ csrf_token }}">
+<input type="hidden" id="upload_csrf" value="{{ g.user.csrf }}">
 <input type="hidden" id="upload_dir" value="{{ base_path }}">
 
 <script src="/static/js/files.js" async></script>

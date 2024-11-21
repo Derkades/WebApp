@@ -19,12 +19,10 @@ bp = Blueprint('download', __name__, url_prefix='/download')
 @route(bp, '', redirect_to_login=True)
 def route_download(conn: Connection, user: User):
     """Download page"""
-    csrf_token = user.get_csrf()
     playlists = [(playlist.name, playlist.write)
                      for playlist in music.user_playlists(conn, user.user_id, all_writable=user.admin)]
 
     return render_template('download.jinja2',
-                           csrf_token=csrf_token,
                            primary_playlist=user.primary_playlist,
                            playlists=playlists)
 

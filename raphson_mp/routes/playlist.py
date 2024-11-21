@@ -36,7 +36,6 @@ def route_playlists(conn: Connection, user: User):
     return render_template('playlists.jinja2',
                            user_is_admin=user.admin,
                            playlists=user_playlists,
-                           csrf_token=user.get_csrf(),
                            primary_playlist=primary_playlist,
                            playlists_stats=playlists_stats,
                            spotify_available=spotify_available)

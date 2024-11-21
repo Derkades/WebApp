@@ -10,7 +10,7 @@
 
 <h2>{% trans %}Create new playlist{% endtrans %}</h2>
 <form action="/playlist/create" method="POST" class="form">
-    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+    <input type="hidden" name="csrf" value="{{ g.user.csrf }}">
     <label for="create-name">{% trans %}Directory name{% endtrans %}</label><input type="text" name="name" id="create-name">
     <input type="submit" value="{% trans %}Create{% endtrans %}">
 </form>
@@ -69,7 +69,7 @@
                 </td>
                 <td>
                     <form action="/playlist/favorite" method="POST" class="form-inline">
-                        <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                        <input type="hidden" name="csrf" value="{{ g.user.csrf }}">
                         <input type="hidden" name="playlist" value="{{ playlist.name }}">
                         {% if playlist.favorite %}
                             <input type="hidden" name="favorite" value="0">
@@ -81,7 +81,7 @@
                     </form>
                     {% if user_is_admin or playlist.write %}
                         <form action="/playlist/share" method="GET" class="form-inline">
-                            <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                            <input type="hidden" name="csrf" value="{{ g.user.csrf }}">
                             <input type="hidden" name="playlist" value="{{ playlist.name }}">
                             <input type="submit" value="{% trans %}Share{% endtrans %}">
                         </form>

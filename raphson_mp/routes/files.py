@@ -69,7 +69,6 @@ def route_files(conn: Connection, user: User):
                            write_permission=write_permission,
                            files=children,
                            music_extensions=','.join(music.MUSIC_EXTENSIONS),
-                           csrf_token=user.get_csrf(),
                            show_trashed=show_trashed)
 
 
@@ -134,7 +133,6 @@ def route_rename(conn: Connection, user: User):
         path = music.from_relpath(request.args['path'])
         back_url = request.args['back_url']
         return render_template('files_rename.jinja2',
-                            csrf_token=user.get_csrf(),
                             path=music.to_relpath(path),
                             name=path.name,
                             back_url=back_url)

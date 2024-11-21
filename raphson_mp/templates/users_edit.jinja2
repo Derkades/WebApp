@@ -9,7 +9,7 @@
 {{ page_heading(gettext('Editing user: %(username)s', username=username), back_url='/users') }}
 
 <form action="/users/edit" method="POST" class="form">
-    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+    <input type="hidden" name="csrf" value="{{ g.user.csrf }}">
     <input type="hidden" name="username" value="{{ username }}">
 
     <label for="new-username">{% trans %}New username{% endtrans %}</label>

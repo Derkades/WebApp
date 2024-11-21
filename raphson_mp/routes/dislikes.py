@@ -32,7 +32,6 @@ def route_dislikes(conn: Connection, user: User):
     """
     Page showing a table with disliked tracks, with buttons to undo disliking each trach.
     """
-    csrf_token = user.get_csrf()
     rows = conn.execute('''
                         SELECT playlist, track
                         FROM dislikes JOIN track on dislikes.track = track.path
@@ -44,7 +43,6 @@ def route_dislikes(conn: Connection, user: User):
                 for playlist, path in rows]
 
     return render_template('dislikes.jinja2',
-                           csrf_token=csrf_token,
                            tracks=tracks)
 
 

@@ -23,8 +23,7 @@ def route_player(_conn: Connection, user: User):
                            mobile=util.is_mobile(),
                            primary_playlist=user.primary_playlist,
                            load_timestamp=int(time.time()),
-                           offline_mode=settings.offline_mode,
-                           csrf_token=user.get_csrf()))
+                           offline_mode=settings.offline_mode))
 
     # Refresh token cookie
     if isinstance(user, StandardUser):

@@ -10,7 +10,7 @@
 
 <h2>{% trans %}Settings{% endtrans %}</h2>
 <form method="POST" action="/account/change_settings" class="form">
-    <input type="hidden" value="{{ csrf_token }}" name="csrf">
+    <input type="hidden" value="{{ g.user.csrf }}" name="csrf">
 
     <label for="username">{% trans %}Username{% endtrans %}</label>
     <input type="text" value="{{ g.user.username }}" id="username" readonly>
@@ -61,7 +61,7 @@
         {% if lastfm_name %}
             {% trans name=lastfm_name %}Connected to last.fm account: {{ name }}{% endtrans%}<br>
             <form action="/lastfm_disconnect" method="POST">
-                <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                <input type="hidden" name="csrf" value="{{ g.user.csrf }}">
                 <input type="submit" value="{% trans %}Disconnect last.fm account{% endtrans %}">
             </form>
         {% else %}
@@ -74,7 +74,7 @@
 
 <h2>{% trans %}Password{% endtrans %}</h2>
 <form method="POST" action="/account/change_password" class="form">
-    <input type="hidden" value="{{ csrf_token }}" name="csrf">
+    <input type="hidden" value="{{ g.user.csrf }}" name="csrf">
     <label for="current-password">{% trans %}Current password{% endtrans %}</label>
     <input type="password" value="" name="current_password" id="current-password">
 

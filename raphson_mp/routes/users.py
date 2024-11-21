@@ -39,19 +39,16 @@ def route_users(conn: Connection, user: User):
             user_dict['last_use'] = format_timedelta(user_dict['last_use'] - int(time.time()), add_direction=True)
 
     return render_template('users.jinja2',
-                           csrf_token=user.get_csrf(),
                            users=users)
 
 
 @route(bp, '/edit', methods=['GET', 'POST'], write=True, require_admin=True)
-def route_edit(conn: Connection, user: User):
+def route_edit(conn: Connection, _user: User):
     """Change username or password"""
     if request.method == 'GET':
-        csrf_token = user.get_csrf()
         username = request.args['username']
 
         return render_template('users_edit.jinja2',
-                                csrf_token=csrf_token,
                                 username=username)
 
     username = request.form['username']

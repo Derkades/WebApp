@@ -20,7 +20,7 @@
 </div>
 
 <audio id="audio"></audio>
-<div hidden id="csrf-token">{{ csrf_token }}</div>
+<div hidden id="csrf-token">{{ g.user.csrf }}</div>
 
 <script src="/static/js/base.js"></script>
 <script src="/static/js/api.js"></script>

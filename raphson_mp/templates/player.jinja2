@@ -332,7 +332,7 @@
     <script src="/static/js/api.js"></script>
     <script src="/static/js/player.js"></script>
 
-    <div hidden id="csrf-token">{{ csrf_token }}</div>
+    <div hidden id="csrf-token">{{ g.user.csrf }}</div>
     <div hidden id="primary-playlist">{{ primary_playlist }}</div>
     <div hidden id="load-timestamp">{{ load_timestamp }} </div>
     <div hidden id="trans-artist">{% trans %}Artist: {% endtrans %}</div>

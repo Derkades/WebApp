@@ -10,11 +10,9 @@ bp = Blueprint('games', __name__, url_prefix='/games')
 
 @route(bp, '/guess', redirect_to_login=True)
 def route_guess(_conn: Connection, user: User):
-    return render_template('games_guess.jinja2',
-                           csrf_token=user.get_csrf())
+    return render_template('games_guess.jinja2')
 
 
 @route(bp, '/chairs', redirect_to_login=True)
 def route_chairs(_conn: Connection, user: User):
-    return render_template('games_chairs.jinja2',
-                           csrf_token=user.get_csrf())
+    return render_template('games_chairs.jinja2')

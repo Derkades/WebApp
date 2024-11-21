@@ -5,7 +5,7 @@ import logging
 import os
 import secrets
 import time
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, abstractproperty
 from dataclasses import dataclass
 from enum import Enum, unique
 from sqlite3 import Connection, OperationalError
@@ -159,17 +159,18 @@ class User(ABC):
     language: str | None
     privacy: PrivacyOption
 
+    # TODO make it a property
+    @property
+    @abstractmethod
+    def csrf(self) -> str:
+        """
+        Get CSRF token for current session
+        """
+
     @abstractmethod
     def sessions(self) -> list[Session]:
         """
         Get all sessions for users
-        """
-
-    # TODO make it a property
-    @abstractmethod
-    def get_csrf(self) -> str:
-        """
-        Get CSRF token for current session
         """
 
     @abstractmethod
@@ -200,8 +201,9 @@ class StandardUser(User):
                                     """, (self.user_id,)).fetchall()
         return [Session(*row) for row in results]
 
+    @property
     @override
-    def get_csrf(self) -> str:
+    def csrf(self) -> str:
         return self.session.csrf_token
 
     @override
@@ -228,8 +230,9 @@ class OfflineUser(User):
     def sessions(self) -> list[Session]:
         return []
 
+    @property
     @override
-    def get_csrf(self) -> str:
+    def csrf(self) -> str:
         return 'fake_csrf_token'
 
     @override
@@ -394,7 +397,7 @@ def verify_auth_cookie(conn: Connection,
         else:
             raise AuthError(AuthErrorReason.MISSING_CSRF, False)
 
-        if not hmac.compare_digest(csrf_token, user.get_csrf()):
+        if not hmac.compare_digest(csrf_token, user.csrf):
             raise AuthError(AuthErrorReason.INVALID_CSRF, False)
 
     return user

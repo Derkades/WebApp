@@ -65,8 +65,7 @@ def route_get_csrf(_conn: Connection, user: User):
     """
     Get CSRF token
     """
-    csrf_token = user.get_csrf()
-    response = jsonw.json_response({'token': csrf_token})
+    response = jsonw.json_response({'token': user.csrf})
     response.cache_control.max_age = 600
     response.cache_control.private = True
     return response

@@ -17,7 +17,6 @@ def route_account(conn: Connection, user: User):
     """
     from raphson_mp import lastfm
 
-    csrf_token = user.get_csrf()
     sessions = user.sessions()
 
     result = conn.execute('SELECT name FROM user_lastfm WHERE user=?',
@@ -31,7 +30,6 @@ def route_account(conn: Connection, user: User):
 
     return render_template('account.jinja2',
                             languages=language.LANGUAGES.items(),
-                            csrf_token=csrf_token,
                             sessions=sessions,
                             lastfm_enabled=lastfm.is_configured(),
                             lastfm_name=lastfm_name,
