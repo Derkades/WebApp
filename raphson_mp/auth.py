@@ -276,6 +276,22 @@ class AuthError(Exception):
     redirect: bool
 
 
+def create_session(conn: Connection, user: int|User) -> Session:
+    user_id = user if isinstance(user, int) else user.user_id
+    token = secrets.token_urlsafe()
+    csrf_token = secrets.token_urlsafe()
+    remote_addr = request.remote_addr
+    user_agent = request.headers['User-Agent'] if 'User-Agent' in request.headers else None
+
+    conn.execute("""
+                 INSERT INTO session (user, token, csrf_token, creation_date, user_agent, remote_address, last_use)
+                 VALUES (?, ?, ?, unixepoch(), ?, ?, unixepoch())
+                 """,
+                 (user_id, token, csrf_token, user_agent, remote_addr))
+
+    return Session(token, csrf_token, int(time.time()), None, None, int(time.time()))
+
+
 def log_in(conn: Connection, username: str, password: str) -> Session | None:
     """
     Log in using username and password.
@@ -302,20 +318,9 @@ def log_in(conn: Connection, username: str, password: str) -> Session | None:
         log.warning('Failed login for user %s', username)
         return None
 
-    token = secrets.token_urlsafe()
-    csrf_token = secrets.token_urlsafe()
-    remote_addr = request.remote_addr
-    user_agent = request.headers['User-Agent'] if 'User-Agent' in request.headers else None
-
-    conn.execute("""
-                 INSERT INTO session (user, token, csrf_token, creation_date, user_agent, remote_address, last_use)
-                 VALUES (?, ?, ?, unixepoch(), ?, ?, unixepoch())
-                 """,
-                 (user_id, token, csrf_token, user_agent, remote_addr))
-
+    session = create_session(conn, user_id)
     log.info('Successful login for user %s', username)
-
-    return Session(token, csrf_token, int(time.time()), None, None, int(time.time()))
+    return session
 
 
 def _verify_token(conn: Connection, token: str) -> User | None:

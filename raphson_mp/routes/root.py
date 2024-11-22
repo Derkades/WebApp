@@ -5,6 +5,7 @@ from typing import cast
 from flask import Blueprint, Response, abort, redirect, render_template, request
 
 from raphson_mp import db, jsonw, music, packer, settings
+from raphson_mp import auth
 from raphson_mp.auth import StandardUser, User
 from raphson_mp.decorators import route
 
@@ -113,6 +114,15 @@ def route_error_report(_conn: Connection, _user: StandardUser):
     else:
         log.warning('Received JavaScript error: %s', request.json)
     return Response(None, 200)
+
+
+# TODO add nice interface
+# TODO add a way to discover this page
+# TODO require user password
+@route(bp, 'token', write=True)
+def route_token(conn: Connection, user: StandardUser):
+    token = auth.create_session(conn, user)
+    return Response(token.token, status=200, mimetype='text/plain')
 
 
 @route(bp, 'health_check', public=True)
