@@ -377,11 +377,15 @@ def verify_auth_cookie(conn: Connection,
     if settings.offline_mode:
         return OFFLINE_DUMMY_USER
 
-    if 'token' not in request.cookies:
+    if request.authorization and request.authorization.token:
+        token = request.authorization.token
+        require_csrf = False # CSRF is only an issue with cookies
+    elif 'token' in request.cookies:
+        token = request.cookies['token']
+    else:
         log.warning('No auth token')
         raise AuthError(AuthErrorReason.NO_TOKEN, redirect_to_login)
 
-    token = request.cookies['token']
     user = _verify_token(conn, token)
     if user is None:
         raise AuthError(AuthErrorReason.INVALID_TOKEN, redirect_to_login)
