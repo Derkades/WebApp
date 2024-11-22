@@ -11,9 +11,9 @@ CREATE TABLE content (
 ) STRICT; -- STRICT mode only for new databases, no migration exists for old databases as it would be too expensive
 
 CREATE TABLE settings (
-    key TEXT NOT NULL UNIQUE PRIMARY KEY,
-    value TEXT NOT NULL
-);
+    base_url TEXT NOT NULL,
+    token TEXT NOT NULL,
+) STRICT;
 
 CREATE TABLE playlists (
     name TEXT NOT NULL UNIQUE

@@ -35,6 +35,9 @@ online = [
     "bcrypt>=3.0",
     "yt-dlp",
 ]
+offline = [
+    "raphson_music_client"
+]
 prometheus = ["prometheus-client>=0.15.0"]
 dev = [
     "pylint",
